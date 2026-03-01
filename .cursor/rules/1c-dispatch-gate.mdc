@@ -13,6 +13,7 @@ priority: 999
 | Файл трассы (`.pff`, `*_TRACE_*.txt`) или стек ошибки 1С | СТОП. Подготовить бриф. Делегировать **onec-trace-analyst**. По результату — onec-code-explorer, onec-code-architect | `.cursor/rules/1c-error-analysis.mdc` |
 | Правка `.bsl` файла | СТОП. Загрузить скилл. Делегировать **onec-code-writer**. Обязательно **onec-code-reviewer** после | `.cursor/rules/1c-agent-delegation.mdc` |
 | Точечная правка (Light Mode): 2–10 строк, 1 файл, без архитектуры | Делегировать **onec-code-writer** с контекстом, затем **onec-code-reviewer**. Без артефактов OpenSpec | см. раздел Light Mode ниже |
+| Шаблонная правка (Mechanical Mode): find-replace, #Область, удаление комментариев | Прямая правка + Grep-верификация + **onec-code-reviewer** после. Без writer | `.cursor/rules/1c-agent-delegation.mdc` (MECHANICAL MODE) |
 | Доработка 1С (не точечная правка) | СТОП. Сначала **onec-code-architect** (план + ревью плана). Код — только после одобрения | `.cursor/rules/1c-agent-delegation.mdc` |
 | Работа с формами 1С (Form.xml) | Загрузить 1c-forms. Делегировать **onec-form-generator** | `.cursor/skills/1c-forms/SKILL.md` |
 | Оптимизация запросов 1С | Загрузить 1c-query-optimization. Делегировать **onec-query-optimizer** | `.cursor/skills/1c-query-optimization/SKILL.md` |

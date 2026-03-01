@@ -405,33 +405,54 @@ status: NOT_CONNECTED
 
 ## PRE-RELEASE SEVERITY ESCALATION
 
-When reviewer is called with context `mode=prerelease`, apply the following escalation on top of standard levels.
+When reviewer is called with context `mode=prerelease`, tag each finding with **kind** and apply escalation only to functional findings.
+
+### Kind (every finding)
 
 ```yaml
-Pre-release escalation rules:
+kind:
+  functional — affects behavior, data, security, reliability (bugs, ТекущаяДата on server, injection, silent skips, band-aids)
+  style — affects readability, standards, structure only (?(), #Область missing, naming prefix, changelog markers, header format)
+```
+
+**Escalation (LOW→MEDIUM, MEDIUM→HIGH) applies only to kind=functional.** For kind=style, keep the normal level and tag the finding with `[style]` in the report.
+
+### Kind by category (examples)
+
+```yaml
+kind=functional:
+  - ТекущаяДата() on server (use ТекущаяДатаСеанса())
+  - Сообщить() instead of ОбщегоНазначения.СообщитьПользователю()
+  - Silent skip on structural check failure, band-aid fixes
+  - Security, performance bugs, logic errors
+
+kind=style:
+  - Ternary operator ?()
+  - Missing #Область structure in module
+  - Own non-intercept method using extension prefix
+  - Changelog markers, design refs in comments, missing module header
+  - Event handler without description, header format not matching BSP
+```
+
+### Escalation rules (kind=functional only)
+
+```yaml
+Pre-release escalation (functional only):
   LOW → MEDIUM:
-    - Changelog markers (// +++ Иванов, // ---, date-author)
-    - Design artifact references in code comments (// D11, // F5, // Design §3)
-    - Missing module header comment
-    - Event handler without description
-    - Header format not matching BSP template
+    - (only if kind=functional; style LOW stays LOW)
 
   MEDIUM → HIGH:
-    - Missing #Область structure in module
-    - Export method without header comment (Параметры / Возвращаемое значение)
-    - Dead code (unused procedures/functions)
-    - Logic duplication between modules
-    - Own non-intercept method using extension prefix
+    - Export method without header (if functional impact, e.g. contract unclear)
+    - Dead code, logic duplication (if kind=functional)
     - Business logic directly in #Вставка block
 
   HIGH → CRITICAL:
     - (not escalated — CRITICAL reserved for real blockers only)
 
-Note: Escalation is additive. An issue that is MEDIUM in normal mode becomes HIGH in prerelease mode.
-Escalation does not change the technical severity — it affects the release gate decision only.
+Note: Escalation is additive for functional issues. Style issues are not escalated; tag [style] and keep original level.
 ```
 
-**How to detect `mode=prerelease`**: The calling prompt explicitly passes `mode=prerelease` in context, or the review is triggered by the `/prerelease-review` command skill.
+**How to detect `mode=prerelease`**: The calling prompt explicitly passes `mode=prerelease` in context, or the review is triggered by the `/prerelease-review` command skill. In prerelease reports, always output `kind: functional` or `kind: style` (and level) for each finding.
 
 ## STANDARDS REFERENCE
 
