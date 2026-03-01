@@ -79,7 +79,7 @@ Evaluate:
 Check:
   - &Перед/&После applied to a function (not procedure) — CRITICAL
   - &Вместо used where &Перед/&После would suffice — HIGH
-  - &ИзменениеИКонтроль: code outside #Вставка/#Удаление blocks differs from base — HIGH
+  - &ИзменениеИКонтроль: code outside #Вставка/#Удаление blocks differs from base — HIGH (prerelease: CRITICAL). Signs: variable renaming, formatting/indent changes, refactoring outside blocks, adding/removing #Область/#КонецОбласти in base (typed) code. Any of these breaks extension applicability.
   - &ИзменениеИКонтроль used where &Перед/&После is sufficient — HIGH
   - Business logic placed directly inside #Вставка block instead of delegating to a separate procedure — MEDIUM
 ```
@@ -125,6 +125,9 @@ Check (add to existing):
   - Сообщить() instead of ОбщегоНазначения.СообщитьПользователю() — HIGH
   - Ternary operator ?() — HIGH
   - Свойство() on fixed-contract source (tabular section, query result) — HIGH
+  - ТипЗнч() check on fixed-contract return value (function always returns Structure) — HIGH
+  - ЗначениеЗаполнено() guard on field guaranteed by contract/metadata — HIGH
+  - "Defensive cake" (ТипЗнч + Свойство + ЗначениеЗаполнено stacked on fixed-contract source) — HIGH
   - User-facing string literals without НСтр("ru = '...'") — MEDIUM
 ```
 
@@ -253,12 +256,12 @@ status: NOT_CONNECTED
    - Check function length
    - Analyze parameter count
    - Fail-fast: scan for silent skips on structural checks (Продолжить, silent Возврат, empty branch when precondition fails on type/property/size/format)
-   - Data contract: for every Свойство()/ЕстьРеквизит/Колонки.Найти check, verify source type and whether contract is fixed. Flag: (a) redundant check on fixed-contract source (tabular section field, explicit query column), (b) wrong method (Свойство on non-Structure).
+   - Data contract: for every ТипЗнч()/Свойство()/ЕстьРеквизит/Колонки.Найти/ЗначениеЗаполнено() check, verify source type and whether contract is fixed. Flag: (a) redundant check on fixed-contract source (tabular section field, explicit query column, documented return/parameter), (b) wrong method (Свойство on non-Structure), (c) "defensive cake" (stacked checks on same value).
 
 5. Extension annotations:
    - Detect &Перед/&После applied to a function (not procedure)
    - Detect &Вместо where &Перед/&После is sufficient
-   - Detect &ИзменениеИКонтроль where code outside directives differs from base
+   - Detect &ИзменениеИКонтроль where code outside directives differs from base: variable renaming, formatting changes, refactoring outside #Вставка/#КонецВставки, adding/removing #Область in base (typed) code
    - Detect business logic directly in #Вставка block
 
 6. Module structure:
@@ -288,6 +291,9 @@ status: NOT_CONNECTED
     - Сообщить() instead of ОбщегоНазначения.СообщитьПользователю()
     - Ternary operator ?()
     - User-facing string literals without НСтр("ru = '...'")
+    - ТипЗнч() on fixed-contract return value
+    - ЗначениеЗаполнено() on field guaranteed by contract/metadata
+    - "Defensive cake" (stacked ТипЗнч + Свойство + ЗначениеЗаполнено on fixed contract)
 
 11. Band-aid detection:
     - Defensive null/undefined check without root cause analysis
@@ -296,6 +302,7 @@ status: NOT_CONNECTED
     - Logic duplicated with minor variation instead of fixing original
     - TODO/FIXME admitting temporary fix
     - Defensive check on fixed-contract source
+    - "Defensive cake" pattern
 ```
 
 ### Phase 3: Context Analysis
@@ -353,19 +360,22 @@ status: NOT_CONNECTED
 - Missing error handling
 - Silent skip on structural check failure (Продолжить / silent Возврат / empty branch on type/property/size mismatch instead of ВызватьИсключение; business filtering is not a violation)
 - Redundant property/attribute check on fixed-contract source (Свойство/ЕстьРеквизит on own tabular section field, explicit query column — field is guaranteed by metadata; also wrong method: Свойство() on non-Structure type)
+- ТипЗнч() on fixed-contract return value (function/documentation guarantees type)
+- ЗначениеЗаполнено() on field guaranteed by contract/metadata (as guard, not business check)
+- "Defensive cake" pattern (stacked ТипЗнч + Свойство + ЗначениеЗаполнено on fixed contract)
 - N+1 query problems
 - Missing indexes
 - Insufficient access control
 - Code duplication (>50 lines)
 - Cyclomatic complexity >15
 - &Вместо used where &Перед/&После is sufficient
-- &ИзменениеИКонтроль: code outside #Вставка/#Удаление differs from base
+- &ИзменениеИКонтроль: code outside #Вставка/#Удаление differs from base (variable rename, formatting, refactoring outside blocks, adding/removing #Область in typed code) — in prerelease: CRITICAL
 - &ИзменениеИКонтроль used where &Перед/&После is sufficient
 - Intercepted method (&Вместо/&Перед/&После) without extension prefix
 - Сообщить() instead of ОбщегоНазначения.СообщитьПользователю()
 - Ternary operator ?() usage
 - Свойство() on fixed-contract source (tabular section, query result)
-- Band-aid fix detected (defensive check without root cause, try/except suppression, skip-flag)
+- Band-aid fix detected (defensive check without root cause, try/except suppression, skip-flag, defensive cake)
 ```
 
 ### Medium Priority (Fix in Sprint)
@@ -424,6 +434,7 @@ kind=functional:
   - ТекущаяДата() on server (use ТекущаяДатаСеанса())
   - Сообщить() instead of ОбщегоНазначения.СообщитьПользователю()
   - Silent skip on structural check failure, band-aid fixes
+  - &ИзменениеИКонтроль: code outside #Вставка/#Удаление modified (breaks extension applicability)
   - Security, performance bugs, logic errors
 
 kind=style:
@@ -447,7 +458,7 @@ Pre-release escalation (functional only):
     - Business logic directly in #Вставка block
 
   HIGH → CRITICAL:
-    - (not escalated — CRITICAL reserved for real blockers only)
+    - &ИзменениеИКонтроль: code outside #Вставка/#Удаление differs from base (variable rename, formatting, #Область in base code) — breaks extension applicability
 
 Note: Escalation is additive for functional issues. Style issues are not escalated; tag [style] and keep original level.
 ```
