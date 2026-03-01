@@ -31,11 +31,11 @@ powershell.exe -NoProfile -File skills/1c-mxl-compile/scripts/mxl-compile.ps1 -J
 3. Run `1c-mxl-validate` to verify correctness
 4. Run `1c-mxl-info` to verify structure
 
-**If creating a layout from an image** (screenshot, scanned print form) — first use `img-grid-analysis` skill to overlay a grid, determine column boundaries and proportions, then use `"Nx"` widths + `"page"` for automatic size calculation.
+**If creating a layout from an image** (screenshot, scanned print form) — determine column boundaries and proportions, then use `"Nx"` widths + `"page"` for automatic size calculation.
 
 ## JSON DSL Schema
 
-Full format specification: **`docs/mxl-dsl-spec.md`** (read via Read tool before writing JSON).
+Full format: JSON with `version`, `page`, `areas` (name, parameters, columnSets). Use Read on existing Template.xml or MXL examples for structure.
 
 Brief structure:
 

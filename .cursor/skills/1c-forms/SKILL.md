@@ -7,9 +7,11 @@ description: Complete toolkit for 1C managed forms - create, edit, analyze, vali
 
 Полный набор инструментов для работы с управляемыми формами 1С. Объединяет практические skills с MCP инструментами для максимальной эффективности.
 
+Платформенный референс по формам: `.cursor/docs/platform/Глава 7. Формы.md` (Grep+Read, не читать целиком).
+
 ---
 
-## 🎯 Quick Start
+## Quick Start
 
 ### Создать новую форму
 ```bash
@@ -356,11 +358,9 @@ powershell -NoProfile -File .cursor/skills/1c-forms/validate/scripts/form-valida
 
 ---
 
-## 🚀 Интеграция с 1c-feature-dev-enhanced
+## Интеграция с OpenSpec apply
 
-### Phase 6: Реализация
-
-Когда в плане есть задача "Создать форму":
+Когда в tasks.md есть задача "Создать форму":
 
 ```yaml
 1. Загрузить: 1c-forms/patterns/SKILL.md
@@ -394,16 +394,9 @@ powershell -NoProfile -File .cursor/skills/1c-forms/validate/scripts/form-valida
 - JSON схема: `user-1c-forms-get_json_schema`
 - Инструкции: `user-1c-forms-get_instructions`
 
-### Примеры
-- Простая форма объекта: `1c-forms/compile/examples/simple-object-form.json`
-- Форма списка: `1c-forms/compile/examples/list-form.json`
-- Форма с таблицей: `1c-forms/compile/examples/table-form.json`
-- Wizard форма: `1c-forms/patterns/examples/wizard-pattern.md`
-
-### Спецификации
-- Form.xml формат: `1c-forms/patterns/specs/form-xml-spec.md`
-- JSON DSL формат: `1c-forms/compile/specs/json-dsl-spec.md`
-- Архетипы форм: `1c-forms/patterns/specs/form-archetypes.md`
+### Примеры и структура
+- Примеры JSON DSL и архетипы форм см. в подскиллах `1c-forms/compile/SKILL.md` и `1c-forms/patterns/SKILL.md`.
+- Формат Form.xml и JSON DSL описан в этих же SKILL и в `.cursor/docs/platform/Глава 7. Формы.md`.
 
 ---
 

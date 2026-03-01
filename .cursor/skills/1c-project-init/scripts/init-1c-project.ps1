@@ -169,7 +169,7 @@ Write-Host "  [OK] Structure created (including MCP folders)" -ForegroundColor G
 Write-Host "[2/12] Copying skills..." -ForegroundColor Yellow
 
 # Core skills (always copy)
-$coreSkills = @("1c-batch", "1c-feature-dev-enhanced", "1c-help-mcp", "auto-skill-bootstrap")
+$coreSkills = @("1c-batch", "1c-agent-patterns", "1c-help-mcp", "auto-skill-bootstrap")
 
 # Extended skills (new from cursor_rules_1c integration)
 $extendedSkills = @("1c-forms", "1c-mxl", "1c-roles", "1c-bsp", "1c-query-optimization")
@@ -426,12 +426,8 @@ if (-not (Test-Path $rulesDestDir)) {
 
 # Core rules (always copy)
 $rulesToCopy = @(
-    "skills-first.mdc",
     "no-roi-estimates.mdc",
-    "context-management.mdc",
     "model-selection.mdc",
-    "bsl-lsp-integration.mdc",
-    "rlm-toolkit-autoload.mdc",
     "mcp-tools-usage.mdc"
 )
 
@@ -590,16 +586,12 @@ User: $Username
   - onec-admin, mcp-deploy, dev-optimizer
 - .cursor/skills/ - skills
   - 1c-batch/ - batch operations
-  - 1c-feature-dev-enhanced/ - full dev cycle
+  - 1c-agent-patterns/ - agent delegation patterns
   - 1c-help-mcp/ - 1C documentation
   - auto-skill-bootstrap/ - auto-install skills
-- .cursor/rules/ - AI rules (7 rules)
-  - skills-first.mdc - use skills before custom code
+- .cursor/rules/ - AI rules (3 rules)
   - no-roi-estimates.mdc - no time/cost estimates
-  - context-management.mdc - context optimization (200K limit)
   - model-selection.mdc - Opus vs Sonnet selection
-  - bsl-lsp-integration.mdc - BSL LSP usage
-  - rlm-toolkit-autoload.mdc - RLM memory system
   - mcp-tools-usage.mdc - MCP tools guide
 - openspec/ - specifications (SDD)
 - configs/ - configuration guides
@@ -1044,7 +1036,7 @@ $cursorRules = @"
 ## Skills Available
 
 - 1c-batch: Dump/load config/extensions
-- 1c-feature-dev-enhanced: Full dev cycle
+- 1c-agent-patterns: Agent delegation patterns
 - 1c-help-mcp: 1C documentation search
 - auto-skill-bootstrap: Auto-install skills
 "@

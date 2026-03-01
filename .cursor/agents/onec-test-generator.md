@@ -1,4 +1,4 @@
-﻿---
+---
 capabilities: [1c-testing, 1c-code-quality]
 name: onec-test-generator
 model: claude-4.6-sonnet-medium-thinking
@@ -99,7 +99,7 @@ Output:
 
 ```yaml
 Skills:
-  - 1c-feature-dev-enhanced: Development context for test generation
+  - 1c-agent-patterns: Agent delegation patterns for test context
   - 1c-batch: Build and run tests via ibcmd
 
 MCP:

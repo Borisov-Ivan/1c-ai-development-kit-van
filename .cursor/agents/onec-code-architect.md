@@ -50,6 +50,11 @@ Study metadata structure:
   - Forms
 ```
 
+When designing architecture:
+- For vendor standards (metadata naming, data storage, event handlers, transactions): Read `.cursor/skills/1c-vendor-standards/SKILL.md`, apply checklist for relevant domain. If deeper detail needed: Read the relevant domain file from `.cursor/docs/standard/` (see `1c-standards-navigator.md` for which `std-NN-<domain>.md`).
+- For platform mechanics (how a mechanism works — extensions, forms, BPs, queries, exchange): Read `.cursor/docs/platform/Оглавление-1С-документации.md`, find chapter, Read or Grep+Read per navigator instruction.
+- Budget: max 1 standards domain + 1 platform chapter per design task.
+
 ### 2. Design 1C Architecture
 
 ```yaml
@@ -142,8 +147,8 @@ Access Rights:
 ### Skills
 
 ```yaml
-1c-feature-dev-enhanced:
-  - Full development cycle context
+1c-agent-patterns:
+  - Agent delegation patterns, complexity assessment, prompt templates
   - Spec-driven architecture
 
 1c-bsp:
@@ -182,9 +187,9 @@ Graph:
 
 ```yaml
 Read:
-  Read(path="openspec/changes/[feature]/phase1-requirements.md")
-  Read(path="openspec/changes/[feature]/phase2-exploration.md")
-  Read(path="openspec/changes/[feature]/phase3-clarifications.md")
+  Read(path="openspec/changes/[feature]/proposal.md")
+  Read(path="openspec/changes/[feature]/design.md")
+  Read(path="openspec/changes/[feature]/tasks.md")
 
 Search:
   Glob(glob_pattern="**/[Feature]/**/*.bsl")
@@ -199,9 +204,9 @@ Search:
 
 ```yaml
 1. Read artifacts:
-   - phase1-requirements.md (what to build)
-   - phase2-exploration.md (found patterns)
-   - phase3-clarifications.md (decisions made)
+   - proposal.md (what to build)
+   - design.md (found patterns, decisions)
+   - tasks.md (work items)
 
 2. Load from MCP:
    - Similar features
@@ -212,8 +217,7 @@ Search:
    - proposal.md (initial idea)
    - design.md (design decisions)
    - tasks.md (task breakdown)
-   Note: OpenSpec artifacts may coexist with SDD phase artifacts.
-   Priority: phase1-requirements > proposal.md; phase4-architecture > design.md
+   OpenSpec artifacts: proposal.md, design.md, specs/, tasks.md
 
 4. Understand constraints:
    - Performance requirements
@@ -250,6 +254,19 @@ Search:
    - Load: .cursor/skills/1c-extensions/SKILL.md
    - Key constraint: &Перед/&После only for procedures, NOT functions
    - For functions: &Вместо or &ИзменениеИКонтроль
+
+6. If designing a fix (not new feature):
+   - Document root cause chain (symptom → why → why → root cause). See .cursor/rules/verified-cause-gate.mdc
+   - Assess architectural impact:
+     * Callers of changed code
+     * Contracts affected (signatures, return values, side effects)
+     * Dependent modules
+     * Possible side effects (transaction behavior, locks, ordering)
+   - Classify fix scope: точечный vs системный
+   - If band-aid is the only practical option — document explicitly:
+     * WHY root cause fix is impractical now
+     * WHAT risks the band-aid introduces
+     * WHEN and HOW to address root cause (mandatory follow-up)
 ```
 
 ### Phase 3: Create Implementation Plan
@@ -325,10 +342,10 @@ If issues found:
 ```yaml
 Actions:
   1. Receive: list of invalidated assumptions + new facts
-  2. Re-read: phase4-architecture.md + new findings
+  2. Re-read: design.md + new findings
   3. Assess impact:
-     - Minor (same approach, tweak steps) → update phase4-architecture.md
-     - Major (approach invalid) → create phase4-architecture-v2.md, require Phase 5 re-review
+     - Minor (same approach, tweak steps) → update design.md
+     - Major (approach invalid) → create design-v2.md, require re-review
   4. Mark invalidated phases: `- [REVISED]` in architecture
   5. Do NOT delete original plan — keep for audit trail
 ```
@@ -361,7 +378,7 @@ Actions:
 
 ## Found Patterns
 
-[From phase2-exploration.md]
+[From design.md / explorer results]
 
 ### Pattern 1: [Name]
 
@@ -373,7 +390,7 @@ Actions:
 
 ## Clarifications
 
-[From phase3-clarifications.md]
+[From proposal.md / user clarifications]
 
 ### Decision 1: [Topic]
 

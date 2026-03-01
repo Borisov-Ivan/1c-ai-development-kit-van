@@ -1,5 +1,5 @@
 ---
-name: 1c-ssl-patterns
+name: 1c-bsp-patterns
 description: "SSL/БСП subsystems guidance. Use when working with standard library subsystems."
 ---
 
@@ -7,7 +7,7 @@ description: "SSL/БСП subsystems guidance. Use when working with standard lib
 
 This skill provides guidance for using SSL subsystems via `ssl_search` MCP tool.
 
-For basic SSL usage (attribute access, user messages) — see `project_rules.mdc`.
+For basic SSL usage (attribute access, user messages) — see `1c-coding-standards.mdc`.
 
 ## When to Use
 
@@ -47,9 +47,11 @@ When implementing new functionality:
 - **ВерсионированиеОбъектов** — object history
 - **РаботаСПочтовымиСообщениями** — email sending
 - **ОбщегоНазначения** / **ОбщегоНазначенияКлиентСервер** — common utilities
-- **Проверка наличия реквизита**: `ОбщегоНазначенияКлиентСервер.ЕстьРеквизитИлиСвойствоОбъекта(Объект, "Имя")` — для формы, строки ТЗ/дерева, объектов; метод `Свойство()` — только для Структуры
+- **Проверка наличия реквизита**: см. `.cursor/rules/1c-coding-standards.mdc` (правила проверки заполнения и доступа к реквизитам)
 - **СтроковыеФункцииКлиентСервер** — string functions
 
 ---
 
 **Remember**: SSL is your first stop for common functionality. Writing custom code when SSL has a solution is technical debt.
+
+Для стандартов вендора по разработке библиотек и переопределению модулей: чеклист — `.cursor/skills/1c-vendor-standards/SKILL.md` (раздел 10); детали — Read `.cursor/docs/standard/std-10-bsp-libraries.md`. Навигатор: `.cursor/docs/standard/1c-standards-navigator.md`.

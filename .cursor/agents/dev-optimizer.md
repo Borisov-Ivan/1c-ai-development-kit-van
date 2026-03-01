@@ -1,4 +1,4 @@
-﻿---
+---
 autoTrigger: true
 priority: background
 name: dev-optimizer
@@ -141,7 +141,7 @@ Action:
   1. Analyze: Categorize warnings (naming, performance, etc)
   2. Propose: Refactoring plan
   3. Create: Pre-commit hook for future prevention
-  4. Update: .cursor/rules/bsl-standards.mdc
+  4. Update: .cursor/rules/1c-coding-standards.mdc
 ```
 
 ### On Token Waste
@@ -286,7 +286,7 @@ Proposed:
 
 Action:
   1. Create .git/hooks/pre-commit
-  2. Add .cursor/rules/bsl-standards.mdc
+  2. Add .cursor/rules/1c-coding-standards.mdc
   3. Test on sample commit
   4. Document in RLM
 ```
@@ -414,7 +414,7 @@ If token limit exceeded:
 
 ## INVOCATION
 
-This agent runs **automatically** via `.cursor/rules/dev-optimizer-autorun.mdc`.
+This agent is invoked manually or by the parent agent when optimization is needed.
 
 Manual invocation:
 - "оптимизируй процесс"

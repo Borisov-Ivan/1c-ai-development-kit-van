@@ -28,7 +28,7 @@ Cost optimization: Sonnet handles coding effectively.
 ```yaml
 Before writing code:
   - Study the task carefully
-  - Read implementation plan (phase4-architecture.md)
+  - Read implementation plan (design.md)
   - Identify unclear requirements
   - Ask user for clarification if needed
 ```
@@ -75,7 +75,7 @@ CRITICAL:
   - ALL coding standards are in 1c-coding-standards.mdc
   - READ this file BEFORE writing code
   - Follow EVERY rule - they are mandatory, not recommendations
-  - Exception handling: see 1c-coding-standards.mdc (Обработка исключений, Когда использовать Попытка/Исключение) and 1c-feature-dev-enhanced/SKILL.md (секция Обработка исключений) — Попытка only where external factors can cause error; prefer explicit checks; do not mask errors
+  - Exception handling: see 1c-coding-standards.mdc (Обработка исключений, Когда использовать Попытка/Исключение) — Попытка only where external factors can cause error; prefer explicit checks; do not mask errors
 ```
 
 ### 6. MCP Help Usage
@@ -131,8 +131,8 @@ If BSL LSP unavailable (current state):
   - Validate registration
   - Command structure
 
-1c-feature-dev-enhanced:
-  - Full development cycle context
+1c-agent-patterns:
+  - Agent delegation patterns, prompt templates, skill integration
   - Spec-driven implementation
 
 1c-query-optimization:
@@ -167,7 +167,7 @@ Code search:
 
 ```yaml
 Read:
-  Read(path="openspec/changes/[feature]/phase4-architecture.md")
+  Read(path="openspec/changes/[feature]/design.md")
   Read(path="src/cf/Catalogs/Клиенты/Ext/ObjectModule.bsl")
 
 Write:
@@ -187,7 +187,7 @@ If file does not exist — STOP (see CRITICAL RULE 12).
 
 ```yaml
 1. Read implementation plan:
-   - phase4-architecture.md (full plan)
+   - design.md (full plan)
    - Identify current phase
    - Read phase description
    - Read acceptance criteria
@@ -205,6 +205,13 @@ If file does not exist — STOP (see CRITICAL RULE 12).
    - Read reviewer's findings
    - Apply fixes to current file state
    - Self-review from scratch
+
+5. If task is a bug fix:
+   - Locate root cause documentation (from design.md / debug.md / caller prompt)
+   - Verify: fix targets ROOT CAUSE, not symptom
+   - Verify: architectural impact assessed (callers, contracts, side effects)
+   - If root cause unclear or fix looks like band-aid — STOP, request clarification
+   - Do NOT add defensive checks "just in case" without understanding WHY the value is wrong
 ```
 
 ### Phase 2: Design Solution
@@ -260,9 +267,9 @@ If file does not exist — STOP (see CRITICAL RULE 12).
    - Brief comments for complex logic
 
 4. Error handling:
-   - Use Попытка/Исключение only for expected failures; in Исключение always log (ЗаписьЖурналаРегистрации with context); avoid silent Возврат. See .cursor/rules/1c-coding-standards.mdc (Обработка исключений) and 1c-feature-dev-enhanced (exception handling).
+   - Use Попытка/Исключение only for expected failures; in Исключение always log (ЗаписьЖурналаРегистрации with context); avoid silent Возврат. See .cursor/rules/1c-coding-standards.mdc (Обработка исключений).
    - Fail-fast on structural checks: if a structural precondition fails (wrong type, missing property, size mismatch, unexpected format) — raise ВызватьИсключение, do NOT silently continue (no Продолжить, no silent Возврат, no empty branch). Business filtering (Status, doc type) is allowed. See 1c-coding-standards.mdc — Fail-fast вместо тихого пропуска.
-   - Data contract verification: before adding ANY property/attribute existence check (Свойство, ЕстьРеквизитИлиСвойствоОбъекта, Колонки.Найти), HALT and verify: (a) source of the row/object (this object's tabular section? query result? parameter?), (b) is the contract fixed by metadata/query/documented type? If YES — do NOT add check, access field directly. If NO — add check using correct method (Structure → Свойство; other → ЕстьРеквизитИлиСвойствоОбъекта). See 1c-coding-standards.mdc rule 14, 1c-common-mistakes.mdc rule 10.
+   - Data contract verification: before adding ANY property/attribute existence check (Свойство, ЕстьРеквизитИлиСвойствоОбъекта, Колонки.Найти), HALT and verify: (a) source of the row/object (this object's tabular section? query result? parameter?), (b) is the contract fixed by metadata/query/documented type? If YES — do NOT add check, access field directly. If NO — add check using correct method (Structure → Свойство; other → ЕстьРеквизитИлиСвойствоОбъекта). See 1c-coding-standards.mdc (Избыточная проверка полей, rule 14).
    - User notifications: ОбщегоНазначения.СообщитьПользователю
 ```
 
@@ -529,8 +536,9 @@ Output:
     - **Ожидаемый путь:** например src/cf/CommonModules/ИмяМодуля/Ext/Module.bsl
     - **После выгрузки:** сообщите, и я продолжу реализацию
 14. ✅ **Fail-fast on structural checks** — if precondition fails (type, property, size, format): ВызватьИсключение. No silent Продолжить, Возврат, or empty branch. See 1c-coding-standards.mdc (rule 16).
-15. ✅ **Один этап = один вызов.** Если задача содержит несколько этапов из phase4-architecture.md — реализовать только указанный этап. Не пытаться реализовать всё за один проход. При получении задачи "реализуй этапы 1-3" — реализовать этап 1, отчитаться, ждать следующего вызова для этапа 2.
-16. ✅ **Data contract gate** — before adding Свойство()/ЕстьРеквизит/Колонки.Найти: HALT, identify source (ТЧ this object / query / documented param = fixed → no check; unknown contract → check with correct method). Redundant check = antipattern. See 1c-coding-standards.mdc rule 14, 1c-common-mistakes.mdc rule 10.
+15. ✅ **Один этап = один вызов.** Если задача содержит несколько этапов из design.md — реализовать только указанный этап. Не пытаться реализовать всё за один проход. При получении задачи "реализуй этапы 1-3" — реализовать этап 1, отчитаться, ждать следующего вызова для этапа 2.
+16. ✅ **Data contract gate** — before adding Свойство()/ЕстьРеквизит/Колонки.Найти: HALT, identify source (ТЧ this object / query / documented param = fixed → no check; unknown contract → check with correct method). Redundant check = antipattern. See 1c-coding-standards.mdc (Избыточная проверка полей, rule 14).
+17. ✅ **NO BAND-AID FIXES** — before implementing any bug fix, verify root cause is documented and fix targets it (not the symptom). If the task says "add check for Undefined" but doesn't explain WHY the value is Undefined — STOP and ask. See .cursor/rules/verified-cause-gate.mdc.
 
 ---
 

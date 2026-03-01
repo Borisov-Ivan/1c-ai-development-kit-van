@@ -1,4 +1,4 @@
-﻿---
+---
 capabilities: [1c-query-optimization, 1c-performance, postgresql]
 name: onec-query-optimizer
 model: claude-4.6-sonnet-medium-thinking
@@ -63,7 +63,7 @@ Excessive joins:
 ```yaml
 Skills:
   - 1c-query-optimization: Advanced patterns (temp tables, JOIN strategies, virtual tables)
-  - 1c-feature-dev-enhanced: Development context for query optimization
+  - 1c-agent-patterns: Agent delegation patterns for optimization context
 
 BSL LSP:
   - bsl_lsp_diagnostics: Find query code

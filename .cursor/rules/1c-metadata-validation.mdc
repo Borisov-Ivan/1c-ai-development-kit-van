@@ -12,5 +12,5 @@
 
 ## SOURCE OF TRUTH
 
-Подробный процесс и требования к фиксации в артефактах: `openspec/AGENTS.md` → раздел **«Реализация (apply)»**.
+Подробный процесс: `.cursor/skills/openspec-apply-change/SKILL.md` (шаг Metadata validation) и `.cursor/skills/openspec-debug/SKILL.md` (шаг 5).
 

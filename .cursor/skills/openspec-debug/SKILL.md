@@ -159,7 +159,7 @@ Write a **structured RCA** with two mandatory sections. Never present a hypothes
 - What is **assumed** but not directly proven (e.g. "algorithm returns exclude because of missing executor context").
 - For each hypothesis, add a **verification plan**: what to log, which scenario to run, what to check in the trace — or mark "hypothesis-based fix" with a follow-up verification task.
 
-Keep the RCA compact; the split ensures apply/debug can later enforce the hypothesis gate (see `hypothesis-verification-gate.mdc`).
+Keep the RCA compact; the split ensures apply/debug can later enforce the verified cause gate (see `verified-cause-gate.mdc`).
 
 ### 7) Plan and apply fixes (default: code + artifacts)
 

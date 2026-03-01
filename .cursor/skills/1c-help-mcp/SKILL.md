@@ -1,4 +1,4 @@
-﻿# 1C Help MCP — Platform Documentation Search
+# 1C Help MCP — Platform Documentation Search
 
 **MCP Server:** 1c-help (comol/1c_help_mcp:latest)
 **Endpoint:** http://YOUR_SERVER:8003/mcp
@@ -383,7 +383,7 @@ Runtime cost:
 - MCP server config: `configs/mcp-shared/docker-compose.yml`
 - Cursor config: `C:\Users\YOUR_USERNAME\.cursor\mcp.json` (1c-help section)
 - Infrastructure map: `configs/infra-mcp/data/infrastructure.yaml`
-- Tool registry: `docs/mcp-tool-registry.md`
+- MCP tools: use Cursor MCP docs or project `.cursor` config for available tools.
 
 ---
 

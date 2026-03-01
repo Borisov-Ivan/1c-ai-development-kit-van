@@ -108,6 +108,8 @@ Note cross-cutting concerns:
   - Transaction boundaries
 ```
 
+If you encounter an unfamiliar platform mechanism during code tracing: Read `.cursor/docs/platform/Оглавление-1С-документации.md` to find the relevant chapter.
+
 ### 4. Implementation Details
 
 ```yaml
@@ -171,8 +173,8 @@ Breadth-first for initial discovery, depth-first for specific call chains.
 ### Skills
 
 ```yaml
-1c-feature-dev-enhanced:
-  - Development cycle context
+1c-agent-patterns:
+  - Agent delegation patterns, exploration triggers
   - Pattern exploration
 
 1c-bsp:
@@ -257,7 +259,7 @@ Semantic search:
 
 ```yaml
 1. Understand the task:
-   - Read requirements (phase1-requirements.md if provided)
+   - Read requirements (proposal.md if provided)
    - Identify key concepts
    - List unknowns
 

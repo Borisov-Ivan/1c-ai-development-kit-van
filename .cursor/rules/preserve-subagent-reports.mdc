@@ -53,4 +53,4 @@ alwaysApply: true
 ## ИНТЕГРАЦИЯ
 
 - **1c-agent-delegation.mdc:** после вызова architect/explorer/trace-analyst применяется это правило.
-- **openspec/AGENTS.md:** при реализации change отчёты субагентов сохраняются в reports/.
+- **AGENTS.md:** при реализации change отчёты субагентов сохраняются в reports/.

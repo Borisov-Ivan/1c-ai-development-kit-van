@@ -43,8 +43,9 @@ openspec list --json
 
 ### 1.1 Прочитать стандарты проекта
 
-- `.cursor/rules/1c-coding-standards.mdc` — стандарты BSL.
-- `.cursor/agents/onec-code-reviewer.md` — категории и правила ревью.
+- `.cursor/rules/1c-coding-standards.mdc` — стандарты BSL проекта.
+- `.cursor/agents/onec-code-reviewer.md` — категории и правила ревью (в т.ч. отсылка к вендорским стандартам).
+- **Вендорские стандарты 1С** (для полноты предрелизной проверки): `.cursor/skills/1c-vendor-standards/SKILL.md` — чеклисты по доменам; навигация — `.cursor/docs/standard/1c-standards-navigator.md`; полный текст по доменам — `.cursor/docs/standard/std-*.md` (метаданные, запросы, транзакции, формы и т.д.). Согласовано с AGENTS.md и onec-code-reviewer.
 
 ### 1.2 Прочитать спецификацию расширения (если есть)
 
@@ -87,6 +88,7 @@ openspec instructions apply --change "<name>" --json
 
 ### Стандарты
 - 1c-coding-standards.mdc
+- Вендорские стандарты: 1c-vendor-standards/SKILL.md; при необходимости — .cursor/docs/standard/ (1c-standards-navigator.md, std-*.md)
 - Спецификация расширения: [путь]
 
 ### Режим ревью
@@ -143,7 +145,7 @@ prompt: |
 **Дата:** [дата]
 **Scope:** N файлов, M процедур/функций
 **Режим:** предрелизный (эскалация: LOW→MEDIUM, MEDIUM→HIGH)
-**Стандарты:** 1c-coding-standards.mdc, [спецификация расширения]
+**Стандарты:** 1c-coding-standards.mdc, вендорские (1c-vendor-standards, .cursor/docs/standard/ при необходимости), [спецификация расширения]
 
 ### Сводка
 
@@ -238,5 +240,6 @@ openspec new --name "prerelease-fix-<расширение>" --schema spec-driven
 ## Интеграция
 
 - Ревьювер: `onec-code-reviewer` v1.2 с поддержкой `mode=prerelease` и новыми категориями.
+- Стандарты вендора и навигация: `AGENTS.md` → секция «Стандарты вендора 1С»; `.cursor/docs/standard/` (1c-standards-navigator.md, std-*.md) и `.cursor/skills/1c-vendor-standards/SKILL.md` — единый набор для предрелизной проверки.
 - Если после ревью обнаружены архитектурные замечания (новые объекты, изменение API, структуры хранения) — не создавать задачи writer, остановиться и показать пользователю.
 - Отчёт сохраняется согласно `preserve-subagent-reports.mdc`.

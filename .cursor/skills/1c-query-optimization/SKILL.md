@@ -1,13 +1,15 @@
 ---
 name: 1c-query-optimization
-description: "Advanced query patterns for 1C: temporary tables, joins, DCS optimization. Use for complex queries beyond basic rules in project_rules.mdc."
+description: "Advanced query patterns for 1C: temporary tables, joins, DCS optimization. Use for complex queries beyond basic rules in 1c-coding-standards.mdc."
 ---
 
 # 1C Query Optimization Skill (Advanced Patterns)
 
-This skill provides **advanced** query patterns beyond basic rules in `project_rules.mdc`.
+This skill provides **advanced** query patterns beyond basic rules in `1c-coding-standards.mdc`.
 
-For basic query rules (formatting, aliases, parameters, no queries in loops) — see `project_rules.mdc`.
+For basic query rules (formatting, aliases, parameters, no queries in loops) — see `1c-coding-standards.mdc`.
+
+Платформенный референс по запросам: `.cursor/docs/platform/Глава 8. Работа с запросами.md`.
 
 ## When to Use
 

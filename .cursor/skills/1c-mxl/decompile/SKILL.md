@@ -35,7 +35,7 @@ Decompiling an existing layout for analysis or modification:
 
 ## JSON DSL Schema
 
-Full format specification: **`docs/mxl-dsl-spec.md`** (read via Read tool).
+Output format: JSON with `version`, `page`, `areas` (name, parameters, columnSets). See 1c-mxl/compile SKILL for structure.
 
 ## Name Generation
 

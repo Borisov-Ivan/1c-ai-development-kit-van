@@ -156,7 +156,6 @@ Right:
 Works with:
  - sdd-workflow.mdc: Specs without timelines
  - model-selection.mdc: Cost optimization (not ROI)
- - context-management.mdc: Token economy (not financial ROI)
 
 Priority: 300 (very high - applies early)
 ```

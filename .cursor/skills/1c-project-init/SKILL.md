@@ -1,4 +1,4 @@
-﻿---
+---
 name: 1c-project-init
 description: Initialize a new 1C project from a server database - create folder structure, copy skills, auto-detect 1C version, generate .1c-devbase.bat, dump configuration and extensions, setup OpenSpec and Git. Use when user requests "создать проект 1С", "инициализировать проект", "развернуть проект из базы", "init 1C project", or needs to bootstrap a new 1C development workspace from an existing database.
 ---
@@ -13,7 +13,7 @@ Automated 1C project initialization from a server database. Creates a complete d
 2. **Creates MCP data folders** (`mcp/base/report`, `mcp/base/src`, `mcp/ext/report`, `mcp/ext/src`)
 3. **Creates symlinks** (`mcp/base/src` → `src/cf/`, `mcp/ext/src` → `src/cfe/`)
 4. **Copies all skills** (10 skills):
-   - **Core skills** (4): 1c-batch, 1c-feature-dev-enhanced, 1c-help-mcp, auto-skill-bootstrap
+   - **Core skills** (4): 1c-batch, 1c-agent-patterns, 1c-help-mcp, auto-skill-bootstrap
    - **Extended skills** (5): 1c-forms, 1c-mxl, 1c-roles, 1c-bsp, 1c-query-optimization
    - **Total**: 30+ sub-skills with JSON DSL support
 5. **Copies 1C agents** (12 agents: onec-*, onec-admin, mcp-deploy, dev-optimizer)
@@ -21,7 +21,7 @@ Automated 1C project initialization from a server database. Creates a complete d
 7. Generates `.1c-devbase.bat` from 1c-batch template (or uses existing one)
 8. Dumps configuration to `src/cf/`
 9. Dumps extensions to `src/cfe/<Name>/` (if specified via `-Extensions`)
-10. **Copies AI rules** (7 rules: skills-first, no-roi-estimates, context-management, model-selection, bsl-lsp-integration, rlm-toolkit-autoload, mcp-tools-usage)
+10. **Copies AI rules** (3 rules: no-roi-estimates, model-selection, mcp-tools-usage)
 11. **Copies optimization docs** (.cursorignore, CURSOR-CONTEXT-LIMITS.md, docs/cursor-optimization.md)
 12. Creates OpenSpec structure (AGENTS.md, project.md, templates)
 13. **Creates project MCP configuration** (`.cursor/mcp.json`, `docker-compose.yml`, management scripts)
@@ -51,7 +51,7 @@ This skill uses **UTF-8 BOM encoding** for all generated files to ensure proper 
 - .cursorrules, .gitignore, .1c-devbase.bat - UTF-8 BOM
 - Console output - UTF-8 (chcp 65001)
 
-See `.cursor/rules/powershell-cyrillic.mdc` for encoding rules.
+For PowerShell scripts involving Cyrillic, use UTF-8 encoding (e.g. `[Console]::OutputEncoding`, `chcp 65001`, or script file encoding).
 
 Test encoding: `.cursor/skills/1c-project-init/scripts/test-cyrillic.ps1`
 
@@ -299,16 +299,12 @@ MyProject/
     │   ├── mcp-deploy.md
     │   └── dev-optimizer.md
     ├── rules/
-    │   ├── skills-first.mdc
     │   ├── no-roi-estimates.mdc
-    │   ├── context-management.mdc
     │   ├── model-selection.mdc
-    │   ├── bsl-lsp-integration.mdc
-    │   ├── rlm-toolkit-autoload.mdc
     │   └── mcp-tools-usage.mdc
     └── skills/
         ├── 1c-batch/
-        ├── 1c-feature-dev-enhanced/
+        ├── 1c-agent-patterns/
         ├── 1c-help-mcp/
         └── auto-skill-bootstrap/
 ```
@@ -321,7 +317,7 @@ MyProject/
 1. `cd <ProjectPath>` and open in Cursor
 2. Start development via `openspec/changes/` (SDD workflow)
 3. Use `1c-batch` skill for dump/load operations
-4. Use `1c-feature-dev-enhanced` skill for full development cycle
+4. Use `1c-agent-patterns` skill for agent delegation patterns
 5. Use `1c-help-mcp` skill for 1C documentation search
 
 ### Optional (for full AI capabilities)

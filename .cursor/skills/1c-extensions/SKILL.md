@@ -7,6 +7,8 @@ description: Аннотации расширений 1С — выбор анно
 
 Руководство по работе с аннотациями расширений конфигурации 1С:Предприятие и механизмом `&ИзменениеИКонтроль`. Алгоритм переноса правок адаптирован из [skirdinsa/1c-merge-prompt](https://github.com/skirdinsa/1c-merge-prompt).
 
+Глубокий платформенный референс (терминология, заимствованные объекты, расширение данных): `.cursor/docs/platform/Глава 30. Расширение конфигурации.md`.
+
 ---
 
 ## A. Дерево решений: какую аннотацию использовать
@@ -121,5 +123,5 @@ description: Аннотации расширений 1С — выбор анно
 ## Интеграция
 
 - **Стандарты кодирования:** [.cursor/rules/1c-coding-standards.mdc](.cursor/rules/1c-coding-standards.mdc) — раздел «Аннотации расширений».
-- **Разработка доработок:** [.cursor/skills/1c-feature-dev-enhanced/SKILL.md](.cursor/skills/1c-feature-dev-enhanced/SKILL.md) — Phase 4 (выбор аннотации), Phase 6 (реализация).
+- **Паттерны делегирования:** [.cursor/skills/1c-agent-patterns/SKILL.md](.cursor/skills/1c-agent-patterns/SKILL.md) — выбор аннотации при проектировании, реализация через onec-code-writer.
 - **Загрузка расширения после правок:** [.cursor/skills/1c-batch/SKILL.md](.cursor/skills/1c-batch/SKILL.md) — load-extension.bat.

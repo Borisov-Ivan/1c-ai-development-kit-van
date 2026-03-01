@@ -15,7 +15,7 @@ Adds the `ExternalDataProcessorInfo()` function to the object module, required f
 
 | Parameter | Required | Default | Description |
 |-----------|:--------:|---------|-------------|
-| ProcessorName | yes | — | Processor name (must be created via `1c-epf-scaffold`) |
+| ProcessorName | yes | — | Processor name (create EPF structure via project init or manually) |
 | Kind | yes | — | Processor kind (see mapping below) |
 | TargetObjects | * | — | Metadata objects for assignable kinds |
 | SrcDir | no | `src` | Source directory |
@@ -141,7 +141,7 @@ Note: global processors do not have the `TargetObjects` parameter.
 1. Find `ObjectModule.bsl` via Glob: `src/{{ProcessorName}}/Ext/ObjectModule.bsl`
 2. Read the file
 3. If `ExternalDataProcessorInfo` already exists — inform user, do not duplicate
-4. If file not found — suggest using `1c-epf-scaffold` skill first
+4. If file not found — suggest using `1c-forms/scaffold` skill first (it can create EPF structure)
 5. Find the region `#Region PublicInterface` ... `#EndRegion`
 6. Insert `ExternalDataProcessorInfo()` function inside this region
 7. If kind requires server handler — insert it too, after the function
@@ -198,8 +198,8 @@ EndProcedure
 
 - Add more commands: `1c-bsp-command` skill
 - Add a form: `1c-form-scaffold` skill
-- Add a template: `1c-template-manage` skill
-- Build EPF: `1c-platform-ops` skill
+- Add a template: use configurator or project scripts for layout management.
+- Build EPF: use `1c-batch` or project build scripts.
 
 ## MCP Integration
 

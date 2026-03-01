@@ -466,10 +466,8 @@ Skill: .cursor/skills/1c-forms-mcp/SKILL.md
 ## INTEGRATION WITH OTHER RULES
 
 This rule works with:
-- `rlm-toolkit-autoload.mdc` — RLM context management
-- `bsl-lsp-integration.mdc` — LSP tool usage
-- `context-management.mdc` — Agent usage patterns
 - `model-selection.mdc` — When to use Opus vs Sonnet
+- `1c-agent-delegation.mdc` — Agent delegation patterns
 
 ---
 

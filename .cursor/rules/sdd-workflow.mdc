@@ -1,59 +1,35 @@
 ---
-description: Навигация по SDD workflow — полное описание в 1c-feature-dev-enhanced
+description: "OpenSpec workflow — explore, plan, apply, verify, archive"
+alwaysApply: false
 ---
 
-# Specification-Driven Development (SDD) Workflow
+# OpenSpec Workflow (единственный рабочий процесс)
 
-Краткая навигация. **Полное описание, инструкции и примеры:** [.cursor/skills/1c-feature-dev-enhanced/SKILL.md](.cursor/skills/1c-feature-dev-enhanced/SKILL.md)
+## FLOW
 
----
+```
+explore → new/ff → apply → verify → archive
+```
 
-## OVERVIEW
+| Этап | Команда | Что происходит | Агенты |
+|------|---------|----------------|--------|
+| **Исследование** | `/opsx:explore` | Понять задачу, исследовать код, принять решения | onec-code-explorer, onec-code-architect |
+| **Создание change** | `/opsx:new` или `/opsx:ff` | proposal → design → specs → tasks | onec-code-architect (design) |
+| **Реализация** | `/opsx:apply` | Выполнение задач из tasks.md | onec-code-writer + onec-code-reviewer |
+| **Проверка** | `/opsx:verify` | Completeness, correctness, coherence | — |
+| **Архивация** | `/opsx:archive` | Синхронизация specs, перенос в archive/ | — |
 
-Спецификация создаётся и ревьюируется ДО написания кода. Количество агентов зависит от сложности (1–4+). Атомарные этапы с критериями приемки.
+## ПРИНЦИПЫ
 
----
+- Архитектура до кода: design.md ревьюируется architect-ом до реализации
+- Атомарные задачи с критериями приемки в tasks.md
+- BSL — только через агентов (onec-code-writer → onec-code-reviewer)
+- Для точечных правок (2-10 строк, 1 файл) — Light Mode (см. 1c-agent-delegation.mdc)
 
-## ФАЗЫ И АГЕНТЫ
+## СПРАВОЧНИК ПАТТЕРНОВ
 
-| Фаза | Цель | Агент | Артефакт |
-|------|------|-------|----------|
-| **0** | Оценка сложности, выбор стратегии | — | phase0-complexity.md |
-| **1** | Уточнение требований, подтверждение | — | phase1-requirements.md |
-| **2** | Исследование кода и паттернов | onec-code-explorer | phase2-exploration.md |
-| **3** | Уточняющие вопросы до проектирования | — | phase3-clarifications.md |
-| **4** | Проектирование архитектуры, план этапов | onec-code-architect | phase4-architecture.md |
-| **5** | Ревью плана до реализации | onec-code-architect | phase5-plan-review.md |
-| **6** | Реализация по этапам | onec-code-writer | код + отметки в phase4 |
-| **7** | Ревью кода | onec-code-reviewer, onec-code-architect | phase7-code-review.md |
-| **8** | Итоги, резюме | — | phase8-summary.md |
-
-**Артефакты:** `openspec/changes/[feature-name]/` — phase0…phase8 (Phase 6 обновляет phase4-architecture.md).
-
----
-
-## КРАТКО ПО ФАЗАМ
-
-- **Phase 0:** Оценить сложность (простая/средняя/сложная/критичная), выбрать число агентов.
-- **Phase 1:** Понять задачу, задать вопросы, сохранить требования, получить подтверждение.
-- **Phase 2:** Запустить explorer(ы), прочитать ключевые файлы, сохранить паттерны и выводы.
-- **Phase 3:** Выявить неоднозначности, задать вопросы пользователю, ждать ответов. Не переходить к Phase 4 без ответов.
-- **Phase 4:** Запустить architect(ов), получить план с этапами и критериями приемки, Mermaid-диаграммы.
-- **Phase 5:** Ревью плана (architect), исправить замечания, получить одобрение пользователя. **Не начинать Phase 6 без одобрения.**
-- **Phase 6:** Для каждого этапа: writer → проверка критериев → отметка в плане. Один этап за вызов.
-- **Phase 7:** Ревью кода (reviewer, при необходимости architect), консолидация замечаний, решение: исправить сейчас / позже / как есть.
-- **Phase 8:** Резюме (что построено, файлы, техдолг), представить пользователю.
+Оценка сложности, шаблоны промптов для агентов, интеграция со скиллами: `.cursor/skills/1c-agent-patterns/SKILL.md`
 
 ---
 
-## КРИТИЧЕСКИЕ ПРАВИЛА
-
-1. Phase 0, 3, 5 обязательны. Phase 6 — только после одобрения плана.
-2. Атомарные этапы, итеративное ревью до качества.
-3. Артефакты в openspec/changes/, следование 1c-coding-standards.mdc.
-4. Для точечных правок (2–10 строк, 1 файл) см. Light Mode в 1c-dispatch-gate.mdc и 1c-agent-delegation.mdc.
-
----
-
-**Подробности:** [.cursor/skills/1c-feature-dev-enhanced/SKILL.md](.cursor/skills/1c-feature-dev-enhanced/SKILL.md)  
-**Last updated:** 2026-02-27 | **Version:** 1.1
+**Last updated:** 2026-03-01 | **Version:** 2.0

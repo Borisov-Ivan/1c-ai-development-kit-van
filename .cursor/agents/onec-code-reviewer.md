@@ -39,6 +39,8 @@ Check against:
   - Documentation requirements
 ```
 
+For deep vendor-standards compliance (transactions, event handlers, queries, locking): Read `.cursor/skills/1c-vendor-standards/SKILL.md`, check all domains touched by reviewed code. For details: Read the relevant domain file from `.cursor/docs/standard/` (see `1c-standards-navigator.md`). Do NOT read platform documentation routinely — only if the reviewed code uses an unfamiliar platform mechanism.
+
 ### 2. Performance Analysis
 ```yaml
 Identify:
@@ -126,6 +128,17 @@ Check (add to existing):
   - User-facing string literals without НСтр("ru = '...'") — MEDIUM
 ```
 
+### 11. Band-Aid Detection
+```yaml
+Check (see .cursor/rules/verified-cause-gate.mdc):
+  - Defensive null/undefined check added without root cause analysis — HIGH
+  - Try/Except wrapping error instead of preventing it — HIGH
+  - Flag/parameter added to skip problematic code path — HIGH
+  - Logic duplicated with minor variation instead of fixing original — MEDIUM
+  - TODO/FIXME comment admitting the fix is temporary — MEDIUM
+  - Defensive check on fixed-contract source (overlaps with rule 10/Свойство) — HIGH
+```
+
 ## AVAILABLE TOOLS
 
 ### Primary validation (BSL LSP NOT_CONNECTED)
@@ -168,8 +181,8 @@ bsl_lsp_format(file_path):
   - Validate command structure
   - Verify ExternalDataProcessorInfo
 
-1c-feature-dev-enhanced:
-  - Full development cycle context
+1c-agent-patterns:
+  - Agent delegation patterns, review workflow
   - Spec-driven validation
 ```
 
@@ -275,6 +288,14 @@ status: NOT_CONNECTED
     - Сообщить() instead of ОбщегоНазначения.СообщитьПользователю()
     - Ternary operator ?()
     - User-facing string literals without НСтр("ru = '...'")
+
+11. Band-aid detection:
+    - Defensive null/undefined check without root cause analysis
+    - Try/Except wrapping error instead of preventing it
+    - Flag/parameter to skip problematic code path
+    - Logic duplicated with minor variation instead of fixing original
+    - TODO/FIXME admitting temporary fix
+    - Defensive check on fixed-contract source
 ```
 
 ### Phase 3: Context Analysis
@@ -344,6 +365,7 @@ status: NOT_CONNECTED
 - Сообщить() instead of ОбщегоНазначения.СообщитьПользователю()
 - Ternary operator ?() usage
 - Свойство() on fixed-contract source (tabular section, query result)
+- Band-aid fix detected (defensive check without root cause, try/except suppression, skip-flag)
 ```
 
 ### Medium Priority (Fix in Sprint)
@@ -364,6 +386,7 @@ status: NOT_CONNECTED
 - Logic duplication between modules
 - Commented-out code without explanation
 - User-facing string literals without НСтр("ru = '...'")
+- Probable band-aid (TODO workaround, duplicated logic with variation)
 ```
 
 ### Low Priority (Technical Debt)
