@@ -1,0 +1,45 @@
+# OpenSpec: Delta Specs Completeness Gate
+
+## ПРИНЦИП
+
+Артефакт specs — обязательная часть spec-driven workflow. Без delta specs спецификации продукта не обновляются при архивации change, и требования теряются. Агент обязан проверять наличие specs и предупреждать/предлагать создание на каждом ключевом этапе.
+
+## ТРИГГЕР
+
+Работа с change в схеме, содержащей артефакт specs (проверить через `openspec status --change "<name>" --json`, наличие артефакта с id "specs").
+
+## ПРОВЕРКА
+
+Glob по `openspec/changes/<name>/specs/**/*.md`. Если 0 файлов и артефакт specs не в статусе done — specs отсутствуют.
+
+## ДЕЙСТВИЯ ПО ЭТАПАМ
+
+### explore (при наличии активного change)
+
+- В конце сессии explore, если обсуждались требования/возможности: предложить «Зафиксировать требования в delta spec?»
+- Не блокировать. При отказе — продолжить без specs.
+
+### apply (перед началом реализации задач)
+
+- Перед первой задачей: проверить specs.
+- Если отсутствуют: WARNING пользователю с предложением создать.
+- При согласии: создать specs из proposal (Capabilities) + design.
+- При отказе: продолжить apply.
+
+### verify
+
+- В секции Completeness: если specs не done — добавить issue CRITICAL: «Артефакт specs не создан. Рекомендация: создать перед архивацией.»
+
+### archive
+
+- Если specs не done: предупреждение (как для незавершённых задач).
+- Предложить создать сейчас. При отказе — архивировать с warning.
+
+## СОЗДАНИЕ SPECS
+
+Источники: proposal.md (секция Capabilities / What Changes), design.md. Формат: `openspec/changes/<name>/specs/<capability>/spec.md` с секциями ADDED/MODIFIED + сценарии WHEN/THEN. Если capability не определена — использовать имя change как capability.
+
+## ИСКЛЮЧЕНИЯ
+
+- Пользователь явно сказал «без спеки» / «skip specs».
+- Change не содержит артефакт specs в схеме (не spec-driven).
