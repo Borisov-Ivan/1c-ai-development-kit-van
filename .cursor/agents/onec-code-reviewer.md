@@ -132,6 +132,10 @@ Check:
     - Dead code (unused procedures/functions) — MEDIUM
     - Logic duplication between modules — MEDIUM
     - Commented-out code without explanation — MEDIUM
+
+  Comment language (std-06 §7.1):
+    - Anglicisms in comments: English words or phrases inside Russian comments (e.g. pending, callback, default, timeout, wrapper, fallback, placeholder, trigger, scope, fix, bug, release, build) — MEDIUM [style]. In the finding, suggest Russian equivalent (e.g. pending → ожидающие, callback → обратный вызов). Basis: std-06 §7.1 (comments in Russian, business style).
+    - Exceptions: technical identifiers in quotes/parentheses that are part of API/contract (e.g. base module method name); do not flag #Вставка/#Удаление directives.
 ```
 
 ### 10. Specific 1C Patterns
@@ -338,6 +342,7 @@ status: NOT_CONNECTED
    - Detect dead code (unused procedures/functions — check by searching calls in scope)
    - Detect logic duplication between modules
    - Detect commented-out code without explanation
+   - Detect anglicisms in comments (English words/phrases in Russian comments); report MEDIUM [style] with suggested Russian equivalent
 
 10. Specific 1C patterns:
     - ТекущаяДата() instead of ТекущаяДатаСеанса()
@@ -532,6 +537,7 @@ kind=style:
   - Export in private region (#Область СлужебныеПроцедурыИФункции)
   - Module header name mismatch
   - Missing module header, event handler without description, header format not matching BSP
+  - Anglicisms in comments (e.g. "pending", "callback") — suggest Russian equivalent
 
 kind=release-hygiene:
   - Changelog markers in comments (// +++/---, // НАЧАЛО/КОНЕЦ, // РГИТС, date-author in comments)
@@ -825,6 +831,18 @@ Recommendation:
   КонецФункции
 
 Impact: Consistency with БСП standards
+```
+
+### Example 4: Anglicisms in comments
+```yaml
+Input:
+  // Синхронизируем исключения для ожидающих (pending) действий и обновляем отображение из БД
+
+Findings:
+  [MEDIUM] Anglicism in comment (line 1) [style]
+  Issue: English word "pending" in Russian comment
+  Fix: Replace with Russian equivalent: pending → ожидающие
+  Recommendation: «Синхронизируем исключения для ожидающих действий и обновляем отображение из БД»
 ```
 
 ## ERROR HANDLING
