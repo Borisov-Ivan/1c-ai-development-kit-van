@@ -8,18 +8,21 @@ priority: 999
 
 ## HALT CONDITIONS (проверять ДО любого действия)
 
+Триггеры проверяются **сверху вниз**; более специфичный триггер (Light Mode, Mechanical Mode) имеет приоритет над общим («Правка .bsl файла»).
+
 | Триггер | Действие | Детали |
 |---------|----------|--------|
 | Файл трассы (`.pff`, `*_TRACE_*.txt`) или стек ошибки 1С | СТОП. Подготовить бриф. Делегировать **onec-trace-analyst**. По результату — onec-code-explorer, onec-code-architect | `.cursor/rules/1c-error-analysis.mdc` |
-| Правка `.bsl` файла | СТОП. Загрузить скилл. Делегировать **onec-code-writer**. Обязательно **onec-code-reviewer** после | `.cursor/rules/1c-agent-delegation.mdc` |
 | Точечная правка (Light Mode): 2–10 строк, 1 файл, без архитектуры | Делегировать **onec-code-writer** с контекстом, затем **onec-code-reviewer**. Без артефактов OpenSpec | см. раздел Light Mode ниже |
 | Шаблонная правка (Mechanical Mode): find-replace, #Область, удаление комментариев | Прямая правка + Grep-верификация + **onec-code-reviewer** после. Без writer | `.cursor/rules/1c-agent-delegation.mdc` (MECHANICAL MODE) |
+| Правка `.bsl` файла (общий случай) | СТОП. Загрузить скилл. Делегировать **onec-code-writer**. Обязательно **onec-code-reviewer** после | `.cursor/rules/1c-agent-delegation.mdc` |
 | Доработка 1С (не точечная правка) | СТОП. Сначала **onec-code-architect** (план + ревью плана). Код — только после одобрения | `.cursor/rules/1c-agent-delegation.mdc` |
 | Работа с формами 1С (Form.xml) | Загрузить 1c-forms. Делегировать **onec-form-generator** | `.cursor/skills/1c-forms/SKILL.md` |
 | Оптимизация запросов 1С | Загрузить 1c-query-optimization. Делегировать **onec-query-optimizer** | `.cursor/skills/1c-query-optimization/SKILL.md` |
 | Генерация тестов 1С | Делегировать **onec-test-generator** | — |
 | Упрощение BSL-кода | Делегировать **onec-code-simplifier** | — |
 | Навигация по метаданным (поиск объектов, связей) | Делегировать **onec-metadata-helper** | — |
+| Управление серверами 1С, базами, PostgreSQL, ibcmd, выгрузка/загрузка XML | Делегировать **onec-admin** | `.cursor/agents/onec-admin.md` |
 | Исследование кода из 3+ модулей | Делегировать **onec-code-explorer** (не читать модули вручную) | `.cursor/rules/1c-agent-delegation.mdc` |
 | Исправление ошибки (bug fix) | СТОП. Проверить root cause + impact assessment. При системном масштабе — **onec-code-architect** | `.cursor/rules/verified-cause-gate.mdc` |
 
@@ -37,4 +40,4 @@ priority: 999
 
 ## Исключения
 
-Не считать ROI и временные оценки. Не писать BSL напрямую — исключения: однострочная правка, только комментарии, явный запрос «без агентов».
+Не считать ROI и временные оценки. Не писать BSL напрямую — исключения: однострочная правка, только комментарии, явный запрос «без агентов» / «без ревью».

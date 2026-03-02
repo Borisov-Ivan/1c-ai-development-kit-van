@@ -40,6 +40,13 @@ description: Complete toolkit for 1C managed forms - create, edit, analyze, vali
 1c-forms validate Documents/ЗаказКлиента/Forms/ФормаДокумента/Ext/Form.xml
 ```
 
+### Удалить форму
+```bash
+# Удалить форму с очисткой регистрации в метаданных объекта
+# Загрузи: 1c-forms/scaffold/SKILL.md
+1c-forms scaffold remove Documents/ЗаказКлиента.xml ФормаДокумента
+```
+
 ---
 
 ## 📦 Включенные Skills

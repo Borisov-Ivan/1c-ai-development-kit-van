@@ -55,6 +55,8 @@ Ensure:
     * Contracts (parameters, return values)
     * Constraints
     * Technical debt (TODO, FIXME)
+  - NEVER add changelog markers (author, date, ticket, НАЧАЛО/КОНЕЦ)
+  - History is tracked in Git, not in code comments
   - Handle errors and edge cases
 ```
 

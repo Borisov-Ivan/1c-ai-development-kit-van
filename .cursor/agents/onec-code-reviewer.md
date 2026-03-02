@@ -72,6 +72,7 @@ Evaluate:
   - Parameter count
   - Error handling
   - Testability
+  - Stub/placeholder code returning empty or dummy values (empty Thumbprint, hardcoded "TODO", always-false conditions) — HIGH (always checked, not prerelease-only)
 ```
 
 ### 5. Extension Annotations (1C Extensions)
@@ -87,8 +88,11 @@ Check:
 ### 6. Module Structure
 ```yaml
 Check:
-  - Missing #Область markup entirely — MEDIUM
+  - Missing #Область markup entirely — MEDIUM (only if module > 100 lines; for modules ≤ 100 lines — LOW)
   - Wrong order: ПрограммныйИнтерфейс → СлужебныйПрограммныйИнтерфейс → СлужебныеПроцедурыИФункции — MEDIUM
+  - Duplicate #Область or #КонецОбласти directives — HIGH
+  - Export method placed in #Область СлужебныеПроцедурыИФункции (private region) — MEDIUM
+  - Module header comment name does not match actual module name — LOW
   - No module header comment (module purpose) — LOW
 ```
 
@@ -111,11 +115,23 @@ Check:
 ### 9. Code Cleanliness
 ```yaml
 Check:
-  - Changelog markers (// +++ Иванов, // ---, date-author) — LOW
-  - References to design artifacts in comments (// Design §3, // D11, // F5) — LOW
-  - Dead code (unused procedures/functions) — MEDIUM
-  - Logic duplication between modules — MEDIUM
-  - Commented-out code without explanation — MEDIUM
+  Principle: comments describe code intent, not change history.
+  Do NOT treat as release-hygiene or remove: directives #Вставка, #КонецВставки, #Удаление, #КонецУдаления — they are 1C extension override syntax, required for correct merge.
+
+  Release hygiene (process metadata in comments only):
+    - Changelog markers in comments: author+date+ticket in comment lines
+      (// +++ Author, // ---, // НАЧАЛО/КОНЕЦ Изменения внес:,
+       // РГИТС ... +++/---, Заявка №, Подрядчик:, date-author stamps) — MEDIUM
+    - Commented-out old code with replacement markers
+      ("Оригинальный код:", "Новый код:", "Старый вариант:") — MEDIUM
+    - Work instructions in code
+      ("Добавить в xml...", "Перенести в...", "TODO перенести") — MEDIUM
+    - Design artifact references (// Design §3, // D11, // F5) — MEDIUM
+
+  Code waste:
+    - Dead code (unused procedures/functions) — MEDIUM
+    - Logic duplication between modules — MEDIUM
+    - Commented-out code without explanation — MEDIUM
 ```
 
 ### 10. Specific 1C Patterns
@@ -123,12 +139,15 @@ Check:
 Check (add to existing):
   - ТекущаяДата() instead of ТекущаяДатаСеанса() — CRITICAL
   - Сообщить() instead of ОбщегоНазначения.СообщитьПользователю() — HIGH
-  - Ternary operator ?() — HIGH
+  - Ternary operator ?() — MEDIUM
   - Свойство() on fixed-contract source (tabular section, query result) — HIGH
   - ТипЗнч() check on fixed-contract return value (function always returns Structure) — HIGH
   - ЗначениеЗаполнено() guard on field guaranteed by contract/metadata — HIGH
   - "Defensive cake" (ТипЗнч + Свойство + ЗначениеЗаполнено stacked on fixed-contract source) — HIGH
   - User-facing string literals without НСтр("ru = '...'") — MEDIUM
+  - ЭтаФорма instead of ЭтотОбъект in ОписаниеОповещения/callbacks — HIGH
+  - Method name contradicts compilation directive (e.g. "...НаКлиенте" declared &НаСервере, "...НаСервере" declared &НаКлиенте) — MEDIUM
+  - Попытка/Исключение wrapping access to fixed-contract field/method (tabular section attribute, explicit query column, documented return type). If the code inside Попытка can only fail due to a code bug (not external factor), then Попытка masks the bug — HIGH
 ```
 
 ### 11. Band-Aid Detection
@@ -139,7 +158,37 @@ Check (see .cursor/rules/verified-cause-gate.mdc):
   - Flag/parameter added to skip problematic code path — HIGH
   - Logic duplicated with minor variation instead of fixing original — MEDIUM
   - TODO/FIXME comment admitting the fix is temporary — MEDIUM
-  - Defensive check on fixed-contract source (overlaps with rule 10/Свойство) — HIGH
+  - Defensive check on fixed-contract source — HIGH (see category 10 for detection; do NOT duplicate finding — report under category 10 only)
+  - "Defensive cake" (ТипЗнч + Свойство + ЗначениеЗаполнено stacked on fixed contract) — see category 10, Specific 1C Patterns; do NOT duplicate
+```
+
+### 12. Release Readiness (checked only in mode=prerelease)
+```yaml
+Check:
+  - Typos and encoding errors in user-facing strings: mixed Cyrillic/Latin chars (С vs C, а vs a, о vs o, е vs e), spelling errors in НСтр/ПоказатьПредупреждение arguments — HIGH
+  - Stub/placeholder code — see category 4 Code Quality (always checked, not prerelease-only)
+  - Попытка/Исключение block without logging (neither ЗаписьЖурналаРегистрации nor wrapper like ЗаписатьОшибкуВЖурнал) where exception is NOT re-raised — MEDIUM
+    (Note: if exception is re-raised via ВызватьИсключение, logging is optional)
+```
+
+### 13. Transactions and Locking
+```yaml
+Check:
+  - НачатьТранзакцию() without matching ЗафиксироватьТранзакцию()/ОтменитьТранзакцию() in same scope — CRITICAL
+  - НачатьТранзакцию() without Попытка/Исключение wrapping the transactional block — HIGH
+  - Missing ОтменитьТранзакцию() in Исключение block of transactional Попытка — CRITICAL
+  - User interaction (ПоказатьВопрос, Предупреждение, Сообщить) inside transaction — HIGH
+  - Read-then-write without БлокировкаДанных in concurrent scenario — HIGH
+  - Nested НачатьТранзакцию() without justification — MEDIUM
+```
+
+### 14. Resource Leaks
+```yaml
+Check:
+  - COMОбъект (Новый COMОбъект()) created without Попытка/Исключение ensuring release — HIGH
+  - HTTPСоединение/FTPСоединение created but not wrapped in Попытка for timeout/error handling — MEDIUM
+  - File reader/writer (ЧтениеXML, НачатьЗаписьXML, ЧтениеJSON, ЗаписьJSON, ТекстовыйДокумент.Открыть) opened without close in error path — MEDIUM
+  - Temporary file created (ПолучитьИмяВременногоФайла) without cleanup in error path — LOW
 ```
 
 ## AVAILABLE TOOLS
@@ -257,6 +306,7 @@ status: NOT_CONNECTED
    - Analyze parameter count
    - Fail-fast: scan for silent skips on structural checks (Продолжить, silent Возврат, empty branch when precondition fails on type/property/size/format)
    - Data contract: for every ТипЗнч()/Свойство()/ЕстьРеквизит/Колонки.Найти/ЗначениеЗаполнено() check, verify source type and whether contract is fixed. Flag: (a) redundant check on fixed-contract source (tabular section field, explicit query column, documented return/parameter), (b) wrong method (Свойство on non-Structure), (c) "defensive cake" (stacked checks on same value).
+   - Detect stub/placeholder code: empty Thumbprint, hardcoded "TODO" return values, always-false conditions — HIGH (always, not prerelease-only)
 
 5. Extension annotations:
    - Detect &Перед/&После applied to a function (not procedure)
@@ -265,8 +315,11 @@ status: NOT_CONNECTED
    - Detect business logic directly in #Вставка block
 
 6. Module structure:
-   - Check presence of #Область markup
+   - Check presence of #Область markup (flag as MEDIUM only if module > 100 lines; otherwise LOW)
    - Check order: ПрограммныйИнтерфейс → СлужебныйПрограммныйИнтерфейс → СлужебныеПроцедурыИФункции
+   - Detect duplicate #Область/#КонецОбласти directives
+   - Detect Export methods in #Область СлужебныеПроцедурыИФункции
+   - Verify module header comment matches actual module name
    - Check module header comment
 
 7. Method documentation:
@@ -294,6 +347,9 @@ status: NOT_CONNECTED
     - ТипЗнч() on fixed-contract return value
     - ЗначениеЗаполнено() on field guaranteed by contract/metadata
     - "Defensive cake" (stacked ТипЗнч + Свойство + ЗначениеЗаполнено on fixed contract)
+    - ЭтаФорма instead of ЭтотОбъект in ОписаниеОповещения
+    - Method name contradicts compilation directive
+    - Попытка/Исключение wrapping fixed-contract field/method access
 
 11. Band-aid detection:
     - Defensive null/undefined check without root cause analysis
@@ -301,8 +357,27 @@ status: NOT_CONNECTED
     - Flag/parameter to skip problematic code path
     - Logic duplicated with minor variation instead of fixing original
     - TODO/FIXME admitting temporary fix
-    - Defensive check on fixed-contract source
-    - "Defensive cake" pattern
+    - Defensive check on fixed-contract source (report under category 10 only, do not duplicate)
+    - "Defensive cake" pattern (report under category 10 only, do not duplicate)
+
+12. Release readiness (prerelease only):
+    - Typos and mixed Cyrillic/Latin in user-facing strings
+    - Stub code — see category 4 (always checked)
+    - Попытка/Исключение without logging (exception not re-raised)
+
+13. Transactions and locking:
+    - НачатьТранзакцию() without matching ЗафиксироватьТранзакцию()/ОтменитьТранзакцию() in same scope
+    - НачатьТранзакцию() without Попытка/Исключение block
+    - Missing ОтменитьТранзакцию() in Исключение of transactional Попытка
+    - User interaction (ПоказатьВопрос, Предупреждение) inside transaction
+    - Read-then-write without БлокировкаДанных in concurrent scenario
+    - Nested НачатьТранзакцию() without justification
+
+14. Resource leaks:
+    - COMОбъект (Новый COMОбъект()) without Попытка/Исключение ensuring release
+    - HTTPСоединение/FTPСоединение not wrapped in Попытка for error handling
+    - File reader/writer opened without close in error path
+    - Temporary file created without cleanup in error path
 ```
 
 ### Phase 3: Context Analysis
@@ -352,6 +427,8 @@ status: NOT_CONNECTED
 - БСП violations (breaking changes)
 - &Перед/&После applied to a function instead of a procedure
 - ТекущаяДата() instead of ТекущаяДатаСеанса()
+- НачатьТранзакцию() without matching ЗафиксироватьТранзакцию()/ОтменитьТранзакцию() in same scope
+- Missing ОтменитьТранзакцию() in Исключение block of transactional Попытка
 ```
 
 ### High Priority (Fix Before Merge)
@@ -373,9 +450,12 @@ status: NOT_CONNECTED
 - &ИзменениеИКонтроль used where &Перед/&После is sufficient
 - Intercepted method (&Вместо/&Перед/&После) without extension prefix
 - Сообщить() instead of ОбщегоНазначения.СообщитьПользователю()
-- Ternary operator ?() usage
 - Свойство() on fixed-contract source (tabular section, query result)
 - Band-aid fix detected (defensive check without root cause, try/except suppression, skip-flag, defensive cake)
+- НачатьТранзакцию() without Попытка/Исключение wrapping the transactional block
+- User interaction (ПоказатьВопрос, Предупреждение, Сообщить) inside transaction
+- Read-then-write without БлокировкаДанных in concurrent scenario
+- COMОбъект created without Попытка/Исключение ensuring release
 ```
 
 ### Medium Priority (Fix in Sprint)
@@ -386,7 +466,7 @@ status: NOT_CONNECTED
 - Code smells
 - Minor БСП deviations
 - Testability issues
-- Missing #Область markup in module
+- Missing #Область markup in module (module > 100 lines; otherwise LOW)
 - Wrong order of #Область regions
 - Export method without header comment (purpose, parameters, return value)
 - Business logic directly in #Вставка block instead of separate procedure
@@ -396,6 +476,7 @@ status: NOT_CONNECTED
 - Logic duplication between modules
 - Commented-out code without explanation
 - User-facing string literals without НСтр("ru = '...'")
+- Ternary operator ?() usage (style preference)
 - Probable band-aid (TODO workaround, duplicated logic with variation)
 ```
 
@@ -406,12 +487,11 @@ status: NOT_CONNECTED
 - Variable naming
 - Minor optimizations
 - Refactoring opportunities
-- Changelog markers (// +++ Author, // ---, date-author)
-- References to design artifacts in comments (// D11, // F5, // Design §3)
 - Missing module header comment
 - Event handler without description
 - Header format not matching BSP template
 ```
+(Changelog markers and design refs in comments are now MEDIUM under Code Cleanliness / release-hygiene and escalate to HIGH in prerelease.)
 
 ## PRE-RELEASE SEVERITY ESCALATION
 
@@ -422,10 +502,11 @@ When reviewer is called with context `mode=prerelease`, tag each finding with **
 ```yaml
 kind:
   functional — affects behavior, data, security, reliability (bugs, ТекущаяДата on server, injection, silent skips, band-aids)
-  style — affects readability, standards, structure only (?(), #Область missing, naming prefix, changelog markers, header format)
+  style — affects readability, standards, structure only (?(), #Область missing, naming prefix, header format)
+  release-hygiene — process metadata that must not ship to production (changelog markers, work instructions, commented-out old code, design refs)
 ```
 
-**Escalation (LOW→MEDIUM, MEDIUM→HIGH) applies only to kind=functional.** For kind=style, keep the normal level and tag the finding with `[style]` in the report.
+**Escalation (LOW→MEDIUM, MEDIUM→HIGH) applies only to kind=functional.** For kind=style, keep the normal level and tag the finding with `[style]` in the report. For kind=release-hygiene, see Pre-release escalation (release-hygiene) below.
 
 ### Kind by category (examples)
 
@@ -436,13 +517,28 @@ kind=functional:
   - Silent skip on structural check failure, band-aid fixes
   - &ИзменениеИКонтроль: code outside #Вставка/#Удаление modified (breaks extension applicability)
   - Security, performance bugs, logic errors
+  - ЭтаФорма instead of ЭтотОбъект
+  - Duplicate #Область (structural breakage)
+  - Typos in user-facing strings (mixed encoding, spelling)
+  - Stub/placeholder code in production
+  - Попытка/Исключение without logging (exception silently swallowed)
+  - Попытка/Исключение wrapping fixed-contract access (contract masking)
 
 kind=style:
-  - Ternary operator ?()
+  - Ternary operator ?() (style preference, not functional defect)
   - Missing #Область structure in module
   - Own non-intercept method using extension prefix
-  - Changelog markers, design refs in comments, missing module header
-  - Event handler without description, header format not matching BSP
+  - Method name contradicts compilation directive
+  - Export in private region (#Область СлужебныеПроцедурыИФункции)
+  - Module header name mismatch
+  - Missing module header, event handler without description, header format not matching BSP
+
+kind=release-hygiene:
+  - Changelog markers in comments (// +++/---, // НАЧАЛО/КОНЕЦ, // РГИТС, date-author in comments)
+  - Commented-out old code with replacement markers
+  - Work instructions in comments
+  - Design artifact references in comments
+  Not release-hygiene: #Вставка, #КонецВставки, #Удаление, #КонецУдаления — extension override directives, do not remove or flag.
 ```
 
 ### Escalation rules (kind=functional only)
@@ -456,6 +552,8 @@ Pre-release escalation (functional only):
     - Export method without header (if functional impact, e.g. contract unclear)
     - Dead code, logic duplication (if kind=functional)
     - Business logic directly in #Вставка block
+    - Попытка/Исключение without logging (if exception silently swallowed)
+    - Export method in СлужебныеПроцедурыИФункции (contract violation)
 
   HIGH → CRITICAL:
     - &ИзменениеИКонтроль: code outside #Вставка/#Удаление differs from base (variable rename, formatting, #Область in base code) — breaks extension applicability
@@ -463,7 +561,18 @@ Pre-release escalation (functional only):
 Note: Escalation is additive for functional issues. Style issues are not escalated; tag [style] and keep original level.
 ```
 
-**How to detect `mode=prerelease`**: The calling prompt explicitly passes `mode=prerelease` in context, or the review is triggered by the `/prerelease-review` command skill. In prerelease reports, always output `kind: functional` or `kind: style` (and level) for each finding.
+### Pre-release escalation (release-hygiene)
+
+```yaml
+Pre-release escalation (release-hygiene):
+  MEDIUM → HIGH:
+    - All release-hygiene items (changelog markers in comments, work instructions, commented-out old code, design refs). Do not flag or remove #Вставка/#Удаление directives.
+
+  Note: release-hygiene HIGH items appear in "fix before release" section
+  (unlike style HIGH which is optional).
+```
+
+**How to detect `mode=prerelease`**: The calling prompt explicitly passes `mode=prerelease` in context, or the review is triggered by the `/prerelease-review` command skill. In prerelease reports, always output `kind: functional`, `kind: style`, or `kind: release-hygiene` (and level) for each finding.
 
 ## STANDARDS REFERENCE
 
@@ -774,5 +883,5 @@ RLM NOT_CONNECTED — секция опциональна.
 
 ---
 
-**Last updated**: 2026-03-01  
-**Version**: 1.2
+**Last updated**: 2026-03-02  
+**Version**: 1.3

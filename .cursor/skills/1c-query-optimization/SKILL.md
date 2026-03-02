@@ -299,6 +299,12 @@ Ensure query conditions match available indexes:
 
 ---
 
-**Reference**: [ITS Query Optimization Standards](https://its.1c.ru/db/v8std/browse/13/-1/26/28)
+**Reference**: [ITS Query Optimization Standards](https://its.1c.ru/db/v8std/browse/13/-1/26/28) | `.cursor/docs/standard/std-04-queries.md`
 
-**Remember**: Verify metadata attributes exist using `search_metadata` before writing queries.
+Темы, не описанные в этом скилле, но важные (см. std-04-queries.md):
+- ПОЛНОЕ ВНЕШНЕЕ СОЕДИНЕНИЕ — только при обосновании
+- ПОДОБНО — осторожно с производительностью (не используется по индексу)
+- ПЕРВЫЕ + АВТОУПОРЯДОЧИВАНИЕ — явное УПОРЯДОЧИТЬ ПО предпочтительнее
+- ДЛЯ ИЗМЕНЕНИЯ — блокировка данных в транзакции (виртуальные таблицы не поддерживают)
+
+**Remember**: Verify metadata attributes exist using `user-PROJECT-codemetadata-metadatasearch` before writing queries.
