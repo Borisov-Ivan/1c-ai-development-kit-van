@@ -129,13 +129,9 @@ Check:
     - Design artifact references (// Design §3, // D11, // F5) — MEDIUM
 
   Code waste:
-    - Dead code (unused procedures/functions) — MEDIUM
+    - Dead code — see category 15 (Obsolete and Unused Code)
     - Logic duplication between modules — MEDIUM
     - Commented-out code without explanation — MEDIUM
-
-  Comment language (std-06 §7.1):
-    - Anglicisms in comments: English words or phrases inside Russian comments (e.g. pending, callback, default, timeout, wrapper, fallback, placeholder, trigger, scope, fix, bug, release, build) — MEDIUM [style]. In the finding, suggest Russian equivalent (e.g. pending → ожидающие, callback → обратный вызов). Basis: std-06 §7.1 (comments in Russian, business style).
-    - Exceptions: technical identifiers in quotes/parentheses that are part of API/contract (e.g. base module method name); do not flag #Вставка/#Удаление directives.
 ```
 
 ### 10. Specific 1C Patterns
@@ -193,6 +189,31 @@ Check:
   - HTTPСоединение/FTPСоединение created but not wrapped in Попытка for timeout/error handling — MEDIUM
   - File reader/writer (ЧтениеXML, НачатьЗаписьXML, ЧтениеJSON, ЗаписьJSON, ТекстовыйДокумент.Открыть) opened without close in error path — MEDIUM
   - Temporary file created (ПолучитьИмяВременногоФайла) without cleanup in error path — LOW
+```
+
+### 15. Obsolete and Unused Code
+```yaml
+Check:
+  Unused procedures/functions (std-06 п.2, std-01 п.2.2):
+    - For each Процедура/Функция in reviewed files, verify at least one call exists
+      in the extension scope (Grep by name across all .bsl in extension directory).
+      Exceptions: event handlers (ОбработчикСобытия), BSP-registered commands
+      (ExternalDataProcessorInfo / ВнешняяОбработкаСведения), callback procedures
+      passed as string to ОписаниеОповещения or ОбработкаВнешнегоСобытия.
+    - Unused non-export procedure/function — MEDIUM
+    - Unused export procedure/function (no callers found in extension scope) — HIGH
+      (broken public contract or dead API surface)
+
+  Obsolete code markers (std-10 п.3.1):
+    - Procedure/function with comment "Устарела:" or "Deprecated" — MEDIUM
+      Reason: document replacement or plan removal per std-10 п.3.1
+    - #Область УстаревшиеПроцедурыИФункции present — LOW
+      (informational: track obsolete API surface; confirm replacement is documented)
+    - Obsolete procedure (marked Устарела:/Deprecated) still called from
+      non-obsolete code — HIGH (caller must migrate to replacement per std-10)
+
+  Unused parameters (std-06):
+    - Procedure/function parameter never referenced in body — LOW
 ```
 
 ## AVAILABLE TOOLS
@@ -339,10 +360,9 @@ status: NOT_CONNECTED
 9. Code cleanliness:
    - Detect changelog markers (// +++ Author, // ---, date-author comments)
    - Detect design artifact references in comments (// D11, // F5, // Design §3)
-   - Detect dead code (unused procedures/functions — check by searching calls in scope)
+   - Dead code — see category 15 (Obsolete and Unused Code)
    - Detect logic duplication between modules
    - Detect commented-out code without explanation
-   - Detect anglicisms in comments (English words/phrases in Russian comments); report MEDIUM [style] with suggested Russian equivalent
 
 10. Specific 1C patterns:
     - ТекущаяДата() instead of ТекущаяДатаСеанса()
@@ -383,6 +403,14 @@ status: NOT_CONNECTED
     - HTTPСоединение/FTPСоединение not wrapped in Попытка for error handling
     - File reader/writer opened without close in error path
     - Temporary file created without cleanup in error path
+
+15. Obsolete and unused code:
+    - For each Процедура/Функция: Grep by name across all .bsl in extension directory
+      to verify at least one call exists. Skip: event handlers, BSP commands, callbacks.
+    - Unused non-export → MEDIUM; unused export → HIGH
+    - Comment "Устарела:" / "Deprecated" or #Область УстаревшиеПроцедурыИФункции → MEDIUM/LOW
+    - Obsolete procedure still called from non-obsolete code → HIGH
+    - Unused parameter (never referenced in body) → LOW
 ```
 
 ### Phase 3: Context Analysis
@@ -461,6 +489,8 @@ status: NOT_CONNECTED
 - User interaction (ПоказатьВопрос, Предупреждение, Сообщить) inside transaction
 - Read-then-write without БлокировкаДанных in concurrent scenario
 - COMОбъект created without Попытка/Исключение ensuring release
+- Unused export procedure/function (no callers in extension scope) — category 15
+- Obsolete procedure still called from non-obsolete code — category 15
 ```
 
 ### Medium Priority (Fix in Sprint)
@@ -477,7 +507,9 @@ status: NOT_CONNECTED
 - Business logic directly in #Вставка block instead of separate procedure
 - Own non-intercept method with extension prefix
 - Export own method without descriptive unique name
-- Dead code (unused procedures/functions)
+- Dead code — see category 15 (Obsolete and Unused Code)
+- Unused non-export procedure/function (category 15)
+- Procedure/function marked "Устарела:" / "Deprecated" (category 15)
 - Logic duplication between modules
 - Commented-out code without explanation
 - User-facing string literals without НСтр("ru = '...'")
@@ -537,7 +569,6 @@ kind=style:
   - Export in private region (#Область СлужебныеПроцедурыИФункции)
   - Module header name mismatch
   - Missing module header, event handler without description, header format not matching BSP
-  - Anglicisms in comments (e.g. "pending", "callback") — suggest Russian equivalent
 
 kind=release-hygiene:
   - Changelog markers in comments (// +++/---, // НАЧАЛО/КОНЕЦ, // РГИТС, date-author in comments)
@@ -545,6 +576,15 @@ kind=release-hygiene:
   - Work instructions in comments
   - Design artifact references in comments
   Not release-hygiene: #Вставка, #КонецВставки, #Удаление, #КонецУдаления — extension override directives, do not remove or flag.
+
+kind=functional (category 15 — unused/obsolete):
+  - Unused export procedure/function (no callers in extension scope) — dead API surface
+  - Obsolete procedure still called from non-obsolete code — caller must migrate
+
+kind=style (category 15 — unused/obsolete):
+  - Unused non-export procedure/function (no behavior impact, dead weight)
+  - Obsolete markers present (comment "Устарела:", #Область УстаревшиеПроцедурыИФункции)
+  - Unused parameter in procedure/function body
 ```
 
 ### Escalation rules (kind=functional only)
@@ -560,6 +600,8 @@ Pre-release escalation (functional only):
     - Business logic directly in #Вставка block
     - Попытка/Исключение without logging (if exception silently swallowed)
     - Export method in СлужебныеПроцедурыИФункции (contract violation)
+    - Unused export procedure/function (dead API surface before release) — category 15
+    - Procedure marked "Устарела:" / "Deprecated" still present without documented plan — category 15
 
   HIGH → CRITICAL:
     - &ИзменениеИКонтроль: code outside #Вставка/#Удаление differs from base (variable rename, formatting, #Область in base code) — breaks extension applicability
@@ -833,18 +875,6 @@ Recommendation:
 Impact: Consistency with БСП standards
 ```
 
-### Example 4: Anglicisms in comments
-```yaml
-Input:
-  // Синхронизируем исключения для ожидающих (pending) действий и обновляем отображение из БД
-
-Findings:
-  [MEDIUM] Anglicism in comment (line 1) [style]
-  Issue: English word "pending" in Russian comment
-  Fix: Replace with Russian equivalent: pending → ожидающие
-  Recommendation: «Синхронизируем исключения для ожидающих действий и обновляем отображение из БД»
-```
-
 ## ERROR HANDLING
 
 ### MCP Server Errors
@@ -901,5 +931,5 @@ RLM NOT_CONNECTED — секция опциональна.
 
 ---
 
-**Last updated**: 2026-03-02  
-**Version**: 1.3
+**Last updated**: 2026-03-03  
+**Version**: 1.4

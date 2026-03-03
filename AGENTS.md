@@ -26,6 +26,12 @@ explore → new/ff → apply → verify → archive
 
 ---
 
+## Запрет создания объектов метаданных
+
+**Никогда** не создавать XML-файлы метаданных, директории объектов или новые .bsl в несуществующих директориях. При отсутствии объекта — СТОП, блокер пользователю. `.cursor/rules/1c-no-metadata-creation.mdc`.
+
+---
+
 ## Анализ ошибок 1С (трассы и стеки)
 
 Делегирование onec-trace-analyst, затем explorer/architect — `.cursor/rules/1c-error-analysis.mdc`.
