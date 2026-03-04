@@ -11,6 +11,18 @@ alwaysApply: true
 Если начал писать BSL напрямую — ОСТАНОВИСЬ. Отмени. Делегируй.
 **Explore-mode guard:** В режиме `/opsx:explore` без активного change — onec-code-writer и onec-code-reviewer НЕ вызываются. Сначала ЗНИ (`/opsx:new` или `/opsx:ff`).
 
+## APPLY GATE
+
+Реализация (onec-code-writer, onec-code-reviewer, прямая правка .bsl) разрешена **только** в контексте активной команды `/opsx:apply`.
+
+Создание и правка артефактов OpenSpec (proposal.md, design.md, tasks.md, specs/) — разрешено без /opsx:apply. Это планирование, не реализация.
+
+Если change существует, но /opsx:apply не был вызван:
+1. **СТОП.** Не вызывать writer/reviewer, не править .bsl.
+2. Предложить: «Артефакты готовы. Для начала реализации: `/opsx:apply <name>`»
+
+Исключения: Light Mode и Mechanical Mode — работают без артефактов OpenSpec (см. соответствующие секции).
+
 ## ПОЛНОМОЧИЯ АГЕНТОВ (BSL-ONLY)
 
 Агенты-исполнители (writer, simplifier, form-generator): **только правка .bsl в существующих файлах**.

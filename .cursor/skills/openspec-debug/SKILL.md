@@ -10,7 +10,7 @@ metadata:
 
 Investigate a test-found bug and produce a root-cause analysis and a fix plan that is **captured inside the same OpenSpec change**.
 
-This skill is designed for the `/debug` command.
+This skill is designed for the `/opsx:debug` command (alias: `/debug`).
 
 ## Input (free-form)
 

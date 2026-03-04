@@ -15,19 +15,14 @@ Continue working on a change by creating the next artifact.
 
 **Steps**
 
-1. **If no change name provided, prompt for selection**
+1. **Select the change**
 
-   Run `openspec list --json` to get available changes sorted by most recently modified. Then use the **AskUserQuestion tool** to let the user select which change to work on.
+   If a name is provided, use it. Otherwise:
+   - Infer from conversation context if the user mentioned a change
+   - Auto-select if only one active change exists
+   - If multiple active changes: run `openspec list --json` sorted by most recently modified, present top 3-4 options showing name, schema, status, last modified time, mark most recent as "(Recommended)", and use **AskUserQuestion tool** to let user select
 
-   Present the top 3-4 most recently modified changes as options, showing:
-   - Change name
-   - Schema (from `schema` field if present, otherwise "spec-driven")
-   - Status (e.g., "0/5 tasks", "complete", "no tasks")
-   - How recently it was modified (from `lastModified` field)
-
-   Mark the most recently modified change as "(Recommended)" since it's likely what the user wants to continue.
-
-   **IMPORTANT**: Do NOT guess or auto-select a change. Always let the user choose.
+   Always announce: "Using change: <name>" and how to override (e.g., `/opsx:continue <other>`).
 
 2. **Check current status**
    ```bash

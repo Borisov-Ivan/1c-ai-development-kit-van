@@ -17,13 +17,14 @@ This is an **agent-driven** operation - you will read delta specs and directly e
 
 **Steps**
 
-1. **If no change name provided, prompt for selection**
+1. **Select the change**
 
-   Run `openspec list --json` to get available changes. Use the **AskUserQuestion tool** to let the user select.
+   If a name is provided, use it. Otherwise:
+   - Infer from conversation context if the user mentioned a change
+   - Auto-select if only one active change exists
+   - If multiple active changes: run `openspec list --json`, show changes that have delta specs (under `specs/` directory), and use **AskUserQuestion tool** to let user select
 
-   Show changes that have delta specs (under `specs/` directory).
-
-   **IMPORTANT**: Do NOT guess or auto-select a change. Always let the user choose.
+   Always announce: "Using change: <name>" and how to override.
 
 2. **Find delta specs**
 
@@ -75,6 +76,14 @@ This is an **agent-driven** operation - you will read delta specs and directly e
    After applying all changes, summarize:
    - Which capabilities were updated
    - What changes were made (requirements added/modified/removed/renamed)
+
+5. **Post-verification**
+
+   After applying all changes:
+   - For each updated main spec: show a brief diff (which sections changed, what was added/removed).
+   - Ask the user: "Changes look correct? [Confirm / Show full spec]"
+   - If "Show full spec": read and display the full main spec file.
+   - If the user spots an issue: fix it before proceeding.
 
 **Delta Spec Format Reference**
 

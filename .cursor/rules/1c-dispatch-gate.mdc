@@ -12,13 +12,13 @@ priority: 999
 
 | Триггер | Действие | Детали |
 |---------|----------|--------|
+| Реализация ЗНИ без /opsx:apply (change существует в `openspec/changes/`, но сессия не в режиме apply) | **СТОП.** Правка .bsl, вызов writer/reviewer запрещены. **Исключение:** Light Mode и Mechanical Mode — работают без /opsx:apply (см. строки ниже). Предложить: «Для начала реализации: /opsx:apply <name>» | `.cursor/rules/1c-agent-delegation.mdc` (APPLY GATE) |
 | Режим explore без активного change (сессия в `/opsx:explore`, в `openspec/changes/` нет каталога change кроме `_template` и `archive`) | **СТОП.** Реализация (writer, reviewer) запрещена. Предложить пользователю: «Для реализации создайте ЗНИ: `/opsx:new <name>` или `/opsx:ff <name>`» | `.cursor/skills/openspec-explore/SKILL.md` (Guardrails, Architect Gate) |
 | Задача требует нового объекта метаданных (форма, модуль, справочник, регистр, роль, XML) | **СТОП. Никогда не создавать.** Выдать блокер с описанием. WAIT | `.cursor/rules/1c-no-metadata-creation.mdc` |
 | Файл трассы (`.pff`, `*_TRACE_*.txt`) или стек ошибки 1С | СТОП. Подготовить бриф. Делегировать **onec-trace-analyst**. По результату — onec-code-explorer, onec-code-architect | `.cursor/rules/1c-error-analysis.mdc` |
 | Точечная правка (Light Mode): 2–10 строк, 1 файл, без архитектуры | Делегировать **onec-code-writer** с контекстом, затем **onec-code-reviewer**. Без артефактов OpenSpec | см. раздел Light Mode ниже |
 | Шаблонная правка (Mechanical Mode): find-replace, #Область, удаление комментариев | Прямая правка + Grep-верификация + **onec-code-reviewer** после. Без writer | `.cursor/rules/1c-agent-delegation.mdc` (MECHANICAL MODE) |
-| Правка `.bsl` файла (общий случай) | СТОП. Загрузить скилл. Делегировать **onec-code-writer**. Обязательно **onec-code-reviewer** после | `.cursor/rules/1c-agent-delegation.mdc` |
-| Доработка 1С (не точечная правка) | СТОП. Сначала **onec-code-architect** (план + ревью плана). Код — только после одобрения | `.cursor/rules/1c-agent-delegation.mdc` |
+| Правка `.bsl` файла | СТОП. Загрузить скилл. — Light Mode (1 файл, ≤10 строк, без архитектуры) → **onec-code-writer** + **onec-code-reviewer**, без артефактов. — Иначе → сначала **onec-code-architect** (план + ревью), затем **onec-code-writer** + **onec-code-reviewer**. Обязательно **onec-code-reviewer** после | `.cursor/rules/1c-agent-delegation.mdc` |
 | Работа с формами 1С (Form.xml) | Загрузить 1c-forms. Делегировать **onec-form-generator** | `.cursor/skills/1c-forms/SKILL.md` |
 | Оптимизация запросов 1С | Загрузить 1c-query-optimization. Делегировать **onec-query-optimizer** | `.cursor/skills/1c-query-optimization/SKILL.md` |
 | Генерация тестов 1С | Делегировать **onec-test-generator** | — |
@@ -28,9 +28,9 @@ priority: 999
 | Исследование кода из 3+ модулей | Делегировать **onec-code-explorer** (не читать модули вручную) | `.cursor/rules/1c-agent-delegation.mdc` |
 | Исправление ошибки (bug fix) | СТОП. Проверить root cause + impact assessment. При системном масштабе — **onec-code-architect** | `.cursor/rules/verified-cause-gate.mdc` |
 
-## DELEGATION GATE (количественный порог)
+## DELEGATION GATE
 
-Если до вызова агента выполнено **>3 обращений к .bsl** (Read/Grep/SemanticSearch) — СТОП, вызвать агента.
+Порог и детали — `1c-agent-delegation.mdc`, секция DELEGATION GATE. Кратко: **>3 обращений к .bsl** до вызова агента → СТОП, вызвать агента.
 
 ## Скилл-первый
 

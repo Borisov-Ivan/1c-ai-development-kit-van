@@ -18,6 +18,10 @@ explore → new/ff → apply → verify → archive
 | **Реализация** | `/opsx:apply` | Выполнение задач из tasks.md | onec-code-writer + onec-code-reviewer |
 | **Проверка** | `/opsx:verify` | Completeness, correctness, coherence | — |
 | **Архивация** | `/opsx:archive` | Синхронизация specs, перенос в archive/ | — |
+| **Отладка** | `/opsx:debug` | RCA + fix plan в контексте change | onec-trace-analyst, onec-code-explorer |
+| **Предрелизное ревью** | `/opsx:prerelease-review` | Батчевый ревью расширения | onec-code-reviewer |
+
+Дополнительные действия: `continue` (следующий артефакт), `sync` (дельта-спеки → main), `bulk-archive` (пакетная архивация).
 
 ## ПРИНЦИПЫ
 

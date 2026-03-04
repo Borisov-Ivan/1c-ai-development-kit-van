@@ -114,14 +114,9 @@ Depending on what the user brings, you might:
 
 ### Agent delegation в explore
 
-| Ситуация | Агент | Порог |
-|----------|-------|-------|
-| Код из 3+ модулей | onec-code-explorer | DELEGATION GATE: >3 обращений к .bsl → СТОП, вызвать агента |
-| Архитектурное решение, варианты подхода | onec-code-architect | При выборе между подходами или проектировании |
-| Трасса/стек ошибки | onec-trace-analyst | При любой трассе — сначала бриф, затем агент |
-| Вопрос по метаданным, связи объектов | onec-metadata-helper | При навигации по структуре конфигурации |
+Аналитические агенты в explore: onec-code-explorer (код 3+ модулей), onec-code-architect (архитектура), onec-trace-analyst (трассы), onec-metadata-helper (метаданные). Пороги делегирования — `1c-dispatch-gate.mdc` и `1c-agent-delegation.mdc` (DELEGATION GATE).
 
-Реализационные агенты (onec-code-writer, onec-code-reviewer) в explore **не запускаются** — только анализ и рекомендации.
+**Реализационные агенты (onec-code-writer, onec-code-reviewer) в explore НЕ запускаются** — только анализ и рекомендации.
 
 ---
 

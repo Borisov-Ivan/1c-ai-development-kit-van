@@ -70,6 +70,13 @@ Fast-forward through artifact creation - generate everything needed to start imp
       - Use **AskUserQuestion tool** to clarify
       - Then continue with creation
 
+   d. **Architect Gate (after design artifact)**:
+      - After creating the `design` artifact, assess change complexity:
+        - If it touches >2 files, changes a contract/API, or describes an architectural decision:
+          - Propose: "Design created. Recommend architect review before continuing. Request review? [Recommended / Skip]"
+          - If user agrees: call **onec-code-architect** to review design.md, incorporate feedback before proceeding.
+        - If simple change (1-2 files, no architecture): continue without prompt.
+
 5. **Show final status**
    ```bash
    openspec status --change "<name>"

@@ -217,28 +217,11 @@ Task(
 
 ---
 
-## DELEGATION GATE (подробности)
+## DELEGATION GATE
 
-### Порядок при BSL-задаче
+Порог и детали — `1c-agent-delegation.mdc`, секция DELEGATION GATE.
 
-1. Прочитать артефакты (design, tasks)
-2. Определить агента (architect / writer / explorer) по типу
-3. Сформулировать промпт из артефактов + пути к ключевым файлам
-4. Вызвать Task tool — агент сам читает код
-
-### Антипаттерн
-
-```
-Задача: «Делегировать architect; вход — design.md, ДействияСервер»
-Read Module.bsl → Grep вызовов → Read ManagerModule.bsl → SemanticSearch → Read ещё 3 файла → ... (агент не вызван)
-```
-
-### Правильно
-
-```
-Задача: «Делегировать architect; вход — design.md, ДействияСервер»
-Read design.md → Glob путь к ДействияСервер → Task(onec-code-architect, prompt=задача + пути)
-```
+Ключевое правило: **до вызова агента допустимо ≤3 обращения к .bsl**. Сформулировать промпт из артефактов + пути к файлам → вызвать Task tool, агент сам читает код.
 
 ---
 

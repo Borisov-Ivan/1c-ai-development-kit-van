@@ -15,14 +15,14 @@ Archive a completed change in the experimental workflow.
 
 **Steps**
 
-1. **If no change name provided, prompt for selection**
+1. **Select the change**
 
-   Run `openspec list --json` to get available changes. Use the **AskUserQuestion tool** to let the user select.
+   If a name is provided, use it. Otherwise:
+   - Infer from conversation context if the user mentioned a change
+   - Auto-select if only one active change exists
+   - If multiple active changes: run `openspec list --json`, show only active changes (not archived), include schema, and use **AskUserQuestion tool** to let user select
 
-   Show only active changes (not already archived).
-   Include the schema used for each change if available.
-
-   **IMPORTANT**: Do NOT guess or auto-select a change. Always let the user choose.
+   Always announce: "Using change: <name>" and how to override (e.g., `/opsx:archive <other>`).
 
 2. **Check artifact completion status**
 
