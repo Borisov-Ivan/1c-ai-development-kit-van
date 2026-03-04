@@ -146,6 +146,7 @@ Check (add to existing):
   - "Defensive cake" (ТипЗнч + Свойство + ЗначениеЗаполнено stacked on fixed-contract source) — HIGH
   - User-facing string literals without НСтр("ru = '...'") — MEDIUM
   - ЭтаФорма instead of ЭтотОбъект in ОписаниеОповещения/callbacks — HIGH
+  - Оповестить()/ОповеститьОбИзменении() in server context (&НаСервере, &НаСервереБезКонтекста, server common module) — HIGH (client-only methods)
   - Method name contradicts compilation directive (e.g. "...НаКлиенте" declared &НаСервере, "...НаСервере" declared &НаКлиенте) — MEDIUM
   - Попытка/Исключение wrapping access to fixed-contract field/method (tabular section attribute, explicit query column, documented return type). If the code inside Попытка can only fail due to a code bug (not external factor), then Попытка masks the bug — HIGH
 ```
@@ -373,6 +374,7 @@ status: NOT_CONNECTED
     - ЗначениеЗаполнено() on field guaranteed by contract/metadata
     - "Defensive cake" (stacked ТипЗнч + Свойство + ЗначениеЗаполнено on fixed contract)
     - ЭтаФорма instead of ЭтотОбъект in ОписаниеОповещения
+    - Оповестить()/ОповеститьОбИзменении() in server context (client-only)
     - Method name contradicts compilation directive
     - Попытка/Исключение wrapping fixed-contract field/method access
 
@@ -483,6 +485,7 @@ status: NOT_CONNECTED
 - &ИзменениеИКонтроль used where &Перед/&После is sufficient
 - Intercepted method (&Вместо/&Перед/&После) without extension prefix
 - Сообщить() instead of ОбщегоНазначения.СообщитьПользователю()
+- Оповестить()/ОповеститьОбИзменении() in server context (client-only methods)
 - Свойство() on fixed-contract source (tabular section, query result)
 - Band-aid fix detected (defensive check without root cause, try/except suppression, skip-flag, defensive cake)
 - НачатьТранзакцию() without Попытка/Исключение wrapping the transactional block
