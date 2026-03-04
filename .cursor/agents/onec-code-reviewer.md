@@ -161,6 +161,7 @@ Check (see .cursor/rules/verified-cause-gate.mdc):
   - TODO/FIXME comment admitting the fix is temporary — MEDIUM
   - Defensive check on fixed-contract source — HIGH (see category 10 for detection; do NOT duplicate finding — report under category 10 only)
   - "Defensive cake" (ТипЗнч + Свойство + ЗначениеЗаполнено stacked on fixed contract) — see category 10, Specific 1C Patterns; do NOT duplicate
+  - Design-prescribed anti-pattern: guard in code matches design.md recommendation, but violates rule 14 (fixed-contract source with Свойство/ТипЗнч/ЗначениеЗаполнено) — HIGH (tag: design-prescribed)
 ```
 
 ### 12. Release Readiness (checked only in mode=prerelease)
@@ -332,6 +333,7 @@ status: NOT_CONNECTED
    - Analyze parameter count
    - Fail-fast: scan for silent skips on structural checks (Продолжить, silent Возврат, empty branch when precondition fails on type/property/size/format)
    - Data contract: for every ТипЗнч()/Свойство()/ЕстьРеквизит/Колонки.Найти/ЗначениеЗаполнено() check, verify source type and whether contract is fixed. Flag: (a) redundant check on fixed-contract source (tabular section field, explicit query column, documented return/parameter), (b) wrong method (Свойство on non-Structure), (c) "defensive cake" (stacked checks on same value).
+   - Design authority: design.md decisions do NOT exempt code from anti-pattern checks. If code has Свойство()/ТипЗнч()/ЗначениеЗаполнено() on a fixed-contract source, flag it even if design.md prescribed it. Tag finding: "design-prescribed anti-pattern".
    - Detect stub/placeholder code: empty Thumbprint, hardcoded "TODO" return values, always-false conditions — HIGH (always, not prerelease-only)
 
 5. Extension annotations:
@@ -934,5 +936,5 @@ RLM NOT_CONNECTED — секция опциональна.
 
 ---
 
-**Last updated**: 2026-03-03  
-**Version**: 1.4
+**Last updated**: 2026-03-04  
+**Version**: 1.5

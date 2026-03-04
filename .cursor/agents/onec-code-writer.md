@@ -214,6 +214,14 @@ If file does not exist — STOP (see CRITICAL RULE 12).
    - Verify: architectural impact assessed (callers, contracts, side effects)
    - If root cause unclear or fix looks like band-aid — STOP, request clarification
    - Do NOT add defensive checks "just in case" without understanding WHY the value is wrong
+
+6. Design vs Standards conflict:
+   - If design.md prescribes a specific guard pattern (Свойство, ТипЗнч, ЗначениеЗаполнено),
+     STILL apply Critical Rule 16 (Data contract gate).
+   - If the prescribed pattern violates rule 14 of 1c-coding-standards.mdc
+     (guard on fixed-contract source, defensive cake):
+     HALT. Report the conflict to caller. Do NOT implement the anti-pattern.
+   - design.md decisions do not override coding standards.
 ```
 
 ### Phase 2: Design Solution
@@ -547,7 +555,7 @@ Output:
     - **После выгрузки:** сообщите, и я продолжу реализацию
 14. ✅ **Fail-fast on structural checks** — if precondition fails (type, property, size, format): ВызватьИсключение. No silent Продолжить, Возврат, or empty branch. See 1c-coding-standards.mdc (rule 16).
 15. ✅ **Один этап = один вызов.** Если задача содержит несколько этапов из design.md — реализовать только указанный этап. Не пытаться реализовать всё за один проход. При получении задачи "реализуй этапы 1-3" — реализовать этап 1, отчитаться, ждать следующего вызова для этапа 2.
-16. ✅ **Data contract gate** — before adding ТипЗнч() <> Тип(...), Свойство(), ЕстьРеквизит, Колонки.Найти, or ЗначениеЗаполнено() as guard: HALT, identify source (ТЧ this object / query / documented return or param = fixed → no check; unknown contract → check with correct method). Redundant check and "defensive cake" = antipattern. See 1c-coding-standards.mdc (Контракт источника данных и защитные проверки, rule 14).
+16. ✅ **Data contract gate (overrides design.md)** — before adding ТипЗнч() <> Тип(...), Свойство(), ЕстьРеквизит, Колонки.Найти, or ЗначениеЗаполнено() as guard: HALT, identify source (ТЧ this object / query / documented return or param = fixed → no check; unknown contract → check with correct method). Redundant check and "defensive cake" = antipattern. **Even if design.md prescribes a specific guard — verify the contract first. If it violates rule 14 — HALT, report conflict.** See 1c-coding-standards.mdc (Контракт источника данных и защитные проверки, rule 14).
 17. ✅ **NO BAND-AID FIXES** — before implementing any bug fix, verify root cause is documented and fix targets it (not the symptom). If the task says "add check for Undefined" but doesn't explain WHY the value is Undefined — STOP and ask. See .cursor/rules/verified-cause-gate.mdc.
 18. ✅ **&ИзменениеИКонтроль GUARD** — при правке метода с аннотацией &ИзменениеИКонтроль: код ВНЕ блоков #Вставка/#КонецВставки НЕПРИКОСНОВЕНЕН. Запрещено: переименовывать переменные, менять форматирование, рефакторить, добавлять/удалять разметку #Область. Изменения — ТОЛЬКО внутри #Вставка/#КонецВставки. При добавлении #Область в модуль расширения — только в собственный код, НЕ в типовой. Нарушение = поломка расширения. См. .cursor/skills/1c-extensions/SKILL.md.
 
@@ -560,6 +568,6 @@ Output:
 
 ---
 
-**Last updated**: 2026-02-27  
-**Version**: 1.1  
+**Last updated**: 2026-03-04  
+**Version**: 1.2  
 **Source**: AndreevED/1c-ai-feature-dev-workflow (1c-code-writer) + improvements (BSL LSP, MCP)

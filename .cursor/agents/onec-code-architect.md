@@ -267,6 +267,17 @@ Search:
      * WHY root cause fix is impractical now
      * WHAT risks the band-aid introduces
      * WHEN and HOW to address root cause (mandatory follow-up)
+
+7. Data Contract Gate (when designing guards, preconditions, or early returns):
+   - HALT before prescribing ANY Свойство(), ТипЗнч(), ЗначениеЗаполнено() check in design.
+   - For &После/&Перед: READ the intercepted procedure to determine parameter contracts
+     (what keys are always present in Structure parameters, what types are guaranteed).
+   - For each proposed guard:
+     * Source has fixed contract (documented params, query, ТЧ, metadata) → NO guard. Access directly.
+     * Source has unknown/variable contract (ДополнительныеСвойства, optional keys) → guard + justify WHY contract is unknown.
+   - Business checks (ЗначениеЗаполнено as "is linked?", not as "does field exist?") are always OK.
+   - Self-check: no "defensive cake" (stacked ТипЗнч + Свойство + ЗначениеЗаполнено on same fixed-contract value).
+   - Reference: 1c-coding-standards.mdc rule 14 (Контракт источника данных и защитные проверки).
 ```
 
 ### Phase 3: Create Implementation Plan
@@ -297,6 +308,8 @@ Search:
    - Performance considerations
    - Security measures
    - Access rights
+   - Parameter contracts (for &После/&Перед/&ИзменениеИКонтроль: document which keys/fields
+     of intercepted procedure's parameters are fixed by contract and which are optional)
 ```
 
 ### Phase 4: Review (if requested)
@@ -328,6 +341,12 @@ When reviewing a plan:
    - Doesn't worsen existing issues?
    - Addresses known problems?
    - Sustainable approach?
+
+6. Check data contracts (rule 14):
+   - Every prescribed Свойство/ТипЗнч/ЗначениеЗаполнено guard: is the source contract truly unknown?
+   - Every silent Возврат: is this a business filter or a structural error being masked?
+   - No "defensive cake" in design decisions
+   - Parameter contracts documented for &После/&Перед targets?
 
 If issues found:
   - Document problems
@@ -502,9 +521,13 @@ sequenceDiagram
 ### Error Handling
 
 ```yaml
-Strategy (see .cursor/rules/1c-coding-standards.mdc — Обработка исключений, Когда использовать Попытка/Исключение):
+Strategy (see .cursor/rules/1c-coding-standards.mdc — Обработка исключений, rule 14):
   - Use Попытка/Исключение only where correct code can still fail (external factors: object deleted, missing property in another config, timeout)
-  - Otherwise: explicit checks (Свойство(), ТипЗнч(), ЗначениеЗаполнено()); let exceptions propagate — they indicate bugs
+  - HALT before prescribing Свойство(), ТипЗнч(), ЗначениеЗаполнено() as guard:
+    * Fixed contract (documented param type, ТЧ, query, metadata) → NO check, access directly
+    * Unknown/optional contract (ДополнительныеСвойства, variable callers) → check + justify
+    * Business check (ЗначениеЗаполнено as "is linked?") → OK, not a guard
+    * "Defensive cake" (stacked checks on fixed-contract value) → anti-pattern
   - Do not mask errors with silent Return; do not clutter ЖР with logs in every Исключение
   - When catching: log only when failure is expected and log is needed for diagnostics
   - User notification via БСП; graceful degradation only where fallback is correct
@@ -581,6 +604,28 @@ Implementation:
   - Audit access attempts
 ```
 
+### Parameter Contracts
+
+```yaml
+(For &После/&Перед/&ИзменениеИКонтроль — document intercepted procedure's parameter contracts)
+
+Intercepted: ПроцедураCF(Параметр1, Параметр2)
+
+Параметр1 (Структура):
+  Fixed keys: [list keys always present by contract]
+  Optional keys: [list keys that depend on caller]
+
+Параметр2 (Структура):
+  Fixed keys: [list keys always present by contract]
+  Optional keys: [list keys that depend on caller]
+
+Guards justified:
+  - [guard description] — because [contract is unknown / key is optional / business check]
+
+Guards NOT needed:
+  - [field] — fixed by contract, access directly
+```
+
 ## Technical Debt
 
 [If any]
@@ -612,6 +657,7 @@ Implementation:
 8. ✅ **Mermaid diagrams** - Visualize architecture and flows
 9. ✅ **Document trade-offs** - Explain why this approach
 10. ✅ **Consider all aspects** - Error handling, performance, security, testing
+11. ✅ **Data Contract Gate** — before prescribing Свойство/ТипЗнч/ЗначениеЗаполнено guard in design: HALT, verify source contract. Fixed contract → no guard; unknown → guard + justification. No "defensive cake". See 1c-coding-standards.mdc rule 14.
 
 ---
 
@@ -622,6 +668,6 @@ Implementation:
 
 ---
 
-**Last updated**: 2026-02-27  
-**Version**: 1.1  
+**Last updated**: 2026-03-04  
+**Version**: 1.2  
 **Source**: AndreevED/1c-ai-feature-dev-workflow (1c-code-architect) + improvements
