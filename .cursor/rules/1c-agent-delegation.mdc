@@ -9,6 +9,7 @@ alwaysApply: true
 
 **BSL-код — только через агентов.** НЕ ИСПОЛЬЗУЙ Write, StrReplace для `.bsl` файлов.
 Если начал писать BSL напрямую — ОСТАНОВИСЬ. Отмени. Делегируй.
+**Explore-mode guard:** В режиме `/opsx:explore` без активного change — onec-code-writer и onec-code-reviewer НЕ вызываются. Сначала ЗНИ (`/opsx:new` или `/opsx:ff`).
 
 ## ПОЛНОМОЧИЯ АГЕНТОВ (BSL-ONLY)
 
