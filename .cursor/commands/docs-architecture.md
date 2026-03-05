@@ -7,9 +7,11 @@ description: "Сгенерировать документ «Архитектур
 
 Сгенерируй документ «Архитектура (для заказчика)» на основе спецификаций OpenSpec.
 
-**IMPORTANT:** Прочитай skill `.cursor/skills/openspec-docs/SKILL.md` и следуй его инструкциям для типа документа `architecture`.
+**FIRST AND ONLY action**: Read `.cursor/skills/openspec-docs/SKILL.md`.
+Do NOT read any other files in the same tool call.
+After reading the skill, follow its instructions for document type `architecture`.
 
-Краткий алгоритм:
+Краткий алгоритм (подробности в скилле):
 
 1. Прочитай `openspec/project.md` — контекст проекта.
 2. Прочитай `openspec/architecture-extension.md` — выжимка (DR-суть, риски), без реестра перехватов.

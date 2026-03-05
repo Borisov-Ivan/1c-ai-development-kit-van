@@ -7,9 +7,11 @@ description: "Сгенерировать функциональные требо
 
 Сгенерируй документ «Функциональные требования» на основе спецификаций OpenSpec.
 
-**IMPORTANT:** Прочитай skill `.cursor/skills/openspec-docs/SKILL.md` и следуй его инструкциям для типа документа `functional`.
+**FIRST AND ONLY action**: Read `.cursor/skills/openspec-docs/SKILL.md`.
+Do NOT read any other files in the same tool call.
+After reading the skill, follow its instructions for document type `functional`.
 
-Краткий алгоритм:
+Краткий алгоритм (подробности в скилле):
 
 1. Прочитай `openspec/project.md` — контекст проекта (назначение, принципы, зависимости).
 2. Прочитай все `openspec/specs/*/spec.md` — спецификации.

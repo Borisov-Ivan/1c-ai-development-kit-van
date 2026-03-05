@@ -7,4 +7,6 @@ description: "Alias for /opsx-debug — investigate a bug with trace analysis an
 
 Investigate a bug in context of an OpenSpec change.
 
-Read the skill file at `.cursor/skills/openspec-debug/SKILL.md` and follow its instructions.
+**FIRST AND ONLY action**: Read `.cursor/skills/openspec-debug/SKILL.md`.
+Do NOT read any other files, traces, or modules in the same tool call.
+After reading the skill, follow its instructions step by step before taking any other action.
