@@ -19,6 +19,8 @@ Enter explore mode. Think deeply. Visualize freely. Follow the conversation wher
 
 При входе в explore **ПЕРВЫЙ шаг** — классификация входа и подготовка брифа. Не начинать исследование до завершения этого протокола.
 
+**WARNING (STOP-GATE):** Если пользователь предоставил трассу (`.pff`, `*_TRACE_*.txt`), стек ошибки или описание бага — ваш ПЕРВЫЙ видимый вывод в ответе ОБЯЗАН быть блоком брифа (шаг 2). До вывода брифа ЗАПРЕЩЕНО: Read трасс, Read design.md/reports, Grep, SemanticSearch, Task. Единственное допустимое действие до брифа — Shell `openspec list --json` (шаг 0). После брифа — END TURN. Нарушение = провал протокола.
+
 ### 0. Проверить активные changes и предложить debug при необходимости
 
 Выполнить `openspec list --json`. **Единственное действие в этом батче** — Shell `openspec list --json`. НЕ читать другие файлы (design.md, трассы, модули) в том же tool call batch.
