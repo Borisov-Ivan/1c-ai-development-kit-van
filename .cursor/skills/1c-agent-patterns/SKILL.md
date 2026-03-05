@@ -47,7 +47,9 @@ description: Reference guide for 1C agent delegation patterns - complexity asses
 
 ### onec-trace-analyst
 - Файл трассы (PFF/TRACE) или стек ошибки 3+ строк
-- Перед вызовом: подготовить бриф (см. openspec-debug/SKILL.md шаг 3.5)
+- Перед вызовом: подготовить бриф.
+  В debug/apply — обогащённый бриф из артефактов change (openspec-debug/SKILL.md шаг 3.5).
+  В explore — бриф из пользовательского ввода (STOP-gate, openspec-explore/SKILL.md шаг 2).
 
 ---
 
