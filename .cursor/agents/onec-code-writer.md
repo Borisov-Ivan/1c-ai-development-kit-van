@@ -219,7 +219,7 @@ If file does not exist — STOP (see CRITICAL RULE 12).
    - If design.md prescribes a specific guard pattern (Свойство, ТипЗнч, ЗначениеЗаполнено),
      STILL apply Critical Rule 16 (Data contract gate).
    - If the prescribed pattern violates rule 14 of 1c-coding-standards.mdc
-     (guard on fixed-contract source, defensive cake):
+     (guard on fixed-contract source, or defensive cake on any contract type):
      HALT. Report the conflict to caller. Do NOT implement the anti-pattern.
    - design.md decisions do not override coding standards.
 ```
@@ -279,7 +279,7 @@ If file does not exist — STOP (see CRITICAL RULE 12).
 4. Error handling:
    - Use Попытка/Исключение only for expected failures; in Исключение always log (ЗаписьЖурналаРегистрации with context); avoid silent Возврат. See .cursor/rules/1c-coding-standards.mdc (Обработка исключений).
    - Fail-fast on structural checks: if a structural precondition fails (wrong type, missing property, size mismatch, unexpected format) — raise ВызватьИсключение, do NOT silently continue (no Продолжить, no silent Возврат, no empty branch). Business filtering (Status, doc type) is allowed. See 1c-coding-standards.mdc — Fail-fast вместо тихого пропуска.
-   - Data contract verification: before adding ANY defensive check (ТипЗнч() <> Тип(...), Свойство, ЕстьРеквизитИлиСвойствоОбъекта, Колонки.Найти, ЗначениеЗаполнено() as guard on fixed-contract field), HALT and verify: (a) source of the row/object (this object's tabular section? query result? documented return/parameter?), (b) is the contract fixed by metadata/query/documented type? If YES — do NOT add check, access field directly. If NO — add check using correct method (Structure → Свойство; other → ЕстьРеквизитИлиСвойствоОбъекта). Avoid "defensive cake" (stacked ТипЗнч + Свойство + ЗначениеЗаполнено on fixed contract). See 1c-coding-standards.mdc (Контракт источника данных и защитные проверки, rule 14).
+   - Data contract verification: before adding ANY defensive check (ТипЗнч() <> Тип(...), Свойство, ЕстьРеквизитИлиСвойствоОбъекта, Колонки.Найти, ЗначениеЗаполнено() as guard), HALT and verify: (a) source of the row/object (this object's tabular section? query result? documented return/parameter?), (b) is the contract fixed by metadata/query/documented type? If YES — do NOT add check, access field directly. If NO — add check using correct method (Structure → Свойство; other → ЕстьРеквизитИлиСвойствоОбъекта). Avoid "defensive cake" — stacked checks on ANY value (fixed OR dynamic contract) where one check is subsumed by another. For dynamic contract: one check per distinct failure class; if check N is subsumed by check N+1 — remove N. See 1c-coding-standards.mdc (Контракт источника данных и защитные проверки, rule 14).
    - User notifications: ОбщегоНазначения.СообщитьПользователю
 
 5. &ИзменениеИКонтроль (модули расширения):
@@ -304,7 +304,7 @@ If file does not exist — STOP (see CRITICAL RULE 12).
    - Logic correct?
    - Errors handled?
    - Edge cases covered?
-   - Every ТипЗнч()/Свойство()/ЕстьРеквизит/ЗначениеЗаполнено() check: is the data contract truly unknown? If source is this object's tabular section, explicit query, or documented return/parameter — remove the check. No "defensive cake".
+   - Every ТипЗнч()/Свойство()/ЕстьРеквизит/ЗначениеЗаполнено() check: is the data contract truly unknown? If source is this object's tabular section, explicit query, or documented return/parameter — remove the check. No "defensive cake" (fixed OR dynamic contract — if check N is subsumed by check N+1, remove N; see rule 14).
 
 4. Check security:
    - No SQL injection?
@@ -555,7 +555,7 @@ Output:
     - **После выгрузки:** сообщите, и я продолжу реализацию
 14. ✅ **Fail-fast on structural checks** — if precondition fails (type, property, size, format): ВызватьИсключение. No silent Продолжить, Возврат, or empty branch. See 1c-coding-standards.mdc (rule 16).
 15. ✅ **Один этап = один вызов.** Если задача содержит несколько этапов из design.md — реализовать только указанный этап. Не пытаться реализовать всё за один проход. При получении задачи "реализуй этапы 1-3" — реализовать этап 1, отчитаться, ждать следующего вызова для этапа 2.
-16. ✅ **Data contract gate (overrides design.md)** — before adding ТипЗнч() <> Тип(...), Свойство(), ЕстьРеквизит, Колонки.Найти, or ЗначениеЗаполнено() as guard: HALT, identify source (ТЧ this object / query / documented return or param = fixed → no check; unknown contract → check with correct method). Redundant check and "defensive cake" = antipattern. **Even if design.md prescribes a specific guard — verify the contract first. If it violates rule 14 — HALT, report conflict.** See 1c-coding-standards.mdc (Контракт источника данных и защитные проверки, rule 14).
+16. ✅ **Data contract gate (overrides design.md)** — before adding ТипЗнч() <> Тип(...), Свойство(), ЕстьРеквизит, Колонки.Найти, or ЗначениеЗаполнено() as guard: HALT, identify source (ТЧ this object / query / documented return or param = fixed → no check; unknown contract → check with correct method). Redundant check and "defensive cake" (any contract type — fixed or dynamic) = antipattern. For dynamic contract: verify each check adds a distinct failure class not covered by adjacent checks; if check N is subsumed by check N+1 — remove N. **Even if design.md prescribes a specific guard — verify the contract first. If it violates rule 14 — HALT, report conflict.** See 1c-coding-standards.mdc (Контракт источника данных и защитные проверки, rule 14).
 17. ✅ **NO BAND-AID FIXES** — before implementing any bug fix, verify root cause is documented and fix targets it (not the symptom). If the task says "add check for Undefined" but doesn't explain WHY the value is Undefined — STOP and ask. See .cursor/rules/verified-cause-gate.mdc.
 18. ✅ **&ИзменениеИКонтроль GUARD** — при правке метода с аннотацией &ИзменениеИКонтроль: код ВНЕ блоков #Вставка/#КонецВставки НЕПРИКОСНОВЕНЕН. Запрещено: переименовывать переменные, менять форматирование, рефакторить, добавлять/удалять разметку #Область. Изменения — ТОЛЬКО внутри #Вставка/#КонецВставки. При добавлении #Область в модуль расширения — только в собственный код, НЕ в типовой. Нарушение = поломка расширения. См. .cursor/skills/1c-extensions/SKILL.md.
 

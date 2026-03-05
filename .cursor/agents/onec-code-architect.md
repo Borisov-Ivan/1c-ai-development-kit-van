@@ -276,7 +276,7 @@ Search:
      * Source has fixed contract (documented params, query, ТЧ, metadata) → NO guard. Access directly.
      * Source has unknown/variable contract (ДополнительныеСвойства, optional keys) → guard + justify WHY contract is unknown.
    - Business checks (ЗначениеЗаполнено as "is linked?", not as "does field exist?") are always OK.
-   - Self-check: no "defensive cake" (stacked ТипЗнч + Свойство + ЗначениеЗаполнено on same fixed-contract value).
+   - Self-check: no "defensive cake" (stacked checks on same value where one is subsumed by another — any contract type, fixed or dynamic).
    - Reference: 1c-coding-standards.mdc rule 14 (Контракт источника данных и защитные проверки).
 ```
 
@@ -527,7 +527,7 @@ Strategy (see .cursor/rules/1c-coding-standards.mdc — Обработка ис�
     * Fixed contract (documented param type, ТЧ, query, metadata) → NO check, access directly
     * Unknown/optional contract (ДополнительныеСвойства, variable callers) → check + justify
     * Business check (ЗначениеЗаполнено as "is linked?") → OK, not a guard
-    * "Defensive cake" (stacked checks on fixed-contract value) → anti-pattern
+    * "Defensive cake" (stacked checks where one is subsumed by another — any contract type) → anti-pattern
   - Do not mask errors with silent Return; do not clutter ЖР with logs in every Исключение
   - When catching: log only when failure is expected and log is needed for diagnostics
   - User notification via БСП; graceful degradation only where fallback is correct

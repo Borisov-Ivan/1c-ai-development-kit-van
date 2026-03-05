@@ -26,7 +26,7 @@ priority: 999
 | Навигация по метаданным (поиск объектов, связей) | Делегировать **onec-metadata-helper** | — |
 | Управление серверами 1С, базами, PostgreSQL, ibcmd, выгрузка/загрузка XML | Делегировать **onec-admin** | `.cursor/agents/onec-admin.md` |
 | Исследование кода из 3+ модулей | Делегировать **onec-code-explorer** (не читать модули вручную) | `.cursor/rules/1c-agent-delegation.mdc` |
-| Исправление ошибки (bug fix) | СТОП. Проверить root cause + impact assessment. При системном масштабе — **onec-code-architect** | `.cursor/rules/verified-cause-gate.mdc` |
+| Исправление ошибки (bug fix). Маркеры: «исправь», «не работает», «падает», «ошибка», «баг», «fix», «crash», «добавь проверку», «Неопределено», «NPE», «null», «не заполнено», «пустое значение», «не находит», «вылетает» | СТОП. Проверить root cause + impact assessment по `verified-cause-gate.mdc` (HALT 1, 1b, 2, 3). При системном масштабе — **onec-code-architect**. При Light Mode bug fix — обязательный root cause блок в промпте writer (см. `1c-agent-delegation.mdc`, Light Mode) | `.cursor/rules/verified-cause-gate.mdc` |
 
 ## DELEGATION GATE
 
