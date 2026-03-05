@@ -36,21 +36,35 @@ Enter explore mode. Think deeply. Visualize freely. Follow the conversation wher
 - Архитектурный вопрос → **HALT**, подготовить бриф для `onec-code-architect`
 - Идея / размышление / сравнение вариантов → свободный режим (The Stance)
 
-### 2. Сформировать структурированный бриф
+### 2. Сформировать и ПОКАЗАТЬ бриф (STOP — END TURN)
 
-- **Контекст**: что за система, какое расширение, какой процесс
-- **Сценарий**: пошаговое воспроизведение (шаг → ожидание → реальность)
-- **Артефакты**: путь к трассе, скриншоты, файлы
-- **Делегирование**: какому агенту (`onec-trace-analyst` / `onec-code-explorer` / `onec-code-architect`)
-- **Что искать**: конкретные вопросы для агента
+Сформировать бриф по шаблону ниже и показать пользователю.
+
+**КРИТИЧНО: После показа брифа — ЗАВЕРШИТЬ ХОД (END TURN).** НЕ вызывать Task/агента в этом же сообщении. Дождаться явного подтверждения пользователя в **следующем** сообщении.
+
+#### Шаблон брифа
+
+```
+---
+**Бриф для делегирования**
+
+- **Контекст:** [что за система, расширение, процесс]
+- **Сценарий:** [шаг → ожидание → реальность]
+- **Артефакты:** [пути к трассам, скриншотам, файлам]
+- **Агент:** `onec-trace-analyst` / `onec-code-explorer` / `onec-code-architect`
+- **Что искать:** [конкретные вопросы агенту — 3-5 пунктов]
+
+Бриф верный? Подтвердите — передам агенту.
+---
+```
 
 Если данных недостаточно для полного брифа — задать уточняющие вопросы пользователю (AskQuestion).
 
-### 3. Показать бриф пользователю, дождаться подтверждения
+⛔ **END TURN** — не продолжать до ответа пользователя.
 
-Не начинать работу без «ОК» / «Да» / подтверждения.
+### 3. После подтверждения — делегировать агенту
 
-### 4. После подтверждения — делегировать агенту
+Дождаться явного подтверждения пользователя («ОК», «Да», «Подтверждаю») в **следующем сообщении**.
 
 НЕ читать трассу/модули вручную. Передать бриф и путь к файлу соответствующему агенту через Task.
 
@@ -374,6 +388,7 @@ But this summary is optional. Sometimes the thinking IS the value.
 
 ## Guardrails
 
+- **Don't skip brief confirmation** - Never call Task/delegate to an agent in the same message where you show the brief. Always END TURN after showing the brief and wait for explicit user confirmation in the next message.
 - **Don't implement** - Never write code or implement features. Creating OpenSpec artifacts is fine, writing application code is not.
 - **Don't read traces manually** - If a trace file is provided, delegate to `onec-trace-analyst`. Never substitute manual trace reading for agent delegation. DELEGATION GATE applies in explore.
 - **Don't bypass HALT conditions** - `1c-dispatch-gate.mdc` and `1c-error-analysis.mdc` apply in explore without exceptions. Entry Protocol enforces this.
