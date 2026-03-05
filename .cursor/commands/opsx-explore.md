@@ -9,7 +9,7 @@ Enter explore mode. Think deeply. Visualize freely. Follow the conversation wher
 
 **IMPORTANT: Explore mode is for thinking, not implementing.** You may read files, search code, and investigate the codebase, but you must NEVER write code or implement features. If the user asks you to implement something, remind them to exit explore mode first (e.g., start a change with `/opsx:new` or `/opsx:ff`). You MAY create OpenSpec artifacts (proposals, designs, specs) if the user asks—that's capturing thinking, not implementing.
 
-**This is a stance, not a workflow.** There are no fixed steps, no required sequence, no mandatory outputs. You're a thinking partner helping the user explore.
+**This is a stance, not a rigid workflow.** After Entry Protocol the conversation flows freely — no mandatory sequence or outputs beyond that. You're a thinking partner helping the user explore.
 
 **Input**: The argument after `/opsx:explore` is whatever the user wants to think about. Could be:
 - A vague idea: "real-time collaboration"
@@ -17,6 +17,49 @@ Enter explore mode. Think deeply. Visualize freely. Follow the conversation wher
 - A change name: "add-dark-mode" (to explore in context of that change)
 - A comparison: "postgres vs sqlite for this"
 - Nothing (just enter explore mode)
+
+---
+
+## Entry Protocol (MANDATORY)
+
+При входе в explore **ПЕРВЫЙ шаг** — классификация входа и подготовка брифа. Не начинать исследование до завершения этого протокола.
+
+### 0. Проверить активные changes и предложить debug при необходимости
+
+Выполнить `openspec list --json`. Если есть активный change **И** вход содержит трассу/баг/ошибку → предложить `/opsx:debug <change>`:
+
+> «Вижу активный change **X** и файл трассы (баг/ошибку). Для анализа бага в контексте change рекомендую `/opsx:debug X` — он использует артефакты change для обогащённого брифа и автоматически обновит tasks.md/design.md. Продолжить в explore или переключиться на debug?»
+
+- Пользователь выбирает debug → завершить explore, предложить ввести `/opsx:debug`.
+- Пользователь выбирает explore → продолжить со следующего шага.
+
+### 1. Классифицировать вход
+
+- Есть файл трассы (`.pff`, `*_TRACE_*.txt`) или стек ошибки → **HALT**, подготовить бриф для `onec-trace-analyst`
+- Есть описание бага/ошибки → **HALT**, подготовить бриф (симптом, ожидание, реальность)
+- Исследование кода 3+ модулей → **HALT**, подготовить бриф для `onec-code-explorer`
+- Архитектурный вопрос → **HALT**, подготовить бриф для `onec-code-architect`
+- Идея / размышление / сравнение вариантов → свободный режим (The Stance)
+
+### 2. Сформировать структурированный бриф
+
+- **Контекст**: что за система, какое расширение, какой процесс
+- **Сценарий**: пошаговое воспроизведение (шаг → ожидание → реальность)
+- **Артефакты**: путь к трассе, скриншоты, файлы
+- **Делегирование**: какому агенту (`onec-trace-analyst` / `onec-code-explorer` / `onec-code-architect`)
+- **Что искать**: конкретные вопросы для агента
+
+Если данных недостаточно для полного брифа — задать уточняющие вопросы пользователю (AskQuestion).
+
+### 3. Показать бриф пользователю, дождаться подтверждения
+
+Не начинать работу без «ОК» / «Да» / подтверждения.
+
+### 4. После подтверждения — делегировать агенту
+
+НЕ читать трассу/модули вручную. Передать бриф и путь к файлу соответствующему агенту через Task.
+
+**HALT-условия из `1c-dispatch-gate.mdc` и `1c-error-analysis.mdc` действуют в explore без исключений.** Свободный режим (The Stance) — только при отсутствии триггеров из шага 1.
 
 ---
 
@@ -165,6 +208,8 @@ When things crystallize, you might offer a summary - but it's optional. Sometime
 ## Guardrails
 
 - **Don't implement** - Never write code or implement features. Creating OpenSpec artifacts is fine, writing application code is not.
+- **Don't read traces manually** - If a trace file is provided, delegate to `onec-trace-analyst`. Never substitute manual trace reading for agent delegation. DELEGATION GATE applies in explore.
+- **Don't bypass HALT conditions** - `1c-dispatch-gate.mdc` and `1c-error-analysis.mdc` apply in explore without exceptions. Entry Protocol enforces this.
 - **Don't fake understanding** - If something is unclear, dig deeper
 - **Don't rush** - Discovery is thinking time, not task time
 - **Don't force structure** - Let patterns emerge naturally
