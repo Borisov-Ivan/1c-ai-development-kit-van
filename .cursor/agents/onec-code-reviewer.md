@@ -73,6 +73,10 @@ Evaluate:
   - Error handling
   - Testability
   - Stub/placeholder code returning empty or dummy values (empty Thumbprint, hardcoded "TODO", always-false conditions) — HIGH (always checked, not prerelease-only)
+  - Parameter overwrite: parameter reassigned inside body (Param = NewValue), parameter NOT documented as output ([out] in header, or standard 1C pattern: Отказ, ПроверяемыеРеквизиты) — HIGH. See 1c-coding-standards.mdc rule 21
+  - Collection mutation: modifying method (.Очистить, .Удалить, .Добавить) called on collection parameter without documented out contract — MEDIUM. Exception: Отказ, ПроверяемыеРеквизиты, documented output params. See 1c-coding-standards.mdc rule 21
+  - Duplicated magic constant: same numeric literal (not 0/1/-1) or same string literal appears 2+ times in module — MEDIUM. Exception: query text, structure keys, metadata names, 0/1/-1/Истина/Ложь. See 1c-coding-standards.mdc rule 22
+  - Mixed responsibilities: procedure >40 lines combining 3+ distinct concerns (rights check, transaction management, business logic, persistence/write, logging, UI feedback) — MEDIUM. Sign: procedure could be split into independent functions without passing internal state
 ```
 
 ### 5. Extension Annotations (1C Extensions)
@@ -110,6 +114,7 @@ Check:
   - Intercepted method (&Вместо/&Перед/&После) without extension prefix — HIGH
   - Own new method (not intercept) with extension prefix — MEDIUM
   - Export own method without unique readable name — MEDIUM
+  - Inconsistent prefix usage: export method without extension prefix in module that contains other exports WITH prefix — MEDIUM. Exception: intercept methods (&Вместо/&Перед/&После of base method) naturally lack prefix
 ```
 
 ### 9. Code Cleanliness
@@ -153,6 +158,7 @@ Check (add to existing):
   - Попытка/Исключение with fallback return/assignment that produces a value indistinguishable from success for the caller (silent degradation: e.g. returning unconverted input, default value that mimics valid result, Неопределено where caller treats it as "not found"). See 1c-coding-standards.mdc rule 20 — HIGH
   - Попытка/Исключение block without logging (neither ЗаписьЖурналаРегистрации nor wrapper like ЗаписатьОшибкуВЖурнал) where exception is NOT re-raised via ВызватьИсключение — traceless suppression. See 1c-coding-standards.mdc rule 20 — HIGH
     (Note: if exception is re-raised via ВызватьИсключение, logging is optional; transactional Попытка — see category 13)
+  - Excessive info logging: ЗаписьЖурналаРегистрации(_, УровеньЖурналаРегистрации.Информация/Примечание) inside loop, or 3+ info-level log calls in single procedure — LOW. Risk: journal pollution in production; consider conditional logging or Отладка level
 ```
 
 ### 11. Band-Aid Detection
@@ -338,6 +344,10 @@ status: NOT_CONNECTED
    - Data contract: for every ТипЗнч()/Свойство()/ЕстьРеквизит/Колонки.Найти/ЗначениеЗаполнено() check, verify source type and whether contract is fixed. Flag: (a) redundant check on fixed-contract source (tabular section field, explicit query column, documented return/parameter), (b) wrong method (Свойство on non-Structure), (c) "defensive cake" (stacked checks on same value where one is subsumed by another — any contract type, not only fixed).
    - Design authority: design.md decisions do NOT exempt code from anti-pattern checks. If code has Свойство()/ТипЗнч()/ЗначениеЗаполнено() on a fixed-contract source, flag it even if design.md prescribed it. Tag finding: "design-prescribed anti-pattern".
    - Detect stub/placeholder code: empty Thumbprint, hardcoded "TODO" return values, always-false conditions — HIGH (always, not prerelease-only)
+   - Parameter integrity: for each Процедура/Функция, check if any parameter appears on LEFT side of assignment (Param = ...) inside body. Flag parameter overwrite when param is not documented as output. See 1c-coding-standards.mdc rule 21
+   - Collection mutation: detect .Очистить/.Удалить/.Добавить on collection parameters without out contract. See 1c-coding-standards.mdc rule 21
+   - Magic constants: detect same numeric (not 0/1/-1) or string literal appearing 2+ times in module. See 1c-coding-standards.mdc rule 22
+   - Mixed responsibilities: detect procedures >40 lines combining 3+ concerns (rights, transaction, business logic, persistence, logging, UI)
 
 5. Extension annotations:
    - Detect &Перед/&После applied to a function (not procedure)
@@ -362,6 +372,7 @@ status: NOT_CONNECTED
    - Detect intercepted methods (&Вместо/&Перед/&После) without extension prefix
    - Detect own methods (non-intercept) incorrectly using extension prefix
    - Detect export own methods with non-descriptive names
+   - Detect inconsistent prefix usage: exports with and without extension prefix in same module
 
 9. Code cleanliness:
    - Detect changelog markers (// +++ Author, // ---, date-author comments)
@@ -385,6 +396,7 @@ status: NOT_CONNECTED
     - Попытка/Исключение wrapping deterministic operation (no external factor — rule 20)
     - Попытка/Исключение with silent degradation fallback (rule 20)
     - Попытка/Исключение without logging, exception not re-raised (rule 20)
+    - Excessive info logging: ЗаписьЖурналаРегистрации with Информация/Примечание inside loop or 3+ info-level calls in single procedure
 
 11. Band-aid detection:
     - Defensive null/undefined check without root cause analysis
@@ -505,6 +517,7 @@ status: NOT_CONNECTED
 - COMОбъект created without Попытка/Исключение ensuring release
 - Unused export procedure/function (no callers in extension scope) — category 15
 - Obsolete procedure still called from non-obsolete code — category 15
+- Parameter overwrite: parameter reassigned inside body, not documented as output — category 4 (rule 21)
 ```
 
 ### Medium Priority (Fix in Sprint)
@@ -529,6 +542,10 @@ status: NOT_CONNECTED
 - User-facing string literals without НСтр("ru = '...'")
 - Ternary operator ?() usage (style preference)
 - Probable band-aid (TODO workaround, duplicated logic with variation)
+- Collection mutation on parameter without out contract — category 4 (rule 21)
+- Duplicated magic constant (same literal 2+ times in module) — category 4 (rule 22)
+- Mixed responsibilities (procedure >40 lines, 3+ concerns) — category 4
+- Inconsistent prefix usage (exports with and without prefix in same module) — category 8
 ```
 
 ### Low Priority (Technical Debt)
@@ -541,6 +558,7 @@ status: NOT_CONNECTED
 - Missing module header comment
 - Event handler without description
 - Header format not matching BSP template
+- Excessive info logging (ЗаписьЖурналаРегистрации Информация/Примечание in loop or 3+ calls) — category 10
 ```
 (Changelog markers and design refs in comments are now MEDIUM under Code Cleanliness / release-hygiene and escalate to HIGH in prerelease.)
 
@@ -576,6 +594,7 @@ kind=functional:
   - Попытка/Исключение wrapping fixed-contract access (contract masking)
   - Попытка/Исключение wrapping deterministic operation (no external factor — rule 20)
   - Попытка/Исключение with silent degradation fallback (rule 20)
+  - Parameter overwrite (parameter reassigned inside body, not documented as output — rule 21)
 
 kind=style:
   - Ternary operator ?() (style preference, not functional defect)
@@ -585,6 +604,11 @@ kind=style:
   - Export in private region (#Область СлужебныеПроцедурыИФункции)
   - Module header name mismatch
   - Missing module header, event handler without description, header format not matching BSP
+  - Collection mutation on parameter without out contract (rule 21)
+  - Duplicated magic constant (rule 22)
+  - Mixed responsibilities (procedure >40 lines, 3+ concerns)
+  - Inconsistent prefix usage (exports with/without prefix in same module)
+  - Excessive info logging (ЗаписьЖурналаРегистрации Информация in loop or 3+ calls)
 
 kind=release-hygiene:
   - Changelog markers in comments (// +++/---, // НАЧАЛО/КОНЕЦ, // РГИТС, date-author in comments)
@@ -948,5 +972,5 @@ RLM NOT_CONNECTED — секция опциональна.
 
 ---
 
-**Last updated**: 2026-03-04  
-**Version**: 1.5
+**Last updated**: 2026-03-06  
+**Version**: 1.6
