@@ -31,6 +31,9 @@ Sonnet (fast) по умолчанию. Opus — только для критич
 | onec-form-generator | fast | Генерация форм |
 | onec-query-optimizer | fast | Оптимизация запросов |
 | onec-test-generator | fast | Генерация тестов |
+| onec-code-simplifier | fast | Упрощение кода |
+| onec-metadata-helper | fast | Навигация по метаданным |
+| onec-admin | fast | Администрирование баз |
 | Все инфраструктурные | fast | Рутинные операции |
 
 ### Override на Opus
@@ -55,7 +58,7 @@ Sonnet (fast) по умолчанию. Opus — только для критич
 ## INTEGRATION
 
 - `1c-agent-delegation.mdc`: agent model defaults
-- `1c-dispatch-gate.mdc`: delegation triggers
+- `1c-agent-delegation.mdc`: HALT conditions + delegation triggers
 - `sdd-workflow.mdc`: OpenSpec flow
 
 ---

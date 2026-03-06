@@ -22,7 +22,7 @@ rlm_enterprise_context(query="1c-project-init skill")
 4. .1c-devbase.bat (из шаблона ИЛИ использует существующий)
 5. Выгрузка конфигурации
 6. Выгрузка расширений (если указаны)
-7. Копирование правил (no-roi-estimates.mdc, model-selection.mdc, mcp-tools-usage.mdc)
+7. Копирование правил (no-roi-estimates.mdc, model-selection.mdc) и скиллов (mcp-tools/SKILL.md)
 8. OpenSpec структура
 9. README.md
 10. Git init + коммиты

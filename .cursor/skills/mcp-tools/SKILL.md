@@ -1,9 +1,3 @@
----
-description: "MCP tools usage patterns, decision trees, and when to use which tool"
-alwaysApply: false
-priority: 150
----
-
 # MCP Tools Usage Guide
 
 ## PRINCIPLE
@@ -149,7 +143,7 @@ Example:
  Step 3: If need example, search_1c_templates(query="работа с файлами")
 ```
 
-### Pattern 3: Code Search in Project
+### Pattern 2: Code Search in Project
 
 ```yaml
 User asks about project code:
@@ -164,7 +158,7 @@ Example:
  Step 2: If not found, user-PROJECT-codemetadata-metadatasearch(query="ПолучитьКлиента")
 ```
 
-### Pattern 4: Code Validation Workflow
+### Pattern 3: Code Validation Workflow
 
 ```yaml
 Before committing code:
@@ -182,7 +176,6 @@ Example:
  Step 4: If errors, report and stop
  Step 5: If OK, approve commit
 ```
-
 
 ---
 
@@ -206,7 +199,6 @@ Forms:
  get_form_xsd_schema → user-1c-forms-get_xsd_schema
  get_form_json_schema → user-1c-forms-get_json_schema
  get_form_instructions → user-1c-forms-get_instructions
-
 ```
 
 ---
@@ -246,7 +238,6 @@ Parameters:
  - query (string, required): Template description
 Returns: Code templates with examples
 Example: search_1c_templates(query="обработка с формой")
-Skill: (no dedicated skill)
 ```
 
 ### Code Validation Tools
@@ -259,7 +250,6 @@ Parameters:
  - code (string, required): BSL code to check
 Returns: Syntax errors with line numbers
 Example: check_bsl_syntax(code="Процедура Test() КонецПроцедуры")
-Skill: (no dedicated skill)
 ```
 
 #### check_1c_logic
@@ -271,7 +261,6 @@ Parameters:
  - check_type (string, optional): "syntax", "logic", "performance"
 Returns: Logic errors and recommendations
 Example: check_1c_logic(code="...", check_type="logic")
-Skill: (no dedicated skill)
 ```
 
 ### Forms Tools
@@ -319,73 +308,12 @@ Skill: .cursor/skills/1c-forms/SKILL.md
 
 ## INTEGRATION WITH OTHER RULES
 
-This rule works with:
+This skill works with:
 - `model-selection.mdc` — When to use Opus vs Sonnet
 - `1c-agent-delegation.mdc` — Agent delegation patterns
 
 ---
 
-## EXAMPLES
-
-### Example 1: Documentation Lookup
-
-```yaml
-User: "Как использовать СтрРазделить?"
-
-Decision tree:
- - Platform method? Yes
- - Tool: search_1c_docs
-
-Action:
- search_1c_docs(query="СтрРазделить")
-
-Result:
- - Function signature
- - Parameters
- - Return value
- - Examples
-```
-
-### Example 2: Project Code Search
-
-```yaml
-User: "Где функция ПолучитьКлиента?"
-
-Decision tree:
- - Find: Code
- - Tool: user-PROJECT-codemetadata-codesearch
-
-Action:
- user-PROJECT-codemetadata-codesearch(query="ПолучитьКлиента")
-
-Result:
- - File locations
- - Function signatures
- - Usage examples
-```
-
-### Example 3: Code Validation
-
-```yaml
-User: "Проверь этот код"
-
-Decision tree:
- - Syntax check? Yes
- - Logic check? Yes
- - Tools: check_bsl_syntax → check_1c_logic
-
-Actions:
- 1. check_bsl_syntax(code="...")
- 2. If OK, check_1c_logic(code="...")
-
-Result:
- - Syntax: OK
- - Logic: 2 warnings (list)
- - Recommendations
-```
-
----
-
-**Last updated:** 2026-03-02
-**Version:** 1.1
-**Status:** Adapted for 1C_DO_KonturAPI (removed KAF/MCParqa24/RLM; fixed skill refs)
+**Last updated:** 2026-03-06
+**Version:** 2.0
+**Status:** Converted from rule to skill

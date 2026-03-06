@@ -1,9 +1,32 @@
 ---
-description: "ОБЯЗАТЕЛЬНО: при написании/правке BSL-кода делегировать специализированным агентам"
+description: "HALT+DELEGATION: диспетчер 1С — проверять ДО любого действия, делегировать по триггерам"
 alwaysApply: true
+priority: 999
 ---
 
-# Делегирование 1C-кода специализированным агентам
+# 1C Code Gate — Dispatch & Delegation
+
+## HALT CONDITIONS (проверять ДО любого действия)
+
+Триггеры проверяются **сверху вниз**; более специфичный триггер (Light Mode, Mechanical Mode) имеет приоритет над общим («Правка .bsl файла»).
+
+| Триггер | Действие | Детали |
+|---------|----------|--------|
+| Реализация ЗНИ без /opsx:apply (change существует в `openspec/changes/`, но сессия не в режиме apply) | **СТОП.** Правка .bsl, вызов writer/reviewer запрещены. **Исключение:** Light Mode и Mechanical Mode — работают без /opsx:apply (см. секции ниже). Предложить: «Для начала реализации: /opsx:apply <name>» | см. APPLY GATE ниже |
+| Режим explore без активного change (сессия в `/opsx:explore`, в `openspec/changes/` нет каталога change кроме `_template` и `archive`) | **СТОП.** Реализация (writer, reviewer) запрещена. Предложить пользователю: «Для реализации создайте ЗНИ: `/opsx:new <name>` или `/opsx:ff <name>`» | `.cursor/skills/openspec-explore/SKILL.md` (Guardrails, Architect Gate) |
+| Задача требует нового объекта метаданных (форма, модуль, справочник, регистр, роль, XML) | **СТОП. Никогда не создавать.** Выдать блокер с описанием. WAIT | `.cursor/rules/1c-no-metadata-creation.mdc` |
+| Файл трассы (`.pff`, `*_TRACE_*.txt`) или стек ошибки 1С | СТОП. Подготовить бриф. Делегировать **onec-trace-analyst**. По результату — onec-code-explorer, onec-code-architect. **В explore:** бриф из пользовательского ввода (без чтения трасс/артефактов), вывести по шаблону openspec-explore/SKILL.md (шаг 2), END TURN; делегировать trace-analyst только после подтверждения пользователя | `.cursor/rules/1c-error-analysis.mdc` |
+| Точечная правка (Light Mode): 2–10 строк, 1 файл, без архитектуры | Делегировать **onec-code-writer** с контекстом, затем **onec-code-reviewer**. Без артефактов OpenSpec | см. LIGHT MODE ниже |
+| Шаблонная правка (Mechanical Mode): find-replace, #Область, удаление комментариев | Прямая правка + Grep-верификация + **onec-code-reviewer** после. Без writer | см. MECHANICAL MODE ниже |
+| Правка `.bsl` файла | СТОП. Загрузить скилл. — Light Mode (1 файл, ≤10 строк, без архитектуры) → **onec-code-writer** + **onec-code-reviewer**, без артефактов. — Иначе → сначала **onec-code-architect** (план + ревью), затем **onec-code-writer** + **onec-code-reviewer**. Обязательно **onec-code-reviewer** после | см. ТАБЛИЦА ДЕЛЕГИРОВАНИЯ ниже |
+| Работа с формами 1С (Form.xml) | Загрузить 1c-forms. Делегировать **onec-form-generator** | `.cursor/skills/1c-forms/SKILL.md` |
+| Оптимизация запросов 1С | Загрузить 1c-query-optimization. Делегировать **onec-query-optimizer** | `.cursor/skills/1c-query-optimization/SKILL.md` |
+| Генерация тестов 1С | Делегировать **onec-test-generator** | — |
+| Упрощение BSL-кода | Делегировать **onec-code-simplifier** | — |
+| Навигация по метаданным (поиск объектов, связей) | Делегировать **onec-metadata-helper** | — |
+| Управление серверами 1С, базами, PostgreSQL, ibcmd, выгрузка/загрузка XML | Делегировать **onec-admin** | `.cursor/agents/onec-admin.md` |
+| Исследование кода из 3+ модулей | Делегировать **onec-code-explorer** (не читать модули вручную) | см. DELEGATION GATE ниже |
+| Исправление ошибки (bug fix). Маркеры: «исправь», «не работает», «падает», «ошибка», «баг», «fix», «crash», «добавь проверку», «Неопределено», «NPE», «null», «не заполнено», «пустое значение», «не находит», «вылетает» | СТОП. Проверить root cause + impact assessment по `verified-cause-gate.mdc` (HALT 1, 1b, 2, 3). При системном масштабе — **onec-code-architect**. При Light Mode bug fix — обязательный root cause блок в промпте writer (см. LIGHT MODE ниже) | `.cursor/rules/verified-cause-gate.mdc` |
 
 ## ПРИНЦИП
 
@@ -77,6 +100,8 @@ Workflow: прямая правка (StrReplace) + Grep-верификация +
 critical/high кодовые → автоматически writer с замечаниями → повторный reviewer (макс. 2 итерации).
 critical/high **архитектурные** (новый объект, API, структура хранения, RLS) → СТОП, к пользователю.
 
+**После получения отчёта аналитического агента** (architect/explorer/trace-analyst) — сохранить полный отчёт: см. `preserve-subagent-reports.mdc`.
+
 ## DELEGATION GATE
 
 **До вызова агента допустимо:** артефакты + до 3 точечных обращений к .bsl.
@@ -103,4 +128,4 @@ critical/high **архитектурные** (новый объект, API, ст
 
 ---
 
-**Last updated**: 2026-03-05 | **Version**: 2.2
+**Last updated**: 2026-03-06 | **Version**: 3.0 | **Merged from**: 1c-dispatch-gate.mdc + 1c-agent-delegation.mdc

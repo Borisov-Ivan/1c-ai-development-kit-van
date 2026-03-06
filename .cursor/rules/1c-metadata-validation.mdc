@@ -1,3 +1,8 @@
+---
+description: "Валидация имён метаданных 1С по XML-выгрузке перед использованием в BSL"
+globs: "**/*.bsl"
+---
+
 # 1C Metadata Validation (XML-first)
 
 ## PRINCIPLE
@@ -12,5 +17,5 @@
 
 ## SOURCE OF TRUTH
 
-Подробный процесс: `.cursor/skills/openspec-apply-change/SKILL.md` (шаг Metadata validation) и `.cursor/skills/openspec-debug/SKILL.md` (шаг 5).
+Скиллы openspec-apply-change и openspec-debug обязаны валидировать метаданные перед использованием в BSL. Подробности: `.cursor/skills/openspec-debug/SKILL.md` (шаг 5).
 

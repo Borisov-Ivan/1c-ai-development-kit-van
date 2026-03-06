@@ -64,6 +64,7 @@ Enter explore mode. Think deeply. Visualize freely. Follow the conversation wher
 - **Артефакты:** [пути к трассам, скриншотам, файлам]
 - **Агент:** `onec-trace-analyst` / `onec-code-explorer` / `onec-code-architect`
 - **Что искать:** [конкретные вопросы агенту — 3-5 пунктов]
+- **Контракты и альтернативы:** для каждой функции/компонента, которые предлагается использовать — входной контракт (что принимает, что обрабатывает внутри). Альтернативные точки реализации, если есть (можно ли решить задачу изменением существующей функции вместо добавления логики в вызывающем коде).
 
 Бриф верный? Подтвердите — передам агенту.
 ---
@@ -79,7 +80,7 @@ Enter explore mode. Think deeply. Visualize freely. Follow the conversation wher
 
 НЕ читать трассу/модули вручную. Передать бриф и путь к файлу соответствующему агенту через Task.
 
-**HALT-условия из `1c-dispatch-gate.mdc` и `1c-error-analysis.mdc` действуют в explore без исключений.** Свободный режим (The Stance) — только при отсутствии триггеров из шага 1.
+**HALT-условия из `1c-agent-delegation.mdc` и `1c-error-analysis.mdc` действуют в explore без исключений.** Свободный режим (The Stance) — только при отсутствии триггеров из шага 1.
 
 ---
 
@@ -147,7 +148,7 @@ Depending on what the user brings, you might:
 
 ## Structured Investigation
 
-**ВАЖНО: Structured Investigation — НЕ рекомендация, а обязательный путь при наличии триггеров** (трасса, стек ошибки, исследование 3+ модулей). HALT-условия из `1c-dispatch-gate.mdc` действуют в explore. Свободный режим (The Stance) — только при отсутствии триггеров.
+**ВАЖНО: Structured Investigation — НЕ рекомендация, а обязательный путь при наличии триггеров** (трасса, стек ошибки, исследование 3+ модулей). HALT-условия из `1c-agent-delegation.mdc` действуют в explore. Свободный режим (The Stance) — только при отсутствии триггеров.
 
 Когда пользователь приходит с задачей или проблемой, которая содержит триггер из Entry Protocol — следовать этой структуре:
 
@@ -156,11 +157,15 @@ Depending on what the user brings, you might:
 - При 3+ модулях — делегировать **onec-code-explorer** (не читать модули вручную)
 - При наличии трассы/стека ошибки — делегировать **onec-trace-analyst** (подготовить бриф, см. `1c-error-analysis.mdc`)
 - Оценить сложность: простая / средняя / сложная (паттерны — `.cursor/skills/1c-agent-patterns/SKILL.md`)
+- Если задача предполагает использование существующего кода: задокументировать контракты ключевых функций (что принимают, что гарантируют, какие форматы обрабатывают). Не допускать проектирования на допущениях.
+- Если есть несколько возможных точек реализации: перечислить варианты (где можно внести изменение) для оценки на шаге «Решение».
 
 ### 2. Решение (Decide)
 - Сравнить варианты (ASCII-диаграммы, таблицы trade-off)
 - При архитектурных решениях — делегировать **onec-code-architect** (мультисэмплинг для сложных)
 - Зафиксировать решения: предложить обновить design.md если change существует
+- Обосновать выбор подхода: почему эта точка реализации, а не другая? Почему новый код, а не расширение существующей функции? Как подобные задачи решены в проекте — следуем паттерну или отклоняемся?
+- Если ответы на эти вопросы неочевидны — это маркер для Architect Gate.
 
 ### 3. Планирование (Plan)
 - Сформулировать scope и задачи
@@ -169,14 +174,25 @@ Depending on what the user brings, you might:
 
 ### Architect Gate (перед созданием change)
 
-Когда решение зафиксировано (выбран вариант, пользователь подтвердил ключевые параметры) и задача **не точечная** (не Light Mode: >1 файла или >10 строк или затрагивает контракт/API):
+Когда решение зафиксировано (выбран вариант, пользователь подтвердил ключевые параметры) и выполняется **хотя бы одно** из условий:
+
+**Структурные триггеры** (как раньше):
+- >1 файла или >10 строк или затрагивает контракт/API
+
+**Семантические триггеры** (Design Maturity):
+- Решение предполагает подмену типового метода (&Вместо/&После/&Перед)
+- Есть несколько возможных точек реализации и выбор неочевиден
+- Решение вводит новые связи между модулями расширения
+- Затрагивается экспортная функция с 3+ вызывающими
+- Решение отклоняется от устоявшегося паттерна проекта
+- Design не содержит обоснования выбора подхода (assumption-driven)
 
 1. **Действие:** сформировать **краткий бриф** (3–5 предложений: что меняем, почему, предложенный подход, конкретные вопросы архитектору) и предложить пользователю: «Решение сформулировано. Рекомендую запросить ревью архитектора перед созданием change. Вот бриф: [...]. Отправить?»
 2. **Пользователь подтверждает** → вызвать **onec-code-architect** с брифом. Результат (полный отчёт) сохранить по правилу `preserve-subagent-reports.mdc`. Учесть замечания в последующих артефактах.
 3. **Пользователь отклоняет** («не надо», «это простое», «без архитектора») → продолжить как обычно.
 
 **Исключения** (Gate не предлагать):
-- Задача точечная (Light Mode)
+- Задача точечная (Light Mode) и нет семантических триггеров
 - Пользователь явно сказал «без архитектора» ранее в сессии
 - Архитектор уже вызывался в этой сессии explore по этой же теме
 
@@ -186,7 +202,7 @@ Depending on what the user brings, you might:
 
 ### Agent delegation в explore
 
-Аналитические агенты в explore: onec-code-explorer (код 3+ модулей), onec-code-architect (архитектура), onec-trace-analyst (трассы), onec-metadata-helper (метаданные). Пороги делегирования — `1c-dispatch-gate.mdc` и `1c-agent-delegation.mdc` (DELEGATION GATE).
+Аналитические агенты в explore: onec-code-explorer (код 3+ модулей), onec-code-architect (архитектура), onec-trace-analyst (трассы), onec-metadata-helper (метаданные). Пороги делегирования — `1c-agent-delegation.mdc` (HALT CONDITIONS + DELEGATION GATE).
 
 **Реализационные агенты (onec-code-writer, onec-code-reviewer) в explore НЕ запускаются** — только анализ и рекомендации.
 
@@ -395,6 +411,10 @@ When it feels like things are crystallizing, you might summarize:
 
 But this summary is optional. Sometimes the thinking IS the value.
 
+**IMPORTANT**: При переходе к `/opsx:new` или `/opsx:ff` — строго следовать инструкциям соответствующего скилла. Не создавать change «по памяти» из контекста explore. Команда загрузит скилл, который обеспечит:
+- Для `/opsx:new`: scaffold через openspec CLI + показ шаблона первого артефакта + STOP
+- Для `/opsx:ff`: scaffold + создание ВСЕХ артефактов + Architect Gate после design + STOP
+
 ---
 
 ## Guardrails
@@ -402,7 +422,7 @@ But this summary is optional. Sometimes the thinking IS the value.
 - **Don't skip brief confirmation** - Never call Task/delegate to an agent in the same message where you show the brief. Always END TURN after showing the brief and wait for explicit user confirmation in the next message.
 - **Don't implement** - Never write code or implement features. Creating OpenSpec artifacts is fine, writing application code is not.
 - **Don't read traces manually** - If a trace file is provided, delegate to `onec-trace-analyst`. Never substitute manual trace reading for agent delegation. DELEGATION GATE applies in explore.
-- **Don't bypass HALT conditions** - `1c-dispatch-gate.mdc` and `1c-error-analysis.mdc` apply in explore without exceptions. Entry Protocol enforces this.
+- **Don't bypass HALT conditions** - `1c-agent-delegation.mdc` (HALT CONDITIONS) and `1c-error-analysis.mdc` apply in explore without exceptions. Entry Protocol enforces this.
 - **Don't fake understanding** - If something is unclear, dig deeper
 - **Don't rush** - Discovery is thinking time, not task time
 - **Don't force structure** - Let patterns emerge naturally

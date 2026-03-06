@@ -1,3 +1,9 @@
+---
+description: "GATE: команда-обёртка — сначала Read скилла, только потом другие файлы"
+alwaysApply: true
+priority: 997
+---
+
 # Command → Skill Read Gate
 
 ## TRIGGER

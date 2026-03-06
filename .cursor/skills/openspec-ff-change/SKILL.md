@@ -72,10 +72,21 @@ Fast-forward through artifact creation - generate everything needed to start imp
 
    d. **Architect Gate (after design artifact)**:
       - After creating the `design` artifact, assess change complexity:
-        - If it touches >2 files, changes a contract/API, or describes an architectural decision:
+
+        **Structural triggers:**
+        - Touches >2 files, changes a contract/API, or describes an architectural decision.
+
+        **Semantic triggers (Design Maturity):**
+        - Design involves method substitution (&Вместо/&После/&Перед)
+        - Introduces new dependencies between extension modules
+        - Modifies an exported function with 3+ callers
+        - Doesn't justify the choice of implementation point
+        - Deviates from established project patterns
+
+        Any structural OR semantic trigger → recommend architect review:
           - Propose: "Design created. Recommend architect review before continuing. Request review? [Recommended / Skip]"
           - If user agrees: call **onec-code-architect** to review design.md, incorporate feedback before proceeding.
-        - If simple change (1-2 files, no architecture): continue without prompt.
+        - If no triggers (simple change, 1-2 files, no architecture, no semantic risks): continue without prompt.
 
 5. **Show final status**
    ```bash
@@ -99,6 +110,11 @@ After completing all artifacts, summarize:
 - **IMPORTANT**: `context` and `rules` are constraints for YOU, not content for the file
   - Do NOT copy `<context>`, `<rules>`, `<project_context>` blocks into the artifact
   - These guide what you write, but should never appear in the output
+- **Design Rationale (for design artifact)**: если решение предполагает интеграцию с существующим кодом, добавить секцию «## Design Rationale»:
+  - Почему выбрана эта точка реализации (а не другие варианты)?
+  - Какие контракты существующих функций учтены (что они уже обрабатывают)?
+  - Следует ли подход паттернам проекта (как решены аналогичные задачи)?
+  - Отсутствие секции при наличии интеграции — маркер для Architect Gate (семантический триггер).
 
 **Guardrails**
 - Create ALL artifacts needed for implementation (as defined by schema's `apply.requires`)

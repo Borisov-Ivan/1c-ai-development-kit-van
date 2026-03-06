@@ -1,3 +1,8 @@
+---
+description: "Проверка полноты delta specs на этапах apply/verify/archive"
+alwaysApply: false
+---
+
 # OpenSpec: Delta Specs Completeness Gate
 
 ## ПРИНЦИП

@@ -1,6 +1,6 @@
 ---
 description: "При ошибке 1С с трассой/стеком — делегировать onec-trace-analyst, затем explorer/architect"
-alwaysApply: true
+alwaysApply: false
 priority: 200
 ---
 

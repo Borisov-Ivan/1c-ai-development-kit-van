@@ -278,6 +278,7 @@ If file does not exist — STOP (see CRITICAL RULE 12).
 
 4. Error handling:
    - Use Попытка/Исключение only for expected failures; in Исключение always log (ЗаписьЖурналаРегистрации with context); avoid silent Возврат. See .cursor/rules/1c-coding-standards.mdc (Обработка исключений).
+   - **Попытка justification gate (rule 20):** before adding Попытка/Исключение — HALT. Identify the external factor that can cause failure despite correct code (network, FS, concurrent data access, COM, external config). If NO external factor (string conversion, arithmetic, metadata access, hex/base64 encoding) — do NOT add Попытка; validate input explicitly instead. If external factor exists — verify fallback is correct for the caller (not silent degradation). Исключение without ЗаписьЖурналаРегистрации and without ВызватьИсключение = forbidden. **Even if design.md prescribes Попытка — verify external factor first. If none — HALT, report conflict.** See 1c-coding-standards.mdc (Попытка Justification Gate, rule 20).
    - Fail-fast on structural checks: if a structural precondition fails (wrong type, missing property, size mismatch, unexpected format) — raise ВызватьИсключение, do NOT silently continue (no Продолжить, no silent Возврат, no empty branch). Business filtering (Status, doc type) is allowed. See 1c-coding-standards.mdc — Fail-fast вместо тихого пропуска.
    - Data contract verification: before adding ANY defensive check (ТипЗнч() <> Тип(...), Свойство, ЕстьРеквизитИлиСвойствоОбъекта, Колонки.Найти, ЗначениеЗаполнено() as guard), HALT and verify: (a) source of the row/object (this object's tabular section? query result? documented return/parameter?), (b) is the contract fixed by metadata/query/documented type? If YES — do NOT add check, access field directly. If NO — add check using correct method (Structure → Свойство; other → ЕстьРеквизитИлиСвойствоОбъекта). Avoid "defensive cake" — stacked checks on ANY value (fixed OR dynamic contract) where one check is subsumed by another. For dynamic contract: one check per distinct failure class; if check N is subsumed by check N+1 — remove N. See 1c-coding-standards.mdc (Контракт источника данных и защитные проверки, rule 14).
    - User notifications: ОбщегоНазначения.СообщитьПользователю
@@ -539,7 +540,7 @@ Output:
 3. ✅ **Self-review** - Always, before presenting
 4. ✅ **Use MCP** - Check syntax, avoid collisions
 5. ✅ **Use БСП** - Reuse standard subsystems
-6. ✅ **Handle errors** - Try-catch + logging
+6. ✅ **Handle errors** - Попытка only with identified external factor; justification gate (rule 20). No traceless suppression, no silent degradation
 7. ✅ **Validate with BSL LSP** - Clean diagnostics
 8. ✅ **Document exported functions** - JSDoc-style
 9. ✅ **Iterate until clean** - Don't present with issues
@@ -558,6 +559,7 @@ Output:
 16. ✅ **Data contract gate (overrides design.md)** — before adding ТипЗнч() <> Тип(...), Свойство(), ЕстьРеквизит, Колонки.Найти, or ЗначениеЗаполнено() as guard: HALT, identify source (ТЧ this object / query / documented return or param = fixed → no check; unknown contract → check with correct method). Redundant check and "defensive cake" (any contract type — fixed or dynamic) = antipattern. For dynamic contract: verify each check adds a distinct failure class not covered by adjacent checks; if check N is subsumed by check N+1 — remove N. **Even if design.md prescribes a specific guard — verify the contract first. If it violates rule 14 — HALT, report conflict.** See 1c-coding-standards.mdc (Контракт источника данных и защитные проверки, rule 14).
 17. ✅ **NO BAND-AID FIXES** — before implementing any bug fix, verify root cause is documented and fix targets it (not the symptom). If the task says "add check for Undefined" but doesn't explain WHY the value is Undefined — STOP and ask. See .cursor/rules/verified-cause-gate.mdc.
 18. ✅ **&ИзменениеИКонтроль GUARD** — при правке метода с аннотацией &ИзменениеИКонтроль: код ВНЕ блоков #Вставка/#КонецВставки НЕПРИКОСНОВЕНЕН. Запрещено: переименовывать переменные, менять форматирование, рефакторить, добавлять/удалять разметку #Область. Изменения — ТОЛЬКО внутри #Вставка/#КонецВставки. При добавлении #Область в модуль расширения — только в собственный код, НЕ в типовой. Нарушение = поломка расширения. См. .cursor/skills/1c-extensions/SKILL.md.
+19. ✅ **Попытка justification gate (overrides design.md)** — before adding Попытка/Исключение: HALT, identify external factor (network, FS, concurrent data, COM, external config). No external factor (string conversion, arithmetic, metadata access) → do NOT add Попытка, validate input instead. Fallback must be correct for caller (no silent degradation). Исключение without log and without re-raise = forbidden. **Even if design.md prescribes Попытка — verify external factor first. If none — HALT, report conflict.** See 1c-coding-standards.mdc (rule 20).
 
 ---
 

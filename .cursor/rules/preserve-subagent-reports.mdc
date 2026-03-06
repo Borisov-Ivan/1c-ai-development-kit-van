@@ -1,6 +1,6 @@
 ---
 description: "Сохранять полные отчёты аналитических субагентов в reports/ change, не суммаризировать"
-alwaysApply: true
+alwaysApply: false
 ---
 
 # Сохранение отчётов субагентов

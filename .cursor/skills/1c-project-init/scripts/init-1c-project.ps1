@@ -427,8 +427,7 @@ if (-not (Test-Path $rulesDestDir)) {
 # Core rules (always copy)
 $rulesToCopy = @(
     "no-roi-estimates.mdc",
-    "model-selection.mdc",
-    "mcp-tools-usage.mdc"
+    "model-selection.mdc"
 )
 
 $copiedRules = @()
@@ -592,7 +591,7 @@ User: $Username
 - .cursor/rules/ - AI rules (3 rules)
   - no-roi-estimates.mdc - no time/cost estimates
   - model-selection.mdc - Opus vs Sonnet selection
-  - mcp-tools-usage.mdc - MCP tools guide
+  - (mcp-tools-usage → skills/mcp-tools/SKILL.md)
 - openspec/ - specifications (SDD)
 - configs/ - configuration guides
   - mcp-setup.md - MCP deployment instructions

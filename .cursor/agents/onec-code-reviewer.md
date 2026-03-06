@@ -149,6 +149,10 @@ Check (add to existing):
   - Оповестить()/ОповеститьОбИзменении() in server context (&НаСервере, &НаСервереБезКонтекста, server common module) — HIGH (client-only methods)
   - Method name contradicts compilation directive (e.g. "...НаКлиенте" declared &НаСервере, "...НаСервере" declared &НаКлиенте) — MEDIUM
   - Попытка/Исключение wrapping access to fixed-contract field/method (tabular section attribute, explicit query column, documented return type). If the code inside Попытка can only fail due to a code bug (not external factor), then Попытка masks the bug — HIGH
+  - Попытка/Исключение wrapping deterministic operation with no external factor (string conversion, arithmetic, metadata access, hex/base64 encoding). Justification gate: if no network, FS, concurrent access, COM, or external config — Попытка is unjustified. See 1c-coding-standards.mdc rule 20 — CRITICAL
+  - Попытка/Исключение with fallback return/assignment that produces a value indistinguishable from success for the caller (silent degradation: e.g. returning unconverted input, default value that mimics valid result, Неопределено where caller treats it as "not found"). See 1c-coding-standards.mdc rule 20 — HIGH
+  - Попытка/Исключение block without logging (neither ЗаписьЖурналаРегистрации nor wrapper like ЗаписатьОшибкуВЖурнал) where exception is NOT re-raised via ВызватьИсключение — traceless suppression. See 1c-coding-standards.mdc rule 20 — HIGH
+    (Note: if exception is re-raised via ВызватьИсключение, logging is optional; transactional Попытка — see category 13)
 ```
 
 ### 11. Band-Aid Detection
@@ -169,8 +173,7 @@ Check (see .cursor/rules/verified-cause-gate.mdc):
 Check:
   - Typos and encoding errors in user-facing strings: mixed Cyrillic/Latin chars (С vs C, а vs a, о vs o, е vs e), spelling errors in НСтр/ПоказатьПредупреждение arguments — HIGH
   - Stub/placeholder code — see category 4 Code Quality (always checked, not prerelease-only)
-  - Попытка/Исключение block without logging (neither ЗаписьЖурналаРегистрации nor wrapper like ЗаписатьОшибкуВЖурнал) where exception is NOT re-raised — MEDIUM
-    (Note: if exception is re-raised via ВызватьИсключение, logging is optional)
+  - Попытка/Исключение without logging — moved to category 10 (always-checked, HIGH). See category 10 for detection; do NOT duplicate finding here
 ```
 
 ### 13. Transactions and Locking
@@ -379,6 +382,9 @@ status: NOT_CONNECTED
     - Оповестить()/ОповеститьОбИзменении() in server context (client-only)
     - Method name contradicts compilation directive
     - Попытка/Исключение wrapping fixed-contract field/method access
+    - Попытка/Исключение wrapping deterministic operation (no external factor — rule 20)
+    - Попытка/Исключение with silent degradation fallback (rule 20)
+    - Попытка/Исключение without logging, exception not re-raised (rule 20)
 
 11. Band-aid detection:
     - Defensive null/undefined check without root cause analysis
@@ -392,7 +398,7 @@ status: NOT_CONNECTED
 12. Release readiness (prerelease only):
     - Typos and mixed Cyrillic/Latin in user-facing strings
     - Stub code — see category 4 (always checked)
-    - Попытка/Исключение without logging (exception not re-raised)
+    - Попытка/Исключение without logging — see category 10 (always-checked); do NOT duplicate
 
 13. Transactions and locking:
     - НачатьТранзакцию() without matching ЗафиксироватьТранзакцию()/ОтменитьТранзакцию() in same scope
@@ -466,6 +472,7 @@ status: NOT_CONNECTED
 - ТекущаяДата() instead of ТекущаяДатаСеанса()
 - НачатьТранзакцию() without matching ЗафиксироватьТранзакцию()/ОтменитьТранзакцию() in same scope
 - Missing ОтменитьТранзакцию() in Исключение block of transactional Попытка
+- Попытка wrapping deterministic operation (no external factor — rule 20)
 ```
 
 ### High Priority (Fix Before Merge)
@@ -490,6 +497,8 @@ status: NOT_CONNECTED
 - Оповестить()/ОповеститьОбИзменении() in server context (client-only methods)
 - Свойство() on fixed-contract source (tabular section, query result)
 - Band-aid fix detected (defensive check without root cause, try/except suppression, skip-flag, defensive cake)
+- Попытка without logging (exception not re-raised) — traceless suppression (rule 20)
+- Попытка with silent degradation fallback (rule 20)
 - НачатьТранзакцию() without Попытка/Исключение wrapping the transactional block
 - User interaction (ПоказатьВопрос, Предупреждение, Сообщить) inside transaction
 - Read-then-write without БлокировкаДанных in concurrent scenario
@@ -563,8 +572,10 @@ kind=functional:
   - Duplicate #Область (structural breakage)
   - Typos in user-facing strings (mixed encoding, spelling)
   - Stub/placeholder code in production
-  - Попытка/Исключение without logging (exception silently swallowed)
+  - Попытка/Исключение without logging (exception silently swallowed) — traceless suppression
   - Попытка/Исключение wrapping fixed-contract access (contract masking)
+  - Попытка/Исключение wrapping deterministic operation (no external factor — rule 20)
+  - Попытка/Исключение with silent degradation fallback (rule 20)
 
 kind=style:
   - Ternary operator ?() (style preference, not functional defect)
@@ -603,13 +614,14 @@ Pre-release escalation (functional only):
     - Export method without header (if functional impact, e.g. contract unclear)
     - Dead code, logic duplication (if kind=functional)
     - Business logic directly in #Вставка block
-    - Попытка/Исключение without logging (if exception silently swallowed)
     - Export method in СлужебныеПроцедурыИФункции (contract violation)
     - Unused export procedure/function (dead API surface before release) — category 15
     - Procedure marked "Устарела:" / "Deprecated" still present without documented plan — category 15
 
   HIGH → CRITICAL:
     - &ИзменениеИКонтроль: code outside #Вставка/#Удаление differs from base (variable rename, formatting, #Область in base code) — breaks extension applicability
+    - Попытка/Исключение without logging (traceless suppression — rule 20)
+    - Попытка/Исключение with silent degradation fallback (rule 20)
 
 Note: Escalation is additive for functional issues. Style issues are not escalated; tag [style] and keep original level.
 ```

@@ -21,7 +21,7 @@ Automated 1C project initialization from a server database. Creates a complete d
 7. Generates `.1c-devbase.bat` from 1c-batch template (or uses existing one)
 8. Dumps configuration to `src/cf/`
 9. Dumps extensions to `src/cfe/<Name>/` (if specified via `-Extensions`)
-10. **Copies AI rules** (3 rules: no-roi-estimates, model-selection, mcp-tools-usage)
+10. **Copies AI rules** (2 rules: no-roi-estimates, model-selection) **and skills** (mcp-tools/SKILL.md)
 11. **Copies optimization docs** (.cursorignore, CURSOR-CONTEXT-LIMITS.md, docs/cursor-optimization.md)
 12. Creates OpenSpec structure (AGENTS.md, project.md, templates)
 13. **Creates project MCP configuration** (`.cursor/mcp.json`, `docker-compose.yml`, management scripts)
@@ -301,7 +301,7 @@ MyProject/
     ├── rules/
     │   ├── no-roi-estimates.mdc
     │   ├── model-selection.mdc
-    │   └── mcp-tools-usage.mdc
+    │   └── (mcp-tools-usage removed → see skills/mcp-tools/SKILL.md)
     └── skills/
         ├── 1c-batch/
         ├── 1c-agent-patterns/
