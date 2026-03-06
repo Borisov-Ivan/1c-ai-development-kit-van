@@ -5,7 +5,7 @@ license: MIT
 compatibility: Requires openspec CLI.
 metadata:
   author: openspec
-  version: "1.0"
+  version: "1.1"
   generatedBy: "1.1.1"
 ---
 
@@ -19,26 +19,39 @@ Enter explore mode. Think deeply. Visualize freely. Follow the conversation wher
 
 При входе в explore **ПЕРВЫЙ шаг** — классификация входа и подготовка брифа. Не начинать исследование до завершения этого протокола.
 
-**WARNING (STOP-GATE):** Если пользователь предоставил трассу (`.pff`, `*_TRACE_*.txt`), стек ошибки или описание бага — ваш ПЕРВЫЙ видимый вывод в ответе ОБЯЗАН быть блоком брифа (шаг 2). До вывода брифа ЗАПРЕЩЕНО: Read трасс, Read design.md/reports, Grep, SemanticSearch, Task. Единственное допустимое действие до брифа — Shell `openspec list --json` (шаг 0). После брифа — END TURN. Нарушение = провал протокола.
+**STOP-GATE (БЕЗУСЛОВНЫЙ):** Вход содержит **любой** HALT-триггер (трасса, стек, баг, ссылки на код/модули/функции, архитектурный вопрос, исследование, ревизия change) — ваш ПЕРВЫЙ видимый вывод ОБЯЗАН быть блоком брифа (шаг 2). До вывода брифа ЗАПРЕЩЕНО: Read (артефактов, модулей, трасс, design.md/reports), Grep, SemanticSearch, Task. Единственные допустимые действия до брифа — Read SKILL.md (command-skill-gate) и Shell `openspec list --json` (шаг 0). После брифа — END TURN. Нарушение = провал протокола.
+
+**Пакетная дисциплина:** Батч после `openspec list --json` — ТОЛЬКО текстовый вывод (классификация + бриф при HALT, или начало свободного режима при отсутствии триггеров). Допустимый tool call — только AskQuestion (уточняющие вопросы). Read, Grep, Shell, SemanticSearch, Task — ЗАПРЕЩЕНЫ до завершения Entry Protocol (подтверждение брифа пользователем на шаге 3).
 
 ### 0. Проверить активные changes и предложить debug при необходимости
 
 Выполнить `openspec list --json`. **Единственное действие в этом батче** — Shell `openspec list --json`. НЕ читать другие файлы (design.md, трассы, модули) в том же tool call batch.
 
-Если есть активный change **И** вход содержит трассу/баг/ошибку → предложить `/opsx:debug <change>`:
+Если есть активный change **И** вход содержит трассу/баг/ошибку **ИЛИ** ревизию/перепроектирование работы по change (маркеры: «пересмотреть», «перепроектировать», «переделать», «ревизия», «пересмотр ЗНИ», «ошибочна», «перепроектировать стройно») → предложить `/opsx:debug <change>`:
 
-> «Вижу активный change **X** и файл трассы (баг/ошибку). Для анализа бага в контексте change рекомендую `/opsx:debug X` — он использует артефакты change для обогащённого брифа и автоматически обновит tasks.md/design.md. Продолжить в explore или переключиться на debug?»
+> «Вижу активный change **X** и [файл трассы (баг/ошибку) | запрос на ревизию работы по change]. Для анализа в контексте change рекомендую `/opsx:debug X` — он использует артефакты change для обогащённого брифа и автоматически обновит tasks.md/design.md. Продолжить в explore или переключиться на debug?»
 
 - Пользователь выбирает debug → завершить explore, предложить ввести `/opsx:debug`.
 - Пользователь выбирает explore → продолжить со следующего шага.
 
 ### 1. Классифицировать вход
 
-- Есть файл трассы (`.pff`, `*_TRACE_*.txt`) или стек ошибки → **HALT**, подготовить бриф для `onec-trace-analyst`
-- Есть описание бага/ошибки → **HALT**, подготовить бриф (симптом, ожидание, реальность)
-- Исследование кода 3+ модулей → **HALT**, подготовить бриф для `onec-code-explorer`
-- Архитектурный вопрос → **HALT**, подготовить бриф для `onec-code-architect`
-- Идея / размышление / сравнение вариантов → свободный режим (The Stance)
+**HALT-триггеры** (любой из них → бриф обязателен, шаг 2):
+
+- Есть файл трассы (`.pff`, `*_TRACE_*.txt`) или стек ошибки → бриф для `onec-trace-analyst`
+- Есть описание бага/ошибки → бриф (симптом, ожидание, реальность)
+- Исследование кода 3+ модулей → бриф для `onec-code-explorer`
+- Архитектурный вопрос, перепроектирование → бриф для `onec-code-architect`
+- Ссылки на конкретный код, модули, функции (в т.ч. через вложения/code selections) → бриф для `onec-code-explorer` или `onec-code-architect`
+- Ревизия/пересмотр работы по активному change → бриф для `onec-code-explorer`
+
+**Свободный режим (The Stance)** — только при **явном отсутствии всех** HALT-триггеров:
+- Нет ссылок на конкретный код, модули, функции
+- Нет активного change в контексте обсуждения (или change не затрагивается входом)
+- Нет слов-маркеров исследования/отладки/перепроектирования
+- Примеры: абстрактная идея, сравнение технологий без привязки к коду, общий вопрос
+
+**Правило:** если сомневаешься между HALT и свободным режимом — выбирай HALT. Ложный бриф = потеря одного хода; пропущенный бриф = потеря качества исследования.
 
 ### 2. Сформировать и ПОКАЗАТЬ бриф (STOP — END TURN)
 
@@ -148,9 +161,11 @@ Depending on what the user brings, you might:
 
 ## Structured Investigation
 
+**Пост-бриф фаза.** Structured Investigation начинается **после шага 3 Entry Protocol** — подтверждение брифа пользователем и делегирование агенту. Это НЕ замена Entry Protocol и НЕ параллельный путь. Последовательность: Entry Protocol (бриф → подтверждение → делегирование) → Structured Investigation (исследование → решение → планирование).
+
 **ВАЖНО: Structured Investigation — НЕ рекомендация, а обязательный путь при наличии триггеров** (трасса, стек ошибки, исследование 3+ модулей). HALT-условия из `1c-agent-delegation.mdc` действуют в explore. Свободный режим (The Stance) — только при отсутствии триггеров.
 
-Когда пользователь приходит с задачей или проблемой, которая содержит триггер из Entry Protocol — следовать этой структуре:
+После завершения Entry Protocol и получения результатов от агента — следовать этой структуре:
 
 ### 1. Исследование (Investigate)
 - Понять задачу: что, зачем, какие ограничения
@@ -234,9 +249,11 @@ Think freely. When insights crystallize, you might offer:
 
 ### When a change exists
 
-If the user mentions a change or you detect one is relevant:
+**Entry Protocol first.** Чтение артефактов change — **после завершения Entry Protocol** (после подтверждения брифа пользователем на шаге 3). До этого — использовать только информацию из `openspec list --json` и пользовательского ввода. Не читать proposal.md, design.md, tasks.md для подготовки брифа.
 
-1. **Read existing artifacts for context**
+If the user mentions a change or you detect one is relevant (after Entry Protocol):
+
+1. **Read existing artifacts for context** (пост-бриф фаза)
    - `openspec/changes/<name>/proposal.md`
    - `openspec/changes/<name>/design.md`
    - `openspec/changes/<name>/tasks.md`
@@ -279,7 +296,30 @@ If the user mentions a change or you detect one is relevant:
 
 ## Handling Different Entry Points
 
-**User brings a vague idea:**
+**User brings a code investigation (HALT — Entry Protocol):**
+```
+User: /opsx:explore
+      @Module.bsl:2735-2755 функция ошибочна, нужно перепроектировать.
+      Просмотри всю работу по текущему ЗНИ
+
+You: [openspec list → active change found]
+
+     ---
+     **Бриф для делегирования**
+
+     - **Контекст:** расширение X, модуль Y, активный change Z (5/7 задач)
+     - **Сценарий:** функция ПреобразоватьОтпечаток содержит ошибку [детали из ввода]
+     - **Артефакты:** code selection Module.bsl:2735-2755, change Z
+     - **Агент:** `onec-code-explorer`
+     - **Что искать:** [конкретные вопросы]
+
+     Бриф верный? Подтвердите — передам агенту.
+     ---
+
+     ⛔ END TURN
+```
+
+**User brings a vague idea (свободный режим — нет HALT-триггеров):**
 ```
 User: I'm thinking about adding real-time collaboration
 
@@ -302,11 +342,12 @@ You: Real-time collab is a big space. Let me think about this...
       Where's your head at?
 ```
 
-**User brings a specific problem:**
+**User brings a specific problem (after Entry Protocol — post-brief phase):**
 ```
 User: The auth system is a mess
 
-You: [reads codebase]
+You: [Entry Protocol: brief → confirmation → delegation to explorer]
+     [After explorer report, in post-brief phase:]
 
      ┌─────────────────────────────────────────────┐
      │              CURRENT AUTH FLOW              │
@@ -333,16 +374,15 @@ You: [reads codebase]
      I see three tangles. Which one's burning?
 ```
 
-**User is stuck mid-implementation:**
+**User is stuck mid-implementation (after Entry Protocol — post-brief phase):**
 ```
 User: /opsx:explore add-auth-system
       The OAuth integration is more complex than expected
 
-You: [reads change artifacts]
+You: [Entry Protocol: brief → confirmation → delegation]
+     [After exploration, in post-brief phase:]
 
      You're on task 4: "Implement OAuth flow"
-
-     Let me trace what's involved...
 
      [draws diagram, explores options, suggests paths]
 
@@ -350,7 +390,7 @@ You: [reads change artifacts]
      Or add a spike task to investigate?
 ```
 
-**User wants to compare options:**
+**User wants to compare options (свободный режим — абстрактный вопрос):**
 ```
 User: Should we use Postgres or SQLite?
 
@@ -419,6 +459,7 @@ But this summary is optional. Sometimes the thinking IS the value.
 
 ## Guardrails
 
+- **Don't bypass Entry Protocol** - Never Read code, artifacts, traces, or modules before showing the brief. The only tool calls before brief output are: Read SKILL.md (command-skill-gate batch) and Shell `openspec list --json` (step 0 batch). Everything else — after brief confirmation on step 3. Reading change artifacts (proposal.md, design.md, tasks.md) is also forbidden before brief.
 - **Don't skip brief confirmation** - Never call Task/delegate to an agent in the same message where you show the brief. Always END TURN after showing the brief and wait for explicit user confirmation in the next message.
 - **Don't implement** - Never write code or implement features. Creating OpenSpec artifacts is fine, writing application code is not.
 - **Don't read traces manually** - If a trace file is provided, delegate to `onec-trace-analyst`. Never substitute manual trace reading for agent delegation. DELEGATION GATE applies in explore.
@@ -430,3 +471,7 @@ But this summary is optional. Sometimes the thinking IS the value.
 - **Do visualize** - A good diagram is worth many paragraphs
 - **Do explore the codebase** - Ground discussions in reality
 - **Do question assumptions** - Including the user's and your own
+
+---
+
+**Last updated**: 2026-03-06 | **Version**: 1.1 | **Changes**: безусловный STOP-GATE, пакетная дисциплина, fail-safe свободный режим, подчинение OpenSpec Awareness протоколу, примеры с Entry Protocol, Structured Investigation как пост-бриф фаза, guardrail bypass, развилка debug для ревизии change
