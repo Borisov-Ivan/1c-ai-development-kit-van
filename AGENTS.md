@@ -17,6 +17,9 @@
 ## Анализ ошибок 1С
 `.cursor/rules/1c-error-analysis.mdc` — trace-analyst → explorer/architect.
 
+## Architect Gate
+`.cursor/rules/architect-gate.mdc` — единые триггеры архитектурного ревью (объективные маркеры, семантические, структурные). Проверяется в explore (шаг Decide), ff/new (Design Gate после design.md), apply (pre-flight check). Три рубежа: explore рекомендует, ff/new контролирует, apply предупреждает.
+
 ## Verified Cause Gate
 `.cursor/rules/verified-cause-gate.mdc` — root cause + impact перед фиксом.
 

@@ -70,23 +70,30 @@ Fast-forward through artifact creation - generate everything needed to start imp
       - Use **AskUserQuestion tool** to clarify
       - Then continue with creation
 
-   d. **Architect Gate (after design artifact)**:
-      - After creating the `design` artifact, assess change complexity:
+   d. **Design Gate (after design artifact)**:
+      After creating the `design` artifact, check architect-gate triggers mechanically:
 
-        **Structural triggers:**
-        - Touches >2 files, changes a contract/API, or describes an architectural decision.
-
-        **Semantic triggers (Design Maturity):**
-        - Design involves method substitution (&Вместо/&После/&Перед)
-        - Introduces new dependencies between extension modules
-        - Modifies an exported function with 3+ callers
-        - Doesn't justify the choice of implementation point
-        - Deviates from established project patterns
-
-        Any structural OR semantic trigger → recommend architect review:
-          - Propose: "Design created. Recommend architect review before continuing. Request review? [Recommended / Skip]"
-          - If user agrees: call **onec-code-architect** to review design.md, incorporate feedback before proceeding.
-        - If no triggers (simple change, 1-2 files, no architecture, no semantic risks): continue without prompt.
+      1. **Check objective markers** (Glob/Grep, not subjective assessment):
+         - Glob `reports/architecture-*.md` in change dir and `temp/reports/` — architect report exists?
+         - Glob `reports/trace-analysis-*.md`, `reports/exploration-*.md` — analytical agents were used?
+         - Glob `temp/explore-summary-*.md` or `reports/explore-summary-*.md` — explore summary exists?
+         - Grep design.md for: «базовая процедура», «платформа», «повторная запись», «перехват», «после вызова базы», «&Вместо», «&После»
+      2. **Check semantic and structural triggers** from `architect-gate.mdc`
+      3. **Decision matrix:**
+         - **Triggers fired AND `architecture-*.md` found** → continue (architect already reviewed)
+         - **Triggers fired AND NO `architecture-*.md`** → **PAUSE.** AskQuestion to USER (not agent decision):
+           ```
+           "Design создан. Сработали маркеры Architect Gate:
+           - [list of triggered markers]
+           Архитектурный анализ не найден.
+           1. Запустить архитектора сейчас [Рекомендуется]
+           2. Вернуться в explore для архитектурного анализа
+           3. Продолжить без архитектора (на ваш риск)"
+           ```
+           - Option 1 → call **onec-code-architect** to review design.md, save report, incorporate feedback
+           - Option 2 → STOP ff, suggest `/opsx:explore`
+           - Option 3 → continue, document user's decision in design.md
+         - **No triggers fired** → continue without pause
 
 5. **Show final status**
    ```bash
@@ -110,11 +117,7 @@ After completing all artifacts, summarize:
 - **IMPORTANT**: `context` and `rules` are constraints for YOU, not content for the file
   - Do NOT copy `<context>`, `<rules>`, `<project_context>` blocks into the artifact
   - These guide what you write, but should never appear in the output
-- **Design Rationale (for design artifact)**: если решение предполагает интеграцию с существующим кодом, добавить секцию «## Design Rationale»:
-  - Почему выбрана эта точка реализации (а не другие варианты)?
-  - Какие контракты существующих функций учтены (что они уже обрабатывают)?
-  - Следует ли подход паттернам проекта (как решены аналогичные задачи)?
-  - Отсутствие секции при наличии интеграции — маркер для Architect Gate (семантический триггер).
+- **Design Rationale (for design artifact)**: если решение предполагает интеграцию с существующим кодом, добавить секцию «## Design Rationale» (почему эта точка реализации, контракты, паттерны проекта). **Важно:** самописный Rationale НЕ закрывает Architect Gate — критерии валидности и триггеры в `architect-gate.mdc`.
 
 **Guardrails**
 - Create ALL artifacts needed for implementation (as defined by schema's `apply.requires`)

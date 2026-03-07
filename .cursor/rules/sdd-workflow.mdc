@@ -23,9 +23,15 @@ explore → new/ff → apply → verify → archive
 
 Дополнительные действия: `continue` (следующий артефакт), `sync` (дельта-спеки → main), `bulk-archive` (пакетная архивация).
 
+## АЛИАСЫ КОМАНД
+
+| Фраза пользователя | Что выполнять |
+|---------------------|---------------|
+| «создай ЗНИ», «заведи ЗНИ», «новый change» | `/opsx:new` → `/opsx:ff` (scaffold + все артефакты до tasks включительно) |
+
 ## ПРИНЦИПЫ
 
-- Архитектура до кода: design.md ревьюируется architect-ом до реализации
+- Архитектура до кода: design.md ревьюируется architect-ом до реализации. Триггеры — `architect-gate.mdc`
 - Атомарные задачи с критериями приемки в tasks.md
 - BSL — только через агентов (onec-code-writer → onec-code-reviewer)
 - Для точечных правок (2–10 строк, 1 файл) — Light Mode (см. 1c-agent-delegation.mdc)
@@ -36,4 +42,4 @@ explore → new/ff → apply → verify → archive
 
 ---
 
-**Last updated:** 2026-03-01 | **Version:** 2.0
+**Last updated:** 2026-03-06 | **Version:** 2.1 | **Changes:** алиасы команд («создай ЗНИ» = new+ff), ссылка на architect-gate.mdc

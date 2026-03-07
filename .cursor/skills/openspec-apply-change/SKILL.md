@@ -49,12 +49,23 @@ Implement tasks from an OpenSpec change.
    - If `state: "all_done"`: congratulate, suggest archive
    - Otherwise: proceed to implementation
 
-4. **Read context files**
+4. **Read context files + Architect Gate pre-flight check**
 
    Read the files listed in `contextFiles` from the apply instructions output.
    The files depend on the schema being used:
    - **spec-driven**: proposal, specs, design, tasks
    - Other schemas: follow the contextFiles from CLI output
+
+   **Pre-flight check (после чтения контекста):**
+   - Проверить триггеры из `architect-gate.mdc` по содержимому design.md и наличию reports/
+   - Glob `reports/architecture-*.md` в change dir и `temp/reports/`
+   - Если триггеры сработали И `architecture-*.md` отсутствует → предупреждение:
+     ```
+     "Внимание: сработали маркеры архитектурной сложности
+     ([перечисление]), но архитектурный анализ не найден.
+     Продолжить реализацию? [Да / Запустить архитектора / Вернуться в explore]"
+     ```
+   - Это последний рубеж — если explore и ff пропустили
 
 5. **Show current progress**
 

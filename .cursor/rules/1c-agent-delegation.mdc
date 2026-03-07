@@ -18,7 +18,7 @@ priority: 999
 | Файл трассы (`.pff`, `*_TRACE_*.txt`) или стек ошибки 1С | СТОП. Подготовить бриф. Делегировать **onec-trace-analyst**. По результату — onec-code-explorer, onec-code-architect. **В explore:** бриф из пользовательского ввода (без чтения трасс/артефактов), вывести по шаблону openspec-explore/SKILL.md (шаг 2), END TURN; делегировать trace-analyst только после подтверждения пользователя | `.cursor/rules/1c-error-analysis.mdc` |
 | Точечная правка (Light Mode): 2–10 строк, 1 файл, без архитектуры | Делегировать **onec-code-writer** с контекстом, затем **onec-code-reviewer**. Без артефактов OpenSpec | см. LIGHT MODE ниже |
 | Шаблонная правка (Mechanical Mode): find-replace, #Область, удаление комментариев | Прямая правка + Grep-верификация + **onec-code-reviewer** после. Без writer | см. MECHANICAL MODE ниже |
-| Правка `.bsl` файла | СТОП. Загрузить скилл. — Light Mode (1 файл, ≤10 строк, без архитектуры) → **onec-code-writer** + **onec-code-reviewer**, без артефактов. — Иначе → сначала **onec-code-architect** (план + ревью), затем **onec-code-writer** + **onec-code-reviewer**. Обязательно **onec-code-reviewer** после | см. ТАБЛИЦА ДЕЛЕГИРОВАНИЯ ниже |
+| Правка `.bsl` файла | СТОП. Загрузить скилл. — Light Mode (1 файл, ≤10 строк, без архитектуры) → **onec-code-writer** + **onec-code-reviewer**, без артефактов. — Иначе → проверить триггеры `architect-gate.mdc`; при срабатывании — **onec-code-architect** до реализации, затем **onec-code-writer** + **onec-code-reviewer**. Обязательно **onec-code-reviewer** после | см. ТАБЛИЦА ДЕЛЕГИРОВАНИЯ ниже |
 | Работа с формами 1С (Form.xml) | Загрузить 1c-forms. Делегировать **onec-form-generator** | `.cursor/skills/1c-forms/SKILL.md` |
 | Оптимизация запросов 1С | Загрузить 1c-query-optimization. Делегировать **onec-query-optimizer** | `.cursor/skills/1c-query-optimization/SKILL.md` |
 | Генерация тестов 1С | Делегировать **onec-test-generator** | — |
@@ -63,7 +63,7 @@ Architect может рекомендовать новые объекты в des
 |------------|-------|-------------|
 | Написание/правка BSL | **onec-code-writer** | Да |
 | Ревью после правок | **onec-code-reviewer** | Да, задача НЕ завершена до ревью |
-| Архитектура (не точечная правка) | **onec-code-architect** | Да, до реализации |
+| Архитектура (не точечная правка) | **onec-code-architect** | Да, до реализации. Триггеры — `architect-gate.mdc` |
 | Исследование 3+ модулей | **onec-code-explorer** | Рекомендуется |
 | Ошибка с трассой/стеком | **onec-trace-analyst** | Да, см. `1c-error-analysis.mdc` |
 
