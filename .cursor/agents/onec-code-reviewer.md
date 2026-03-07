@@ -84,9 +84,15 @@ Evaluate:
 Check:
   - &Перед/&После applied to a function (not procedure) — CRITICAL
   - &Вместо used where &Перед/&После would suffice — HIGH
-  - &ИзменениеИКонтроль: code outside #Вставка/#Удаление blocks differs from base — HIGH (prerelease: CRITICAL). Signs: variable renaming, formatting/indent changes, refactoring outside blocks, adding/removing #Область/#КонецОбласти in base (typed) code. Any of these breaks extension applicability.
+  - &ИзменениеИКонтроль: code outside #Вставка/#Удаление blocks differs from base — HIGH (prerelease: CRITICAL). Signs: variable renaming, formatting/indent changes, refactoring outside blocks, adding/removing #Область/#КонецОбласти in base (typed) code, NEW CODE added outside directive blocks. Any of these breaks extension applicability.
   - &ИзменениеИКонтроль used where &Перед/&После is sufficient — HIGH
   - Business logic placed directly inside #Вставка block instead of delegating to a separate procedure — MEDIUM
+  - &ИзменениеИКонтроль VERIFICATION PROCEDURE (mandatory when such methods exist):
+    1. Identify all methods with &ИзменениеИКонтроль in the reviewed file.
+    2. For each: load the base method from cf/ (path: replace cfe/<ExtName>/ with cf/ in file path).
+    3. Extract code OUTSIDE #Вставка/#КонецВставки and #Удаление/#КонецУдаления blocks from the extension method.
+    4. Diff against base: any divergence (added lines, deleted lines, modified lines) — CRITICAL (prerelease) / HIGH (normal).
+    5. If base file not found — mark NEEDS_MANUAL_REVIEW.
 ```
 
 ### 6. Module Structure
@@ -352,8 +358,12 @@ status: NOT_CONNECTED
 5. Extension annotations:
    - Detect &Перед/&После applied to a function (not procedure)
    - Detect &Вместо where &Перед/&После is sufficient
-   - Detect &ИзменениеИКонтроль where code outside directives differs from base: variable renaming, formatting changes, refactoring outside #Вставка/#КонецВставки, adding/removing #Область in base (typed) code
+   - Detect &ИзменениеИКонтроль where code outside directives differs from base: variable renaming, formatting changes, refactoring outside #Вставка/#КонецВставки, adding/removing #Область in base (typed) code, NEW CODE added outside directive blocks
    - Detect business logic directly in #Вставка block
+   - &ИзменениеИКонтроль VERIFICATION: for each method with this annotation, load base from cf/ path
+     (replace cfe/<ExtName>/ with cf/), extract code outside directive blocks, diff against base.
+     Any diff (added/deleted/modified lines outside directives) = CRITICAL (prerelease) / HIGH (normal).
+     Base file not found = NEEDS_MANUAL_REVIEW.
 
 6. Module structure:
    - Check presence of #Область markup (flag as MEDIUM only if module > 100 lines; otherwise LOW)
