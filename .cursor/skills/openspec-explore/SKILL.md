@@ -169,6 +169,7 @@ Depending on what the user brings, you might:
 
 ### 1. Исследование (Investigate)
 - Понять задачу: что, зачем, какие ограничения
+- **Context Strategy:** если задача включает анализ файлов — проверить триггеры `context-strategy-gate.mdc`. При срабатывании — загрузить `.cursor/skills/context-strategy/SKILL.md` и следовать Entry Protocol до чтения файлов
 - При 3+ модулях — делегировать **onec-code-explorer** (не читать модули вручную)
 - При наличии трассы/стека ошибки — делегировать **onec-trace-analyst** (подготовить бриф, см. `1c-error-analysis.mdc`)
 - Оценить сложность: простая / средняя / сложная (паттерны — `.cursor/skills/1c-agent-patterns/SKILL.md`)

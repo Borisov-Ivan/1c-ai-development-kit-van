@@ -111,6 +111,8 @@ If step 3 loaded a trace (PFF/TRACE file) or an error stack with 3+ call lines:
 
 If step 3.5 was already run (trace analyzed by subagents), use their output as the basis; do not duplicate manual search.
 
+**Context Strategy:** если исследование требует анализа 3+ файлов или файлов данных (XML, HTML, CSV) — применить стратегию из `.cursor/skills/context-strategy/SKILL.md` (инвентаризация → decision matrix → субагенты → синтез).
+
 Use the trace/remark to identify likely modules and entry points:
 - Search for procedure/function names from the trace
 - Search for key phrases from exception messages
