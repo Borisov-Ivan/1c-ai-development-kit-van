@@ -57,6 +57,8 @@ Implement tasks from an OpenSpec change.
    - Other schemas: follow the contextFiles from CLI output
 
    **Pre-flight check (после чтения контекста):**
+
+   **A. Architect Gate (архитектурный подход):**
    - Проверить триггеры из `architect-gate.mdc` по содержимому design.md и наличию reports/
    - Glob `reports/architecture-*.md` в change dir и `temp/reports/`
    - Если триггеры сработали И `architecture-*.md` отсутствует → предупреждение:
@@ -65,7 +67,23 @@ Implement tasks from an OpenSpec change.
      ([перечисление]), но архитектурный анализ не найден.
      Продолжить реализацию? [Да / Запустить архитектора / Вернуться в explore]"
      ```
-   - Это последний рубеж — если explore и ff пропустили
+
+   **B. Design Review Gate (качество постановки):**
+   - Проверить триггеры Design Review из `architect-gate.mdc` (секция DESIGN REVIEW ТРИГГЕРЫ):
+     1. Glob `reports/trace-analysis-*.md`, `reports/exploration-*.md` — суммарно ≥ 2?
+     2. Grep design.md / proposal.md на маркеры bug fix
+     3. Grep design.md / proposal.md на `&ИзменениеИКонтроль`
+     4. Grep tasks.md на паттерны ветвления
+     5. Grep design.md на hypothesis-маркеры без `## Hypotheses`
+   - Glob `reports/design-review-*.md` — ревью уже проводилось?
+   - Если триггеры сработали И `design-review-*.md` не найден → мягкое предупреждение:
+     ```
+     "Дополнительно: сработали маркеры ревью постановки ([перечисление]),
+     но ревью не проводилось. Это не блокирует реализацию.
+     Запустить ревью? [Да / Нет, продолжить]"
+     ```
+
+   Оба check — последний рубеж, если explore и ff пропустили.
 
 5. **Show current progress**
 
@@ -89,12 +107,30 @@ Implement tasks from an OpenSpec change.
 
 6. **Implement tasks (loop until done or blocked)**
 
+   **Conditional Task Detection (перед началом loop):**
+   Просканировать tasks.md на паттерны условного ветвления (ссылки между задачами вида `Если в п.`, `При отрицательн`, `Альтернатив`, `workaround`, `Иначе →`, `Иначе —`).
+
+   Если обнаружены:
+   - Идентифицировать **задачу-верификацию** (определяет ветку) и **зависимые задачи-ветки**.
+   - После выполнения задачи-верификации — **ОБЯЗАТЕЛЬНАЯ ПАУЗА:**
+     ```
+     "Задача N (верификация) выполнена. Результат: [краткий итог].
+     Следующие задачи зависят от этого результата:
+     - Задача X: [при положительном результате]
+     - Задача Y: [при отрицательном результате]
+     Какую ветку выполнять?"
+     ```
+   - НЕ выбирать ветку автоматически. Решает пользователь.
+
+   **Task loop:**
+
    For each pending task:
    - Show which task is being worked on
    - Make the code changes required
    - Keep changes minimal and focused
    - **Spot-check (post-verification):** After the agent reports completion, verify the change: Grep for a pattern that confirms the fix (e.g. after "replace ТекущаяДата with ТекущаяДатаСеанса" → Grep for `ТекущаяДата()` in that file must return 0 matches). For batch tasks (5+ files), spot-check at least 3 files (first, middle, last in the list). If the result does not match expectations → STOP, report to user, do NOT mark task complete.
    - Mark task complete in the tasks file: `- [ ]` → `- [x]`
+   - **If this was a verification/decision task** (identified in Conditional Task Detection) → trigger ОБЯЗАТЕЛЬНАЯ ПАУЗА above before proceeding
    - Continue to next task
 
    **Pause if:**
@@ -102,6 +138,7 @@ Implement tasks from an OpenSpec change.
    - Implementation reveals a design issue → suggest updating artifacts
    - Error or blocker encountered → report and wait for guidance
    - User interrupts
+   - **Verification/decision task completed** → conditional task checkpoint (see above)
 
 7. **On completion or pause, show status**
 

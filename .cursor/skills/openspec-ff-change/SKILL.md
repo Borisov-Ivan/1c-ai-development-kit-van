@@ -95,6 +95,34 @@ Fast-forward through artifact creation - generate everything needed to start imp
            - Option 3 → continue, document user's decision in design.md
          - **No triggers fired** → continue without pause
 
+   e. **Design Review Gate (после всех артефактов)**:
+      Когда все `applyRequires` артефакты готовы (перед шагом 5), проверить триггеры Design Review из `architect-gate.mdc` (секция DESIGN REVIEW ТРИГГЕРЫ):
+
+      1. Glob `reports/trace-analysis-*.md`, `reports/exploration-*.md` — суммарно ≥ 2 файла?
+      2. Grep design.md / proposal.md на маркеры bug fix (`исправь`, `ошибка`, `баг`, `fix`, `crash`, `не работает`, `падает`)
+      3. Grep design.md / proposal.md на `&ИзменениеИКонтроль`
+      4. Grep tasks.md на паттерны ветвления: `При отрицательн`, `Если в п.`, `Альтернатив`, `workaround`, `Иначе →`, `Иначе —`
+      5. Grep design.md на `вероятно`, `возможно`, `скорее всего`, `гипотеза` — и при этом отсутствует секция `## Hypotheses`
+
+      **Decision:**
+      - **Triggers fired AND `reports/design-review-*.md` NOT found** →
+        AskQuestion:
+        ```
+        "Артефакты созданы. Обнаружены маркеры сложности постановки:
+        - [перечисление сработавших триггеров]
+        Рекомендую ревью постановки (полнота, verified/hypothesis,
+        критерии приёмки, покрытие spec, риски).
+        1. Запустить ревью [Рекомендуется]
+        2. Пропустить, перейти к apply"
+        ```
+        - Option 1 → call **onec-code-architect** с фокусом на качество артефактов
+          (prompt: все артефакты текстом + фокусные вопросы из `architect-gate.mdc`).
+          Сохранить отчёт в `reports/design-review-YYYY-MM-DD.md`.
+          Внести рекомендованные правки уровня medium+ в артефакты.
+        - Option 2 → продолжить
+      - **Triggers NOT fired** → продолжить без паузы
+      - **`reports/design-review-*.md` found** → продолжить (уже проведено)
+
 5. **Show final status**
    ```bash
    openspec status --change "<name>"
