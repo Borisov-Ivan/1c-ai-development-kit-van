@@ -28,13 +28,7 @@ Sonnet (fast) по умолчанию. Opus — только для критич
 | onec-code-reviewer | fast | Ревью по стандартам |
 | onec-code-explorer | fast | Навигация по коду |
 | onec-trace-analyst | fast | Парсинг трасс |
-| onec-form-generator | fast | Генерация форм |
-| onec-query-optimizer | fast | Оптимизация запросов |
-| onec-test-generator | fast | Генерация тестов |
-| onec-code-simplifier | fast | Упрощение кода |
-| onec-metadata-helper | fast | Навигация по метаданным |
-| onec-admin | fast | Администрирование баз |
-| Все инфраструктурные | fast | Рутинные операции |
+| Утилитарные и инфраструктурные | fast | По умолчанию. См. `1c-utility-agents.mdc` |
 
 ### Override на Opus
 
@@ -63,4 +57,4 @@ Sonnet (fast) по умолчанию. Opus — только для критич
 
 ---
 
-**Last updated**: 2026-03-01 | **Version**: 2.0
+**Last updated**: 2026-03-08 | **Version**: 2.1 | **Changes**: Utility agents consolidated to `1c-utility-agents.mdc`

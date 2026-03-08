@@ -57,7 +57,13 @@ Fast-forward through artifact creation - generate everything needed to start imp
         - `outputPath`: Where to write the artifact
         - `dependencies`: Completed artifacts to read for context
       - Read any completed dependency files for context
-      - Create the artifact file using `template` as the structure
+      - **Special case: `tasks` artifact (task decomposition)**:
+        Instead of writing tasks directly, delegate to **onec-code-architect** with the
+        "Architect — task decomposition" template (`1c-agent-patterns/SKILL.md`).
+        Pass: paths to proposal.md, design.md, specs/, and the `template` from instructions.
+        Architect reads files independently and returns tasks.md content.
+        Save the result to `outputPath`.
+      - **All other artifacts**: Create the artifact file using `template` as the structure
       - Apply `context` and `rules` as constraints - but do NOT copy them into the file
       - Show brief progress: "✓ Created <artifact-id>"
 

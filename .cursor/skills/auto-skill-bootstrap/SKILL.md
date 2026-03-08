@@ -250,22 +250,6 @@ Prevents:
 
 ## INTEGRATION WITH AGENTS
 
-### dev-optimizer Integration
-```yaml
-When dev-optimizer detects pattern:
-  1. Identify capability: Map pattern to capability
-  2. Check coverage: Is capability covered?
-  3. If not covered:
-     - Run auto-skill-bootstrap
-     - Propose installation
-     - Record decision in RLM
-
-Example:
-  Pattern: "User searched for function 5 times"
-  Capability: "1c-code-quality" (code search)
-  Action: Find and install code search skill
-```
-
 ### Agent Coordination
 ```yaml
 Before agent starts work:
@@ -612,4 +596,4 @@ Metrics:
 - [ ] Trust policy configured: `trust-policy.json`
 - [ ] Test run: `--no-install --cap docker`
 - [ ] RLM integration: Record facts
-- [ ] Agent integration: dev-optimizer uses this
+- [ ] Agent integration: orchestrator uses this

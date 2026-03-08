@@ -15,8 +15,8 @@ description: Reference guide for 1C agent delegation patterns - complexity asses
 |-----------|----------|--------|
 | **Простая** | 1-2 файла, очевидная реализация, нет архитектурных решений | 1 explorer, 1 writer, 1 reviewer |
 | **Средняя** | 3-5 файлов, требует понимания архитектуры, несколько модулей | 1-2 explorer, 1 architect, 1 writer, 1 reviewer |
-| **Сложная** | 5+ файлов, несколько подсистем, интеграции | 2-4 explorer (параллельно), 2 architect (мультисэмплинг), writer + reviewer |
-| **Критичная** | Архитектурные изменения, высокие риски, много зависимостей | 4+ explorer (итеративно), 2-3 architect, writer + reviewer + architect-ревью |
+| **Сложная** | 5+ файлов, несколько подсистем, интеграции | 1-2 explorer, architect (deep analysis), architect (design), writer + reviewer |
+| **Критичная** | Архитектурные изменения, высокие риски, много зависимостей | 2-4 explorer (итеративно), architect (deep analysis), 2 architect (design, мультисэмплинг), writer + reviewer |
 
 ---
 
@@ -122,6 +122,63 @@ Task(
          Все задачи на verified facts? Если на hypotheses — есть ли задача верификации?
          
          Если проблемы — опиши и предложи исправления.",
+  subagent_type="onec-code-architect"
+)
+```
+
+### Architect (глубокий анализ)
+
+```
+Task(
+  description="Глубокий анализ [область]",
+  prompt="Проанализируй результаты исследования кода.
+         
+         Отчёт explorer: [путь к exploration-*.md]
+         Контекст задачи: [из брифа / proposal]
+         
+         Фокус (АНАЛИЗ, не проектирование):
+         1. Gap analysis: что explorer мог пропустить?
+            Какие модули/вызовы не охвачены?
+         2. Контракты: задокументированы ли входные контракты
+            ключевых функций? Допустимые типы, внутренняя
+            нормализация, гарантии.
+         3. Противоречия: есть ли расхождения между
+            паттернами в коде и требованиями задачи?
+         4. Альтернативные точки реализации — все ли
+            рассмотрены? Почему одна лучше другой?
+         5. Root cause верификация (для bug fix): факты
+            из explorer подтверждены кодом?
+         
+         Результат: дополненный анализ (gap analysis,
+         верифицированные контракты, рекомендации).
+         Сохранить в reports/deep-analysis-YYYY-MM-DD.md.",
+  subagent_type="onec-code-architect"
+)
+```
+
+### Architect (декомпозиция задач)
+
+```
+Task(
+  description="Декомпозиция задач [feature]",
+  prompt="Декомпозируй design.md на атомарные задачи.
+         
+         Артефакты:
+         - proposal: [путь]
+         - design: [путь]
+         - specs: [путь к specs/ или описание]
+         - template: [шаблон из openspec instructions]
+         
+         Правила декомпозиции:
+         1. Каждая задача — атомарная (1 файл, 1 аспект)
+         2. Критерии приёмки для каждой задачи (что проверить)
+         3. Зависимости между задачами (что сначала)
+         4. Группировка по файлам (для параллелизации)
+         5. Для каждой задачи: путь к файлу + что менять
+         
+         Используй переданный шаблон для структуры вывода.
+         
+         Результат: полный tasks.md готовый к /opsx:apply.",
   subagent_type="onec-code-architect"
 )
 ```
@@ -370,6 +427,7 @@ Task(
 
 ---
 
-**Last updated**: 2026-03-05
-**Version**: 1.1
+**Last updated**: 2026-03-08
+**Version**: 1.2
+**Changes**: Added "Architect — deep analysis" and "Architect — task decomposition" templates, updated complexity table
 **Source**: Extracted from 1c-feature-dev-enhanced v2.2 (Phase 0-8 workflow replaced by OpenSpec)

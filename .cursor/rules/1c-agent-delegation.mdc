@@ -19,12 +19,6 @@ priority: 999
 | Точечная правка (Light Mode): 2–10 строк, 1 файл, без архитектуры | Делегировать **onec-code-writer** с контекстом, затем **onec-code-reviewer**. Без артефактов OpenSpec | см. LIGHT MODE ниже |
 | Шаблонная правка (Mechanical Mode): find-replace, #Область, удаление комментариев | Прямая правка + Grep-верификация + **onec-code-reviewer** после. Без writer | см. MECHANICAL MODE ниже |
 | Правка `.bsl` файла | СТОП. Загрузить скилл. — Light Mode (1 файл, ≤10 строк, без архитектуры) → **onec-code-writer** + **onec-code-reviewer**, без артефактов. — Иначе → проверить триггеры `architect-gate.mdc`; при срабатывании — **onec-code-architect** до реализации, затем **onec-code-writer** + **onec-code-reviewer**. Обязательно **onec-code-reviewer** после | см. ТАБЛИЦА ДЕЛЕГИРОВАНИЯ ниже |
-| Работа с формами 1С (Form.xml) | Загрузить 1c-forms. Делегировать **onec-form-generator** | `.cursor/skills/1c-forms/SKILL.md` |
-| Оптимизация запросов 1С | Загрузить 1c-query-optimization. Делегировать **onec-query-optimizer** | `.cursor/skills/1c-query-optimization/SKILL.md` |
-| Генерация тестов 1С | Делегировать **onec-test-generator** | — |
-| Упрощение BSL-кода | Делегировать **onec-code-simplifier** | — |
-| Навигация по метаданным (поиск объектов, связей) | Делегировать **onec-metadata-helper** | — |
-| Управление серверами 1С, базами, PostgreSQL, ibcmd, выгрузка/загрузка XML | Делегировать **onec-admin** | `.cursor/agents/onec-admin.md` |
 | Исследование кода из 3+ модулей | Делегировать **onec-code-explorer** (не читать модули вручную) | см. DELEGATION GATE ниже |
 | Исправление ошибки (bug fix). Маркеры: «исправь», «не работает», «падает», «ошибка», «баг», «fix», «crash», «добавь проверку», «Неопределено», «NPE», «null», «не заполнено», «пустое значение», «не находит», «вылетает» | СТОП. Проверить root cause + impact assessment по `verified-cause-gate.mdc` (HALT 1, 1b, 2, 3). При системном масштабе — **onec-code-architect**. При Light Mode bug fix — обязательный root cause блок в промпте writer (см. LIGHT MODE ниже) | `.cursor/rules/verified-cause-gate.mdc` |
 
@@ -48,7 +42,7 @@ priority: 999
 
 ## ПОЛНОМОЧИЯ АГЕНТОВ (BSL-ONLY)
 
-Агенты-исполнители (writer, simplifier, form-generator): **только правка .bsl в существующих файлах**.
+Агенты-исполнители (writer): **только правка .bsl в существующих файлах**. Утилитарные агенты (simplifier, form-generator и др.) — см. `1c-utility-agents.mdc`.
 **ЗАПРЕЩЕНО** создавать, копировать или модифицировать XML-файлы метаданных, создавать директории метаданных, создавать новые .bsl в несуществующих директориях.
 Нет нужного объекта → СТОП, блокер пользователю в формате из 1c-no-metadata-creation.mdc.
 Architect может рекомендовать новые объекты в design.md.
@@ -142,4 +136,4 @@ critical/high **архитектурные** (новый объект, API, ст
 
 ---
 
-**Last updated**: 2026-03-06 | **Version**: 3.0 | **Merged from**: 1c-dispatch-gate.mdc + 1c-agent-delegation.mdc
+**Last updated**: 2026-03-08 | **Version**: 3.1 | **Changes**: Utility agents (forms, queries, tests, simplifier, metadata, admin) moved to `1c-utility-agents.mdc` (requestable)

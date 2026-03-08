@@ -49,14 +49,20 @@ Implement tasks from an OpenSpec change.
    - If `state: "all_done"`: congratulate, suggest archive
    - Otherwise: proceed to implementation
 
-4. **Read context files + Architect Gate pre-flight check**
+4. **Read tasks + minimal context (lazy loading) + Architect Gate pre-flight check**
 
-   Read the files listed in `contextFiles` from the apply instructions output.
-   The files depend on the schema being used:
-   - **spec-driven**: proposal, specs, design, tasks
-   - Other schemas: follow the contextFiles from CLI output
+   **Mandatory read:** tasks.md (navigation, progress, dependencies).
+   
+   **Lazy reads (по необходимости):**
+   - proposal.md — only on first run (for overview), skip on resume
+   - design.md — only if current task references an architectural decision, or for pre-flight check
+   - specs/ — only when verifying acceptance criteria
+   
+   Writer subagents receive **paths** to design.md and specs/ in their prompt and read needed sections independently. This keeps orchestrator context lean.
+   
+   **For pre-flight check:** read design.md (needed for Grep-based trigger checks below).
 
-   **Pre-flight check (после чтения контекста):**
+   **Pre-flight check (после чтения tasks + design):**
 
    **A. Architect Gate (архитектурный подход):**
    - Проверить триггеры из `architect-gate.mdc` по содержимому design.md и наличию reports/

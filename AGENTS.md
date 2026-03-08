@@ -26,8 +26,8 @@
 ## Сохранение отчётов субагентов
 `.cursor/rules/preserve-subagent-reports.mdc` — полные отчёты в reports/.
 
-## Администрирование 1С
-`.cursor/agents/onec-admin.md` — серверы, базы, PostgreSQL, ibcmd.
+## Утилитарные агенты
+`.cursor/rules/1c-utility-agents.mdc` — формы, запросы, тесты, упрощение, метаданные, администрирование. Загружается по необходимости (не always-apply).
 
 ## Предрелизное ревью
 `.cursor/skills/prerelease-review/SKILL.md` — `/opsx:prerelease-review`.
