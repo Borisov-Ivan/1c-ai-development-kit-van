@@ -51,7 +51,7 @@ Implement tasks from an OpenSpec change.
 
 4. **Read tasks + minimal context (lazy loading) + Architect Gate pre-flight check**
 
-   **Mandatory read:** tasks.md (navigation, progress, dependencies).
+   **Mandatory read:** tasks.md (navigation, progress, dependencies) + `openspec/project.md` (project-level constraints: allowed directories, editing rules).
    
    **Lazy reads (по необходимости):**
    - proposal.md — only on first run (for overview), skip on resume
@@ -89,7 +89,13 @@ Implement tasks from an OpenSpec change.
      Запустить ревью? [Да / Нет, продолжить]"
      ```
 
-   Оба check — последний рубеж, если explore и ff пропустили.
+   **C. Project constraints check:**
+   Verify that tasks reference only directories allowed by project.md.
+   If any task targets a path outside allowed directories (e.g., cf/ when project.md restricts to cfe/) —
+   STOP, warn user: "Task X targets <path> which is outside allowed directories per project.md.
+   Rewrite task to use extension (cfe/) approach?"
+
+   Оба check (A, B) и C — последний рубеж, если explore и ff пропустили.
 
 5. **Show current progress**
 

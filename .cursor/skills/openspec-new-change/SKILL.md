@@ -65,13 +65,19 @@ Start a new change using the experimental artifact-driven approach.
    Add `--schema <name>` only if the user requested a specific workflow.
    This creates a scaffolded change at `openspec/changes/<name>/` with the selected schema.
 
-4. **Show the artifact status**
+4. **Read project context**
+   Read `openspec/project.md` for project-level constraints (editing rules, allowed directories, conventions).
+   All subsequent artifacts (proposal, design, tasks, specs) MUST respect these constraints.
+   In particular: if project.md restricts edits to specific directories (e.g., only cfe/, not cf/) —
+   design and tasks MUST NOT propose changes outside allowed directories.
+
+5. **Show the artifact status**
    ```bash
    openspec status --change "<name>"
    ```
    This shows which artifacts need to be created and which are ready (dependencies satisfied).
 
-5. **Get instructions for the first artifact**
+6. **Get instructions for the first artifact**
    The first artifact depends on the schema (e.g., `proposal` for spec-driven).
    Check the status output to find the first artifact with status "ready".
    ```bash
@@ -79,7 +85,7 @@ Start a new change using the experimental artifact-driven approach.
    ```
    This outputs the template and context for creating the first artifact.
 
-6. **STOP and wait for user direction**
+7. **STOP and wait for user direction**
 
 **Output**
 
