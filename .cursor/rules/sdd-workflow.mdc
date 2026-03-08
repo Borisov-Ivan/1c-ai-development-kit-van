@@ -27,7 +27,7 @@ explore → new/ff → apply → verify → archive
 
 | Фраза пользователя | Что выполнять |
 |---------------------|---------------|
-| «создай ЗНИ», «заведи ЗНИ», «новый change» | `/opsx:new` → `/opsx:ff` (scaffold + все артефакты до tasks включительно) |
+| «создай ЗНИ», «заведи ЗНИ», «новый change» | **СТОП.** Если активна сессия explore — Change Creation Gate (Explore Summary + redirect). Иначе — `/opsx:ff` (scaffold + все артефакты с делегированием и gates). **Запрещено** создавать артефакты change вручную в обход `/opsx:ff`. |
 
 ## ПРИНЦИПЫ
 

@@ -34,6 +34,7 @@ priority: 996
    | explore | «добавь X» | Воспринять как директиву, редактировать файл | Это тема для обсуждения. Предложить зафиксировать, дождаться подтверждения |
    | explore | «измени design» | Молча StrReplace в design.md | Проверить gates (Architect, Verified Cause, auto-capture). Предложить правку, не делать |
    | explore | «обследуй» / «проверь в коде» / «найди где вызывается» | Grep/Glob/Read по .bsl самостоятельно | Бриф → делегировать explorer. Контекст оркестратора — не для обследования |
+   | explore | «создай ЗНИ» / «заведи ЗНИ» | Создать артефакты вручную (Write proposal, design, tasks) | СТОП (Change Creation Gate). Explore Summary + redirect на `/opsx:ff <name>` |
    | apply | «а может лучше по-другому?» | Начать explore-стиль обсуждение | Предложить вернуться в explore для перепроектирования |
    | ff/new | Пропустить Design Gate после design.md | Продолжить без проверки | СТОП, выполнить Design Gate по протоколу скилла |
 
@@ -47,4 +48,4 @@ priority: 996
 
 ---
 
-**Last updated**: 2026-03-08 | **Version**: 1.1 | **Changes**: Added anti-pattern for «обследуй» in explore (delegation gate)
+**Last updated**: 2026-03-08 | **Version**: 1.2 | **Changes**: Added anti-pattern for «создай ЗНИ» in explore (Change Creation Gate)

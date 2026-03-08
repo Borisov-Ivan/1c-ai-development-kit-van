@@ -11,7 +11,7 @@ metadata:
 
 Enter explore mode. Think deeply. Visualize freely. Follow the conversation wherever it goes.
 
-**IMPORTANT: Explore mode is for thinking, not implementing.** You may read files, search code, and investigate the codebase, but you must NEVER write code or implement features. If the user asks you to implement something, remind them to exit explore mode first (e.g., start a change with `/opsx:new` or `/opsx:ff`). You MAY create OpenSpec artifacts (proposals, designs, specs) if the user asks—that's capturing thinking, not implementing.
+**IMPORTANT: Explore mode is for thinking, not implementing.** You may read files, search code, and investigate the codebase, but you must NEVER write code or implement features. If the user asks you to implement something, remind them to exit explore mode first (e.g., start a change with `/opsx:new` or `/opsx:ff`). You MAY **update individual** OpenSpec artifacts (add a decision to design.md, add a scenario to a spec) if the user asks—that's capturing thinking, not implementing. **Creating a full change** (scaffold + all artifacts) MUST go through `/opsx:ff` — see Change Creation Gate.
 
 ---
 
@@ -114,6 +114,23 @@ Enter explore mode. Think deeply. Visualize freely. Follow the conversation wher
 4. **Допустимо до делегирования:** Read артефактов OpenSpec (proposal/design/tasks/specs) для обогащения брифа — до 3 файлов. Grep/Glob/Read по .bsl — ЗАПРЕЩЕНО.
 
 **Почему:** контекст оркестратора — дорогой ресурс. Обследование кода загрязняет его и снижает качество оркестрации на последующих ходах. Агенты работают в изолированном контексте.
+
+---
+
+## Change Creation Gate (MANDATORY)
+
+На **каждом follow-up ходе** перед созданием артефактов OpenSpec:
+
+1. **Маркеры создания change:** «создай ЗНИ», «заведи ЗНИ», «новый change», «create change», «оформи change», «сделай постановку», а также любой запрос на создание **полного набора** артефактов (proposal + design + specs + tasks) за один ход.
+2. **При срабатывании → СТОП:**
+   - НЕ создавать артефакты вручную (Write proposal.md, design.md, specs/, tasks.md)
+   - НЕ вызывать `openspec new change` самостоятельно
+   - Создать **Explore Summary** (шаблон — секция «Explore Summary при переходе к change»)
+   - Предложить пользователю: «Для создания ЗНИ с полным протоколом (шаблоны CLI, делегирование архитектору, Design Gate) используйте `/opsx:ff` (имя change будет предложено из Explore Summary). Explore Summary сохранён в `temp/explore-summary-<дата>.md`.»
+   - **END TURN.** Дождаться, пока пользователь вызовет `/opsx:ff`.
+3. **Допустимо в explore без guard:** обновление **отдельного** артефакта существующего change (дописать решение в design.md, добавить сценарий в spec) — это capture, не создание change.
+
+**Почему:** при создании артефактов из explore минуется `openspec instructions` (шаблоны, context, rules), делегирование tasks архитектору и Design Gate / Design Review Gate. Полный протокол ff обеспечивает качество постановки.
 
 ---
 
@@ -475,7 +492,7 @@ There's no required ending. Discovery might:
 
 Explore Summary — входной артефакт для ff/new. Design Gate в ff проверяет его наличие и содержание.
 
-**IMPORTANT**: При переходе к `/opsx:new` или `/opsx:ff` — строго следовать инструкциям соответствующего скилла. Не создавать change «по памяти» из контекста explore. Команда загрузит скилл, который обеспечит:
+**IMPORTANT (enforced by Change Creation Gate)**: Создание нового change из explore **ЗАПРЕЩЕНО**. При запросе «создай ЗНИ» и т.п. — СТОП, Explore Summary, redirect на `/opsx:ff`. См. секцию Change Creation Gate. Команда загрузит скилл, который обеспечит:
 - Для `/opsx:new`: scaffold через openspec CLI + показ шаблона первого артефакта + STOP
 - Для `/opsx:ff`: scaffold + создание ВСЕХ артефактов + Design Gate после design + STOP
 
@@ -500,4 +517,4 @@ Explore Summary — входной артефакт для ff/new. Design Gate �
 
 ---
 
-**Last updated**: 2026-03-08 | **Version**: 1.5 | **Changes**: Added Per-turn Delegation Gate — mandatory delegation for code investigation on follow-up turns (zero .bsl reads for orchestrator)
+**Last updated**: 2026-03-08 | **Version**: 1.6 | **Changes**: Added Change Creation Gate — при «создай ЗНИ» СТОП, Explore Summary, redirect на /opsx:ff; уточнено MAY update individual artifacts only

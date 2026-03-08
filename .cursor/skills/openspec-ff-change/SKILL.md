@@ -11,18 +11,29 @@ metadata:
 
 Fast-forward through artifact creation - generate everything needed to start implementation in one go.
 
-**Input**: The user's request should include a change name (kebab-case) OR a description of what they want to build.
+**Input**: The user's request may include a change name (kebab-case), a description of what they want to build, or nothing (auto-detect from context).
 
 **Steps**
 
-1. **If no clear input provided, ask what they want to build**
+1. **Determine change name**
 
-   Use the **AskUserQuestion tool** (open-ended, no preset options) to ask:
-   > "What change do you want to work on? Describe what you want to build or fix."
+   a. **If argument provided** — use it as change name (kebab-case). Proceed to step 2.
 
-   From their description, derive a kebab-case name (e.g., "add user authentication" → `add-user-auth`).
+   b. **If no argument — auto-detect from context:**
+      1. Glob `temp/explore-summary-*.md`. If found, read the most recent one (by date in filename).
+         Extract change name from line matching `Готово к созданию ЗНИ <name>`
+         or derive kebab-case from `**Тема:**`.
+         AskQuestion: «Из Explore Summary: `<name>`. Использовать?
+         [Да / Другое имя]».
+      2. If no Explore Summary — run `openspec list --json`.
+         If exactly 1 active change with incomplete artifacts — AskQuestion:
+         «Найден активный change `<name>` (N/M задач). Продолжить?
+         [Да / Новый change]».
+      3. If nothing found — AskQuestion (open-ended):
+         «What change do you want to work on? Describe what you want to build or fix.»
+         Derive kebab-case name from description.
 
-   **IMPORTANT**: Do NOT proceed without understanding what the user wants to build.
+   **IMPORTANT**: Do NOT proceed without a confirmed change name.
 
 2. **Create the change directory**
    ```bash
