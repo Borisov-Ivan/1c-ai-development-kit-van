@@ -87,7 +87,15 @@ Fast-forward through artifact creation - generate everything needed to start imp
       - Use **AskUserQuestion tool** to clarify
       - Then continue with creation
 
-   d. **Design Gate (after design artifact)**:
+   d. **ADR Discovery (before/during design artifact)**:
+      Before creating the `design` artifact, search for existing ADR decisions relevant to this change:
+      1. Glob `openspec/adrs/ADR-*.md` — if any ADR files exist
+      2. Grep ADR files for keywords related to the change area (from proposal topic, module names, subsystem names)
+      3. If relevant ADRs found — include references in the design artifact's Context or Design Rationale section:
+         `Связанные ADR: ADR-NNNN (краткое описание) — [ссылка]`
+      4. If relevant ADRs found and the proposed approach contradicts an existing ADR — note this explicitly in design.md Risks section
+
+   e. **Design Gate (after design artifact)**:
       After creating the `design` artifact, check architect-gate triggers mechanically:
 
       1. **Check objective markers** (Glob/Grep, not subjective assessment):
@@ -112,7 +120,7 @@ Fast-forward through artifact creation - generate everything needed to start imp
            - Option 3 → continue, document user's decision in design.md
          - **No triggers fired** → continue without pause
 
-   e. **Design Review Gate (после всех артефактов)**:
+   f. **Design Review Gate (после всех артефактов)**:
       Когда все `applyRequires` артефакты готовы (перед шагом 5), проверить триггеры Design Review из `architect-gate.mdc` (секция DESIGN REVIEW ТРИГГЕРЫ):
 
       1. Glob `reports/trace-analysis-*.md`, `reports/exploration-*.md` — суммарно ≥ 2 файла?

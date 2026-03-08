@@ -11,18 +11,42 @@ metadata:
 
 Start a new change using the experimental artifact-driven approach.
 
-**Input**: The user's request should include a change name (kebab-case) OR a description of what they want to build.
+**Input**: The user's request may include a change name (kebab-case), a description of what they want to build, or nothing (auto-detect from context).
 
 **Steps**
 
-1. **If no clear input provided, ask what they want to build**
+1. **Determine change name and brief**
 
-   Use the **AskUserQuestion tool** (open-ended, no preset options) to ask:
-   > "What change do you want to work on? Describe what you want to build or fix."
+   a. **If argument provided** — use it as change name (kebab-case). Proceed to step 2.
 
-   From their description, derive a kebab-case name (e.g., "add user authentication" → `add-user-auth`).
+   b. **If no argument — auto-detect from context:**
+      1. Glob `temp/explore-summary-*.md`. If found, read the most recent one (by date in filename).
+         Extract change name from line matching `Готово к созданию ЗНИ <name>`
+         or derive kebab-case from `**Тема:**`.
+         Extract brief from `**Ключевые решения:**` section (2-3 sentences).
+         AskQuestion:
+         ```
+         Из контекста обсуждения:
+         - **Имя ЗНИ:** `<kebab-name>`
+         - **Бриф:** <2-3 sentences from key decisions>
+         - **Источник:** explore-summary-YYYY-MM-DD.md
 
-   **IMPORTANT**: Do NOT proceed without understanding what the user wants to build.
+         1. Подтвердить
+         2. Изменить имя
+         3. Уточнить бриф
+         ```
+      2. If no Explore Summary — Glob `temp/reports/{trace-analysis,exploration,correlation}-*.md`.
+         If found, read the most recent report, derive topic and brief from its content.
+         AskQuestion with proposed name and brief (same format as above, source = report filename).
+      3. If no reports — run `openspec list --json`.
+         If exactly 1 active change with incomplete artifacts — AskQuestion:
+         «Найден активный change `<name>` (N/M артефактов). Продолжить?
+         [Да / Новый change]».
+      4. If nothing found — AskQuestion (open-ended, no preset options):
+         «Что хотите реализовать? Опишите задачу.»
+         From the answer, derive a kebab-case name and brief.
+
+   **IMPORTANT**: Do NOT proceed without a confirmed change name.
 
 2. **Determine the workflow schema**
 
@@ -72,4 +96,5 @@ After completing the steps, summarize:
 - If the name is invalid (not kebab-case), ask for a valid name
 - If a change with that name already exists, suggest continuing that change instead
 - Pass --schema if using a non-default workflow
+- **ADR Discovery**: при создании design — Glob `openspec/adrs/ADR-*.md`, Grep по области задачи. Если релевантные ADR найдены — включить ссылки в Context/Design Rationale секцию design.md. Если подход противоречит ADR — отметить в Risks. Формат: `.cursor/rules/adr-format.mdc`
 - **Design Gate**: при пошаговом создании design — проверить триггеры `architect-gate.mdc` перед переходом к следующему артефакту (аналогично Design Gate в ff). Если триггеры сработали и architecture-*.md отсутствует — ПАУЗА, AskQuestion пользователю

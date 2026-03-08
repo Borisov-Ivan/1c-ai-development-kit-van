@@ -65,7 +65,36 @@ Archive a completed change in the experimental workflow.
 
    If user chooses sync, execute /opsx:sync logic (use the openspec-sync-specs skill). Proceed to archive regardless of choice.
 
-5. **Perform the archive**
+5. **ADR extraction (architecture decision records)**
+
+   Check if `reports/architecture-*.md` exists in the change directory.
+
+   **If architecture reports found:**
+   - For each `architecture-*.md`, read the report and identify key **decisions** (not analysis/validation).
+   - A decision is ADR-worthy if: it affects future changes, involves trade-offs between alternatives, or establishes a contract/pattern/principle. See criteria in `.cursor/rules/adr-format.mdc`.
+   - Show a summary of candidate decisions and use **AskUserQuestion tool**:
+     ```
+     Найдены архитектурные отчёты с решениями:
+     - [report-1]: "Решение X — краткое описание"
+     - [report-2]: "Решение Y — краткое описание"
+
+     Извлечь как ADR (постоянная проектная память)?
+     1. Да, извлечь все
+     2. Да, выбрать какие
+     3. Пропустить
+     ```
+   - If user selects extraction:
+     1. Determine next ADR number: Glob `openspec/adrs/ADR-*.md`, take max NNNN + 1 (or 0001 if empty)
+     2. For each selected decision, create ADR file using format from `.cursor/rules/adr-format.mdc`:
+        - Status: **Accepted** (decision was implemented in the change being archived)
+        - Source: path to the architecture report in archive (use the target archive path)
+        - Area: derive from change context (proposal.md topic)
+     3. Update `openspec/adrs/README.md` — add row to the index table
+   - If user skips — proceed without extraction.
+
+   **If no architecture reports found:** Skip this step.
+
+6. **Perform the archive**
 
    Create the archive directory if it doesn't exist:
    ```bash
@@ -82,13 +111,14 @@ Archive a completed change in the experimental workflow.
    mv openspec/changes/<name> openspec/changes/archive/YYYY-MM-DD-<name>
    ```
 
-6. **Display summary**
+7. **Display summary**
 
    Show archive completion summary including:
    - Change name
    - Schema that was used
    - Archive location
    - Whether specs were synced (if applicable)
+   - Whether ADRs were extracted (count and numbers)
    - Note about any warnings (incomplete artifacts/tasks)
 
 **Output On Success**
@@ -100,6 +130,7 @@ Archive a completed change in the experimental workflow.
 **Schema:** <schema-name>
 **Archived to:** openspec/changes/archive/YYYY-MM-DD-<name>/
 **Specs:** ✓ Synced to main specs (or "No delta specs" or "Sync skipped")
+**ADR:** ✓ Extracted N ADRs (ADR-NNNN, ...) (or "No architecture reports" or "Extraction skipped")
 
 All artifacts complete. All tasks complete.
 ```

@@ -111,6 +111,8 @@ Common anomalies (when investigating errors):
 
 **Do not rely only on trace data.** Trace lines may be truncated; variables and full query text are often missing in COMPACT.
 
+#### 3a. Point Verification
+
 ```yaml
 For each critical line (error site, or points relevant to the analysis focus — e.g. write call, transaction start/end, slow call):
   1. Resolve module from MODULES MAP (e.g. M03 → ОбщийМодуль.ДействияСервер.Модуль)
@@ -122,6 +124,33 @@ For each critical line (error site, or points relevant to the analysis focus —
 If file not found or line not in repo:
   - State in Hypotheses: "Source line not verified (file/line not in workspace)"
   - Do not invent code or variable values
+```
+
+#### 3b. Extended Verification (call chain tracing)
+
+When step 3a reveals ambiguity — alternative call paths, unclear call order ("does A call B before C?"), or missing links in the chain — attempt to resolve it by tracing callers/callees in code.
+
+```yaml
+Trigger: a hypothesis emerges from 3a about call order, alternative paths,
+         or presence/absence of a call in the chain.
+
+Procedure:
+  1. Grep for the procedure name to find all callers / call sites
+  2. Read calling contexts (±10 lines around each call site)
+  3. Determine: which path leads to the observed trace sequence?
+     Are there alternative paths that skip a step?
+  4. If resolved → move from Hypotheses to Verified facts
+     If still ambiguous → formulate a Verification Query (see step 5)
+
+Budget: up to 5 additional modules (total across all 3b verifications).
+  - Count each distinct .bsl file read in 3b (files already read in 3a don't count)
+  - When budget is exhausted → STOP further 3b verification
+  - Remaining ambiguities → Verification Queries for explorer (step 5)
+
+Do NOT:
+  - Exceed the 5-module budget (prevents context bloat)
+  - Perform deep multi-hop investigation (that is explorer's job)
+  - Guess call order without code evidence
 ```
 
 ### 4. Escalation — Insufficient Data
@@ -149,6 +178,19 @@ Verified facts:
 Hypotheses:
   - Assumptions without direct proof; each with verification plan or "hypothesis-based fix" + follow-up
   - Example: "[Observed pattern]. Hypothesis: [cause]. Verify: [how to confirm]."
+
+Verification queries for explorer:
+  - Only if hypotheses remain that could not be verified within the 5-module budget (step 3b).
+  - Each query is a structured request for onec-code-explorer to resolve.
+  - Format:
+      id: VQ-1, VQ-2, ...
+      hypothesis: which hypothesis is being tested (reference H1, H2, etc.)
+      question: concrete question about the code
+        (e.g. "Is ОбновитьДействие called from ОбработатьСохранение without prior ВыполнитьЗадачу?")
+      check: what to verify (procedure, call path, presence/absence of a call)
+      modules_hint: where to look (from MODULES MAP or 3a/3b findings)
+      confirms_if: what answer confirms the hypothesis
+      refutes_if: what answer refutes the hypothesis
 
 Recommendations for downstream agents:
   - onec-code-explorer: task derived from the analysis focus (e.g. "Trace call chain from [entry] to [error]. Find [key points from report]. Files: [list].")
@@ -207,11 +249,16 @@ Provide a report that the parent (or onec-code-architect) can use without re-rea
 ## Hypotheses
 - ...
 
+## Verification queries for explorer
+(Only present if hypotheses remain that could not be verified within the 5-module budget.)
+- **VQ-1** | Hypothesis: [H-ref] | Question: [concrete question] | Check: [what to verify] | Modules hint: [where to look] | Confirms if: [answer] | Refutes if: [answer]
+- **VQ-2** | ...
+
 ## Insufficient data (if any)
 - Request TRACE_FULL: [how to obtain]
 
 ## Recommended next steps
-- onec-code-explorer: [concrete task]
+- onec-code-explorer: [concrete task, or "resolve VQ-1..VQ-N above" if verification queries are present]
 - onec-code-architect: [concrete task, if applicable]
 ```
 
@@ -235,6 +282,7 @@ Provide a report that the parent (or onec-code-architect) can use without re-rea
 
 ---
 
-**Last updated**: 2026-02-24  
-**Version**: 1.0  
+**Last updated**: 2026-03-08  
+**Version**: 1.1  
+**Changes**: Extended Verification (3b) with 5-module budget; Verification Queries for explorer output section  
 **Source**: trace-analysis-framework plan (1c-error-analysis, openspec-debug)

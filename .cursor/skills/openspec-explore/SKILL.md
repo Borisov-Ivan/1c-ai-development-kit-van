@@ -201,6 +201,7 @@ Depending on what the user brings, you might:
 После завершения Entry Protocol и получения результатов от агента — следовать этой структуре:
 
 ### 1. Исследование (Investigate)
+- **ADR Discovery:** Glob `openspec/adrs/ADR-*.md`, Grep по области задачи. Если релевантные ADR найдены — показать пользователю как контекст: «Найдены ADR по этой области: ADR-NNNN (заголовок). Учесть при проектировании.» Формат: `.cursor/rules/adr-format.mdc`
 - Понять задачу: что, зачем, какие ограничения
 - **Context Strategy:** если задача включает анализ файлов — проверить триггеры `context-strategy-gate.mdc`. При срабатывании — загрузить `.cursor/skills/context-strategy/SKILL.md` и следовать Entry Protocol до чтения файлов
 - При 3+ модулях — делегировать **onec-code-explorer** (не читать модули вручную)

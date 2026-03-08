@@ -44,6 +44,12 @@
 ## Command Session Persistence
 `.cursor/rules/command-session-persistence.mdc` — протокол команды действует на каждом ходе сессии, не только на первом.
 
+## Architecture Decision Records (ADR)
+`openspec/adrs/` — постоянное хранилище архитектурных решений проекта.
+`.cursor/rules/adr-format.mdc` — формат, именование, критерии, жизненный цикл.
+Индекс: `openspec/adrs/README.md`. Создаются при archive (шаг 5), обнаруживаются при explore/ff/new (ADR Discovery).
+Интеграция: `architect-gate.mdc` (ADR Discovery при срабатывании), `1c-agent-patterns/SKILL.md` (шаблон extraction).
+
 ## Стратегия анализа файлов
 `.cursor/skills/context-strategy/SKILL.md` — планирование: прямое чтение vs субагенты.
 `.cursor/rules/context-strategy-gate.mdc` — триггер при 3+ файлах, данных, крупных модулях.

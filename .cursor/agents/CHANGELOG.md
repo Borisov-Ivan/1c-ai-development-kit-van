@@ -1,5 +1,19 @@
 # Changelog — 1C Agent Ecosystem
 
+## [2.0] - 2026-03-08
+
+### Changed (onec-code-explorer)
+- Added TASK CLASSIFICATION: Focused Investigation / Hypothesis Verification / Full Feature Exploration
+- Added Phase 0: Process Caller Context (use trace-analyst findings, classify task before code reading)
+- Added Extension Analysis (cf/cfe): annotation types, base contract, interplay mapping, risks
+- Added Verified Facts / Hypotheses format in Output Guidance with explicit markers
+- Added Hypothesis Verification Template (mini-template for hypothesis reports)
+- Refined anti-pattern: "no design decisions" instead of blanket "no recommendations"; exploration facts (extension points, contracts) are allowed
+- Renamed Recommendations → Extension Points / Modification Notes in output template
+- Linked Report Levels to Task Classification (Compact / Hypothesis Template / Full)
+- Marked Architecture Analysis and Phases 3-4 as optional (Full Exploration only)
+- Replaced Example 2, added Example 3 with realistic cf/cfe scenarios
+
 ## [1.1] - 2026-02-27
 
 ### Changed

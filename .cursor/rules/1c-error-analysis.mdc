@@ -15,7 +15,10 @@ priority: 200
 1. **Подготовить бриф**: суть задачи, ожидаемое поведение, симптом, релевантные модули, что искать в трассе. Если есть OpenSpec change — из proposal/design/tasks. Если ad-hoc — из описания + 1-2 поиска.
    **Карвеаут для explore:** В режиме `/opsx:explore` (активен STOP-gate скилла) формировать бриф из ТОЛЬКО пользовательского ввода и уже загруженного контекста (recently viewed, git status, скриншоты). НЕ читать артефакты (proposal/design/tasks/reports) для подготовки брифа — обогащение контекстом change выполнит агент после подтверждения пользователя. Полное чтение артефактов перед делегированием — в `/opsx:debug` (openspec-debug/SKILL.md шаг 3.5).
 2. **Файл трассы** → **onec-trace-analyst** с брифом и путём к файлу. Инструкция: проверить по коду, не додумывать; если COMPACT и неясно — требовать FULL.
-3. **По результатам trace-analyst**: стек 3+ модулей → **onec-code-explorer**; архитектурная проблема → **onec-code-architect**.
+3. **По результатам trace-analyst**:
+   a. Если отчёт содержит `## Verification queries for explorer` → **onec-code-explorer** с целевым промптом для верификации гипотез (шаблон «Explorer — верификация гипотез trace-analyst» из `1c-agent-patterns`), затем merge ответов в RCA (confirmed → Verified facts, refuted → Refuted hypotheses).
+   b. Если после верификации (или без неё) стек 3+ модулей и нужна полная цепочка вызовов → **onec-code-explorer** (полный). Пропустить, если шаг 3a уже вызвал explorer и все гипотезы разрешены.
+   c. Архитектурная проблема → **onec-code-architect**.
 4. **Только текст ошибки** (1-2 строки, нет трассы) → Grep/SemanticSearch по тексту, ручной разбор.
 5. **trace-analyst запросил FULL** → запросить у пользователя, не продолжать без неё.
 
@@ -27,4 +30,4 @@ priority: 200
 
 ---
 
-**Last updated**: 2026-03-05 | **Version**: 2.1
+**Last updated**: 2026-03-08 | **Version**: 2.2 | **Changes**: VQ-шаг — целевая верификация гипотез explorer перед полным исследованием

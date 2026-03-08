@@ -24,7 +24,7 @@ Sonnet (fast) по умолчанию. Opus — только для критич
 | Агент | Модель | Причина |
 |-------|--------|---------|
 | **onec-code-architect** | **Opus** | Архитектурные решения, глубокий анализ |
-| onec-code-writer | fast | Генерация кода |
+| onec-code-writer | fast / adaptive | Генерация кода. Fast для Light Mode и простых задач; parent model для Extension Guard, bug fix, средней+ сложности |
 | onec-code-reviewer | fast | Ревью по стандартам |
 | onec-code-explorer | fast | Навигация по коду |
 | onec-trace-analyst | fast | Парсинг трасс |
@@ -57,4 +57,4 @@ Sonnet (fast) по умолчанию. Opus — только для критич
 
 ---
 
-**Last updated**: 2026-03-08 | **Version**: 2.1 | **Changes**: Utility agents consolidated to `1c-utility-agents.mdc`
+**Last updated**: 2026-03-08 | **Version**: 2.2 | **Changes**: Writer model selection now adaptive (see `1c-agent-patterns/SKILL.md` table)

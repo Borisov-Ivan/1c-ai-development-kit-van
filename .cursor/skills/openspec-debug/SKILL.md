@@ -96,16 +96,30 @@ If step 3 loaded a trace (PFF/TRACE file) or an error stack with 3+ call lines:
 
 2. If the trace-analyst report contains "Insufficient data" or "Request TRACE_FULL", ask the user for the full trace and do not continue the chain until it is provided. Otherwise proceed.
 
-3. **From trace-analyst output, run onec-code-explorer**:
-   - Task: restore the full call chain in code (trace shows "what", code shows "why").
-   - Pass: list of modules and line numbers from the summary, focus on extension files (e.g. `src/**/cfe/**`).
+3. **Verification queries** — check if the trace-analyst report contains a `## Verification queries for explorer` section with VQ-items:
+   - **If VQ-items exist**: run **onec-code-explorer** with the targeted verification prompt (template «Explorer — верификация гипотез trace-analyst» from `1c-agent-patterns/SKILL.md`). Pass: path to the trace-analyst report, the VQ list, and modules_hint from the report. Explorer returns a confirms/refutes/inconclusive answer for each VQ with code citations.
+   - **If no VQ-items**: skip to step 4.
 
-4. If trace-analyst or explorer identified an **architectural issue** (e.g. write conflicts, transaction problems, data flow issues):
+4. **Merge VQ answers into RCA** (only if step 3 ran explorer):
+   - For each VQ where explorer answered **confirms** — move the corresponding hypothesis to Verified facts (with explorer's code citation).
+   - For each VQ where explorer answered **refutes** — record as "Refuted hypothesis" (valuable context for architect).
+   - For each VQ where explorer answered **inconclusive** — keep as Hypothesis with updated verification plan.
+   - Result: updated Verified facts / Hypotheses / Refuted hypotheses for the final RCA.
+
+5. **Full code exploration** (conditional) — run **onec-code-explorer** for the full call chain only if:
+   - Step 3 did NOT already call explorer (no VQ-items existed), OR
+   - After step 4 merge, significant unresolved hypotheses remain, OR
+   - The trace involves 3+ modules and a full call chain reconstruction is needed.
+   - Task: restore the full call chain in code (trace shows "what", code shows "why").
+   - Pass: list of modules and line numbers from the trace-analyst summary + VQ verification results (if available), focus on extension files (e.g. `src/**/cfe/**`).
+   - If step 3 already called explorer and all hypotheses are resolved — skip this step.
+
+6. If trace-analyst or explorer identified an **architectural issue** (e.g. write conflicts, transaction problems, data flow issues):
    - **Run onec-code-architect**:
      - Task: propose fix options (transaction boundaries, write order, or skip write in handler).
      - Pass: RCA from trace-analyst/explorer, paths to relevant files.
 
-5. Merge results into step 6 (Root cause): Verified facts and Hypotheses come from trace-analyst output, supplemented by explorer.
+7. Merge results into step 6 (Root cause): Verified facts and Hypotheses come from trace-analyst output, enriched by VQ verification (step 4) and supplemented by explorer (step 5).
 
 ### 4) Investigate in codebase (read-only)
 
