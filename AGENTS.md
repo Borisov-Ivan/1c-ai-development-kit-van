@@ -41,6 +41,9 @@
 ## Command → Skill Read Gate
 `.cursor/rules/command-skill-gate.mdc` — сначала Read скилла, потом файлы.
 
+## Command Session Persistence
+`.cursor/rules/command-session-persistence.mdc` — протокол команды действует на каждом ходе сессии, не только на первом.
+
 ## Стратегия анализа файлов
 `.cursor/skills/context-strategy/SKILL.md` — планирование: прямое чтение vs субагенты.
 `.cursor/rules/context-strategy-gate.mdc` — триггер при 3+ файлах, данных, крупных модулях.

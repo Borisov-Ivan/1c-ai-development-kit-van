@@ -93,11 +93,27 @@ Enter explore mode. Think deeply. Visualize freely. Follow the conversation wher
 
 НЕ читать трассу/модули вручную. Передать бриф и путь к файлу соответствующему агенту через Task.
 
-**HALT-условия из `1c-agent-delegation.mdc` и `1c-error-analysis.mdc` действуют в explore без исключений.** Свободный режим (The Stance) — только при отсутствии триггеров из шага 1.
+**HALT-условия из `1c-agent-delegation.mdc` и `1c-error-analysis.mdc` действуют в explore без исключений.** При отсутствии HALT-триггеров из шага 1 — бриф и Structured Investigation не обязательны, но **gates (Architect Gate, Verified Cause Gate, auto-capture, delegation) действуют на каждом ходе** независимо от наличия триггеров.
 
 ---
 
-**This is a stance, not a rigid workflow.** After Entry Protocol the conversation flows freely — no mandatory sequence or outputs beyond that. You're a thinking partner helping the user explore.
+**The Stance describes thinking style, not permission to bypass protocol.** After Entry Protocol, the conversation follows the user's lead — but all gates (Architect Gate, Verified Cause Gate, auto-capture, delegation) remain active on **every turn**. You're a thinking partner, not a free-form agent.
+
+---
+
+## Per-turn Delegation Gate (MANDATORY)
+
+На **каждом follow-up ходе** (после завершения Entry Protocol) перед выполнением действия:
+
+1. **Классифицировать запрос:** подразумевает ли он обследование кода, трассировку вызовов, анализ модулей?
+2. **Маркеры обследования:** «обследуй», «проверь в коде», «найди где», «проследи вызов», «уточни в коде», «посмотри модуль», «как вызывается», «откуда берётся», а также контекст задач из tasks.md типа «уточнить в коде базы»
+3. **При срабатывании → СТОП:**
+   - НЕ запускать Grep, Glob, Read по .bsl/.xml модулям
+   - Сформировать бриф (упрощённый: агент + что искать + артефакты контекста)
+   - Делегировать через Task (onec-code-explorer / onec-trace-analyst / onec-code-architect)
+4. **Допустимо до делегирования:** Read артефактов OpenSpec (proposal/design/tasks/specs) для обогащения брифа — до 3 файлов. Grep/Glob/Read по .bsl — ЗАПРЕЩЕНО.
+
+**Почему:** контекст оркестратора — дорогой ресурс. Обследование кода загрязняет его и снижает качество оркестрации на последующих ходах. Агенты работают в изолированном контексте.
 
 ---
 
@@ -476,10 +492,12 @@ Explore Summary — входной артефакт для ff/new. Design Gate �
 - **Don't rush** - Discovery is thinking time, not task time
 - **Don't force structure** - Let patterns emerge naturally
 - **Don't auto-capture** - Offer to save insights, don't just do it
+- **Don't treat follow-ups as free-form** - Every user message in an explore session goes through the same gates as the first. "Добавь X" in explore = offer to capture, not a directive to edit. Check Architect Gate, Verified Cause Gate, auto-capture rule on every turn.
+- **Don't lose session context** - Gates, guards and explore restrictions apply on ALL turns, not just the first. See `command-session-persistence.mdc`.
 - **Do visualize** - A good diagram is worth many paragraphs
 - **Do explore the codebase** - Ground discussions in reality
 - **Do question assumptions** - Including the user's and your own
 
 ---
 
-**Last updated**: 2026-03-08 | **Version**: 1.3 | **Changes**: Added step 1.5 Verification Pass (deep analysis for Complex/Critical tasks via architect)
+**Last updated**: 2026-03-08 | **Version**: 1.5 | **Changes**: Added Per-turn Delegation Gate — mandatory delegation for code investigation on follow-up turns (zero .bsl reads for orchestrator)
