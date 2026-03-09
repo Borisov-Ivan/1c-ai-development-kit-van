@@ -137,7 +137,15 @@ Check:
       ("Оригинальный код:", "Новый код:", "Старый вариант:") — MEDIUM
     - Work instructions in code
       ("Добавить в xml...", "Перенести в...", "TODO перенести") — MEDIUM
-    - Design artifact references (// Design §3, // D11, // F5) — MEDIUM
+    - Design/process artifact references in comments — MEDIUM:
+        Short-form refs: // Design §3, // D11, // F5
+        Natural-language refs: // По design Decision 6 (fix-signing-result): ...
+        Change names (kebab-case in comments): fix-signing-result, add-feature-X
+        Process terms in comments: design, decision, proposal, architecture,
+          exploration, root cause, trace-analysis, ЗНИ, ADR
+        Task number refs: п. 3.1, задача 2.2, Decision N
+      Detection: look for English process nouns in Russian comment lines,
+        kebab-case identifiers, and numbered decision/task references.
 
   Code waste:
     - Dead code — see category 15 (Obsolete and Unused Code)
@@ -386,7 +394,8 @@ status: NOT_CONNECTED
 
 9. Code cleanliness:
    - Detect changelog markers (// +++ Author, // ---, date-author comments)
-   - Detect design artifact references in comments (// D11, // F5, // Design §3)
+   - Detect design/process artifact references in comments: short-form (D11, F5, Design §3),
+     natural-language (По design Decision N, fix-signing-result), process terms, task numbers
    - Dead code — see category 15 (Obsolete and Unused Code)
    - Detect logic duplication between modules
    - Detect commented-out code without explanation
@@ -624,7 +633,8 @@ kind=release-hygiene:
   - Changelog markers in comments (// +++/---, // НАЧАЛО/КОНЕЦ, // РГИТС, date-author in comments)
   - Commented-out old code with replacement markers
   - Work instructions in comments
-  - Design artifact references in comments
+  - Design/process artifact references in comments (short-form D11/F5, natural-language
+    "По design Decision N (change-name)", process terms, kebab-case change names, task numbers)
   Not release-hygiene: #Вставка, #КонецВставки, #Удаление, #КонецУдаления — extension override directives, do not remove or flag.
 
 kind=functional (category 15 — unused/obsolete):

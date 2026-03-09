@@ -56,7 +56,11 @@ Ensure:
     * Constraints
     * Technical debt (TODO, FIXME)
   - NEVER add changelog markers (author, date, ticket, НАЧАЛО/КОНЕЦ)
-  - History is tracked in Git, not in code comments
+  - NEVER reference development artifacts in comments:
+      design decisions, change names (fix-signing-result, add-feature-X),
+      proposal/architecture/exploration refs, task numbers (п. 3.1),
+      ЗНИ, ADR. Comments describe code intent in domain terms only.
+  - History and decisions are tracked in Git and OpenSpec, not in code comments
   - Handle errors and edge cases
 ```
 
