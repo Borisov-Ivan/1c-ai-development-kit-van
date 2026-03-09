@@ -11,6 +11,9 @@
 ## BSL write guard
 `.cursor/rules/1c-agent-delegation.mdc` — запрет прямого .bsl, APPLY GATE, DELEGATION GATE, LINT GATE.
 
+## Tool Name Guard
+`.cursor/rules/tool-name-guard.mdc` — инструмент вызова агентов только `Task`; при `Invalid enum value` не переключаться на generalPurpose.
+
 ## Запрет создания метаданных
 `.cursor/rules/1c-no-metadata-creation.mdc` — СТОП, блокер пользователю.
 

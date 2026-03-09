@@ -1,0 +1,16 @@
+---
+description: "GUARD: инструмент для вызова агентов — ТОЛЬКО Task, НЕ mcp_task"
+alwaysApply: true
+---
+
+# Tool Name Guard
+
+Инструмент для вызова агентов: **Task** (единственное допустимое имя).
+
+`mcp_task`, `mcp_invoke`, `run_task`, `call_agent` — **НЕ СУЩЕСТВУЮТ** в toolset. Это галлюцинация.
+
+При ошибке `Invalid enum value`:
+1. Проверить имя инструмента — должно быть `Task`
+2. Проверить `subagent_type` — допустимые: onec-code-writer, onec-code-reviewer, onec-code-architect, onec-code-explorer, onec-trace-analyst, onec-code-simplifier, onec-form-generator, onec-metadata-helper, onec-query-optimizer, onec-test-generator, generalPurpose, explore, shell, browser-use
+3. **НЕ переключаться на generalPurpose** — это маскирует ошибку
+4. Если retry не помог — СТОП, сообщить пользователю
