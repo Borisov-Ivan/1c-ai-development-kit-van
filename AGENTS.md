@@ -26,6 +26,9 @@
 ## Verified Cause Gate
 `.cursor/rules/verified-cause-gate.mdc` — root cause + impact перед фиксом.
 
+## Приоритет существующих механизмов
+`.cursor/rules/existing-mechanism-priority.mdc` — Preference Hierarchy, Mandatory Discovery, anti-patterns. Срабатывает при создании нового объекта или интеграции с базой. Обязательная секция Existing Mechanisms в design.md / architecture-отчёте.
+
 ## Сохранение отчётов субагентов
 `.cursor/rules/preserve-subagent-reports.mdc` — полные отчёты в reports/.
 
