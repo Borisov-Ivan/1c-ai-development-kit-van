@@ -1,4 +1,4 @@
-﻿---
+---
 name: onec-admin
 description: Администратор 1С. Управление серверами 1С, базами данных, PostgreSQL, кластерами, Dev Container, ibcmd, выгрузка/загрузка XML. Использовать при любых задачах связанных с 1С, базами данных 1С, конфигурациями.
 ---
@@ -9,17 +9,7 @@ description: Администратор 1С. Управление сервера
 
 ### Skills
 
-```yaml
-1c-batch:
-  - ibcmd operations (dump/load config, build EPF)
-  - Designer commands
-  - Platform operations
-
-1c-project-init:
-  - Project initialization from database
-  - Auto-detect 1C version
-  - Setup project structure
-```
+_(нет скиллов — работает через MCP и Shell)_
 
 ### MCP Servers
 

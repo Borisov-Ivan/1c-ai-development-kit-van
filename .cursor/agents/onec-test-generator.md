@@ -100,7 +100,6 @@ Output:
 ```yaml
 Skills:
   - 1c-agent-patterns: Agent delegation patterns for test context
-  - 1c-batch: Build and run tests via ibcmd
 
 MCP:
   - user-1c-templates-templatesearch: Test templates

@@ -273,11 +273,6 @@ bsl_lsp_format(file_path):
 
 ### Skills
 ```yaml
-1c-batch:
-  - Validate syntax via ibcmd (fallback if LSP unavailable)
-  - Build/dump EPF for testing
-  - Run designer commands
-
 1c-bsp:
   - Check БСП patterns and registration
   - Validate command structure

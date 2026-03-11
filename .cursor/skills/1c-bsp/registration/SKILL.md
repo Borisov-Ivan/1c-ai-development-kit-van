@@ -199,7 +199,7 @@ EndProcedure
 - Add more commands: `1c-bsp-command` skill
 - Add a form: `1c-form-scaffold` skill
 - Add a template: use configurator or project scripts for layout management.
-- Build EPF: use `1c-batch` or project build scripts.
+- Build EPF: use Конфигуратор (Конфигурация → Загрузить конфигурацию из файлов).
 
 ## MCP Integration
 

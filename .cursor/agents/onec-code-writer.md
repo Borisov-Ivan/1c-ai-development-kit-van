@@ -127,11 +127,6 @@ If BSL LSP unavailable (current state):
 ### Skills
 
 ```yaml
-1c-batch:
-  - Build/dump EPF for testing
-  - Load/dump configuration XML
-  - Run designer commands
-
 1c-bsp:
   - Check БСП patterns
   - Validate registration
