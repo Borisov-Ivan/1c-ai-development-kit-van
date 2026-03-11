@@ -18,7 +18,7 @@ Parses a role's `Rights.xml` and outputs a compact summary: objects grouped by t
 ## Command
 
 ```powershell
-powershell.exe -File skills/1c-role-info/scripts/role-info.ps1 -RightsPath <path> -OutFile <output.txt>
+powershell.exe -File skills/1c-roles/info/scripts/role-info.ps1 -RightsPath <path> -OutFile <output.txt>
 ```
 
 ### Parameters

@@ -5,8 +5,9 @@
 ## OpenSpec Workflow
 `.cursor/rules/sdd-workflow.mdc` — explore → new/ff → apply → verify → archive.
 Команды: `/opsx:explore`, `/opsx:new`, `/opsx:ff`, `/opsx:apply`, `/opsx:verify`, `/opsx:archive`, `/opsx:debug`, `/opsx:estimate`, `/opsx:prerelease-review`.
-Дополнительные: continue, sync, bulk-archive. Паттерны агентов: `.cursor/skills/1c-agent-patterns/SKILL.md`.
-Документы из OpenSpec: `/docs:functional`, `/docs:architecture`, `/docs:technical` — `.cursor/skills/openspec-docs/SKILL.md`.
+Дополнительные: `/opsx:continue`, `/opsx:sync`, `/opsx:bulk-archive`, `/opsx:onboard`, `/init-project`.
+Паттерны агентов: `.cursor/skills/1c-agent-patterns/SKILL.md`.
+Документы: `/opsx:doc-tz <name>` (ТЗ по ЗНИ с архитектурным ревью и контролем качества артефактов) — `.cursor/skills/openspec-docs/SKILL.md`.
 
 ## BSL write guard
 `.cursor/rules/1c-agent-delegation.mdc` — запрет прямого .bsl, APPLY GATE, DELEGATION GATE, LINT GATE.
@@ -62,3 +63,19 @@
 ## Стратегия анализа файлов
 `.cursor/skills/context-strategy/SKILL.md` — планирование: прямое чтение vs субагенты.
 `.cursor/rules/context-strategy-gate.mdc` — триггер при 3+ файлах, данных, крупных модулях.
+
+## Стандарты BSL
+`.cursor/rules/1c-coding-standards.mdc` — file-scoped (`**/*.bsl`): структура, именование, запросы, Попытка, защитные проверки, валидация имён метаданных по XML-выгрузке.
+
+## Выбор модели
+`.cursor/rules/model-selection.mdc` — Opus для критичных задач, Sonnet/fast для остального.
+
+## Запрет ROI-оценок
+`.cursor/rules/no-roi-estimates.mdc` — запрет на расчёт ROI и временных оценок (кроме `/opsx:estimate`).
+
+## Инфраструктура 1С
+`.cursor/docs/onec-infrastructure.md` — серверы 1С, PostgreSQL, HASP, Dev Container.
+
+## Системные промпты агентов
+`.cursor/agents/*.md` — промпты для onec-code-writer, onec-code-reviewer, onec-code-architect, onec-code-explorer, onec-trace-analyst, onec-code-simplifier, onec-form-generator, onec-metadata-helper, onec-query-optimizer, onec-test-generator, onec-admin, mcp-deploy.
+Changelog: `.cursor/agents/CHANGELOG.md`.

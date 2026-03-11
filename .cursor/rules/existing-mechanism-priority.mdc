@@ -1,6 +1,6 @@
 ---
 description: "При интеграции с типовой конфигурацией: сначала существующие механизмы, затем новые"
-alwaysApply: true
+alwaysApply: false
 priority: 180
 ---
 

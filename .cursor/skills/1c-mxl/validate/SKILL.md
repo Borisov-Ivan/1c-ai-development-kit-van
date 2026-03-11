@@ -27,12 +27,12 @@ Specify either `-TemplatePath`, or both `-ProcessorName` and `-TemplateName`.
 ## Command
 
 ```powershell
-powershell.exe -NoProfile -File skills/1c-mxl-validate/scripts/mxl-validate.ps1 -TemplatePath "<path>"
+powershell.exe -NoProfile -File skills/1c-mxl/validate/scripts/mxl-validate.ps1 -TemplatePath "<path>"
 ```
 
 Or by processor/template name:
 ```powershell
-powershell.exe -NoProfile -File skills/1c-mxl-validate/scripts/mxl-validate.ps1 -ProcessorName "<Name>" -TemplateName "<Template>" [-SrcDir "<dir>"]
+powershell.exe -NoProfile -File skills/1c-mxl/validate/scripts/mxl-validate.ps1 -ProcessorName "<Name>" -TemplateName "<Template>" [-SrcDir "<dir>"]
 ```
 
 ## Checks Performed

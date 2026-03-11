@@ -21,7 +21,7 @@ Checks Form.xml of a managed form for structural errors: ID uniqueness, companio
 ## Command
 
 ```powershell
-powershell.exe -NoProfile -File skills/1c-form-validate/scripts/form-validate.ps1 -FormPath "<path>"
+powershell.exe -NoProfile -File skills/1c-forms/validate/scripts/form-validate.ps1 -FormPath "<path>"
 ```
 
 ## Checks Performed

@@ -1,8 +1,3 @@
-﻿---
-description: 1С серверы, PostgreSQL, HASP, Dev Container
-globs: configs/onec-*/**,scripts/onec-*
----
-
 # 1С Инфраструктура
 
 ## Архитектурное решение (2026-02-06)
@@ -36,3 +31,7 @@ globs: configs/onec-*/**,scripts/onec-*
 - **MS SQL из 1С Linux:** нет NLS-компонента (mssql.so), требуется пересборка образа
 - **HASP на Linux:** не работает ни через UDP, ни TCP, ни usb-vhci в LXC
 - **ibcmd + кириллица:** передавать user/password через файл с stdin
+
+---
+
+**Last updated**: 2026-03-11 | **Version**: 1.0

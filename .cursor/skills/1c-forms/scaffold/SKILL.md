@@ -25,7 +25,7 @@ Creates a managed form (metadata XML + Form.xml + Module.bsl) and registers it i
 
 **Command:**
 ```powershell
-powershell.exe -NoProfile -File skills/1c-form-scaffold/scripts/form-add.ps1 -ObjectPath "<ObjectPath>" -FormName "<FormName>" [-Purpose "<Purpose>"] [-Synonym "<Synonym>"] [-SetDefault]
+powershell.exe -NoProfile -File skills/1c-forms/scaffold/scripts/form-add.ps1 -ObjectPath "<ObjectPath>" -FormName "<FormName>" [-Purpose "<Purpose>"] [-Synonym "<Synonym>"] [-SetDefault]
 ```
 
 ### For External Data Processors (EPF)
@@ -44,7 +44,7 @@ powershell.exe -NoProfile -File skills/1c-form-scaffold/scripts/form-add.ps1 -Ob
 
 **Command:**
 ```powershell
-pwsh -NoProfile -File skills/1c-form-scaffold/scripts/add-form.ps1 -ProcessorName "<ProcessorName>" -FormName "<FormName>" [-Synonym "<Synonym>"] [-Main] [-SrcDir "<SrcDir>"]
+pwsh -NoProfile -File skills/1c-forms/scaffold/scripts/add-form.ps1 -ProcessorName "<ProcessorName>" -FormName "<FormName>" [-Synonym "<Synonym>"] [-Main] [-SrcDir "<SrcDir>"]
 ```
 
 ### Purpose — Form Assignment
@@ -106,7 +106,7 @@ Remove form files and unregister from the object's root XML.
 
 **Command:**
 ```powershell
-pwsh -NoProfile -File skills/1c-form-scaffold/scripts/remove-form.ps1 -ProcessorName "<ProcessorName>" -FormName "<FormName>" [-SrcDir "<SrcDir>"]
+pwsh -NoProfile -File skills/1c-forms/scaffold/scripts/remove-form.ps1 -ProcessorName "<ProcessorName>" -FormName "<FormName>" [-SrcDir "<SrcDir>"]
 ```
 
 ### What Gets Removed

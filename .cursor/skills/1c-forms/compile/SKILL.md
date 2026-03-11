@@ -23,7 +23,7 @@ Takes a compact JSON definition (20–50 lines) and generates a complete, valid 
 ## Command
 
 ```powershell
-powershell.exe -NoProfile -File skills/1c-form-compile/scripts/form-compile.ps1 -JsonPath "<json>" -OutputPath "<xml>"
+powershell.exe -NoProfile -File skills/1c-forms/compile/scripts/form-compile.ps1 -JsonPath "<json>" -OutputPath "<xml>"
 ```
 
 ## JSON DSL Reference

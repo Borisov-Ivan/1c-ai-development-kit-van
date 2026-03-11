@@ -21,7 +21,7 @@ Adds elements, attributes, and/or commands to an existing Form.xml. Automaticall
 ## Command
 
 ```powershell
-powershell.exe -NoProfile -File skills/1c-form-edit/scripts/form-edit.ps1 -FormPath "<path>" -JsonPath "<path>"
+powershell.exe -NoProfile -File skills/1c-forms/edit/scripts/form-edit.ps1 -FormPath "<path>" -JsonPath "<path>"
 ```
 
 ## JSON Format

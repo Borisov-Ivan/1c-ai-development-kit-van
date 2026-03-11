@@ -21,7 +21,7 @@ Takes a Template.xml of a 1C spreadsheet document and generates a compact JSON d
 ## Command
 
 ```powershell
-powershell.exe -NoProfile -File skills/1c-mxl-decompile/scripts/mxl-decompile.ps1 -TemplatePath "<path>/Template.xml" [-OutputPath "<path>.json"]
+powershell.exe -NoProfile -File skills/1c-mxl/decompile/scripts/mxl-decompile.ps1 -TemplatePath "<path>/Template.xml" [-OutputPath "<path>.json"]
 ```
 
 ## Workflow

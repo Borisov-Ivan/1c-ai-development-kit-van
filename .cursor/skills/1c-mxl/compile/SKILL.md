@@ -21,7 +21,7 @@ Takes a compact JSON definition and generates a correct Template.xml for a 1C sp
 ## Command
 
 ```powershell
-powershell.exe -NoProfile -File skills/1c-mxl-compile/scripts/mxl-compile.ps1 -JsonPath "<path>.json" -OutputPath "<path>/Template.xml"
+powershell.exe -NoProfile -File skills/1c-mxl/compile/scripts/mxl-compile.ps1 -JsonPath "<path>.json" -OutputPath "<path>/Template.xml"
 ```
 
 ## Workflow

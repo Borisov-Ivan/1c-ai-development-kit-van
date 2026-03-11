@@ -22,12 +22,12 @@ Reads a Form.xml of a managed form and outputs a compact summary: element tree, 
 ## Command
 
 ```powershell
-powershell.exe -NoProfile -File skills/1c-form-info/scripts/form-info.ps1 -FormPath "<path to Form.xml>"
+powershell.exe -NoProfile -File skills/1c-forms/info/scripts/form-info.ps1 -FormPath "<path to Form.xml>"
 ```
 
 With pagination:
 ```powershell
-powershell.exe -NoProfile -File skills/1c-form-info/scripts/form-info.ps1 -FormPath "<path>" -Offset 150
+powershell.exe -NoProfile -File skills/1c-forms/info/scripts/form-info.ps1 -FormPath "<path>" -Offset 150
 ```
 
 ## Reading the Output

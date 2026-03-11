@@ -11,7 +11,7 @@ alwaysApply: false
 
 ## ТРИГГЕР
 
-Работа с change в схеме, содержащей артефакт specs (проверить через `openspec status --change "<name>" --json`, наличие артефакта с id "specs").
+Работа с change в схеме, содержащей артефакт specs (проверить через Glob по `openspec/changes/<name>/specs/**/*.md`).
 
 ## ПРОВЕРКА
 
@@ -48,3 +48,7 @@ Glob по `openspec/changes/<name>/specs/**/*.md`. Если 0 файлов и а
 
 - Пользователь явно сказал «без спеки» / «skip specs».
 - Change не содержит артефакт specs в схеме (не spec-driven).
+
+---
+
+**Last updated**: 2026-03-11 | **Version**: 1.1 | **Changes**: Replaced non-existent openspec CLI reference with Glob-based check
