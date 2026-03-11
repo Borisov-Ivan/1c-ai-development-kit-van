@@ -4,7 +4,7 @@
 
 ## OpenSpec Workflow
 `.cursor/rules/sdd-workflow.mdc` — explore → new/ff → apply → verify → archive.
-Команды: `/opsx:explore`, `/opsx:new`, `/opsx:ff`, `/opsx:apply`, `/opsx:verify`, `/opsx:archive`, `/opsx:debug`, `/opsx:prerelease-review`.
+Команды: `/opsx:explore`, `/opsx:new`, `/opsx:ff`, `/opsx:apply`, `/opsx:verify`, `/opsx:archive`, `/opsx:debug`, `/opsx:estimate`, `/opsx:prerelease-review`.
 Дополнительные: continue, sync, bulk-archive. Паттерны агентов: `.cursor/skills/1c-agent-patterns/SKILL.md`.
 Документы из OpenSpec: `/docs:functional`, `/docs:architecture`, `/docs:technical` — `.cursor/skills/openspec-docs/SKILL.md`.
 
@@ -55,6 +55,9 @@
 `.cursor/rules/adr-format.mdc` — формат, именование, критерии, жизненный цикл.
 Индекс: `openspec/adrs/README.md`. Создаются при archive (шаг 5), обнаруживаются при explore/ff/new (ADR Discovery).
 Интеграция: `architect-gate.mdc` (ADR Discovery при срабатывании), `1c-agent-patterns/SKILL.md` (шаблон extraction).
+
+## Оценка трудозатрат
+`.cursor/skills/openspec-estimate/SKILL.md` — `/opsx:estimate <name>`. Трёхточечная PERT-оценка по tasks.md. Авторежимы: первичная оценка / переоценка / калибровка по факту. Ставки встроены в скилл, опциональный оверрайд — `openspec/estimate-rates.md`.
 
 ## Стратегия анализа файлов
 `.cursor/skills/context-strategy/SKILL.md` — планирование: прямое чтение vs субагенты.

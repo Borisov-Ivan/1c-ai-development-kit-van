@@ -23,6 +23,10 @@ alwaysApply: false
 
 Вместо `Timeline: 8 days, ROI: 4 months` → `Phases: 1. Core (critical) 2. Extended (high) 3. Optional (low). Dependencies: Phase 2 needs Phase 1.`
 
+## EXCEPTIONS
+
+- Команда `/opsx:estimate` — структурированная оценка трудозатрат по tasks.md методом PERT с конфигурируемыми ставками. Спонтанные оценки в других контекстах (proposal, design, apply) по-прежнему запрещены.
+
 ---
 
-**Last updated**: 2026-03-06 | **Version**: 2.0
+**Last updated**: 2026-03-11 | **Version**: 2.1 | **Changes**: Exception for /opsx:estimate
