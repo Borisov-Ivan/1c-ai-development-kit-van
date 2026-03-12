@@ -73,8 +73,7 @@ Evaluate:
   - Error handling
   - Testability
   - Stub/placeholder code returning empty or dummy values (empty Thumbprint, hardcoded "TODO", always-false conditions) — HIGH (always checked, not prerelease-only)
-  - Parameter overwrite: parameter reassigned inside body (Param = NewValue), parameter NOT documented as output ([out] in header, or standard 1C pattern: Отказ, ПроверяемыеРеквизиты) — HIGH. See 1c-coding-standards.mdc rule 21
-  - Collection mutation: modifying method (.Очистить, .Удалить, .Добавить) called on collection parameter without documented out contract — MEDIUM. Exception: Отказ, ПроверяемыеРеквизиты, documented output params. See 1c-coding-standards.mdc rule 21
+  - AP-007: Parameter overwrite / collection mutation — HIGH/MEDIUM. See anti-pattern registry
   - Duplicated magic constant: same numeric literal (not 0/1/-1) or same string literal appears 2+ times in module — MEDIUM. Exception: query text, structure keys, metadata names, 0/1/-1/Истина/Ложь. See 1c-coding-standards.mdc rule 22
   - Mixed responsibilities: procedure >40 lines combining 3+ distinct concerns (rights check, transaction management, business logic, persistence/write, logging, UI feedback) — MEDIUM. Sign: procedure could be split into independent functions without passing internal state
 ```
@@ -155,37 +154,34 @@ Check:
 
 ### 10. Specific 1C Patterns
 ```yaml
-Check (add to existing):
-  - ТекущаяДата() instead of ТекущаяДатаСеанса() — CRITICAL
-  - Сообщить() instead of ОбщегоНазначения.СообщитьПользователю() — HIGH
+Check via Anti-pattern Registry (see category 16):
+  AP-002: Client-only methods in server context — HIGH
+  AP-003: ЭтаФорма instead of ЭтотОбъект in callbacks — HIGH
+  AP-004: Defensive check on fixed-contract source — HIGH
+  AP-005: Свойство() on non-Structure type — HIGH
+  AP-006: Defensive cake (stacked redundant checks) — HIGH
+  AP-008: Попытка wrapping deterministic operation — CRITICAL
+  AP-009: Silent degradation in Исключение — HIGH
+  AP-010: Traceless exception suppression — HIGH
+  AP-011: ТекущаяДата() instead of ТекущаяДатаСеанса() — CRITICAL
+  AP-012: Сообщить() instead of BSP methods — HIGH
+  AP-013: Query in loop (N+1) — HIGH
+  AP-014: Attribute via reference dot notation — HIGH
+
+Remain inline (not in registry):
   - Ternary operator ?() — MEDIUM
-  - Свойство() on fixed-contract source (tabular section, query result) — HIGH
-  - ТипЗнч() check on fixed-contract return value (function always returns Structure) — HIGH
-  - ЗначениеЗаполнено() guard on field guaranteed by contract/metadata — HIGH
-  - "Defensive cake" (stacked checks on same value where one is subsumed by another — applies to BOTH fixed-contract and dynamic-contract sources) — HIGH
   - User-facing string literals without НСтр("ru = '...'") — MEDIUM
-  - ЭтаФорма instead of ЭтотОбъект in ОписаниеОповещения/callbacks — HIGH
-  - Оповестить()/ОповеститьОбИзменении() in server context (&НаСервере, &НаСервереБезКонтекста, server common module) — HIGH (client-only methods)
-  - Method name contradicts compilation directive (e.g. "...НаКлиенте" declared &НаСервере, "...НаСервере" declared &НаКлиенте) — MEDIUM
-  - Попытка/Исключение wrapping access to fixed-contract field/method (tabular section attribute, explicit query column, documented return type). If the code inside Попытка can only fail due to a code bug (not external factor), then Попытка masks the bug — HIGH
-  - Попытка/Исключение wrapping deterministic operation with no external factor (string conversion, arithmetic, metadata access, hex/base64 encoding). Justification gate: if no network, FS, concurrent access, COM, or external config — Попытка is unjustified. See 1c-coding-standards.mdc rule 20 — CRITICAL
-  - Попытка/Исключение with fallback return/assignment that produces a value indistinguishable from success for the caller (silent degradation: e.g. returning unconverted input, default value that mimics valid result, Неопределено where caller treats it as "not found"). See 1c-coding-standards.mdc rule 20 — HIGH
-  - Попытка/Исключение block without logging (neither ЗаписьЖурналаРегистрации nor wrapper like ЗаписатьОшибкуВЖурнал) where exception is NOT re-raised via ВызватьИсключение — traceless suppression. See 1c-coding-standards.mdc rule 20 — HIGH
-    (Note: if exception is re-raised via ВызватьИсключение, logging is optional; transactional Попытка — see category 13)
-  - Excessive info logging: ЗаписьЖурналаРегистрации(_, УровеньЖурналаРегистрации.Информация/Примечание) inside loop, or 3+ info-level log calls in single procedure — LOW. Risk: journal pollution in production; consider conditional logging or Отладка level
+  - Excessive info logging inside loop or 3+ info-level calls — LOW
 ```
 
 ### 11. Band-Aid Detection
 ```yaml
-Check (see .cursor/rules/verified-cause-gate.mdc):
-  - Defensive null/undefined check added without root cause analysis — HIGH
-  - Try/Except wrapping error instead of preventing it — HIGH
-  - Flag/parameter added to skip problematic code path — HIGH
-  - Logic duplicated with minor variation instead of fixing original — MEDIUM
-  - TODO/FIXME comment admitting the fix is temporary — MEDIUM
-  - Defensive check on fixed-contract source — HIGH (see category 10 for detection; do NOT duplicate finding — report under category 10 only)
-  - "Defensive cake" (any contract type — fixed or dynamic) — see category 10, Specific 1C Patterns; do NOT duplicate
-  - Design-prescribed anti-pattern: guard in code matches design.md recommendation, but violates rule 14 (fixed-contract source with Свойство/ТипЗнч/ЗначениеЗаполнено) — HIGH (tag: design-prescribed)
+Check via Anti-pattern Registry:
+  AP-016: Band-aid fix — HIGH (see .cursor/rules/verified-cause-gate.mdc)
+
+Remain inline:
+  - Design-prescribed anti-pattern: guard in code matches design.md recommendation,
+    but violates rule 14 — HIGH (tag: design-prescribed)
 ```
 
 ### 12. Release Readiness (checked only in mode=prerelease)
@@ -199,9 +195,8 @@ Check:
 ### 13. Transactions and Locking
 ```yaml
 Check:
-  - НачатьТранзакцию() without matching ЗафиксироватьТранзакцию()/ОтменитьТранзакцию() in same scope — CRITICAL
-  - НачатьТранзакцию() without Попытка/Исключение wrapping the transactional block — HIGH
-  - Missing ОтменитьТранзакцию() in Исключение block of transactional Попытка — CRITICAL
+  AP-015: Transaction without safety pattern (НачатьТранзакцию without Попытка+Зафиксировать+Отменить) — CRITICAL. See anti-pattern registry
+  Remain inline:
   - User interaction (ПоказатьВопрос, Предупреждение, Сообщить) inside transaction — HIGH
   - Read-then-write without БлокировкаДанных in concurrent scenario — HIGH
   - Nested НачатьТранзакцию() without justification — MEDIUM
@@ -350,11 +345,10 @@ status: NOT_CONNECTED
    - Check function length
    - Analyze parameter count
    - Fail-fast: scan for silent skips on structural checks (Продолжить, silent Возврат, empty branch when precondition fails on type/property/size/format)
-   - Data contract: for every ТипЗнч()/Свойство()/ЕстьРеквизит/Колонки.Найти/ЗначениеЗаполнено() check, verify source type and whether contract is fixed. Flag: (a) redundant check on fixed-contract source (tabular section field, explicit query column, documented return/parameter), (b) wrong method (Свойство on non-Structure), (c) "defensive cake" (stacked checks on same value where one is subsumed by another — any contract type, not only fixed).
-   - Design authority: design.md decisions do NOT exempt code from anti-pattern checks. If code has Свойство()/ТипЗнч()/ЗначениеЗаполнено() on a fixed-contract source, flag it even if design.md prescribed it. Tag finding: "design-prescribed anti-pattern".
+   - Data contract: → see AP-004, AP-005, AP-006 in anti-pattern registry (category 16)
+   - Design authority: design.md decisions do NOT exempt code from anti-pattern checks. Tag: "design-prescribed anti-pattern".
    - Detect stub/placeholder code: empty Thumbprint, hardcoded "TODO" return values, always-false conditions — HIGH (always, not prerelease-only)
-   - Parameter integrity: for each Процедура/Функция, check if any parameter appears on LEFT side of assignment (Param = ...) inside body. Flag parameter overwrite when param is not documented as output. See 1c-coding-standards.mdc rule 21
-   - Collection mutation: detect .Очистить/.Удалить/.Добавить on collection parameters without out contract. See 1c-coding-standards.mdc rule 21
+   - Parameter integrity: → see AP-007 in anti-pattern registry (category 16)
    - Magic constants: detect same numeric (not 0/1/-1) or string literal appearing 2+ times in module. See 1c-coding-standards.mdc rule 22
    - Mixed responsibilities: detect procedures >40 lines combining 3+ concerns (rights, transaction, business logic, persistence, logging, UI)
 
@@ -395,31 +389,15 @@ status: NOT_CONNECTED
    - Detect logic duplication between modules
    - Detect commented-out code without explanation
 
-10. Specific 1C patterns:
-    - ТекущаяДата() instead of ТекущаяДатаСеанса()
-    - Сообщить() instead of ОбщегоНазначения.СообщитьПользователю()
-    - Ternary operator ?()
-    - User-facing string literals without НСтр("ru = '...'")
-    - ТипЗнч() on fixed-contract return value
-    - ЗначениеЗаполнено() on field guaranteed by contract/metadata
-    - "Defensive cake" (stacked checks on same value where one is subsumed by another — any contract type)
-    - ЭтаФорма instead of ЭтотОбъект in ОписаниеОповещения
-    - Оповестить()/ОповеститьОбИзменении() in server context (client-only)
-    - Method name contradicts compilation directive
-    - Попытка/Исключение wrapping fixed-contract field/method access
-    - Попытка/Исключение wrapping deterministic operation (no external factor — rule 20)
-    - Попытка/Исключение with silent degradation fallback (rule 20)
-    - Попытка/Исключение without logging, exception not re-raised (rule 20)
-    - Excessive info logging: ЗаписьЖурналаРегистрации with Информация/Примечание inside loop or 3+ info-level calls in single procedure
+10. Specific 1C patterns: → see AP-002..AP-014 in anti-pattern registry (category 16)
+    Remain inline:
+    - Ternary operator ?() — MEDIUM
+    - User-facing string literals without НСтр("ru = '...'") — MEDIUM
+    - Excessive info logging inside loop or 3+ info-level calls — LOW
 
-11. Band-aid detection:
-    - Defensive null/undefined check without root cause analysis
-    - Try/Except wrapping error instead of preventing it
-    - Flag/parameter to skip problematic code path
-    - Logic duplicated with minor variation instead of fixing original
-    - TODO/FIXME admitting temporary fix
-    - Defensive check on fixed-contract source (report under category 10 only, do not duplicate)
-    - "Defensive cake" pattern (report under category 10 only, do not duplicate)
+11. Band-aid detection: → see AP-016 in anti-pattern registry (category 16)
+    Remain inline:
+    - Design-prescribed anti-pattern (tag: design-prescribed)
 
 12. Release readiness (prerelease only):
     - Typos and mixed Cyrillic/Latin in user-facing strings
@@ -427,12 +405,11 @@ status: NOT_CONNECTED
     - Попытка/Исключение without logging — see category 10 (always-checked); do NOT duplicate
 
 13. Transactions and locking:
-    - НачатьТранзакцию() without matching ЗафиксироватьТранзакцию()/ОтменитьТранзакцию() in same scope
-    - НачатьТранзакцию() without Попытка/Исключение block
-    - Missing ОтменитьТранзакцию() in Исключение of transactional Попытка
-    - User interaction (ПоказатьВопрос, Предупреждение) inside transaction
-    - Read-then-write without БлокировкаДанных in concurrent scenario
-    - Nested НачатьТранзакцию() without justification
+    AP-015: Transaction without safety pattern — CRITICAL (see anti-pattern registry)
+    Remain inline:
+    - User interaction (ПоказатьВопрос, Предупреждение) inside transaction — HIGH
+    - Read-then-write without БлокировкаДанных in concurrent scenario — HIGH
+    - Nested НачатьТранзакцию() without justification — MEDIUM
 
 14. Resource leaks:
     - COMОбъект (Новый COMОбъект()) without Попытка/Исключение ensuring release
@@ -447,6 +424,15 @@ status: NOT_CONNECTED
     - Comment "Устарела:" / "Deprecated" or #Область УстаревшиеПроцедурыИФункции → MEDIUM/LOW
     - Obsolete procedure still called from non-obsolete code → HIGH
     - Unused parameter (never referenced in body) → LOW
+
+16. Anti-pattern registry (reviewer-only, NOT loaded for writer):
+    - Read `.cursor/rules/bsl-antipatterns.mdc` (index with AP-NNN IDs and detection rules).
+    - For each AP-NNN: check reviewed code against detection rule in the index.
+    - If detection rule matches: Read full card from `.cursor/docs/antipatterns/bsl-antipatterns.md`
+      for examples and fix guidance.
+    - Report finding with AP-NNN ID for traceability.
+    - Anti-patterns are NOT auto-loaded for writer to avoid misinterpretation
+      of BAD/GOOD examples as coding instructions.
 ```
 
 ### Phase 3: Context Analysis
@@ -987,5 +973,5 @@ RLM NOT_CONNECTED — секция опциональна.
 
 ---
 
-**Last updated**: 2026-03-06  
-**Version**: 1.6
+**Last updated**: 2026-03-12  
+**Version**: 1.7 | **Changes**: Extracted inline anti-patterns to AP-NNN registry (categories 10, 11, 13; Phase 2 items 4, 10, 11, 13). Added step 16 (anti-pattern registry read).

@@ -121,6 +121,24 @@ If step 3 loaded a trace (PFF/TRACE file) or an error stack with 3+ call lines:
 
 7. Merge results into step 6 (Root cause): Verified facts and Hypotheses come from trace-analyst output, enriched by VQ verification (step 4) and supplemented by explorer (step 5).
 
+7.5. **Anti-pattern detection (optional).**
+   After RCA is established, evaluate whether the root cause represents a **generalizable anti-pattern** that could recur in other code.
+   Three criteria (ALL must be met):
+   - **Повторяемость**: паттерн может встретиться в другом коде (не уникален для данного модуля/сценария).
+   - **Пробел в ревью**: текущий ревьювер НЕ обнаружит этот паттерн (нет AP-NNN в `.cursor/rules/bsl-antipatterns.mdc`).
+   - **Обобщаемость**: можно сформулировать абстрактный принцип (без привязки к конкретному change/модулю).
+
+   If all three criteria are met:
+   - Inform user: «Ситуация [описание] тянет на антипаттерн — зарегистрируем? [Да / Нет]»
+   - User may also directly ask: «зарегистрируй антипаттерн».
+   - On confirmation:
+     1. Grep `.cursor/docs/antipatterns/bsl-antipatterns.md` for existing similar AP.
+     2. Determine next AP-NNN ID.
+     3. Formulate generalized principle (abstract, not tied to current incident).
+     4. Add full card to `.cursor/docs/antipatterns/bsl-antipatterns.md`.
+     5. Add index entry to `.cursor/rules/bsl-antipatterns.mdc`.
+   - On rejection: note in debug.md (section «Anti-pattern considered but not registered»).
+
 ### 4) Investigate in codebase (read-only)
 
 If step 3.5 was already run (trace analyzed by subagents), use their output as the basis; do not duplicate manual search.

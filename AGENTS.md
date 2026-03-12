@@ -74,6 +74,12 @@ Quality Controller (шаг 7.6): фазовая классификация за�
 ## Стандарты BSL
 `.cursor/rules/1c-coding-standards.mdc` — file-scoped (`**/*.bsl`): структура, именование, запросы, Попытка, защитные проверки, валидация имён метаданных по XML-выгрузке.
 
+## Реестр антипаттернов BSL
+`.cursor/rules/bsl-antipatterns.mdc` — краткий индекс (AP-NNN ID, detection rule, severity). **Reviewer-only** (`alwaysApply: false`, без `globs`), не загружается для writer. Writer не должен видеть антипаттерны — они могут быть неверно интерпретированы как паттерны.
+`.cursor/docs/antipatterns/bsl-antipatterns.md` — полные карточки с примерами BAD/GOOD, ссылками на стандарты.
+Пополняется из `/opsx:debug` (шаг 7.5 — Anti-pattern detection) по подтверждению пользователя.
+Ревьювер читает индекс динамически (Phase 2, step 16 в `onec-code-reviewer.md`). Новые AP подхватываются автоматически без правки агентских промптов.
+
 ## Выбор модели
 `.cursor/rules/model-selection.mdc` — Opus для критичных задач, Sonnet/fast для остального.
 
