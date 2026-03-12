@@ -2,10 +2,14 @@
 name: /opsx-verify
 id: opsx-verify
 category: Workflow
-description: Verify implementation matches change artifacts before archiving
+description: Universal quality gate — pre-apply (artifact quality, task specificity, gates) and post-apply (implementation completeness, correctness, coherence)
 ---
 
-Verify that an implementation matches the change artifacts (specs, tasks, design).
+Universal quality gate for OpenSpec changes. Automatically determines mode:
+- **Pre-apply**: artifact format, task quality and specificity, Architect Gate, Design Review, TZ Review, project constraints
+- **Post-apply**: implementation completeness, correctness, coherence
+
+Offers auto-remediation of found issues.
 
 **FIRST AND ONLY action**: Read `.cursor/skills/openspec-verify-change/SKILL.md`.
 Do NOT read any other files, traces, or modules in the same tool call.

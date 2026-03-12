@@ -101,59 +101,6 @@ Fast-forward through artifact creation - generate everything needed to start imp
          `Связанные ADR: ADR-NNNN (краткое описание) — [ссылка]`
       4. If relevant ADRs found and the proposed approach contradicts an existing ADR — note this explicitly in design.md Risks section
 
-   e. **Design Gate (after design artifact)**:
-      After creating the `design` artifact, check architect-gate triggers mechanically:
-
-      1. **Check objective markers** (Glob/Grep, not subjective assessment):
-         - Glob `reports/architecture-*.md` in change dir and `temp/reports/` — architect report exists?
-         - Glob `reports/trace-analysis-*.md`, `reports/exploration-*.md` — analytical agents were used?
-         - Glob `temp/explore-summary-*.md` or `reports/explore-summary-*.md` — explore summary exists?
-         - Grep design.md for: «базовая процедура», «платформа», «повторная запись», «перехват», «после вызова базы», «&Вместо», «&После»
-      2. **Check semantic and structural triggers** from `architect-gate.mdc`
-      3. **Decision matrix:**
-         - **Triggers fired AND `architecture-*.md` found** → continue (architect already reviewed)
-         - **Triggers fired AND NO `architecture-*.md`** → **PAUSE.** AskQuestion to USER (not agent decision):
-           ```
-           "Design создан. Сработали маркеры Architect Gate:
-           - [list of triggered markers]
-           Архитектурный анализ не найден.
-           1. Запустить архитектора сейчас [Рекомендуется]
-           2. Вернуться в explore для архитектурного анализа
-           3. Продолжить без архитектора (на ваш риск)"
-           ```
-           - Option 1 → call **onec-code-architect** to review design.md, save report, incorporate feedback
-           - Option 2 → STOP ff, suggest `/opsx:explore`
-           - Option 3 → continue, document user's decision in design.md
-         - **No triggers fired** → continue without pause
-
-   f. **Design Review Gate (после всех артефактов)**:
-      Когда все `applyRequires` артефакты готовы (перед шагом 5), проверить триггеры Design Review из `architect-gate.mdc` (секция DESIGN REVIEW ТРИГГЕРЫ):
-
-      1. Glob `reports/trace-analysis-*.md`, `reports/exploration-*.md` — суммарно ≥ 2 файла?
-      2. Grep design.md / proposal.md на маркеры bug fix (`исправь`, `ошибка`, `баг`, `fix`, `crash`, `не работает`, `падает`)
-      3. Grep design.md / proposal.md на `&ИзменениеИКонтроль`
-      4. Grep tasks.md на паттерны ветвления: `При отрицательн`, `Если в п.`, `Альтернатив`, `workaround`, `Иначе →`, `Иначе —`
-      5. Grep design.md на `вероятно`, `возможно`, `скорее всего`, `гипотеза` — и при этом отсутствует секция `## Hypotheses`
-
-      **Decision:**
-      - **Triggers fired AND `reports/design-review-*.md` NOT found** →
-        AskQuestion:
-        ```
-        "Артефакты созданы. Обнаружены маркеры сложности постановки:
-        - [перечисление сработавших триггеров]
-        Рекомендую ревью постановки (полнота, verified/hypothesis,
-        критерии приёмки, покрытие spec, риски).
-        1. Запустить ревью [Рекомендуется]
-        2. Пропустить, перейти к apply"
-        ```
-        - Option 1 → call **onec-code-architect** с фокусом на качество артефактов
-          (prompt: все артефакты текстом + фокусные вопросы из `architect-gate.mdc`).
-          Сохранить отчёт в `reports/design-review-YYYY-MM-DD.md`.
-          Внести рекомендованные правки уровня medium+ в артефакты.
-        - Option 2 → продолжить
-      - **Triggers NOT fired** → продолжить без паузы
-      - **`reports/design-review-*.md` found** → продолжить (уже проведено)
-
 6. **Show final status**
    ```bash
    openspec status --change "<name>"
@@ -165,7 +112,7 @@ After completing all artifacts, summarize:
 - Change name and location
 - List of artifacts created with brief descriptions
 - What's ready: "All artifacts created! Ready for implementation."
-- Prompt: "Run `/opsx:apply` or ask me to implement to start working on the tasks."
+- Prompt: "Рекомендуется: `/opsx:verify <name>` для проверки качества артефактов перед реализацией. Или сразу `/opsx:apply <name>` для начала реализации."
 
 **Artifact Creation Guidelines**
 

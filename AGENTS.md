@@ -3,7 +3,7 @@
 **Главный диспетчер:** `.cursor/rules/1c-agent-delegation.mdc` — HALT-условия + делегирование агентам.
 
 ## OpenSpec Workflow
-`.cursor/rules/sdd-workflow.mdc` — explore → new/ff → apply → verify → archive.
+`.cursor/rules/sdd-workflow.mdc` — explore → new/ff → verify → apply → verify → archive.
 Команды: `/opsx:explore`, `/opsx:new`, `/opsx:ff`, `/opsx:apply`, `/opsx:verify`, `/opsx:archive`, `/opsx:debug`, `/opsx:estimate`, `/opsx:prerelease-review`.
 Дополнительные: `/opsx:continue`, `/opsx:sync`, `/opsx:bulk-archive`, `/opsx:onboard`, `/init-project`.
 Паттерны агентов: `.cursor/skills/1c-agent-patterns/SKILL.md`.
@@ -22,7 +22,10 @@
 `.cursor/rules/1c-error-analysis.mdc` — trace-analyst → explorer/architect.
 
 ## Architect Gate
-`.cursor/rules/architect-gate.mdc` — единые триггеры архитектурного ревью (объективные маркеры, семантические, структурные). Проверяется в explore (шаг Decide), ff/new (Design Gate после design.md), apply (pre-flight check). Три рубежа: explore рекомендует, ff/new контролирует, apply предупреждает.
+`.cursor/rules/architect-gate.mdc` — единые триггеры архитектурного ревью (объективные маркеры, семантические, структурные). Проверяется в explore (шаг Decide), verify (pre-apply, основной рубеж), apply (soft redirect на verify). Два рубежа: explore рекомендует, verify контролирует.
+
+## Verify (универсальный quality gate)
+`.cursor/skills/openspec-verify-change/SKILL.md` — `/opsx:verify`. Pre-apply: формат tasks (чекбоксы, нумерация), качество задач (конкретность, пути к файлам, критерии приёмки, маркеры размытости), Architect Gate, Design Review, ТЗ Review, project constraints. Post-apply: completeness, correctness, coherence. Авто-устранение замечаний.
 
 ## Verified Cause Gate
 `.cursor/rules/verified-cause-gate.mdc` — root cause + impact перед фиксом.

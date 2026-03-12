@@ -8,15 +8,15 @@ alwaysApply: false
 ## FLOW
 
 ```
-explore → new/ff → apply → verify → archive
+explore → new/ff → verify → apply → verify → archive
 ```
 
 | Этап | Команда | Что происходит | Агенты |
 |------|---------|----------------|--------|
 | **Исследование** | `/opsx:explore` | Понять задачу, исследовать код, принять решения | onec-code-explorer, onec-code-architect |
-| **Создание change** | `/opsx:new` или `/opsx:ff` | proposal → design → specs → tasks | onec-code-architect (design) |
-| **Реализация** | `/opsx:apply` | Выполнение задач из tasks.md | onec-code-writer + onec-code-reviewer |
-| **Проверка** | `/opsx:verify` | Completeness, correctness, coherence | — |
+| **Создание change** | `/opsx:new` или `/opsx:ff` | proposal → design → specs → tasks | onec-code-architect (tasks) |
+| **Проверка** | `/opsx:verify` | Pre-apply: формат tasks, качество задач, Architect Gate, Design Review, ТЗ, project constraints. Post-apply: completeness, correctness, coherence. Авто-устранение замечаний | onec-code-architect (при устранении) |
+| **Реализация** | `/opsx:apply` | Выполнение задач из tasks.md. Soft redirect на verify если не проводился | onec-code-writer + onec-code-reviewer |
 | **Архивация** | `/opsx:archive` | Синхронизация specs, перенос в archive/ | — |
 | **Отладка** | `/opsx:debug` | RCA + fix plan в контексте change | onec-trace-analyst, onec-code-explorer |
 | **Предрелизное ревью** | `/opsx:prerelease-review` | Батчевый ревью расширения | onec-code-reviewer |
@@ -31,7 +31,7 @@ explore → new/ff → apply → verify → archive
 
 ## ПРИНЦИПЫ
 
-- Архитектура до кода: design.md ревьюируется architect-ом до реализации. Триггеры — `architect-gate.mdc`
+- Архитектура до кода: design.md ревьюируется architect-ом до реализации. Триггеры — `architect-gate.mdc`. Основная точка проверки — `/opsx:verify` (pre-apply режим)
 - Атомарные задачи с критериями приемки в tasks.md
 - BSL — только через агентов (onec-code-writer → onec-code-reviewer)
 - Для точечных правок (2–10 строк, 1 файл) — Light Mode (см. 1c-agent-delegation.mdc)
@@ -42,4 +42,4 @@ explore → new/ff → apply → verify → archive
 
 ---
 
-**Last updated:** 2026-03-06 | **Version:** 2.1 | **Changes:** алиасы команд («создай ЗНИ» = new+ff), ссылка на architect-gate.mdc
+**Last updated:** 2026-03-12 | **Version:** 2.2 | **Changes:** verify как универсальный quality gate (pre-apply + post-apply), flow обновлён: ff → verify → apply

@@ -49,53 +49,31 @@ Implement tasks from an OpenSpec change.
    - If `state: "all_done"`: congratulate, suggest archive
    - Otherwise: proceed to implementation
 
-4. **Read tasks + minimal context (lazy loading) + Architect Gate pre-flight check**
+4. **Read tasks + minimal context (lazy loading) + verify pre-flight**
 
    **Mandatory read:** tasks.md (navigation, progress, dependencies) + `openspec/project.md` (project-level constraints: allowed directories, editing rules).
    
    **Lazy reads (по необходимости):**
    - proposal.md — only on first run (for overview), skip on resume
-   - design.md — only if current task references an architectural decision, or for pre-flight check
+   - design.md — only if current task references an architectural decision
    - specs/ — only when verifying acceptance criteria
    
    Writer subagents receive **paths** to design.md and specs/ in their prompt and read needed sections independently. This keeps orchestrator context lean.
-   
-   **For pre-flight check:** read design.md (needed for Grep-based trigger checks below).
 
-   **Pre-flight check (после чтения tasks + design):**
+   **Pre-flight: verify check**
 
-   **A. Architect Gate (архитектурный подход):**
-   - Проверить триггеры из `architect-gate.mdc` по содержимому design.md и наличию reports/
-   - Glob `reports/architecture-*.md` в change dir и `temp/reports/`
-   - Если триггеры сработали И `architecture-*.md` отсутствует → предупреждение:
+   Glob `reports/verification-pre-*.md` or `reports/verification-mixed-*.md` in change dir.
+   - **If found** → show summary line from report (first CRITICAL/WARNING counts). Continue.
+   - **If NOT found** → soft warning:
      ```
-     "Внимание: сработали маркеры архитектурной сложности
-     ([перечисление]), но архитектурный анализ не найден.
-     Продолжить реализацию? [Да / Запустить архитектора / Вернуться в explore]"
+     "Pre-apply verify не проводился. Рекомендуется `/opsx:verify <name>`
+     для проверки качества артефактов (формат tasks, gates, конкретность задач).
+     [Запустить verify / Продолжить без]"
      ```
+     - Option 1 → STOP apply, suggest running `/opsx:verify <name>` first
+     - Option 2 → continue implementation
 
-   **B. Design Review Gate (качество постановки):**
-   - Проверить триггеры Design Review из `architect-gate.mdc` (секция DESIGN REVIEW ТРИГГЕРЫ):
-     1. Glob `reports/trace-analysis-*.md`, `reports/exploration-*.md` — суммарно ≥ 2?
-     2. Grep design.md / proposal.md на маркеры bug fix
-     3. Grep design.md / proposal.md на `&ИзменениеИКонтроль`
-     4. Grep tasks.md на паттерны ветвления
-     5. Grep design.md на hypothesis-маркеры без `## Hypotheses`
-   - Glob `reports/design-review-*.md` — ревью уже проводилось?
-   - Если триггеры сработали И `design-review-*.md` не найден → мягкое предупреждение:
-     ```
-     "Дополнительно: сработали маркеры ревью постановки ([перечисление]),
-     но ревью не проводилось. Это не блокирует реализацию.
-     Запустить ревью? [Да / Нет, продолжить]"
-     ```
-
-   **C. Project constraints check:**
-   Verify that tasks reference only directories allowed by project.md.
-   If any task targets a path outside allowed directories (e.g., cf/ when project.md restricts to cfe/) —
-   STOP, warn user: "Task X targets <path> which is outside allowed directories per project.md.
-   Rewrite task to use extension (cfe/) approach?"
-
-   Оба check (A, B) и C — последний рубеж, если explore и ff пропустили.
+   Verify check is advisory — does not block apply.
 
 5. **Show current progress**
 
