@@ -1,16 +1,16 @@
 ---
 name: openspec-verify-change
-description: Universal quality gate for OpenSpec changes. Pre-apply — artifact quality, task specificity, gates. Post-apply — implementation completeness, correctness, coherence.
+description: Universal quality gate for OpenSpec changes. Pre-apply — artifact quality, task specificity, phase coherence, TZ generation, gates. Post-apply — implementation completeness, correctness, coherence.
 license: MIT
 compatibility: Requires openspec CLI.
 metadata:
   author: openspec
-  version: "3.0"
+  version: "4.0"
   generatedBy: "1.1.1"
 ---
 
 Universal quality gate for OpenSpec changes. Works in two modes determined automatically:
-- **Pre-apply**: artifact format, task quality, manual config checklist, **mandatory architect readiness review**, Architect Gate, Design Review, TZ Review, project constraints
+- **Pre-apply**: artifact format, task quality, manual config checklist, **phase coherence (Quality Controller)**, **mandatory architect readiness review**, **TZ generation**, Architect Gate, Design Review, TZ Review, project constraints
 - **Post-apply**: implementation completeness, correctness, coherence
 
 **Input**: Optionally specify a change name. If omitted, check if it can be inferred from conversation context. If vague or ambiguous you MUST prompt for available changes.
@@ -72,7 +72,9 @@ Universal quality gate for OpenSpec changes. Works in two modes determined autom
    - **Artifact Format** (pre-apply, mixed)
    - **Task Quality** (pre-apply, mixed)
    - **Manual Configuration Sufficiency** (pre-apply, mixed) — structured checklist with proof
-   - **Task Readiness (Architect)** (pre-apply, mixed) — mandatory architect holistic assessment
+   - **Phase Coherence (Quality Controller)** (pre-apply, mixed) — phase classification, dependency graph, false start detection, rework risk
+   - **Task Readiness (Architect)** (pre-apply, mixed) — mandatory architect holistic assessment of realizability
+   - **TZ (Functional Requirements)** (pre-apply, mixed) — generated TZ document, gap analysis
    - **Gates** (pre-apply, mixed): Architect Gate, Design Review, TZ Review, Project Constraints
    - **Completeness** (post-apply, mixed)
    - **Correctness** (post-apply, mixed)
@@ -91,7 +93,7 @@ Universal quality gate for OpenSpec changes. Works in two modes determined autom
    - Scan for lines matching pattern `^- \d+\.\d+\s` (bare task without checkbox)
    - If bare tasks found:
      - Add CRITICAL: "Задачи без чекбоксов: N строк. apply/estimate/archive не смогут отслеживать прогресс"
-     - Set `autofix_checkboxes = true` for step 12
+     - Set `autofix_checkboxes = true` for step 17
 
    **6B. Task numbering:**
    - Tasks should follow `N.M` numbering within `## N. Group` sections
@@ -203,17 +205,51 @@ Universal quality gate for OpenSpec changes. Works in two modes determined autom
 
    **IMPORTANT:** The filled checklist table is the **proof** of this check. It MUST be included verbatim in the verification report (section "Полнота ручной конфигурации"). Writing "OK — design describes scenario" without the table is a verification failure.
 
-7.6. **Task Readiness Architect Review (MANDATORY)**
+7.6. **Quality Controller — Phase Coherence Review (MANDATORY)**
 
-   **This step executes ALWAYS in pre-apply and mixed modes.** It is not remediation — it is part of the verification pipeline. The architect (Opus model) provides the expert holistic assessment that mechanical checks cannot.
+   **This step executes ALWAYS in pre-apply and mixed modes.** Domain-agnostic assessment of task ordering, dependencies, and execution risk. Complements the architect's realizability review (step 7.7).
+
+   **Prepare repository state** (before calling the controller):
+   For each task in tasks.md that mentions a file path or object name:
+   - Glob the repository for the object/file
+   - Record: exists / does not exist / exists but empty (e.g., Form.xml with only `<form>` root)
+   - Record: if code file (`.bsl`) is non-empty while prerequisite tasks are still `- [ ]`
+
+   **What to pass to the Quality Controller:**
+   - Full text of: tasks.md, design.md, proposal.md
+   - Paths to specs/ files
+   - Checklist table from step 7.5 (if manual config markers were found), or "маркеров ручной конфигурации не найдено"
+   - List of issues from steps 7A-7E (if any), or "механических замечаний нет"
+   - Repository state (object/file existence and emptiness list)
+
+   **Quality Controller prompt** (use template from `1c-agent-patterns/SKILL.md`, section "Quality Controller — phase coherence review"):
+
+   Call via `Task(subagent_type="openspec-quality-controller")`. Agent file: `.cursor/agents/openspec-quality-controller.md` (model: Opus, readonly). The controller evaluates 4 criteria:
+   1. **Phase Classification** — classify every task as P0 (Infrastructure) / P1 (Specification-UI) / P2 (Implementation) / P3 (Integration) / P4 (Verification)
+   2. **Dependency Graph** — explicit refs between tasks, artifact deps (task uses object from another task), phase deps (implicit P2→P0)
+   3. **False Start Detection** — code exists but prerequisite task pending = CRITICAL; object exists but "create" task pending = WARNING
+   4. **Rework Risk** — P2 task depends on incomplete P1 spec = HIGH risk; depends on hypothesis = MEDIUM risk
+
+   **After receiving the controller's report:**
+   1. Save full report to `reports/quality-control-YYYY-MM-DD.md`.
+   2. Include verdict and phase classification table in the verification report (section "Фазовая когерентность (Quality Controller)").
+   3. Map each alert to verification issues:
+      - `false-start`, `phase-violation`, `cycle` → CRITICAL
+      - `rework-risk` HIGH → WARNING
+      - `rework-risk` MEDIUM, `missing-dependency` → SUGGESTION
+
+7.7. **Task Readiness Architect Review (MANDATORY)**
+
+   **This step executes ALWAYS in pre-apply and mixed modes.** It is not remediation — it is part of the verification pipeline. The architect provides the expert holistic assessment that mechanical checks cannot.
 
    **What to pass to the architect:**
    - Full text of: tasks.md, design.md, proposal.md
    - Paths to specs/ files (architect reads them)
    - Checklist table from step 7.5 (if manual config markers were found), or "маркеров ручной конфигурации не найдено"
    - List of issues from steps 7A-7E (if any), or "механических замечаний нет"
+   - Quality Controller result: phase classification table and alerts from step 7.6 (or "Quality Controller замечаний нет")
 
-   **Architect prompt** (use template from `1c-agent-patterns/SKILL.md`, section "Architect — task readiness review"):
+   **Architect prompt** (use template from `1c-agent-patterns/SKILL.md`, section "Architect — task readiness review (verify шаг 7.7)"):
 
    ```
    ## Задача
@@ -230,6 +266,7 @@ Universal quality gate for OpenSpec changes. Works in two modes determined autom
    - specs: <путь>
    - Чеклист ручной конфигурации (verify, шаг 7.5): <чеклист-таблица или «маркеров не найдено»>
    - Замечания механических проверок (verify, шаги 7A-7E): <список или «замечаний нет»>
+   - Фазовая когерентность (verify, шаг 7.6 Quality Controller): <фазовая таблица и alerts или «замечаний нет»>
 
    ## Критерии оценки
 
@@ -287,7 +324,28 @@ Universal quality gate for OpenSpec changes. Works in two modes determined autom
       - "Не реализуемо без уточнения" → CRITICAL
       - "Можно реализовать, но субоптимально / неоднозначно" → WARNING
 
-8. **Architect Gate Check**
+7.8. **TZ Generation (MANDATORY)**
+
+   **This step executes ALWAYS in pre-apply and mixed modes.** Generates a human-readable technical specification (ТЗ) document from change artifacts. The TZ serves as a functional requirements artifact oriented at stakeholder review. Gaps in TZ generation reveal gaps in source artifacts.
+
+   **Logic:**
+   1. Read the TZ prompt from `.cursor/skills/openspec-docs/prompts/change-tz.md`
+   2. Read all change artifacts: proposal.md, design.md, specs/\*/spec.md, latest `reports/architecture-*.md` (if any), latest `reports/exploration-*.md` (if any). Optionally `openspec/project.md` for product context.
+   3. Apply the prompt to generate the TZ document. The TZ is generated by the orchestrator (not a subagent) — this is cheaper than full `/opsx:doc-tz` with architect review.
+   4. **Verify completeness**: for each TZ section defined in the prompt template:
+      - If the section is filled with substantive content from artifacts → OK
+      - If a section cannot be filled (data absent in artifacts) → WARNING with indication of which artifact is incomplete
+      - If "Проблема" section is empty (no Why in proposal) → WARNING: "proposal.md не содержит обоснования (секция Why)"
+      - If "Критерии приёмки" section is empty (no scenarios in spec) → WARNING: "spec не содержит сценариев для критериев приёмки"
+   5. Run the prompt's built-in "Верификация артефактов" checks (contradictions, defaults analysis, completeness)
+   6. Save TZ to `openspec/changes/<name>/ТЗ.md`
+   7. Add TZ generation remarks (if any) to the verification report
+
+   **Report section:** `### ТЗ (функциональные требования)` — status (generated / generated with warnings), file path, list of gaps if any.
+
+   **If ТЗ.md already exists:** overwrite with fresh generation (verify always produces current state).
+
+9. **Architect Gate Check**
 
    Check triggers from `architect-gate.mdc`:
 
@@ -316,7 +374,7 @@ Universal quality gate for OpenSpec changes. Works in two modes determined autom
    - Triggers fired AND `architecture-*.md` exists → `OK (отчёт: <filename>)`
    - Triggers fired AND NO `architecture-*.md` → CRITICAL: "Сработали маркеры Architect Gate: [list]. Архитектурный анализ не найден. Рекомендация: запустить `/opsx:verify` с опцией устранения или onec-code-architect вручную"
 
-9. **Design Review Gate Check**
+10. **Design Review Gate Check**
 
    Check triggers from `architect-gate.mdc` (DESIGN REVIEW section):
    1. Glob `reports/trace-analysis-*.md` + `reports/exploration-*.md` — total >= 2?
@@ -334,7 +392,7 @@ Universal quality gate for OpenSpec changes. Works in two modes determined autom
    - Triggers fired AND `design-review-*.md` exists → `OK (отчёт: <filename>)`
    - Triggers fired AND no review → WARNING: "Сработали маркеры Design Review: [list]. Ревью постановки не проводилось. Рекомендация: запустить ревью"
 
-10. **TZ Review Check**
+11. **TZ Review Check**
 
     - Glob `ТЗ.md` in change dir
     - If not found → `N/A` (skip)
@@ -346,7 +404,7 @@ Universal quality gate for OpenSpec changes. Works in two modes determined autom
         - If high-severity remarks found → WARNING: "ТЗ содержит неустранённые замечания уровня [severity]"
         - If no high-severity → `OK`
 
-11. **Project Constraints Check**
+12. **Project Constraints Check**
 
     Read `openspec/project.md` and extract allowed directories (e.g., `cfe/` only, not `cf/`).
     For each task in tasks.md that mentions a file path:
@@ -359,7 +417,7 @@ Universal quality gate for OpenSpec changes. Works in two modes determined autom
 
 In **mixed** mode, post-apply checks apply **only to tasks marked `[x]`**.
 
-12. **Verify Completeness**
+13. **Verify Completeness**
 
     **Task Completion**:
     - Parse checkboxes: `- [ ]` (incomplete) vs `- [x]` (complete)
@@ -378,7 +436,7 @@ In **mixed** mode, post-apply checks apply **only to tasks marked `[x]`**.
         - Add CRITICAL issue: "Requirement not found: <requirement name>"
         - Recommendation: "Implement requirement X: <description>"
 
-13. **Verify Correctness**
+14. **Verify Correctness**
 
     **Requirement Implementation Mapping**:
     - For each requirement from delta specs:
@@ -397,7 +455,7 @@ In **mixed** mode, post-apply checks apply **only to tasks marked `[x]`**.
         - Add WARNING: "Scenario not covered: <scenario name>"
         - Recommendation: "Add test or implementation for scenario: <description>"
 
-14. **Verify Coherence**
+15. **Verify Coherence**
 
     **Design Adherence**:
     - If design.md exists in contextFiles:
@@ -419,7 +477,7 @@ In **mixed** mode, post-apply checks apply **only to tasks marked `[x]`**.
 
 ## Report and remediation
 
-15. **Generate Verification Report**
+16. **Generate Verification Report**
 
     **Summary Scorecard:**
     ```
@@ -462,6 +520,23 @@ In **mixed** mode, post-apply checks apply **only to tasks marked `[x]`**.
 
     (повторить для каждого маркера; при отсутствии маркеров — «маркеров не найдено»)
 
+    ### Фазовая когерентность (Quality Controller)
+
+    **Вердикт:** OK / WARNING / CRITICAL
+    **Полный отчёт:** reports/quality-control-YYYY-MM-DD.md
+
+    | Задача | Фаза | Зависит от | Статус |
+    |--------|------|-----------|--------|
+    | 1.1    | P0   | -         | OK     |
+    | 2.1    | P1   | 1.1       | OK     |
+    | 3.1    | P2   | 1.1       | OK     |
+    ...
+
+    Alerts:
+    - [CRITICAL] false-start: задача N.M (P2) — код существует, но предшественник K.L (P0) не завершён
+    - [WARNING] rework-risk: задача N.M (P2) зависит от незавершённой спецификации P1
+    ...
+
     ### Готовность к реализации (архитектор)
 
     **Вердикт:** ГОТОВО / ГОТОВО С ЗАМЕЧАНИЯМИ / НЕ ГОТОВО
@@ -477,6 +552,16 @@ In **mixed** mode, post-apply checks apply **only to tasks marked `[x]`**.
 
     Пробелы:
     - [CRITICAL/WARNING] ...
+
+    ### ТЗ (функциональные требования)
+
+    **Статус:** сгенерировано / сгенерировано с замечаниями
+    **Файл:** ТЗ.md
+
+    Замечания (при наличии):
+    - [WARNING] proposal.md не содержит обоснования (секция Why)
+    - [WARNING] spec не содержит сценариев для критериев приёмки
+    ...
 
     ### Gates
     | Gate | Статус | Детали |
@@ -508,7 +593,7 @@ In **mixed** mode, post-apply checks apply **only to tasks marked `[x]`**.
     - Only warnings → "Критичных замечаний нет. M предупреждений. Готов к apply/archive (с учётом замечаний)."
     - All clear → "Все проверки пройдены. Готов к apply/archive."
 
-16. **Offer remediation**
+17. **Offer remediation**
 
     If any CRITICAL or WARNING issues found, offer:
     ```
@@ -527,14 +612,17 @@ In **mixed** mode, post-apply checks apply **only to tasks marked `[x]`**.
     | Architect Gate not closed | Offer to run onec-code-architect for architecture review. Save report to `reports/architecture-verify-YYYY-MM-DD.md` |
     | Design Review not done | Offer to run onec-code-architect with design review focus. Save report to `reports/design-review-YYYY-MM-DD.md` |
     | Repo Consistency (WARNING from 7E) | Suggest rewriting task: «создать» → «доработать» / «наполнить содержимым» if object already exists |
-    | TZ review remarks | Suggest `/opsx:doc-tz <name>` to regenerate TZ |
+    | Phase violation / false start (QC 7.6) | Suggest reordering tasks in tasks.md to respect phase dependencies (P0→P1→P2→P3→P4). For false starts: suggest marking already-implemented code tasks as `[x]` or reverting premature implementation |
+    | Rework risk (QC 7.6) | Suggest completing prerequisite P1 specs in design.md before proceeding with dependent P2 tasks |
+    | TZ generation gaps (7.8) | Suggest completing the artifact indicated in the TZ gap (e.g., add Why to proposal, add scenarios to spec) |
+    | TZ review remarks | Suggest `/opsx:doc-tz <name>` to regenerate TZ with architect review |
     | Project constraints violation | Suggest rewriting tasks to target allowed directories |
     | Incomplete tasks (post-apply) | List remaining tasks, suggest `/opsx:apply <name>` |
     | Spec/design divergence (post-apply) | Suggest updating artifact or implementation |
 
     After remediation, re-run affected checks and update report.
 
-17. **Save verification report**
+18. **Save verification report**
 
     Save the report to `reports/verification-<mode>-YYYY-MM-DD.md` in the change directory,
     where `<mode>` is `pre`, `mixed`, or `post`.
@@ -555,7 +643,7 @@ In **mixed** mode, post-apply checks apply **only to tasks marked `[x]`**.
 - If only tasks.md exists: run format + quality checks; skip spec/design/gates checks
 - If tasks + design exist: add gate checks
 - If tasks + design + specs: full pre-apply + post-apply checks
-- If TZ absent: skip TZ review, don't flag
+- TZ is generated by verify (step 7.8); TZ Review gate (step 11) checks for prior ТЗ review reports
 - Always note which checks were skipped and why
 
 **Output Format**

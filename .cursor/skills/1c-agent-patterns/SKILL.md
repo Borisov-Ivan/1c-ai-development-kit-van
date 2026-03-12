@@ -294,9 +294,9 @@ Task(
 )
 ```
 
-### Architect — task readiness review (verify шаг 7.6)
+### Architect — task readiness review (verify шаг 7.7)
 
-Used by `/opsx:verify` step 7.6 — MANDATORY in every pre-apply verification. The architect evaluates holistic readiness: can the ЗНИ be implemented as-is by agents and users without returning for clarification?
+Used by `/opsx:verify` step 7.7 — MANDATORY in every pre-apply verification. The architect evaluates holistic readiness: can the ЗНИ be implemented as-is by agents and users without returning for clarification?
 
 ```
 Task(
@@ -373,6 +373,34 @@ Task(
 )
 ```
 
+### Quality Controller — phase coherence review (verify шаг 7.6)
+
+Used by `/opsx:verify` step 7.6 — MANDATORY in every pre-apply verification. Domain-agnostic assessment of task ordering, dependencies, and execution risk. Complements the architect's realizability review (step 7.7).
+
+**Agent file:** `.cursor/agents/openspec-quality-controller.md` (model: Opus, readonly). Role, evaluation criteria and output format defined in agent system prompt.
+
+```
+Task(
+  description="Quality Control [change-name]",
+  prompt="## Artifacts
+
+         - tasks: <path to tasks.md>
+         - design: <path to design.md>
+         - proposal: <path to proposal.md>
+         - specs: <path to specs/>
+         - Manual config checklist (verify step 7.5):
+           <checklist table or 'none found'>
+         - Mechanical check issues (verify steps 7A-7E):
+           <list or 'none'>
+         - Repository state: <list of existing objects/files
+           mentioned in tasks, with empty/non-empty status>
+
+         Save result to:
+         reports/quality-control-YYYY-MM-DD.md.",
+  subagent_type="openspec-quality-controller"
+)
+```
+
 ### Architect (декомпозиция задач)
 
 ```
@@ -392,6 +420,23 @@ Task(
          3. Зависимости между задачами (что сначала)
          4. Группировка по файлам (для параллелизации)
          5. Для каждой задачи: путь к файлу + что менять
+         
+         Дополнительные требования к порядку задач:
+         6. Группировать задачи по фазам выполнения:
+            - Сначала P0 (инфраструктура: создание объектов
+              метаданных, регистров, проверка соответствия)
+            - Затем P1 (спецификация UI: создание/доработка форм)
+            - Затем P2 (реализация: бизнес-логика, функции,
+              процедуры)
+            - Затем P3 (интеграция: встройка в существующие
+              процессы)
+            - В конце P4 (верификация: тесты, проверки)
+         7. Кодовые задачи (P2) не должны стоять раньше задач
+            создания объектов (P0), которые они используют
+         8. Задачи на логику формы (P2) не должны стоять раньше
+            задач на создание/доработку формы (P1)
+         9. Для каждой задачи с зависимостью от другой —
+            указать явно: «Зависимости: N.M»
          
          Используй переданный шаблон для структуры вывода.
          

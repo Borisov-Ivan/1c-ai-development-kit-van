@@ -25,13 +25,17 @@
 `.cursor/rules/architect-gate.mdc` — единые триггеры архитектурного ревью (объективные маркеры, семантические, структурные). Проверяется в explore (шаг Decide), verify (pre-apply, основной рубеж), apply (soft redirect на verify). Два рубежа: explore рекомендует, verify контролирует.
 
 ## Verify (универсальный quality gate)
-`.cursor/skills/openspec-verify-change/SKILL.md` — `/opsx:verify`. Pre-apply: формат tasks (чекбоксы, нумерация), качество задач (конкретность, пути к файлам, критерии приёмки, маркеры размытости), Architect Gate, Design Review, ТЗ Review, project constraints. Post-apply: completeness, correctness, coherence. Авто-устранение замечаний.
+`.cursor/skills/openspec-verify-change/SKILL.md` — `/opsx:verify`. Pre-apply: формат tasks, качество задач, полнота ручной конфигурации, **фазовая когерентность (Quality Controller — generalPurpose, домен-агностичный)**, **реализуемость (Architect)**, **генерация ТЗ (обязательный шаг)**, Architect Gate, Design Review, ТЗ Review, project constraints. Post-apply: completeness, correctness, coherence. Авто-устранение замечаний.
+Quality Controller (шаг 7.6): фазовая классификация задач P0-P4, граф зависимостей, false start detection, rework risk. Шаблон промпта: `1c-agent-patterns/SKILL.md` (секция «Quality Controller — phase coherence review»). ТЗ (шаг 7.8): генерация функциональных требований по промпту `openspec-docs/prompts/change-tz.md`, сохранение в `ТЗ.md` change.
 
 ## Verified Cause Gate
 `.cursor/rules/verified-cause-gate.mdc` — root cause + impact перед фиксом.
 
 ## Приоритет существующих механизмов
 `.cursor/rules/existing-mechanism-priority.mdc` — Preference Hierarchy, Mandatory Discovery, anti-patterns. Срабатывает при создании нового объекта или интеграции с базой. Обязательная секция Existing Mechanisms в design.md / architecture-отчёте.
+
+## Quality Controller (OpenSpec)
+`.cursor/agents/openspec-quality-controller.md` — домен-агностичный агент (Opus, readonly). Фазовая классификация задач (P0-P4), граф зависимостей, false start detection, rework risk. Вызывается из `/opsx:verify` шаг 7.6 через `Task(subagent_type="openspec-quality-controller")`. Шаблон промпта: `1c-agent-patterns/SKILL.md` (секция «Quality Controller — phase coherence review»).
 
 ## Сохранение отчётов субагентов
 `.cursor/rules/preserve-subagent-reports.mdc` — полные отчёты в reports/.
@@ -80,5 +84,5 @@
 `.cursor/docs/onec-infrastructure.md` — серверы 1С, PostgreSQL, HASP, Dev Container.
 
 ## Системные промпты агентов
-`.cursor/agents/*.md` — промпты для onec-code-writer, onec-code-reviewer, onec-code-architect, onec-code-explorer, onec-trace-analyst, onec-code-simplifier, onec-form-generator, onec-metadata-helper, onec-query-optimizer, onec-test-generator, onec-admin, mcp-deploy.
+`.cursor/agents/*.md` — промпты для onec-code-writer, onec-code-reviewer, onec-code-architect, onec-code-explorer, onec-trace-analyst, onec-code-simplifier, onec-form-generator, onec-metadata-helper, onec-query-optimizer, onec-test-generator, onec-admin, mcp-deploy, openspec-quality-controller.
 Changelog: `.cursor/agents/CHANGELOG.md`.

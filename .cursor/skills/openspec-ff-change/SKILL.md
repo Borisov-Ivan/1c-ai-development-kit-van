@@ -78,6 +78,9 @@ Fast-forward through artifact creation - generate everything needed to start imp
         Instead of writing tasks directly, delegate to **onec-code-architect** with the
         "Architect — task decomposition" template (`1c-agent-patterns/SKILL.md`).
         Pass: paths to proposal.md, design.md, specs/, and the `template` from instructions.
+        The architect's prompt includes phase ordering requirements (P0→P1→P2→P3→P4):
+        infrastructure tasks first, then UI/form specification, then implementation,
+        then integration, then verification. Explicit dependencies between tasks required.
         Architect reads files independently and returns tasks.md content.
         Save the result to `outputPath`.
       - **All other artifacts**: Create the artifact file using `template` as the structure
@@ -101,6 +104,28 @@ Fast-forward through artifact creation - generate everything needed to start imp
          `Связанные ADR: ADR-NNNN (краткое описание) — [ссылка]`
       4. If relevant ADRs found and the proposed approach contradicts an existing ADR — note this explicitly in design.md Risks section
 
+   e. **Design Gate (MANDATORY — after design, before specs/tasks)**:
+
+      After the `design` artifact is created and written, **before** proceeding to `specs` or `tasks`:
+
+      1. Check triggers from `architect-gate.mdc` on the just-created design.md:
+         - **Objective markers**: Grep design.md for bug fix markers, base procedure interception, new metadata objects
+         - **Semantic triggers**: Grep for `&Вместо`, `&После`, `&Перед`; missing `## Existing Mechanisms` or `## Design Rationale` when integration is described
+         - **Structural triggers**: >1 file affected, >10 lines of change, contract/API changes
+      2. Check if `architecture-*.md` already exists in `reports/` (from prior explore session)
+      3. **If triggers fired AND no architecture report**:
+         - **MANDATORY PAUSE** — AskQuestion:
+           ```
+           Design создан. Сработали триггеры Architect Gate: [list].
+           Рекомендуется архитектурное ревью перед продолжением.
+           1. Запустить архитектора
+           2. Пропустить (задокументировать отказ)
+           ```
+         - Option 1 → delegate to `onec-code-architect` with design review brief. Save report to `reports/architecture-ff-YYYY-MM-DD.md`. If architect suggests design changes — apply them to design.md, show diff to user.
+         - Option 2 → document skip: add note to design.md footer: `<!-- Architect Gate: triggers [...] fired, skipped by user at ff -->`
+      4. **If triggers fired AND architecture report exists** → OK, continue
+      5. **If no triggers fired** → continue without pause
+
 6. **Show final status**
    ```bash
    openspec status --change "<name>"
@@ -112,7 +137,7 @@ After completing all artifacts, summarize:
 - Change name and location
 - List of artifacts created with brief descriptions
 - What's ready: "All artifacts created! Ready for implementation."
-- Prompt: "Рекомендуется: `/opsx:verify <name>` для проверки качества артефактов перед реализацией. Или сразу `/opsx:apply <name>` для начала реализации."
+- Prompt: "Рекомендуется: `/opsx:verify <name>` для проверки качества артефактов (фазовая когерентность, ТЗ, реализуемость, gates). Или сразу `/opsx:apply <name>` для начала реализации."
 
 **Artifact Creation Guidelines**
 

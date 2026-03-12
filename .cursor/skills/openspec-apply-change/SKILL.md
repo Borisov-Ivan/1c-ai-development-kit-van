@@ -83,15 +83,26 @@ Implement tasks from an OpenSpec change.
    - Remaining tasks overview
    - Dynamic instruction from CLI
 
-5.5 **Analyze parallelization**
+5.5 **Analyze parallelization (file + phase dependencies)**
 
-   Before starting implementation, group tasks by file dependencies:
+   Before starting implementation:
+
+   **Phase-aware ordering:**
+   1. Glob `reports/quality-control-*.md` in change dir
+   2. If found — read the phase classification table and dependency graph from the most recent report
+   3. Group tasks by phase AND file dependencies:
+      - **Phase dependencies** (from Quality Controller report): P0 tasks before P1, P1 before P2, P2 before P3, P3 before P4. Tasks in phase P(N) cannot start until their dependencies in P(N-1) are complete.
+      - **File dependencies** (existing logic): tasks touching different files within the same phase = independent = can run in parallel; tasks touching the same file = sequential
+   4. Display groups with phase annotations:
+      - "P0: tasks 1.1, 1.2 (infrastructure, run first)"
+      - "P1: task 2.1 (form spec, after P0)"
+      - "P2: tasks 2.2-2.5, 3.1-3.2 (implementation, after P1; parallel by file)"
+      - "P3: tasks 3.3-3.6 (integration, after P2)"
+      - "P4: tasks 4.1-4.4 (verification, last)"
+
+   **If no Quality Controller report found** — fall back to file-only parallelization:
    - Tasks touching different files = independent = can run in parallel
    - Tasks touching the same file = sequential
-
-   Display groups, e.g.:
-   - "Parallel group A: tasks 2.3, 3.1, 4.1 (different files)"
-   - "Sequential: task 2.1 before 2.2 (same module)"
 
    Launch up to 3 independent tasks in parallel via Task tool when applicable.
 

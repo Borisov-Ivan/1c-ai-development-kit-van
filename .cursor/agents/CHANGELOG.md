@@ -1,5 +1,13 @@
 # Changelog — 1C Agent Ecosystem
 
+## [3.0] - 2026-03-12
+
+### Added (openspec-quality-controller)
+- New agent: domain-agnostic OpenSpec Quality Controller (model: Opus, readonly)
+- Phase classification (P0-P4), dependency graph, false start detection, rework risk assessment
+- Called from `/opsx:verify` step 7.6 via `Task(subagent_type="openspec-quality-controller")`
+- Replaces previous `generalPurpose` call with guaranteed Opus model via agent file
+
 ## [2.0] - 2026-03-08
 
 ### Changed (onec-code-explorer)
