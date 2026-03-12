@@ -123,12 +123,28 @@ Implement tasks from an OpenSpec change.
      ```
    - НЕ выбирать ветку автоматически. Решает пользователь.
 
+   **Task Dispatch (для каждой задачи перед реализацией):**
+
+   Классифицировать задачу по типу и назначить исполнителя:
+
+   | Тип задачи | Маркеры в тексте задачи | Исполнитель |
+   |---|---|---|
+   | BSL-код (новая логика, правка процедур) | «реализовать», «добавить», «доработать» + путь к .bsl | **onec-code-writer** + **onec-code-reviewer** после |
+   | Форма (Form.xml) | «форму», «реквизиты формы», «элементы формы», «Form.xml» | **onec-form-generator** или скилл 1c-forms через агента |
+   | Запрос 1С | «запрос», «оптимизировать запрос» | **onec-query-optimizer** |
+   | Верификация метаданных | «проверить соответствие», «проверить наличие» | Оркестратор (Glob/Grep/Read — только проверка, не реализация) |
+   | Ручной тест | «ручной тест», «убедиться» | Пропустить (отметить как manual, не выполнять) |
+   | Создание метаданных | «создать регистр», «создать справочник», «создать форму» (scaffold) | **СТОП** — блокер пользователю (`1c-no-metadata-creation.mdc`) |
+
+   **HALT:** Оркестратор НЕ реализует задачи типов BSL-код и Форма самостоятельно. Оркестратор готовит промпт и делегирует. Прямое использование Write/StrReplace для .bsl и прямая генерация JSON-спецификаций форм для form-compile — запрещены. Для форм: передать design-спецификацию агенту onec-form-generator или описать задачу для скилла 1c-forms; агент сам интерпретирует spec и генерирует артефакт. Ref: `1c-agent-delegation.mdc`, `1c-utility-agents.mdc`.
+
    **Task loop:**
 
    For each pending task:
    - Show which task is being worked on
-   - Make the code changes required
-   - Keep changes minimal and focused
+   - **Classify** (Task Dispatch table above) — announce type and executor
+   - **Delegate** to the designated executor (agent or skill)
+   - Orchestrator role: prepare prompt with context, delegate, spot-check result
    - **Spot-check (post-verification):** After the agent reports completion, verify the change: Grep for a pattern that confirms the fix (e.g. after "replace ТекущаяДата with ТекущаяДатаСеанса" → Grep for `ТекущаяДата()` in that file must return 0 matches). For batch tasks (5+ files), spot-check at least 3 files (first, middle, last in the list). If the result does not match expectations → STOP, report to user, do NOT mark task complete.
    - Mark task complete in the tasks file: `- [ ]` → `- [x]`
    - **If this was a verification/decision task** (identified in Conditional Task Detection) → trigger ОБЯЗАТЕЛЬНАЯ ПАУЗА above before proceeding
@@ -210,6 +226,9 @@ What would you like to do?
 - Update task checkbox immediately after completing each task
 - Pause on errors, blockers, or unclear requirements - don't guess
 - Use contextFiles from CLI output, don't assume specific file names
+- **Task Dispatch:** classify each task before implementation; delegate to the correct executor per dispatch table. Orchestrator MUST NOT implement BSL or Form tasks directly — only prepare context and delegate.
+- **Form tasks:** delegate to onec-form-generator or use 1c-forms skills via agent; do not construct JSON specs or call form-compile directly.
+- Reference: `1c-agent-delegation.mdc` (BSL gate), `1c-utility-agents.mdc` (forms, queries, tests).
 
 **Fluid Workflow Integration**
 
