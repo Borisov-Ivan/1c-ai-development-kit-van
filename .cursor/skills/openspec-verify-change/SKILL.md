@@ -5,12 +5,12 @@ license: MIT
 compatibility: Requires openspec CLI.
 metadata:
   author: openspec
-  version: "2.0"
+  version: "3.0"
   generatedBy: "1.1.1"
 ---
 
 Universal quality gate for OpenSpec changes. Works in two modes determined automatically:
-- **Pre-apply**: artifact format, task quality, Architect Gate, Design Review, TZ Review, project constraints
+- **Pre-apply**: artifact format, task quality, manual config checklist, **mandatory architect readiness review**, Architect Gate, Design Review, TZ Review, project constraints
 - **Post-apply**: implementation completeness, correctness, coherence
 
 **Input**: Optionally specify a change name. If omitted, check if it can be inferred from conversation context. If vague or ambiguous you MUST prompt for available changes.
@@ -71,6 +71,8 @@ Universal quality gate for OpenSpec changes. Works in two modes determined autom
    Create a report structure with sections:
    - **Artifact Format** (pre-apply, mixed)
    - **Task Quality** (pre-apply, mixed)
+   - **Manual Configuration Sufficiency** (pre-apply, mixed) — structured checklist with proof
+   - **Task Readiness (Architect)** (pre-apply, mixed) — mandatory architect holistic assessment
    - **Gates** (pre-apply, mixed): Architect Gate, Design Review, TZ Review, Project Constraints
    - **Completeness** (post-apply, mixed)
    - **Correctness** (post-apply, mixed)
@@ -129,11 +131,21 @@ Universal quality gate for OpenSpec changes. Works in two modes determined autom
    - `какой-либо`, `подобн` — WARNING: which one?
    - `(или ...)` — WARNING: alternatives not resolved
    - `переиспользовать логику X или Y` — CRITICAL: decision not made
+   - `X/Y` (слэш между существительными рядом с глаголами действия: `вернуть`, `использовать`, `установить`, `записать`) — WARNING: альтернатива не разрешена
+   - `Неопределено`, `Null`, `""`, `пустая строка`, `пустое значение` без указания контракта возврата — CRITICAL: какой контракт возврата?
+   - `X или Y` при двух глаголах действия (`добавить X или получать Y`, `создать X или использовать Y`) — CRITICAL: решение не принято
 
    For each found marker: report the task number, the marker, and a recommendation to clarify.
 
    **7D. Atomicity check:**
    If a single task line (before sub-items) contains 3+ distinct verbs of action (`создать`, `реализовать`, `добавить`, `обернуть`, `проверить`, etc.): WARNING "task may not be atomic — consider splitting".
+
+   **7E. Repo Consistency:**
+   For tasks containing «создать» + object type (`регистр`, `обработк`, `справочник`, `документ`, `форм`):
+   - Extract the object name from the task description
+   - Glob the repository for a directory or file matching that name (e.g., `**/InformationRegisters/<Name>`, `**/DataProcessors/<Name>`, `**/Catalogs/<Name>`)
+   - If object **already exists**: WARNING — "Задача N.M говорит «создать X», но X уже существует в репозитории (`path`). Уточнить: «доработать» / «наполнить содержимым»?"
+   - If object **does not exist**: OK (consistent with «создать»)
 
    **Reference format** (for recommendations):
    ```
@@ -145,6 +157,135 @@ Universal quality gate for OpenSpec changes. Works in two modes determined autom
        * Проверка 2
      - **Зависимости:** N.M, N.M
    ```
+
+7.5. **Manual Configuration Sufficiency Check (structured checklist)**
+
+   **7.5A. Find markers.** Grep tasks.md (case-insensitive) for manual configuration markers:
+   `создать в расширении`, `добавить форму`, `создать обработку`, `создать регистр`, `добавить реквизит`, `создать справочник`, `создать документ`, `форму записи`, `форму списка`
+
+   If no markers found → record "маркеров ручной конфигурации не найдено", skip to 7.6.
+
+   **7.5B. Classify each marker** by object type: **Metadata**, **Form**, or **Attributes**.
+
+   **7.5C. For each marker — build and fill a checklist table.** For every row, put a **literal quote** from design.md or `ОТСУТСТВУЕТ`. A business-scenario description (e.g. "выбор ящика → авторизация → запись") is NOT a form description — mark as `ОТСУТСТВУЕТ` for Form rows.
+
+   Checklist by object type:
+
+   **Metadata** (РС, справочник, документ, обработка):
+
+   | Элемент | Требование | Цитата из design / статус |
+   |---|---|---|
+   | Имя объекта | Точное имя объекта метаданных | *цитата* или `ОТСУТСТВУЕТ` |
+   | Реквизиты / измерения / ресурсы | Имя, тип, длина — для каждого | *цитата* или `ОТСУТСТВУЕТ` |
+   | Подсистема | В какую подсистему включить | *цитата* или `ОТСУТСТВУЕТ` |
+
+   **Form** (форма обработки, форма документа, форма РС):
+
+   | Элемент | Требование | Цитата из design / статус |
+   |---|---|---|
+   | Группы | Перечень групп (шаги / страницы / закладки) с назначением | *цитата* или `ОТСУТСТВУЕТ` |
+   | Поля | Перечень полей: имя, тип/привязка данных, видимость/доступность | *цитата* или `ОТСУТСТВУЕТ` |
+   | Таблицы | Имя таблицы, перечень колонок | *цитата* или `ОТСУТСТВУЕТ` |
+   | Команды / кнопки | Перечень с описанием действий | *цитата* или `ОТСУТСТВУЕТ` |
+   | UX-сценарий | Пошаговое: что пользователь видит и делает на каждом шаге | *цитата* или `ОТСУТСТВУЕТ` |
+
+   **Attributes** (реквизиты объекта):
+
+   | Элемент | Требование | Цитата из design / статус |
+   |---|---|---|
+   | Имя | Точное имя реквизита | *цитата* или `ОТСУТСТВУЕТ` |
+   | Тип | Тип данных, длина | *цитата* или `ОТСУТСТВУЕТ` |
+   | Назначение | Зачем нужен | *цитата* или `ОТСУТСТВУЕТ` |
+
+   **7.5D. Assessment (strict rule):**
+   - Any cell = `ОТСУТСТВУЕТ` → **CRITICAL**: "Задача N.M требует ручной конфигурации (`маркер`), но в design.md нет: [перечень ОТСУТСТВУЕТ-элементов]. Рекомендация: дополнить design секцией с полным описанием."
+   - All cells filled with quotes → OK
+
+   **IMPORTANT:** The filled checklist table is the **proof** of this check. It MUST be included verbatim in the verification report (section "Полнота ручной конфигурации"). Writing "OK — design describes scenario" without the table is a verification failure.
+
+7.6. **Task Readiness Architect Review (MANDATORY)**
+
+   **This step executes ALWAYS in pre-apply and mixed modes.** It is not remediation — it is part of the verification pipeline. The architect (Opus model) provides the expert holistic assessment that mechanical checks cannot.
+
+   **What to pass to the architect:**
+   - Full text of: tasks.md, design.md, proposal.md
+   - Paths to specs/ files (architect reads them)
+   - Checklist table from step 7.5 (if manual config markers were found), or "маркеров ручной конфигурации не найдено"
+   - List of issues from steps 7A-7E (if any), or "механических замечаний нет"
+
+   **Architect prompt** (use template from `1c-agent-patterns/SKILL.md`, section "Architect — task readiness review"):
+
+   ```
+   ## Задача
+
+   Оцени готовность ЗНИ `<name>` к реализации. Не детали кода — целостная оценка:
+   можно ли по этим артефактам реализовать ЗНИ силами агентов (writer, form-generator)
+   и пользователя (ручная конфигурация) без возвратов на уточнение?
+
+   ## Артефакты
+
+   - proposal: <путь>
+   - design: <путь>
+   - tasks: <путь>
+   - specs: <путь>
+   - Чеклист ручной конфигурации (verify, шаг 7.5): <чеклист-таблица или «маркеров не найдено»>
+   - Замечания механических проверок (verify, шаги 7A-7E): <список или «замечаний нет»>
+
+   ## Критерии оценки
+
+   Для каждого критерия — вердикт (OK / GAP) и краткое обоснование:
+
+   1. **Реализуемость кодовых задач.** Может ли writer (1С-разработчик по промпту)
+      реализовать каждую задачу из tasks.md, имея только design.md + spec + текст задачи?
+      Есть ли задачи, где непонятно ЧТО делать или ГДЕ делать?
+
+   2. **Реализуемость форм и метаданных.** Может ли form-generator построить каждую форму
+      по описанию в design? Может ли пользователь создать каждый объект метаданных
+      без дополнительных вопросов? Для форм: описаны ли элементы (группы, поля,
+      таблицы, команды), UX-сценарий?
+
+   3. **Разрешённость решений.** Все ли «или»/«/» разрешены? Есть ли неопределённые
+      контракты возврата? Есть ли задачи с двумя путями реализации без выбора?
+
+   4. **Полнота покрытия.** Покрывают ли задачи все requirements из spec?
+      Есть ли пробелы — требование описано, но задачи на него нет?
+
+   5. **Согласованность.** Нет ли противоречий между tasks и design? Между tasks и spec?
+      Совпадают ли «создать/доработать» в tasks с реальным состоянием репозитория?
+
+   ## Формат ответа
+
+   ### Вердикт
+
+   ГОТОВО / ГОТОВО С ЗАМЕЧАНИЯМИ / НЕ ГОТОВО
+
+   ### Оценка по критериям
+
+   | # | Критерий | Вердикт | Обоснование |
+   |---|----------|---------|-------------|
+   | 1 | Реализуемость кодовых задач | OK/GAP | ... |
+   | 2 | Реализуемость форм и метаданных | OK/GAP | ... |
+   | 3 | Разрешённость решений | OK/GAP | ... |
+   | 4 | Полнота покрытия | OK/GAP | ... |
+   | 5 | Согласованность | OK/GAP | ... |
+
+   ### Пробелы (только при GAP)
+
+   Для каждого GAP:
+   - Задача / артефакт
+   - Что отсутствует / неоднозначно
+   - Рекомендация (что дополнить, где)
+
+   НЕ НУЖНО: ревью архитектуры, оценка рисков, альтернативные подходы.
+   Только: можно ли реализовать as-is.
+   ```
+
+   **After receiving the architect's report:**
+   1. Save full report to `reports/task-readiness-review-YYYY-MM-DD.md`.
+   2. Include verdict and criteria table in the verification report (section "Готовность к реализации (архитектор)").
+   3. Map each GAP to verification issues:
+      - "Не реализуемо без уточнения" → CRITICAL
+      - "Можно реализовать, но субоптимально / неоднозначно" → WARNING
 
 8. **Architect Gate Check**
 
@@ -183,6 +324,7 @@ Universal quality gate for OpenSpec changes. Works in two modes determined autom
    3. Grep design.md / proposal.md for `&ИзменениеИКонтроль`
    4. Grep tasks.md for conditional branching: `При отрицательн`, `Если в п.`, `Альтернатив`, `workaround`, `Иначе →`, `Иначе —`
    5. Grep design.md for `вероятно`, `возможно`, `скорее всего`, `гипотеза` without `## Hypotheses` section
+   6. Grep tasks.md for manual config markers (`создать в расширении`, `добавить форму`, `создать обработку`, `создать регистр`, `добавить реквизит`, `создать справочник`) + check design.md for exhaustive instructions (names, types, form elements). If tasks require manual config but design lacks full description → trigger fires
 
    **Gate closure check:**
    - Glob `reports/design-review-*.md` in change dir
@@ -294,8 +436,47 @@ In **mixed** mode, post-apply checks apply **only to tasks marked `[x]`**.
     ### Качество задач
     - [CRITICAL] N.M — нет пути к файлу, нет критериев приёмки
     - [WARNING] N.M — размытость: «или аналог ...»
+    - [WARNING] N.M — «создать X», но X уже существует (repo consistency)
     - [SUGGESTION] N.M — рекомендуется разбить на 2 задачи
     ...
+
+    ### Полнота ручной конфигурации (чеклист шага 7.5)
+
+    **Задача N.M** — маркер: `создать обработку` — тип: Metadata
+
+    | Элемент | Требование | Цитата из design / статус |
+    |---|---|---|
+    | Имя объекта | Точное имя | «КД_НастройкаМЧД» |
+    | Реквизиты | Имя, тип, длина | ... или `ОТСУТСТВУЕТ` |
+    | Подсистема | Куда включить | ... или `ОТСУТСТВУЕТ` |
+
+    **Задача N.M** — маркер: `добавить форму` — тип: Form
+
+    | Элемент | Требование | Цитата из design / статус |
+    |---|---|---|
+    | Группы | Перечень групп | ... или `ОТСУТСТВУЕТ` |
+    | Поля | Имя, тип, привязка | ... или `ОТСУТСТВУЕТ` |
+    | Таблицы | Имя, колонки | ... или `ОТСУТСТВУЕТ` |
+    | Команды/кнопки | Перечень, действия | ... или `ОТСУТСТВУЕТ` |
+    | UX-сценарий | Шаги пользователя | ... или `ОТСУТСТВУЕТ` |
+
+    (повторить для каждого маркера; при отсутствии маркеров — «маркеров не найдено»)
+
+    ### Готовность к реализации (архитектор)
+
+    **Вердикт:** ГОТОВО / ГОТОВО С ЗАМЕЧАНИЯМИ / НЕ ГОТОВО
+    **Полный отчёт:** reports/task-readiness-review-YYYY-MM-DD.md
+
+    | # | Критерий | Вердикт |
+    |---|----------|---------|
+    | 1 | Реализуемость кодовых задач | OK / GAP |
+    | 2 | Реализуемость форм и метаданных | OK / GAP |
+    | 3 | Разрешённость решений | OK / GAP |
+    | 4 | Полнота покрытия | OK / GAP |
+    | 5 | Согласованность | OK / GAP |
+
+    Пробелы:
+    - [CRITICAL/WARNING] ...
 
     ### Gates
     | Gate | Статус | Детали |
@@ -345,6 +526,7 @@ In **mixed** mode, post-apply checks apply **only to tasks marked `[x]`**.
     | Task quality (missing details, ambiguity) | Delegate to **onec-code-architect** with prompt: "Доработать tasks.md: устранить замечания [list]". Pass current tasks.md, design.md, proposal.md, specs/. Architect returns updated tasks.md |
     | Architect Gate not closed | Offer to run onec-code-architect for architecture review. Save report to `reports/architecture-verify-YYYY-MM-DD.md` |
     | Design Review not done | Offer to run onec-code-architect with design review focus. Save report to `reports/design-review-YYYY-MM-DD.md` |
+    | Repo Consistency (WARNING from 7E) | Suggest rewriting task: «создать» → «доработать» / «наполнить содержимым» if object already exists |
     | TZ review remarks | Suggest `/opsx:doc-tz <name>` to regenerate TZ |
     | Project constraints violation | Suggest rewriting tasks to target allowed directories |
     | Incomplete tasks (post-apply) | List remaining tasks, suggest `/opsx:apply <name>` |
