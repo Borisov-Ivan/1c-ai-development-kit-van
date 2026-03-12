@@ -28,7 +28,7 @@ powershell.exe -NoProfile -File skills/1c-forms/validate/scripts/form-validate.p
 
 | # | Check | Severity |
 |---|-------|----------|
-| 1 | Root element `<Form>`, version="2.17" | ERROR / WARN |
+| 1 | Root element `<Form>`, version in known set (2.17, 2.20) | ERROR / WARN |
 | 2 | `<AutoCommandBar>` present, id="-1" | ERROR |
 | 3 | Element ID uniqueness (separate pool) | ERROR |
 | 4 | Attribute ID uniqueness (separate pool) | ERROR |
@@ -45,7 +45,7 @@ powershell.exe -NoProfile -File skills/1c-forms/validate/scripts/form-validate.p
 ```
 === Validation: DocumentForm ===
 
-[OK]    Root element: Form version=2.17
+[OK]    Root element: Form version=2.20
 [OK]    AutoCommandBar: name='FormCommandBar', id=-1
 [OK]    Unique element IDs: 96 elements
 [OK]    Unique attribute IDs: 38 entries

@@ -22,10 +22,11 @@ Creates a managed form (metadata XML + Form.xml + Module.bsl) and registers it i
 | Purpose | no | Object | Purpose: Object, List, Choice, Record |
 | Synonym | no | = FormName | Form synonym |
 | --set-default | no | auto | Set as default form |
+| FormVersion | no | auto | XML format version (e.g. `"2.17"`, `"2.20"`). Auto-detected from `ConfigDumpInfo.xml` if omitted |
 
 **Command:**
 ```powershell
-powershell.exe -NoProfile -File skills/1c-forms/scaffold/scripts/form-add.ps1 -ObjectPath "<ObjectPath>" -FormName "<FormName>" [-Purpose "<Purpose>"] [-Synonym "<Synonym>"] [-SetDefault]
+powershell.exe -NoProfile -File skills/1c-forms/scaffold/scripts/form-add.ps1 -ObjectPath "<ObjectPath>" -FormName "<FormName>" [-Purpose "<Purpose>"] [-Synonym "<Synonym>"] [-SetDefault] [-FormVersion "<version>"]
 ```
 
 ### For External Data Processors (EPF)
@@ -41,10 +42,11 @@ powershell.exe -NoProfile -File skills/1c-forms/scaffold/scripts/form-add.ps1 -O
 | Synonym | no | = FormName | Form synonym |
 | --main | no | auto | Set as default form (auto for first form) |
 | SrcDir | no | `src` | Source directory |
+| FormVersion | no | auto | XML format version (e.g. `"2.17"`, `"2.20"`). Auto-detected from `ConfigDumpInfo.xml` if omitted |
 
 **Command:**
 ```powershell
-pwsh -NoProfile -File skills/1c-forms/scaffold/scripts/add-form.ps1 -ProcessorName "<ProcessorName>" -FormName "<FormName>" [-Synonym "<Synonym>"] [-Main] [-SrcDir "<SrcDir>"]
+pwsh -NoProfile -File skills/1c-forms/scaffold/scripts/add-form.ps1 -ProcessorName "<ProcessorName>" -FormName "<FormName>" [-Synonym "<Synonym>"] [-Main] [-SrcDir "<SrcDir>"] [-FormVersion "<version>"]
 ```
 
 ### Purpose — Form Assignment

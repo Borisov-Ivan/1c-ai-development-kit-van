@@ -19,11 +19,12 @@ Takes a compact JSON definition (20–50 lines) and generates a complete, valid 
 |-----------|:--------:|-------------|
 | JsonPath | yes | Path to the form JSON definition |
 | OutputPath | yes | Path to output Form.xml file |
+| FormVersion | no | XML format version (e.g. `"2.17"`, `"2.20"`). Auto-detected from `ConfigDumpInfo.xml` if omitted; fallback `"2.17"` |
 
 ## Command
 
 ```powershell
-powershell.exe -NoProfile -File skills/1c-forms/compile/scripts/form-compile.ps1 -JsonPath "<json>" -OutputPath "<xml>"
+powershell.exe -NoProfile -File skills/1c-forms/compile/scripts/form-compile.ps1 -JsonPath "<json>" -OutputPath "<xml>" [-FormVersion "<version>"]
 ```
 
 ## JSON DSL Reference

@@ -1,4 +1,4 @@
-﻿param(
+param(
 	[Parameter(Mandatory)]
 	[string]$ObjectPath,
 
@@ -9,10 +9,36 @@
 
 	[string]$Purpose = "Object",
 
-	[switch]$SetDefault
+	[switch]$SetDefault,
+
+	[string]$FormVersion = ""
 )
 
 $ErrorActionPreference = "Stop"
+
+# --- Фаза 0: Resolve form version ---
+
+function Resolve-FormVersion {
+	param([string]$StartPath)
+	$dir = if (Test-Path $StartPath -PathType Container) { $StartPath } else { Split-Path $StartPath }
+	while ($dir) {
+		$cdi = Join-Path $dir "ConfigDumpInfo.xml"
+		if (Test-Path $cdi) {
+			[xml]$xml = Get-Content -Raw -Encoding UTF8 $cdi
+			$v = $xml.DocumentElement.GetAttribute("version")
+			if ($v) { return $v }
+		}
+		$parent = Split-Path $dir
+		if ($parent -eq $dir) { break }
+		$dir = $parent
+	}
+	return "2.17"
+}
+
+if (-not $FormVersion) {
+	$FormVersion = Resolve-FormVersion -StartPath $ObjectPath
+}
+Write-Host "[INFO] Form version: $FormVersion"
 
 # --- Фаза 1: Определение типа объекта ---
 
@@ -138,7 +164,7 @@ $formUuid = [guid]::NewGuid().ToString()
 
 $formMetaXml = @"
 <?xml version="1.0" encoding="UTF-8"?>
-<MetaDataObject xmlns="http://v8.1c.ru/8.3/MDClasses" xmlns:app="http://v8.1c.ru/8.2/managed-application/core" xmlns:cfg="http://v8.1c.ru/8.1/data/enterprise/current-config" xmlns:cmi="http://v8.1c.ru/8.2/managed-application/cmi" xmlns:ent="http://v8.1c.ru/8.1/data/enterprise" xmlns:lf="http://v8.1c.ru/8.2/managed-application/logform" xmlns:style="http://v8.1c.ru/8.1/data/ui/style" xmlns:sys="http://v8.1c.ru/8.1/data/ui/fonts/system" xmlns:v8="http://v8.1c.ru/8.1/data/core" xmlns:v8ui="http://v8.1c.ru/8.1/data/ui" xmlns:web="http://v8.1c.ru/8.1/data/ui/colors/web" xmlns:win="http://v8.1c.ru/8.1/data/ui/colors/windows" xmlns:xen="http://v8.1c.ru/8.3/xcf/enums" xmlns:xpr="http://v8.1c.ru/8.3/xcf/predef" xmlns:xr="http://v8.1c.ru/8.3/xcf/readable" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="2.17">
+<MetaDataObject xmlns="http://v8.1c.ru/8.3/MDClasses" xmlns:app="http://v8.1c.ru/8.2/managed-application/core" xmlns:cfg="http://v8.1c.ru/8.1/data/enterprise/current-config" xmlns:cmi="http://v8.1c.ru/8.2/managed-application/cmi" xmlns:ent="http://v8.1c.ru/8.1/data/enterprise" xmlns:lf="http://v8.1c.ru/8.2/managed-application/logform" xmlns:style="http://v8.1c.ru/8.1/data/ui/style" xmlns:sys="http://v8.1c.ru/8.1/data/ui/fonts/system" xmlns:v8="http://v8.1c.ru/8.1/data/core" xmlns:v8ui="http://v8.1c.ru/8.1/data/ui" xmlns:web="http://v8.1c.ru/8.1/data/ui/colors/web" xmlns:win="http://v8.1c.ru/8.1/data/ui/colors/windows" xmlns:xen="http://v8.1c.ru/8.3/xcf/enums" xmlns:xpr="http://v8.1c.ru/8.3/xcf/predef" xmlns:xr="http://v8.1c.ru/8.3/xcf/readable" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="$FormVersion">
 	<Form uuid="$formUuid">
 		<Properties>
 			<Name>$FormName</Name>
@@ -176,7 +202,7 @@ if ($Purpose -eq "List" -or $Purpose -eq "Choice") {
 
 	$formXml = @"
 <?xml version="1.0" encoding="UTF-8"?>
-<Form $formNsDecl version="2.17">
+<Form $formNsDecl version="$FormVersion">
 	<AutoCommandBar name="ФормаКоманднаяПанель" id="-1">
 		<Autofill>true</Autofill>
 	</AutoCommandBar>
@@ -204,7 +230,7 @@ if ($Purpose -eq "List" -or $Purpose -eq "Choice") {
 
 	$formXml = @"
 <?xml version="1.0" encoding="UTF-8"?>
-<Form $formNsDecl version="2.17">
+<Form $formNsDecl version="$FormVersion">
 	<AutoCommandBar name="ФормаКоманднаяПанель" id="-1">
 		<Autofill>true</Autofill>
 	</AutoCommandBar>
@@ -245,7 +271,7 @@ if ($Purpose -eq "List" -or $Purpose -eq "Choice") {
 
 	$formXml = @"
 <?xml version="1.0" encoding="UTF-8"?>
-<Form $formNsDecl version="2.17">
+<Form $formNsDecl version="$FormVersion">
 	<AutoCommandBar name="ФормаКоманднаяПанель" id="-1">
 		<Autofill>true</Autofill>
 	</AutoCommandBar>
