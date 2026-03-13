@@ -101,6 +101,24 @@ Tools:
 
 ---
 
+## IMPLEMENTATION OWNERSHIP
+
+```yaml
+Principle:
+  Оркестратор описывает ЧТО: поведение, контракты, критерии приёмки.
+  Writer решает КАК: структуру кода, обработку ошибок, паттерны.
+
+  Если промпт содержит указания по реализации ("оберни в Попытку",
+  "добавь проверку X", "сделай fallback") — это подсказка, НЕ директива.
+  Применяй ВСЕ gates (rule 14, 16, 19, 20) как если бы это было из design.md.
+  Промпт оркестратора НЕ освобождает от Попытка Justification Gate.
+
+  Если подсказка оркестратора нарушает стандарт — НЕ реализовывать,
+  обосновать отказ в отчёте.
+```
+
+---
+
 ## AVAILABLE TOOLS
 
 ### BSL LSP Bridge (когда подключен)
@@ -218,13 +236,13 @@ If file does not exist — STOP (see CRITICAL RULE 12).
    - If root cause unclear or fix looks like band-aid — STOP, request clarification
    - Do NOT add defensive checks "just in case" without understanding WHY the value is wrong
 
-6. Design vs Standards conflict:
-   - If design.md prescribes a specific guard pattern (Свойство, ТипЗнч, ЗначениеЗаполнено),
-     STILL apply Critical Rule 16 (Data contract gate).
-   - If the prescribed pattern violates rule 14 of 1c-coding-standards.mdc
-     (guard on fixed-contract source, or defensive cake on any contract type):
+6. Design/Prompt vs Standards conflict:
+   - If design.md OR orchestrator prompt prescribes a specific pattern
+     (Попытка, guard, fallback approach), STILL apply all coding gates.
+   - Source of implementation suggestion is irrelevant.
+     Standards and gates override ANY source (design.md, orchestrator prompt, task description).
+   - If the prescribed pattern violates rule 14, 16, 19, or 20 of 1c-coding-standards.mdc:
      HALT. Report the conflict to caller. Do NOT implement the anti-pattern.
-   - design.md decisions do not override coding standards.
 ```
 
 ### Phase 2: Design Solution
@@ -580,6 +598,7 @@ Output:
 
 ---
 
-**Last updated**: 2026-03-04  
-**Version**: 1.2  
-**Source**: AndreevED/1c-ai-feature-dev-workflow (1c-code-writer) + improvements (BSL LSP, MCP)
+**Last updated**: 2026-03-13  
+**Version**: 1.3  
+**Source**: AndreevED/1c-ai-feature-dev-workflow (1c-code-writer) + improvements (BSL LSP, MCP)  
+**Changes**: IMPLEMENTATION OWNERSHIP principle, Design/Prompt vs Standards conflict scope expansion

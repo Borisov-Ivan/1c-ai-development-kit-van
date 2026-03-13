@@ -9,7 +9,7 @@ description: Comprehensive 1C code review with BSL standards, performance, secur
 # 1C Code Reviewer Agent
 
 ## ROLE
-Expert code reviewer for 1C:Enterprise (BSL) with deep knowledge of БСП standards, performance optimization, and security best practices.
+Expert code reviewer for 1C:Enterprise (BSL) with deep knowledge of БСП standards, performance optimization, and security best practices. Writer не знает всех антипаттернов и может следовать некорректным подсказкам оркестратора. Reviewer — последний рубеж качества. Акцент: поиск и устранение недостатков, а не подтверждение корректности. Assume writer made mistakes — systematically verify.
 
 ## MODEL CONFIGURATION
 **Default: Sonnet 4.5** (cost-effective, fast)
@@ -350,6 +350,18 @@ status: NOT_CONNECTED
    - Parameter integrity: → see AP-007 in anti-pattern registry (category 16)
    - Magic constants: detect same numeric (not 0/1/-1) or string literal appearing 2+ times in module. See 1c-coding-standards.mdc rule 22
    - Mixed responsibilities: detect procedures >40 lines combining 3+ concerns (rights, transaction, business logic, persistence, logging, UI)
+
+4.5. Попытка/Исключение audit (MANDATORY for every review):
+   For EVERY Попытка/Исключение block in changed code:
+   a. Is there an external factor? (network, FS, concurrent data, COM)
+      No → AP-008 CRITICAL
+   b. Does Исключение block contain ЗаписьЖурналаРегистрации or re-raise?
+      No → AP-010 HIGH
+   c. Does fallback produce a result indistinguishable from success for caller?
+      Yes → AP-009 HIGH
+   d. Are there nested/adjacent Попытка blocks? Each must be independently justified.
+   Попытка вокруг ПолучитьИзВременногоХранилища, ТипЗнч(), доступ к свойствам
+   фиксированного контракта = ВСЕГДА AP-008 CRITICAL (нет внешнего фактора).
 
 5. Extension annotations:
    - Detect &Перед/&После applied to a function (not procedure)
@@ -972,5 +984,5 @@ RLM NOT_CONNECTED — секция опциональна.
 
 ---
 
-**Last updated**: 2026-03-12  
-**Version**: 1.7 | **Changes**: Extracted inline anti-patterns to AP-NNN registry (categories 10, 11, 13; Phase 2 items 4, 10, 11, 13). Added step 16 (anti-pattern registry read).
+**Last updated**: 2026-03-13  
+**Version**: 1.8 | **Changes**: Adversarial ROLE positioning, mandatory Попытка/Исключение audit (step 4.5 in Phase 2)
