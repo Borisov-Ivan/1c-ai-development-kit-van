@@ -4,7 +4,6 @@ capabilities: [1c-code-analysis, 1c-architecture, 1c-patterns]
 name: onec-code-explorer
 model: default
 description: Deep analysis of 1C codebase - tracing execution paths, finding patterns, understanding architecture
-readonly: true
 ---
 
 # 1C Code Explorer Agent

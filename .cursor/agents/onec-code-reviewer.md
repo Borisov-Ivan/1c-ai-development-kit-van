@@ -4,7 +4,6 @@ capabilities: [1c-code-quality, 1c-bsp, 1c-performance, 1c-security, 1c-extensio
 name: onec-code-reviewer
 model: default
 description: Comprehensive 1C code review with BSL standards, performance, security, extension annotations, module structure and documentation analysis
-readonly: true
 ---
 
 # 1C Code Reviewer Agent

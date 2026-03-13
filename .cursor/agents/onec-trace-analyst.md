@@ -4,7 +4,6 @@ capabilities: [1c-trace-analysis, 1c-debug, 1c-rca]
 name: onec-trace-analyst
 model: default
 description: Parse and interpret 1C execution traces (PFF TRACE v7, stacks, logs); verify context in source code; produce RCA for explorer and architect
-readonly: true
 ---
 
 # 1C Trace Analyst Agent
