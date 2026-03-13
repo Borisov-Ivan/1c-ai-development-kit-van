@@ -25,6 +25,8 @@ priority: 996
 
    Если действие нарушает протокол команды — **СТОП**, сообщить пользователю (не выполнять молча).
 
+2b. **TodoWrite checkpoint.** Если TodoWrite используется в сессии — на каждом ходе перед действием проверить: есть ли задача со статусом `in_progress`? Если да — завершить или обработать её отказ прежде чем начинать новое действие.
+
 3. **Выход только явный.** Пользователь вводит другую команду или явно завершает сессию. Агент **не может** самостоятельно выйти из протокола команды.
 
 4. **Типичные нарушения (anti-patterns):**
@@ -37,6 +39,7 @@ priority: 996
    | explore | «создай ЗНИ» / «заведи ЗНИ» | Создать артефакты вручную (Write proposal, design, tasks) | СТОП (Change Creation Gate). Explore Summary + redirect на `/opsx:ff <name>` |
    | apply | «а может лучше по-другому?» | Начать explore-стиль обсуждение | Предложить вернуться в explore для перепроектирования |
    | ff/new | Пропустить Design Gate после design.md | Продолжить без проверки | СТОП, выполнить Design Gate по протоколу скилла |
+   | ff | Follow-up с правкой артефакта | Обработать follow-up, забыв о незавершённых артефактах | Сначала `openspec status --json` — завершить незаконченные артефакты, затем обработать follow-up |
 
 ## WHY
 
@@ -48,4 +51,4 @@ priority: 996
 
 ---
 
-**Last updated**: 2026-03-08 | **Version**: 1.2 | **Changes**: Added anti-pattern for «создай ЗНИ» in explore (Change Creation Gate)
+**Last updated**: 2026-03-13 | **Version**: 1.3 | **Changes**: Anti-pattern ff (completion checkpoint before follow-up), TodoWrite checkpoint rule (2b)

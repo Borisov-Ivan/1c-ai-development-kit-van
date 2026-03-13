@@ -59,6 +59,15 @@ Fast-forward through artifact creation - generate everything needed to start imp
 
    Use the **TodoWrite tool** to track progress through the artifacts.
 
+   **Error handling (MANDATORY for all Task delegations in ff):**
+   If a Task call returns an error (Error, Aborted, timeout):
+   1. **Retry once** with the same prompt.
+   2. If retry also fails — create the artifact yourself using the `template`
+      and dependency artifacts (proposal, design, specs). Log a warning to the user:
+      "Делегирование агенту не удалось; артефакт создан оркестратором."
+   3. **NEVER silently skip** an artifact. Every `applyRequires` artifact
+      MUST be written to disk before the ff session ends.
+
    Loop through artifacts in dependency order (artifacts with no pending dependencies first):
 
    a. **For each artifact that is `ready` (dependencies satisfied)**:
@@ -83,6 +92,7 @@ Fast-forward through artifact creation - generate everything needed to start imp
         then integration, then verification. Explicit dependencies between tasks required.
         Architect reads files independently and returns tasks.md content.
         Save the result to `outputPath`.
+        If architect Task fails — apply error handling above (retry once, then create yourself).
       - **All other artifacts**: Create the artifact file using `template` as the structure
       - Apply `context` and `rules` as constraints - but do NOT copy them into the file
       - Show brief progress: "✓ Created <artifact-id>"
@@ -157,3 +167,4 @@ After completing all artifacts, summarize:
 - If context is critically unclear, ask the user - but prefer making reasonable decisions to keep momentum
 - If a change with that name already exists, suggest continuing that change instead
 - Verify each artifact file exists after writing before proceeding to next
+- **Completion checkpoint (MANDATORY on every turn):** Before processing a user follow-up message during ff, run `openspec status --change "<name>" --json`. If any `applyRequires` artifact has status != `"done"`: (1) Notify the user: «Артефакт `<id>` не создан. Продолжить создание?» (2) Complete the missing artifact BEFORE handling the follow-up request. Rationale: user follow-ups in ff are still part of the ff session (`command-session-persistence`). Missing artifacts must not be silently dropped.

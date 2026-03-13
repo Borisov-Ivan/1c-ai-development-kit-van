@@ -338,6 +338,9 @@ Universal quality gate for OpenSpec changes. Works in two modes determined autom
       - If "Проблема" section is empty (no Why in proposal) → WARNING: "proposal.md не содержит обоснования (секция Why)"
       - If "Критерии приёмки" section is empty (no scenarios in spec) → WARNING: "spec не содержит сценариев для критериев приёмки"
    5. Run the prompt's built-in "Верификация артефактов" checks (contradictions, defaults analysis, completeness)
+   5b. **Lexicon check**: read Grep patterns from `.cursor/docs/tz-lexicon-dictionary.md` (section "Grep-паттерны"). Run Grep on the generated TZ text.
+      - Matches found → WARNING: "ТЗ содержит нарушения лексики: [found words]. Рекомендация: заменить на русские эквиваленты из словаря (`.cursor/docs/tz-lexicon-dictionary.md`) или перегенерировать ТЗ (`/opsx:doc-tz <name>`)."
+      - No matches → OK
    6. Save TZ to `openspec/changes/<name>/ТЗ.md`
    7. Add TZ generation remarks (if any) to the verification report
 
@@ -397,6 +400,9 @@ Universal quality gate for OpenSpec changes. Works in two modes determined autom
     - Glob `ТЗ.md` in change dir
     - If not found → `N/A` (skip)
     - If found:
+      - **Lexicon check**: read Grep patterns from `.cursor/docs/tz-lexicon-dictionary.md`. Grep `ТЗ.md` for matches.
+        - Matches found → WARNING: "В ТЗ обнаружены нарушения лексики: [words]. Рекомендация: `/opsx:doc-tz <name>` или ручная правка."
+        - No matches → OK (lexicon)
       - Glob `reports/tz-review-*.md` in change dir
       - If no review report → SUGGESTION: "ТЗ создано, но ревью не проводилось"
       - If review report exists:
@@ -558,6 +564,10 @@ In **mixed** mode, post-apply checks apply **only to tasks marked `[x]`**.
     **Статус:** сгенерировано / сгенерировано с замечаниями
     **Файл:** ТЗ.md
 
+    | Проверка | Статус |
+    |---|---|
+    | Лексика ТЗ | OK / WARNING (N нарушений) |
+
     Замечания (при наличии):
     - [WARNING] proposal.md не содержит обоснования (секция Why)
     - [WARNING] spec не содержит сценариев для критериев приёмки
@@ -615,6 +625,7 @@ In **mixed** mode, post-apply checks apply **only to tasks marked `[x]`**.
     | Phase violation / false start (QC 7.6) | Suggest reordering tasks in tasks.md to respect phase dependencies (P0→P1→P2→P3→P4). For false starts: suggest marking already-implemented code tasks as `[x]` or reverting premature implementation |
     | Rework risk (QC 7.6) | Suggest completing prerequisite P1 specs in design.md before proceeding with dependent P2 tasks |
     | TZ generation gaps (7.8) | Suggest completing the artifact indicated in the TZ gap (e.g., add Why to proposal, add scenarios to spec) |
+    | TZ lexicon violation | StrReplace forbidden words in `ТЗ.md` with correct replacements from `.cursor/docs/tz-lexicon-dictionary.md` |
     | TZ review remarks | Suggest `/opsx:doc-tz <name>` to regenerate TZ with architect review |
     | Project constraints violation | Suggest rewriting tasks to target allowed directories |
     | Incomplete tasks (post-apply) | List remaining tasks, suggest `/opsx:apply <name>` |
