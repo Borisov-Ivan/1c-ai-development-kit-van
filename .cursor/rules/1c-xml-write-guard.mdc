@@ -1,0 +1,35 @@
+---
+description: "Запрет прямой правки XML метаданных 1С оркестратором — только через скиллы/агентов"
+alwaysApply: true
+globs: "src/**/*.xml"
+---
+
+# XML Write Guard
+
+## АБСОЛЮТНЫЙ ЗАПРЕТ
+
+**Оркестратор НЕ использует Write, StrReplace, Delete для XML-файлов 1С** в `src/` (Form.xml, Template.xml, Rights.xml, Configuration.xml, любые *.xml метаданных).
+
+Если начал правку XML напрямую — **ОСТАНОВИСЬ.** Отмени. Делегируй.
+
+## ДЕЛЕГИРОВАНИЕ
+
+| Файл / артефакт | Инструмент |
+|-----------------|------------|
+| Form.xml (управляемая форма) | Скилл 1c-forms/edit (form-edit.ps1) или onec-form-generator с design-спецификацией |
+| Template.xml (макет табличного документа) | Скилл 1c-mxl/compile через onec-form-generator |
+| Rights.xml (роль) | Скилл 1c-roles/compile через агента |
+| Остальные XML в src/ (метаданные, конфигурация) | **СТОП** — блокер пользователю по `1c-no-metadata-creation.mdc` |
+
+## ИСКЛЮЧЕНИЯ
+
+- Правки файлов в `openspec/`, `.cursor/` (не XML метаданных 1С в src/) — разрешены.
+- Чтение (Read) XML для анализа — разрешено. Запрещены только Write, StrReplace, Delete.
+
+## СВЯЗЬ
+
+Ref: `1c-agent-delegation.mdc` (ПРИНЦИП), `1c-utility-agents.mdc`, `openspec-apply-change/SKILL.md` (Task Dispatch, Form tasks).
+
+---
+
+**Last updated**: 2026-03-13 | **Version**: 1.0
