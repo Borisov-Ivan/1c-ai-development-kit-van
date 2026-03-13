@@ -12,6 +12,9 @@
 ## BSL write guard
 `.cursor/rules/1c-agent-delegation.mdc` — запрет прямого .bsl, APPLY GATE, DELEGATION GATE, LINT GATE.
 
+## XML write guard
+`.cursor/rules/1c-xml-write-guard.mdc` — запрет прямой правки Form.xml, Template.xml, Rights.xml и прочих XML в src/; только через скиллы 1c-forms, 1c-mxl, 1c-roles.
+
 ## Tool Name Guard
 `.cursor/rules/tool-name-guard.mdc` — инструмент вызова агентов только `Task`; при `Invalid enum value` не переключаться на generalPurpose.
 
