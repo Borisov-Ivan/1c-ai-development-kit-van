@@ -485,7 +485,24 @@ In **mixed** mode, post-apply checks apply **only to tasks marked `[x]`**.
 
 16. **Generate Verification Report**
 
-    **Summary Scorecard:**
+    **Executive Summary (обязательная первая секция отчёта):**
+
+    ```
+    ## Executive Summary
+
+    **Вердикт:** N CRITICAL, M WARNING, K SUGGESTION
+    **Решений от пользователя:** <число> — <перечень решений или «не требуется»>
+    **Статус:** <одна фраза>
+    ```
+
+    Правила заполнения:
+    - CRITICAL > 0 → Статус: «Блокировано до устранения: [перечень CRITICAL]»
+    - Только WARNING → Статус: «Готов при принятии рисков: [перечень WARNING]»
+    - Только SUGGESTION → Статус: «Готов. Предложения к сведению»
+    - Всё OK → Статус: «Все проверки пройдены. Готов к apply/archive»
+    - «Решений от пользователя» — перечислить конкретные решения, которые не может принять машина (выбор подхода, отложить/реализовать задачу, принять риск). Если таких нет — «не требуется».
+
+    **Summary Scorecard (после Executive Summary):**
     ```
     ## Verification Report: <change-name>
     ### Режим: pre-apply | mixed | post-apply
@@ -598,10 +615,31 @@ In **mixed** mode, post-apply checks apply **only to tasks marked `[x]`**.
     N CRITICAL, M WARNING, K SUGGESTION.
     ```
 
-    **Final Assessment:**
-    - CRITICAL issues present → "N критичных замечаний. Требуется устранение до apply/archive."
-    - Only warnings → "Критичных замечаний нет. M предупреждений. Готов к apply/archive (с учётом замечаний)."
-    - All clear → "Все проверки пройдены. Готов к apply/archive."
+    **Final Assessment (сообщение пользователю, НЕ только в файле отчёта):**
+
+    Обязательные элементы сообщения пользователю:
+    1. **Сводная таблица всех замечаний** (severity + краткое описание + рекомендация). Если замечаний нет — «Замечаний нет».
+    2. **Для каждого SUGGESTION и WARNING** — одно предложение: почему не блокирует / что потеряем если проигнорировать.
+    3. **«Решений от вас: N»** — перечень решений, которые нужны от пользователя, или «не требуется».
+    4. **Следующие шаги** — конкретные команды (apply / archive / устранить замечания).
+
+    **Голые счётчики** («0 CRITICAL, 2 WARNING, 1 SUGGESTION») **БЕЗ расшифровки — запрещены.**
+
+    Примеры:
+
+    Плохо: «0 CRITICAL, 0 WARNING, 2 SUGGESTION. Готов к apply/archive.»
+
+    Хорошо:
+    ```
+    Замечаний нет. Два предложения к сведению:
+    1. ТЗ Review — можно провести при необходимости (`/opsx:doc-tz <name>`)
+    2. Реализация 6.1 — детали по признаку УНЭП решатся при apply
+
+    Решений от вас не требуется. Следующий шаг:
+    - `/opsx:apply <name>` или `/opsx:archive <name>`
+    ```
+
+    Коммуникация с пользователем: `.cursor/rules/verify-user-communication.mdc`
 
 17. **Offer remediation**
 
@@ -632,6 +670,57 @@ In **mixed** mode, post-apply checks apply **only to tasks marked `[x]`**.
     | Spec/design divergence (post-apply) | Suggest updating artifact or implementation |
 
     After remediation, re-run affected checks and update report.
+
+    **17b. Communicate remediation results (обязательно после авто-устранения)**
+
+    После авто-устранения сообщение пользователю ОБЯЗАТЕЛЬНО содержит три блока:
+
+    **Блок 1 — Before/After scorecard:**
+    ```
+    ## Результат авто-устранения
+
+    | # | Замечание | Было | Стало | Что сделано |
+    |---|-----------|------|-------|-------------|
+    | 1 | <краткое описание> | WARNING | OK | <конкретное действие> |
+    | 2 | ... | ... | ... | ... |
+    ```
+
+    **Блок 2 — Осталось (если есть незакрытые замечания):**
+    ```
+    ## Осталось
+
+    | # | Замечание | Severity | Нужно решение? | Пояснение |
+    |---|-----------|----------|----------------|-----------|
+    | 1 | <описание> | SUGGESTION | Нет | <почему не критично / что потеряем при игноре> |
+    ```
+
+    Каждый оставшийся пункт ОБЯЗАН иметь:
+    - severity (CRITICAL/WARNING/SUGGESTION)
+    - «Нужно решение?» — Да/Нет
+    - Пояснение — одно предложение: почему не блокирует / что потеряем если проигнорировать
+
+    **Блок 3 — Вердикт после устранения:**
+
+    Если решений от пользователя не требуется:
+    ```
+    ## Вердикт: ГОТОВ
+
+    Решений от вас не требуется. Следующий шаг:
+    - `/opsx:apply <name>` — реализовать оставшиеся задачи
+    - `/opsx:archive <name>` — закрыть change
+    ```
+
+    Если решение нужно:
+    ```
+    ## Вердикт: ГОТОВ С ОГОВОРКОЙ
+
+    Требуется ваше решение:
+    1. <конкретный вопрос, который не может решить машина>
+
+    После ответа — следующий шаг: `/opsx:apply` или `/opsx:archive`.
+    ```
+
+    Коммуникация с пользователем: `.cursor/rules/verify-user-communication.mdc`
 
 18. **Save verification report**
 
@@ -665,3 +754,5 @@ Use clear markdown with:
 - Code references in format: `file.bsl:123`
 - Specific, actionable recommendations
 - No vague suggestions like "consider reviewing"
+
+Коммуникация с пользователем: `.cursor/rules/verify-user-communication.mdc` — обязательные требования к Executive Summary, расшифровке замечаний, Before/After scorecard после remediation, и явному указанию решений от пользователя.

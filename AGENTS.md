@@ -27,6 +27,7 @@
 ## Verify (универсальный quality gate)
 `.cursor/skills/openspec-verify-change/SKILL.md` — `/opsx:verify`. Pre-apply: формат tasks, качество задач, полнота ручной конфигурации, **фазовая когерентность (Quality Controller — generalPurpose, домен-агностичный)**, **реализуемость (Architect)**, **генерация ТЗ (обязательный шаг)**, Architect Gate, Design Review, ТЗ Review, project constraints. Post-apply: completeness, correctness, coherence. Авто-устранение замечаний.
 Quality Controller (шаг 7.6): фазовая классификация задач P0-P4, граф зависимостей, false start detection, rework risk. Шаблон промпта: `1c-agent-patterns/SKILL.md` (секция «Quality Controller — phase coherence review»). ТЗ (шаг 7.8): генерация функциональных требований по промпту `openspec-docs/prompts/change-tz.md`, сохранение в `ТЗ.md` change.
+Коммуникация с пользователем: `.cursor/rules/verify-user-communication.mdc` — Executive Summary в отчёте, Before/After scorecard после remediation, расшифровка каждого замечания, явное указание решений от пользователя. Голые счётчики без расшифровки запрещены.
 
 ## Verified Cause Gate
 `.cursor/rules/verified-cause-gate.mdc` — root cause + impact перед фиксом.
@@ -91,6 +92,21 @@ Quality Controller (шаг 7.6): фазовая классификация за�
 
 ## Инфраструктура 1С
 `.cursor/docs/onec-infrastructure.md` — серверы 1С, PostgreSQL, HASP, Dev Container.
+
+## Доменные навыки 1С
+Навыки доступны через `available_skills`; вызываются из правил и агентов по типу задачи.
+- **1c-bsp** — `.cursor/skills/1c-bsp/SKILL.md` (и подскиллы command, patterns, registration): регистрация в БСП «Дополнительные отчёты и обработки», команды, паттерны подсистем.
+- **1c-extensions** — `.cursor/skills/1c-extensions/SKILL.md`: аннотации расширений (&Перед/&После, &ИзменениеИКонтроль, &Вместо), синтаксис директив.
+- **1c-forms** — `.cursor/skills/1c-forms/SKILL.md` (и подскиллы compile, edit, info, patterns, scaffold, validate): управляемые формы — создание, редактирование, анализ, валидация, компиляция из JSON DSL.
+- **1c-mxl** — `.cursor/skills/1c-mxl/SKILL.md` (и подскиллы compile, decompile, info, validate): табличные макеты (MXL) — компиляция, декомпиляция, анализ.
+- **1c-roles** — `.cursor/skills/1c-roles/SKILL.md` (и подскиллы compile, info): роли и права доступа — создание из JSON, анализ Rights.xml.
+- **1c-query-optimization** — `.cursor/skills/1c-query-optimization/SKILL.md`: продвинутые паттерны запросов (временные таблицы, DCS).
+- **1c-help-mcp**, **mcp-tools** — `.cursor/skills/1c-help-mcp/SKILL.md`, `.cursor/skills/mcp-tools/SKILL.md`: справка и MCP-инструменты.
+
+## Справочная документация
+`.cursor/docs/` — справочники для агентов и генерации документов.
+- **platform/** — документация платформы 1С (оглавление, главы по формам, запросам, расширению конфигурации и др.). Используется в 1c-coding-standards, onec-code-explorer.
+- **standard/** — `.cursor/docs/standard/1c-standards-navigator.md`, `std-01-metadata.md` … `std-11-general.md`: вендорские стандарты 1С. Ссылается `1c-vendor-standards/SKILL.md`.
 
 ## Системные промпты агентов
 `.cursor/agents/*.md` — промпты для onec-code-writer, onec-code-reviewer, onec-code-architect, onec-code-explorer, onec-trace-analyst, onec-code-simplifier, onec-form-generator, onec-metadata-helper, onec-query-optimizer, onec-test-generator, onec-admin, mcp-deploy, openspec-quality-controller.
