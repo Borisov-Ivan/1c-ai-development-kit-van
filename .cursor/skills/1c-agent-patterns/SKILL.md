@@ -56,15 +56,11 @@ description: Reference guide for 1C agent delegation patterns - complexity asses
 
 ## ВЫЗОВ АГЕНТОВ (КРИТИЧНО)
 
-Для вызова специализированных агентов используется **инструмент Task** (именно это имя).
-Все subagent_type из таблицы ниже (onec-code-writer, onec-code-reviewer, onec-code-architect,
-onec-code-explorer, onec-trace-analyst и др.) доступны в Task.
+**Для вызова субагентов используй инструмент `Task`.** Все subagent_type из таблицы ниже (onec-code-writer, onec-code-reviewer, onec-code-architect, onec-code-explorer, onec-trace-analyst и др.) доступны через Task. См. `.cursor/rules/tool-name-guard.mdc`.
 
-**НЕ ИСПОЛЬЗОВАТЬ** другие инструменты (mcp_task и т.п.) — они не поддерживают
-специализированные subagent_type и вернут ошибку Invalid enum value.
+Формат вызова: `Task(subagent_type="...", description="...", ...)`.
 
-Если получена ошибка Invalid enum value — сначала проверь, что вызван именно Task,
-а не другой инструмент. См. секцию «ПРИ ОШИБКЕ ВЫЗОВА АГЕНТА».
+Если получена ошибка Invalid enum value — проверить, что вызван именно **Task** (в других контекстах могут встречаться иные имена — здесь корректно только Task). См. секцию «ПРИ ОШИБКЕ ВЫЗОВА АГЕНТА».
 
 ---
 

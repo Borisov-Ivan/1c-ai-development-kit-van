@@ -1,20 +1,24 @@
 ---
-description: "GUARD: инструмент для вызова агентов — ТОЛЬКО Task, НЕ mcp_task"
+description: "GUARD: для вызова субагентов использовать инструмент Task"
 alwaysApply: true
 ---
 
 # Tool Name Guard
 
-Инструмент для вызова агентов: **Task** (единственное допустимое имя).
+## Как вызывать субагентов
 
-`mcp_task`, `mcp_invoke`, `run_task`, `call_agent` — **НЕ СУЩЕСТВУЮТ** в toolset. Это галлюцинация.
+**Используй инструмент `Task`** — это единственный способ запуска субагентов в этом проекте.
 
-При ошибке `Invalid enum value`:
-1. Проверить имя инструмента — должно быть `Task`
-2. Проверить `subagent_type` — допустимые: onec-code-writer, onec-code-reviewer, onec-code-architect, onec-code-explorer, onec-trace-analyst, onec-code-simplifier, onec-form-generator, onec-metadata-helper, onec-query-optimizer, onec-test-generator, openspec-quality-controller, generalPurpose, explore, shell, browser-use
-3. **НЕ переключаться на generalPurpose** — это маскирует ошибку
-4. Если retry не помог — СТОП, сообщить пользователю
+- Вызов: `Task(subagent_type="...", description="...", ...)`.
+- Перед вызовом: убедиться, что в коде/промпте указано именно **Task**.
+
+## При ошибке `Invalid enum value`
+
+1. Проверить имя инструмента — должен быть **Task** (в других средах или в памяти иногда фигурируют иные имена — здесь корректно только Task).
+2. Проверить `subagent_type` — допустимые: onec-code-writer, onec-code-reviewer, onec-code-architect, onec-code-explorer, onec-trace-analyst, onec-code-simplifier, onec-form-generator, onec-metadata-helper, onec-query-optimizer, onec-test-generator, openspec-quality-controller, generalPurpose, explore, shell, mcp-deploy, onec-admin и др. (см. описание инструмента).
+3. Не переключаться на generalPurpose — это маскирует причину.
+4. Если retry не помог — СТОП, сообщить пользователю.
 
 ---
 
-**Last updated**: 2026-03-11 | **Version**: 1.0
+**Last updated**: 2026-03-14 | **Version**: 1.2 | **Changes**: позитивная формулировка — акцент на «используй Task», убрано частое перечисление несуществующих имён

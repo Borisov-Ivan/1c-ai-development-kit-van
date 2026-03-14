@@ -123,7 +123,7 @@ Implement tasks from an OpenSpec change.
      Реализация будет останавливаться на каждом phase gate."
    Ref: `.cursor/rules/phase-gates.mdc`.
 
-   Launch up to 3 independent tasks in parallel via Task tool when applicable.
+   Launch up to 3 independent tasks in parallel via **Task** tool when applicable. Делегирование субагентам — через инструмент **Task** (см. `.cursor/rules/tool-name-guard.mdc`).
 
 6. **Implement tasks (loop until done or blocked)**
 

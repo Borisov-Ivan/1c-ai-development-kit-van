@@ -19,7 +19,7 @@
 `.cursor/rules/1c-xml-write-guard.mdc` — запрет прямой правки Form.xml, Template.xml, Rights.xml и прочих XML в src/; только через скиллы 1c-forms, 1c-mxl, 1c-roles.
 
 ## Tool Name Guard
-`.cursor/rules/tool-name-guard.mdc` — инструмент вызова агентов только `Task`; при `Invalid enum value` не переключаться на generalPurpose.
+`.cursor/rules/tool-name-guard.mdc` — для вызова субагентов использовать инструмент **Task**. При `Invalid enum value` проверить имя инструмента (должен быть Task) и subagent_type; не переключаться на generalPurpose.
 
 ## Запрет создания метаданных
 `.cursor/rules/1c-no-metadata-creation.mdc` — СТОП, блокер пользователю.

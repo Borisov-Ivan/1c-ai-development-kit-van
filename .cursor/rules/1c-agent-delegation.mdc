@@ -25,7 +25,7 @@ priority: 999
 ## ПРИНЦИП
 
 **Инвариант BSL:** см. `.cursor/rules/bsl-write-guard.mdc` — правка .bsl только через onec-code-writer + обязательный onec-code-reviewer.
-**Tool Name Guard:** Инструмент вызова агентов — ТОЛЬКО `Task`. `mcp_task` не существует. При `Invalid enum value` — см. `.cursor/rules/tool-name-guard.mdc`.
+**Tool Name Guard:** Для вызова субагентов использовать инструмент **Task**. При `Invalid enum value` — см. `.cursor/rules/tool-name-guard.mdc`.
 **Explore-mode guard:** В режиме `/opsx:explore` без активного change — onec-code-writer и onec-code-reviewer НЕ вызываются. Сначала ЗНИ (`/opsx:new` или `/opsx:ff`).
 
 ## APPLY GATE
