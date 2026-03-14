@@ -370,6 +370,11 @@ status: NOT_CONNECTED
    d. Are there nested/adjacent Попытка blocks? Each must be independently justified.
    Попытка вокруг ПолучитьИзВременногоХранилища, ТипЗнч(), доступ к свойствам
    фиксированного контракта = ВСЕГДА AP-008 CRITICAL (нет внешнего фактора).
+   При использовании ПоместитьВоВременноеХранилище в коде формы для данных,
+   используемых в нескольких серверных вызовах, проверять передачу второго
+   параметра ЭтаФорма.УникальныйИдентификатор (привязка к сроку жизни формы;
+   иначе данные могут удаляться платформой между вызовами). Правило:
+   1c-coding-standards.mdc, раздел «Временное хранилище».
    e. Scope minimality (INTEGRATION_CONTRACT_GATE applied to Попытка):
       If a Попытка wraps a call to a function/procedure that ITSELF catches
       the same external factor — redundant layering. Apply rule: "если

@@ -1,0 +1,41 @@
+---
+description: "BSL Write Guard: правка .bsl — только через onec-code-writer + обязательный onec-code-reviewer"
+alwaysApply: true
+---
+
+# BSL Write Guard
+
+## АБСОЛЮТНЫЙ ЗАПРЕТ
+
+Оркестратор НЕ использует Write, StrReplace для .bsl файлов.
+Если начал — СТОП, отмени, делегируй.
+
+## ПРАВИЛО
+
+Любая нетривиальная правка .bsl модуля — только через onec-code-writer
+(Task, subagent_type: onec-code-writer).
+
+После writer — обязательная проверка onec-code-reviewer
+(Task, subagent_type: onec-code-reviewer). Задача НЕ завершена до ревью.
+
+## МИНИМАЛЬНЫЙ ПОТОК
+
+writer → ReadLints → reviewer
+
+## ИСКЛЮЧЕНИЯ (writer не нужен)
+
+- Однострочная правка: опечатка, переименование переменной
+- Только комментарии
+- Mechanical Mode: шаблонная замена без изменения логики — прямая правка + reviewer
+- Пользователь явно: «без агентов» / «без ревью»
+
+Даже в исключениях reviewer обязателен (кроме явного отказа пользователя).
+
+## СВЯЗЬ
+
+Детальная диспетчеризация (Light Mode, APPLY GATE, LINT GATE, API CHECK,
+EXTENSION GATE): `1c-agent-delegation.mdc`.
+
+---
+
+**Last updated**: 2026-03-14 | **Version**: 1.0
