@@ -173,6 +173,8 @@ Check via Anti-pattern Registry (see category 16):
   AP-020: Missing explicit directive on procedure/function in form module — HIGH
   AP-021: Fail-fast violation (silent skip on structural precondition) — HIGH
   AP-025: User-facing string without НСтр() — MEDIUM
+  AP-027: Guard-then-catch (Попытка after guard validating same value) — HIGH
+  AP-028: Check-after-establish (property/attribute check after type established) — HIGH
 
 Remain inline (not in registry):
   - Ternary operator ?() — MEDIUM
@@ -376,6 +378,13 @@ status: NOT_CONNECTED
       (user action handler, scheduled job entry, HTTP handler).
       Inner functions: propagate exceptions, don't catch.
       Violation → HIGH "redundant Попытка layering (rule 20 + INTEGRATION_CONTRACT_GATE)".
+   f. Flow-check (guard-then-catch): does a guard clause immediately precede this Попытка, validating the same value used inside? Yes → AP-027 HIGH (code contradicts itself: guard makes operation safe, Попытка says it doesn't).
+
+4.6. API existence (from orchestrator):
+   If orchestrator passed API_VERIFIED / UNCHECKED_API items:
+   - VERIFIED: no action needed
+   - UNCHECKED_API: note in report as INFO ("method not verified, external dependency")
+   If orchestrator did NOT pass API check results: skip (backward compatibility)
 
 5. Extension annotations:
    - Detect &Перед/&После applied to a function (not procedure) — AP-022 CRITICAL. See anti-pattern registry
@@ -414,7 +423,7 @@ status: NOT_CONNECTED
    - Detect logic duplication between modules
    - Detect commented-out code without explanation
 
-10. Specific 1C patterns: → see AP-001..AP-025 in anti-pattern registry (category 16)
+10. Specific 1C patterns: → see AP-001..AP-028 in anti-pattern registry (category 16)
     Remain inline:
     - Ternary operator ?() — MEDIUM
     - Excessive info logging inside loop or 3+ info-level calls — LOW
@@ -538,6 +547,8 @@ Required Improvements (вместо секции "Рекомендации"):
 - Band-aid fix detected (defensive check without root cause, try/except suppression, skip-flag, defensive cake)
 - Попытка without logging (exception not re-raised) — traceless suppression (rule 20)
 - Попытка with silent degradation fallback (rule 20)
+- AP-027: Guard-then-catch (Попытка immediately after guard validating same value)
+- AP-028: Check-after-establish (Свойство/ЕстьРеквизит/ЗначениеЗаполнено after type/structure established in code flow)
 - НачатьТранзакцию() without Попытка/Исключение wrapping the transactional block
 - User interaction (ПоказатьВопрос, Предупреждение, Сообщить) inside transaction
 - Read-then-write without БлокировкаДанных in concurrent scenario
