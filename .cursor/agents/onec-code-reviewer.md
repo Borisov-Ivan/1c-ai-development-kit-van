@@ -592,7 +592,7 @@ Required Improvements (вместо секции "Рекомендации"):
 | KNOWLEDGE_DEFICIT | Код компенсирует незнание контракта/домена вместо того, чтобы его выяснить | HIGH |
 | CLARITY_DEFICIT | Намерение блока невозможно определить из кода без внешнего контекста | MEDIUM |
 
-Формат замечания Phase 0: Intent, Expected, Actual, Root cause, Counterfactual, Remediation, Supporting (AP-NNN при совпадении).
+Формат замечания Phase 0: Procedure (имя процедуры/функции), Anchor (1–2 уникальные строки кода для Grep-поиска после правок), Intent, Expected, Actual, Root cause, Counterfactual, Remediation, Action (MUST_FIX | VERIFIED_OK | OPTIONAL), Supporting (AP-NNN при совпадении).
 
 ### Critical (блокирует коммит)
 ```yaml
@@ -864,15 +864,21 @@ Overall: Исправить все замечания (...)
 **Artifacts:** Intent Map, Contract Map, Knowledge Assessment (кратко или структурированно).
 
 **Findings:** замечания типов DISPROPORTIONATE_COMPLEXITY, CONTRACT_INCONSISTENCY, CONTRACT_INFERENCE, KNOWLEDGE_DEFICIT, CLARITY_DEFICIT в формате:
-- Intent, Expected, Actual, Root cause, Counterfactual, Remediation, Supporting (AP-NNN при совпадении).
+- Procedure, Anchor, Intent, Expected, Actual, Root cause, Counterfactual, Remediation, Action (MUST_FIX | VERIFIED_OK | OPTIONAL), Supporting (AP-NNN при совпадении).
 
 ### Standards & Patterns (Phase 1-2)
 
 Findings из каталога AP и прочих проверок. Там, где то же место уже покрыто Phase 0 замечанием — не дублировать, указать в Phase 0 как Supporting.
 
 ### Detailed Findings
+
+Каждое замечание содержит обязательные поля: **Procedure** (имя процедуры/функции), **Anchor** (1–2 уникальные строки кода для Grep-поиска после правок), **Action** (MUST_FIX | VERIFIED_OK | OPTIONAL). Номер строки указывать с пометкой «(на момент ревью)».
+
 ```yaml
-[CRITICAL] Line 45: SQL Injection Vulnerability
+[CRITICAL] Line 45 (на момент ревью): SQL Injection Vulnerability
+  Procedure: ПолучитьДанные
+  Anchor: Запрос.Текст = "ВЫБРАТЬ * ИЗ Таблица ГДЕ Поле = """ + Значение + """"
+  Action: MUST_FIX
   Issue: String concatenation in query
   Code: Запрос.Текст = "ВЫБРАТЬ * ИЗ Таблица ГДЕ Поле = """ + Значение + """"
   Fix: Use query parameters
@@ -882,7 +888,10 @@ Findings из каталога AP и прочих проверок. Там, гд
   Impact: Security breach, data theft risk
   Priority: CRITICAL - блокирует коммит
 
-[HIGH] Line 78: N+1 Query Problem
+[HIGH] Line 78 (на момент ревью): N+1 Query Problem
+  Procedure: ПолучитьКлиентов
+  Anchor: ПолучитьДанныеКлиента(Выборка.Клиент)
+  Action: MUST_FIX
   Issue: Query inside loop
   Code:
     Выборка = Запрос.Выполнить().Выбрать();
@@ -897,7 +906,16 @@ Findings из каталога AP и прочих проверок. Там, гд
   Impact: Performance degradation, 10x slower
   Priority: HIGH - исправить до завершения задачи
 
-[MEDIUM] Line 120: Missing Documentation
+[HIGH] Line 280 (на момент ревью): ПоместитьВоВременноеХранилище — привязка к сроку жизни формы
+  Procedure: ЗаполнитьОрганизацииДиадокНаСервере
+  Anchor: ПоместитьВоВременноеХранилище(КонтекстИзФормы, ЭтаФорма.УникальныйИдентификатор)
+  Action: VERIFIED_OK
+  Issue: Проверена корректность привязки к сроку жизни формы; действий не требуется.
+
+[MEDIUM] Line 120 (на момент ревью): Missing Documentation
+  Procedure: ПолучитьДанные
+  Anchor: Функция ПолучитьДанные() Экспорт
+  Action: MUST_FIX
   Issue: Export function without comment
   Code: Функция ПолучитьДанные() Экспорт
   Fix: Add JSDoc-style comment
@@ -915,8 +933,10 @@ Findings из каталога AP и прочих проверок. Там, гд
   Priority: MEDIUM - исправить в текущей итерации
 ```
 
+**Action:** MUST_FIX = дефект/нарушение, обязательно к исправлению writer. VERIFIED_OK = проверено корректным, действий не требуется, **не передавать writer**. OPTIONAL = улучшение на усмотрение.
+
 ### Required Improvements
-Все улучшения оформляются как findings с severity (MEDIUM или LOW). Отдельной секции "Рекомендации" НЕТ — каждый пункт в формате [SEVERITY] описание, Fix:, Impact:.
+Все улучшения оформляются как findings с severity (MEDIUM или LOW). Отдельной секции "Рекомендации" НЕТ — каждый пункт в формате [SEVERITY] описание, Fix:, Impact:. При **Action=VERIFIED_OK** замечание не считается defect и не передаётся writer; оно включается в отчёт как positive verification.
 
 ### Metrics
 ```yaml
