@@ -477,10 +477,10 @@ status: NOT_CONNECTED
 ### Phase 4: Report Generation
 ```yaml
 1. Categorize issues:
-   - Critical: Block commit
-   - High: Fix before merge
-   - Medium: Fix in sprint
-   - Low: Technical debt
+   - Critical: Исправить немедленно (блокирует коммит)
+   - High: Исправить до завершения задачи
+   - Medium: Исправить в текущей итерации
+   - Low: Исправить (минимальный приоритет, но обязательно)
 
 2. Provide fixes:
    - Specific code changes
@@ -494,9 +494,12 @@ status: NOT_CONNECTED
    - Track patterns
 ```
 
+Required Improvements (вместо секции "Рекомендации"):
+Все пункты, ранее попадавшие в "Рекомендации", ДОЛЖНЫ быть оформлены как findings с severity (MEDIUM или LOW). Отдельной секции "Рекомендации" в отчёте НЕТ.
+
 ## REVIEW CATEGORIES
 
-### Critical Issues (Block Commit)
+### Critical (блокирует коммит)
 ```yaml
 - Syntax errors
 - SQL injection vulnerabilities
@@ -511,7 +514,7 @@ status: NOT_CONNECTED
 - Попытка wrapping deterministic operation (no external factor — rule 20)
 ```
 
-### High Priority (Fix Before Merge)
+### High (исправить до завершения задачи)
 ```yaml
 - Logic errors
 - Missing error handling
@@ -544,7 +547,7 @@ status: NOT_CONNECTED
 - Parameter overwrite: parameter reassigned inside body, not documented as output — category 4 (rule 21)
 ```
 
-### Medium Priority (Fix in Sprint)
+### Medium (исправить в текущей итерации)
 ```yaml
 - Naming convention violations
 - Missing documentation
@@ -572,7 +575,7 @@ status: NOT_CONNECTED
 - Inconsistent prefix usage (exports with and without prefix in same module) — category 8
 ```
 
-### Low Priority (Technical Debt)
+### Low (исправить, минимальный приоритет)
 ```yaml
 - Code formatting
 - Comment style
@@ -683,7 +686,7 @@ Pre-release escalation (release-hygiene):
     - All release-hygiene items (changelog markers in comments, work instructions, commented-out old code, design refs). Do not flag or remove #Вставка/#Удаление directives.
 
   Note: release-hygiene HIGH items appear in "fix before release" section
-  (unlike style HIGH which is optional).
+  Все замечания (в т.ч. style HIGH) обязательны к исправлению; severity задаёт приоритет.
 ```
 
 **How to detect `mode=prerelease`**: The calling prompt explicitly passes `mode=prerelease` in context, or the review is triggered by the `/prerelease-review` command skill. In prerelease reports, always output `kind: functional`, `kind: style`, or `kind: release-hygiene` (and level) for each finding.
@@ -750,7 +753,7 @@ High: 2
 Medium: 5
 Low: 3
 
-Overall: Fix 2 high-priority issues before merge
+Overall: Исправить все замечания (2 High — до завершения задачи)
 ```
 
 ### Detailed Findings
@@ -763,7 +766,7 @@ Overall: Fix 2 high-priority issues before merge
     Запрос.Текст = "ВЫБРАТЬ * ИЗ Таблица ГДЕ Поле = &Значение";
     Запрос.УстановитьПараметр("Значение", Значение);
   Impact: Security breach, data theft risk
-  Priority: CRITICAL - Block commit
+  Priority: CRITICAL - блокирует коммит
 
 [HIGH] Line 78: N+1 Query Problem
   Issue: Query inside loop
@@ -778,7 +781,7 @@ Overall: Fix 2 high-priority issues before merge
                     ВНУТРЕННЕЕ СОЕДИНЕНИЕ РегистрСведений.Данные КАК Данные
                     ПО Клиенты.Ссылка = Данные.Клиент";
   Impact: Performance degradation, 10x slower
-  Priority: HIGH - Fix before merge
+  Priority: HIGH - исправить до завершения задачи
 
 [MEDIUM] Line 120: Missing Documentation
   Issue: Export function without comment
@@ -795,27 +798,11 @@ Overall: Fix 2 high-priority issues before merge
     //
     Функция ПолучитьДанные(Клиент) Экспорт
   Impact: Maintainability
-  Priority: MEDIUM - Fix in sprint
+  Priority: MEDIUM - исправить в текущей итерации
 ```
 
-### Recommendations
-```yaml
-1. Add indexes:
-   - Таблица.Поле1 (used in WHERE clause, line 45)
-   - Таблица.Поле2 (used in JOIN, line 78)
-
-2. Refactor functions:
-   - ПолучитьДанныеКлиента: Split into smaller functions
-   - ОбработатьДанные: Reduce cyclomatic complexity
-
-3. Add tests:
-   - ПолучитьДанныеКлиента: Unit test for edge cases
-   - ОбработатьДанные: Integration test
-
-4. Update documentation:
-   - README: Document new API
-   - Architecture: Update data flow diagram
-```
+### Required Improvements
+Все улучшения оформляются как findings с severity (MEDIUM или LOW). Отдельной секции "Рекомендации" НЕТ — каждый пункт в формате [SEVERITY] описание, Fix:, Impact:.
 
 ### Metrics
 ```yaml
@@ -865,7 +852,7 @@ Findings:
   [MEDIUM] SELECT * instead of specific fields (line 3)
   [LOW] Missing documentation (line 1)
 
-Recommendation:
+Fix:
   Функция ПолучитьКлиентов()
       Запрос = Новый Запрос;
       Запрос.Текст = "
@@ -897,7 +884,7 @@ Input:
 Findings:
   [CRITICAL] SQL Injection (line 3)
 
-Recommendation:
+Fix:
   Функция ПолучитьДанные(ИмяПользователя)
       Запрос = Новый Запрос;
       Запрос.Текст = "ВЫБРАТЬ * ИЗ Справочник.Пользователи ГДЕ Имя = &ИмяПользователя";
@@ -922,7 +909,7 @@ Findings:
   [MEDIUM] English naming in Russian codebase (line 1)
   [MEDIUM] Inconsistent with БСП conventions
 
-Recommendation:
+Fix:
   // Получает данные клиента
   //
   // Параметры:
@@ -987,6 +974,7 @@ RLM NOT_CONNECTED — секция опциональна.
 8. **Performance matters** - Identify bottlenecks
 9. **Security first** - Check for vulnerabilities
 10. **Document decisions** - Record in RLM when available
+11. **No soft language** — ЗАПРЕЩЕНЫ формулировки: "по возможности", "желательно", "рекомендуется", "при наличии времени", "можно улучшить". Каждое замечание = обязательное к исправлению finding с severity. Если замечание не стоит исправления — не включать в отчёт.
 
 ---
 
