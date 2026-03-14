@@ -164,6 +164,35 @@ Universal quality gate for OpenSpec changes. Works in two modes determined autom
    - If object **already exists**: WARNING — "Задача N.M говорит «создать X», но X уже существует в репозитории (`path`). Уточнить: «доработать» / «наполнить содержимым»?"
    - If object **does not exist**: OK (consistent with «создать»)
 
+   **7F. Executability & Ordering Check:**
+
+   Mechanical pre-check for all tasks (enriches data for QC step 7.6).
+
+   **7F.1 Functional dependency extraction (all tasks):**
+   For each task line, extract implied preconditions:
+   - P4 tasks: Grep for `заполнить`, `запустить`, `отправить`, `открыть`, `убедиться` + object name → map to P2/P3 tasks implementing that object
+   - P2/P3 tasks: Grep for references to procedures/functions from other modules (pattern `МодульИмя.МетодИмя`) → map to tasks that create/modify those procedures
+   - P1 tasks: Grep for data attribute references → map to P0 tasks that create the object
+   - Any task: Grep for `Зависимости:` or `Зависимость:` → explicit deps
+
+   For each found dependency:
+   - Dep task `[ ]` AND current task `[ ]` → WARNING: "задача N.M зависит от M.K ([ ]), обе не выполнены — порядок выполнения критичен"
+   - Dep task `[ ]` AND current task needs it for execution → WARNING: "задача N.M невыполнима — зависит от нереализованной M.K"
+   - Dep task `[x]` but line > current task line → SUGGESTION: "задача N.M расположена до зависимости M.K в файле"
+
+   **7F.2 Execution order text validation:**
+   Grep tasks.md for `Порядок выполнения|Порядок реализации|Последовательность`. If found:
+   - Extract task IDs (pattern `\d+\.\d+`)
+   - Check each ID exists in tasks.md and its status
+   - Flag contradictions with file order
+
+   **7F.3 Phase gate named task check:**
+   For each `<!-- phase-gate: ... -->`:
+   - Extract task IDs from marker text
+   - Check status of each → flag `[ ]` tasks
+
+   Pass all 7F results to Quality Controller (step 7.6) and Architect (step 7.7): "Executability issues (verify 7F): <list or 'замечаний нет'>".
+
    **Reference format** (for recommendations):
    ```
    - [ ] N.M Краткое описание
@@ -235,6 +264,7 @@ Universal quality gate for OpenSpec changes. Works in two modes determined autom
    - Paths to specs/ files
    - Checklist table from step 7.5 (if manual config markers were found), or "маркеров ручной конфигурации не найдено"
    - List of issues from steps 7A-7E (if any), or "механических замечаний нет"
+   - Executability issues from step 7F (if any), or "замечаний выполнимости нет"
    - Repository state (object/file existence and emptiness list)
 
    **Quality Controller prompt** (use template from `1c-agent-patterns/SKILL.md`, section "Quality Controller — phase coherence review"):
@@ -254,6 +284,8 @@ Universal quality gate for OpenSpec changes. Works in two modes determined autom
       - `rework-risk` MEDIUM, `missing-dependency` → SUGGESTION
       - `missing-phase-gate` → SUGGESTION
       - `phase-gate-blocked`, `task-validity-drift` → WARNING (phase-transition)
+      - `ordering-mismatch`, `iteration-drift`, `phase-gate-named-task-blocked`, `phase-gate-stale-ref`, `execution-order-contradiction` → WARNING
+      - `ordering-cosmetic` → SUGGESTION
 
 7.6b. **Phase Transition Review (phase-transition mode ONLY)**
 
@@ -288,6 +320,7 @@ Universal quality gate for OpenSpec changes. Works in two modes determined autom
    - Paths to specs/ files (architect reads them)
    - Checklist table from step 7.5 (if manual config markers were found), or "маркеров ручной конфигурации не найдено"
    - List of issues from steps 7A-7E (if any), or "механических замечаний нет"
+   - Executability issues from step 7F (if any), or "замечаний выполнимости нет"
    - Quality Controller result: phase classification table and alerts from step 7.6 (or "Quality Controller замечаний нет")
 
    **Architect prompt** (use template from `1c-agent-patterns/SKILL.md`, section "Architect — task readiness review (verify шаг 7.7)"):
@@ -562,6 +595,13 @@ In **mixed** mode, post-apply checks apply **only to tasks marked `[x]`**.
     - [SUGGESTION] N.M — рекомендуется разбить на 2 задачи
     ...
 
+    ### Выполнимость и порядок задач (verify 7F, QC 5d)
+    - [WARNING] N.M — невыполним: зависит от M.K (описание), задача [ ]
+    - [SUGGESTION] N.M — расположен до зависимости M.K (строка X vs Y)
+    - [WARNING] Phase Gate: задача N.M [ ], K.L [ ] (именованы в маркере gate)
+    - [SUGGESTION] «Порядок выполнения» не покрывает задачи: [list]
+    (или: замечаний выполнимости нет)
+
     ### Полнота ручной конфигурации (чеклист шага 7.5)
 
     **Задача N.M** — маркер: `создать обработку` — тип: Metadata
@@ -715,6 +755,7 @@ In **mixed** mode, post-apply checks apply **only to tasks marked `[x]`**.
     | Design Review not done | Offer to run onec-code-architect with design review focus. Save report to `reports/design-review-YYYY-MM-DD.md` |
     | Repo Consistency (WARNING from 7E) | Suggest rewriting task: «создать» → «доработать» / «наполнить содержимым» if object already exists |
     | Phase violation / false start (QC 7.6) | Suggest reordering tasks in tasks.md to respect phase dependencies (P0→P1→P2→P3→P4). For false starts: suggest marking already-implemented code tasks as `[x]` or reverting premature implementation |
+    | Executability issues (7F) | Suggest: (a) add explicit `Зависимости:` to affected tasks, (b) reorder sections to match dependency graph, (c) update execution order text to cover all tasks. For iteration-drift: suggest reviewing stale tasks with architect |
     | Rework risk (QC 7.6) | Suggest completing prerequisite P1 specs in design.md before proceeding with dependent P2 tasks |
     | Phase transition issues (7.6b) | Suggest restructuring tasks via onec-code-architect (phase transition review). If design drift detected — suggest updating design.md before proceeding |
     | Missing phase gates (QC) | Delegate to **onec-code-architect** with prompt "Architect — phase gate restructuring" from `1c-agent-patterns/SKILL.md`. Architect returns full restructured tasks.md. Show diff to user, apply on confirmation. Ref `.cursor/rules/phase-gates.mdc` |

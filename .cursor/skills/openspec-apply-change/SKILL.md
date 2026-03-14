@@ -123,6 +123,17 @@ Implement tasks from an OpenSpec change.
      Реализация будет останавливаться на каждом phase gate."
    Ref: `.cursor/rules/phase-gates.mdc`.
 
+   **5.6 Determine execution mode**
+
+   **Step-by-step mode** activates when ANY of:
+   - User explicitly requests: «по одной», «step-by-step», «пошагово», «по шагам», «одну задачу»
+   - Debug session: debug.md exists AND was modified today (current session is actively debugging)
+   - Current batch has P4 (test) tasks intermixed with P2/P3 (implementation) tasks in the execution order
+
+   **Batch mode** (default): current behavior — sequential execution with pauses only on errors/gates/conditionals.
+
+   Announce mode: "Режим: пошаговый (подтверждение после каждой задачи)" or "Режим: последовательный (пауза на gate/ошибке/условии)".
+
    Launch up to 3 independent tasks in parallel via **Task** tool when applicable. Делегирование субагентам — через инструмент **Task** (см. `.cursor/rules/tool-name-guard.mdc`).
 
 6. **Implement tasks (loop until done or blocked)**
@@ -152,7 +163,7 @@ Implement tasks from an OpenSpec change.
    | Форма (Form.xml) | «форму», «реквизиты формы», «элементы формы», «Form.xml» | **onec-form-generator** или скилл 1c-forms через агента |
    | Запрос 1С | «запрос», «оптимизировать запрос» | **onec-query-optimizer** |
    | Верификация метаданных | «проверить соответствие», «проверить наличие» | Оркестратор (Glob/Grep/Read — только проверка, не реализация) |
-   | Ручной тест | «ручной тест», «убедиться» | Пропустить (отметить как manual, не выполнять) |
+   | Ручной тест | «ручной тест», «убедиться» | **Step-by-step:** показать сценарий, ждать результат (Пройден/Не пройден/Отложить). **Batch:** пропустить с предупреждением; включить в Session Summary секцию "Отложенные ручные тесты" |
    | Создание метаданных | «создать регистр», «создать справочник», «создать форму» (scaffold) | **СТОП** — блокер пользователю (`1c-no-metadata-creation.mdc`) |
 
    **HALT:** Оркестратор НЕ реализует задачи типов BSL-код и Форма самостоятельно. Оркестратор готовит промпт и делегирует. Прямое использование Write/StrReplace для .bsl и прямая генерация JSON-спецификаций форм для form-compile — запрещены. Для форм: передать design-спецификацию агенту onec-form-generator или описать задачу для скилла 1c-forms; агент сам интерпретирует spec и генерирует артефакт. Ref: `1c-agent-delegation.mdc`, `1c-utility-agents.mdc`.
@@ -201,10 +212,12 @@ Implement tasks from an OpenSpec change.
    - Orchestrator role: prepare prompt with context, delegate, spot-check result
    - **Spot-check (post-verification):** After the agent reports completion, verify the change: Grep for a pattern that confirms the fix (e.g. after "replace ТекущаяДата with ТекущаяДатаСеанса" → Grep for `ТекущаяДата()` in that file must return 0 matches). For batch tasks (5+ files), spot-check at least 3 files (first, middle, last in the list). If the result does not match expectations → STOP, report to user, do NOT mark task complete.
    - Mark task complete in the tasks file: `- [ ]` → `- [x]`
+   - **Step-by-step checkpoint (if step-by-step mode):** After marking task complete, ОБЯЗАТЕЛЬНАЯ ПАУЗА. For **code/form tasks** (completed by agent): show "Задача N.M выполнена", "Что изменено" (path, строки, описание), "Что проверить" (из критериев приёмки). Options: [Подтвердить / Проблема / Пропустить]. Подтвердить → proceed; Проблема → user describes issue, create follow-up task in tasks.md (phase-gates.mdc for phased insertion), do NOT proceed until resolved or "Пропустить"; Пропустить → proceed, add "(не проверено пользователем)" note, include in Session Summary as unverified. For **manual test tasks** (P4): show "Задача N.M — ручной тест (ваше действие)", "Сценарий" (шаги из задачи), "Зависимости: M.K [x], M.L [x]" or "M.K [ ] — НЕ выполнена". Options: [Тест пройден / Тест не пройден / Отложить]. Тест пройден → mark [x]; Тест не пройден → debug flow (tasks.md or debug.md); Отложить → leave [ ], proceed.
    - **If this was a verification/decision task** (identified in Conditional Task Detection) → trigger ОБЯЗАТЕЛЬНАЯ ПАУЗА above before proceeding
    - Continue to next task
 
    **Pause if:**
+   - **Step-by-step mode:** after every task completion (step-by-step checkpoint above)
    - Task is unclear → ask for clarification
    - Implementation reveals a design issue → suggest updating artifacts
    - Error or blocker encountered → report and wait for guidance
@@ -212,13 +225,33 @@ Implement tasks from an OpenSpec change.
    - **Verification/decision task completed** → conditional task checkpoint (see above)
    - **Phase Gate reached** → before first task of next phase (see Phase Gate check above)
 
-7. **On completion or pause, show status**
+7. **On completion or pause — Session Handoff Summary**
 
-   Display:
-   - Tasks completed this session
-   - Overall progress: "N/M tasks complete"
-   - If all done: suggest archive
-   - If paused: explain why and wait for guidance
+   Generate three-section summary:
+
+   **Section 1 — "Выполнено агентами":**
+   For each task completed this session:
+   - [x] N.M — краткое описание
+     - Файл: `path`, строки X-Y
+     - Что изменено: одно предложение (было → стало)
+     - Авто-проверка: результат spot-check (OK / расхождение)
+
+   **Section 2 — "Что проверить СЕЙЧАС":**
+   For each completed task that has acceptance criteria with user-facing actions (markers: `убедиться`, `проверить`, `критерий приёмки`, `Критерий приёмки`):
+   - Extract the acceptance criteria from the task description
+   - Rewrite as concrete user steps (imperative mood): 1. Открыть ... → Выполнить ... → Ожидаемый результат: ...
+   - If task type was "Ручной тест" (dispatched as manual) — include the full test scenario with expected results
+
+   If no acceptance criteria require user action → "Ручная проверка не требуется для задач этого сеанса."
+
+   **Section 3 — "Следующие задачи":**
+   | Задача | Тип | Исполнитель | Зависит от | Статус зависимости |
+   Show only the next 3-5 tasks. For each: Type (BSL / Form / Manual test / Metadata / etc.), Executor (agent / user), Dependencies and their status ([x] / [ ]). If dependency is [ ] → flag "невыполнима до N.M"
+
+   **Blockers (if any):**
+   List tasks that cannot proceed and why.
+
+   If all done: suggest archive. If paused: explain why and wait for guidance.
 
 **Output During Implementation**
 
@@ -241,12 +274,25 @@ Working on task 4/7: <task description>
 
 **Change:** <change-name>
 **Schema:** <schema-name>
-**Progress:** 7/7 tasks complete ✓
+**Progress:** N/M tasks complete ✓
 
-### Completed This Session
-- [x] Task 1
-- [x] Task 2
-...
+### 1. Выполнено агентами
+- [x] N.M — <краткое описание>
+  - Файл: `path`, строки X-Y
+  - Что изменено: <одно предложение>
+  - Авто-проверка: OK / расхождение
+
+### 2. Что проверить СЕЙЧАС
+1. <конкретный шаг из критериев приёмки> → Ожидаемый результат: ...
+(или: Ручная проверка не требуется для задач этого сеанса.)
+
+### 3. Следующие задачи
+| Задача | Тип | Исполнитель | Зависит от | Статус |
+|--------|-----|-------------|------------|--------|
+| ...    | ... | ...         | ...        | [x]/[ ] |
+
+### Blockers (если есть)
+<список>
 
 All tasks complete! Ready to archive this change.
 ```
@@ -258,7 +304,16 @@ All tasks complete! Ready to archive this change.
 
 **Change:** <change-name>
 **Schema:** <schema-name>
-**Progress:** 4/7 tasks complete
+**Progress:** N/M tasks complete
+
+### 1. Выполнено агентами (этот сеанс)
+<как в Output On Completion>
+
+### 2. Что проверить СЕЙЧАС
+<шаги для пользователя>
+
+### 3. Следующие задачи
+<таблица>
 
 ### Issue Encountered
 <description of the issue>

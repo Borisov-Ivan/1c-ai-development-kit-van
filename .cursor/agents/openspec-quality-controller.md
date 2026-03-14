@@ -78,6 +78,81 @@ For each P2/P3 task, check:
 - Any task before gate still `[ ]`? → BLOCKED
 - Output: "Phase Gate N: PASS / BLOCKED (tasks X.Y pending)"
 
+### 5d. Executability Analysis (ALWAYS evaluated)
+
+Verify that every task can be executed given the current state of other tasks,
+their position in the file, and iteration history. Applies to ALL phases (P0-P4).
+
+#### 5d.1 Functional Dependency Inference
+
+For EACH task (not just P4), parse description and infer **functional preconditions**
+— what must already work for this task to be executable:
+
+| Task phase | What to look for in description |
+|-------|------|-------------|
+| P4 (test) | User actions: `заполнить`, `запустить`, `отправить`, `открыть`, `убедиться`, `настроить` + object → requires that object's implementation works |
+| P3 (integration) | References to procedures/functions from other modules → requires those procedures exist and work |
+| P2 (implementation) | Uses objects/structures from P0 tasks → requires objects created; reads from register/catalog → requires register/catalog configured |
+| P1 (form/UI) | References data attributes → requires P0 objects with those attributes exist |
+| P0 (infrastructure) | Typically no functional preconditions (leaf nodes) |
+
+For each inferred precondition, find the task that provides it (by matching
+object name, procedure name, or described functionality). Add to dependency graph
+as **functional dep** (new edge type, alongside explicit/artifact/phase).
+
+#### 5d.2 File Position Ordering
+
+For every dependency edge (A depends on B) in the full graph
+(explicit + artifact + phase + functional):
+- If B appears AFTER A in tasks.md (by line number) AND B is `[ ]`:
+  → alert `ordering-mismatch` (WARNING):
+  "задача A.B (строка X) зависит от M.K (строка Y, позже в файле),
+  которая не выполнена — порядок в файле не соответствует зависимостям"
+- If B appears AFTER A but B is `[x]`:
+  → alert `ordering-cosmetic` (SUGGESTION):
+  "задача A.B расположена до зависимости M.K в файле,
+  но M.K выполнена — рекомендуется переупорядочить для читаемости"
+
+#### 5d.3 Iteration Drift Detection
+
+Detect tasks added in later iterations (heuristics):
+- Section number N > previous sections' max number but tasks
+  in N fix/extend functionality from earlier sections
+  (e.g., section 7 "Рефакторинг" fixes issues in section 2 "Обработка")
+- Tasks reference `debug.md`, `reports/`, `См.` markers — added iteratively
+
+For each iteratively-added task with `[x]`:
+- Find all EARLIER-numbered tasks (lower section) that are `[ ]`
+  and whose description implies using the same functionality
+- If found → alert `iteration-drift` (WARNING):
+  "задача N.M (итеративно добавлена, [x]) исправляет функционал,
+  от которого зависит ранее определённая задача K.L ([ ]).
+  Задача K.L может быть устаревшей или требовать обновления зависимостей"
+
+#### 5d.4 Execution Order Text Validation
+
+If tasks.md contains a free-text block with execution order instructions
+(markers: `Порядок выполнения`, `Порядок реализации`, `Последовательность`):
+1. Parse referenced task numbers from the text
+2. Build an ordered sequence from the text
+3. Compare with the dependency graph:
+   - Text says "сначала A, потом B", but graph shows B has no dep on A → SUGGESTION: "порядок в тексте не отражён в зависимостях задач"
+   - Text says "сначала A, потом B", but A depends on B in the graph → WARNING: "текст порядка противоречит графу зависимостей"
+   - Tasks mentioned in text but absent from tasks.md → WARNING: "текст ссылается на несуществующую задачу"
+4. If execution order text exists but some tasks are NOT mentioned in it
+   → SUGGESTION: "текст порядка выполнения не покрывает задачи: [list]"
+
+#### 5d.5 Phase Gate Named Task Validation
+
+If `<!-- phase-gate: ... -->` marker contains task identifiers (pattern `N.M`
+or `задачи N.M, K.L`):
+1. Extract all task IDs from the marker text
+2. For each ID: check status in tasks.md
+3. If any named task is `[ ]` → alert `phase-gate-named-task-blocked` (WARNING):
+   "Phase Gate ссылается на задачу N.M, которая не выполнена [ ]"
+4. If named task ID not found in tasks.md → alert `phase-gate-stale-ref` (WARNING):
+   "Phase Gate ссылается на задачу N.M, которой нет в tasks.md"
+
 ## OUTPUT FORMAT
 
 ### Verdict
@@ -98,7 +173,7 @@ Show edges, highlight violations.
 
 For each issue:
 - **Task(s) affected**
-- **Type**: phase-violation / false-start / rework-risk / missing-dependency / cycle / missing-phase-gate / phase-gate-blocked / task-validity-drift
+- **Type**: phase-violation / false-start / rework-risk / missing-dependency / cycle / missing-phase-gate / phase-gate-blocked / task-validity-drift / ordering-mismatch / ordering-cosmetic / iteration-drift / execution-order-contradiction / phase-gate-named-task-blocked / phase-gate-stale-ref
 - **Severity**: CRITICAL / WARNING / SUGGESTION
 - **Recommendation**
 
@@ -122,6 +197,7 @@ Only evaluate: ordering, dependencies, execution risk.
 5. Validate topological ordering
 5.5. Evaluate criterion #5b (Missing Phase Gates) — always
 5.6. If **phase-transition** mode — additionally evaluate #5a (Task Validity) and #5c (Phase Gate Status)
+5.7. Evaluate criterion #5d (Executability Analysis) — always
 6. Detect false starts (task status vs repo state)
 7. Assess rework risk for P2/P3 tasks
 8. Produce report in output format

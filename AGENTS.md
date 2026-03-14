@@ -12,6 +12,9 @@
 ## BSL write guard
 `.cursor/rules/bsl-write-guard.mdc` — глобальный инвариант: правка .bsl только через onec-code-writer + обязательный onec-code-reviewer (любой диалог). `.cursor/rules/1c-agent-delegation.mdc` — детальная диспетчеризация: APPLY GATE, DELEGATION GATE, LINT GATE, API CHECK, EXTENSION GATE.
 
+## Code reviewer (onec-code-reviewer)
+`.cursor/agents/onec-code-reviewer.md` — ревью кода BSL. **Приоритет рассуждения над каталогом:** сначала Phase 0 (Intent & Reasoning Analysis) — артефакты Intent Map, Contract Map, Knowledge Assessment; замечания по логике (DISPROPORTIONATE_COMPLEXITY, CONTRACT_INCONSISTENCY, CONTRACT_INFERENCE, KNOWLEDGE_DEFICIT, CLARITY_DEFICIT). Каталог антипаттернов (AP-NNN) — вспомогательный шаг. Отчёт: секция Reasoning Analysis (Phase 0), затем Standards & Patterns.
+
 ## API Existence Check
 `.cursor/rules/1c-agent-delegation.mdc` (секция API EXISTENCE CHECK) — проверка существования вызываемых методов общих модулей в src/ (cf + cfe) после writer, до reviewer. AskQuestion при ненайденном методе.
 
@@ -32,7 +35,8 @@
 
 ## Verify (универсальный quality gate)
 `.cursor/skills/openspec-verify-change/SKILL.md` — `/opsx:verify`. Pre-apply: формат tasks, качество задач, полнота ручной конфигурации, **фазовая когерентность (Quality Controller — generalPurpose, домен-агностичный)**, **реализуемость (Architect)**, **генерация ТЗ (обязательный шаг)**, Architect Gate, Design Review, ТЗ Review, project constraints. Post-apply: completeness, correctness, coherence. Авто-устранение замечаний.
-Quality Controller (шаг 7.6): фазовая классификация задач P0-P4, граф зависимостей, false start detection, rework risk. Шаблон промпта: `1c-agent-patterns/SKILL.md` (секция «Quality Controller — phase coherence review»). ТЗ (шаг 7.8): генерация функциональных требований по промпту `openspec-docs/prompts/change-tz.md`, сохранение в `ТЗ.md` change.
+**Executability Analysis (тройная проверка):** verify шаг 7F (механическая), QC критерий 5d (семантическая), Architect критерий 6 (холистическая). Покрывает ВСЕ задачи (P0-P4): функциональные зависимости из описаний, порядок в файле vs граф зависимостей, итерационный дрифт (задачи из debug ломают порядок ранних секций), валидация текста «Порядок выполнения», именованные задачи в phase gate маркерах.
+Quality Controller (шаг 7.6): фазовая классификация задач P0-P4, граф зависимостей, false start detection, rework risk, executability analysis (5d). Шаблон промпта: `1c-agent-patterns/SKILL.md` (секция «Quality Controller — phase coherence review»). ТЗ (шаг 7.8): генерация функциональных требований по промпту `openspec-docs/prompts/change-tz.md`, сохранение в `ТЗ.md` change.
 Коммуникация с пользователем: `.cursor/rules/verify-user-communication.mdc` — Executive Summary в отчёте, Before/After scorecard после remediation, расшифровка каждого замечания, явное указание решений от пользователя. Голые счётчики без расшифровки запрещены.
 
 ## Verified Cause Gate
@@ -45,7 +49,10 @@ Quality Controller (шаг 7.6): фазовая классификация за�
 `.cursor/agents/openspec-quality-controller.md` — домен-агностичный агент (Opus, readonly). Фазовая классификация задач (P0-P4), граф зависимостей, false start detection, rework risk. Вызывается из `/opsx:verify` шаг 7.6 через `Task(subagent_type="openspec-quality-controller")`. Шаблон промпта: `1c-agent-patterns/SKILL.md` (секция «Quality Controller — phase coherence review»).
 
 ## Phase Gates (фазовое исполнение больших ЗНИ)
-`.cursor/rules/phase-gates.mdc` — формат маркеров в tasks.md (`# Фаза N`, `<!-- phase-gate -->`), поведение apply (СТОП на gate, confirmation, phase gate log в debug.md, фазовый прогресс, post-architect flow), verify (phase-transition mode с **автодетектом**: phase gates + [x] перед gate + [ ] после → предложение phase-transition), ff (генерация gates архитектором), QC (alert missing-phase-gate — **always-on** критерий 5b, не только phase-transition). Правила вставки задач в phased tasks (ДОБАВЛЕНИЕ ЗАДАЧ В PHASED TASKS). Debug: phase-aware вставка задач в правильную фазу. Промпт реструктуризации плоских задач: `1c-agent-patterns/SKILL.md` (секция «Architect — phase gate restructuring»). Триггер рекомендации: 10+ задач spanning P0–P3+. Хинт: `/opsx:ff` — только для новых changes; добавление задач к существующему — через `/opsx:debug`, `/opsx:explore`, apply Phase Gate Option 3.
+`.cursor/rules/phase-gates.mdc` — формат маркеров в tasks.md (`# Фаза N`, `<!-- phase-gate -->`), поведение apply (СТОП на gate, confirmation, phase gate log в debug.md, фазовый прогресс, post-architect flow), verify (phase-transition mode с **автодетектом**: phase gates + [x] перед gate + [ ] после → предложение phase-transition), ff (генерация gates архитектором), QC (alert missing-phase-gate — **always-on** критерий 5b, не только phase-transition). **5c enrichment:** именованные задачи в маркере gate проверяются поимённо; валидация текста «Порядок выполнения» при apply. Правила вставки задач в phased tasks (ДОБАВЛЕНИЕ ЗАДАЧ В PHASED TASKS). Debug: phase-aware вставка задач в правильную фазу. Промпт реструктуризации плоских задач: `1c-agent-patterns/SKILL.md` (секция «Architect — phase gate restructuring»). Триггер рекомендации: 10+ задач spanning P0–P3+. Хинт: `/opsx:ff` — только для новых changes; добавление задач к существующему — через `/opsx:debug`, `/opsx:explore`, apply Phase Gate Option 3.
+
+## Session Handoff и Step-by-step mode
+`.cursor/skills/openspec-apply-change/SKILL.md` (шаги 5.6, 6, 7) — Session Handoff Summary (три секции: код / действия пользователя / следующие задачи), Step-by-step mode (пауза после каждой задачи с подтверждением, обработка ручных тестов с ожиданием результата). Триггеры step-by-step: явный запрос, debug-сессия, P4 задачи в текущей пачке.
 
 ## Сохранение отчётов субагентов
 `.cursor/rules/preserve-subagent-reports.mdc` — полные отчёты в reports/.
