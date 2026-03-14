@@ -56,13 +56,28 @@ Universal quality gate for OpenSpec changes. Works in two modes determined autom
    |---|---|---|---|
    | 0 (bare lines only) | — | — | **pre-apply** |
    | >0 | 0 | >0 | **pre-apply** |
-   | >0 | >0 | >0 | **mixed** |
+   | >0 | >0 | >0 | **mixed** or **phase-transition** (see below) |
    | >0 | >0 | 0 | **post-apply** |
+
+   **Phase-transition mode detection:**
+
+   Phase-transition activates in ANY of these cases:
+   1. User or apply explicitly requested phase-transition review (e.g. "verify in phase-transition mode", "phase gate review")
+   2. The prompt indicates this run was triggered from apply at a phase gate
+   3. **Auto-detect:** tasks.md contains `<!-- phase-gate -->` markers AND there exist `[x]` tasks before a gate AND `[ ]` tasks after that gate (= a phase boundary has been crossed)
+
+   For case 3 (auto-detect): AskQuestion — "Обнаружены phase gates в tasks.md. Фаза N завершена (K задач [x] до gate, M задач [ ] после). Запустить phase-transition ревью? [Да — phase-transition / Нет — обычный mixed]". If user selects "Нет" → mode = mixed.
+
+   When phase-transition:
+   - Mode = **phase-transition**
+   - Inherit mixed-mode checks and ADD phase-specific checks (step 7.6b)
+   - Otherwise mixed (both [x] and [ ] present) = **mixed**
 
    Announce mode to user:
    ```
    Режим: pre-apply (артефакты не реализованы)
    Режим: mixed (N/M задач выполнено — pre-проверки для оставшихся, post-проверки для выполненных)
+   Режим: phase-transition (ревью на границе фазы — актуальность оставшихся задач)
    Режим: post-apply (все задачи выполнены)
    ```
 
@@ -237,6 +252,32 @@ Universal quality gate for OpenSpec changes. Works in two modes determined autom
       - `false-start`, `phase-violation`, `cycle` → CRITICAL
       - `rework-risk` HIGH → WARNING
       - `rework-risk` MEDIUM, `missing-dependency` → SUGGESTION
+      - `missing-phase-gate` → SUGGESTION
+      - `phase-gate-blocked`, `task-validity-drift` → WARNING (phase-transition)
+
+7.6b. **Phase Transition Review (phase-transition mode ONLY)**
+
+   **This step executes ONLY in phase-transition mode.** Assesses whether remaining tasks are still valid after completing the current phase.
+
+   **Context to collect:**
+   - Completed tasks (current phase): list from tasks.md marked `[x]` that belong to the phase just finished (tasks before the last crossed phase-gate)
+   - Upcoming tasks (next phases): list from tasks.md marked `[ ]` that follow the next `<!-- phase-gate -->`
+   - debug.md (if exists): implementation issues discovered during the phase
+   - Recent architecture/exploration reports in change `reports/`
+
+   **Quality Controller call (enhanced):**
+   Pass the same inputs as step 7.6, plus:
+   - "Mode: phase-transition"
+   - "Completed phase tasks: [list]"
+   - "Upcoming phase tasks: [list]"
+   - "Implementation notes (debug.md): <content or 'none'>"
+   QC evaluates criterion #5 (Phase Gate Review) in addition to standard criteria. Use template from `1c-agent-patterns/SKILL.md` (QC prompt with optional phase-transition context block).
+
+   **Architect call (phase-transition focus):**
+   Use template from `1c-agent-patterns/SKILL.md`, section "Architect — phase transition review (verify шаг 7.6b)".
+   Pass: tasks.md, design.md, proposal.md, path to debug.md, paths to recent reports.
+   Focus: are upcoming tasks still valid given implementation results? Any design drift? Need restructuring?
+   Save architect result to `reports/phase-transition-YYYY-MM-DD.md`.
 
 7.7. **Task Readiness Architect Review (MANDATORY)**
 
@@ -505,7 +546,7 @@ In **mixed** mode, post-apply checks apply **only to tasks marked `[x]`**.
     **Summary Scorecard (после Executive Summary):**
     ```
     ## Verification Report: <change-name>
-    ### Режим: pre-apply | mixed | post-apply
+    ### Режим: pre-apply | mixed | post-apply | phase-transition
 
     ### Формат артефактов
     | Проверка | Статус |
@@ -559,6 +600,19 @@ In **mixed** mode, post-apply checks apply **only to tasks marked `[x]`**.
     - [CRITICAL] false-start: задача N.M (P2) — код существует, но предшественник K.L (P0) не завершён
     - [WARNING] rework-risk: задача N.M (P2) зависит от незавершённой спецификации P1
     ...
+
+    ### Phase Transition Review (phase-transition only)
+
+    **Текущая фаза:** N (завершена)
+    **Следующая фаза:** N+1
+
+    | Проверка | Статус |
+    |---|---|
+    | Актуальность задач следующей фазы | OK / WARNING |
+    | Design drift | OK / WARNING |
+    | Необходимость перепроектирования | Нет / Да (рекомендация) |
+
+    Детали: см. reports/phase-transition-YYYY-MM-DD.md и quality-control (критерий #5).
 
     ### Готовность к реализации (архитектор)
 
@@ -662,6 +716,8 @@ In **mixed** mode, post-apply checks apply **only to tasks marked `[x]`**.
     | Repo Consistency (WARNING from 7E) | Suggest rewriting task: «создать» → «доработать» / «наполнить содержимым» if object already exists |
     | Phase violation / false start (QC 7.6) | Suggest reordering tasks in tasks.md to respect phase dependencies (P0→P1→P2→P3→P4). For false starts: suggest marking already-implemented code tasks as `[x]` or reverting premature implementation |
     | Rework risk (QC 7.6) | Suggest completing prerequisite P1 specs in design.md before proceeding with dependent P2 tasks |
+    | Phase transition issues (7.6b) | Suggest restructuring tasks via onec-code-architect (phase transition review). If design drift detected — suggest updating design.md before proceeding |
+    | Missing phase gates (QC) | Delegate to **onec-code-architect** with prompt "Architect — phase gate restructuring" from `1c-agent-patterns/SKILL.md`. Architect returns full restructured tasks.md. Show diff to user, apply on confirmation. Ref `.cursor/rules/phase-gates.mdc` |
     | TZ generation gaps (7.8) | Suggest completing the artifact indicated in the TZ gap (e.g., add Why to proposal, add scenarios to spec) |
     | TZ lexicon violation | StrReplace forbidden words in `ТЗ.md` with correct replacements from `.cursor/docs/tz-lexicon-dictionary.md` |
     | TZ review remarks | Suggest `/opsx:doc-tz <name>` to regenerate TZ with architect review |
@@ -725,7 +781,7 @@ In **mixed** mode, post-apply checks apply **only to tasks marked `[x]`**.
 18. **Save verification report**
 
     Save the report to `reports/verification-<mode>-YYYY-MM-DD.md` in the change directory,
-    where `<mode>` is `pre`, `mixed`, or `post`.
+    where `<mode>` is `pre`, `mixed`, `post`, or `phase-N` (N = completed phase number when in phase-transition mode).
 
 ---
 

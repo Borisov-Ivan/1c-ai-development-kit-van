@@ -71,7 +71,7 @@ Evaluate:
   - Parameter count
   - Error handling
   - Testability
-  - Stub/placeholder code returning empty or dummy values (empty Thumbprint, hardcoded "TODO", always-false conditions) — HIGH (always checked, not prerelease-only)
+  - Stub/placeholder code returning empty or dummy values (empty Thumbprint, hardcoded "TODO", always-false conditions) — HIGH — AP-024. See anti-pattern registry
   - AP-007: Parameter overwrite / collection mutation — HIGH/MEDIUM. See anti-pattern registry
   - Duplicated magic constant: same numeric literal (not 0/1/-1) or same string literal appears 2+ times in module — MEDIUM. Exception: query text, structure keys, metadata names, 0/1/-1/Истина/Ложь. See 1c-coding-standards.mdc rule 22
   - Mixed responsibilities: procedure >40 lines combining 3+ distinct concerns (rights check, transaction management, business logic, persistence/write, logging, UI feedback) — MEDIUM. Sign: procedure could be split into independent functions without passing internal state
@@ -80,7 +80,7 @@ Evaluate:
 ### 5. Extension Annotations (1C Extensions)
 ```yaml
 Check:
-  - &Перед/&После applied to a function (not procedure) — CRITICAL
+  - &Перед/&После applied to a function (not procedure) — CRITICAL — AP-022. See anti-pattern registry
   - &Вместо used where &Перед/&После would suffice — HIGH
   - &ИзменениеИКонтроль: code outside #Вставка/#Удаление blocks differs from base — HIGH (prerelease: CRITICAL). Signs: variable renaming, formatting/indent changes, refactoring outside blocks, adding/removing #Область/#КонецОбласти in base (typed) code, NEW CODE added outside directive blocks. Any of these breaks extension applicability.
   - &ИзменениеИКонтроль used where &Перед/&После is sufficient — HIGH
@@ -154,6 +154,7 @@ Check:
 ### 10. Specific 1C Patterns
 ```yaml
 Check via Anti-pattern Registry (see category 16):
+  AP-001: Server scope by default in form modules (Перем/Тип without &НаКлиенте) — HIGH
   AP-002: Client-only methods in server context — HIGH
   AP-003: ЭтаФорма instead of ЭтотОбъект in callbacks — HIGH
   AP-004: Defensive check on fixed-contract source — HIGH
@@ -166,10 +167,15 @@ Check via Anti-pattern Registry (see category 16):
   AP-012: Сообщить() instead of BSP methods — HIGH
   AP-013: Query in loop (N+1) — HIGH
   AP-014: Attribute via reference dot notation — HIGH
+  AP-017: Inverted early exit (condition tied to exit instead of action) — MEDIUM
+  AP-018: ТекущаяСтрока() on form TableValue attribute (use Элементы.<Name>.ТекущиеДанные) — HIGH
+  AP-019: Новый Тип(...) instead of Тип(...) for type descriptor — HIGH
+  AP-020: Missing explicit directive on procedure/function in form module — HIGH
+  AP-021: Fail-fast violation (silent skip on structural precondition) — HIGH
+  AP-025: User-facing string without НСтр() — MEDIUM
 
 Remain inline (not in registry):
   - Ternary operator ?() — MEDIUM
-  - User-facing string literals without НСтр("ru = '...'") — MEDIUM
   - Excessive info logging inside loop or 3+ info-level calls — LOW
 ```
 
@@ -195,8 +201,8 @@ Check:
 ```yaml
 Check:
   AP-015: Transaction without safety pattern (НачатьТранзакцию without Попытка+Зафиксировать+Отменить) — CRITICAL. See anti-pattern registry
+  AP-023: User interaction (ПоказатьВопрос, Предупреждение, Сообщить) inside transaction — HIGH. See anti-pattern registry
   Remain inline:
-  - User interaction (ПоказатьВопрос, Предупреждение, Сообщить) inside transaction — HIGH
   - Read-then-write without БлокировкаДанных in concurrent scenario — HIGH
   - Nested НачатьТранзакцию() without justification — MEDIUM
 ```
@@ -343,10 +349,10 @@ status: NOT_CONNECTED
    - Detect code duplication
    - Check function length
    - Analyze parameter count
-   - Fail-fast: scan for silent skips on structural checks (Продолжить, silent Возврат, empty branch when precondition fails on type/property/size/format)
+   - Fail-fast: scan for silent skips on structural checks (Продолжить, silent Возврат, empty branch when precondition fails on type/property/size/format) — AP-021. See anti-pattern registry
    - Data contract: → see AP-004, AP-005, AP-006 in anti-pattern registry (category 16)
    - Design authority: design.md decisions do NOT exempt code from anti-pattern checks. Tag: "design-prescribed anti-pattern".
-   - Detect stub/placeholder code: empty Thumbprint, hardcoded "TODO" return values, always-false conditions — HIGH (always, not prerelease-only)
+   - Detect stub/placeholder code: empty Thumbprint, hardcoded "TODO" return values, always-false conditions — HIGH — AP-024 (always, not prerelease-only). See anti-pattern registry
    - Parameter integrity: → see AP-007 in anti-pattern registry (category 16)
    - Magic constants: detect same numeric (not 0/1/-1) or string literal appearing 2+ times in module. See 1c-coding-standards.mdc rule 22
    - Mixed responsibilities: detect procedures >40 lines combining 3+ concerns (rights, transaction, business logic, persistence, logging, UI)
@@ -362,9 +368,17 @@ status: NOT_CONNECTED
    d. Are there nested/adjacent Попытка blocks? Each must be independently justified.
    Попытка вокруг ПолучитьИзВременногоХранилища, ТипЗнч(), доступ к свойствам
    фиксированного контракта = ВСЕГДА AP-008 CRITICAL (нет внешнего фактора).
+   e. Scope minimality (INTEGRATION_CONTRACT_GATE applied to Попытка):
+      If a Попытка wraps a call to a function/procedure that ITSELF catches
+      the same external factor — redundant layering. Apply rule: "если
+      функция уже обрабатывает — не дублировать" (1c-agent-patterns,
+      INTEGRATION_CONTRACT_GATE). ONE Попытка at the outermost boundary
+      (user action handler, scheduled job entry, HTTP handler).
+      Inner functions: propagate exceptions, don't catch.
+      Violation → HIGH "redundant Попытка layering (rule 20 + INTEGRATION_CONTRACT_GATE)".
 
 5. Extension annotations:
-   - Detect &Перед/&После applied to a function (not procedure)
+   - Detect &Перед/&После applied to a function (not procedure) — AP-022 CRITICAL. See anti-pattern registry
    - Detect &Вместо where &Перед/&После is sufficient
    - Detect &ИзменениеИКонтроль where code outside directives differs from base: variable renaming, formatting changes, refactoring outside #Вставка/#КонецВставки, adding/removing #Область in base (typed) code, NEW CODE added outside directive blocks
    - Detect business logic directly in #Вставка block
@@ -400,10 +414,9 @@ status: NOT_CONNECTED
    - Detect logic duplication between modules
    - Detect commented-out code without explanation
 
-10. Specific 1C patterns: → see AP-002..AP-014 in anti-pattern registry (category 16)
+10. Specific 1C patterns: → see AP-001..AP-025 in anti-pattern registry (category 16)
     Remain inline:
     - Ternary operator ?() — MEDIUM
-    - User-facing string literals without НСтр("ru = '...'") — MEDIUM
     - Excessive info logging inside loop or 3+ info-level calls — LOW
 
 11. Band-aid detection: → see AP-016 in anti-pattern registry (category 16)
@@ -417,8 +430,8 @@ status: NOT_CONNECTED
 
 13. Transactions and locking:
     AP-015: Transaction without safety pattern — CRITICAL (see anti-pattern registry)
+    AP-023: User interaction (ПоказатьВопрос, Предупреждение, Сообщить) inside transaction — HIGH. See anti-pattern registry
     Remain inline:
-    - User interaction (ПоказатьВопрос, Предупреждение) inside transaction — HIGH
     - Read-then-write without БлокировкаДанных in concurrent scenario — HIGH
     - Nested НачатьТранзакцию() without justification — MEDIUM
 

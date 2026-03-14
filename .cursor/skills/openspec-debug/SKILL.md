@@ -202,7 +202,9 @@ Propose a fix plan in two layers:
 **Code steps** (concrete, small): which files to modify, what to change, what to log / edge cases.
 
 **Artifact steps** (to keep "big picture"):
-- Add or refine tasks in `openspec/changes/<change>/tasks.md` (under the relevant section or "7. Рефакторинг и качество" as "7.x Исправить: …")
+- Add or refine tasks in `openspec/changes/<change>/tasks.md`:
+  - **Phase-aware insertion:** Grep tasks.md for `<!-- phase-gate`. If markers found (phased tasks.md): insert each new task into the correct phase section based on task type (see `.cursor/rules/phase-gates.mdc`, section "ДОБАВЛЕНИЕ ЗАДАЧ В PHASED TASKS"). If the target phase is ambiguous — AskQuestion.
+  - **Flat tasks.md (no phase gates):** insert under the relevant section or "7. Рефакторинг и качество" as "7.x Исправить: …"
 - If the bug reveals a missing/incorrect design decision: add a short note in `design.md`
 - **Hypothesis gate:** If the root cause is under **## Hypotheses** (not Verified facts):
   - **First** task in the plan must be **verification** (e.g. add logging, reproduce scenario, check trace) so the hypothesis becomes a verified fact, **or**

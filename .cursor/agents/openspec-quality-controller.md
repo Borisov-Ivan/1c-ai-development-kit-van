@@ -62,6 +62,22 @@ For each P2/P3 task, check:
 - Does it depend on a decision marked "hypothesis" in design? → **MEDIUM** rework risk
 - Are all return contracts fixed? → **LOW** risk if yes
 
+### 5. Phase Gate Review
+
+**5b. Missing Phase Gates (ALWAYS evaluated):** If tasks.md has 10+ tasks spanning P0–P3+ and NO `<!-- phase-gate -->` markers:
+- Alert: **missing-phase-gate** (SUGGESTION)
+- Recommendation: restructure tasks.md with phase gates (see `.cursor/rules/phase-gates.mdc`)
+
+**5a. Task Validity Check (phase-transition mode only):** When **Mode: phase-transition** is specified in the prompt, for each upcoming task (`[ ]`), verify:
+- Does it reference objects/contracts that were created or modified in completed tasks?
+- Does its description match current design.md?
+- Are there notes in debug.md that invalidate assumptions?
+
+**5c. Phase Gate Status (phase-transition mode only):** For each phase gate in tasks.md:
+- All tasks before gate completed `[x]`? → PASS
+- Any task before gate still `[ ]`? → BLOCKED
+- Output: "Phase Gate N: PASS / BLOCKED (tasks X.Y pending)"
+
 ## OUTPUT FORMAT
 
 ### Verdict
@@ -82,8 +98,8 @@ Show edges, highlight violations.
 
 For each issue:
 - **Task(s) affected**
-- **Type**: phase-violation / false-start / rework-risk / missing-dependency / cycle
-- **Severity**: CRITICAL / WARNING
+- **Type**: phase-violation / false-start / rework-risk / missing-dependency / cycle / missing-phase-gate / phase-gate-blocked / task-validity-drift
+- **Severity**: CRITICAL / WARNING / SUGGESTION
 - **Recommendation**
 
 ## BOUNDARIES
@@ -104,6 +120,8 @@ Only evaluate: ordering, dependencies, execution risk.
 3. Classify each task by phase (P0-P4)
 4. Build dependency graph (explicit + artifact + phase deps)
 5. Validate topological ordering
+5.5. Evaluate criterion #5b (Missing Phase Gates) — always
+5.6. If **phase-transition** mode — additionally evaluate #5a (Task Validity) and #5c (Phase Gate Status)
 6. Detect false starts (task status vs repo state)
 7. Assess rework risk for P2/P3 tasks
 8. Produce report in output format

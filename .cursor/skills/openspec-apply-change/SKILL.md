@@ -80,8 +80,15 @@ Implement tasks from an OpenSpec change.
    Display:
    - Schema being used
    - Progress: "N/M tasks complete"
+   - **Phase progress (if phase gates detected):** For each phase, show task count and status:
+     ```
+     Фаза 1: Подготовка — 4/4 done
+     Фаза 2: Реализация — 0/5 pending  ← текущая
+     Фаза 3: Интеграция — 0/3 pending
+     ```
    - Remaining tasks overview
    - Dynamic instruction from CLI
+   - **Phase Gate Decisions (if debug.md contains them):** Show previous phase gate decisions from `debug.md` section `## Phase Gate Decisions` — helps orient after session breaks
 
 5.5 **Analyze parallelization (file + phase dependencies)**
 
@@ -103,6 +110,18 @@ Implement tasks from an OpenSpec change.
    **If no Quality Controller report found** — fall back to file-only parallelization:
    - Tasks touching different files = independent = can run in parallel
    - Tasks touching the same file = sequential
+
+   **Phase Gate Detection:**
+   Grep tasks.md for `<!-- phase-gate` markers.
+   If found:
+   - Parse phase boundaries (tasks between consecutive markers or between `# Фаза N` headers)
+   - Display phase plan:
+     "Phase Gates обнаружены. Задачи разбиты на N фаз:
+     - Фаза 1 (задачи X.Y–Z.W): <название из заголовка или маркера>
+     - --- Phase Gate ---
+     - Фаза 2 (задачи ...): ...
+     Реализация будет останавливаться на каждом phase gate."
+   Ref: `.cursor/rules/phase-gates.mdc`.
 
    Launch up to 3 independent tasks in parallel via Task tool when applicable.
 
@@ -141,6 +160,41 @@ Implement tasks from an OpenSpec change.
    **Task loop:**
 
    For each pending task:
+   - **Phase Gate check:** If this task is the first task after a `<!-- phase-gate -->` marker (i.e. all tasks before the gate are [x]), trigger ОБЯЗАТЕЛЬНАЯ ПАУЗА:
+     ```
+     === Phase Gate ===
+     Фаза N завершена. K/M задач выполнено.
+     Критерий приёмки фазы: <текст из phase-gate маркера>
+
+     Задачи следующей фазы:
+     - N+1.1: <краткое описание>
+     - N+1.2: ...
+
+     [1. Продолжить к следующей фазе]
+     [2. Запустить phase-transition verify (рекомендуется)]
+     [3. Пересмотреть задачи следующей фазы]
+     [4. Стоп]
+     ```
+     - Option 1 → continue to next task
+     - Option 2 → suggest `/opsx:verify <name>` in phase-transition mode; STOP apply until user has run verify and confirms resume
+     - Option 3 → **Post-architect task restructuring flow:**
+       1. Delegate to **onec-code-architect** with prompt from `1c-agent-patterns/SKILL.md` "Architect — phase transition review": пересмотреть задачи следующей фазы с учётом реализации текущей; передать путь к debug.md и reports/.
+       2. Architect returns: recommendations + full text of updated task sections for the next phase.
+       3. Show user a summary of changes: which tasks added/removed/modified, what rationale.
+       4. AskQuestion: "Применить изменения к tasks.md? [Да / Нет / Скорректировать]"
+       5. On "Да" → apply changes to tasks.md via StrReplace (preserve `[x]` status of completed tasks, new tasks get `[ ]`). Re-read tasks.md. Recalculate phase progress.
+       6. On "Нет" → keep original tasks, continue to Phase Gate log.
+       7. On "Скорректировать" → ask user for specific corrections, apply, re-read.
+       8. After tasks update: AskQuestion "Продолжить apply?"
+     - Option 4 → STOP apply
+   - **Phase Gate log (mandatory for all options):** After the user's decision at a phase gate, append a record to `debug.md` (create section `## Phase Gate Decisions` if absent):
+     ```
+     ### Phase Gate N (YYYY-MM-DD)
+     Фаза: N — <phase name>
+     Решение: <продолжить / пересмотр / verify / стоп>
+     Обоснование: <user's rationale or "без замечаний">
+     Изменения tasks: <"нет" / "N задач добавлено, M удалено, K переформулировано">
+     ```
    - Show which task is being worked on
    - **Classify** (Task Dispatch table above) — announce type and executor
    - **Delegate** to the designated executor (agent or skill)
@@ -156,6 +210,7 @@ Implement tasks from an OpenSpec change.
    - Error or blocker encountered → report and wait for guidance
    - User interrupts
    - **Verification/decision task completed** → conditional task checkpoint (see above)
+   - **Phase Gate reached** → before first task of next phase (see Phase Gate check above)
 
 7. **On completion or pause, show status**
 

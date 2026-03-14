@@ -41,6 +41,9 @@ Quality Controller (шаг 7.6): фазовая классификация за�
 ## Quality Controller (OpenSpec)
 `.cursor/agents/openspec-quality-controller.md` — домен-агностичный агент (Opus, readonly). Фазовая классификация задач (P0-P4), граф зависимостей, false start detection, rework risk. Вызывается из `/opsx:verify` шаг 7.6 через `Task(subagent_type="openspec-quality-controller")`. Шаблон промпта: `1c-agent-patterns/SKILL.md` (секция «Quality Controller — phase coherence review»).
 
+## Phase Gates (фазовое исполнение больших ЗНИ)
+`.cursor/rules/phase-gates.mdc` — формат маркеров в tasks.md (`# Фаза N`, `<!-- phase-gate -->`), поведение apply (СТОП на gate, confirmation, phase gate log в debug.md, фазовый прогресс, post-architect flow), verify (phase-transition mode с **автодетектом**: phase gates + [x] перед gate + [ ] после → предложение phase-transition), ff (генерация gates архитектором), QC (alert missing-phase-gate — **always-on** критерий 5b, не только phase-transition). Правила вставки задач в phased tasks (ДОБАВЛЕНИЕ ЗАДАЧ В PHASED TASKS). Debug: phase-aware вставка задач в правильную фазу. Промпт реструктуризации плоских задач: `1c-agent-patterns/SKILL.md` (секция «Architect — phase gate restructuring»). Триггер рекомендации: 10+ задач spanning P0–P3+. Хинт: `/opsx:ff` — только для новых changes; добавление задач к существующему — через `/opsx:debug`, `/opsx:explore`, apply Phase Gate Option 3.
+
 ## Сохранение отчётов субагентов
 `.cursor/rules/preserve-subagent-reports.mdc` — полные отчёты в reports/.
 

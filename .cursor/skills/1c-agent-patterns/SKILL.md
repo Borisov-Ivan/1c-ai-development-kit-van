@@ -413,6 +413,124 @@ Task(
 )
 ```
 
+**Phase-transition context (optional):** When verify runs in phase-transition mode, add to the prompt:
+
+```
+         ## Phase-transition context (only if mode = phase-transition)
+         - Mode: phase-transition
+         - Completed phase tasks: <list of [x] tasks in current phase>
+         - Upcoming phase tasks: <list of [ ] tasks in next phases>
+         - Implementation notes (debug.md): <content or 'none'>
+```
+
+### Architect — phase transition review (verify шаг 7.6b)
+
+Used by `/opsx:verify` in phase-transition mode. Assesses whether upcoming tasks are still valid after completing the current phase.
+
+```
+Task(
+  description="Phase transition review [change-name]",
+  prompt="## Задача
+
+         Оцени актуальность задач следующей фазы ЗНИ
+         `<name>` после завершения текущей фазы.
+
+         ## Контекст
+
+         - tasks: <путь> (задачи [x] = текущая фаза,
+           задачи [ ] = следующие фазы)
+         - design: <путь>
+         - debug.md: <путь или «отсутствует»>
+         - Недавние отчёты: <пути к reports/*.md>
+
+         ## Критерии
+
+         1. **Актуальность задач.** Описания оставшихся
+            задач соответствуют текущему состоянию кода
+            и design? Нет ли ссылок на подходы, которые
+            изменились при реализации текущей фазы?
+
+         2. **Design drift.** Отличается ли реализация
+            текущей фазы от того, что описано в design?
+            Если да — какие задачи следующей фазы
+            затронуты?
+
+         3. **Необходимость перегруппировки.** Нужно ли
+            переупорядочить, объединить или разделить
+            задачи следующей фазы?
+
+         4. **Новые задачи.** Выявились ли при реализации
+            текущей фазы задачи, не предусмотренные
+            в текущем tasks.md?
+
+         ## Формат ответа
+
+         ### Вердикт
+         АКТУАЛЬНО / ТРЕБУЕТ КОРРЕКТИРОВКИ
+
+         ### Оценка
+         | # | Критерий | Вердикт |
+         |---|----------|---------|
+         | 1 | Актуальность задач | OK/DRIFT |
+         | 2 | Design drift | OK/DRIFT |
+         | 3 | Перегруппировка | НЕ НУЖНА/РЕКОМЕНДУЕТСЯ |
+         | 4 | Новые задачи | НЕТ/ЕСТЬ |
+
+         ### Рекомендации (при DRIFT/РЕКОМЕНДУЕТСЯ/ЕСТЬ)
+         Конкретные изменения в tasks.md.
+
+         Результат: сохранить в
+         reports/phase-transition-YYYY-MM-DD.md.",
+  subagent_type="onec-code-architect"
+)
+```
+
+### Architect — phase gate restructuring (verify remediation)
+
+Used by `/opsx:verify` remediation for `missing-phase-gate` alert. Restructures an existing flat tasks.md into a phased structure with phase gate markers. Unlike task decomposition (which generates tasks from scratch), this preserves existing tasks, their numbering, and `[x]`/`[ ]` statuses.
+
+```
+Task(
+  description="Phase gate restructuring [change-name]",
+  prompt="## Задача
+
+         Перестрой плоский tasks.md ЗНИ `<name>` в
+         фазовую структуру с phase gate маркерами.
+
+         ## Артефакты
+
+         - tasks: <путь> (существующие задачи, часть
+           может быть [x])
+         - design: <путь>
+         - proposal: <путь>
+
+         ## Требования
+
+         1. Сохранить все существующие задачи as-is
+            (текст, нумерацию, [x]/[ ] статусы).
+         2. Сгруппировать задачи по фазам (P0–P4):
+            P0 = инфраструктура, P1 = спецификация/UI,
+            P2 = реализация, P3 = интеграция,
+            P4 = верификация.
+         3. Добавить заголовки фаз: `# Фаза N: Название`
+         4. Между фазами вставить маркеры:
+            `<!-- phase-gate: критерий приёмки фазы -->`
+            Критерий = что должно работать после
+            завершения этой фазы (одно предложение).
+         5. Если задачи внутри фазы нарушают порядок
+            зависимостей — переупорядочить внутри фазы.
+         6. Перенумерацию делать ТОЛЬКО если неизбежна.
+            Предпочтительно: оставить исходные номера.
+
+         Формат phase gates: .cursor/rules/phase-gates.mdc
+
+         ## Формат ответа
+
+         Полный обновлённый tasks.md (весь файл).",
+  subagent_type="onec-code-architect"
+)
+```
+
 ### Architect (декомпозиция задач)
 
 ```
@@ -449,8 +567,20 @@ Task(
             задач на создание/доработку формы (P1)
          9. Для каждой задачи с зависимостью от другой —
             указать явно: «Зависимости: N.M»
+         10. Для ЗНИ с 10+ задачами, охватывающими P0–P3+:
+             обернуть группы в фазы: «# Фаза N: Название»; между
+             фазами вставить маркер «<!-- phase-gate: критерий
+             приёмки фазы -->» (критерий = что должно работать
+             после завершения этой фазы, одно предложение).
+         11. Каждая фаза — логически завершённый блок: можно
+             протестировать/принять независимо. Не дробить на
+             фазы по одной задаче.
+         12. Фазы не обязаны совпадать с P-классами: одна фаза
+             может содержать P0+P1+P2, если логически связаны
+             (например «настройка» = РС + форма + логика формы).
          
          Используй переданный шаблон для структуры вывода.
+         Формат phase gates: .cursor/rules/phase-gates.mdc.
          
          Результат: полный tasks.md готовый к /opsx:apply.",
   subagent_type="onec-code-architect"

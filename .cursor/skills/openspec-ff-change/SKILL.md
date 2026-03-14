@@ -87,9 +87,11 @@ Fast-forward through artifact creation - generate everything needed to start imp
         Instead of writing tasks directly, delegate to **onec-code-architect** with the
         "Architect — task decomposition" template (`1c-agent-patterns/SKILL.md`).
         Pass: paths to proposal.md, design.md, specs/, and the `template` from instructions.
-        The architect's prompt includes phase ordering requirements (P0→P1→P2→P3→P4):
-        infrastructure tasks first, then UI/form specification, then implementation,
-        then integration, then verification. Explicit dependencies between tasks required.
+        The architect's prompt includes phase ordering requirements (P0→P1→P2→P3→P4)
+        and **phase gate generation**: for changes with 10+ tasks spanning P0–P3+, the
+        architect must insert `<!-- phase-gate: description -->` markers between logical
+        phases and wrap groups in `# Фаза N: Name` headers. See rule `.cursor/rules/phase-gates.mdc` for format.
+        Explicit dependencies between tasks required.
         Architect reads files independently and returns tasks.md content.
         Save the result to `outputPath`.
         If architect Task fails — apply error handling above (retry once, then create yourself).
