@@ -183,6 +183,7 @@ Check via Anti-pattern Registry (see category 16):
   AP-027: Guard-then-catch (Попытка after guard validating same value) — HIGH
   AP-028: Check-after-establish (property/attribute check after type established) — HIGH
   AP-029: Defense stack (Попытка + Свойство as contract uncertainty compensation) — HIGH/CRITICAL
+  AP-030: Hidden partial result (Попытка+Продолжить/Возврат without user feedback) — HIGH
 
 Remain inline (not in registry):
   - Ternary operator ?() — MEDIUM
@@ -423,6 +424,9 @@ status: NOT_CONNECTED
       No → AP-010 HIGH
    c. Does fallback produce a result indistinguishable from success for caller?
       Yes → AP-009 HIGH
+   c2. HIDDEN_PARTIAL_RESULT_GATE: Does fallback use Продолжить or silent Возврат without user feedback?
+      (No СообщитьПользователю / ВызватьИсключение; caller does not show error to user.)
+      Yes → AP-030 HIGH (hidden partial result). Exception: application logic explicitly requires silent skip (documented in design/ТЗ).
    d. Are there nested/adjacent Попытка blocks? Each must be independently justified.
    Попытка вокруг ПолучитьИзВременногоХранилища, ТипЗнч(), доступ к свойствам
    фиксированного контракта = ВСЕГДА AP-008 CRITICAL (нет внешнего фактора).
