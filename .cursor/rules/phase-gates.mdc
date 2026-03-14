@@ -65,7 +65,7 @@ priority: 150
 
 ## ПОВЕДЕНИЕ VERIFY (АВТОДЕТЕКТ)
 
-- **Phase-transition mode** включается: (1) при явном запросе, (2) из apply на phase gate, (3) **автодетект** — tasks.md содержит `<!-- phase-gate -->` + есть `[x]` перед gate + `[ ]` после → AskQuestion с предложением phase-transition mode.
+- **Phase-transition mode** включается: (1) при явном запросе, (2) из apply на phase gate, (3) **автодетект** — tasks.md содержит `<!-- phase-gate -->` + есть `[x]` перед gate + `[ ]` после → автоматически активировать phase-transition mode (без AskQuestion). Анонсировать режим пользователю.
 
 ## ФИКСАЦИЯ РЕШЕНИЙ
 

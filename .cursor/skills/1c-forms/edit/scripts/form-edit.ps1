@@ -1,4 +1,4 @@
-﻿param(
+param(
 	[Parameter(Mandatory)]
 	[string]$FormPath,
 
@@ -188,6 +188,7 @@ function Emit-SingleType {
 		"ValueTable" = "v8:ValueTable"; "ValueTree" = "v8:ValueTree"; "ValueList" = "v8:ValueListType"
 		"TypeDescription" = "v8:TypeDescription"; "Universal" = "v8:Universal"
 		"FixedArray" = "v8:FixedArray"; "FixedStructure" = "v8:FixedStructure"
+		"ValueStorage" = "v8:ValueStorage"
 	}
 	if ($v8Types.ContainsKey($typeStr)) { X "$indent<v8:Type>$($v8Types[$typeStr])</v8:Type>"; return }
 	$uiTypes = @{ "FormattedString" = "v8ui:FormattedString"; "Picture" = "v8ui:Picture"; "Color" = "v8ui:Color"; "Font" = "v8ui:Font" }

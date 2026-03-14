@@ -66,7 +66,7 @@ Universal quality gate for OpenSpec changes. Works in two modes determined autom
    2. The prompt indicates this run was triggered from apply at a phase gate
    3. **Auto-detect:** tasks.md contains `<!-- phase-gate -->` markers AND there exist `[x]` tasks before a gate AND `[ ]` tasks after that gate (= a phase boundary has been crossed)
 
-   For case 3 (auto-detect): AskQuestion — "Обнаружены phase gates в tasks.md. Фаза N завершена (K задач [x] до gate, M задач [ ] после). Запустить phase-transition ревью? [Да — phase-transition / Нет — обычный mixed]". If user selects "Нет" → mode = mixed.
+   For case 3 (auto-detect): automatically set mode = phase-transition. Announce: "Обнаружены phase gates. Фаза N завершена (K задач [x] до gate, M задач [ ] после). Режим: phase-transition (mixed + проверка актуальности оставшихся задач)."
 
    When phase-transition:
    - Mode = **phase-transition**
