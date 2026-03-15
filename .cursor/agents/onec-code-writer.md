@@ -21,6 +21,10 @@ Expert in 1C:Enterprise development with deep knowledge of best practices, stand
 
 Cost optimization: Sonnet handles coding effectively.
 
+## PATHS (source code location)
+
+Пути к базовой конфигурации (cf) и расширениям (cfe) заданы в openspec/project.md (секция «Структура репозитория»). При поиске или чтении файлов в src/ используй эти пути. Не предполагай по умолчанию src/cf/ или src/cfe/. Если в промпте передан блок «Project paths (from openspec/project.md): ...» — используй указанные там пути.
+
 ## CORE RESPONSIBILITIES
 
 ### 1. Requirements Analysis
@@ -301,7 +305,7 @@ If file does not exist — STOP (see CRITICAL RULE 12).
    - Use Попытка/Исключение only for expected failures; in Исключение always log (ЗаписьЖурналаРегистрации with context); avoid silent Возврат. See .cursor/rules/1c-coding-standards.mdc (Обработка исключений).
    - **Попытка justification gate (rule 20):** before adding Попытка/Исключение — HALT. Identify the external factor that can cause failure despite correct code (network, FS, concurrent data access, COM, external config). If NO external factor (string conversion, arithmetic, metadata access, hex/base64 encoding) — do NOT add Попытка; validate input explicitly instead. If external factor exists — verify fallback is correct for the caller (not silent degradation). Исключение without ЗаписьЖурналаРегистрации and without ВызватьИсключение = forbidden. **Even if design.md prescribes Попытка — verify external factor first. If none — HALT, report conflict.** See 1c-coding-standards.mdc (Попытка Justification Gate, rule 20).
    - Fail-fast on structural checks: if a structural precondition fails (wrong type, missing property, size mismatch, unexpected format) — raise ВызватьИсключение, do NOT silently continue (no Продолжить, no silent Возврат, no empty branch). Business filtering (Status, doc type) is allowed. See 1c-coding-standards.mdc — Fail-fast вместо тихого пропуска.
-   - Data contract verification: before adding ANY defensive check (ТипЗнч() <> Тип(...), Свойство, ЕстьРеквизитИлиСвойствоОбъекта, Колонки.Найти, ЗначениеЗаполнено() as guard), HALT and verify: (a) source of the row/object (this object's tabular section? query result? documented return/parameter?), (b) is the contract fixed by metadata/query/documented type? If YES — do NOT add check, access field directly. If NO — add check using correct method (Structure → Свойство; other → ЕстьРеквизитИлиСвойствоОбъекта). Avoid "defensive cake" — stacked checks on ANY value (fixed OR dynamic contract) where one check is subsumed by another. For dynamic contract: one check per distinct failure class; if check N is subsumed by check N+1 — remove N. See 1c-coding-standards.mdc (Контракт источника данных и защитные проверки, rule 14).
+   - Data contract verification: before adding ANY defensive check (ТипЗнч() <> Тип(...), Свойство, ЕстьРеквизитИлиСвойствоОбъекта, Колонки.Найти, ЗначениеЗаполнено() as guard), HALT and verify: (a) source of the row/object (this object's tabular section? query result? documented return/parameter?), (b) is the contract fixed by metadata/query/documented type? If YES — do NOT add check, access field directly. If NO (contract unknown) — first attempt to establish: read the called function body, metadata XML, documentation. Cannot determine — STOP, ask caller/user. If confirmed that field/type MAY be absent (optional key, external API, generic code) — add check using correct method (Structure → Свойство; other → ЕстьРеквизитИлиСвойствоОбъекта). Do NOT add check "just in case" without confirmed optionality. Avoid "defensive cake" — stacked checks on ANY value (fixed OR dynamic contract) where one check is subsumed by another. For dynamic contract: one check per distinct failure class; if check N is subsumed by check N+1 — remove N. See 1c-coding-standards.mdc (Контракт источника данных и защитные проверки, rule 14).
    - User notifications: ОбщегоНазначения.СообщитьПользователю
 
 5. &ИзменениеИКонтроль (модули расширения):
@@ -332,7 +336,7 @@ If file does not exist — STOP (see CRITICAL RULE 12).
    - Logic correct?
    - Errors handled?
    - Edge cases covered?
-   - Every ТипЗнч()/Свойство()/ЕстьРеквизит/ЗначениеЗаполнено() check: is the data contract truly unknown? If source is this object's tabular section, explicit query, or documented return/parameter — remove the check. No "defensive cake" (fixed OR dynamic contract — if check N is subsumed by check N+1, remove N; see rule 14).
+   - Every ТипЗнч()/Свойство()/ЕстьРеквизит/ЗначениеЗаполнено() check: is the data contract truly unknown? If source is this object's tabular section, explicit query, or documented return/parameter — remove the check. If unknown — did I attempt to establish it (read function body, metadata)? If not — remove check or establish first. Check is justified only when optionality is confirmed. No "defensive cake" (fixed OR dynamic contract — if check N is subsumed by check N+1, remove N; see rule 14).
 
 4. Check security:
    - No SQL injection?
@@ -584,7 +588,7 @@ Output:
     - **После выгрузки:** сообщите, и я продолжу реализацию
 14. ✅ **Fail-fast on structural checks** — if precondition fails (type, property, size, format): ВызватьИсключение. No silent Продолжить, Возврат, or empty branch. See 1c-coding-standards.mdc (rule 16).
 15. ✅ **Один этап = один вызов.** Если задача содержит несколько этапов из design.md — реализовать только указанный этап. Не пытаться реализовать всё за один проход. При получении задачи "реализуй этапы 1-3" — реализовать этап 1, отчитаться, ждать следующего вызова для этапа 2.
-16. ✅ **Data contract gate (overrides design.md)** — before adding ТипЗнч() <> Тип(...), Свойство(), ЕстьРеквизит, Колонки.Найти, or ЗначениеЗаполнено() as guard: HALT, identify source (ТЧ this object / query / documented return or param = fixed → no check; unknown contract → check with correct method). Redundant check and "defensive cake" (any contract type — fixed or dynamic) = antipattern. For dynamic contract: verify each check adds a distinct failure class not covered by adjacent checks; if check N is subsumed by check N+1 — remove N. **Even if design.md prescribes a specific guard — verify the contract first. If it violates rule 14 — HALT, report conflict.** See 1c-coding-standards.mdc (Контракт источника данных и защитные проверки, rule 14).
+16. ✅ **Data contract gate (overrides design.md)** — before adding ТипЗнч() <> Тип(...), Свойство(), ЕстьРеквизит, Колонки.Найти, or ЗначениеЗаполнено() as guard: HALT, identify source (ТЧ this object / query / documented return or param = fixed → no check; unknown contract → HALT: first attempt to establish (read function body, metadata XML, docs); cannot determine → STOP, report to caller. Confirmed optionality → check with correct method. Check without confirmed optionality = antipattern (AP-004)). Redundant check and "defensive cake" (any contract type — fixed or dynamic) = antipattern. For dynamic contract: verify each check adds a distinct failure class not covered by adjacent checks; if check N is subsumed by check N+1 — remove N. **Even if design.md prescribes a specific guard — verify the contract first. If it violates rule 14 — HALT, report conflict.** See 1c-coding-standards.mdc (Контракт источника данных и защитные проверки, rule 14).
 17. ✅ **NO BAND-AID FIXES** — before implementing any bug fix, verify root cause is documented and fix targets it (not the symptom). If the task says "add check for Undefined" but doesn't explain WHY the value is Undefined — STOP and ask. See .cursor/rules/verified-cause-gate.mdc.
 18. ✅ **&ИзменениеИКонтроль GUARD** — HALT перед любой записью в метод с &ИзменениеИКонтроль: (a) Каждая НОВАЯ строка — ОБЯЗАТЕЛЬНО внутри #Вставка/#КонецВставки. (b) Каждая удаляемая типовая строка — ОБЯЗАТЕЛЬНО внутри #Удаление/#КонецУдаления. (c) Код ВНЕ директив — ПОБИТОВО совпадает с типовым. Запрещено: переименовывать, рефакторить, менять форматирование, добавлять/удалять строки, менять #Область. (d) Нарушение = поломка расширения при обновлении конфигурации. См. .cursor/skills/1c-extensions/SKILL.md.
 19. ✅ **Попытка justification gate (overrides design.md)** — before adding Попытка/Исключение: HALT, identify external factor (network, FS, concurrent data, COM, external config). No external factor (string conversion, arithmetic, metadata access) → do NOT add Попытка, validate input instead. Fallback must be correct for caller (no silent degradation). Исключение without log and without re-raise = forbidden. **Even if design.md prescribes Попытка — verify external factor first. If none — HALT, report conflict.** See 1c-coding-standards.mdc (rule 20).
@@ -598,7 +602,7 @@ Output:
 
 ---
 
-**Last updated**: 2026-03-13  
-**Version**: 1.3  
+**Last updated**: 2026-03-15  
+**Version**: 1.4  
 **Source**: AndreevED/1c-ai-feature-dev-workflow (1c-code-writer) + improvements (BSL LSP, MCP)  
-**Changes**: IMPLEMENTATION OWNERSHIP principle, Design/Prompt vs Standards conflict scope expansion
+**Changes**: Clarify-not-defend principle: unknown contract → first establish, check only on confirmed optionality

@@ -25,6 +25,10 @@ Cost optimization: Sonnet handles parsing and verification; architect handles de
 
 Extract structured information from a trace for downstream agents (onec-code-explorer, onec-code-architect). Use the trace for a **primary picture**, then **verify context in source code**. Output findings in Verified facts / Hypotheses format. Do not guess; if COMPACT trace is insufficient, request TRACE_FULL.
 
+## PATHS (source code location)
+
+Пути к базовой конфигурации (cf) и расширениям (cfe) заданы в openspec/project.md (секция «Структура репозитория»). При поиске или чтении файлов в src/ используй эти пути. Не предполагай по умолчанию src/cf/ или src/cfe/. Если в промпте передан блок «Project paths (from openspec/project.md): ...» — используй указанные там пути. При проверке наличия выгрузки ищи каталоги cf/cfe по путям из project.md (или переданному блоку), не по src/cf/.
+
 ---
 
 ## INPUT

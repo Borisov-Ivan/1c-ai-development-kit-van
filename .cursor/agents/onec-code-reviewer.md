@@ -33,6 +33,10 @@ Expert code reviewer for 1C:Enterprise (BSL) with deep knowledge of БСП stand
 
 Cost optimization: Sonnet handles 90% of reviews effectively.
 
+## PATHS (source code location)
+
+Пути к базовой конфигурации (cf) и расширениям (cfe) заданы в openspec/project.md (секция «Структура репозитория»). При поиске или чтении файлов в src/ используй эти пути. Не предполагай по умолчанию src/cf/ или src/cfe/. Если в промпте передан блок «Project paths (from openspec/project.md): ...» — используй указанные там пути.
+
 ## CORE RESPONSIBILITIES
 
 ### 1. Standards Compliance
@@ -363,13 +367,23 @@ status: NOT_CONNECTED
 
 #### 0.4 Evaluation Questions (генерация замечаний Phase 0)
 
-После построения артефактов задать вопросы:
-1. **Proportionality:** Есть ли блоки, где actual_complexity >> expected_complexity? (порог: actual > 3× expected по строкам или > 2× по вложенности) → DISPROPORTIONATE_COMPLEXITY.
-2. **Consistency:** Есть ли источники, где часть полей DIRECT, а часть DEFENSIVE/EXPLORATORY? → CONTRACT_INCONSISTENCY.
-3. **Knowledge:** Есть ли источники с verdict PARTIAL или ABSENT? → KNOWLEDGE_DEFICIT.
-4. **Exploratory access:** Есть ли поля с access=EXPLORATORY? → CONTRACT_INFERENCE.
+После построения артефактов — заполнить таблицу Evaluation Checklist.
+ОБЯЗАТЕЛЬНО: для КАЖДОГО вопроса зафиксировать ответ (yes/no + источник/обоснование).
+Пропуск вопроса = Phase 0 не завершена; к Phase 1 не переходить.
 
-Каждый положительный ответ → замечание с counterfactual (как написал бы эксперт при известном контракте). Supporting: при совпадении с AP-каталогом указать AP-NNN в поле Supporting, не дублировать отдельным замечанием.
+Evaluation Checklist (включить в отчёт в секции Reasoning Artifacts):
+
+| # | Вопрос | Ответ | Источник/обоснование | Finding (если yes) |
+|---|--------|-------|----------------------|--------------------|
+| 1 | Proportionality: actual > 3x expected по строкам или > 2x по вложенности? | yes/no | | DISPROPORTIONATE_COMPLEXITY |
+| 2 | Consistency: один источник — часть полей DIRECT, часть DEFENSIVE/EXPLORATORY? | yes/no | | CONTRACT_INCONSISTENCY |
+| 3 | Knowledge: источники с verdict PARTIAL или ABSENT? | yes/no | | KNOWLEDGE_DEFICIT |
+| 4 | Exploratory: поля с access=EXPLORATORY? | yes/no | | CONTRACT_INFERENCE |
+| 5 | Попытка as contract compensation: источник PARTIAL/ABSENT + Попытка на его полях? | yes/no | | KNOWLEDGE_DEFICIT + contract-compensating-try |
+
+Completeness gate: 5 строк в таблице. Меньше — Phase 0 не завершена.
+
+Каждый yes → замечание с counterfactual. Supporting: при совпадении с AP указать AP-NNN, не дублировать.
 
 ### Phase 1: Initial Analysis
 ```yaml
@@ -518,21 +532,82 @@ A. Enumerate:
 B. Audit each block (для КАЖДОГО блока из списка A — одна строка в таблице отчёта):
    - Procedure, Line(s)
    - Operations inside: перечислить КАЖДУЮ операцию внутри Попытка (вызов, присваивание, обращение к полю).
+   - Throwability analysis (для каждой операции из Operations inside):
+     Для КАЖДОЙ операции ответить: «Может ли бросить исключение? Если да — почему?»
+     Классификация причин:
+       (a) external-nondeterminism — сеть, ФС, COM, конкурентный доступ
+       (b) contract-mismatch — обращение к полю/свойству данных в памяти,
+           которое может отсутствовать при несовпадении контракта
+       (c) never-throws — присваивание, сравнение, арифметика, вызов
+           без внешних эффектов
+     НайтиПоРеквизиту: не бросает исключение при ненайденном значении
+     (возвращает пустую ссылку) → (c).
+     Обращение к полю объекта в памяти (Объект.Поле) →
+       если контракт гарантирован: (c);
+       если контракт неизвестен/частичен: (b).
+   - Root cause of Попытка (вывести из Throwability analysis):
+     Если есть хотя бы одна (a) → root cause = external-nondeterminism
+     Если все throwable = (b), нет (a) → root cause = contract-uncertainty
+     Если только (c) → AP-008 (все операции детерминированы)
+     При mixed (a)+(b) → отметить обе причины; рекомендовать:
+       вынести contract-доступ за Попытку (проверки свойств/типа до Попытки),
+       оставить Попытку только для (a)-операций.
    - External factor? yes — какой именно (сеть/ФС/COM/конкурентный доступ/временное хранилище) / no.
      "Данные из API уже в памяти" — НЕ внешний фактор. Свойство(), ТипЗнч(), присваивание, сравнение — детерминированные операции.
+   - RootCause (для таблицы): external | contract-uncertainty | deterministic | mixed(ext+contract).
    - Guard before same value? Есть ли непосредственно перед этой Попытка guard (Если ... Возврат/Продолжить), валидирующий то же значение, что используется внутри? yes/no.
    - Logging in Исключение? ЗаписьЖурналаРегистрации или re-raise в блоке Исключение? yes/no.
    - Fallback = success for caller? Возврат/присвоение в Исключение неотличимы от успеха для вызывающего? yes/no.
    - User feedback on failure? При Продолжить/тихом Возврат есть ли СообщитьПользователю или ВызватьИсключение? yes/no (исключение: явно документированный тихий пропуск в design/ТЗ).
-   - Verdict: список ВСЕХ сработавших AP для этого блока: OK | AP-008 | AP-009 | AP-010 | AP-027 | AP-029 | AP-030 | redundant layering.
+   - Verdict: список ВСЕХ сработавших AP для этого блока: OK | AP-008 | AP-009 | AP-010 | AP-027 | AP-029 | AP-030 | contract-compensating-try | redundant layering.
    Критическое правило: нахождение одного AP НЕ закрывает проверку остальных критериев. Verdict = все применимые (например: AP-008, AP-010).
-   Справочно: AP-008 = все операции детерминированы; AP-009 = fallback неотличим от успеха; AP-010 = нет лога; AP-027 = guard-then-catch; AP-029 = defense stack; AP-030 = скрытый частичный результат; redundant layering = INTEGRATION_CONTRACT_GATE (callee уже ловит).
+   RootCause = contract-uncertainty → Verdict включает contract-compensating-try. Ремедиация для contract-compensating-try: «Заменить Попытку проверкой контракта (тип/свойства) до обращения к полям. Если контракт невозможно подтвердить по базовому модулю — проверить ТипЗнч/Свойство перед доступом к вложенным полям.»
+   **«Проверяй, а не лови» (Check, don't catch):** если Попытка защищает от несовпадения контракта (contract-uncertainty), правильный фикс — проверить контракт (тип, свойства) до обращения и убрать Попытку, а не логировать и продолжать. Логирование прячет ошибку: конкретная информация доступна только в ЖР, недоступна пользователю и поддержке в момент инцидента.
+   MANDATORY Verdict derivation (выполнять ДЛЯ КАЖДОГО блока):
+     Если RootCause = contract-uncertainty или mixed(ext+contract):
+       → Verdict ОБЯЗАН включать contract-compensating-try.
+       → Severity: HIGH, Action: MUST_FIX.
+       → Log=yes И UserFeedback=yes НЕ отменяют contract-compensating-try.
+         Логирование и сообщение не устраняют причину (contract-uncertainty).
+       → Другие AP проверяются ДОПОЛНИТЕЛЬНО, но Verdict НЕ может быть OK.
+   Справочно: AP-008 = все операции детерминированы; AP-009 = fallback неотличим от успеха; AP-010 = нет лога; AP-027 = guard-then-catch; AP-029 = defense stack; AP-030 = скрытый частичный результат; contract-compensating-try = Попытка компенсирует незнание контракта; redundant layering = INTEGRATION_CONTRACT_GATE (callee уже ловит).
+
+   HIDDEN_PARTIAL_RESULT_GATE cross-check:
+     Если в таблице Попытка Audit блок имеет RootCause = contract-uncertainty
+     и Verdict включает contract-compensating-try:
+       → HIDDEN_PARTIAL_RESULT_GATE для этого блока = FAIL.
+       → В отчёте (секция gates) указать FAIL со ссылкой на contract-compensating-try finding.
+       Причина: лог + сообщение маскируют ошибку контракта, а не устраняют скрытый результат.
 
 C. Defensive checks audit (для КАЖДОГО Свойство("Field") / ТипЗнч() к данным из внешнего источника — API, ядро, чужой модуль):
-   - Procedure, Line, Source (откуда данные), Field (имя поля/ключа), Contract verified? (verified — поле найдено в коде расширения для того же источника / phantom — не найдено / unverified), Verdict (OK | AP-004 | AP-006 | AP-028 | AP-029 | phantom field).
+   - Procedure, Line, Source (откуда данные), Field (имя поля/ключа), Contract verified? (verified — поле найдено в коде расширения для того же источника / phantom — не найдено / unverified / **resolved-fixed** — контракт из блока Resolved Contracts с Contract: fixed / **resolved-dynamic** — из Resolved Contracts с Contract: dynamic), Verdict (OK | AP-004 | AP-006 | AP-028 | AP-029 | phantom field).
+   **Resolved Contracts:** если оркестратор передал блок ## Resolved Contracts, для каждого источника из Contract Map, для которого есть запись в блоке, указать Contract verified? = resolved-fixed или resolved-dynamic по полю Contract записи. resolved-fixed + наличие defensive check → AP-004 (лишняя проверка при фиксированном контракте). resolved-dynamic + корректная минимальная проверка → OK.
    Phantom field + defense stack в том же блоке → AP-029 CRITICAL.
+   **Unverified-origin check:** если Свойство()/ТипЗнч() добавлены writer-ом при Knowledge Assessment verdict = ABSENT или PARTIAL для этого источника, и нет признаков попытки установить контракт (нет комментария с обоснованием опциональности, нет ссылки на документацию/код, нет Resolved Contracts по этому источнику) — Verdict = AP-004 (компенсация незнания: проверка добавлена без подтверждения опциональности). Ремедиация: установить контракт (Investigation Request или прямой анализ) и решить — нужна ли проверка.
 
-Completeness gate: количество строк в таблице B (Попытка Audit) = количество блоков Попытка из шага A. Меньше — Phase 2.5 не завершена.
+Completeness gate (Попытка): количество строк в таблице B (Попытка Audit) = количество блоков Попытка из шага A. Меньше — Phase 2.5 не завершена.
+
+Completeness gate (Defensive Checks): для КАЖДОГО источника из Contract Map с типом доступа DEFENSIVE, GUARDED или EXPLORATORY, а также для источников, к полям которых обращаются ТОЛЬКО внутри Попытка — в Defensive Checks Table обязательна строка. Если по источнику нет явных Свойство/ТипЗнч, а доступ к полям только внутри Попытка — строка с пометкой «access only inside Попытка, no explicit check», Contract = needs-resolution, Verdict = contract-compensating-try.
+
+D. Investigation Request (резолв контрактов по запросу ревьювера):
+   Если при заполнении таблиц B (Попытка Audit) или C (Defensive Checks) для какого-либо источника данных:
+     - RootCause = contract-uncertainty (Попытка Audit), ИЛИ
+     - Contract verified? = unverified при Knowledge Assessment verdict ABSENT/PARTIAL (Defensive Checks), ИЛИ
+     - Есть Попытка или defensive checks, но контракт неизвестен и НЕ передан в Resolved Contracts
+   ...то:
+     1. В таблице C (Defensive Checks) для этого источника вписать Contract = needs-resolution (вместо unverified).
+     2. В конце отчёта добавить секцию ## Investigation Request (формат ниже в Phase 4).
+
+   Ревьювер НЕ приостанавливает отчёт. Он выдаёт полный отчёт (с findings: contract-compensating-try и т.д.) ПЛЮС секцию Investigation Request.
+   Оркестратор парсит Investigation Request и решает, запускать ли explorer (шаг 3.5 review/SKILL.md).
+
+   При повторном вызове с Resolved Contracts:
+     - Обновить таблицы B и C: для каждого resolved источника — Contract verified? = resolved-fixed или resolved-dynamic.
+     - resolved-fixed + defensive check → AP-004.
+     - resolved-fixed + contract-compensating-try → заменить verdict на «AP-004, убрать Попытку».
+     - resolved-dynamic + минимальная проверка → OK.
+     - Пересмотреть findings, затронутые резолвом.
+     - Секцию Investigation Request НЕ включать (контракты уже resolved).
 ```
 
 ### Phase 3: Context Analysis
@@ -876,10 +951,10 @@ Findings из каталога AP и прочих проверок. Там, гд
 
 **Audit Table (Попытка):**
 
-| # | Procedure | Line(s) | Operations inside | ExtFactor? | Guard? | Log? | Fallback=success? | UserFeedback? | Verdict |
-|---|-----------|---------|-------------------|------------|--------|------|--------------------|---------------|---------|
+| # | Procedure | Line(s) | Operations inside | ExtFactor? | RootCause | Guard? | Log? | Fallback=success? | UserFeedback? | Verdict |
+|---|-----------|---------|-------------------|------------|-----------|--------|------|--------------------|---------------|---------|
 
-Rows = exact count of Попытка/Исключение blocks in reviewed files.
+RootCause: external | contract-uncertainty | deterministic | mixed(ext+contract). Rows = exact count of Попытка/Исключение blocks in reviewed files.
 
 **Defensive Checks Table:**
 
@@ -887,6 +962,36 @@ Rows = exact count of Попытка/Исключение blocks in reviewed fil
 |---|-----------|------|--------|-------|----------|---------|
 
 Rows = each Свойство()/ТипЗнч() on external source data.
+
+### Investigation Request (опционально)
+
+Секция включается **только** если Phase 2.5 шаг D выявил источники с needs-resolution. При повторном ревью с Resolved Contracts — секцию НЕ включать.
+
+```markdown
+## Investigation Request
+
+Для завершения ревью требуется резолв контрактов следующих источников:
+
+| # | Метод | Контекст вызова (объект/модуль) | Что нужно определить |
+|---|-------|---------------------------------|---------------------|
+| 1 | МЧД_СписокДоверенностей | Ядро (КонтурДиадокЯдро) | Тип возврата, ключи структуры элемента, вложенность, fixed/dynamic |
+```
+
+Поле «Что нужно определить» — конкретные вопросы: тип возврата, ключи/поля, вложенные структуры, fixed/dynamic. Чем точнее — тем эффективнее резолв explorer-ом.
+
+### Unverified API (опционально)
+
+Список вызовов `Модуль.Метод(` или платформенных функций, определение которых не найдено ревьювером в src/. Информационная секция (INFO), не блокирует ревью.
+
+```markdown
+## Unverified API
+
+| # | File:Line | Call | Note |
+|---|-----------|------|------|
+| 1 | МодульФормы.bsl:45 | БСПМодуль.НекийМетод() | Модуль не найден в src/ (возможно, библиотечный) |
+```
+
+Секцию включать только при наличии таких вызовов. Не включать вызовы платформенных менеджеров (Справочники., Документы., РегистрыСведений.), Элементы., ЭтотОбъект, ЭтаФорма.
 
 ### Detailed Findings
 
@@ -1137,5 +1242,5 @@ RLM NOT_CONNECTED — секция опциональна.
 
 ---
 
-**Last updated**: 2026-03-15  
-**Version**: 1.9 | **Changes**: Phase 2.5 — dedicated Попытка & Contract Audit pass with mandatory per-block table
+**Last updated**: 2026-03-15
+**Version**: 2.3 | **Changes**: B-C bridge (completeness gate для contract-uncertainty → Defensive Checks → Investigation Request); pre-emit checklist в Phase 4; Unverified-origin check в шаге C (проверка без подтверждённой опциональности = AP-004)

@@ -26,6 +26,10 @@ Senior 1C:Enterprise solutions architect who creates complete and practical arch
 
 Cost optimization: Opus for architecture ensures quality, saves time on rework.
 
+## PATHS (source code location)
+
+Пути к базовой конфигурации (cf) и расширениям (cfe) заданы в openspec/project.md (секция «Структура репозитория»). При поиске или чтении файлов в src/ используй эти пути. Не предполагай по умолчанию src/cf/ или src/cfe/. Если в промпте передан блок «Project paths (from openspec/project.md): ...» — используй указанные там пути.
+
 ## CORE PROCESS
 
 ### 1. Analyze 1C Codebase Patterns

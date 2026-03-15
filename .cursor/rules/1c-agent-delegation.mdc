@@ -63,6 +63,15 @@ Architect может рекомендовать новые объекты в des
 
 Шаблоны промптов, оценка сложности, интеграция со скиллами: `.cursor/skills/1c-agent-patterns/SKILL.md`.
 
+## PROJECT PATHS
+
+Перед вызовом onec-code-explorer, onec-code-architect, onec-code-writer, onec-code-reviewer, onec-trace-analyst, если контекст касается файлов в `src/` (пути к модулям, поиск по коду, проверка выгрузки):
+
+1. Прочитать `openspec/project.md`, из секции **«Структура репозитория»** извлечь пути к cf и cfe (по таблице, колонка «Путь»).
+2. Включить в промпт субагента блок: «Project paths (from openspec/project.md): base=<путь к cf>, extensions=<список путей cfe>. Use these paths for file search and base/cfe resolution; do not assume src/cf/ or src/cfe/.»
+
+См. `.cursor/rules/project-paths.mdc`.
+
 ## LIGHT MODE (точечная правка)
 
 1 файл, 2–10 строк, без архитектуры → writer + reviewer. Без артефактов OpenSpec. За рамками → полный workflow (architect → writer → reviewer).
@@ -161,7 +170,7 @@ Workflow: прямая правка (StrReplace) + Grep-верификация +
 
 ### Шаг 2. Для каждой пары — поиск определения
 
-Область поиска — **весь src/** (включает cf и все cfe):
+Область поиска — **весь src/** (все подкаталоги, содержащие cf и cfe). Фактические пути к cf/cfe могут отличаться от `src/cf/` и `src/cfe/`; см. `openspec/project.md`.
 
 - Общий модуль: Grep `Функция МетодИмя|Процедура МетодИмя` в `src/**/CommonModules/МодульИмя*/Ext/Module.bsl`
 - Объект (обработка, документ и т.д.): Grep `Функция МетодИмя|Процедура МетодИмя` в `src/**/МодульИмя/**/Module.bsl` и `src/**/МодульИмя/**/ObjectModule.bsl`
@@ -196,6 +205,46 @@ AskQuestion:
 - Дедупликация по паре (типичный diff: 1–5 уникальных вызовов).
 - При отсутствии diff (Mechanical Mode) — пропустить шаг.
 
+## CONTRACT RESOLUTION (формат и investigation loop)
+
+**Назначение:** описывает формат блока Resolved Contracts и протокол reviewer-driven investigation loop. Это **не шаг** перед writer/reviewer — резолв запускается **по запросу ревьювера** (секция Investigation Request в отчёте).
+
+**Цель:** определить, фиксирован ли контракт возврата внешних вызовов (fixed — конструируется в коде; dynamic — десериализация, внешний API), чтобы reviewer мог квалифицировать defensive checks (AP-004 при fixed) и Попытка-блоки (contract-compensating-try при unknown).
+
+### Триггер
+
+Ревьювер после Phase 0–2.5 включает в отчёт секцию `## Investigation Request` с таблицей источников, требующих резолва контракта. Оркестратор парсит эту секцию и запускает investigation loop (шаг 3.5 в `review/SKILL.md`).
+
+Без секции Investigation Request — CONTRACT RESOLUTION не выполняется.
+
+### Формат Resolved Contracts
+
+Блок для вставки в промпт повторного ревью:
+
+```markdown
+## Resolved Contracts
+
+### МетодИмя (ИмяМодуляИлиОбъекта)
+- Returns: тип (Структура | Соответствие | Массив | примитив | Произвольный)
+- Values/Keys: при структуре — перечень ключей, при вложенности — кратко (например Доверитель(Структура: ИНН, ...))
+- Contract: fixed | dynamic
+- Evidence: файл, строки (источник: explorer)
+```
+
+Если контракт не удалось определить — запись: `Contract: unknown`; reviewer трактует как динамический (допустима минимальная проверка).
+
+### Резолв контракта (только explorer)
+
+Оркестратор **не** резолвит контракты сам. Для всех точек из таблицы Investigation Request — один вызов **onec-code-explorer** по глубокому шаблону «Explorer — contract resolution (deep)» из `1c-agent-patterns/SKILL.md`.
+
+### Передача результата
+
+- **Reviewer (повторный прогон):** секция `## Resolved Contracts` в промпте. Использовать для Phase 2.5 Defensive Checks Audit: колонка Contract verified? = resolved-fixed или resolved-dynamic.
+- **Writer (при устранении замечаний):** замечания ревьювера уже содержат конкретную ремедиацию с учётом Resolved Contracts. Если оркестратор передаёт writer Resolved Contracts для дополнительного контекста при fix — допустимо, но не обязательно.
+
+Поток `/review`: `resolve scope → контекст → reviewer → [Investigation Request?] → explorer → reviewer (+ Resolved Contracts) → отчёт`.
+Поток `/opsx:apply`: `writer → ... → reviewer → [Investigation Request?] → explorer → reviewer (+ Resolved Contracts) → отчёт`.
+
 ## EXTENSION GATE
 
 При делегировании writer для файла в cfe/ (расширение):
@@ -226,4 +275,4 @@ AskQuestion:
 
 ---
 
-**Last updated**: 2026-03-14 | **Version**: 3.5 | **Changes**: API EXISTENCE CHECK (поиск по cf + cfe, AskQuestion при ненайденном методе)
+**Last updated**: 2026-03-15 | **Version**: 3.7 | **Changes**: CONTRACT RESOLUTION переработан в reviewer-driven investigation loop; убрана ветка apply и превентивный резолв; оркестратор не резолвит сам — только explorer

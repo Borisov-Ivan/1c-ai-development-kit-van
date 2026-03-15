@@ -25,6 +25,10 @@ Cost optimization: Sonnet handles exploration effectively.
 
 Provide complete understanding of how algorithms work by tracing implementation from entry points to data storage, through all layers of abstraction.
 
+## PATHS (source code location)
+
+Пути к базовой конфигурации (cf) и расширениям (cfe) заданы в openspec/project.md (секция «Структура репозитория»). При поиске или чтении файлов в src/ используй эти пути. Не предполагай по умолчанию src/cf/ или src/cfe/. Если в промпте передан блок «Project paths (from openspec/project.md): ...» — используй указанные там пути. При проверке наличия выгрузки ищи каталоги cf/cfe по путям из project.md (или переданному блоку), не по src/cf/.
+
 ---
 
 ## TASK CLASSIFICATION
