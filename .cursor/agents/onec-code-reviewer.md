@@ -356,7 +356,7 @@ status: NOT_CONNECTED
 - **DIRECT** — Объект.Поле, без проверок.
 - **DEFENSIVE** — Объект.Свойство("Поле", ...), одна проверка.
 - **EXPLORATORY** — несколько альтернативных путей к одному семантическому значению.
-- **GUARDED** — доступ после guard clause (Если ТипЗнч(...)).
+- **GUARDED** — доступ после guard clause (любая конструкция: Если ТипЗнч, Колонки.Найти, булев флаг, ЗначениеЗаполнено-as-guard, ЕстьРеквизит и др.).
 
 #### 0.3 Артефакт: Knowledge Assessment
 
@@ -364,6 +364,8 @@ status: NOT_CONNECTED
 - evidence_of_knowledge / evidence_of_ignorance (списки).
 - verdict: FULL / PARTIAL / ABSENT.
 - explanation (одно предложение).
+
+**Антикруговое правило:** guard (Свойство, ТипЗнч, Колонки.Найти, ЕстьРеквизит, булев флаг и т.п.) НЕ является evidence_of_knowledge для того же источника. Guard — объект проверки, а не доказательство. Evidence = Form.xml, метаданные объекта, текст запроса, документация функции, Resolved Contracts, код вызываемой функции.
 
 #### 0.4 Evaluation Questions (генерация замечаний Phase 0)
 
@@ -524,6 +526,8 @@ Completeness gate: 5 строк в таблице. Меньше — Phase 0 не
 
 Выделенный проход **только** для блоков Попытка/Исключение и оборонительных проверок (Свойство/ТипЗнч к внешним данным). Консолидирует логику из шагов 4.5 и 4.7. К Phase 3 не переходить, пока Phase 2.5 не завершена.
 
+**SKEPTIC'S STANCE (принцип скептика):** Каждая защитная проверка (guard) виновна, пока не доказана обратная. Наличие guard в коде — НЕ доказательство того, что guard нужен. Контракт источника определять ТОЛЬКО из внешних источников (Form.xml, метаданные, текст запроса, документация, Resolved Contracts, код вызываемой функции). Если единственное основание считать контракт нефиксированным — сам guard → Contract verified? = **needs-verification** (не OK, не optional).
+
 ```yaml
 A. Enumerate:
    - Найти ВСЕ блоки Попытка/Исключение в проверяемых файлах.
@@ -579,16 +583,29 @@ B. Audit each block (для КАЖДОГО блока из списка A — о
        → В отчёте (секция gates) указать FAIL со ссылкой на contract-compensating-try finding.
        Причина: лог + сообщение маскируют ошибку контракта, а не устраняют скрытый результат.
 
-C. Defensive checks audit (для КАЖДОГО Свойство("Field") / ТипЗнч() к данным из внешнего источника — API, ядро, чужой модуль):
-   - Procedure, Line, Source (откуда данные), Field (имя поля/ключа), Contract verified? (verified — поле найдено в коде расширения для того же источника / phantom — не найдено / unverified / **resolved-fixed** — контракт из блока Resolved Contracts с Contract: fixed / **resolved-dynamic** — из Resolved Contracts с Contract: dynamic), Verdict (OK | AP-004 | AP-006 | AP-028 | AP-029 | phantom field).
-   **Resolved Contracts — артифакт ЗНИ.** Это верифицированные explorer контракты внешних вызовов, сохранённые в `reports/resolved-contract-*.md` change. Содержат тип возврата, ключи, вложенность, классификацию fixed/dynamic и Evidence (файл:строки). Ценность: устраняют contract-uncertainty, позволяют корректно квалифицировать defensive checks и Попытка-блоки.
-   **Resolved Contracts:** если оркестратор передал блок ## Resolved Contracts, для каждого источника из Contract Map, для которого есть запись в блоке, указать Contract verified? = resolved-fixed или resolved-dynamic по полю Contract записи. resolved-fixed + наличие defensive check → AP-004 (лишняя проверка при фиксированном контракте). resolved-dynamic + корректная минимальная проверка → OK.
-   Phantom field + defense stack в том же блоке → AP-029 CRITICAL.
-   **Unverified-origin check:** если Свойство()/ТипЗнч() добавлены writer-ом при Knowledge Assessment verdict = ABSENT или PARTIAL для этого источника, и нет признаков попытки установить контракт (нет комментария с обоснованием опциональности, нет ссылки на документацию/код, нет Resolved Contracts по этому источнику) — Verdict = AP-004 (компенсация незнания: проверка добавлена без подтверждения опциональности). Ремедиация: установить контракт (Investigation Request или прямой анализ) и решить — нужна ли проверка.
+C. Defensive checks audit (Contract Map–driven; НЕ синтаксический scan):
+   **Драйвер:** обход артефакта Contract Map (Phase 0). Для КАЖДОГО источника из Contract Map с access != DIRECT (т.е. DEFENSIVE, GUARDED, EXPLORATORY), а также для источников, к полям которых обращаются ТОЛЬКО внутри Попытка — одна строка в Defensive Checks Table.
+   **Для каждой строки:**
+   1. Procedure, Line, Source (откуда данные), Field (имя поля/колонки/ключа).
+   2. Идентифицировать конструкцию guard-а: Свойство(), ТипЗнч(), Колонки.Найти("Имя"), булев флаг (переменная/реквизит), ЕстьРеквизитИлиСвойствоОбъекта(), ЗначениеЗаполнено() как guard, условие — любая.
+   3. Определить контракт источника:
+      **ANTI-CIRCULAR GATE:** перед определением контракта — HALT. Проверить: единственное ли основание для «нефиксированный» — наличие самого guard? Если да → Contract verified? = needs-verification, Verdict ≠ OK.
+      **Реквизит формы — обязательная верификация:** если источник = реквизит формы (таблица значений, колонка):
+      1. Прочитать Form.xml того же объекта (Read).
+      2. Если колонка/реквизит присутствует в Form.xml → контракт **фиксированный**, guard на наличие колонки = AP-004.
+      3. Если колонки нет в Form.xml (или структура формируется динамически в коде) → контракт нефиксированный, guard может быть OK.
+      4. Если Form.xml не удалось прочитать → Contract verified? = unverified (не «optional»).
+      Без этой верификации нельзя ставить Contract = «optional column» или Verdict = OK для guard на колонку реквизита формы.
+      - **Фиксированный:** метаданные объекта (ТЧ, реквизит), Form.xml реквизита формы (колонки таблицы значений формы заданы макетом того же объекта), текст запроса с явным списком полей, документированный параметр/возврат, Resolved Contracts с Contract: fixed. Для реквизита формы: если колонка/реквизит присутствует в Form.xml — контракт фиксирован; guard на наличие колонки (Колонки.Найти и т.п.) = избыточен.
+      - **Нефиксированный:** внешний API, динамическая схема, Resolved Contracts с Contract: dynamic или unknown.
+   4. Contract verified? (verified / phantom / unverified / **resolved-fixed** / **resolved-dynamic** — по Resolved Contracts при наличии).
+   5. Verdict: фиксированный контракт + наличие guard → AP-004; нефиксированный + корректный guard → OK; нефиксированный + некорректный метод guard-а → AP-005 или иной по каталогу; phantom field + defense stack → AP-029 CRITICAL.
+   **Resolved Contracts — артифакт ЗНИ.** Верифицированные explorer контракты в `reports/resolved-contract-*.md`. resolved-fixed + guard → AP-004; resolved-dynamic + минимальная проверка → OK.
+   **Unverified-origin check:** для любого guard (не только Свойство/ТипЗнч): при Knowledge Assessment verdict = ABSENT или PARTIAL и отсутствии признаков установки контракта (комментарий, документация, Resolved Contracts) — Verdict = AP-004. Ремедиация: установить контракт (Investigation Request или анализ), затем решить — нужна ли проверка.
 
 Completeness gate (Попытка): количество строк в таблице B (Попытка Audit) = количество блоков Попытка из шага A. Меньше — Phase 2.5 не завершена.
 
-Completeness gate (Defensive Checks): для КАЖДОГО источника из Contract Map с типом доступа DEFENSIVE, GUARDED или EXPLORATORY, а также для источников, к полям которых обращаются ТОЛЬКО внутри Попытка — в Defensive Checks Table обязательна строка. Если по источнику нет явных Свойство/ТипЗнч, а доступ к полям только внутри Попытка — строка с пометкой «access only inside Попытка, no explicit check», Contract = needs-resolution, Verdict = contract-compensating-try.
+Completeness gate (Defensive Checks): количество строк в Defensive Checks Table = количество источников с access != DIRECT в Contract Map + источники, к полям которых обращаются только внутри Попытка (для них — строка с пометкой «access only inside Попытка, no explicit check», Contract = needs-resolution, Verdict = contract-compensating-try). Меньше — Phase 2.5 не завершена.
 
 D. Investigation Request (резолв контрактов по запросу ревьювера):
    Если при заполнении таблиц B (Попытка Audit) или C (Defensive Checks) для какого-либо источника данных:
@@ -642,7 +659,7 @@ D. Investigation Request (резолв контрактов по запросу 
 
 2.5. Попытка & Contract Audit (Phase 2.5):
    - Audit Table (every Попытка block with verdict)
-   - Defensive Checks Table (every Свойство/ТипЗнч on external data)
+   - Defensive Checks Table (every non-DIRECT source from Contract Map)
    - Findings from Phase 2.5 that are NOT already covered as Phase 0 Supporting
 
 3. Summary:
@@ -964,7 +981,7 @@ RootCause: external | contract-uncertainty | deterministic | mixed(ext+contract)
 | # | Procedure | Line | Source | Field | Contract | Verdict |
 |---|-----------|------|--------|-------|----------|---------|
 
-Rows = each Свойство()/ТипЗнч() on external source data.
+Rows = every non-DIRECT source from Contract Map.
 
 ### Investigation Request (опционально)
 
