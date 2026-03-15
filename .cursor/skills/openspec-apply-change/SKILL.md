@@ -168,6 +168,13 @@ Implement tasks from an OpenSpec change.
 
    **HALT:** Оркестратор НЕ реализует задачи типов BSL-код и Форма самостоятельно. Оркестратор готовит промпт и делегирует. Прямое использование Write/StrReplace для .bsl и прямая генерация JSON-спецификаций форм для form-compile — запрещены. Для форм: передать design-спецификацию агенту onec-form-generator или описать задачу для скилла 1c-forms; агент сам интерпретирует spec и генерирует артефакт. Ref: `1c-agent-delegation.mdc`, `1c-utility-agents.mdc`.
 
+   **Investigation Loop при apply.** Если reviewer в отчёте включил секцию `## Investigation Request`:
+   1. Вызвать explorer (contract resolution deep) по таблице из Investigation Request. Шаблон: «Explorer — contract resolution (deep)» из `1c-agent-patterns/SKILL.md`.
+   2. Сохранить вывод в `reports/resolved-contract-<slug>-YYYY-MM-DD.md` (артифакт ЗНИ).
+   3. Повторно вызвать reviewer с Resolved Contracts в промпте.
+   4. При последующем устранении замечаний — передать Resolved Contracts в промпт writer.
+   Протокол: см. `1c-agent-delegation.mdc`, секция CONTRACT RESOLUTION; шаблоны: `1c-agent-patterns/SKILL.md`.
+
    **Task loop:**
 
    For each pending task:

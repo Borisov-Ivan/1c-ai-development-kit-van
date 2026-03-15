@@ -64,7 +64,11 @@ metadata:
 1. **Парсинг:** в выводе ревьювера искать секцию `## Investigation Request`. Если секция отсутствует — пропустить шаг, перейти к шагу 4.
 2. **Если секция есть:** извлечь таблицу (Метод, Контекст вызова, Что нужно определить).
 3. **Вызов explorer:** один вызов **Task**(`subagent_type="onec-code-explorer"`) по глубокому шаблону «Explorer — contract resolution (deep)» из `.cursor/skills/1c-agent-patterns/SKILL.md`. Передать всю таблицу из Investigation Request одним батчем. Explorer возвращает блок `## Resolved Contracts`.
-4. **Повторное ревью:** вызвать **Task**(`subagent_type="onec-code-reviewer"`) — тот же scope (шаг 1), тот же контекст (шаг 2) + блок `## Resolved Contracts` из шага 3. Промпт: «Повторное ревью с Resolved Contracts. Обновить Phase 2.5 (Defensive Checks, Попытка Audit), Contract Map и findings. Секцию Investigation Request НЕ включать.»
+3a. **Сохранение артифакта.** Сохранить полный вывод explorer (блок `## Resolved Contracts` + Evidence + вердикт) в файл:
+   - При активном change: `openspec/changes/<id>/reports/resolved-contract-<scope-slug>-YYYY-MM-DD.md`
+   - Без change: `temp/reports/resolved-contract-<scope-slug>-YYYY-MM-DD.md`
+   Формат содержимого: заголовок (дата, scope, цель), затем блок Resolved Contracts целиком от explorer. Это артифакт ЗНИ — доступен в следующих сессиях.
+4. **Повторное ревью:** вызвать **Task**(`subagent_type="onec-code-reviewer"`) — тот же scope (шаг 1), тот же контекст (шаг 2) + блок `## Resolved Contracts` из сохранённого файла (шаг 3a). Промпт: «Повторное ревью с Resolved Contracts. Обновить Phase 2.5 (Defensive Checks, Попытка Audit), Contract Map и findings. Секцию Investigation Request НЕ включать.»
 5. **Максимум 1 итерация:** investigation loop выполняется не более одного раза (reviewer → explorer → reviewer). После второго прогона ревьювера — перейти к шагу 4 в любом случае.
 
 **Сохранение отчёта первого прогона:** первый отчёт (с Investigation Request) сохраняется с суффиксом `-initial` в имени файла. Итоговый отчёт (после investigation loop) сохраняется без суффикса в шаге 4.
@@ -77,6 +81,7 @@ metadata:
   - При активном change: `openspec/changes/<id>/reports/review-<scope-slug>-YYYY-MM-DD.md`.
   - Иначе: `temp/reports/review-<scope-slug>-YYYY-MM-DD.md`.
   - `<scope-slug>` — короткий идентификатор (например имя модуля, имя расширения или `change-<id>`); YYYY-MM-DD — текущая дата.
+- При выполненном шаге 3.5 — в reports/ также сохранён `resolved-contract-*.md` (артифакт ЗНИ). Упомянуть путь в сводке пользователю.
 - Вывести пользователю сводку: количество замечаний по уровням (CRITICAL, HIGH, MEDIUM, LOW), разделение на кодовые и архитектурные (если reviewer явно пометил), путь к полному отчёту.
 
 ---
@@ -97,12 +102,19 @@ metadata:
 ## Шаг 6. Устранение (при «Да»)
 
 - **Архитектурные замечания** (новый объект, API, RLS, структура хранения) — не передавать writer. Вывести их списком пользователю с пометкой, что для них нужны отдельные решения.
-- **Кодовые замечания** — отфильтровать: передавать writer только замечания с **Action: MUST_FIX**. Замечания VERIFIED_OK и OPTIONAL не передавать. Сгруппировать по файлам. Для каждого затронутого файла:
-  1. Вызвать **Task**(`subagent_type="onec-code-writer"`) по шаблону **«Writer — review fix»** из `.cursor/skills/1c-agent-patterns/SKILL.md`. Для каждого замечания передать: ID, Severity, Procedure, Anchor, Issue, Fix. Если после шага 3.5 (Investigation Loop) есть блок **Resolved Contracts** — включить его в промпт writer (writer использует для выбора стратегии проверки при правках, затрагивающих внешние источники данных).
+- **Кодовые замечания** — отфильтровать: передавать writer только замечания с **Action: MUST_FIX**. Замечания VERIFIED_OK и OPTIONAL не передавать. Сгруппировать по файлам.
+
+**Чеклист перед вызовом writer (если был шаг 3.5):**
+- Файл `reports/resolved-contract-*.md` существует (сохранён на шаге 3a).
+- Полный блок `## Resolved Contracts` из этого файла включён в промпт writer.
+- Без блока вызов writer **не выполнять** для замечаний, затрагивающих контракты из Investigation Request.
+
+Для каждого затронутого файла:
+  1. Вызвать **Task**(`subagent_type="onec-code-writer"`) по шаблону **«Writer — review fix»** из `.cursor/skills/1c-agent-patterns/SKILL.md`. Для каждого замечания передать: ID, Severity, Procedure, Anchor, Issue, Fix. Если после шага 3.5 есть блок Resolved Contracts — **обязательно** включить его в промпт writer целиком (из сохранённого файла). Writer использует контракт для выбора стратегии (fixed — не добавлять проверки; dynamic — минимальная проверка).
   2. **LINT GATE:** ReadLints по изменённым .bsl. При ошибках — исправить (повторный writer или точечная правка), затем снова ReadLints.
   3. **API EXISTENCE CHECK:** по правилам из `1c-agent-delegation.mdc` (секция API EXISTENCE CHECK) проверить новые вызовы вида `МодульИмя.МетодИмя(` в diff. При WARNING — AskQuestion пользователю.
   4. При наличии `&ИзменениеИКонтроль` в файле — **EXTENSION VERIFICATION** (сравнение кода вне #Вставка/#Удаление с base в cf/). При расхождении — вернуть writer на исправление.
-  5. Вызвать **Task**(`subagent_type="onec-code-reviewer"`) по изменённым файлам: передать контекст «ревью после устранения замечаний по отчёту /review», вывод линтера, base-пути при необходимости. Если после шага 3.5 (Investigation Loop) есть блок **Resolved Contracts** — передать его в промпт reviewer.
+  5. Вызвать **Task**(`subagent_type="onec-code-reviewer"`) по изменённым файлам: передать контекст «ревью после устранения замечаний по отчёту /review», вывод линтера, base-пути при необходимости. Передать в промпт reviewer блок `## Resolved Contracts` из файла `reports/resolved-contract-*.md`. Reviewer использует для Phase 2.5 и Defensive Checks.
 - При новых замечаниях после первого ревью — повторить цикл writer → LINT → API CHECK → (EXTENSION VERIFICATION) → reviewer. **Максимум 2 итерации** (первое устранение + один повтор). После этого перейти к шагу 7 даже при оставшихся замечаниях.
 
 ---
