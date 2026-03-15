@@ -581,6 +581,7 @@ B. Audit each block (для КАЖДОГО блока из списка A — о
 
 C. Defensive checks audit (для КАЖДОГО Свойство("Field") / ТипЗнч() к данным из внешнего источника — API, ядро, чужой модуль):
    - Procedure, Line, Source (откуда данные), Field (имя поля/ключа), Contract verified? (verified — поле найдено в коде расширения для того же источника / phantom — не найдено / unverified / **resolved-fixed** — контракт из блока Resolved Contracts с Contract: fixed / **resolved-dynamic** — из Resolved Contracts с Contract: dynamic), Verdict (OK | AP-004 | AP-006 | AP-028 | AP-029 | phantom field).
+   **Resolved Contracts — артифакт ЗНИ.** Это верифицированные explorer контракты внешних вызовов, сохранённые в `reports/resolved-contract-*.md` change. Содержат тип возврата, ключи, вложенность, классификацию fixed/dynamic и Evidence (файл:строки). Ценность: устраняют contract-uncertainty, позволяют корректно квалифицировать defensive checks и Попытка-блоки.
    **Resolved Contracts:** если оркестратор передал блок ## Resolved Contracts, для каждого источника из Contract Map, для которого есть запись в блоке, указать Contract verified? = resolved-fixed или resolved-dynamic по полю Contract записи. resolved-fixed + наличие defensive check → AP-004 (лишняя проверка при фиксированном контракте). resolved-dynamic + корректная минимальная проверка → OK.
    Phantom field + defense stack в том же блоке → AP-029 CRITICAL.
    **Unverified-origin check:** если Свойство()/ТипЗнч() добавлены writer-ом при Knowledge Assessment verdict = ABSENT или PARTIAL для этого источника, и нет признаков попытки установить контракт (нет комментария с обоснованием опциональности, нет ссылки на документацию/код, нет Resolved Contracts по этому источнику) — Verdict = AP-004 (компенсация незнания: проверка добавлена без подтверждения опциональности). Ремедиация: установить контракт (Investigation Request или прямой анализ) и решить — нужна ли проверка.
@@ -608,6 +609,8 @@ D. Investigation Request (резолв контрактов по запросу 
      - resolved-dynamic + минимальная проверка → OK.
      - Пересмотреть findings, затронутые резолвом.
      - Секцию Investigation Request НЕ включать (контракты уже resolved).
+
+   **Fallback при отсутствии блока в промпте.** Если оркестратор не передал блок ## Resolved Contracts, но ревью выполняется в контексте change — проверить Glob `reports/resolved-contract-*.md` в директории change. Если файл найден и scope совпадает — прочитать и использовать для Phase 2.5.
 ```
 
 ### Phase 3: Context Analysis

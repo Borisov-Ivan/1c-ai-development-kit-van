@@ -239,8 +239,10 @@ AskQuestion:
 
 ### Передача результата
 
-- **Reviewer (повторный прогон):** секция `## Resolved Contracts` в промпте. Использовать для Phase 2.5 Defensive Checks Audit: колонка Contract verified? = resolved-fixed или resolved-dynamic.
-- **Writer (при устранении замечаний):** замечания ревьювера уже содержат конкретную ремедиацию с учётом Resolved Contracts. Если оркестратор передаёт writer Resolved Contracts для дополнительного контекста при fix — допустимо, но не обязательно.
+- **Reviewer (повторный прогон):** секция `## Resolved Contracts` в промпте. Блок при наличии берётся из сохранённого отчёта в reports/ (см. review/SKILL.md шаг 3.5) или из вывода explorer. Использовать для Phase 2.5 Defensive Checks Audit: колонка Contract verified? = resolved-fixed или resolved-dynamic.
+- **Writer (при устранении замечаний):** при устранении замечаний ревью после Investigation Loop оркестратор **обязательно** передаёт writer полный блок `## Resolved Contracts` из файла `reports/resolved-contract-<scope-slug>-YYYY-MM-DD.md`. Без блока writer не вызывать для замечаний, затрагивающих resolved-контракты.
+
+**Сохранение.** Resolved Contracts после investigation loop сохраняются оркестратором в `openspec/changes/<id>/reports/resolved-contract-<scope-slug>-YYYY-MM-DD.md` (или `temp/reports/` без change) как артифакт ЗНИ. Reviewer и writer при всех последующих вызовах по этому scope получают блок из файла.
 
 Поток `/review`: `resolve scope → контекст → reviewer → [Investigation Request?] → explorer → reviewer (+ Resolved Contracts) → отчёт`.
 Поток `/opsx:apply`: `writer → ... → reviewer → [Investigation Request?] → explorer → reviewer (+ Resolved Contracts) → отчёт`.

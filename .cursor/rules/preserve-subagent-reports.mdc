@@ -30,6 +30,8 @@ alwaysApply: true
 
 Не относятся: onec-code-writer, onec-code-reviewer (их вывод — код или ревью-отчёт, сохраняется по другим правилам).
 
+Вывод onec-code-explorer в контексте Investigation Loop (резолв контрактов) сохраняется с типом `resolved-contract` (а не `exploration`), т.к. это отдельный артифакт с конкретным назначением — содержит верифицированные контракты для writer и reviewer. Сохранение выполняет оркестратор по review/SKILL.md шаг 3a.
+
 ## ЧТО СОХРАНЯТЬ (ПОЛНОСТЬЮ, БЕЗ СОКРАЩЕНИЙ)
 
 - Mermaid-диаграммы (sequence, flowchart)
@@ -43,6 +45,7 @@ alwaysApply: true
 - `architecture` — отчёт onec-code-architect
 - `exploration` — отчёт onec-code-explorer
 - `trace-analysis` — отчёт onec-trace-analyst
+- `resolved-contract` — результат резолва контрактов (investigation loop, onec-code-explorer)
 
 ## ИСКЛЮЧЕНИЯ
 
