@@ -412,38 +412,8 @@ status: NOT_CONNECTED
    - Magic constants: detect same numeric (not 0/1/-1) or string literal appearing 2+ times in module. See 1c-coding-standards.mdc rule 22
    - Mixed responsibilities: detect procedures >40 lines combining 3+ concerns (rights, transaction, business logic, persistence, logging, UI)
 
-4.5. Попытка/Исключение audit (MANDATORY for every review):
-   For EVERY Попытка/Исключение block in changed code:
-   a. List EACH operation inside Попытка that can throw an exception.
-      "Data from external API" is NOT an external factor — data is already in memory.
-      External factor = operation that accesses an external resource RIGHT NOW (network, FS, COM, concurrent DB access).
-      Свойство(), ТипЗнч(), assignment, comparison = deterministic operations, CANNOT be external factor.
-      If ALL operations inside Попытка are deterministic → AP-008 CRITICAL.
-      If defense stack detected (Попытка + Свойство() on all accesses) → also AP-029.
-   b. Does Исключение block contain ЗаписьЖурналаРегистрации or re-raise?
-      No → AP-010 HIGH
-   c. Does fallback produce a result indistinguishable from success for caller?
-      Yes → AP-009 HIGH
-   c2. HIDDEN_PARTIAL_RESULT_GATE: Does fallback use Продолжить or silent Возврат without user feedback?
-      (No СообщитьПользователю / ВызватьИсключение; caller does not show error to user.)
-      Yes → AP-030 HIGH (hidden partial result). Exception: application logic explicitly requires silent skip (documented in design/ТЗ).
-   d. Are there nested/adjacent Попытка blocks? Each must be independently justified.
-   Попытка вокруг ПолучитьИзВременногоХранилища, ТипЗнч(), доступ к свойствам
-   фиксированного контракта = ВСЕГДА AP-008 CRITICAL (нет внешнего фактора).
-   При использовании ПоместитьВоВременноеХранилище в коде формы для данных,
-   используемых в нескольких серверных вызовах, проверять передачу второго
-   параметра ЭтаФорма.УникальныйИдентификатор (привязка к сроку жизни формы;
-   иначе данные могут удаляться платформой между вызовами). Правило:
-   1c-coding-standards.mdc, раздел «Временное хранилище».
-   e. Scope minimality (INTEGRATION_CONTRACT_GATE applied to Попытка):
-      If a Попытка wraps a call to a function/procedure that ITSELF catches
-      the same external factor — redundant layering. Apply rule: "если
-      функция уже обрабатывает — не дублировать" (1c-agent-patterns,
-      INTEGRATION_CONTRACT_GATE). ONE Попытка at the outermost boundary
-      (user action handler, scheduled job entry, HTTP handler).
-      Inner functions: propagate exceptions, don't catch.
-      Violation → HIGH "redundant Попытка layering (rule 20 + INTEGRATION_CONTRACT_GATE)".
-   f. Flow-check (guard-then-catch): does a guard clause immediately precede this Попытка, validating the same value used inside? Yes → AP-027 HIGH (code contradicts itself: guard makes operation safe, Попытка says it doesn't).
+4.5. Попытка/Исключение audit — see Phase 2.5 (dedicated pass).
+     Do NOT audit Попытка blocks inline here; Phase 2.5 handles this systematically.
 
 4.6. API existence (from orchestrator):
    If orchestrator passed API_VERIFIED / UNCHECKED_API items:
@@ -451,17 +421,8 @@ status: NOT_CONNECTED
    - UNCHECKED_API: note in report as INFO ("method not verified, external dependency")
    If orchestrator did NOT pass API check results: skip (backward compatibility)
 
-4.7. Contract Provenance Audit (CPA) — MANDATORY for every review:
-   Target: AI-generated code that compensates for unknown contracts with defensive layers.
-   a. Defense Stack Detection — for EACH Попытка/Исключение block:
-      - List EVERY operation inside Попытка that can throw an exception.
-      - If ALL operations are Свойство(), ТипЗнч(), assignments, comparisons (none can throw on correct data) → AP-029 HIGH: defense stack (Попытка compensates for contract uncertainty, not external factor).
-      - If besides Свойство()/ТипЗнч() there are calls to external functions/objects → Попытка may be justified, verify per 4.5.
-   b. Field Provenance — for EACH Свойство("FieldName") and direct access X.FieldName to data from external/third-party source (API response, result of kernel/foreign function call):
-      - Grep "FieldName" in .bsl files of the extension — is there existing code accessing this field on the same source?
-      - If field found in existing code on same source → VERIFIED.
-      - If field NOT found → phantom field WARNING: "Поле \"FieldName\" не обнаружено в существующем коде расширения. Верифицировать контракт источника (API-документация, трасса, exploration report)."
-      - If phantom field + defense stack (same block) → CRITICAL: phantom field inside Попытка (AP-029 CRITICAL).
+4.7. Contract Provenance Audit — see Phase 2.5 (dedicated pass).
+     Do NOT audit defensive checks inline here; Phase 2.5 handles this systematically.
 
 5. Extension annotations:
    - Detect &Перед/&После applied to a function (not procedure) — AP-022 CRITICAL. See anti-pattern registry
@@ -545,6 +506,35 @@ status: NOT_CONNECTED
       of BAD/GOOD examples as coding instructions.
 ```
 
+### Phase 2.5: Попытка & Contract Audit (MANDATORY, выполнять ДО Phase 3)
+
+Выделенный проход **только** для блоков Попытка/Исключение и оборонительных проверок (Свойство/ТипЗнч к внешним данным). Консолидирует логику из шагов 4.5 и 4.7. К Phase 3 не переходить, пока Phase 2.5 не завершена.
+
+```yaml
+A. Enumerate:
+   - Найти ВСЕ блоки Попытка/Исключение в проверяемых файлах.
+   - Составить нумерованный список: #, Procedure, approx. line (или диапазон).
+
+B. Audit each block (для КАЖДОГО блока из списка A — одна строка в таблице отчёта):
+   - Procedure, Line(s)
+   - Operations inside: перечислить КАЖДУЮ операцию внутри Попытка (вызов, присваивание, обращение к полю).
+   - External factor? yes — какой именно (сеть/ФС/COM/конкурентный доступ/временное хранилище) / no.
+     "Данные из API уже в памяти" — НЕ внешний фактор. Свойство(), ТипЗнч(), присваивание, сравнение — детерминированные операции.
+   - Guard before same value? Есть ли непосредственно перед этой Попытка guard (Если ... Возврат/Продолжить), валидирующий то же значение, что используется внутри? yes/no.
+   - Logging in Исключение? ЗаписьЖурналаРегистрации или re-raise в блоке Исключение? yes/no.
+   - Fallback = success for caller? Возврат/присвоение в Исключение неотличимы от успеха для вызывающего? yes/no.
+   - User feedback on failure? При Продолжить/тихом Возврат есть ли СообщитьПользователю или ВызватьИсключение? yes/no (исключение: явно документированный тихий пропуск в design/ТЗ).
+   - Verdict: список ВСЕХ сработавших AP для этого блока: OK | AP-008 | AP-009 | AP-010 | AP-027 | AP-029 | AP-030 | redundant layering.
+   Критическое правило: нахождение одного AP НЕ закрывает проверку остальных критериев. Verdict = все применимые (например: AP-008, AP-010).
+   Справочно: AP-008 = все операции детерминированы; AP-009 = fallback неотличим от успеха; AP-010 = нет лога; AP-027 = guard-then-catch; AP-029 = defense stack; AP-030 = скрытый частичный результат; redundant layering = INTEGRATION_CONTRACT_GATE (callee уже ловит).
+
+C. Defensive checks audit (для КАЖДОГО Свойство("Field") / ТипЗнч() к данным из внешнего источника — API, ядро, чужой модуль):
+   - Procedure, Line, Source (откуда данные), Field (имя поля/ключа), Contract verified? (verified — поле найдено в коде расширения для того же источника / phantom — не найдено / unverified), Verdict (OK | AP-004 | AP-006 | AP-028 | AP-029 | phantom field).
+   Phantom field + defense stack в том же блоке → AP-029 CRITICAL.
+
+Completeness gate: количество строк в таблице B (Попытка Audit) = количество блоков Попытка из шага A. Меньше — Phase 2.5 не завершена.
+```
+
 ### Phase 3: Context Analysis
 ```yaml
 1. Get similar code:
@@ -571,6 +561,11 @@ status: NOT_CONNECTED
 
 2. Standards & Patterns (Phase 1-2):
    - Findings (AP-NNN и прочие) — исключая те, что уже покрыты Phase 0 замечанием в том же месте (указаны как Supporting)
+
+2.5. Попытка & Contract Audit (Phase 2.5):
+   - Audit Table (every Попытка block with verdict)
+   - Defensive Checks Table (every Свойство/ТипЗнч on external data)
+   - Findings from Phase 2.5 that are NOT already covered as Phase 0 Supporting
 
 3. Summary:
    - Status: PASS | FAIL | NEEDS_WORK
@@ -857,6 +852,7 @@ Best practices:
 File: src/.../Module.bsl
 Status: [PASS | FAIL | NEEDS_WORK]
 Phase 0: N findings (X HIGH, Y MEDIUM)   # если Phase 0 выполнялась
+Попытка Audit: P blocks checked, Q findings   # Phase 2.5
 Standards: M findings (Critical: ..., High: ..., Medium: ..., Low: ...)
 Overall: Исправить все замечания (...)
 ```
@@ -873,6 +869,24 @@ Overall: Исправить все замечания (...)
 ### Standards & Patterns (Phase 1-2)
 
 Findings из каталога AP и прочих проверок. Там, где то же место уже покрыто Phase 0 замечанием — не дублировать, указать в Phase 0 как Supporting.
+
+### Попытка & Contract Audit (Phase 2.5)
+
+**Обязательная секция.** Количество строк в Audit Table (Попытка) = количество блоков Попытка/Исключение в проверяемых файлах.
+
+**Audit Table (Попытка):**
+
+| # | Procedure | Line(s) | Operations inside | ExtFactor? | Guard? | Log? | Fallback=success? | UserFeedback? | Verdict |
+|---|-----------|---------|-------------------|------------|--------|------|--------------------|---------------|---------|
+
+Rows = exact count of Попытка/Исключение blocks in reviewed files.
+
+**Defensive Checks Table:**
+
+| # | Procedure | Line | Source | Field | Contract | Verdict |
+|---|-----------|------|--------|-------|----------|---------|
+
+Rows = each Свойство()/ТипЗнч() on external source data.
 
 ### Detailed Findings
 
@@ -1123,5 +1137,5 @@ RLM NOT_CONNECTED — секция опциональна.
 
 ---
 
-**Last updated**: 2026-03-13  
-**Version**: 1.8 | **Changes**: Adversarial ROLE positioning, mandatory Попытка/Исключение audit (step 4.5 in Phase 2)
+**Last updated**: 2026-03-15  
+**Version**: 1.9 | **Changes**: Phase 2.5 — dedicated Попытка & Contract Audit pass with mandatory per-block table
