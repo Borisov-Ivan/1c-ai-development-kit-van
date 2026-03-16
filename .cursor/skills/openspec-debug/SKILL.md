@@ -1,11 +1,11 @@
 ---
 name: openspec-debug
-description: Investigate a bug (trace/remark/screenshots) in context of an OpenSpec change and plan fixes captured in change artifacts.
+description: Investigate a bug (trace/remark/screenshots) in context of an OpenSpec change; produce RCA and capture fix tasks in change artifacts.
 license: MIT
 compatibility: Requires openspec CLI.
 metadata:
   author: project
-  version: "1.0"
+  version: "2.1"
 ---
 
 Investigate a test-found bug and produce a root-cause analysis and a fix plan that is **captured inside the same OpenSpec change**.
@@ -27,65 +27,91 @@ The user may provide any combination of:
 2. **Evidence summary**: what the trace/remark/screenshots show
 3. **Root cause**: why it happens (with file/function references)
 4. **Fix plan**: code steps + artifact steps (tasks.md, design.md)
-5. **Apply (default scenario)**: implement the code fix and update artifacts (add/refine tasks in `tasks.md`, add note in `design.md` if the bug reveals a design gap). Then suggest re-test and `/opsx:apply` for remaining work.
+5. **Apply (default scenario)**: capture tasks in `tasks.md` for `/opsx:apply` and update artifacts (add/refine tasks, add note in `design.md` if the bug reveals a design gap). Then hand off to `/opsx:apply <change>` for implementation.
 
 ## Guardrails
 
 - **Always separate verified facts from hypotheses in RCA.** Never present a hypothesis as a verified fact.
-- **Default scenario:** after producing the fix plan, **implement the code change** and **update artifacts** (tasks + design) in the same change. Only skip implementation or artifact edits if the user explicitly asks for "plan only", "tasks only", or "do not edit artifacts".
+- **Default scenario:** after producing the fix plan, **capture tasks** in tasks.md and update design.md. Code implementation is done via `/opsx:apply`. Only skip artifact edits if the user explicitly asks for "plan only".
 - **Never invent metadata names**. Any reference to metadata or types must be validated against XML dumps in `src/` (see "Metadata validation" below).
 - If information is insufficient: ask 1–2 targeted questions, then continue.
 
 ## Steps
 
-### 1) Determine the change
+## Entry Protocol (MANDATORY)
 
-If the change id is provided: use it.
+При входе в debug **первый шаг** — определить change, загрузить контекст, сформировать и **показать бриф**. До подтверждения брифа запрещены: вызов Task (trace-analyst, explorer, architect), чтение файла трассы. Единственные допустимые действия до брифа: Read этого скилла (command-skill-gate), определение change, загрузка артефактов change и project.md. После показа брифа — **END TURN**; продолжение — только после явного подтверждения пользователя в следующем сообщении.
 
-Otherwise:
-- If you can infer a likely change from the conversation context, propose it.
-- If ambiguous, run:
+### 0. Определить change и загрузить контекст
 
-```bash
-openspec list --json
+- Если change id указан в запросе — использовать его.
+- Иначе: выполнить `openspec list --json`, при неоднозначности — **AskQuestion** для выбора change.
+- Объявить: `Using change: <name>`, способ переопределения: `/debug <other-change>`.
+- Выполнить `openspec instructions apply --change "<name>" --json`.
+- Прочитать существующие `contextFiles` (proposal.md, design.md, tasks.md, specs/** при наличии).
+- Прочитать `openspec/project.md` — извлечь пути к cf и cfe из секции «Структура репозитория» (для передачи субагентам по правилу project-paths.mdc).
+- Если пользователь указал номер задачи: найти её в tasks.md и считать основной областью; если не найдена — показать соседние и уточнить.
+
+### 0b. Классификация входа и бриф
+
+- **Классифицировать вход:** трасса (путь к .pff / *_TRACE_*.txt) / текстовое замечание (ожидание vs реальность) / скриншот(ы).
+- **Сформировать бриф** из:
+  - Контекст (суть доработки из proposal)
+  - Сценарий (ожидаемое поведение затронутой задачи из tasks.md; при указанном номере задачи — её описание)
+  - Затронутые модули/процедуры (из design.md)
+  - Симптом (текст ошибки / замечание пользователя; при трассе — описание из пользовательского ввода, **не** из чтения файла трассы)
+  - Артефакты (пути к трассам, скриншотам, файлам)
+  - План исследования: 1 → onec-trace-analyst (при трассе) или пропуск; 2 → по результатам: onec-code-explorer (VQ или полная цепочка); 3 → при архитектурной проблеме: onec-code-architect; 4 → RCA → задачи в tasks.md → hand off на /opsx:apply
+- **Показать бриф** пользователю по шаблону ниже.
+- **END TURN.** Не вызывать Task, не читать трассу. Дождаться явного подтверждения («ОК», «Да», «Подтверждаю») в **следующем** сообщении.
+
+**Шаблон брифа:**
+
+```
+---
+**Бриф для отладки (change: <name>)**
+
+- **Контекст:** [суть доработки из proposal]
+- **Сценарий:** [ожидаемое поведение из tasks]
+- **Затронутые модули:** [из design]
+- **Симптом:** [текст ошибки / замечание пользователя]
+- **Артефакты:** [пути к трассам, скриншотам]
+
+**План:** trace-analyst (путь к трассе) → [VQ →] explorer → [architect] → RCA → задачи в tasks.md → hand off на /opsx:apply.
+
+Бриф верный? Подтвердите — начну с шага 3 (загрузка входов) и делегирования.
+---
 ```
 
-Then use the **AskQuestion** tool to let the user select a change.
+Если данных недостаточно для брифа — задать 1–2 уточняющих вопроса (AskQuestion). **После подтверждения** перейти к шагу 3 (Load debug inputs) и далее.
 
-Always announce:
-- `Using change: <name>`
-- How to override: `/debug <other-change>`
+---
 
-### 2) Load change context
+## Per-turn Delegation Gate (MANDATORY на follow-up)
 
-Run:
+На **каждом follow-up ходе** (после завершения Entry Protocol) перед выполнением действия:
 
-```bash
-openspec instructions apply --change "<name>" --json
-```
+1. **Классифицировать запрос:** подразумевает ли он обследование кода, трассировку вызовов, анализ модулей?
+2. **Маркеры обследования:** «обследуй», «проверь в коде», «найди где», «проследи вызов», «уточни в коде», «посмотри модуль», «как вызывается», «откуда берётся», а также контекст задач из tasks.md типа «уточнить в коде базы».
+3. **При срабатывании → СТОП:**
+   - НЕ запускать Grep, Glob, Read по .bsl/.xml модулям для анализа логики.
+   - Сформировать бриф (агент + что искать + артефакты контекста).
+   - Делегировать через Task (onec-code-explorer / onec-trace-analyst / onec-code-architect).
+4. **Допустимо до делегирования:** Read артефактов OpenSpec (proposal, design, tasks, specs) для обогащения брифа — до 3 файлов. Grep/Glob/Read по .bsl для обследования логики — запрещено; допустимы точечные обращения (пути к файлам, проверка наличия процедуры) в объёме до 3 обращений.
 
-Read `contextFiles` that exist (typically `proposal.md`, `design.md`, `tasks.md`, and `specs/**` if present).
+Контекст оркестратора — дорогой ресурс; обследование кода выполняют субагенты в изолированном контексте.
 
-If the user provided a task number/id:
-- Locate it in `tasks.md` and treat it as primary scope
-- If not found, show nearby tasks and ask the user to confirm the intended one
+---
 
 ### 3) Load debug inputs
 
-- If a trace file path is provided: read it as text.
+- **Если указан путь к файлу трассы:** зафиксировать путь. **Не читать** файл трассы — он будет передан onec-trace-analyst по пути. Записать только текстовое описание ошибки пользователя как доказательство (симптом). См. `.cursor/rules/1c-error-analysis.mdc` (ЗАПРЕТ подменять trace-analyst ручным чтением).
 - If screenshots are attached: read image attachments and extract what the UI shows (titles, messages, states).
 - If only a textual remark is provided: treat it as evidence and ask for missing reproduction details only if necessary.
 
 ### 3.5) Trace analysis (when trace or multi-line stack is available)
 
-**3.5.0. Подготовить контекст для trace-analyst** (перед вызовом агента). На основе шага 2 (уже загружены proposal, design, tasks) синтезировать структурированный бриф:
-- Суть доработки (из proposal)
-- Ожидаемое поведение затронутой задачи (из tasks.md — конкретная задача, если указан номер)
-- Затронутые модули/процедуры (из design.md — секция с архитектурой/модулями)
-- Что искать в трассе (вывести из ожидаемого поведения: например, если задача «создать задачи при проведении» — искать вызов создания задач, запись в регистр задач, обработчик проведения)
-- Фактический симптом (из шага 3 — текст ошибки / замечание пользователя)
-
-Если шаг 3.5.0 выполнен — передавать trace-analyst путь к трассе **и подготовленный бриф** (см. `.cursor/rules/1c-error-analysis.mdc`, шаг 1 ДЕЙСТВИЕ — «Подготовить бриф»).
+**3.5.0. Контекст для trace-analyst.** Бриф уже подготовлен в Entry Protocol (шаг 0b). Здесь — финализация: убедиться, что в промпт trace-analyst входят суть доработки (proposal), ожидаемое поведение затронутой задачи (tasks.md), затронутые модули (design.md), что искать в трассе (вывести из ожидаемого поведения), фактический симптом (из шага 3 — текст ошибки/замечание пользователя). Передавать trace-analyst **путь к файлу трассы** (не содержимое) и подготовленный бриф (см. `.cursor/rules/1c-error-analysis.mdc`, шаг 1 ДЕЙСТВИЕ — «Подготовить бриф»).
 
 If step 3 loaded a trace (PFF/TRACE file) or an error stack with 3+ call lines:
 
@@ -120,6 +146,8 @@ If step 3 loaded a trace (PFF/TRACE file) or an error stack with 3+ call lines:
      - Pass: RCA from trace-analyst/explorer, paths to relevant files.
 
 7. Merge results into step 6 (Root cause): Verified facts and Hypotheses come from trace-analyst output, enriched by VQ verification (step 4) and supplemented by explorer (step 5).
+
+**3.5.8. Сохранение отчётов субагентов.** После шагов 3.5.1–3.5.7 сохранить полные отчёты аналитических агентов по правилу `preserve-subagent-reports.mdc`: отчёт onec-trace-analyst — в `openspec/changes/<id>/reports/trace-analysis-YYYY-MM-DD.md` (или `temp/reports/` при отсутствии change); отчёт onec-code-explorer — в `reports/exploration-YYYY-MM-DD.md` или `reports/resolved-contract-*-YYYY-MM-DD.md` при investigation loop; отчёт onec-code-architect — в `reports/architecture-YYYY-MM-DD.md`. В design.md / debug.md ссылаться на полный отчёт (путь к файлу), не дублировать выжимку.
 
 7.5. **Anti-pattern detection (optional).**
    After RCA is established, evaluate whether the root cause represents a **generalizable anti-pattern** that could recur in other code.
@@ -195,28 +223,55 @@ Write a **structured RCA** with two mandatory sections. Never present a hypothes
 
 Keep the RCA compact; the split ensures apply/debug can later enforce the verified cause gate (see `verified-cause-gate.mdc`).
 
-### 7) Plan and apply fixes (default: code + artifacts)
+### 5.5) Architect Gate (после RCA, до фикса)
 
-Propose a fix plan in two layers:
+Перед переходом к плану фикса проверить триггеры из `.cursor/rules/architect-gate.mdc` (объективные маркеры, семантические, структурные). В контексте debug автоматически срабатывают: **bug fix** (объективный маркер); наличие отчётов trace-analyst или explorer в сессии (объективный маркер «вызывался trace-analyst/explorer»). Дополнительно проверить остальные триггеры (перехват базовой процедуры, новый объект в design, несколько точек реализации и т.д.).
 
-**Code steps** (concrete, small): which files to modify, what to change, what to log / edge cases.
+- **При срабатывании любого триггера:** сформировать краткий бриф (3–5 предложений: что меняем, корневая причина, предложенный подход, конкретные вопросы архитектору). **AskQuestion** пользователю: «Сработали триггеры Architect Gate: [перечисление]. Рекомендую ревью архитектора перед реализацией фикса. Отправить?» При подтверждении — вызвать **onec-code-architect** с брифом и путями к RCA/отчётам; результат сохранить в `reports/architecture-YYYY-MM-DD.md` по `preserve-subagent-reports.mdc`. Учесть рекомендации в плане фикса (шаг 7). При отклонении пользователем — задокументировать в debug.md (секция «Architect Gate») и продолжить.
+- **Триггеры не сработали** — перейти к шагу 7 без вызова архитектора.
 
-**Artifact steps** (to keep "big picture"):
-- Add or refine tasks in `openspec/changes/<change>/tasks.md`:
-  - **Phase-aware insertion:** Grep tasks.md for `<!-- phase-gate`. If markers found (phased tasks.md): insert each new task into the correct phase section based on task type (see `.cursor/rules/phase-gates.mdc`, section "ДОБАВЛЕНИЕ ЗАДАЧ В PHASED TASKS"). If the target phase is ambiguous — AskQuestion.
-  - **Flat tasks.md (no phase gates):** insert under the relevant section or "7. Рефакторинг и качество" as "7.x Исправить: …"
-- If the bug reveals a missing/incorrect design decision: add a short note in `design.md`
-- **Hypothesis gate:** If the root cause is under **## Hypotheses** (not Verified facts):
-  - **First** task in the plan must be **verification** (e.g. add logging, reproduce scenario, check trace) so the hypothesis becomes a verified fact, **or**
-  - Explicitly mark a "hypothesis-based fix" and add a **follow-up verification** task after the fix.
-  - If the root cause is under **## Verified facts**, you may proceed directly to the fix task(s).
+Исключения по architect-gate.mdc (Gate не срабатывает): Light Mode без семантических триггеров, рефакторинг без изменения поведения, опечатки. В debug типичный сценарий — bug fix, поэтому проверка обязательна.
 
-**Default:** implement the code fix and update `tasks.md` and `design.md` as above. Do **not** ask for confirmation before editing unless the user has previously asked for "plan only" or "do not edit".
+### 7) Plan and capture tasks (default: artifacts + hand off)
 
-**If user explicitly prefers:** "plan only" → do not implement or edit artifacts; "tasks only" → implement code + update tasks only; "do not edit artifacts" → implement code only.
+**7a. Plan** — предложить план в двух слоях:
+
+**Code steps** (конкретные, мелкие): какие файлы менять, что менять, что логировать / граничные случаи.
+
+**Artifact steps:**
+- Добавить или уточнить задачи в `openspec/changes/<change>/tasks.md`: при наличии `<!-- phase-gate` вставлять задачи в нужную фазу (см. `.cursor/rules/phase-gates.mdc`, «ДОБАВЛЕНИЕ ЗАДАЧ В PHASED TASKS»); при плоском tasks — в соответствующую секцию или «7. Рефакторинг и качество» как «7.x Исправить: …».
+- При выявленном пробеле в design — краткая заметка в `design.md`.
+- **Hypothesis gate:** если корневая причина в **## Hypotheses**: первая задача плана — верификация (логирование, воспроизведение, проверка трассы) **или** явная пометка «hypothesis-based fix» + задача follow-up верификации после фикса. Если корневая причина в **## Verified facts** — переходить к задачам фикса.
+
+**Default:** после плана выполнить 7b (артефакты) и hand off. Не спрашивать подтверждение перед правкой артефактов, если пользователь не просил «plan only». **Если пользователь явно:** "plan only" — не править артефакты.
+
+---
+
+**7b. Update artifacts.** Обновить `tasks.md` и при необходимости `design.md`. Формирование задач в tasks.md:
+- Каждая задача — одна конкретная правка (файл, процедура, что менять, почему — ссылка на RCA).
+- В тексте задачи указать корневую причину (Verified / Hypothesis), чтобы apply при вызове writer мог передать Root Cause Context.
+- Phase-aware вставка: при наличии `<!-- phase-gate` в tasks.md вставлять задачи в нужную фазу по `.cursor/rules/phase-gates.mdc` («ДОБАВЛЕНИЕ ЗАДАЧ В PHASED TASKS»); при плоском списке — в соответствующую секцию или «7. Рефакторинг и качество» как «7.x Исправить: …».
+- Задачи на верификацию гипотезы или follow-up — по Hypothesis gate в 7a.
 
 ### 8) Hand off
 
-After applying the fix and artifacts:
-- Suggest re-running the relevant test task(s), then `/opsx:verify` + `/review` if needed
-- Suggest `/opsx:apply <change>` for any remaining tasks before `/opsx:archive`
+После обновления артефактов:
+- Предложить: `/opsx:apply <change>` для реализации задач. При наличии hypothesis-based задач — предупредить о необходимости верификации (или задачи follow-up в tasks.md).
+
+---
+
+## Интеграция
+
+- **command-skill-gate.mdc:** первый и единственный инструмент в первом батче при вызове команды — Read этого скилла.
+- **command-session-persistence.mdc:** протокол debug действует на **каждом** ходе сессии (Entry Protocol, Per-turn Gate, шаги 3–8). Выход из протокола — только по явному завершению пользователем или смене команды.
+- **1c-agent-delegation.mdc (APPLY GATE):** debug не реализует код — реализация через `/opsx:apply`. Writer и reviewer вызываются только в контексте apply.
+- **preserve-subagent-reports.mdc:** полные отчёты trace-analyst, explorer, architect сохранять в `openspec/changes/<id>/reports/` (или `temp/reports/`); в design/debug ссылаться на файл отчёта.
+- **architect-gate.mdc:** единый источник триггеров для шага 5.5 (Architect Gate после RCA).
+- **project-paths.mdc:** пути к cf и cfe брать из `openspec/project.md`; передавать субагентам (explorer, trace-analyst, architect) в промпте.
+- **context-strategy-gate.mdc:** при исследовании 3+ файлов или файлов данных — загружать `.cursor/skills/context-strategy/SKILL.md` и следовать Entry Protocol до чтения файлов.
+- **1c-error-analysis.mdc:** не читать трассу вручную; делегировать onec-trace-analyst с путём и брифом. TRACE_FULL по запросу агента — запросить у пользователя.
+- **verified-cause-gate.mdc:** перед фиксом — разделение Verified facts / Hypotheses, цепочка «Почему», корневая причина; hypothesis-based fix только с задачей верификации или follow-up.
+
+---
+
+**Last updated**: 2026-03-16 | **Version**: 2.1 | **Changes**: Debug не реализует код — убраны 7b–7g (writer, LINT, API, EXTENSION, reviewer, Investigation Loop). Остаётся RCA + задачи в tasks.md + hand off на /opsx:apply. APPLY GATE в Integration.

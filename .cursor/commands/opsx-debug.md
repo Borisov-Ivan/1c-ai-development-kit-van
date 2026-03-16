@@ -2,7 +2,7 @@
 name: /opsx-debug
 id: opsx-debug
 category: Workflow
-description: "Investigate a bug in context of an OpenSpec change — trace analysis, RCA, fix plan and apply"
+description: "Investigate a bug in context of an OpenSpec change — trace analysis, RCA, fix tasks for apply"
 ---
 
 Investigate a test-found bug and produce a root-cause analysis and a fix plan captured inside an OpenSpec change.
