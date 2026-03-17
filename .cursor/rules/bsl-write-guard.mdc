@@ -29,6 +29,8 @@ writer → ReadLints → reviewer
 - Mechanical Mode: шаблонная замена без изменения логики — прямая правка + reviewer
 - Пользователь явно: «без агентов» / «без ревью»
 
+**Контекст apply/review:** Исключения (однострочная правка, только комментарии) НЕ действуют в командных сессиях /opsx:apply и /review. В этих контекстах ВСЕ правки .bsl → writer. Post-reviewer fixes, spot-check corrections, пропущенные строки — всегда через writer. Rationale: в apply-сессии оркестратор склонен трактовать содержательные правки как «мелкие», обходя делегирование.
+
 Даже в исключениях reviewer обязателен (кроме явного отказа пользователя).
 
 ## СВЯЗЬ
@@ -38,4 +40,4 @@ EXTENSION GATE): `1c-agent-delegation.mdc`.
 
 ---
 
-**Last updated**: 2026-03-14 | **Version**: 1.0
+**Last updated**: 2026-03-17 | **Version**: 1.1

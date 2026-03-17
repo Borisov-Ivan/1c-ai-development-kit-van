@@ -11,7 +11,7 @@ alwaysApply: false
 
 | Триггер | Действие | Детали |
 |---------|----------|--------|
-| Работа с формами 1С (Form.xml) | Загрузить 1c-forms. Делегировать **onec-form-generator** | `.cursor/skills/1c-forms/SKILL.md` |
+| Работа с формами 1С (Form.xml) | СТОП. Инструкция ручного конфигурирования. Ref: 1c-xml-write-guard.mdc | — |
 | Оптимизация запросов 1С | Загрузить 1c-query-optimization. Делегировать **onec-query-optimizer** | `.cursor/skills/1c-query-optimization/SKILL.md` |
 | Генерация тестов 1С | Делегировать **onec-test-generator** | — |
 | Упрощение BSL-кода | Делегировать **onec-code-simplifier** | — |
@@ -20,7 +20,7 @@ alwaysApply: false
 
 ## ПОЛНОМОЧИЯ (BSL-ONLY)
 
-Агенты-исполнители (simplifier, form-generator): **только правка .bsl в существующих файлах**.
+Агенты-исполнители (simplifier и др.): **только правка .bsl в существующих файлах**.
 **ЗАПРЕЩЕНО** создавать, копировать или модифицировать XML-файлы метаданных, создавать директории метаданных, создавать новые .bsl в несуществующих директориях.
 Нет нужного объекта → СТОП, блокер пользователю в формате из `1c-no-metadata-creation.mdc`.
 
@@ -30,4 +30,4 @@ alwaysApply: false
 
 ---
 
-**Last updated**: 2026-03-08 | **Version**: 1.0 | **Source**: extracted from `1c-agent-delegation.mdc` v3.0
+**Last updated**: 2026-03-17 | **Version**: 1.1 | **Source**: extracted from `1c-agent-delegation.mdc` v3.0

@@ -23,7 +23,7 @@
 `.cursor/rules/1c-agent-delegation.mdc` (секция API EXISTENCE CHECK) — проверка существования вызываемых методов общих модулей в src/ (cf + cfe) после writer, до reviewer. AskQuestion при ненайденном методе.
 
 ## XML write guard
-`.cursor/rules/1c-xml-write-guard.mdc` — запрет прямой правки Form.xml, Template.xml, Rights.xml и прочих XML в src/; только через скиллы 1c-forms, 1c-mxl, 1c-roles.
+`.cursor/rules/1c-xml-write-guard.mdc` — запрет прямой правки Form.xml, Template.xml, Rights.xml и прочих XML в src/. Form.xml → только инструкция ручного конфигурирования (не через скиллы/агентов). Template.xml, Rights.xml — через скиллы 1c-mxl, 1c-roles.
 
 ## Tool Name Guard
 `.cursor/rules/tool-name-guard.mdc` — для вызова субагентов использовать инструмент **Task**. При `Invalid enum value` проверить имя инструмента (должен быть Task) и subagent_type; не переключаться на generalPurpose.
@@ -62,7 +62,7 @@ Quality Controller (шаг 7.6): фазовая классификация за�
 `.cursor/rules/preserve-subagent-reports.mdc` — полные отчёты в reports/.
 
 ## Утилитарные агенты
-`.cursor/rules/1c-utility-agents.mdc` — формы, запросы, тесты, упрощение, метаданные, администрирование. Загружается по необходимости (не always-apply).
+`.cursor/rules/1c-utility-agents.mdc` — инструкции по формам (Form.xml), запросы, тесты, упрощение, метаданные, администрирование. Загружается по необходимости (не always-apply).
 
 ## Предрелизное ревью
 `.cursor/skills/prerelease-review/SKILL.md` — `/opsx:prerelease-review`.

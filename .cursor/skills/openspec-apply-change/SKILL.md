@@ -160,13 +160,13 @@ Implement tasks from an OpenSpec change.
    | Тип задачи | Маркеры в тексте задачи | Исполнитель |
    |---|---|---|
    | BSL-код (новая логика, правка процедур) | «реализовать», «добавить», «доработать» + путь к .bsl | **onec-code-writer** + **onec-code-reviewer** после |
-   | Форма (Form.xml) | «форму», «реквизиты формы», «элементы формы», «Form.xml» | **onec-form-generator** или скилл 1c-forms через агента |
+   | Форма (Form.xml) | «форму», «реквизиты формы», «элементы формы», «Form.xml» | **СТОП.** Инструкция ручного конфигурирования (1c-xml-write-guard.mdc). WAIT — не продолжать до выгрузки |
    | Запрос 1С | «запрос», «оптимизировать запрос» | **onec-query-optimizer** |
    | Верификация метаданных | «проверить соответствие», «проверить наличие» | Оркестратор (Glob/Grep/Read — только проверка, не реализация) |
    | Ручной тест | «ручной тест», «убедиться» | **Step-by-step:** показать сценарий, ждать результат (Пройден/Не пройден/Отложить). **Batch:** пропустить с предупреждением; включить в Session Summary секцию "Отложенные ручные тесты" |
    | Создание метаданных | «создать регистр», «создать справочник», «создать форму» (scaffold) | **СТОП** — блокер пользователю (`1c-no-metadata-creation.mdc`) |
 
-   **HALT:** Оркестратор НЕ реализует задачи типов BSL-код и Форма самостоятельно. Оркестратор готовит промпт и делегирует. Прямое использование Write/StrReplace для .bsl и прямая генерация JSON-спецификаций форм для form-compile — запрещены. Для форм: передать design-спецификацию агенту onec-form-generator или описать задачу для скилла 1c-forms; агент сам интерпретирует spec и генерирует артефакт. Ref: `1c-agent-delegation.mdc`, `1c-utility-agents.mdc`.
+   **HALT:** Оркестратор НЕ реализует задачи типов BSL-код и Форма самостоятельно. Оркестратор готовит промпт и делегирует. Прямое использование Write/StrReplace для .bsl, **прямая правка Form.xml** и прямая генерация JSON-спецификаций форм для form-compile — запрещены. Для форм: СТОП — сформировать инструкцию ручного конфигурирования (1c-xml-write-guard.mdc); не продолжать до выгрузки пользователем. Ref: `1c-agent-delegation.mdc`, `1c-utility-agents.mdc`.
 
    **Investigation Loop при apply.** Если reviewer в отчёте включил секцию `## Investigation Request`:
    1. Вызвать explorer (contract resolution deep) по таблице из Investigation Request. Шаблон: «Explorer — contract resolution (deep)» из `1c-agent-patterns/SKILL.md`.
@@ -344,7 +344,7 @@ What would you like to do?
 - Pause on errors, blockers, or unclear requirements - don't guess
 - Use contextFiles from CLI output, don't assume specific file names
 - **Task Dispatch:** classify each task before implementation; delegate to the correct executor per dispatch table. Orchestrator MUST NOT implement BSL or Form tasks directly — only prepare context and delegate.
-- **Form tasks:** delegate to onec-form-generator or use 1c-forms skills via agent; do not construct JSON specs or call form-compile directly.
+- **Form tasks:** STOP — produce manual configuration instructions (1c-xml-write-guard.mdc); do not edit Form.xml or continue until user has performed configuration and re-exported.
 - Reference: `1c-agent-delegation.mdc` (BSL gate), `1c-utility-agents.mdc` (forms, queries, tests).
 
 **Fluid Workflow Integration**
