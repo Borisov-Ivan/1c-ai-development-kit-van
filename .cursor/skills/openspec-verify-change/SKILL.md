@@ -364,6 +364,12 @@ Universal quality gate for OpenSpec changes. Works in two modes determined autom
    5. **Согласованность.** Нет ли противоречий между tasks и design? Между tasks и spec?
       Совпадают ли «создать/доработать» в tasks с реальным состоянием репозитория?
 
+   6. **Качество фиксов (Fix Quality).** Для каждой задачи в tasks.md, помеченной как исправление
+      (RCA, корневая причина, «исправление»): (a) Фикс направлен на корневую причину, а не на симптом?
+      (b) Есть ли более «здоровые» альтернативы (меньше условий, одна точка изменения, без обходных флагов)?
+      (c) Нет ли признаков заплатки (обход, дублирование, assumption-driven)? (d) Учтён ли UX-сценарий
+      (что видит/делает пользователь после фикса)?
+
    ## Формат ответа
 
    ### Вердикт
@@ -379,6 +385,7 @@ Universal quality gate for OpenSpec changes. Works in two modes determined autom
    | 3 | Разрешённость решений | OK/GAP | ... |
    | 4 | Полнота покрытия | OK/GAP | ... |
    | 5 | Согласованность | OK/GAP | ... |
+   | 6 | Качество фиксов (Fix Quality) | OK/GAP | ... |
 
    ### Пробелы (только при GAP)
 
@@ -446,10 +453,16 @@ Universal quality gate for OpenSpec changes. Works in two modes determined autom
    **Gate closure check:**
    - Glob `reports/architecture-*.md` in change dir and `temp/reports/`
 
+   **Debug fix check (дополнительно):**
+   - Grep tasks.md на маркеры: `(исправление)`, `RCA:`, `корневая причина`, `reports/trace-analysis`, `reports/exploration`
+   - Если маркеры найдены И нет ни одного `reports/architecture-*.md` в change dir (в т.ч. `architecture-debug-*.md`):
+     → CRITICAL: "В tasks.md есть задачи-исправления из debug без архитектурного ревью. Рекомендация: запустить onec-code-architect или /opsx:debug с прохождением Architect Gate (шаг 5.5)."
+
    **Result:**
-   - No triggers fired → `OK`
+   - No triggers fired AND (no debug fix markers OR architecture-*.md exists) → `OK`
    - Triggers fired AND `architecture-*.md` exists → `OK (отчёт: <filename>)`
    - Triggers fired AND NO `architecture-*.md` → CRITICAL: "Сработали маркеры Architect Gate: [list]. Архитектурный анализ не найден. Рекомендация: запустить `/opsx:verify` с опцией устранения или onec-code-architect вручную"
+   - Debug fix markers in tasks AND NO `architecture-*.md` → CRITICAL (см. Debug fix check выше)
 
 10. **Design Review Gate Check**
 
