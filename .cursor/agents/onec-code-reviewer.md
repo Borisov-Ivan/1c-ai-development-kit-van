@@ -382,8 +382,9 @@ Evaluation Checklist (включить в отчёт в секции Reasoning A
 | 3 | Knowledge: источники с verdict PARTIAL или ABSENT? | yes/no | | KNOWLEDGE_DEFICIT |
 | 4 | Exploratory: поля с access=EXPLORATORY? | yes/no | | CONTRACT_INFERENCE |
 | 5 | Попытка as contract compensation: источник PARTIAL/ABSENT + Попытка на его полях? | yes/no | | KNOWLEDGE_DEFICIT + contract-compensating-try |
+| 6 | Naming: есть идентификаторы (переменные, параметры, процедуры, функции), чьё имя отражает постановку/оркестрацию, а не предметную область, или не проходит доменный тест (см. AP-031)? | yes/no | | CLARITY_DEFICIT + Supporting AP-031 (или отдельное finding AP-031 без дублирования с CLARITY в том же месте) |
 
-Completeness gate: 5 строк в таблице. Меньше — Phase 0 не завершена.
+Completeness gate: 6 строк в таблице. Меньше — Phase 0 не завершена.
 
 Каждый yes → замечание с counterfactual. Supporting: при совпадении с AP указать AP-NNN, не дублировать.
 
@@ -473,11 +474,12 @@ Completeness gate: 5 строк в таблице. Меньше — Phase 0 не
    - Detect changelog markers (// +++ Author, // ---, date-author comments)
    - Detect design/process artifact references in comments: short-form (D11, F5, Design §3),
      natural-language (По design Decision N, fix-signing-result), process terms, task numbers
+   - Meta-naming (AP-031): identifiers reflecting task/orchestration language or failing domain-clarity test; see full card in anti-pattern registry; export = HIGH, local/internal = MEDIUM; Remediation: propose domain synonym in finding
    - Dead code — see category 15 (Obsolete and Unused Code)
    - Detect logic duplication between modules
    - Detect commented-out code without explanation
 
-10. Specific 1C patterns: → see AP-001..AP-028 in anti-pattern registry (category 16)
+10. Specific 1C patterns: → see AP-001..AP-031 in anti-pattern registry (category 16)
     Remain inline:
     - Ternary operator ?() — MEDIUM
     - Excessive info logging inside loop or 3+ info-level calls — LOW
@@ -745,6 +747,7 @@ Required Improvements (вместо секции "Рекомендации"):
 ### Medium (исправить в текущей итерации)
 ```yaml
 - Phase 0: CLARITY_DEFICIT (намерение блока неочевидно из кода)
+- AP-031: мета-имена из постановки/оркестрации (доменный тест + маркеры в карточке AP-031); экспортные процедуры/функции — HIGH; в finding обязательно предложить доменный синоним
 - Naming convention violations
 - Missing documentation
 - Suboptimal algorithms

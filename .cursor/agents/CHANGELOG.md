@@ -1,5 +1,12 @@
 # Changelog — 1C Agent Ecosystem
 
+## [3.1] - 2026-03-20
+
+### Changed (onec-code-reviewer, bsl-antipatterns)
+- AP-031: мета-имена из постановки/оркестрации — доменный тест + эвристики; интеграция в Phase 0 Evaluation Checklist (вопрос 6), Medium severity, Phase 2 code cleanliness; диапазон ссылок на реестр AP-001..AP-031
+- 1c-coding-standards.mdc: подсекция ИМЕНОВАНИЕ — «Доменная релевантность»
+- bsl-antipatterns.mdc / bsl-antipatterns.md: полная карточка AP-031
+
 ## [3.0] - 2026-03-12
 
 ### Added (openspec-quality-controller)
