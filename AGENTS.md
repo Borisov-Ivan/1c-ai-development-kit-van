@@ -10,6 +10,9 @@
 Паттерны агентов: `.cursor/skills/1c-agent-patterns/SKILL.md`.
 Документы: `/opsx:doc-tz <name>` (ТЗ по ЗНИ с архитектурным ревью и контролем качества артефактов) — `.cursor/skills/openspec-docs/SKILL.md`.
 
+## Фиксация договорённостей
+`.cursor/rules/capture-to-project.mdc` — «зафиксируй в проекте» → Read `openspec/project.md` → адаптация под формат секции → подтверждение → запись.
+
 ## BSL write guard
 `.cursor/rules/bsl-write-guard.mdc` — глобальный инвариант: правка .bsl только через onec-code-writer + обязательный onec-code-reviewer (любой диалог). `.cursor/rules/1c-agent-delegation.mdc` — детальная диспетчеризация: APPLY GATE, DELEGATION GATE, LINT GATE, API CHECK, EXTENSION GATE.
 
