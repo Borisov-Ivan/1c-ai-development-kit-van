@@ -188,6 +188,7 @@ Check via Anti-pattern Registry (see category 16):
   AP-028: Check-after-establish (property/attribute check after type established) — HIGH
   AP-029: Defense stack (Попытка + Свойство as contract uncertainty compensation) — HIGH/CRITICAL
   AP-030: Hidden partial result (Попытка+Продолжить/Возврат without user feedback) — HIGH
+  AP-032: Inconsistent persistent state (Попытка + persistent write + no re-raise + downstream dependency) — CRITICAL
 
 Remain inline (not in registry):
   - Ternary operator ?() — MEDIUM
@@ -565,7 +566,10 @@ B. Audit each block (для КАЖДОГО блока из списка A — о
    - Logging in Исключение? ЗаписьЖурналаРегистрации или re-raise в блоке Исключение? yes/no.
    - Fallback = success for caller? Возврат/присвоение в Исключение неотличимы от успеха для вызывающего? yes/no.
    - User feedback on failure? При Продолжить/тихом Возврат есть ли СообщитьПользователю или ВызватьИсключение? yes/no (исключение: явно документированный тихий пропуск в design/ТЗ).
-   - Verdict: список ВСЕХ сработавших AP для этого блока: OK | AP-008 | AP-009 | AP-010 | AP-027 | AP-029 | AP-030 | contract-compensating-try | redundant layering.
+   - Persistent side effects? Операция внутри Попытка записывает в БД (`Записать`, `ЗафиксироватьТранзакцию`, `НачатьТранзакцию` в связке с записью) или вызывает процедуру/функцию, которая пишет (1 уровень callee в том же репозитории)? yes — какие / no.
+   - Re-raise in Исключение? Есть `ВызватьИсключение` в блоке Исключение (в т.ч. без аргумента)? yes/no.
+   - Downstream dependency? Код после КонецПопытки (или после цикла, или caller после вызова процедуры) зависит от успешности этой записи? yes (описать) / no / uncertain.
+   - Verdict: список ВСЕХ сработавших AP для этого блока: OK | AP-008 | AP-009 | AP-010 | AP-027 | AP-029 | AP-030 | AP-032 | contract-compensating-try | redundant layering.
    Критическое правило: нахождение одного AP НЕ закрывает проверку остальных критериев. Verdict = все применимые (например: AP-008, AP-010).
    RootCause = contract-uncertainty → Verdict включает contract-compensating-try. Ремедиация для contract-compensating-try: «Заменить Попытку проверкой контракта (тип/свойства) до обращения к полям. Если контракт невозможно подтвердить по базовому модулю — проверить ТипЗнч/Свойство перед доступом к вложенным полям.»
    **«Проверяй, а не лови» (Check, don't catch):** если Попытка защищает от несовпадения контракта (contract-uncertainty), правильный фикс — проверить контракт (тип, свойства) до обращения и убрать Попытку, а не логировать и продолжать. Логирование прячет ошибку: конкретная информация доступна только в ЖР, недоступна пользователю и поддержке в момент инцидента.
@@ -576,7 +580,16 @@ B. Audit each block (для КАЖДОГО блока из списка A — о
        → Log=yes И UserFeedback=yes НЕ отменяют contract-compensating-try.
          Логирование и сообщение не устраняют причину (contract-uncertainty).
        → Другие AP проверяются ДОПОЛНИТЕЛЬНО, но Verdict НЕ может быть OK.
-   Справочно: AP-008 = все операции детерминированы; AP-009 = fallback неотличим от успеха; AP-010 = нет лога; AP-027 = guard-then-catch; AP-029 = defense stack; AP-030 = скрытый частичный результат; contract-compensating-try = Попытка компенсирует незнание контракта; redundant layering = INTEGRATION_CONTRACT_GATE (callee уже ловит).
+   MANDATORY Verdict derivation — persistent state (выполнять ДЛЯ КАЖДОГО блока):
+     Если Persistent side effects = yes И Re-raise in Исключение = no:
+       Проверить Downstream dependency:
+       → yes или uncertain → Verdict ОБЯЗАН включать AP-032.
+       → Severity: CRITICAL, Action: MUST_FIX.
+       → UserFeedback=yes НЕ отменяет AP-032 (сообщение пользователю не устраняет рассогласование данных в БД).
+       → Log=yes НЕ отменяет AP-032.
+       → Блок внутри цикла (Для Каждого / Для / Пока): Downstream dependency = yes по определению (гарантированный partial batch), если callee или тело Попытка пишет в БД.
+       → Ремедиация: (a) убрать Попытку / re-raise — атомарность; (b) accumulate errors + signal caller + block downstream для сбойных элементов.
+   Справочно: AP-008 = все операции детерминированы; AP-009 = fallback неотличим от успеха; AP-010 = нет лога; AP-027 = guard-then-catch; AP-029 = defense stack; AP-030 = скрытый частичный результат; AP-032 = персистентные side effects + подавление + downstream dependency; contract-compensating-try = Попытка компенсирует незнание контракта; redundant layering = INTEGRATION_CONTRACT_GATE (callee уже ловит).
 
    HIDDEN_PARTIAL_RESULT_GATE cross-check:
      Если в таблице Попытка Audit блок имеет RootCause = contract-uncertainty
@@ -584,6 +597,10 @@ B. Audit each block (для КАЖДОГО блока из списка A — о
        → HIDDEN_PARTIAL_RESULT_GATE для этого блока = FAIL.
        → В отчёте (секция gates) указать FAIL со ссылкой на contract-compensating-try finding.
        Причина: лог + сообщение маскируют ошибку контракта, а не устраняют скрытый результат.
+     AP-032 cross-check:
+       Если Persistent side effects = yes и Verdict включает AP-032:
+       → HIDDEN_PARTIAL_RESULT_GATE для этого блока = FAIL.
+       → Причина: данные в БД рассогласованы; сообщение пользователю / лог не устраняют зависимость downstream-кода от неконсистентного состояния.
 
 C. Defensive checks audit (Contract Map–driven; НЕ синтаксический scan):
    **Драйвер:** обход артефакта Contract Map (Phase 0). Для КАЖДОГО источника из Contract Map с access != DIRECT (т.е. DEFENSIVE, GUARDED, EXPLORATORY), а также для источников, к полям которых обращаются ТОЛЬКО внутри Попытка — одна строка в Defensive Checks Table.
