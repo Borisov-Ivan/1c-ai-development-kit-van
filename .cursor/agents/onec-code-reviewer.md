@@ -383,7 +383,7 @@ Evaluation Checklist (включить в отчёт в секции Reasoning A
 | 3 | Knowledge: источники с verdict PARTIAL или ABSENT? | yes/no | | KNOWLEDGE_DEFICIT |
 | 4 | Exploratory: поля с access=EXPLORATORY? | yes/no | | CONTRACT_INFERENCE |
 | 5 | Попытка as contract compensation: источник PARTIAL/ABSENT + Попытка на его полях? | yes/no | | KNOWLEDGE_DEFICIT + contract-compensating-try |
-| 6 | Naming: есть идентификаторы (переменные, параметры, процедуры, функции), чьё имя отражает постановку/оркестрацию, а не предметную область, или не проходит доменный тест (см. AP-031)? | yes/no | | CLARITY_DEFICIT + Supporting AP-031 (или отдельное finding AP-031 без дублирования с CLARITY в том же месте) |
+| 6 | Naming: есть идентификаторы, чьё имя (a) отражает постановку/оркестрацию, (b) описывает роль в коде (контейнер, промежуточное, накопитель) без доменного квалификатора, или (c) при наличии в том же scope доменно названных данных — контейнер для них не отсылает к домену? Тест: мысленно убрать реализационное слово (Массив, Новый, Добавляемые) — остаётся ли доменный смысл? (см. AP-031) | yes/no | | CLARITY_DEFICIT + Supporting AP-031 (или отдельное finding AP-031 без дублирования с CLARITY в том же месте) |
 
 Completeness gate: 6 строк в таблице. Меньше — Phase 0 не завершена.
 
@@ -789,13 +789,14 @@ Required Improvements (вместо секции "Рекомендации"):
 - Duplicated magic constant (same literal 2+ times in module) — category 4 (rule 22)
 - Mixed responsibilities (procedure >40 lines, 3+ concerns) — category 4
 - Inconsistent prefix usage (exports with and without prefix in same module) — category 8
+- AP-031: Domain naming test failure (meta-names, implementation-role names) — MEDIUM (export: HIGH). See anti-pattern registry
 ```
 
 ### Low (исправить, минимальный приоритет)
 ```yaml
 - Code formatting
 - Comment style
-- Variable naming
+- Variable naming (casing, prefix style only; domain-clarity failures are MEDIUM via AP-031)
 - Minor optimizations
 - Refactoring opportunities
 - Missing module header comment
@@ -818,7 +819,7 @@ kind:
   release-hygiene — process metadata that must not ship to production (changelog markers, work instructions, commented-out old code, design refs)
 ```
 
-**Escalation (LOW→MEDIUM, MEDIUM→HIGH) applies only to kind=functional.** For kind=style, keep the normal level and tag the finding with `[style]` in the report. For kind=release-hygiene, see Pre-release escalation (release-hygiene) below.
+**Escalation (LOW→MEDIUM, MEDIUM→HIGH) applies to kind=functional, release-hygiene, and style.** Code is delivered to the customer — style matters in prerelease. Tag style findings with `[style]` in the report. For kind=release-hygiene, see also Pre-release escalation (release-hygiene) below.
 
 ### Kind by category (examples)
 
@@ -871,12 +872,12 @@ kind=style (category 15 — unused/obsolete):
   - Unused parameter in procedure/function body
 ```
 
-### Escalation rules (kind=functional only)
+### Escalation rules
 
 ```yaml
-Pre-release escalation (functional only):
+Pre-release escalation (all kinds: functional, style, release-hygiene):
   LOW → MEDIUM:
-    - (only if kind=functional; style LOW stays LOW)
+    - All kinds escalated (code is delivered to the customer)
 
   MEDIUM → HIGH:
     - Export method without header (if functional impact, e.g. contract unclear)
@@ -891,7 +892,7 @@ Pre-release escalation (functional only):
     - Попытка/Исключение without logging (traceless suppression — rule 20)
     - Попытка/Исключение with silent degradation fallback (rule 20)
 
-Note: Escalation is additive for functional issues. Style issues are not escalated; tag [style] and keep original level.
+Note: Escalation is additive. All kinds (functional, style, release-hygiene) are escalated in prerelease — code is delivered to the customer. Tag style findings with [style].
 ```
 
 ### Pre-release escalation (release-hygiene)
