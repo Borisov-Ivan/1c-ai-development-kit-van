@@ -138,6 +138,11 @@ Check:
   Principle: comments describe code intent, not change history.
   Do NOT treat as release-hygiene or remove: directives #Вставка, #КонецВставки, #Удаление, #КонецУдаления — they are 1C extension override syntax, required for correct merge.
 
+  Project-level whitelist: if openspec/project.md contains section «Форматы и соглашения по комментариям BSL»
+  with subsection «Whitelist предрелиза» (table: prefix after //, optional regex on full // line, scope glob per row),
+  comments in files matching that scope that match the whitelist are NOT release-hygiene findings.
+  Read project.md before flagging changelog-style markers (e.g. +++/---) in whitelisted lines.
+
   Release hygiene (process metadata in comments only):
     - Changelog markers in comments: author+date+ticket in comment lines
       (// +++ Author, // ---, // НАЧАЛО/КОНЕЦ Изменения внес:,
@@ -861,6 +866,7 @@ kind=release-hygiene:
   - Design/process artifact references in comments (short-form D11/F5, natural-language
     "По design Decision N (change-name)", process terms, kebab-case change names, task numbers)
   Not release-hygiene: #Вставка, #КонецВставки, #Удаление, #КонецУдаления — extension override directives, do not remove or flag.
+  Project-level override: comments matching openspec/project.md «Whitelist предрелиза» patterns within the row’s scope (glob) — NOT release-hygiene. Check project.md before flagging.
 
 kind=functional (category 15 — unused/obsolete):
   - Unused export procedure/function (no callers in extension scope) — dead API surface
