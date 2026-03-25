@@ -2,7 +2,7 @@
 priority: critical
 capabilities: [openspec-quality-control, phase-analysis, dependency-graph]
 name: openspec-quality-controller
-model: claude-4.6-opus-high-thinking
+model: default
 description: Evaluate task ordering, dependencies, phase coherence and rework risk for OpenSpec changes
 readonly: true
 ---
