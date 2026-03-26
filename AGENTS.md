@@ -53,7 +53,7 @@
 
 Quality Controller (шаг 7.6): фазовая классификация задач P0-P4, граф зависимостей, false start detection, rework risk, executability analysis (5d). Шаблон промпта: `1c-agent-patterns/SKILL.md` (секция «Quality Controller — phase coherence review»). ТЗ (шаг 7.8): генерация по `openspec-docs/prompts/change-tz.md` при выполнении порога или явном запросе; иначе пропуск с сохранением существующего `ТЗ.md`.
 
-Коммуникация с пользователем: `.cursor/rules/verify-user-communication.mdc` — Executive Summary, развёрнутые абзацы для WARNING/CRITICAL в первом сообщении, Before/After scorecard после remediation, явное указание решений от пользователя. Голые счётчики без таблицы и развёрнутых объяснений запрещены.
+Коммуникация с пользователем: `.cursor/rules/verify-user-communication.mdc` — Executive Summary, **Actionability Principle** (WARNING/CRITICAL только при необходимости решения/правки артефактов до apply; контекст режима — **INFO**), развёрнутые абзацы для WARNING/CRITICAL в первом сообщении, Before/After scorecard после remediation, явное указание решений от пользователя. Голые счётчики без таблицы и развёрнутых объяснений запрещены. Подробности: **Actionability Gate** в `openspec-verify-change/SKILL.md`.
 
 ## Verified Cause Gate
 `.cursor/rules/verified-cause-gate.mdc` — root cause + impact перед фиксом. Масштаб: точечный (не меняет UX) / **UX-значимый** (меняет сценарий пользователя) / системный; UX-значимый и системный → architect обязателен. Fix Quality Gate: анти-паттерн «фикс симптома»; verify шаг 7.7 — критерий 6 (качество фиксов), шаг 9 — Debug fix check (задачи из debug без architecture-*.md → CRITICAL).

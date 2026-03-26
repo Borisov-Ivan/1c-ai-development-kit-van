@@ -5,7 +5,7 @@ license: MIT
 compatibility: Requires openspec CLI.
 metadata:
   author: openspec
-  version: "5.0"
+  version: "5.1"
   generatedBy: "1.1.1"
 ---
 
@@ -196,9 +196,11 @@ Universal quality gate for OpenSpec changes. Works in two modes determined autom
    - P1 tasks: Grep for data attribute references → map to P0 tasks that create the object
    - Any task: Grep for `Зависимости:` or `Зависимость:` → explicit deps
 
-   For each found dependency:
-   - Dep task `[ ]` AND current task `[ ]` → WARNING: "задача N.M зависит от M.K ([ ]), обе не выполнены — порядок выполнения критичен"
-   - Dep task `[ ]` AND current task needs it for execution → WARNING: "задача N.M невыполнима — зависит от нереализованной M.K"
+   For each found dependency (после Actionability Gate при финализации отчёта):
+   - Dep task `[ ]` AND current task `[ ]`:
+     - Если зависимость **явно указана** в тексте задачи (`Зависимости:` / `Зависимость:` с ID M.K) → **INFO**: "задача N.M зависит от M.K ([ ]); порядок обеспечен объявленными зависимостями / apply"
+     - Если зависимость **выявлена только эвристикой**, но **не** отражена в `Зависимости:` → **WARNING**: "задача N.M предположительно зависит от M.K — добавить явные **Зависимости:** в tasks.md"
+   - Dep task `[ ]` AND current task needs it for execution — то же правило: явная ссылка в tasks → INFO; нет явной ссылки → WARNING
    - Dep task `[x]` but line > current task line → SUGGESTION: "задача N.M расположена до зависимости M.K в файле"
 
    **7F.2 Execution order text validation:**
@@ -299,13 +301,16 @@ Universal quality gate for OpenSpec changes. Works in two modes determined autom
    **After receiving the controller's report:**
    1. Save full report to `reports/quality-control-YYYY-MM-DD.md`.
    2. Include verdict and phase classification table in the verification report (section "Фазовая когерентность (Quality Controller)").
-   3. Map each alert to verification issues:
-      - `false-start`, `phase-violation`, `cycle` → CRITICAL
-      - `rework-risk` HIGH → WARNING
-      - `rework-risk` MEDIUM, `missing-dependency` → SUGGESTION
+   3. Map each alert to verification issues (затем **Actionability Gate**):
+      - `false-start`, `phase-violation`, `cycle` → CRITICAL (Gate: обычно actionable — дефект постановки или кода)
+      - `rework-risk` HIGH / MEDIUM:
+        - Если в `tasks.md` зависимости между затронутыми задачами **явно заданы** и **не противоречат** графу QC → переклассифицировать в **INFO** (риск снимается соблюдением порядка apply; пользователю нечего менять в артефактах ради порядка)
+        - Если зависимость **отсутствует** или **противоречит** графу → **WARNING** (нужна правка tasks/design)
+      - `missing-dependency` → WARNING (actionable: дополнить tasks)
       - `missing-phase-gate` → SUGGESTION
-      - `phase-gate-blocked`, `task-validity-drift` → WARNING (phase-transition)
-      - `ordering-mismatch`, `iteration-drift`, `phase-gate-named-task-blocked`, `phase-gate-stale-ref`, `execution-order-contradiction` → WARNING
+      - `phase-gate-blocked`, `task-validity-drift` → WARNING (phase-transition), затем Gate
+      - `ordering-mismatch`, `iteration-drift`, `phase-gate-named-task-blocked`, `phase-gate-stale-ref`, `execution-order-contradiction`:
+        - Если граф зависимостей в tasks **согласован** с топологическим порядком — **INFO**; иначе **WARNING**
       - `ordering-cosmetic` → SUGGESTION
 
 7.6b. **Phase Transition Review (phase-transition mode ONLY)**
@@ -552,24 +557,22 @@ In **mixed** mode, post-apply checks apply **only to tasks marked `[x]`**.
     **Task Completion**:
     - Parse checkboxes: `- [ ]` (incomplete) vs `- [x]` (complete)
     - Count complete vs total tasks
-    - If incomplete tasks exist (post-apply mode only):
-      - Add CRITICAL issue for each incomplete task
-      - Recommendation: "Complete task: <description>" or "Mark as done if already implemented"
+    - If incomplete tasks exist:
+      - **post-apply mode (все задачи должны быть закрыты):** Add CRITICAL issue for each incomplete task; Recommendation: "Complete task: <description>" or "Mark as done if already implemented"
+      - **mixed mode:** незавершённые `[ ]` задачи — **не** CRITICAL/WARNING. Добавить **INFO**: «N задач с `[ ]` ожидают реализации через `/opsx:apply`» (Actionability Gate: следствие режима, не дефект верификации)
 
     **Spec Coverage**:
     - If delta specs exist in `openspec/changes/<name>/specs/`:
       - Extract all requirements (marked with "### Requirement:")
-      - For each requirement:
-        - Search codebase for keywords related to the requirement
-        - Assess if implementation likely exists
-      - If requirements appear unimplemented:
-        - Add CRITICAL issue: "Requirement not found: <requirement name>"
-        - Recommendation: "Implement requirement X: <description>"
+      - **mixed mode:** проверять покрытие **только** для требований, которые **целиком** относятся к уже выполненным `[x]` задачам (по смысловому сопоставлению tasks ↔ spec). Требования, относящиеся к невыполненным задачам — **INFO**: «M requirements ожидают реализации (связанные задачи `[ ]`)»
+      - **post-apply mode:** для каждого requirement — поиск в коде; если не реализовано → CRITICAL: "Requirement not found: <requirement name>"
+      - Для **mixed**, если requirement относится к `[x]`-задачам, но реализация не найдена → **WARNING** (расхождение: задача отмечена выполненной, код/spec не сходятся)
 
 14. **Verify Correctness**
 
     **Requirement Implementation Mapping**:
-    - For each requirement from delta specs:
+    - **mixed mode:** выполнять **только** для требований/частей spec, отнесённых к задачам с `[x]`. Для остальных — не выдавать WARNING «не реализовано»; при необходимости одна **INFO**-строка в духе «сценарии невыполненных задач не проверялись в коде»
+    - For each requirement from delta specs (в **post-apply** — все; в **mixed** — только связанные с `[x]`):
       - Search codebase for implementation evidence
       - If found, note file paths and line ranges
       - Assess if implementation matches requirement intent
@@ -578,10 +581,11 @@ In **mixed** mode, post-apply checks apply **only to tasks marked `[x]`**.
         - Recommendation: "Review <file>:<lines> against requirement X"
 
     **Scenario Coverage**:
-    - For each scenario in delta specs (marked with "#### Scenario:"):
+    - **mixed mode:** для сценариев, относящихся к **невыполненным** задачам — **INFO** или пропуск, не WARNING
+    - For each scenario in delta specs (marked with "#### Scenario:") — в **post-apply** полный проход; в **mixed** только сценарии для `[x]`-контекста:
       - Check if conditions are handled in code
       - Check if tests exist covering the scenario
-      - If scenario appears uncovered:
+      - If scenario appears uncovered **и** задачи для него уже `[x]`:
         - Add WARNING: "Scenario not covered: <scenario name>"
         - Recommendation: "Add test or implementation for scenario: <description>"
 
@@ -605,6 +609,31 @@ In **mixed** mode, post-apply checks apply **only to tasks marked `[x]`**.
 
 ---
 
+## Actionability Gate (перед записью замечаний в отчёт)
+
+Применяется **ко всем** замечаниям перед финальным присвоением severity в отчёте verify (после сбора результатов шагов 6–15, 7.6, 7.7 и т.д.).
+
+**Цель:** пользователь, запускающий verify, видит **WARNING/CRITICAL** только там, где нужно **решение или правка артефакта до apply**; всё остальное — контекст, а не «угроза».
+
+**Уровень INFO** (контекст):
+
+- Не входит в счётчики вердикта (N CRITICAL / M WARNING / K SUGGESTION).
+- **Не** триггерит предложение remediation (шаг 17).
+- В сообщении пользователю — **компактно** (bullet-строки в секции «Контекст (INFO)»), **без** развёрнутых абзацев как у WARNING.
+- Формат в отчёте: `- [INFO] <краткий текст>`.
+
+**Тест для каждого кандидата в CRITICAL / WARNING / SUGGESTION:**
+
+| Шаг | Вопрос | Если да → |
+|-----|--------|------------|
+| 1 | Пользователь может устранить **правкой артефакта** (proposal/design/spec/tasks) **до** старта apply? | Присвоить severity по правилам соответствующего шага verify. |
+| 2 | Замечание **полностью снимается** автоматикой (`/opsx:apply`, phase gates, явные **Зависимости:** в tasks)? | **INFO** (или не включать в отчёт, если дублирует очевидное). |
+| 3 | Замечание — **неизбежное следствие режима** (pre-apply / mixed: код ещё не реализован по невыполненным `[ ]`)? | **INFO** (например: «K задач ожидают реализации»), не WARNING. |
+
+**Склеивание:** если после Gate не осталось CRITICAL и WARNING, но есть SUGGESTION — статус «Готов. Предложения к сведению». Если нет ни CRITICAL, ни WARNING, ни SUGGESTION — «Все проверки пройдены. Готов к apply/archive». При наличии INFO добавить в Executive Summary строку: `**Контекст (INFO):** K пометок — см. секцию в отчёте` (только если K > 0).
+
+---
+
 ## Report and remediation
 
 16. **Generate Verification Report**
@@ -615,16 +644,18 @@ In **mixed** mode, post-apply checks apply **only to tasks marked `[x]`**.
     ## Executive Summary
 
     **Вердикт:** N CRITICAL, M WARNING, K SUGGESTION
+    **Контекст (INFO):** <число> пометок — см. секцию «Контекст (INFO)» ниже *(только если INFO > 0; иначе строку опустить)*
     **Решений от пользователя:** <число> — <перечень решений или «не требуется»>
     **Статус:** <одна фраза>
     ```
 
     Правила заполнения:
+    - Счётчики **Вердикта** учитывают только CRITICAL / WARNING / SUGGESTION. **INFO не входят** в N, M, K.
     - CRITICAL > 0 → Статус: «Блокировано до устранения: [перечень CRITICAL]»
-    - Только WARNING → Статус: «Готов при принятии рисков: [перечень WARNING]»
-    - Только SUGGESTION → Статус: «Готов. Предложения к сведению»
-    - Всё OK → Статус: «Все проверки пройдены. Готов к apply/archive»
-    - «Решений от пользователя» — перечислить конкретные решения, которые не может принять машина (выбор подхода, отложить/реализовать задачу, принять риск). Если таких нет — «не требуется».
+    - Только WARNING (INFO допускаются) → Статус: «Готов при принятии рисков: [перечень WARNING]»
+    - Только SUGGESTION (INFO допускаются) → Статус: «Готов. Предложения к сведению»
+    - Нет CRITICAL, нет WARNING, нет SUGGESTION (возможны только INFO) → Статус: «Все проверки пройдены. Готов к apply/archive»
+    - «Решений от пользователя» — перечислить конкретные решения, которые не может принять машина (выбор подхода, отложить/реализовать задачу, принять риск). Если таких нет — «не требуется». INFO **не** считаются запросом решения.
 
     **Summary Scorecard (после Executive Summary):**
     ```
@@ -646,11 +677,18 @@ In **mixed** mode, post-apply checks apply **only to tasks marked `[x]`**.
     ...
 
     ### Выполнимость и порядок задач (verify 7F, QC 5d)
-    - [WARNING] N.M — невыполним: зависит от M.K (описание), задача [ ]
-    - [SUGGESTION] N.M — расположен до зависимости M.K (строка X vs Y)
+    - [INFO] порядок N.M → M.K обеспечен явными **Зависимостями:** в tasks (не требует действий пользователя до apply)
+    - [WARNING] N.M — нет явной зависимости от M.K при выявленной потребности — дополнить tasks.md
+    - [SUGGESTION] N.M — расположен до зависимости M.K в файле (при этом граф может быть OK)
     - [WARNING] Phase Gate: задача N.M [ ], K.L [ ] (именованы в маркере gate)
     - [SUGGESTION] «Порядок выполнения» не покрывает задачи: [list]
     (или: замечаний выполнимости нет)
+
+    ### Контекст (INFO)
+
+    Список всех INFO-строк (после Actionability Gate). Без развёрнутых абзацев. Пример:
+    - [INFO] K задач с `[ ]` ожидают реализации (mixed)
+    - [INFO] Цепочка 4.1→4.2 объявлена в tasks; apply соблюдает порядок
 
     ### Полнота ручной конфигурации (чеклист шага 7.5)
 
@@ -756,22 +794,25 @@ In **mixed** mode, post-apply checks apply **only to tasks marked `[x]`**.
     - [SUGGESTION] ...
 
     ### Итог
-    N CRITICAL, M WARNING, K SUGGESTION.
+    N CRITICAL, M WARNING, K SUGGESTION (INFO в счётчик не входят; при необходимости отдельно: «INFO: R»).
 
     ### Развёрнутые объяснения замечаний
 
-    **Обязательно** в **файле** отчёта и **дословно** в сообщении пользователю, если есть **хотя бы одно** замечание (CRITICAL / WARNING / SUGGESTION). Если замечаний нет — секция: «Замечаний нет.»
+    **Обязательно** в **файле** отчёта и **дословно** в сообщении пользователю, если есть **хотя бы одно** замечание (CRITICAL / WARNING / SUGGESTION). Если таких нет — секция: «Замечаний нет (INFO см. выше / в секции Контекст).»
+
+    **INFO** в эту секцию **не** включаются развёрнуто — только перечень в «Контекст (INFO)».
 
     Формат (нумерация сквозная по всем severity, сначала CRITICAL, затем WARNING, затем SUGGESTION): заголовки уровня 4 `#### CRITICAL N — …`, `#### WARNING N — …`, `#### SUGGESTION N — …`; под каждым — абзац (для CRITICAL/WARNING 3–5 предложений; для SUGGESTION 1–2 предложения).
 
-    См. `.cursor/rules/verify-user-communication.mdc` — правила 2, 6, 7.
+    См. `.cursor/rules/verify-user-communication.mdc` — правила 0, 2, 6, 7.
     ```
 
     **Final Assessment (сообщение пользователю, НЕ только в файле отчёта):**
 
     Обязательные элементы сообщения пользователю:
-    1. **Сводная таблица всех замечаний** (severity + краткий заголовок + одна строка рекомендации). Если замечаний нет — «Замечаний нет».
-    2. **Секция «Развёрнутые объяснения»** — **тот же текст**, что в файле отчёта (дублирование осознанное): для **каждого CRITICAL и WARNING** — развёрнутый абзац (3–5 предложений): суть, почему возникло, что произойдёт при игноре, конкретное действие для устранения; для **каждого SUGGESTION** — 1–2 предложения (суть + что потеряем при игноре). **Запрещено** выдавать только таблицу без этих абзацев (расчёт «пользователь спросит подробнее»).
+    1. **Сводная таблица** только **CRITICAL / WARNING / SUGGESTION** (severity + краткий заголовок + одна строка рекомендации). Если таких нет — «Замечаний нет (только контекст INFO — см. ниже)».
+    1b. **Секция «Контекст (INFO)»** — если INFO > 0: краткий bullet-список (без таблицы вердикта и без развёрнутых абзацев).
+    2. **Секция «Развёрнутые объяснения»** — **тот же текст**, что в файле отчёта (дублирование осознанное): для **каждого CRITICAL и WARNING** — развёрнутый абзац (3–5 предложений): суть, почему возникло, что произойдёт при игноре, конкретное действие для устранения; для **каждого SUGGESTION** — 1–2 предложения (суть + что потеряем при игноре). Если есть **только INFO** и нет CRITICAL/WARNING/SUGGESTION — секция «Развёрнутые объяснения»: «Замечаний нет.» **Запрещено** выдавать только таблицу без этих абзацев при наличии CRITICAL/WARNING/SUGGESTION.
     3. **«Решений от вас: N»** — перечень решений, которые нужны от пользователя, или «не требуется».
     4. **Следующие шаги** — конкретные команды (apply / archive / устранить замечания).
 
@@ -814,6 +855,8 @@ In **mixed** mode, post-apply checks apply **only to tasks marked `[x]`**.
     Коммуникация с пользователем: `.cursor/rules/verify-user-communication.mdc`
 
 17. **Offer remediation**
+
+    **INFO** не участвуют в решении о remediation и не считаются «issues» для этого шага.
 
     If any CRITICAL or WARNING issues found, offer:
     ```
@@ -922,7 +965,8 @@ In **mixed** mode, post-apply checks apply **only to tasks marked `[x]`**.
 - **Correctness**: use keyword search, file path analysis, reasonable inference — don't require perfect certainty
 - **Coherence**: look for glaring inconsistencies, don't nitpick style
 - **False Positives**: when uncertain, prefer SUGGESTION over WARNING, WARNING over CRITICAL
-- **Actionability**: every issue must have a specific recommendation with file/line references where applicable
+- **Actionability**: every **CRITICAL / WARNING / SUGGESTION** must answer: «что пользователь меняет в артефактах или решает до apply?» Иначе → **INFO** (см. Actionability Gate). INFO допускаются без «рекомендации устранить» в стиле remediation
+- **INFO**: контекст режима и автоматики; не дублировать как WARNING только потому что задачи ещё `[ ]` или зависимости корректно объявлены
 
 **Graceful Degradation**
 
@@ -936,7 +980,7 @@ In **mixed** mode, post-apply checks apply **only to tasks marked `[x]`**.
 
 Use clear markdown with:
 - Tables for summary scorecards
-- Grouped lists for issues (CRITICAL/WARNING/SUGGESTION)
+- Grouped lists for issues (CRITICAL/WARNING/SUGGESTION); отдельный блок bullets для **INFO**
 - Code references in format: `file.bsl:123`
 - Specific, actionable recommendations
 - No vague suggestions like "consider reviewing"
