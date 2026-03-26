@@ -41,10 +41,19 @@
 `.cursor/rules/architect-gate.mdc` — единые триггеры архитектурного ревью (объективные маркеры, семантические, структурные). **UX-значимый фикс** (меняет что видит/делает пользователь) — семантический триггер; **debug:** при срабатывании триггеров architect обязателен до шага 7 (не AskQuestion), шаблон «Architect — fix quality review» в `1c-agent-patterns/SKILL.md`. Проверяется в explore (шаг Decide, Fix Quality check при bug fix), verify (pre-apply, шаг 9 + Debug fix check), apply (soft redirect на verify).
 
 ## Verify (универсальный quality gate)
-`.cursor/skills/openspec-verify-change/SKILL.md` — `/opsx:verify`. Pre-apply: формат tasks, качество задач, полнота ручной конфигурации, **фазовая когерентность (Quality Controller — generalPurpose, домен-агностичный)**, **реализуемость (Architect)**, **генерация ТЗ (обязательный шаг)**, Architect Gate, Design Review, ТЗ Review, project constraints. Post-apply: completeness, correctness, coherence. Авто-устранение замечаний.
+`.cursor/skills/openspec-verify-change/SKILL.md` — `/opsx:verify`. Pre-apply: формат tasks, качество задач, полнота ручной конфигурации, **фазовая когерентность (Quality Controller)** — **строго до** шага реализуемости (Architect 7.7), **реализуемость (Architect)**, **генерация ТЗ (шаг 7.8, при пороге 4+ задач с чекбоксами или явном запросе ТЗ)**, Architect Gate, Design Review, ТЗ Review, project constraints. Post-apply: completeness, correctness, coherence. Авто-устранение замечаний; **после remediation** — обязательная повторная верификация затронутых проверок и при необходимости повторный QC/Architect (шаг 17a).
+
+**Scope Gate (шаг 1b):** verify не расширяет scope сам по себе; если в запросе есть новое требование помимо команды verify — AskQuestion: дополнить артефакты → verify / verify as-is / TODO в отчёте.
+
+**Порядок субагентов:** QC (7.6) и Architect task readiness (7.7) **не** запускать параллельно — Architect получает результат QC.
+
+**Отчёт:** `reports/verification-<mode>-YYYY-MM-DD.md` — полный артефакт, включая секцию **«Развёрнутые объяснения замечаний»** (дублируется в сообщении пользователю). См. шаг 16 скилла.
+
 **Executability Analysis (тройная проверка):** verify шаг 7F (механическая), QC критерий 5d (семантическая), Architect критерий 6 (холистическая). Покрывает ВСЕ задачи (P0-P4): функциональные зависимости из описаний, порядок в файле vs граф зависимостей, итерационный дрифт (задачи из debug ломают порядок ранних секций), валидация текста «Порядок выполнения», именованные задачи в phase gate маркерах.
-Quality Controller (шаг 7.6): фазовая классификация задач P0-P4, граф зависимостей, false start detection, rework risk, executability analysis (5d). Шаблон промпта: `1c-agent-patterns/SKILL.md` (секция «Quality Controller — phase coherence review»). ТЗ (шаг 7.8): генерация функциональных требований по промпту `openspec-docs/prompts/change-tz.md`, сохранение в `ТЗ.md` change.
-Коммуникация с пользователем: `.cursor/rules/verify-user-communication.mdc` — Executive Summary в отчёте, Before/After scorecard после remediation, расшифровка каждого замечания, явное указание решений от пользователя. Голые счётчики без расшифровки запрещены.
+
+Quality Controller (шаг 7.6): фазовая классификация задач P0-P4, граф зависимостей, false start detection, rework risk, executability analysis (5d). Шаблон промпта: `1c-agent-patterns/SKILL.md` (секция «Quality Controller — phase coherence review»). ТЗ (шаг 7.8): генерация по `openspec-docs/prompts/change-tz.md` при выполнении порога или явном запросе; иначе пропуск с сохранением существующего `ТЗ.md`.
+
+Коммуникация с пользователем: `.cursor/rules/verify-user-communication.mdc` — Executive Summary, развёрнутые абзацы для WARNING/CRITICAL в первом сообщении, Before/After scorecard после remediation, явное указание решений от пользователя. Голые счётчики без таблицы и развёрнутых объяснений запрещены.
 
 ## Verified Cause Gate
 `.cursor/rules/verified-cause-gate.mdc` — root cause + impact перед фиксом. Масштаб: точечный (не меняет UX) / **UX-значимый** (меняет сценарий пользователя) / системный; UX-значимый и системный → architect обязателен. Fix Quality Gate: анти-паттерн «фикс симптома»; verify шаг 7.7 — критерий 6 (качество фиксов), шаг 9 — Debug fix check (задачи из debug без architecture-*.md → CRITICAL).

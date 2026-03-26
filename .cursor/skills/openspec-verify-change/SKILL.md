@@ -1,16 +1,16 @@
 ---
 name: openspec-verify-change
-description: Universal quality gate for OpenSpec changes. Pre-apply — artifact quality, task specificity, phase coherence, TZ generation, gates. Post-apply — implementation completeness, correctness, coherence.
+description: Universal quality gate for OpenSpec changes. Pre-apply — artifact quality, task specificity, phase coherence (QC before Architect), conditional TZ generation, gates, scope gate. Post-apply — implementation completeness, correctness, coherence.
 license: MIT
 compatibility: Requires openspec CLI.
 metadata:
   author: openspec
-  version: "4.0"
+  version: "5.0"
   generatedBy: "1.1.1"
 ---
 
 Universal quality gate for OpenSpec changes. Works in two modes determined automatically:
-- **Pre-apply**: artifact format, task quality, manual config checklist, **phase coherence (Quality Controller)**, **mandatory architect readiness review**, **TZ generation**, Architect Gate, Design Review, TZ Review, project constraints
+- **Pre-apply**: artifact format, task quality, manual config checklist, **phase coherence (Quality Controller)** — **строго до** architect readiness review (шаг 7.7), **mandatory architect readiness review**, **TZ generation** (при пороге задач или явном запросе, шаг 7.8), Architect Gate, Design Review, TZ Review, project constraints
 - **Post-apply**: implementation completeness, correctness, coherence
 
 **Input**: Optionally specify a change name. If omitted, check if it can be inferred from conversation context. If vague or ambiguous you MUST prompt for available changes.
@@ -25,6 +25,26 @@ Universal quality gate for OpenSpec changes. Works in two modes determined autom
    - If multiple active changes: run `openspec list --json`, show changes that have tasks artifact, include schema, mark incomplete as "(In Progress)", and use **AskUserQuestion tool** to let user select
 
    Always announce: "Using change: <name>" and how to override (e.g., `/opsx:verify <other>`).
+
+1b. **Scope Gate — новое требование vs verify**
+
+   Если в сообщении пользователя **помимо** выбора change и команды `/opsx:verify` есть:
+   - новое функциональное требование (формулировки вроде «нужно предусмотреть», «добавить», «учесть сценарий», «не забудь», «доработай постановку»);
+   - явный запрос расширить scope change (новые задачи, требования, сценарии в свободной форме).
+
+   **СТОП** до разрешения. Использовать **AskUserQuestion** (или эквивалент):
+
+   - Текст: «В запросе обнаружено новое требование: „<краткая формулировка>“. Verify — quality gate для **существующих** артефактов. Выберите вариант:»
+   - **Вариант 1:** Сначала дополнить артефакты (оркестратор вносит правки → подтверждение пользователя), затем verify полного scope.
+   - **Вариант 2:** Verify текущего scope как есть; новое требование — отдельно после (`/opsx:explore`, `/opsx:ff`, ручное дополнение).
+   - **Вариант 3:** Verify текущего scope as-is; новое требование зафиксировать как TODO в отчёте verify (Executive Summary), без правки артефактов в этой сессии.
+
+   **Поведение по выбору:**
+   - **1:** Внести правки в proposal/design/spec/tasks по согласованию; получить явное подтверждение пользователя («ок», «да» и т.п.); продолжить verify с шага 2. В итоговом отчёте — секция `## Изменения артефактов в ходе verify` (перечень файлов и сути правок). Маркер: «Артефакты модифицированы перед верификацией. QC и Architect оценивали **изменённую** версию.»
+   - **2:** Продолжить verify без правок; в конце отчёта — «Не включено в scope: <требование>. Рекомендация: `/opsx:explore` или `/opsx:ff`.»
+   - **3:** Продолжить verify без правок; в Executive Summary — «TODO (не верифицировано в этом прогоне): <требование>.»
+
+   Если **только** `/opsx:verify` / `/opsx:verify <change>` без дополнительного текста требований — шаг 1b **пропустить**.
 
 2. **Check status to understand the schema**
    ```bash
@@ -94,6 +114,7 @@ Universal quality gate for OpenSpec changes. Works in two modes determined autom
    - **Completeness** (post-apply, mixed)
    - **Correctness** (post-apply, mixed)
    - **Coherence** (post-apply, mixed)
+   - **Развёрнутые объяснения замечаний** (если есть любые CRITICAL/WARNING/SUGGESTION) — обязательная секция в **файле** отчёта и в сообщении пользователю; см. шаг 16
 
    Each section can have CRITICAL, WARNING, or SUGGESTION issues.
 
@@ -305,6 +326,8 @@ Universal quality gate for OpenSpec changes. Works in two modes determined autom
    - "Implementation notes (debug.md): <content or 'none'>"
    QC evaluates criterion #5 (Phase Gate Review) in addition to standard criteria. Use template from `1c-agent-patterns/SKILL.md` (QC prompt with optional phase-transition context block).
 
+   **Порядок:** enhanced QC (абзац выше) MUST завершиться **до** вызова Architect phase-transition (аналогично запрету параллели 7.6/7.7).
+
    **Architect call (phase-transition focus):**
    Use template from `1c-agent-patterns/SKILL.md`, section "Architect — phase transition review (verify шаг 7.6b)".
    Pass: tasks.md, design.md, proposal.md, path to debug.md, paths to recent reports.
@@ -312,6 +335,8 @@ Universal quality gate for OpenSpec changes. Works in two modes determined autom
    Save architect result to `reports/phase-transition-YYYY-MM-DD.md`.
 
 7.7. **Task Readiness Architect Review (MANDATORY)**
+
+   **Порядок выполнения:** шаг **7.6** (Quality Controller) MUST завершиться **до** запуска шага **7.7** (Architect). Архитектор получает результат QC (фазовая таблица и alerts из 7.6) как входной параметр. **Параллельный** запуск QC (7.6) и Architect (7.7) **запрещён** (оптимизация по latency не оправдывает нарушение зависимости).
 
    **This step executes ALWAYS in pre-apply and mixed modes.** It is not remediation — it is part of the verification pipeline. The architect provides the expert holistic assessment that mechanical checks cannot.
 
@@ -405,11 +430,22 @@ Universal quality gate for OpenSpec changes. Works in two modes determined autom
       - "Не реализуемо без уточнения" → CRITICAL
       - "Можно реализовать, но субоптимально / неоднозначно" → WARNING
 
-7.8. **TZ Generation (MANDATORY)**
+7.8. **TZ Generation (conditional in pre-apply / mixed)**
 
-   **This step executes ALWAYS in pre-apply and mixed modes.** Generates a human-readable technical specification (ТЗ) document from change artifacts. The TZ serves as a functional requirements artifact oriented at stakeholder review. Gaps in TZ generation reveal gaps in source artifacts.
+   Generates a human-readable technical specification (ТЗ) document from change artifacts. The TZ serves as a functional requirements artifact oriented at stakeholder review. Gaps in TZ generation reveal gaps in source artifacts.
 
-   **Logic:**
+   **Порог обязательности (только для режимов pre-apply и mixed):**
+   - Подсчитать в `tasks.md` строки с `- [ ]` и `- [x]` (каждая строка задачи с чекбоксом = одна задача).
+   - **4 и более** задач → ТЗ **генерируется обязательно** (выполнить **Logic** ниже).
+   - **1–3** задачи → ТЗ **не генерировать**, если пользователь **явно** не запросил ТЗ в том же сообщении (фразы вроде «с ТЗ», «сгенерируй ТЗ», «нужно ТЗ», «включи ТЗ») и не указывал отдельно `/opsx:doc-tz`. В отчёте verify: «ТЗ: не генерировалось (3 или менее задач по чекбоксам). При необходимости: `/opsx:doc-tz <name>`.» Перейти к шагу 9 без записи `ТЗ.md`.
+   - **0** задач с чекбоксами (например, только bare-строки) → трактовать как «меньше порога»; ТЗ не генерировать, если нет явного запроса.
+   - **Явный запрос ТЗ** в сообщении пользователя → генерировать **независимо** от количества задач.
+
+   **Перезапись `ТЗ.md`:** если файл уже существует — **перезаписывать** только при фактической генерации в этом прогоне (порог выполнен или явный запрос). Если генерация **пропущена** по порогу — **сохранить** существующий `ТЗ.md` без изменений; в отчёте: «ТЗ: существующий файл сохранён (ниже порога обязательности / генерация не требовалась).»
+
+   **Режимы post-apply и phase-transition:** при чистом post-apply (все задачи `[x]`) шаг 7.8 обычно не применяется; если verify запускается в **mixed**, использовать тот же подсчёт задач по всему `tasks.md`.
+
+   **Logic:** (выполнять только если генерация ТЗ обязательна или запрошена по правилам выше)
    1. Read the TZ prompt from `.cursor/skills/openspec-docs/prompts/change-tz.md`
    2. Read all change artifacts: proposal.md, design.md, specs/\*/spec.md, latest `reports/architecture-*.md` (if any), latest `reports/exploration-*.md` (if any). Optionally `openspec/project.md` for product context.
    3. Apply the prompt to generate the TZ document. The TZ is generated by the orchestrator (not a subagent) — this is cheaper than full `/opsx:doc-tz` with architect review.
@@ -425,9 +461,9 @@ Universal quality gate for OpenSpec changes. Works in two modes determined autom
    6. Save TZ to `openspec/changes/<name>/ТЗ.md`
    7. Add TZ generation remarks (if any) to the verification report
 
-   **Report section:** `### ТЗ (функциональные требования)` — status (generated / generated with warnings), file path, list of gaps if any.
+   **Report section:** `### ТЗ (функциональные требования)` — status (generated / generated with warnings / skipped threshold / skipped — user N/A), file path, list of gaps if any.
 
-   **If ТЗ.md already exists:** overwrite with fresh generation (verify always produces current state).
+   Если шаг 7.8 пропущен по порогу — в отчёте указать статус **skipped (threshold)** и не выполнять пункты 4–5b Logic для ТЗ.
 
 9. **Architect Gate Check**
 
@@ -484,6 +520,7 @@ Universal quality gate for OpenSpec changes. Works in two modes determined autom
 
 11. **TZ Review Check**
 
+    - Если шаг 7.8 был **пропущен по порогу** — статус `N/A` (ТЗ не генерировалось); не добавлять SUGGESTION «ТЗ создано, но ревью не проводилось».
     - Glob `ТЗ.md` in change dir
     - If not found → `N/A` (skip)
     - If found:
@@ -685,8 +722,8 @@ In **mixed** mode, post-apply checks apply **only to tasks marked `[x]`**.
 
     ### ТЗ (функциональные требования)
 
-    **Статус:** сгенерировано / сгенерировано с замечаниями
-    **Файл:** ТЗ.md
+    **Статус:** сгенерировано / сгенерировано с замечаниями / пропущено (порог задач) / пропущено (явный запрос не был)
+    **Файл:** ТЗ.md (или «не создавался»)
 
     | Проверка | Статус |
     |---|---|
@@ -720,30 +757,58 @@ In **mixed** mode, post-apply checks apply **only to tasks marked `[x]`**.
 
     ### Итог
     N CRITICAL, M WARNING, K SUGGESTION.
+
+    ### Развёрнутые объяснения замечаний
+
+    **Обязательно** в **файле** отчёта и **дословно** в сообщении пользователю, если есть **хотя бы одно** замечание (CRITICAL / WARNING / SUGGESTION). Если замечаний нет — секция: «Замечаний нет.»
+
+    Формат (нумерация сквозная по всем severity, сначала CRITICAL, затем WARNING, затем SUGGESTION): заголовки уровня 4 `#### CRITICAL N — …`, `#### WARNING N — …`, `#### SUGGESTION N — …`; под каждым — абзац (для CRITICAL/WARNING 3–5 предложений; для SUGGESTION 1–2 предложения).
+
+    См. `.cursor/rules/verify-user-communication.mdc` — правила 2, 6, 7.
     ```
 
     **Final Assessment (сообщение пользователю, НЕ только в файле отчёта):**
 
     Обязательные элементы сообщения пользователю:
-    1. **Сводная таблица всех замечаний** (severity + краткое описание + рекомендация). Если замечаний нет — «Замечаний нет».
-    2. **Для каждого SUGGESTION и WARNING** — одно предложение: почему не блокирует / что потеряем если проигнорировать.
+    1. **Сводная таблица всех замечаний** (severity + краткий заголовок + одна строка рекомендации). Если замечаний нет — «Замечаний нет».
+    2. **Секция «Развёрнутые объяснения»** — **тот же текст**, что в файле отчёта (дублирование осознанное): для **каждого CRITICAL и WARNING** — развёрнутый абзац (3–5 предложений): суть, почему возникло, что произойдёт при игноре, конкретное действие для устранения; для **каждого SUGGESTION** — 1–2 предложения (суть + что потеряем при игноре). **Запрещено** выдавать только таблицу без этих абзацев (расчёт «пользователь спросит подробнее»).
     3. **«Решений от вас: N»** — перечень решений, которые нужны от пользователя, или «не требуется».
     4. **Следующие шаги** — конкретные команды (apply / archive / устранить замечания).
 
-    **Голые счётчики** («0 CRITICAL, 2 WARNING, 1 SUGGESTION») **БЕЗ расшифровки — запрещены.**
+    **Голые счётчики** («0 CRITICAL, 2 WARNING, 1 SUGGESTION») **БЕЗ таблицы и без секции развёрнутых объяснений (или без явного «Замечаний нет») — запрещены.**
 
     Примеры:
 
     Плохо: «0 CRITICAL, 0 WARNING, 2 SUGGESTION. Готов к apply/archive.»
 
-    Хорошо:
+    Хорошо (только SUGGESTION):
     ```
-    Замечаний нет. Два предложения к сведению:
-    1. ТЗ Review — можно провести при необходимости (`/opsx:doc-tz <name>`)
-    2. Реализация 6.1 — детали по признаку УНЭП решатся при apply
+    | # | Severity | Заголовок | Рекомендация |
+    |---|----------|-----------|--------------|
+    | 1 | SUGGESTION | ТЗ Review | При необходимости `/opsx:doc-tz <name>` |
+
+    ### Развёрнутые объяснения замечаний
+
+    #### SUGGESTION 1 — ТЗ Review
+    ТЗ сгенерировано без отдельного ревью архитектора. При игноре возможны формулировки, неудобные для заказчика. Рекомендуется `/opsx:doc-tz <name>` при согласовании с заказчиком.
+
+    #### SUGGESTION 2 — Детали реализации
+    Отдельные детали сценария уточнятся при apply; на готовность к apply это не влияет.
 
     Решений от вас не требуется. Следующий шаг:
     - `/opsx:apply <name>` или `/opsx:archive <name>`
+    ```
+
+    Хорошо (есть WARNING — обязателен развёрнутый абзац):
+    ```
+    | # | Severity | Заголовок | Рекомендация |
+    |---|----------|-----------|--------------|
+    | 1 | WARNING | Политика ЭП | Зафиксировать матрицу в design после обследования |
+
+    ### Развёрнутые объяснения замечаний
+
+    #### WARNING 1 — Политика ЭП
+    В постановке два контекста одной операции (интерактивная команда и фоновая привязка), но единая политика электронной подписи в design не зафиксирована. Это вызвано тем, что сценарии формы и сценарий повторной привязки обрабатываются разными задачами без явной матрицы «форма / привязка». Если проигнорировать, приёмка может выявить противоречивое поведение и потребовать переделки кода. Действие: после задачи обследования (например 4.1) дополнить design.md таблицей политики ЭП для обоих контекстов.
     ```
 
     Коммуникация с пользователем: `.cursor/rules/verify-user-communication.mdc`
@@ -779,7 +844,18 @@ In **mixed** mode, post-apply checks apply **only to tasks marked `[x]`**.
     | Incomplete tasks (post-apply) | List remaining tasks, suggest `/opsx:apply <name>` |
     | Spec/design divergence (post-apply) | Suggest updating artifact or implementation |
 
-    After remediation, re-run affected checks and update report.
+    **17a. Mandatory re-verification after remediation**
+
+    После каждого remediation-действия, затронувшего **содержимое** артефакта (`tasks.md`, `design.md`, `spec`, `proposal`):
+
+    1. Перезапустить **только затронутые** механические проверки (шаги 6–7F) на изменённых артефактах.
+    2. Если remediation затронула `tasks.md` и в этом прогоне уже выполнялся QC (шаг 7.6):
+       - **Перезапустить QC** с обновлённым `tasks.md` (те же входы + пометка «re-run after remediation»).
+       - Новые алерты QC → добавить в отчёт verify.
+    3. Перезапуск Architect (шаг 7.7) **не обязателен**, если remediation **не** добавляла новые задачи и **не** меняла явные зависимости между задачами в `tasks.md`. Если добавлялись задачи или менялись зависимости — **перезапустить** шаг 7.7 с обновлёнными артефактами и свежим результатом QC (п.2).
+    4. Обновить файл отчёта: секция `### Re-verification after remediation` — что перепроверено, новые алерты или «новых алертов нет».
+
+    Без перезапуска затронутых проверок по п.1–2 (и п.3 при необходимости) remediation **не считается завершённой**.
 
     **17b. Communicate remediation results (обязательно после авто-устранения)**
 
@@ -853,7 +929,7 @@ In **mixed** mode, post-apply checks apply **only to tasks marked `[x]`**.
 - If only tasks.md exists: run format + quality checks; skip spec/design/gates checks
 - If tasks + design exist: add gate checks
 - If tasks + design + specs: full pre-apply + post-apply checks
-- TZ is generated by verify (step 7.8); TZ Review gate (step 11) checks for prior ТЗ review reports
+- TZ is generated by verify (step 7.8) when task-count threshold or explicit user request is met; otherwise skipped; TZ Review gate (step 11) checks for prior ТЗ review reports when `ТЗ.md` exists
 - Always note which checks were skipped and why
 
 **Output Format**
