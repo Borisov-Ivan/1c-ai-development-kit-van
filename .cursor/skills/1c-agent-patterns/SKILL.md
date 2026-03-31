@@ -878,6 +878,8 @@ Task(
          Base-файл (для &ИзменениеИКонтроль): [путь к base в cf/ или 'не применимо']
          [Если оркестратор передал блок ## Resolved Contracts — включить его сюда. Использовать для Phase 2.5 Defensive Checks Audit: для каждого источника данных из Contract Map, для которого есть запись в Resolved Contracts, в колонке Contract verified? указать resolved-fixed или resolved-dynamic по полю Contract записи. resolved-fixed + наличие defensive check (ТипЗнч/Свойство) → AP-004. resolved-dynamic + корректная минимальная проверка → OK.]
 
+         [Если оркестратор собрал diff-focused scope — вставить блок ## Review Boundaries целиком (см. `.cursor/skills/review/SKILL.md`, шаг 1.5). При полном ревью (focus=full для всех файлов батча) секцию ## Review Boundaries не вставлять. В смешанном батче — по подзаголовку ### Файл: <path> и Focus: full | diff-focused на каждый файл. Соблюдай Review Boundaries Protocol в onec-code-reviewer.md.]
+
          ## Reasoning focus (Phase 0 — выполнять ПЕРВЫМ)
          Перед проверкой стандартов и паттернов — понять код:
          1. Для каждого блока: что он делает? (Intent Map)
@@ -974,6 +976,8 @@ Task(
          Стандарты: 1c-coding-standards.mdc
          Диагностики линтера: [вывод ReadLints или 'линтер не выявил ошибок']
          Base-файл (для &ИзменениеИКонтроль): [путь к base в cf/ или 'не применимо']
+
+         [Если оркестратор собрал diff-focused scope — вставить блок ## Review Boundaries (как в шаблоне «Reviewer (ревью кода)»). При focus=full для всех файлов — секцию не вставлять.]
 
          ## Root Cause Context
          Симптом: [что наблюдалось]

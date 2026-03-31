@@ -5,7 +5,7 @@
 ## OpenSpec Workflow
 `.cursor/rules/sdd-workflow.mdc` — explore → new/ff → verify → apply → verify → archive.
 Команды: `/opsx:explore`, `/opsx:new`, `/opsx:ff`, `/opsx:apply`, `/opsx:verify`, `/opsx:archive`, `/opsx:debug`, `/opsx:estimate`, `/opsx:prerelease-review`, `/review`.
-`/review` — полное ревью по контексту запроса (модуль/файлы/расширение) с опцией устранения замечаний; скилл `.cursor/skills/review/SKILL.md`.
+`/review` — ревью по контексту запроса (модуль/файлы/расширение/ЗНИ) с опцией устранения замечаний; скилл `.cursor/skills/review/SKILL.md`. **Review Focus Boundaries:** без аргументов — scope по изменённым `.bsl` в git (`diff-focused`, границы по процедурам из diff); явный файл/каталог/расширение — полное ревью (`full`); ЗНИ — `diff-focused` по `tasks.md` `[x]` + git diff и маппинг на процедуры; в промпт ревьювера передаётся `## Review Boundaries` (протокол в `.cursor/agents/onec-code-reviewer.md`).
 Дополнительные: `/opsx:continue`, `/opsx:sync`, `/opsx:bulk-archive`, `/opsx:onboard`, `/init-project`.
 Паттерны агентов: `.cursor/skills/1c-agent-patterns/SKILL.md`.
 Документы: `/opsx:doc-tz <name>` (ТЗ по ЗНИ с архитектурным ревью и контролем качества артефактов) — `.cursor/skills/openspec-docs/SKILL.md`.
@@ -77,7 +77,7 @@ Quality Controller (шаг 7.6): фазовая классификация за�
 `.cursor/rules/1c-utility-agents.mdc` — инструкции по формам (Form.xml), запросы, тесты, упрощение, метаданные, администрирование. Загружается по необходимости (не always-apply).
 
 ## Предрелизное ревью
-`.cursor/skills/prerelease-review/SKILL.md` — `/opsx:prerelease-review`.
+`.cursor/skills/prerelease-review/SKILL.md` — `/opsx:prerelease-review`. В режиме **`change-scoped`** Tier 1 использует **Review Boundaries** (diff-focused по изменённым процедурам, шаг 1.3b скилла); механические проверки 1.7/1.7b фильтруют совпадения по строкам границ; Tier 2 — по-прежнему всё расширение.
 
 ## Стандарты вендора 1С
 `.cursor/skills/1c-vendor-standards/SKILL.md` — чеклисты для architect/reviewer.
