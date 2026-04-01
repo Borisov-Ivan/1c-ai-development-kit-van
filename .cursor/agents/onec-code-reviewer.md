@@ -157,6 +157,7 @@ Check:
   - Wrong order: ПрограммныйИнтерфейс → СлужебныйПрограммныйИнтерфейс → СлужебныеПроцедурыИФункции — MEDIUM
   - Duplicate #Область or #КонецОбласти directives — HIGH
   - Export method placed in #Область СлужебныеПроцедурыИФункции (private region) — MEDIUM
+  - Export procedure/function in form module (Forms/*/Module.bsl) — HIGH — AP-033. Exception: Подключаемый_* (BSP attachable commands), callbacks via ОписаниеОповещения(..., ЭтотОбъект). See anti-pattern registry
   - Module header comment name does not match actual module name — LOW
   - No module header comment (module purpose) — LOW
 ```
@@ -508,6 +509,9 @@ Completeness gate: 6 строк в таблице. Меньше — Phase 0 не
    - Check order: ПрограммныйИнтерфейс → СлужебныйПрограммныйИнтерфейс → СлужебныеПроцедурыИФункции
    - Detect duplicate #Область/#КонецОбласти directives
    - Detect Export methods in #Область СлужебныеПроцедурыИФункции
+   - Detect Export procedures/functions in form module (Forms/*/Module.bsl): any Процедура/Функция with Экспорт keyword.
+     Exception: Подключаемый_* prefix (BSP attachable commands), callback exports for ОписаниеОповещения(..., ЭтотОбъект).
+     Each non-excepted export = AP-033 HIGH. See anti-pattern registry.
    - Verify module header comment matches actual module name
    - Check module header comment
 
@@ -532,6 +536,7 @@ Completeness gate: 6 строк в таблице. Меньше — Phase 0 не
    - Detect commented-out code without explanation
 
 10. Specific 1C patterns: → see AP-001..AP-031 in anti-pattern registry (category 16)
+  AP-033: Export procedure/function in form module (Form-as-Service) — HIGH
     Remain inline:
     - Ternary operator ?() — MEDIUM
     - Excessive info logging inside loop or 3+ info-level calls — LOW
@@ -807,6 +812,7 @@ Required Improvements (вместо секции "Рекомендации"):
 - User interaction (ПоказатьВопрос, Предупреждение, Сообщить) inside transaction
 - Read-then-write without БлокировкаДанных in concurrent scenario
 - COMОбъект created without Попытка/Исключение ensuring release
+- Export procedure/function in form module (AP-033) — form-as-service pattern; exception: Подключаемый_* (BSP), ОписаниеОповещения callbacks
 - Unused export procedure/function (no callers in extension scope) — category 15
 - Obsolete procedure still called from non-obsolete code — category 15
 - Parameter overwrite: parameter reassigned inside body, not documented as output — category 4 (rule 21)
@@ -879,6 +885,7 @@ kind=functional:
   - ТекущаяДата() on server (use ТекущаяДатаСеанса())
   - Сообщить() instead of ОбщегоНазначения.СообщитьПользователю()
   - Silent skip on structural check failure, band-aid fixes
+  - Export procedure/function in form module (AP-033, form boundary violation)
   - &ИзменениеИКонтроль: code outside #Вставка/#Удаление modified (breaks extension applicability)
   - Security, performance bugs, logic errors
   - ЭтаФорма instead of ЭтотОбъект
@@ -936,6 +943,7 @@ Pre-release escalation (all kinds: functional, style, release-hygiene):
     - Dead code, logic duplication (if kind=functional)
     - Business logic directly in #Вставка block
     - Export method in СлужебныеПроцедурыИФункции (contract violation)
+    - Export procedure/function in form module (AP-033) — form-as-service before release
     - Unused export procedure/function (dead API surface before release) — category 15
     - Procedure marked "Устарела:" / "Deprecated" still present without documented plan — category 15
 
