@@ -5,7 +5,7 @@ license: MIT
 compatibility: Requires openspec CLI.
 metadata:
   author: openspec
-  version: "5.1"
+  version: "6.0"
   generatedBy: "1.1.1"
 ---
 
@@ -619,7 +619,7 @@ In **mixed** mode, post-apply checks apply **only to tasks marked `[x]`**.
 
 - Не входит в счётчики вердикта (N CRITICAL / M WARNING / K SUGGESTION).
 - **Не** триггерит предложение remediation (шаг 17).
-- В сообщении пользователю — **компактно** (bullet-строки в секции «Контекст (INFO)»), **без** развёрнутых абзацев как у WARNING.
+- В сообщении пользователю — **компактно** (bullet-строки в секции «К сведению»), **без** карточек решений.
 - Формат в отчёте: `- [INFO] <краткий текст>`.
 
 **Тест для каждого кандидата в CRITICAL / WARNING / SUGGESTION:**
@@ -631,6 +631,34 @@ In **mixed** mode, post-apply checks apply **only to tasks marked `[x]`**.
 | 3 | Замечание — **неизбежное следствие режима** (pre-apply / mixed: код ещё не реализован по невыполненным `[ ]`)? | **INFO** (например: «K задач ожидают реализации»), не WARNING. |
 
 **Склеивание:** если после Gate не осталось CRITICAL и WARNING, но есть SUGGESTION — статус «Готов. Предложения к сведению». Если нет ни CRITICAL, ни WARNING, ни SUGGESTION — «Все проверки пройдены. Готов к apply/archive». При наличии INFO добавить в Executive Summary строку: `**Контекст (INFO):** K пометок — см. секцию в отчёте` (только если K > 0).
+
+## Issue Classification (mechanical / judgment)
+
+После Actionability Gate каждое замечание с severity CRITICAL / WARNING / SUGGESTION дополнительно классифицируется для маршрутизации в Phase A (авто-исправление) или Phase B (карточки решений). Классификация определяет **кто** принимает решение: машина или пользователь.
+
+**Критерий mechanical:** исправление детерминировано (однозначная замена), не меняет scope / логику / порядок задач, обратимо через git.
+
+**Критерий judgment:** правка меняет scope, порядок, подход, архитектуру или контракт — решение пользователя приведёт к **разному коду** при apply.
+
+| Тип замечания | Класс | Обоснование |
+|---|---|---|
+| Missing checkboxes (6A) | mechanical | Формат, не меняет содержание |
+| TZ lexicon violation (7.8 / 11) | mechanical | Замена слов по реестру, детерминировано |
+| Repo Consistency wording (7E) | mechanical | `создать X` → `доработать X` при доказанном существовании объекта |
+| Task quality — ambiguity, missing details (7B / 7C) | judgment | Architect может переформулировать scope |
+| Architect Gate not closed (9) | judgment | Архитектурный отчёт может изменить подход |
+| Design Review not done (10) | judgment | Ревью может выявить пробелы в design |
+| Phase violation / false start (QC 7.6) | judgment | Переупорядочивание меняет что делается первым |
+| Executability issues (7F) | judgment | Зависимости влияют на порядок реализации |
+| Rework risk (QC 7.6) | judgment | Вопрос: сначала спецификация или сразу код |
+| Missing phase gates (QC) | judgment | Структура фаз меняет точки остановки |
+| Project constraints violation (12) | judgment | Меняет целевые каталоги |
+| TZ generation gaps (7.8) | footnote | ТЗ — документ для заказчика, не для apply |
+| TZ review remarks (11) | footnote | Не влияет на реализацию |
+| Incomplete tasks (post-apply, 13) | footnote | Рекомендация `/opsx:apply` |
+| Spec/design divergence (post-apply, 15) | footnote | Информационное расхождение |
+
+**Класс footnote:** замечания с severity SUGGESTION, не влияющие на ход реализации. Показываются пользователю в секции «К сведению» (одна строка каждое) — не как карточка решения и не как авто-исправление.
 
 ---
 
@@ -793,103 +821,174 @@ In **mixed** mode, post-apply checks apply **only to tasks marked `[x]`**.
     - [WARNING] ...
     - [SUGGESTION] ...
 
+    ### Авто-исправлено (Phase A)
+
+    | # | Что | Было | Стало |
+    |---|-----|------|-------|
+    | 1 | Чекбоксы | N строк без `[ ]` | Исправлено |
+    | 2 | ... | ... | ... |
+    (или: «mechanical-замечаний не обнаружено»)
+
     ### Итог
     N CRITICAL, M WARNING, K SUGGESTION (INFO в счётчик не входят; при необходимости отдельно: «INFO: R»).
 
     ### Развёрнутые объяснения замечаний
 
-    **Обязательно** в **файле** отчёта и **дословно** в сообщении пользователю, если есть **хотя бы одно** замечание (CRITICAL / WARNING / SUGGESTION). Если таких нет — секция: «Замечаний нет (INFO см. выше / в секции Контекст).»
+    **Обязательно** в **файле** отчёта, если есть **хотя бы одно** замечание (CRITICAL / WARNING / SUGGESTION). Если таких нет — секция: «Замечаний нет (INFO см. выше / в секции Контекст).»
 
     **INFO** в эту секцию **не** включаются развёрнуто — только перечень в «Контекст (INFO)».
 
     Формат (нумерация сквозная по всем severity, сначала CRITICAL, затем WARNING, затем SUGGESTION): заголовки уровня 4 `#### CRITICAL N — …`, `#### WARNING N — …`, `#### SUGGESTION N — …`; под каждым — абзац (для CRITICAL/WARNING 3–5 предложений; для SUGGESTION 1–2 предложения).
 
-    См. `.cursor/rules/verify-user-communication.mdc` — правила 0, 2, 6, 7.
+    **Связь с сообщением пользователю:** файл отчёта содержит развёрнутые абзацы (полная запись); сообщение пользователю использует формат **карточек решений** для judgment-замечаний (см. шаг 17). Это разные форматы — файл как долгосрочная память, карточки как инструмент принятия решений.
+
+    См. `.cursor/rules/verify-user-communication.mdc` — правила 2, 3, 7, 8.
     ```
 
-    **Final Assessment (сообщение пользователю, НЕ только в файле отчёта):**
-
-    Обязательные элементы сообщения пользователю:
-    1. **Сводная таблица** только **CRITICAL / WARNING / SUGGESTION** (severity + краткий заголовок + одна строка рекомендации). Если таких нет — «Замечаний нет (только контекст INFO — см. ниже)».
-    1b. **Секция «Контекст (INFO)»** — если INFO > 0: краткий bullet-список (без таблицы вердикта и без развёрнутых абзацев).
-    2. **Секция «Развёрнутые объяснения»** — **тот же текст**, что в файле отчёта (дублирование осознанное): для **каждого CRITICAL и WARNING** — развёрнутый абзац (3–5 предложений): суть, почему возникло, что произойдёт при игноре, конкретное действие для устранения; для **каждого SUGGESTION** — 1–2 предложения (суть + что потеряем при игноре). Если есть **только INFO** и нет CRITICAL/WARNING/SUGGESTION — секция «Развёрнутые объяснения»: «Замечаний нет.» **Запрещено** выдавать только таблицу без этих абзацев при наличии CRITICAL/WARNING/SUGGESTION.
-    3. **«Решений от вас: N»** — перечень решений, которые нужны от пользователя, или «не требуется».
-    4. **Следующие шаги** — конкретные команды (apply / archive / устранить замечания).
-
-    **Голые счётчики** («0 CRITICAL, 2 WARNING, 1 SUGGESTION») **БЕЗ таблицы и без секции развёрнутых объяснений (или без явного «Замечаний нет») — запрещены.**
-
-    Примеры:
-
-    Плохо: «0 CRITICAL, 0 WARNING, 2 SUGGESTION. Готов к apply/archive.»
-
-    Хорошо (только SUGGESTION):
-    ```
-    | # | Severity | Заголовок | Рекомендация |
-    |---|----------|-----------|--------------|
-    | 1 | SUGGESTION | ТЗ Review | При необходимости `/opsx:doc-tz <name>` |
-
-    ### Развёрнутые объяснения замечаний
-
-    #### SUGGESTION 1 — ТЗ Review
-    ТЗ сгенерировано без отдельного ревью архитектора. При игноре возможны формулировки, неудобные для заказчика. Рекомендуется `/opsx:doc-tz <name>` при согласовании с заказчиком.
-
-    #### SUGGESTION 2 — Детали реализации
-    Отдельные детали сценария уточнятся при apply; на готовность к apply это не влияет.
-
-    Решений от вас не требуется. Следующий шаг:
-    - `/opsx:apply <name>` или `/opsx:archive <name>`
-    ```
-
-    Хорошо (есть WARNING — обязателен развёрнутый абзац):
-    ```
-    | # | Severity | Заголовок | Рекомендация |
-    |---|----------|-----------|--------------|
-    | 1 | WARNING | Политика ЭП | Зафиксировать матрицу в design после обследования |
-
-    ### Развёрнутые объяснения замечаний
-
-    #### WARNING 1 — Политика ЭП
-    В постановке два контекста одной операции (интерактивная команда и фоновая привязка), но единая политика электронной подписи в design не зафиксирована. Это вызвано тем, что сценарии формы и сценарий повторной привязки обрабатываются разными задачами без явной матрицы «форма / привязка». Если проигнорировать, приёмка может выявить противоречивое поведение и потребовать переделки кода. Действие: после задачи обследования (например 4.1) дополнить design.md таблицей политики ЭП для обоих контекстов.
-    ```
+    **Сообщение пользователю** формируется на шаге 17 после Phase A (авто-исправление механических замечаний). Формат карточек решений — см. шаг 17.
 
     Коммуникация с пользователем: `.cursor/rules/verify-user-communication.mdc`
 
-17. **Offer remediation**
+16a. **Phase A — Mechanical auto-fix (silent)**
 
-    **INFO** не участвуют в решении о remediation и не считаются «issues» для этого шага.
+    Выполняется **сразу после** генерации отчёта, **до** показа результатов пользователю. Без вопросов и подтверждений.
 
-    If any CRITICAL or WARNING issues found, offer:
-    ```
-    Устранить замечания?
-    1. Да, автоматически (все, что возможно)
-    2. Да, по одному (с подтверждением каждого)
-    3. Нет, продолжить
-    ```
+    **Правило:** применяются **только** замечания с классом `mechanical` (см. Issue Classification).
 
-    **Auto-remediation actions by issue type:**
+    **Действия:**
 
-    | Issue | Action |
+    | Замечание | Действие |
     |---|---|
-    | Missing checkboxes | Direct StrReplace: `- N.M` → `- [ ] N.M` for each bare task line |
-    | Task quality (missing details, ambiguity) | Delegate to **onec-code-architect** with prompt: "Доработать tasks.md: устранить замечания [list]". Pass current tasks.md, design.md, proposal.md, specs/. Architect returns updated tasks.md |
-    | Architect Gate not closed | Offer to run onec-code-architect for architecture review. Save report to `reports/architecture-verify-YYYY-MM-DD.md` |
-    | Design Review not done | Offer to run onec-code-architect with design review focus. Save report to `reports/design-review-YYYY-MM-DD.md` |
-    | Repo Consistency (WARNING from 7E) | Suggest rewriting task: «создать» → «доработать» / «наполнить содержимым» if object already exists |
-    | Phase violation / false start (QC 7.6) | Suggest reordering tasks in tasks.md to respect phase dependencies (P0→P1→P2→P3→P4). For false starts: suggest marking already-implemented code tasks as `[x]` or reverting premature implementation |
-    | Executability issues (7F) | Suggest: (a) add explicit `Зависимости:` to affected tasks, (b) reorder sections to match dependency graph, (c) update execution order text to cover all tasks. For iteration-drift: suggest reviewing stale tasks with architect |
-    | Rework risk (QC 7.6) | Suggest completing prerequisite P1 specs in design.md before proceeding with dependent P2 tasks |
-    | Phase transition issues (7.6b) | Suggest restructuring tasks via onec-code-architect (phase transition review). If design drift detected — suggest updating design.md before proceeding |
-    | Missing phase gates (QC) | Delegate to **onec-code-architect** with prompt "Architect — phase gate restructuring" from `1c-agent-patterns/SKILL.md`. Architect returns full restructured tasks.md. Show diff to user, apply on confirmation. Ref `.cursor/rules/phase-gates.mdc` |
-    | TZ generation gaps (7.8) | Suggest completing the artifact indicated in the TZ gap (e.g., add Why to proposal, add scenarios to spec) |
-    | TZ lexicon violation | StrReplace forbidden words in `ТЗ.md` with correct replacements from `.cursor/docs/tz-lexicon-dictionary.md` |
-    | TZ review remarks | Suggest `/opsx:doc-tz <name>` to regenerate TZ with architect review |
-    | Project constraints violation | Suggest rewriting tasks to target allowed directories |
-    | Incomplete tasks (post-apply) | List remaining tasks, suggest `/opsx:apply <name>` |
-    | Spec/design divergence (post-apply) | Suggest updating artifact or implementation |
+    | Missing checkboxes (6A) | StrReplace: `- N.M` → `- [ ] N.M` для каждой строки без чекбокса |
+    | TZ lexicon violation (7.8 / 11) | StrReplace запрещённых слов в `ТЗ.md` по `.cursor/docs/tz-lexicon-dictionary.md` |
+    | Repo Consistency wording (7E) | StrReplace: `создать X` → `доработать X` / `наполнить содержимым` в tasks.md |
 
-    **17a. Mandatory re-verification after remediation**
+    **Ре-верификация Phase A:**
+    После всех mechanical-исправлений перезапустить **только** затронутые проверки (шаги 6–7E) на изменённых файлах. QC и Architect **не** перезапускаются на Phase A (механические правки не меняют scope).
 
-    После каждого remediation-действия, затронувшего **содержимое** артефакта (`tasks.md`, `design.md`, `spec`, `proposal`):
+    Результат Phase A записать в отчёт: секция `### Авто-исправлено (Phase A)` с таблицей Before/After.
+
+17. **Phase B — Show results + Judgment decision cards**
+
+    **INFO** не участвуют в remediation и не показываются как карточки.
+    **Footnote**-замечания (см. Issue Classification) показываются в секции «К сведению» — одна строка каждое.
+
+    **Формат сообщения пользователю (обязательный):**
+
+    **Блок 1 — Авто-исправлено (Phase A):**
+    Если Phase A (шаг 16a) выполнила хотя бы одно исправление:
+    ```
+    ## Авто-исправлено
+
+    | # | Что | Было | Стало |
+    |---|-----|------|-------|
+    | 1 | Чекбоксы | 3 строки без `[ ]` | Исправлено |
+    | 2 | Лексикон ТЗ | «парсинг» | «разбор» |
+    ```
+    Если Phase A не нашла mechanical-замечаний — блок опустить.
+
+    **Блок 2 — Требует вашего решения (judgment-замечания):**
+    Если есть замечания с классом `judgment` — показать **карточку решения** для каждого:
+    ```
+    ## Требует вашего решения (N)
+
+    ### 1. <Заголовок> (<SEVERITY>)
+
+    **Проблема:** <в чём конкретно дефект — 1 предложение>
+    **Влияние на реализацию:** <что изменится при apply если не исправить — 1 предложение>
+    **Варианты:**
+      a) <конкретное действие> — <что получим>
+      b) <альтернативное действие> — <что получим>
+      c) Принять как есть — <чем рискуем>
+    ```
+
+    Три обязательных поля карточки:
+    - **Проблема** — конкретный дефект (1 предложение, без общих слов)
+    - **Влияние на реализацию** — как это повлияет на код / поведение при apply (1 предложение)
+    - **Варианты** — 2–3 действия с последствиями; всегда есть «Принять как есть» с описанием риска
+
+    **Действия по вариантам (judgment):**
+
+    | Замечание | Варианты для карточки |
+    |---|---|
+    | Task quality (7B / 7C) | a) Запустить архитектора для доработки tasks.md b) Принять как есть — writer додумает |
+    | Architect Gate not closed (9) | a) Запустить архитектурный анализ (→ `reports/architecture-verify-YYYY-MM-DD.md`) b) Принять как есть — реализация без архитектурного ревью |
+    | Design Review not done (10) | a) Запустить ревью постановки (→ `reports/design-review-YYYY-MM-DD.md`) b) Принять как есть — возможны пробелы в design |
+    | Phase violation / false start (QC 7.6) | a) Переупорядочить задачи по фазам b) Отметить реализованные как `[x]` c) Принять как есть |
+    | Executability issues (7F) | a) Добавить `Зависимости:` в tasks b) Переупорядочить секции c) Принять — apply разберётся |
+    | Rework risk (QC 7.6) | a) Завершить спецификацию P1 в design.md b) Принять — начать кодирование с риском переделки |
+    | Missing phase gates (QC) | a) Запустить архитектора для реструктуризации (шаблон «Architect — phase gate restructuring» из `1c-agent-patterns/SKILL.md`) b) Принять — работать без phase gates |
+    | Phase transition issues (7.6b) | a) Реструктурировать через архитектора b) Обновить design.md c) Принять как есть |
+    | Project constraints violation (12) | a) Переписать задачи на разрешённые каталоги b) Обосновать исключение |
+
+    Если judgment-замечаний нет — блок опустить.
+
+    **Блок 3 — К сведению (footnote + INFO):**
+    ```
+    ## К сведению
+    - ТЗ без ревью архитектора — при необходимости `/opsx:doc-tz <name>`
+    - 6 задач ожидают реализации (mixed mode)
+    ```
+    Footnote-замечания и INFO — по одной строке. Если ни footnote, ни INFO нет — блок опустить.
+
+    **Блок 4 — Вердикт:**
+    ```
+    ## Вердикт: <ГОТОВ / ГОТОВ С ОГОВОРКОЙ / БЛОКИРОВАНО>
+    Решений от вас: N. Напишите номера выбранных вариантов (например: «1a, 2c»).
+    Следующий шаг: `/opsx:apply <name>` или `/opsx:archive <name>`.
+    ```
+
+    Если judgment-замечаний нет → «Решений от вас не требуется».
+
+    **Голые счётчики** («0 CRITICAL, 2 WARNING, 1 SUGGESTION») без карточек / таблиц — **запрещены**.
+
+    **Примеры:**
+
+    Хорошо (нет judgment-замечаний):
+    ```
+    ## Авто-исправлено
+
+    | # | Что | Было | Стало |
+    |---|-----|------|-------|
+    | 1 | Чекбоксы | 2 строки без `[ ]` | Исправлено |
+
+    ## К сведению
+    - ТЗ сгенерировано без ревью — при необходимости `/opsx:doc-tz`
+
+    ## Вердикт: ГОТОВ
+    Решений от вас не требуется. Следующий шаг: `/opsx:apply <name>`.
+    ```
+
+    Хорошо (есть judgment):
+    ```
+    ## Авто-исправлено
+
+    | # | Что | Было | Стало |
+    |---|-----|------|-------|
+    | 1 | Лексикон ТЗ | «парсинг» | «разбор» |
+
+    ## Требует вашего решения (1)
+
+    ### 1. Неоднозначность в задаче 3.1 (WARNING)
+
+    **Проблема:** Задача 3.1 описывает «загрузку данных», но не указан формат
+    файла и поведение при дублях — два допустимых пути реализации.
+    **Влияние на реализацию:** Writer выберет формат произвольно; при приёмке
+    возможно несовпадение с ожиданием.
+    **Варианты:**
+      a) Запустить архитектора для уточнения tasks.md — задача станет однозначной
+      b) Принять как есть — writer примет решение, ревьювер проверит
+
+    ## К сведению
+    - 4 задачи ожидают реализации (mixed mode)
+
+    ## Вердикт: ГОТОВ С ОГОВОРКОЙ
+    Решений от вас: 1. Напишите номер варианта (например: «1a»).
+    ```
+
+    **17a. Mandatory re-verification after judgment remediation**
+
+    После выполнения действий по выбранным вариантам judgment-карточек, если затронуто **содержимое** артефакта (`tasks.md`, `design.md`, `spec`, `proposal`):
 
     1. Перезапустить **только затронутые** механические проверки (шаги 6–7F) на изменённых артефактах.
     2. Если remediation затронула `tasks.md` и в этом прогоне уже выполнялся QC (шаг 7.6):
@@ -900,53 +999,30 @@ In **mixed** mode, post-apply checks apply **only to tasks marked `[x]`**.
 
     Без перезапуска затронутых проверок по п.1–2 (и п.3 при необходимости) remediation **не считается завершённой**.
 
-    **17b. Communicate remediation results (обязательно после авто-устранения)**
+    Phase A mechanical fixes **не** триггерят 17a (их ре-верификация выполнена в шаге 16a).
 
-    После авто-устранения сообщение пользователю ОБЯЗАТЕЛЬНО содержит три блока:
+    **17b. Final verdict after judgment remediation**
 
-    **Блок 1 — Before/After scorecard:**
+    После выполнения judgment-действий и ре-верификации (17a) — финальное сообщение:
+
     ```
-    ## Результат авто-устранения
+    ## Результат устранения
 
     | # | Замечание | Было | Стало | Что сделано |
     |---|-----------|------|-------|-------------|
-    | 1 | <краткое описание> | WARNING | OK | <конкретное действие> |
-    | 2 | ... | ... | ... | ... |
-    ```
+    | 1 | <описание> | WARNING | OK | <действие> |
 
-    **Блок 2 — Осталось (если есть незакрытые замечания):**
-    ```
-    ## Осталось
-
-    | # | Замечание | Severity | Нужно решение? | Пояснение |
-    |---|-----------|----------|----------------|-----------|
-    | 1 | <описание> | SUGGESTION | Нет | <почему не критично / что потеряем при игноре> |
-    ```
-
-    Каждый оставшийся пункт ОБЯЗАН иметь:
-    - severity (CRITICAL/WARNING/SUGGESTION)
-    - «Нужно решение?» — Да/Нет
-    - Пояснение — одно предложение: почему не блокирует / что потеряем если проигнорировать
-
-    **Блок 3 — Вердикт после устранения:**
-
-    Если решений от пользователя не требуется:
-    ```
     ## Вердикт: ГОТОВ
-
-    Решений от вас не требуется. Следующий шаг:
-    - `/opsx:apply <name>` — реализовать оставшиеся задачи
-    - `/opsx:archive <name>` — закрыть change
+    Решений от вас не требуется. Следующий шаг: `/opsx:apply <name>`.
     ```
 
-    Если решение нужно:
+    Если пользователь выбрал «Принять как есть» по некоторым карточкам:
     ```
-    ## Вердикт: ГОТОВ С ОГОВОРКОЙ
+    ## Принятые риски
 
-    Требуется ваше решение:
-    1. <конкретный вопрос, который не может решить машина>
-
-    После ответа — следующий шаг: `/opsx:apply` или `/opsx:archive`.
+    | # | Замечание | Риск |
+    |---|-----------|------|
+    | 1 | <описание> | <одно предложение — чем рискуем> |
     ```
 
     Коммуникация с пользователем: `.cursor/rules/verify-user-communication.mdc`
@@ -966,6 +1042,7 @@ In **mixed** mode, post-apply checks apply **only to tasks marked `[x]`**.
 - **Coherence**: look for glaring inconsistencies, don't nitpick style
 - **False Positives**: when uncertain, prefer SUGGESTION over WARNING, WARNING over CRITICAL
 - **Actionability**: every **CRITICAL / WARNING / SUGGESTION** must answer: «что пользователь меняет в артефактах или решает до apply?» Иначе → **INFO** (см. Actionability Gate). INFO допускаются без «рекомендации устранить» в стиле remediation
+- **Two-phase remediation**: mechanical issues (deterministic, format-only) → silent auto-fix Phase A (шаг 16a); judgment issues (affect scope/order/approach) → decision cards Phase B (шаг 17). См. Issue Classification
 - **INFO**: контекст режима и автоматики; не дублировать как WARNING только потому что задачи ещё `[ ]` или зависимости корректно объявлены
 
 **Graceful Degradation**
@@ -985,4 +1062,4 @@ Use clear markdown with:
 - Specific, actionable recommendations
 - No vague suggestions like "consider reviewing"
 
-Коммуникация с пользователем: `.cursor/rules/verify-user-communication.mdc` — обязательные требования к Executive Summary, расшифровке замечаний, Before/After scorecard после remediation, и явному указанию решений от пользователя.
+Коммуникация с пользователем: `.cursor/rules/verify-user-communication.mdc` — обязательные требования к Executive Summary, двухфазному remediation (Phase A mechanical auto-fix + Phase B judgment decision cards), карточкам решений, и явному указанию решений от пользователя.
