@@ -5,11 +5,13 @@ license: MIT
 compatibility: Requires openspec CLI.
 metadata:
   author: openspec
-  version: "1.0"
+  version: "1.1"
   generatedBy: "1.1.1"
 ---
 
 Archive a completed change in the experimental workflow.
+
+**Auto-yes policy:** Invoking archive means the user accepts the recommended path: proceed despite incomplete artifacts/tasks, **sync delta specs to main** when a delta exists, and **extract all ADR-worthy decisions** from architecture reports. Do **not** use **AskUserQuestion** for these steps—collect issues into the **Warnings** block in the final summary (step 7). Only step 1 may prompt when the target change is ambiguous.
 
 **Input**: Optionally specify a change name. If omitted, check if it can be inferred from conversation context. If vague or ambiguous you MUST prompt for available changes.
 
@@ -32,10 +34,11 @@ Archive a completed change in the experimental workflow.
    - `schemaName`: The workflow being used
    - `artifacts`: List of artifacts with their status (`done` or other)
 
+   Maintain a **warnings accumulator** for step 7.
+
    **If any artifacts are not `done`:**
-   - Display warning listing incomplete artifacts
-   - Use **AskUserQuestion tool** to confirm user wants to proceed
-   - Proceed if user confirms
+   - Append to warnings: list each incomplete artifact by name and status (e.g. `Artifact "debug" was not marked done`)
+   - **Do not** use AskUserQuestion; continue automatically
 
 3. **Check task completion status**
 
@@ -44,55 +47,47 @@ Archive a completed change in the experimental workflow.
    Count tasks marked with `- [ ]` (incomplete) vs `- [x]` (complete).
 
    **If incomplete tasks found:**
-   - Display warning showing count of incomplete tasks
-   - Use **AskUserQuestion tool** to confirm user wants to proceed
-   - Proceed if user confirms
+   - Parse task IDs from lines (e.g. `- [ ] 3.1 ...` → include `3.1` in the warning list when present)
+   - Append to warnings: count and, when identifiable, IDs (e.g. `4 incomplete tasks in tasks.md (3.1, 3.2, 4.1, 5.3)`)
+   - **Do not** use AskUserQuestion; continue automatically
 
    **If no tasks file exists:** Proceed without task-related warning.
 
 4. **Assess delta spec sync state**
 
-   Check for delta specs at `openspec/changes/<name>/specs/`. If none exist, proceed without sync prompt.
+   Check for delta specs at `openspec/changes/<name>/specs/`. If none exist, proceed without sync.
 
    **If delta specs exist:**
    - Compare each delta spec with its corresponding main spec at `openspec/specs/<capability>/spec.md`
    - Determine what changes would be applied (adds, modifications, removals, renames)
-   - Show a combined summary before prompting
+   - Show a **brief informational** combined summary to the user (what would be merged), then proceed—**no prompt**
 
-   **Prompt options:**
-   - If changes needed: "Sync now (recommended)", "Archive without syncing"
-   - If already synced: "Archive now", "Sync anyway", "Cancel"
+   **Default action (automatic):**
+   - If the delta is **already fully reflected** in main specs: note in the final summary (e.g. `Specs: Already up to date with main specs`) and **do not** re-run sync unless you detect drift
+   - If **changes are needed**: **always** execute sync using `/opsx:sync` logic (read and follow `.cursor/skills/openspec-sync-specs/SKILL.md` for the active change)
 
-   If user chooses sync, execute /opsx:sync logic (use the openspec-sync-specs skill). Proceed to archive regardless of choice.
+   Proceed to the next step after sync completes or after confirming no merge was needed.
 
 5. **ADR extraction (architecture decision records)**
+
+   Before reading reports, resolve the **planned archive path** for Source fields: `openspec/changes/archive/YYYY-MM-DD-<change-name>/` (same date and name as in step 6). Use `.../reports/<architecture-file>.md` in each ADR **Source** even though the move happens in step 6.
 
    Check if `reports/architecture-*.md` exists in the change directory.
 
    **If architecture reports found:**
    - For each `architecture-*.md`, read the report and identify key **decisions** (not analysis/validation).
    - A decision is ADR-worthy if: it affects future changes, involves trade-offs between alternatives, or establishes a contract/pattern/principle. See criteria in `.cursor/rules/adr-format.mdc`.
-   - Show a summary of candidate decisions and use **AskUserQuestion tool**:
-     ```
-     Найдены архитектурные отчёты с решениями:
-     - [report-1]: "Решение X — краткое описание"
-     - [report-2]: "Решение Y — краткое описание"
-
-     Извлечь как ADR (постоянная проектная память)?
-     1. Да, извлечь все
-     2. Да, выбрать какие
-     3. Пропустить
-     ```
-   - If user selects extraction:
+   - Show a **brief informational** summary of candidate decisions (report file + one-line title each)—**no AskUserQuestion**
+   - **Automatically extract all** ADR-worthy decisions (equivalent to former option «Да, извлечь все»):
      1. Determine next ADR number: Glob `openspec/adrs/ADR-*.md`, take max NNNN + 1 (or 0001 if empty)
      2. For each selected decision, create ADR file using format from `.cursor/rules/adr-format.mdc`:
         - Status: **Accepted** (decision was implemented in the change being archived)
-        - Source: path to the architecture report in archive (use the target archive path)
+        - Source: planned archive path to the report file (see above)
         - Area: derive from change context (proposal.md topic)
      3. Update `openspec/adrs/README.md` — add row to the index table
-   - If user skips — proceed without extraction.
+   - If no ADR-worthy candidates exist after review, note in summary: `ADR: No ADR-worthy decisions extracted` (no files created)
 
-   **If no architecture reports found:** Skip this step.
+   **If no architecture reports found:** Skip this step; summary: `ADR: No architecture reports`.
 
 6. **Perform the archive**
 
@@ -117,11 +112,13 @@ Archive a completed change in the experimental workflow.
    - Change name
    - Schema that was used
    - Archive location
-   - Whether specs were synced (if applicable)
-   - Whether ADRs were extracted (count and numbers)
-   - Note about any warnings (incomplete artifacts/tasks)
+   - Whether specs were synced / up to date / no delta
+   - Whether ADRs were extracted (count and numbers) or skipped with reason
+   - **`### Warnings`** — only if the warnings accumulator from steps 2–3 is non-empty; list each bullet. If empty, **omit** the Warnings section entirely.
 
 **Output On Success**
+
+Use this template; adapt lines to facts (omit `### Warnings` when there are none). Do not claim «All tasks complete» when warnings list incomplete tasks—use neutral closing or reference Warnings.
 
 ```
 ## Archive Complete
@@ -129,17 +126,19 @@ Archive a completed change in the experimental workflow.
 **Change:** <change-name>
 **Schema:** <schema-name>
 **Archived to:** openspec/changes/archive/YYYY-MM-DD-<name>/
-**Specs:** ✓ Synced to main specs (or "No delta specs" or "Sync skipped")
-**ADR:** ✓ Extracted N ADRs (ADR-NNNN, ...) (or "No architecture reports" or "Extraction skipped")
+**Specs:** ✓ Synced to main specs (N requirements updated) | Already up to date | No delta specs
+**ADR:** ✓ Extracted N ADRs (ADR-NNNN, ...) | No architecture reports | No ADR-worthy decisions extracted
 
-All artifacts complete. All tasks complete.
+### Warnings
+- <only when applicable: incomplete artifacts, incomplete tasks with IDs, etc.>
 ```
 
 **Guardrails**
-- Always prompt for change selection if not provided
-- Use artifact graph (openspec status --json) for completion checking
-- Don't block archive on warnings - just inform and confirm
-- Preserve .openspec.yaml when moving to archive (it moves with the directory)
+- Always prompt for change selection if not provided (step 1 only)
+- Use artifact graph (`openspec status --json`) for completion checking
+- **Don't block archive on warnings** — inform in the final summary (`### Warnings`) and proceed automatically
+- **Recommended actions are automatic:** delta spec sync when merge is needed; ADR extraction for all ADR-worthy decisions from `reports/architecture-*.md`
+- Preserve `.openspec.yaml` when moving to archive (it moves with the directory)
 - Show clear summary of what happened
-- If sync is requested, use openspec-sync-specs approach (agent-driven)
-- If delta specs exist, always run the sync assessment and show the combined summary before prompting
+- Use `openspec-sync-specs` approach (agent-driven) whenever sync runs
+- If delta specs exist, always run the sync assessment and show the combined summary **before** executing sync (informational only, no confirmation prompt)
