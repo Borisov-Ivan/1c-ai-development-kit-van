@@ -15,9 +15,10 @@ alwaysApply: true
 ## При ошибке `Invalid enum value`
 
 1. Проверить имя инструмента — должен быть **Task** (в других средах или в памяти иногда фигурируют иные имена — здесь корректно только Task).
-2. Проверить `subagent_type` — допустимые: onec-code-writer, onec-code-reviewer, onec-code-architect, onec-code-explorer, onec-trace-analyst, onec-code-simplifier, onec-form-generator, onec-metadata-helper, onec-query-optimizer, onec-test-generator, openspec-quality-controller, generalPurpose, explore, shell, mcp-deploy, onec-admin и др. (см. описание инструмента).
+2. Проверить `subagent_type` — допустимые: onec-code-writer, onec-code-reviewer, onec-code-architect, onec-code-architect-gemini, onec-code-explorer, onec-trace-analyst, onec-code-simplifier, onec-form-generator, onec-metadata-helper, onec-query-optimizer, onec-test-generator, openspec-quality-controller, generalPurpose, explore, shell, mcp-deploy, onec-admin и др. (см. описание инструмента).
 3. Не переключаться на generalPurpose — это маскирует причину.
-4. Если retry не помог — СТОП, сообщить пользователю.
+4. **Fallback-перехват:** Если вызов `onec-code-architect` падает с ошибкой недоступности модели или таймаутом, не останавливаться, а выполнить повторный вызов с `subagent_type="onec-code-architect-gemini"`.
+5. Если retry не помог — СТОП, сообщить пользователю.
 
 ---
 
