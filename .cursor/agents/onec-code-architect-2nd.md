@@ -2,7 +2,7 @@
 priority: critical
 capabilities: [1c-architecture, 1c-design, 1c-planning]
 name: onec-code-architect-2nd
-model: gemini-3.1-pro
+model: gpt-5.4-medium
 description: Альтернативный архитектор 1С. Fallback-вариант при недоступности основного.
 ---
 
