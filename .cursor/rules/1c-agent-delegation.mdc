@@ -57,7 +57,7 @@ Architect может рекомендовать новые объекты в des
 |------------|-------|-------------|
 | Написание/правка BSL | **onec-code-writer** | Да |
 | Ревью после правок | **onec-code-reviewer** | Да, задача НЕ завершена до ревью |
-| Архитектура (не точечная правка) | **onec-code-architect** (primary) / **onec-code-architect-gemini** (fallback) | Да, до реализации. Триггеры — `architect-gate.mdc` |
+| Архитектура (не точечная правка) | **onec-code-architect** (primary) / **onec-code-architect-2nd** (fallback) | Да, до реализации. Триггеры — `architect-gate.mdc` |
 | Исследование 3+ модулей | **onec-code-explorer** | Рекомендуется |
 | Ошибка с трассой/стеком | **onec-trace-analyst** | Да, см. `1c-error-analysis.mdc` |
 

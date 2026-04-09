@@ -1,9 +1,9 @@
 ---
 priority: critical
 capabilities: [1c-architecture, 1c-design, 1c-planning]
-name: onec-code-architect-gemini
-model: gemini-3.1-pro-preview
-description: Альтернативный архитектор 1С (Gemini). Fallback-вариант при недоступности Opus.
+name: onec-code-architect-2nd
+model: gemini-3.1-pro
+description: Альтернативный архитектор 1С. Fallback-вариант при недоступности основного.
 ---
 
 # 1C Code Architect Agent

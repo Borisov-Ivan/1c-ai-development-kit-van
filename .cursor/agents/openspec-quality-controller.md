@@ -2,7 +2,7 @@
 priority: critical
 capabilities: [openspec-quality-control, phase-analysis, dependency-graph]
 name: openspec-quality-controller
-model: default
+model: gpt-5.4-medium
 description: Evaluate task ordering, dependencies, phase coherence and rework risk for OpenSpec changes
 readonly: true
 ---

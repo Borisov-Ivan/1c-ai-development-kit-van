@@ -56,11 +56,11 @@ description: Reference guide for 1C agent delegation patterns - complexity asses
 
 ## ВЫЗОВ АГЕНТОВ (КРИТИЧНО)
 
-**Для вызова субагентов используй инструмент `Task`.** Все subagent_type из таблицы ниже (onec-code-writer, onec-code-reviewer, onec-code-architect, onec-code-architect-gemini, onec-code-explorer, onec-trace-analyst и др.) доступны через Task. См. `.cursor/rules/tool-name-guard.mdc`.
+**Для вызова субагентов используй инструмент `Task`.** Все subagent_type из таблицы ниже (onec-code-writer, onec-code-reviewer, onec-code-architect, onec-code-architect-2nd, onec-code-explorer, onec-trace-analyst и др.) доступны через Task. См. `.cursor/rules/tool-name-guard.mdc`.
 
 Формат вызова: `Task(subagent_type="...", description="...", ...)`.
 
-**Fallback для архитектора:** Во всех шаблонах ниже, где указан `subagent_type="onec-code-architect"`, оркестратор может и должен использовать `subagent_type="onec-code-architect-gemini"`, если основной вызов завершился ошибкой недоступности модели, таймаутом, или если пользователь явно запросил использование Gemini.
+**Fallback для архитектора:** Во всех шаблонах ниже, где указан `subagent_type="onec-code-architect"`, оркестратор может и должен использовать `subagent_type="onec-code-architect-2nd"`, если основной вызов завершился ошибкой недоступности модели, таймаутом, или если пользователь явно запросил использование Gemini.
 
 Если получена ошибка Invalid enum value — проверить, что вызван именно **Task** (в других контекстах могут встречаться иные имена — здесь корректно только Task). См. секцию «ПРИ ОШИБКЕ ВЫЗОВА АГЕНТА».
 
@@ -310,7 +310,7 @@ Task(
          
          Создай план с этапами реализации (атомарные, с критериями приемки).
          Используй Mermaid диаграммы.",
-  subagent_type="onec-code-architect" // или "onec-code-architect-gemini" при fallback
+  subagent_type="onec-code-architect" // или "onec-code-architect-2nd" при fallback
 )
 ```
 
