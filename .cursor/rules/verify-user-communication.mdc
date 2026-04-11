@@ -11,7 +11,7 @@ alwaysApply: false
 
 ## Правила
 
-0. **Actionability Principle.** Каждое замечание с severity **WARNING** или **CRITICAL** отвечает на вопрос: «Что пользователь должен **решить** или **изменить в артефактах** до apply?» Если ответа нет — это **INFO** (контекст), а не замечание для вердикта. **INFO** выводится компактно (bullet-строки в секции «К сведению»), **без** карточек решений; не входит в счётчики N CRITICAL / M WARNING / K SUGGESTION; **не** триггерит remediation. См. секцию **Actionability Gate** в `.cursor/skills/openspec-verify-change/SKILL.md`.
+0. **Actionability Principle.** Каждое замечание — **INFO** до доказательства обратного. Повышение до **WARNING** или **CRITICAL** требует прохождения Promotion Test (см. секцию **Promotion Test** в `.cursor/skills/openspec-verify-change/SKILL.md`). Бремя доказательства на повышении, не на понижении. **INFO** выводится компактно (bullet-строки в секции «К сведению»), **без** карточек решений; не входит в счётчики N CRITICAL / M WARNING / K SUGGESTION; **не** триггерит remediation.
 
 1. **Executive Summary** — первая секция файла отчёта (вердикт **без** INFO в счётчиках, при INFO > 0 — строка «Контекст (INFO)», решений от пользователя, статус). См. шаг 16 скилла verify.
 

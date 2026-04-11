@@ -101,6 +101,20 @@ Universal quality gate for OpenSpec changes. Works in two modes determined autom
    Режим: post-apply (все задачи выполнены)
    ```
 
+4b. **Determine verification tier**
+
+   | Tier | Условие | QC (7.6) | Architect (7.7) | TZ (7.8) |
+   |------|---------|----------|-----------------|----------|
+   | Lite | <=5 задач AND 1 фаза (все P_x одинаковы или P_x + P4) | SKIP | YES (compact) | SKIP (порог 6+) |
+   | Standard | 6-15 задач OR 2+ фазы | YES | YES | YES (порог 6+) |
+   | Full | 15+ задач OR phase gates OR phase-transition | YES | YES | YES |
+
+   Tier выбирается автоматически. Пользователь может повысить:
+   `/opsx:verify <name> --full` или `--standard`.
+   Понижение недопустимо — только повышение.
+
+   Объявить пользователю: "Tier: Lite (5 задач, одна фаза P3+P4)"
+
 5. **Initialize report structure**
 
    Create a report structure with sections:
@@ -272,9 +286,9 @@ Universal quality gate for OpenSpec changes. Works in two modes determined autom
 
    **IMPORTANT:** The filled checklist table is the **proof** of this check. It MUST be included verbatim in the verification report (section "Полнота ручной конфигурации"). Writing "OK — design describes scenario" without the table is a verification failure.
 
-7.6. **Quality Controller — Phase Coherence Review (MANDATORY)**
+7.6. **Quality Controller — Phase Coherence Review (Standard/Full tiers ONLY)**
 
-   **This step executes ALWAYS in pre-apply and mixed modes.** Domain-agnostic assessment of task ordering, dependencies, and execution risk. Complements the architect's realizability review (step 7.7).
+   **This step executes in Standard and Full tiers (skipped in Lite).** Domain-agnostic assessment of task ordering, dependencies, and execution risk. Complements the architect's realizability review (step 7.7).
 
    **Prepare repository state** (before calling the controller):
    For each task in tasks.md that mentions a file path or object name:
@@ -341,7 +355,8 @@ Universal quality gate for OpenSpec changes. Works in two modes determined autom
 
 7.7. **Task Readiness Architect Review (MANDATORY)**
 
-   **Порядок выполнения:** шаг **7.6** (Quality Controller) MUST завершиться **до** запуска шага **7.7** (Architect). Архитектор получает результат QC (фазовая таблица и alerts из 7.6) как входной параметр. **Параллельный** запуск QC (7.6) и Architect (7.7) **запрещён** (оптимизация по latency не оправдывает нарушение зависимости).
+   **Порядок выполнения (Standard/Full):** шаг **7.6** (Quality Controller) MUST завершиться **до** запуска шага **7.7** (Architect). Архитектор получает результат QC (фазовая таблица и alerts из 7.6) как входной параметр. **Параллельный** запуск QC (7.6) и Architect (7.7) **запрещён**.
+   **В Lite tier:** шаг 7.6 пропускается, архитектор выполняет compact-ревью (совмещает фазовую оценку и реализуемость).
 
    **This step executes ALWAYS in pre-apply and mixed modes.** It is not remediation — it is part of the verification pipeline. The architect provides the expert holistic assessment that mechanical checks cannot.
 
@@ -351,9 +366,9 @@ Universal quality gate for OpenSpec changes. Works in two modes determined autom
    - Checklist table from step 7.5 (if manual config markers were found), or "маркеров ручной конфигурации не найдено"
    - List of issues from steps 7A-7E (if any), or "механических замечаний нет"
    - Executability issues from step 7F (if any), or "замечаний выполнимости нет"
-   - Quality Controller result: phase classification table and alerts from step 7.6 (or "Quality Controller замечаний нет")
+   - Quality Controller result: phase classification table and alerts from step 7.6 (or "Quality Controller пропущен (Lite tier)")
 
-   **Architect prompt** (use template from `1c-agent-patterns/SKILL.md`, section "Architect — task readiness review (verify шаг 7.7)"):
+   **Architect prompt (Standard/Full tier)** (use template from `1c-agent-patterns/SKILL.md`, section "Architect — task readiness review (verify шаг 7.7)"):
 
    ```
    ## Задача
@@ -426,6 +441,52 @@ Universal quality gate for OpenSpec changes. Works in two modes determined autom
 
    НЕ НУЖНО: ревью архитектуры, оценка рисков, альтернативные подходы.
    Только: можно ли реализовать as-is.
+   ```
+
+   **Architect prompt (Lite tier compact review)**:
+   Используй сокращённый промпт (без критериев 2 и 4, с добавлением фазовой оценки):
+
+   ```
+   ## Задача
+
+   Оцени готовность малого ЗНИ `<name>` к реализации.
+
+   ## Артефакты
+   - proposal: <путь>
+   - design: <путь>
+   - tasks: <путь>
+   - specs: <путь>
+   - Замечания механических проверок (verify, шаги 7A-7E): <список или «замечаний нет»>
+   - Проблемы выполнимости (verify, шаг 7F): <список или «замечаний нет»>
+
+   ## Критерии оценки
+
+   1. **Фазовая когерентность.** Классифицируй задачи по фазам (P0-P4). Есть ли false start (код есть, задача [ ]) или rework risk (зависимость от неполной спецификации)?
+   2. **Реализуемость кодовых задач.** Понятно ли ЧТО и ГДЕ делать?
+   3. **Разрешённость решений.** Все ли альтернативы разрешены?
+   4. **Согласованность.** Нет ли противоречий между tasks, design и spec?
+   5. **Качество фиксов.** Направлен ли фикс на корневую причину?
+
+   ## Формат ответа
+
+   ### Вердикт
+   ГОТОВО / ГОТОВО С ЗАМЕЧАНИЯМИ / НЕ ГОТОВО
+
+   ### Фазы и риски
+   | Задача | Фаза | Риски |
+   |---|---|---|
+   | ... | ... | ... |
+
+   ### Оценка по критериям
+   | # | Критерий | Вердикт | Обоснование |
+   |---|----------|---------|-------------|
+   | 1 | Реализуемость кодовых задач | OK/GAP | ... |
+   | 2 | Разрешённость решений | OK/GAP | ... |
+   | 3 | Согласованность | OK/GAP | ... |
+   | 4 | Качество фиксов | OK/GAP | ... |
+
+   ### Пробелы (только при GAP)
+   (Задача, что отсутствует, рекомендация)
    ```
 
    **After receiving the architect's report:**
@@ -609,11 +670,11 @@ In **mixed** mode, post-apply checks apply **only to tasks marked `[x]`**.
 
 ---
 
-## Actionability Gate (перед записью замечаний в отчёт)
+## Promotion Test (перед записью замечаний в отчёт)
 
 Применяется **ко всем** замечаниям перед финальным присвоением severity в отчёте verify (после сбора результатов шагов 6–15, 7.6, 7.7 и т.д.).
 
-**Цель:** пользователь, запускающий verify, видит **WARNING/CRITICAL** только там, где нужно **решение или правка артефакта до apply**; всё остальное — контекст, а не «угроза».
+**Цель:** пользователь, запускающий verify, видит **WARNING/CRITICAL** только там, где нужно **решение или правка артефакта до apply**; всё остальное — контекст, а не «угроза». Бремя доказательства лежит на повышении severity.
 
 **Уровень INFO** (контекст):
 
@@ -622,19 +683,36 @@ In **mixed** mode, post-apply checks apply **only to tasks marked `[x]`**.
 - В сообщении пользователю — **компактно** (bullet-строки в секции «К сведению»), **без** карточек решений.
 - Формат в отчёте: `- [INFO] <краткий текст>`.
 
-**Тест для каждого кандидата в CRITICAL / WARNING / SUGGESTION:**
+**Promotion Test (для каждого замечания):**
+
+Замечание начинает как INFO. Повышается, если:
 
 | Шаг | Вопрос | Если да → |
-|-----|--------|------------|
-| 1 | Пользователь может устранить **правкой артефакта** (proposal/design/spec/tasks) **до** старта apply? | Присвоить severity по правилам соответствующего шага verify. |
-| 2 | Замечание **полностью снимается** автоматикой (`/opsx:apply`, phase gates, явные **Зависимости:** в tasks)? | **INFO** (или не включать в отчёт, если дублирует очевидное). |
-| 3 | Замечание — **неизбежное следствие режима** (pre-apply / mixed: код ещё не реализован по невыполненным `[ ]`)? | **INFO** (например: «K задач ожидают реализации»), не WARNING. |
+|-----|--------|-----------|
+| P1 | Пользователь ОБЯЗАН править артефакт (иначе apply выдаст ошибку / код не соберётся / результат заведомо неверен)? | CRITICAL |
+| P2 | Пользователь ДОЛЖЕН принять решение из 2+ несовместимых вариантов (разный код при apply)? | WARNING |
+| P3 | Исправление улучшает качество, но apply возможен и без него? | SUGGESTION |
+| - | Ни один тест не пройден | Остаётся INFO |
 
-**Склеивание:** если после Gate не осталось CRITICAL и WARNING, но есть SUGGESTION — статус «Готов. Предложения к сведению». Если нет ни CRITICAL, ни WARNING, ни SUGGESTION — «Все проверки пройдены. Готов к apply/archive». При наличии INFO добавить в Executive Summary строку: `**Контекст (INFO):** K пометок — см. секцию в отчёте` (только если K > 0).
+**Склеивание:** если после Promotion Test не осталось CRITICAL и WARNING, но есть SUGGESTION — статус «Готов. Предложения к сведению». Если нет ни CRITICAL, ни WARNING, ни SUGGESTION — «Все проверки пройдены. Готов к apply/archive». При наличии INFO добавить в Executive Summary строку: `**Контекст (INFO):** K пометок — см. секцию в отчёте` (только если K > 0).
+
+## Determinism Test (между Promotion Test и Issue Classification)
+
+Для каждого замечания, классифицированного по таблице ниже как `judgment`:
+
+1. Существует ли **ровно одно** допустимое исправление?
+   (добавить зависимость X→Y; изменить «создать» на «доработать»;
+   зафиксировать N/A-критерий для опциональной задачи)
+2. Это исправление **не меняет** scope, подход или архитектуру?
+3. Исправление **обратимо** (git revert)?
+
+Если все три = да → переклассифицировать в **mechanical**.
+Зафиксировать в отчёте: «Reclassified: <тип> judgment → mechanical
+(determinism test: единственное допустимое исправление)».
 
 ## Issue Classification (mechanical / judgment)
 
-После Actionability Gate каждое замечание с severity CRITICAL / WARNING / SUGGESTION дополнительно классифицируется для маршрутизации в Phase A (авто-исправление) или Phase B (карточки решений). Классификация определяет **кто** принимает решение: машина или пользователь.
+После Promotion Test каждое замечание с severity CRITICAL / WARNING / SUGGESTION дополнительно классифицируется для маршрутизации в Phase A (авто-исправление) или Phase B (карточки решений). Классификация определяет **кто** принимает решение: машина или пользователь.
 
 **Критерий mechanical:** исправление детерминировано (однозначная замена), не меняет scope / логику / порядок задач, обратимо через git.
 
@@ -645,6 +723,9 @@ In **mixed** mode, post-apply checks apply **only to tasks marked `[x]`**.
 | Missing checkboxes (6A) | mechanical | Формат, не меняет содержание |
 | TZ lexicon violation (7.8 / 11) | mechanical | Замена слов по реестру, детерминировано |
 | Repo Consistency wording (7E) | mechanical | `создать X` → `доработать X` при доказанном существовании объекта |
+| missing-dependency (QC) — зависимость P4→P3 или верификация→реализация | mechanical | Единственно допустимый вариант; не меняет scope |
+| Опциональная задача без явного N/A-критерия | mechanical | Добавить «N/A если не воспроизведено» — детерминировано |
+| Неверная метка типа задачи (BSL code вместо manual) | mechanical | Замена слова, не меняет содержание |
 | Task quality — ambiguity, missing details (7B / 7C) | judgment | Architect может переформулировать scope |
 | Architect Gate not closed (9) | judgment | Архитектурный отчёт может изменить подход |
 | Design Review not done (10) | judgment | Ревью может выявить пробелы в design |
@@ -657,6 +738,7 @@ In **mixed** mode, post-apply checks apply **only to tasks marked `[x]`**.
 | TZ review remarks (11) | footnote | Не влияет на реализацию |
 | Incomplete tasks (post-apply, 13) | footnote | Рекомендация `/opsx:apply` |
 | Spec/design divergence (post-apply, 15) | footnote | Информационное расхождение |
+| rework-risk — hypothesis в Open Questions, fallback безопасен (design) | footnote | Информация о риске, не требует правки артефакта |
 
 **Класс footnote:** замечания с severity SUGGESTION, не влияющие на ход реализации. Показываются пользователю в секции «К сведению» (одна строка каждое) — не как карточка решения и не как авто-исправление.
 
@@ -831,6 +913,19 @@ In **mixed** mode, post-apply checks apply **only to tasks marked `[x]`**.
 
     ### Итог
     N CRITICAL, M WARNING, K SUGGESTION (INFO в счётчик не входят; при необходимости отдельно: «INFO: R»).
+
+    **Compact report (Lite tier only):**
+
+    Файл отчёта содержит только:
+    1. Executive Summary (как обычно)
+    2. Секции с non-OK статусом (CRITICAL / WARNING / SUGGESTION)
+    3. Контекст (INFO) — если есть
+    4. Авто-исправлено (Phase A) — если были
+    5. Развёрнутые объяснения замечаний — если есть
+    6. Итог
+
+    Секции «N/A — режим pre-apply», пустые таблицы,
+    строки «маркеров не найдено» — опускаются.
 
     ### Развёрнутые объяснения замечаний
 
