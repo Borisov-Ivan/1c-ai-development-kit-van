@@ -438,6 +438,7 @@ Universal quality gate for OpenSpec changes. Works in two modes determined autom
    - Задача / артефакт
    - Что отсутствует / неоднозначно
    - Рекомендация (что дополнить, где)
+   - Если GAP связан с отсутствием пути, подсистемы или пропущенной задачей из design, предоставь готовый сниппет (строку) для автоматической вставки в артефакт, чтобы оркестратор мог применить его в Phase A.
 
    НЕ НУЖНО: ревью архитектуры, оценка рисков, альтернативные подходы.
    Только: можно ли реализовать as-is.
@@ -486,7 +487,7 @@ Universal quality gate for OpenSpec changes. Works in two modes determined autom
    | 4 | Качество фиксов | OK/GAP | ... |
 
    ### Пробелы (только при GAP)
-   (Задача, что отсутствует, рекомендация)
+   (Задача, что отсутствует, рекомендация. Если пропущен путь/подсистема/задача из design — дай сниппет для авто-вставки).
    ```
 
    **After receiving the architect's report:**
@@ -703,6 +704,7 @@ In **mixed** mode, post-apply checks apply **only to tasks marked `[x]`**.
 1. Существует ли **ровно одно** допустимое исправление?
    (добавить зависимость X→Y; изменить «создать» на «доработать»;
    зафиксировать N/A-критерий для опциональной задачи)
+   *Оговорка: Исправление считается детерминированным (mechanical), если оно однозначно выводится из утвержденного `design.md`, `project.md` или структуры репозитория, даже если требует генерации новых строк в `tasks.md` (например, перенос утвержденного решения из design в tasks, добавление очевидного пути к файлу или подсистемы).*
 2. Это исправление **не меняет** scope, подход или архитектуру?
 3. Исправление **обратимо** (git revert)?
 
@@ -726,7 +728,9 @@ In **mixed** mode, post-apply checks apply **only to tasks marked `[x]`**.
 | missing-dependency (QC) — зависимость P4→P3 или верификация→реализация | mechanical | Единственно допустимый вариант; не меняет scope |
 | Опциональная задача без явного N/A-критерия | mechanical | Добавить «N/A если не воспроизведено» — детерминировано |
 | Неверная метка типа задачи (BSL code вместо manual) | mechanical | Замена слова, не меняет содержание |
-| Task quality — ambiguity, missing details (7B / 7C) | judgment | Architect может переформулировать scope |
+| Missing paths/subsystems | mechanical | Если путь или подсистему можно однозначно найти в `project.md` или репозитории |
+| Design/Tasks divergence (пропущенная задача) | mechanical | Если решение уже утверждено в `design.md` (например, D4, D5), авто-добавление задачи — это синхронизация, а не изменение scope |
+| Task quality — ambiguity, missing details (7B / 7C) | judgment | Architect может переформулировать scope (если деталь не выводится однозначно из проекта) |
 | Architect Gate not closed (9) | judgment | Архитектурный отчёт может изменить подход |
 | Design Review not done (10) | judgment | Ревью может выявить пробелы в design |
 | Phase violation / false start (QC 7.6) | judgment | Переупорядочивание меняет что делается первым |
@@ -957,6 +961,8 @@ In **mixed** mode, post-apply checks apply **only to tasks marked `[x]`**.
     | Missing checkboxes (6A) | StrReplace: `- N.M` → `- [ ] N.M` для каждой строки без чекбокса |
     | TZ lexicon violation (7.8 / 11) | StrReplace запрещённых слов в `ТЗ.md` по `.cursor/docs/tz-lexicon-dictionary.md` |
     | Repo Consistency wording (7E) | StrReplace: `создать X` → `доработать X` / `наполнить содержимым` в tasks.md |
+    | Missing paths/subsystems | Использовать инструменты `Read`, `Glob`, `Grep` для поиска нужных путей и подсистем в репозитории или `openspec/project.md`, затем применить `StrReplace` или `Write` для обогащения `tasks.md` и `design.md` найденными данными |
+    | Design/Tasks divergence (пропущенная задача) | При выявлении пропущенных задач, описанных в `design.md` (напр. D4, D5), самостоятельно сгенерировать формулировку задачи (или использовать сниппет от архитектора) и вставить в соответствующий раздел `tasks.md` через `StrReplace` или `Write` |
 
     **Ре-верификация Phase A:**
     После всех mechanical-исправлений перезапустить **только** затронутые проверки (шаги 6–7E) на изменённых файлах. QC и Architect **не** перезапускаются на Phase A (механические правки не меняют scope).

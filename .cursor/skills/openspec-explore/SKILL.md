@@ -377,9 +377,7 @@ You: [openspec list → active change found]
      - **Контракты и альтернативы:** [...]
 
      Бриф верный? Подтвердите — начну с шага 1.
-     ---
-
-     ⛔ END TURN
+   
 ```
 
 **User brings a trace file (HALT — Entry Protocol, одношаговый план):**
