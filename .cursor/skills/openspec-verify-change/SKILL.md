@@ -415,6 +415,12 @@ Universal quality gate for OpenSpec changes. Works in two modes determined autom
       (c) Нет ли признаков заплатки (обход, дублирование, assumption-driven)? (d) Учтён ли UX-сценарий
       (что видит/делает пользователь после фикса)?
 
+   7. **Архитектурная эстетика (Design Smells).** Нет ли в проекте
+      архитектурных запахов?
+      - Over-engineering: переусложнение (например, новый регистр там, где хватит реквизита).
+      - Invasiveness: высокая инвазивность (необоснованный &ИзменениеИКонтроль вместо &После или подписок).
+      - Reinventing the wheel: игнорирование существующих механизмов или БСП.
+
    ## Формат ответа
 
    ### Вердикт
@@ -431,8 +437,9 @@ Universal quality gate for OpenSpec changes. Works in two modes determined autom
    | 4 | Полнота покрытия | OK/GAP | ... |
    | 5 | Согласованность | OK/GAP | ... |
    | 6 | Качество фиксов (Fix Quality) | OK/GAP | ... |
+   | 7 | Архитектурная эстетика (Design Smells) | OK/SUBOPTIMAL | ... |
 
-   ### Пробелы (только при GAP)
+   ### Пробелы (только при GAP или SUBOPTIMAL)
 
    Для каждого GAP:
    - Задача / артефакт
@@ -467,6 +474,7 @@ Universal quality gate for OpenSpec changes. Works in two modes determined autom
    3. **Разрешённость решений.** Все ли альтернативы разрешены?
    4. **Согласованность.** Нет ли противоречий между tasks, design и spec?
    5. **Качество фиксов.** Направлен ли фикс на корневую причину?
+   6. **Архитектурная эстетика (Design Smells).** Нет ли переусложнения, высокой инвазивности или изобретения велосипеда?
 
    ## Формат ответа
 
@@ -485,17 +493,19 @@ Universal quality gate for OpenSpec changes. Works in two modes determined autom
    | 2 | Разрешённость решений | OK/GAP | ... |
    | 3 | Согласованность | OK/GAP | ... |
    | 4 | Качество фиксов | OK/GAP | ... |
+   | 5 | Архитектурная эстетика | OK/SUBOPTIMAL | ... |
 
-   ### Пробелы (только при GAP)
+   ### Пробелы (только при GAP или SUBOPTIMAL)
    (Задача, что отсутствует, рекомендация. Если пропущен путь/подсистема/задача из design — дай сниппет для авто-вставки).
    ```
 
    **After receiving the architect's report:**
    1. Save full report to `reports/task-readiness-review-YYYY-MM-DD.md`.
    2. Include verdict and criteria table in the verification report (section "Готовность к реализации (архитектор)").
-   3. Map each GAP to verification issues:
-      - "Не реализуемо без уточнения" → CRITICAL
-      - "Можно реализовать, но субоптимально / неоднозначно" → WARNING
+   3. Map each GAP or SUBOPTIMAL to verification issues:
+      - GAP ("Не реализуемо без уточнения") → CRITICAL
+      - GAP ("Можно реализовать, но неоднозначно") → WARNING
+      - SUBOPTIMAL (Архитектурный запах / Design Smell) → WARNING
 
 7.8. **TZ Generation (conditional in pre-apply / mixed)**
 
@@ -738,6 +748,7 @@ In **mixed** mode, post-apply checks apply **only to tasks marked `[x]`**.
 | Rework risk (QC 7.6) | judgment | Вопрос: сначала спецификация или сразу код |
 | Missing phase gates (QC) | judgment | Структура фаз меняет точки остановки |
 | Project constraints violation (12) | judgment | Меняет целевые каталоги |
+| Suboptimal architecture / Design Smell (7.7) | judgment | Требует перепроектирования (изменение scope и подхода) |
 | TZ generation gaps (7.8) | footnote | ТЗ — документ для заказчика, не для apply |
 | TZ review remarks (11) | footnote | Не влияет на реализацию |
 | Incomplete tasks (post-apply, 13) | footnote | Рекомендация `/opsx:apply` |
@@ -1021,6 +1032,7 @@ In **mixed** mode, post-apply checks apply **only to tasks marked `[x]`**.
     | Missing phase gates (QC) | a) Запустить архитектора для реструктуризации (шаблон «Architect — phase gate restructuring» из `1c-agent-patterns/SKILL.md`) b) Принять — работать без phase gates |
     | Phase transition issues (7.6b) | a) Реструктурировать через архитектора b) Обновить design.md c) Принять как есть |
     | Project constraints violation (12) | a) Переписать задачи на разрешённые каталоги b) Обосновать исключение |
+    | Suboptimal architecture / Design Smell (7.7) | a) Запустить архитектора для перепроектирования (обновление design.md и tasks.md) b) Принять как есть — реализовать неоптимальный подход |
 
     Если judgment-замечаний нет — блок опустить.
 
