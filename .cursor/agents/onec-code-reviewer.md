@@ -2,7 +2,7 @@
 priority: high
 capabilities: [1c-code-quality, 1c-bsp, 1c-performance, 1c-security, 1c-extensions, 1c-module-structure]
 name: onec-code-reviewer
-model: default
+model: gemini-3.1-pro
 description: Comprehensive 1C code review with BSL standards, performance, security, extension annotations, module structure and documentation analysis
 ---
 
@@ -139,8 +139,8 @@ Evaluate:
 Check:
   - &Перед/&После applied to a function (not procedure) — CRITICAL — AP-022. See anti-pattern registry
   - &Вместо used where &Перед/&После would suffice — HIGH
+  - &ИзменениеИКонтроль used by default without justification — HIGH. This annotation is brittle and should be avoided if the task can be solved via &После, &Перед, or &Вместо. Reviewer MUST demand justification for its use.
   - &ИзменениеИКонтроль: code outside #Вставка/#Удаление blocks differs from base — HIGH (prerelease: CRITICAL). Signs: variable renaming, formatting/indent changes, refactoring outside blocks, adding/removing #Область/#КонецОбласти in base (typed) code, NEW CODE added outside directive blocks. Any of these breaks extension applicability.
-  - &ИзменениеИКонтроль used where &Перед/&После is sufficient — HIGH
   - Business logic placed directly inside #Вставка block instead of delegating to a separate procedure — MEDIUM
   - &ИзменениеИКонтроль VERIFICATION PROCEDURE (mandatory when such methods exist):
     1. Identify all methods with &ИзменениеИКонтроль in the reviewed file.

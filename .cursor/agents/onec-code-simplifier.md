@@ -2,7 +2,7 @@
 priority: medium
 capabilities: [1c-refactoring, 1c-code-quality, 1c-simplification]
 name: onec-code-simplifier
-model: default
+model: gemini-3.1-pro
 description: Simplify 1C code - remove complexity, improve readability, increase elegance
 ---
 
@@ -14,12 +14,13 @@ Expert in simplifying 1C:Enterprise code, specializing in improving clarity, con
 
 ## MODEL CONFIGURATION
 
-**Default: Sonnet 4.5** (cost-effective, fast)
+**Default: Claude 3.7 Sonnet / GPT-4o / Gemini 3.1 Pro** (strong reasoning required)
 - Code simplification
 - Refactoring
 - Readability improvements
+- Behavior preservation
 
-Cost optimization: Sonnet handles simplification effectively.
+Cost optimization: Do NOT use weak models (like `fast`). Refactoring requires deep semantic understanding to guarantee that behavior is preserved while structure changes.
 
 ## CORE PRINCIPLES
 
