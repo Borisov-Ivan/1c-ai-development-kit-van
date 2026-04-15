@@ -1,7 +1,7 @@
 ---
 capabilities: [1c-query-optimization, 1c-performance, postgresql]
 name: onec-query-optimizer
-model: claude-4.6-sonnet-medium-thinking
+model: gemini-3.1-pro
 description: Optimize 1C queries for performance with index recommendations
 ---
 

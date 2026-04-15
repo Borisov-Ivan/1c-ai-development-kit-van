@@ -1,7 +1,7 @@
 ﻿---
 capabilities: [1c-metadata, 1c-code-quality]
 name: onec-metadata-helper
-model: claude-4.6-sonnet-medium-thinking
+model: default
 description: Navigate and analyze 1C metadata using Neo4j graph and semantic search
 ---
 

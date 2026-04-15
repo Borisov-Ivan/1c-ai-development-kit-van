@@ -1,7 +1,7 @@
 ---
 capabilities: [1c-forms, 1c-bsp, 1c-code-quality]
 name: onec-form-generator
-model: claude-4.6-sonnet-medium-thinking
+model: default
 description: Generate 1C managed forms from specifications with БСП compliance
 ---
 

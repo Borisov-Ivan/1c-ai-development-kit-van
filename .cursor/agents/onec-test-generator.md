@@ -1,7 +1,7 @@
 ---
 capabilities: [1c-testing, 1c-code-quality]
 name: onec-test-generator
-model: claude-4.6-sonnet-medium-thinking
+model: gemini-3.1-pro
 description: Generate Vanessa BDD and YaXUnit tests for 1C code
 ---
 
