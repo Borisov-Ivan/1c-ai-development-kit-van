@@ -2,7 +2,7 @@
 priority: critical
 capabilities: [1c-architecture, 1c-design, 1c-planning]
 name: onec-code-architect
-model: claude-4.6-opus-high-thinking
+model: claude-opus-4-7-thinking-high
 description: Design 1C architecture, create implementation plans, review architectural plans
 ---
 
