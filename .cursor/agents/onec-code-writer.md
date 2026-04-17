@@ -2,7 +2,7 @@
 priority: high
 capabilities: [1c-coding, 1c-implementation, 1c-refactoring]
 name: onec-code-writer
-model: default
+model: claude-4.6-sonnet-medium-thinking
 description: Modify existing 1C BSL code - edit procedures, functions, queries in existing modules. Never create new files/folders or modify metadata XML.
 ---
 
