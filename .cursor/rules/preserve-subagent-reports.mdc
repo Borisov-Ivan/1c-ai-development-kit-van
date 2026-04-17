@@ -1,6 +1,6 @@
 ---
 description: "Сохранять полные отчёты аналитических субагентов в reports/ change, не суммаризировать"
-alwaysApply: true
+alwaysApply: false
 ---
 
 # Сохранение отчётов субагентов
@@ -60,4 +60,4 @@ alwaysApply: true
 
 ---
 
-**Last updated**: 2026-03-11 | **Version**: 1.1 | **Changes**: alwaysApply: true (was false), added version metadata
+**Last updated**: 2026-03-11 | **Version**: 1.1 | **Changes**: alwaysApply: false (was false), added version metadata

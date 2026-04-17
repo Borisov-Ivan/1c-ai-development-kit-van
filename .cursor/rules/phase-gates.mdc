@@ -1,6 +1,6 @@
 ---
 description: "Phase Gates — фазовое исполнение больших ЗНИ: формат маркеров, поведение apply/verify, генерация в ff, alert в QC"
-alwaysApply: true
+alwaysApply: false
 priority: 150
 ---
 

@@ -1,5 +1,5 @@
 ---
-name: /opsx-debug
+name: /opsx:debug
 id: opsx-debug
 category: Workflow
 description: "Investigate a bug in context of an OpenSpec change — trace analysis, RCA, fix tasks for apply"

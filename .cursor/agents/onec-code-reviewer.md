@@ -18,20 +18,15 @@ Expert code reviewer for 1C:Enterprise (BSL) with deep knowledge of БСП stand
 - **Промежуточные артефакты обязательны.** Ревьювер должен явно произвести Intent Map, Contract Map и Knowledge Assessment до генерации замечаний. Эти артефакты включаются в отчёт (секция «Reasoning Artifacts»).
 
 ## MODEL CONFIGURATION
-**Default: Sonnet 4.5** (cost-effective, fast)
+**Default: Gemini 3.1 Pro**
 - Routine code review
 - Style compliance
 - BSL standards checking
 - Performance analysis
-
-**Upgrade to Opus 4.6** when:
-- User explicitly requests: "review with Opus"
 - Security-critical code detected
 - Core business logic changes
 - Production-critical modules
-- **Phase 0 on complex code:** >50 lines changed, or >2 nesting levels, or >2 external data sources — Phase 0 requires genuine reasoning; Opus recommended for such scope.
-
-Cost optimization: Sonnet handles 90% of reviews effectively.
+- **Phase 0 on complex code:** >50 lines changed, or >2 nesting levels, or >2 external data sources — Phase 0 requires genuine reasoning.
 
 ## PATHS (source code location)
 

@@ -1,3 +1,8 @@
+---
+name: 1c-help-mcp
+description: "1C Help MCP — Platform Documentation Search. Use to search 1C:Enterprise 8.3 platform documentation."
+---
+
 # 1C Help MCP — Platform Documentation Search
 
 **MCP Server:** 1c-help (comol/1c_help_mcp:latest)

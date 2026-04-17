@@ -1,5 +1,5 @@
 ---
-name: /opsx-verify
+name: /opsx:verify
 id: opsx-verify
 category: Workflow
 description: Universal quality gate — pre-apply (artifact quality, task specificity, gates) and post-apply (implementation completeness, correctness, coherence)

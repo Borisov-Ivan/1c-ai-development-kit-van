@@ -1,5 +1,13 @@
 # Changelog — 1C Agent Ecosystem
 
+## [4.0] - 2026-04-17
+
+### Removed
+- onec-form-generator: конфликт с запретом правки Form.xml (1c-xml-write-guard.mdc)
+- onec-test-generator: автотесты в проекте не используются, 0 вызовов в changes
+- onec-metadata-helper: MCP user-PROJECT-graph не развёрнут, функции поглощены onec-code-explorer
+- onec-query-optimizer: 0 вызовов в changes, функции поглощены onec-code-architect и onec-code-reviewer (последний с загрузкой скилла 1c-query-optimization)
+
 ## [3.1] - 2026-03-20
 
 ### Changed (onec-code-reviewer, bsl-antipatterns)
@@ -13,7 +21,7 @@
 - New agent: domain-agnostic OpenSpec Quality Controller (model: Opus, readonly)
 - Phase classification (P0-P4), dependency graph, false start detection, rework risk assessment
 - Called from `/opsx:verify` step 7.6 via `Task(subagent_type="openspec-quality-controller")`
-- Replaces previous `generalPurpose` call with guaranteed Opus model via agent file
+- Replaces previous `generalPurpose` call with default model via agent file
 
 ## [2.0] - 2026-03-08
 

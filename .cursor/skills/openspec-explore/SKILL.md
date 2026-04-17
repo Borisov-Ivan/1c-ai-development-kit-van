@@ -273,7 +273,7 @@ Depending on what the user brings, you might:
 
 ### Agent delegation в explore
 
-Аналитические агенты в explore: onec-code-explorer (код 3+ модулей), onec-code-architect (архитектура), onec-trace-analyst (трассы), onec-metadata-helper (метаданные). Пороги делегирования — `1c-agent-delegation.mdc` (HALT CONDITIONS + DELEGATION GATE).
+Аналитические агенты в explore: onec-code-explorer (код 3+ модулей), onec-code-architect (архитектура), onec-trace-analyst (трассы). Пороги делегирования — `1c-agent-delegation.mdc` (HALT CONDITIONS + DELEGATION GATE).
 
 **Реализационные агенты (onec-code-writer, onec-code-reviewer) в explore НЕ запускаются** — только анализ и рекомендации.
 

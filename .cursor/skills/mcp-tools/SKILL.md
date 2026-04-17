@@ -1,3 +1,8 @@
+---
+name: mcp-tools
+description: "MCP Tools Usage Guide - decision trees and tool categories for selecting the right MCP tool based on task context."
+---
+
 # MCP Tools Usage Guide
 
 ## PRINCIPLE

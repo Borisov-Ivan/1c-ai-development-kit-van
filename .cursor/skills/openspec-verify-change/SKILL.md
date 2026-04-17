@@ -523,20 +523,9 @@ Universal quality gate for OpenSpec changes. Works in two modes determined autom
    **Режимы post-apply и phase-transition:** при чистом post-apply (все задачи `[x]`) шаг 7.8 обычно не применяется; если verify запускается в **mixed**, использовать тот же подсчёт задач по всему `tasks.md`.
 
    **Logic:** (выполнять только если генерация ТЗ обязательна или запрошена по правилам выше)
-   1. Read the TZ prompt from `.cursor/skills/openspec-docs/prompts/change-tz.md`
-   2. Read all change artifacts: proposal.md, design.md, specs/\*/spec.md, latest `reports/architecture-*.md` (if any), latest `reports/exploration-*.md` (if any). Optionally `openspec/project.md` for product context.
-   3. Delegate TZ generation to a subagent via `Task(subagent_type="generalPurpose")`. Pass the TZ prompt and all collected artifacts as context. Ask the subagent to act as a technical writer and output the generated TZ document.
-   4. **Verify completeness**: for each TZ section defined in the prompt template:
-      - If the section is filled with substantive content from artifacts → OK
-      - If a section cannot be filled (data absent in artifacts) → WARNING with indication of which artifact is incomplete
-      - If "Проблема" section is empty (no Why in proposal) → WARNING: "proposal.md не содержит обоснования (секция Why)"
-      - If "Критерии приёмки" section is empty (no scenarios in spec) → WARNING: "spec не содержит сценариев для критериев приёмки"
-   5. Run the prompt's built-in "Верификация артефактов" checks (contradictions, defaults analysis, completeness)
-   5b. **Lexicon check**: read Grep patterns from `.cursor/docs/tz-lexicon-dictionary.md` (section "Grep-паттерны"). Run Grep on the generated TZ text.
-      - Matches found → WARNING: "ТЗ содержит нарушения лексики: [found words]. Рекомендация: заменить на русские эквиваленты из словаря (`.cursor/docs/tz-lexicon-dictionary.md`) или перегенерировать ТЗ (`/opsx:doc-tz <name>`)."
-      - No matches → OK
-   6. Save TZ to `openspec/changes/<name>/ТЗ.md`
-   7. Add TZ generation remarks (if any) to the verification report
+   1. Вызвать алгоритм из `.cursor/skills/openspec-docs/SKILL.md` (генерация ТЗ через `openspec-doc-writer` и опциональное ревью).
+   2. Сохранить результат в `openspec/changes/<name>/ТЗ.md`.
+   3. Добавить замечания по генерации (если были) в отчёт verify.
 
    **Report section:** `### ТЗ (функциональные требования)` — status (generated / generated with warnings / skipped threshold / skipped — user N/A), file path, list of gaps if any.
 

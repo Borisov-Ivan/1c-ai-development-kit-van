@@ -1,5 +1,5 @@
 ---
-name: /opsx-estimate
+name: /opsx:estimate
 id: opsx-estimate
 category: Workflow
 description: Estimate man-hours for a change using PERT method

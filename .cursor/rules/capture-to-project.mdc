@@ -1,6 +1,6 @@
 ---
 description: "Фиксация договорённостей из диалога в openspec/project.md"
-alwaysApply: true
+alwaysApply: false
 ---
 
 # Capture to Project — фиксация в project.md

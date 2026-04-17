@@ -30,6 +30,7 @@ description: Toolkit for 1C roles - create from JSON DSL, analyze rights. Use wh
 - Поддержка всех типов прав (Read, Insert, Update, Delete, View, etc)
 - Настройка RLS (Row Level Security)
 - Шаблоны ограничений
+- *Примечание: Валидация структуры встроена в процесс компиляции.*
 
 ### 2. info - Анализ прав роли
 **Путь**: `1c-roles/info/SKILL.md`

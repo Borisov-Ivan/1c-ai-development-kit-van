@@ -25,4 +25,4 @@ model: gemini-3.1-pro
 
 ## Usage
 
-This agent profile is currently implemented using the `generalPurpose` subagent type in Cursor, instructed to act as a technical writer using the `prompts/change-tz.md` template.
+This agent profile is implemented using the `openspec-doc-writer` subagent type in Cursor, instructed to act as a technical writer using the `.cursor/skills/openspec-docs/prompts/change-tz.md` template.

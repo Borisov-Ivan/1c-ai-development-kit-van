@@ -1,5 +1,5 @@
 ---
-name: /opsx-continue
+name: /opsx:continue
 id: opsx-continue
 category: Workflow
 description: Continue working on a change - create the next artifact (Experimental)

@@ -19,7 +19,8 @@ explore → new/ff → verify → apply → verify → archive
 | **Реализация** | `/opsx:apply` | Выполнение задач из tasks.md. Soft redirect на verify если не проводился | onec-code-writer + onec-code-reviewer |
 | **Архивация** | `/opsx:archive` | Синхронизация specs, перенос в archive/ | — |
 | **Отладка** | `/opsx:debug` | RCA + fix tasks в контексте change (без реализации кода) | onec-trace-analyst, onec-code-explorer |
-| **Предрелизное ревью** | `/opsx:prerelease-review` | Батчевый ревью расширения | onec-code-reviewer |
+| **Предрелизное ревью** | `/prerelease-review` | Батчевый ревью расширения | onec-code-reviewer |
+| **Ревью кода** | `/review` | Ревью по контексту запроса | onec-code-reviewer |
 
 Дополнительные действия: `continue` (следующий артефакт), `sync` (дельта-спеки → main), `bulk-archive` (пакетная архивация).
 
@@ -31,15 +32,15 @@ explore → new/ff → verify → apply → verify → archive
 
 ## ДОБАВЛЕНИЕ ЗАДАЧ К СУЩЕСТВУЮЩЕМУ CHANGE
 
-| Сценарий | Путь |
-|---|---|
-| Исправление ошибки при тестировании | `/opsx:debug <change>` — RCA + автоматическое добавление задач |
-| Новый scope при исследовании | `/opsx:explore` → capture → "Add to tasks.md?" |
-| Пересмотр на границе фазы | `/opsx:apply` → Phase Gate → Option 3 (architect) |
-| Реструктуризация плоских задач в фазы | `/opsx:verify` → remediation `missing-phase-gate` → architect |
+См. таблицу и правила в `phase-gates.mdc` (секция «ДОБАВЛЕНИЕ ЗАДАЧ В PHASED TASKS»). `/opsx:ff` создаёт **новый** change — не используется для добавления задач к существующему.
 
-`/opsx:ff` создаёт **новый** change — не используется для добавления задач к существующему.
-При наличии phase gates в tasks.md — задачи вставляются в правильную фазу (см. `phase-gates.mdc`, секция «ДОБАВЛЕНИЕ ЗАДАЧ В PHASED TASKS»).
+## ПОРОГИ МАСШТАБА ЗНИ
+
+| Порог (задач в tasks.md) | Поведение в workflow |
+|--------------------------|----------------------|
+| **≤ 5 задач** | **Lite verify**: пропускается Quality Controller (openspec-quality-controller), компактный вызов архитектора. |
+| **≥ 6 задач** | **Генерация ТЗ**: шаг 7.8 в verify автоматически генерирует `ТЗ.md` (если не Lite). |
+| **10+ задач** | **Phase Gates**: рекомендуется разбиение на фазы (`<!-- phase-gate -->`). Verify выдаёт алерт `missing-phase-gate`. |
 
 ## ПРИНЦИПЫ
 
