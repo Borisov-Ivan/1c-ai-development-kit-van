@@ -23,16 +23,36 @@ Sonnet (fast) по умолчанию. Opus — только для критич
 
 ## AGENT CONFIGURATION
 
-| Агент | Модель | Причина |
-|-------|--------|---------|
-| **onec-code-architect** | **Opus** | Архитектурные решения, глубокий анализ |
-| onec-code-writer | fast / adaptive | Генерация кода. Fast для Light Mode и простых задач; parent model для Extension Guard, bug fix, средней+ сложности |
+| Агент | Роль (семантика) | Причина |
+|-------|------------------|---------|
+| **onec-code-architect** | **high-reasoning** | Архитектурные решения, глубокий анализ |
+| onec-code-writer | adaptive (writer default) | Генерация кода. Light Mode / простые задачи — fast-равное качество; средняя+ сложность — мощнее |
 | onec-code-reviewer | fast | Ревью по стандартам |
 | onec-code-explorer | fast | Навигация по коду |
 | onec-trace-analyst | fast | Парсинг трасс |
 | Утилитарные и инфраструктурные | fast | По умолчанию. См. `1c-utility-agents.mdc` |
 
-### Override на Opus
+Фактические слаги моделей для каждого агента зафиксированы **во фронтматтере** `.cursor/agents/<agent>.md` (поле `model:`). Текущая раскладка — в `.cursor/skills/1c-agent-patterns/SKILL.md` (секция «Выбор модели (все 1С-агенты)»).
+
+## Как применяется модель
+
+**Единственный штатный способ** — фронтматтер агентного файла. `Task(subagent_type="<agent>")` подхватывает `model:` из `.cursor/agents/<agent>.md` автоматически.
+
+**Передача `model=...` в `Task(...)` — override.** Она заменяет фронтматтер на один конкретный вызов и имеет смысл только в трёх случаях:
+
+1. **Явный запрос пользователя:** «используй gemini», «используй opus», «используй fast».
+2. **Документированный fallback:** `onec-code-architect` недоступен / таймаут → повтор с `subagent_type="onec-code-architect-2nd"` (см. «FALLBACK STRATEGY» ниже).
+3. **Диагностика по прямому указанию пользователя:** «воспроизведи проблему на другой модели».
+
+**Никогда:**
+
+- Не передавать `model="fast"` в `Task(...)` для `onec-code-architect` — понижает Opus и теряет ценность архитектурного ревью.
+- Не копировать `model=...` из шаблонов «по инерции» — это скрытый override фронтматтера.
+- Не передавать `model=...` для 1С-агентов без причины из списка выше.
+
+Если в шаблоне промпта (в т.ч. в `1c-agent-patterns/SKILL.md` или в cursor-commands) встречается `model="fast"` рядом с `subagent_type="onec-*"` — это **устаревшее наследие**. Игнорировать и вызывать без параметра `model`.
+
+### Override на high-reasoning (Opus-подобные модели)
 
 Только при: явном запросе пользователя, обнаруженной security-уязвимости, data corruption, breaking change.
 
@@ -62,10 +82,11 @@ Sonnet (fast) по умолчанию. Opus — только для критич
 
 ## INTEGRATION
 
-- `1c-agent-delegation.mdc`: agent model defaults
-- `1c-agent-delegation.mdc`: HALT conditions + delegation triggers
+- `1c-agent-delegation.mdc`: agent model defaults, HALT conditions + delegation triggers
+- `tool-name-guard.mdc`: правило «параметр `model` в `Task(...)` по умолчанию не передавать»
+- `1c-agent-patterns/SKILL.md` (секция «Выбор модели (все 1С-агенты)»): таблица фактических моделей из фронтматтера
 - `sdd-workflow.mdc`: OpenSpec flow
 
 ---
 
-**Last updated**: 2026-03-08 | **Version**: 2.2 | **Changes**: Writer model selection now adaptive (see `1c-agent-patterns/SKILL.md` table)
+**Last updated**: 2026-04-19 | **Version**: 2.3 | **Changes**: Добавлена секция «Как применяется модель» — фронтматтер агента vs параметр `model` в `Task(...)`; зафиксированы три случая допустимого override; запрет `model="fast"` для `onec-code-architect`

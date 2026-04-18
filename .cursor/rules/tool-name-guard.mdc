@@ -12,14 +12,59 @@ alwaysApply: true
 - Вызов: `Task(subagent_type="...", description="...", ...)`.
 - Перед вызовом: убедиться, что в коде/промпте указано именно **Task**.
 
+## Допустимые `subagent_type`
+
+Список разделён по назначению. Для 1С-задач (BSL, XML-метаданные из `src/**`, трассы `.pff`/TRACE, расширения `cfe/*`, отладка/ревью/архитектура по 1С) использовать **только** агентов из первой группы.
+
+**1С-агенты (для BSL/XML/трасс/cfe):**
+
+- `onec-code-writer` — правка .bsl
+- `onec-code-reviewer` — ревью BSL
+- `onec-code-architect` / `onec-code-architect-2nd` (fallback) — архитектура
+- `onec-code-explorer` — обследование кода 3+ модулей
+- `onec-trace-analyst` — трассы и стеки ошибок
+- `onec-code-simplifier` — упрощение BSL
+- `onec-admin` — серверы 1С, PostgreSQL, ibcmd, выгрузка XML
+
+**Generic / OpenSpec (для задач вне 1С-контента):**
+
+- `generalPurpose`, `explore`, `shell` — общие задачи, инфраструктура, неспецифичный поиск
+- `openspec-quality-controller`, `openspec-doc-writer` — OpenSpec-артефакты (не BSL)
+- `mcp-deploy` — деплой MCP-серверов
+
+## NEGATIVE GUARD (обязательно)
+
+**Запрещено** использовать `generalPurpose` и `explore` для 1С-задач (BSL, XML-метаданные, трассы, расширения `cfe/*`, отладка/ревью/архитектура).
+
+Симптомы ошибки делегирования: вывод без BSL-цитат `file:line`, попытки писать shell-скрипты для обследования кода, игнорирование путей из `openspec/project.md`. Это маскирует причину и даёт скрипто-ориентированный вывод вместо BSL-анализа.
+
+При обнаружении — СТОП, повторить с корректным 1С-агентом:
+
+- Обследование кода / трассировка вызовов → `onec-code-explorer`
+- Трасса `.pff` или стек ошибки → `onec-trace-analyst`
+- Архитектурный вопрос → `onec-code-architect`
+
+См. также HALT-таблицу в `.cursor/rules/1c-agent-delegation.mdc`.
+
+## Параметр `model` в `Task(...)`
+
+**По умолчанию не передавать.** Модель агента задаётся фронтматтером файла `.cursor/agents/<agent>.md` (поле `model:`) и подхватывается автоматически при вызове `subagent_type="<agent>"` без параметра `model`.
+
+Передача `model=...` в `Task(...)` — **override**, заменяющий фронтматтер на один вызов. Использовать **только**:
+
+- По явному запросу пользователя («используй gemini», «используй opus»).
+- При документированном fallback (см. пункт «Fallback-перехват» ниже).
+
+Никогда не передавать `model="fast"` для 1С-агентов: для `onec-code-architect` это понижает Opus до fast; для `onec-code-explorer` / `onec-code-reviewer` — переопределяет оптимальную модель из фронтматтера. См. `.cursor/rules/model-selection.mdc`.
+
 ## При ошибке `Invalid enum value`
 
 1. Проверить имя инструмента — должен быть **Task** (в других средах или в памяти иногда фигурируют иные имена — здесь корректно только Task).
-2. Проверить `subagent_type` — допустимые: onec-code-writer, onec-code-reviewer, onec-code-architect, onec-code-architect-2nd, onec-code-explorer, onec-trace-analyst, onec-code-simplifier, openspec-quality-controller, openspec-doc-writer, generalPurpose, explore, shell, mcp-deploy, onec-admin и др. (см. описание инструмента).
-3. Не переключаться на generalPurpose — это маскирует причину.
+2. Проверить `subagent_type` по списку выше; для 1С-задач — только 1С-агенты.
+3. Не переключаться на `generalPurpose` / `explore` как на «запасной вариант» — это маскирует причину.
 4. **Fallback-перехват:** Если вызов `onec-code-architect` падает с ошибкой недоступности модели или таймаутом, не останавливаться, а выполнить повторный вызов с `subagent_type="onec-code-architect-2nd"`.
 5. Если retry не помог — СТОП, сообщить пользователю.
 
 ---
 
-**Last updated**: 2026-03-14 | **Version**: 1.2 | **Changes**: позитивная формулировка — акцент на «используй Task», убрано частое перечисление несуществующих имён
+**Last updated**: 2026-04-19 | **Version**: 1.3 | **Changes**: список subagent_type разделён на 1С/generic, добавлен negative guard на `explore`+`generalPurpose` для 1С-задач, зафиксировано правило «`model` в `Task(...)` по умолчанию не передавать»

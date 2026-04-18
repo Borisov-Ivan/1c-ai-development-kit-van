@@ -155,14 +155,40 @@ Orchestrator implementation gate: если промпт описывает ко�
 Если подсказка нарушает стандарт — НЕ реализовывать, обосновать отказ.
 ```
 
-### Выбор модели для writer
+### Выбор модели (все 1С-агенты)
 
-| Условие | model |
+**Общее правило: параметр `model` в `Task(...)` по умолчанию не передавать.** Модель каждого агента задана фронтматтером `.cursor/agents/<agent>.md` (поле `model:`) и наследуется автоматически:
+
+| Агент | Модель из фронтматтера |
 |---|---|
-| Light Mode, Mechanical Mode, простая задача (1-2 файла, очевидная реализация) | `model="fast"` |
-| Extension Guard (обнаружен &ИзменениеИКонтроль) | не указывать (наследует parent) |
-| Bug fix с root cause | не указывать (наследует parent) |
-| Средняя+ сложность (3+ файлов, архитектурные решения) | не указывать (наследует parent) |
+| `onec-code-architect` | `claude-opus-4-7-thinking-high` |
+| `onec-code-architect-2nd` (fallback) | `gemini-3.1-pro` |
+| `onec-code-explorer` | `gpt-5.4-medium` |
+| `onec-code-reviewer` | `gemini-3.1-pro` |
+| `onec-code-writer` | `claude-4.6-sonnet-medium-thinking` |
+| `onec-code-simplifier` | `gemini-3.1-pro` |
+| `onec-trace-analyst` | `default` (наследует parent) |
+
+**Когда передавать `model=...` всё-таки нужно:**
+
+- Явный запрос пользователя («используй gemini», «используй opus»).
+- Документированный fallback (`onec-code-architect` недоступен → вызов `onec-code-architect-2nd`).
+
+**Чего нельзя:**
+
+- `model="fast"` для `onec-code-architect` — роняет Opus и теряет глубину архитектурного анализа.
+- Любая передача `model=...` для остальных агентов без явного запроса пользователя — переопределяет фронтматтер на один вызов.
+
+Детали — в `.cursor/rules/model-selection.mdc` (секция «Как применяется модель») и `.cursor/rules/tool-name-guard.mdc` (секция «Параметр `model` в `Task(...)`»).
+
+**Частный случай writer** (осталось для обратной совместимости с LIGHT MODE):
+
+| Условие | model в `Task(...)` |
+|---|---|
+| Light Mode, Mechanical Mode, простая задача (1-2 файла, очевидная реализация) | не указывать (наследует фронтматтер `claude-4.6-sonnet-medium-thinking`) |
+| Extension Guard (обнаружен &ИзменениеИКонтроль) | не указывать |
+| Bug fix с root cause | не указывать |
+| Средняя+ сложность (3+ файлов, архитектурные решения) | не указывать |
 
 ---
 
@@ -187,8 +213,7 @@ Task(
          механизма.
          
          Контекст задачи: [из proposal/design или описания пользователя]",
-  subagent_type="onec-code-explorer",
-  model="fast"
+  subagent_type="onec-code-explorer"
 )
 ```
 
@@ -226,8 +251,7 @@ Task(
          - Не строить альтернативные гипотезы
          - Не додумывать — если код не найден, ответ inconclusive
          - Для каждого confirms/refutes обязательна цитата из кода",
-  subagent_type="onec-code-explorer",
-  model="fast"
+  subagent_type="onec-code-explorer"
 )
 ```
 
@@ -1366,8 +1390,7 @@ Task(
 
          Если в отчёте нет ADR-worthy решений — вернуть:
          'Нет решений, подходящих для ADR. Причина: [объяснение].'",
-  subagent_type="onec-code-architect",
-  model="fast"
+  subagent_type="onec-code-architect"
 )
 ```
 
@@ -1458,8 +1481,7 @@ Task(
          | 1 | ... | ... | ... |
 
          Если замечаний нет — написать 'Замечаний к артефактам нет.'",
-  subagent_type="onec-code-architect",
-  model="fast"
+  subagent_type="onec-code-architect"
 )
 ```
 
@@ -1547,7 +1569,7 @@ Task(
 
 ---
 
-**Last updated**: 2026-04-18
-**Version**: 3.0
-**Changes**: Vertical Slices Framework — заменены 4 архитектурных шаблона (task decomposition → slice decomposition + slice-aware task decomposition; phase transition review → slice transition review; phase gate restructuring → slice restructuring). Удалены упоминания P0–P4 и `<!-- phase-gate -->`. См. `.cursor/rules/vertical-slices.mdc`.
+**Last updated**: 2026-04-19
+**Version**: 3.1
+**Changes**: Убран `model="fast"` из шаблонов Task для `onec-code-explorer` (x2) и `onec-code-architect` (x2) — переопределял фронтматтер агентов. Секция «Выбор модели для writer» переписана в общий раздел «Выбор модели (все 1С-агенты)» с принципом «`model` в `Task(...)` по умолчанию не передавать». (v3.0 — Vertical Slices Framework.)
 **Source**: Extracted from 1c-feature-dev-enhanced v2.2 (Phase 0-8 workflow replaced by OpenSpec)
