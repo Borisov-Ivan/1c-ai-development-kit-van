@@ -75,66 +75,95 @@ Implement tasks from an OpenSpec change.
 
    Verify check is advisory — does not block apply.
 
-5. **Show current progress**
+5. **Resume with pending verdict & Show current progress**
+
+   **Resume with pending verdict (FIRST ACTION, before any work):**
+
+   1. Grep последнюю запись в `debug.md` `## Slice Gate Decisions` для каждого среза.
+   2. Найти самую раннюю по порядку запись с `Решение: awaiting-acceptance`, где:
+      - все non-test задачи среза S<N> = [x],
+      - S<N>.T<M> = [ ].
+   3. Если найдено — НИЧЕГО не реализовывать, сразу AskQuestion:
+
+      Slice Gate S<N> — <имя> — ожидает вердикта
+
+      Ты вернулся с проверки. Что по результату прогона S<N>.T<M>?
+
+      [1] Принят — отметить S<N>.T<M> [x], перейти к S<N+1>
+      [2] Не принят — опишу что не работает, rework внутри S<N>
+      [3] Дефект в предыдущем срезе S<K> — создать мини-срез S<K>.fix
+
+   4. По ответу:
+      - [1] → mark [x], append debug.md "решение: принят", сгенерировать reports/slice-acceptance-S<N>-YYYY-MM-DD.md, перейти к задачам S<N+1>.
+      - [2] → запросить описание проблемы; append debug.md "решение: не принят" + секция ## Debug — S<N>; создать fix-задачи перед S<N>.T<M>; начать их выполнение.
+      - [3] → запросить описание дефекта; создать S<K>.fix срез (по правилу vertical-slices.mdc); снять [x] с S<K>.T<M>.
+
+   5. Если awaiting-acceptance не обнаружено — перейти к обычному "Show current progress" ниже.
+
+   **Show current progress:**
 
    Display:
    - Schema being used
    - Progress: "N/M tasks complete"
-   - **Phase progress (if phase gates detected):** For each phase, show task count and status:
+   - **Slice progress (if slices detected):** For each slice, show task count and acceptance status:
      ```
-     Фаза 1: Подготовка — 4/4 done
-     Фаза 2: Реализация — 0/5 pending  ← текущая
-     Фаза 3: Интеграция — 0/3 pending
+     Срез S1: Флажок в шаблоне — 3/3 done, S1.T1 [x] ПРИНЯТ
+     Срез S2: Копирование флага в БП — 2/4 done, S2.T1 [ ]  ← текущий
+     Срез S3: Индикатор на форме параметров — 0/3 pending
      ```
    - Remaining tasks overview
    - Dynamic instruction from CLI
-   - **Phase Gate Decisions (if debug.md contains them):** Show previous phase gate decisions from `debug.md` section `## Phase Gate Decisions` — helps orient after session breaks
+   - **Slice Gate Decisions (if debug.md contains them):** Show previous slice gate decisions from `debug.md` section `## Slice Gate Decisions` — helps orient after session breaks
 
-5.5 **Analyze parallelization (file + phase dependencies)**
+5.5 **Analyze parallelization (slices + file dependencies)**
 
    Before starting implementation:
 
-   **Phase-aware ordering:**
-   1. Glob `reports/quality-control-*.md` in change dir
-   2. If found — read the phase classification table and dependency graph from the most recent report
-   3. Group tasks by phase AND file dependencies:
-      - **Phase dependencies** (from Quality Controller report): P0 tasks before P1, P1 before P2, P2 before P3, P3 before P4. Tasks in phase P(N) cannot start until their dependencies in P(N-1) are complete.
-      - **File dependencies** (existing logic): tasks touching different files within the same phase = independent = can run in parallel; tasks touching the same file = sequential
-   4. Display groups with phase annotations:
-      - "P0: tasks 1.1, 1.2 (infrastructure, run first)"
-      - "P1: task 2.1 (form spec, after P0)"
-      - "P2: tasks 2.2-2.5, 3.1-3.2 (implementation, after P1; parallel by file)"
-      - "P3: tasks 3.3-3.6 (integration, after P2)"
-      - "P4: tasks 4.1-4.4 (verification, last)"
+   **Slice-aware ordering:**
+   1. Grep `tasks.md` for `^# Срез S\d+` — if found, ЗНИ is in **slice mode** (default).
+   2. Read slice metadata blocks (Сценарий, Приёмка, Связь со spec, Зависимости) for each slice.
+   3. Glob `reports/quality-control-*.md` in change dir — if found, use slice dependency graph and coverage matrix from it.
+   4. Order slices by dependency graph: S<N> can start only when all slices in `**Зависимости:**` have `S<K>.T<M>` = `[x]`.
+   5. Within a slice, group tasks by layer/file:
+      - Tasks touching different files = independent = can run in parallel (up to 3 concurrent via Task tool).
+      - Tasks touching the same file = sequential.
+      - Layer ordering inside slice is guidance only (метаданные → форма → код → приёмка); enforce via task-level dependency graph from tasks.md.
+   6. Display plan:
+     ```
+     Срезы для выполнения:
+     - S1: Флажок в шаблоне (3 задачи + S1.T1)
+     - --- Slice Gate S1 ---
+     - S2: Копирование флага в БП (4 задачи + S2.T1), зависит от S1
+     - --- Slice Gate S2 ---
+     - S3: ...
+     Реализация будет останавливаться на каждом slice gate для приёмки.
+     ```
+   Ref: `.cursor/rules/vertical-slices.mdc`.
 
-   **If no Quality Controller report found** — fall back to file-only parallelization:
-   - Tasks touching different files = independent = can run in parallel
-   - Tasks touching the same file = sequential
-
-   **Phase Gate Detection:**
-   Grep tasks.md for `<!-- phase-gate` markers.
-   If found:
-   - Parse phase boundaries (tasks between consecutive markers or between `# Фаза N` headers)
-   - Display phase plan:
-     "Phase Gates обнаружены. Задачи разбиты на N фаз:
-     - Фаза 1 (задачи X.Y–Z.W): <название из заголовка или маркера>
-     - --- Phase Gate ---
-     - Фаза 2 (задачи ...): ...
-     Реализация будет останавливаться на каждом phase gate."
-   Ref: `.cursor/rules/phase-gates.mdc`.
+   **Legacy mode (no slices in tasks.md):**
+   - Warn: "ЗНИ без срезов. Рекомендуется `/opsx:verify <name> --migrate-to-slices` перед продолжением."
+   - AskQuestion: `[Продолжить без срезов] / [Мигрировать на срезы (verify)] / [Стоп]`.
+   - `Продолжить` → fall back to file-only parallelization (tasks touching different files = independent; same file = sequential). Нет slice-gate пауз.
+   - `Мигрировать` → STOP apply, предложить запустить `/opsx:verify <name> --migrate-to-slices`.
+   - `Стоп` → завершить apply.
 
    **5.6 Determine execution mode**
 
-   **Step-by-step mode** activates when ANY of:
-   - User explicitly requests: «по одной», «step-by-step», «пошагово», «по шагам», «одну задачу»
-   - Debug session: debug.md exists AND was modified today (current session is actively debugging)
-   - Current batch has P4 (test) tasks intermixed with P2/P3 (implementation) tasks in the execution order
+   **Step-by-slice mode** (DEFAULT for slice mode):
+   - Выполнять задачи одного среза подряд (параллелизация по файлам внутри среза допустима).
+   - После последней non-test задачи среза — ОБЯЗАТЕЛЬНАЯ ПАУЗА на slice-gate (карточка приёмки, см. шаг 6).
+   - Не начинать следующий срез до принятия (или явного пропуска) текущего.
 
-   **Batch mode** (default): current behavior — sequential execution with pauses only on errors/gates/conditionals.
+   **Step-by-step mode** — более жёсткий режим, активируется когда:
+   - User explicitly requests: «по одной», «step-by-step», «пошагово», «по шагам», «одну задачу».
+   - Debug session: debug.md exists AND was modified today (current session is actively debugging).
+   - В режиме step-by-step — пауза также после КАЖДОЙ завершённой задачи (не только на slice-gate).
 
-   Announce mode: "Режим: пошаговый (подтверждение после каждой задачи)" or "Режим: последовательный (пауза на gate/ошибке/условии)".
+   **Batch mode** активируется ТОЛЬКО в legacy mode (без срезов) и по явному запросу пользователя — sequential execution с паузами только на ошибках/условных задачах.
 
-   Launch up to 3 independent tasks in parallel via **Task** tool when applicable. Делегирование субагентам — через инструмент **Task** (см. `.cursor/rules/tool-name-guard.mdc`).
+   Announce mode: "Режим: step-by-slice (пауза на каждом slice-gate)" / "Режим: step-by-step (пауза после каждой задачи и на slice-gate)" / "Режим: batch/legacy (пауза только на ошибках)".
+
+   Launch up to 3 independent tasks in parallel via **Task** tool when applicable внутри одного среза. Делегирование субагентам — через инструмент **Task** (см. `.cursor/rules/tool-name-guard.mdc`).
 
 6. **Implement tasks (loop until done or blocked)**
 
@@ -162,7 +191,7 @@ Implement tasks from an OpenSpec change.
    | BSL-код (новая логика, правка процедур) | «реализовать», «добавить», «доработать» + путь к .bsl | **onec-code-writer** + **onec-code-reviewer** после |
    | Форма (Form.xml) | «форму», «реквизиты формы», «элементы формы», «Form.xml» | **СТОП.** Инструкция ручного конфигурирования (1c-xml-write-guard.mdc). WAIT — не продолжать до выгрузки |
    | Верификация метаданных | «проверить соответствие», «проверить наличие» | Оркестратор (Glob/Grep/Read — только проверка, не реализация) |
-   | Ручной тест | «ручной тест», «убедиться» | **Step-by-step:** показать сценарий, ждать результат (Пройден/Не пройден/Отложить). **Batch:** пропустить с предупреждением; включить в Session Summary секцию "Отложенные ручные тесты" |
+   | Приёмочный тест (`S<N>.T<M>`) или ручной тест | «ручной тест», «убедиться», `S<N>.T<M>` | **Step-by-slice / step-by-step:** trigger Slice Gate (см. шаг 6). **Legacy batch:** пропустить с предупреждением; включить в Session Summary секцию "Отложенные ручные тесты" |
    | Создание метаданных | «создать регистр», «создать справочник», «создать форму» (scaffold) | **СТОП** — блокер пользователю (`1c-no-metadata-creation.mdc`) |
 
    **HALT:** Оркестратор НЕ реализует задачи типов BSL-код и Форма самостоятельно. Оркестратор готовит промпт и делегирует. Прямое использование Write/StrReplace для .bsl, **прямая правка Form.xml** и прямая генерация JSON-спецификаций форм для form-compile — запрещены. Для форм: СТОП — сформировать инструкцию ручного конфигурирования (1c-xml-write-guard.mdc); не продолжать до выгрузки пользователем. Ref: `1c-agent-delegation.mdc`, `1c-utility-agents.mdc`.
@@ -177,40 +206,68 @@ Implement tasks from an OpenSpec change.
    **Task loop:**
 
    For each pending task:
-   - **Phase Gate check:** If this task is the first task after a `<!-- phase-gate -->` marker (i.e. all tasks before the gate are [x]), trigger ОБЯЗАТЕЛЬНАЯ ПАУЗА:
-     ```
-     === Phase Gate ===
-     Фаза N завершена. K/M задач выполнено.
-     Критерий приёмки фазы: <текст из phase-gate маркера>
+   - **Slice Gate (после последней non-test задачи среза):**
+     Детектор: все задачи S<N>.<M> = [x], S<N>.T<M> = [ ].
 
-     Задачи следующей фазы:
-     - N+1.1: <краткое описание>
-     - N+1.2: ...
+     Действие — сгенерировать Acceptance Handoff Card (НЕ вызывать AskQuestion):
 
-     [1. Продолжить к следующей фазе]
-     [2. Запустить phase-transition verify (рекомендуется)]
-     [3. Пересмотреть задачи следующей фазы]
-     [4. Стоп]
      ```
-     - Option 1 → continue to next task
-     - Option 2 → suggest `/opsx:verify <name>` in phase-transition mode; STOP apply until user has run verify and confirms resume
-     - Option 3 → **Post-architect task restructuring flow:**
-       1. Delegate to **onec-code-architect** with prompt from `1c-agent-patterns/SKILL.md` "Architect — phase transition review": пересмотреть задачи следующей фазы с учётом реализации текущей; передать путь к debug.md и reports/.
-       2. Architect returns: recommendations + full text of updated task sections for the next phase.
-       3. Show user a summary of changes: which tasks added/removed/modified, what rationale.
-       4. AskQuestion: "Применить изменения к tasks.md? [Да / Нет / Скорректировать]"
-       5. On "Да" → apply changes to tasks.md via StrReplace (preserve `[x]` status of completed tasks, new tasks get `[ ]`). Re-read tasks.md. Recalculate phase progress.
-       6. On "Нет" → keep original tasks, continue to Phase Gate log.
-       7. On "Скорректировать" → ask user for specific corrections, apply, re-read.
-       8. After tasks update: AskQuestion "Продолжить apply?"
-     - Option 4 → STOP apply
-   - **Phase Gate log (mandatory for all options):** After the user's decision at a phase gate, append a record to `debug.md` (create section `## Phase Gate Decisions` if absent):
+     === Acceptance Handoff — S<N>: <имя среза> ===
+
+     Что реализовано:
+     - Задачи: N/N non-test done (S<N>.1, S<N>.2, ..., всё [x])
+     - Файлы: <список с краткой пометкой "что изменилось">
+     - Автопроверки: линтер чист / reviewer PASS (или замечания перечислить)
+
+     Что я прошу проверить — СЦЕНАРИЙ S<N>.T<M>:
+     <переписать критерии приёмки из S<N>.T<M> в императиве, по пунктам>
+     1. Открыть <что>
+     2. Выполнить <действие>
+     3. Убедиться <ожидаемый результат>
+     (R1/R2/R3 или другие ссылки — развернуть человечески)
+
+     Как вернуться:
+       /opsx:apply <change-name>
+     В начале новой сессии я сразу спрошу вердикт (принят / не принят / дефект в предыдущем срезе).
+     Пока ты проверяешь — я ничего не делаю.
+
+     Если сейчас уже всё проверено и принято — напиши "принято S<N>" / "accept S<N>", я отмечу без handoff.
      ```
-     ### Phase Gate N (YYYY-MM-DD)
-     Фаза: N — <phase name>
-     Решение: <продолжить / пересмотр / verify / стоп>
+
+     Параллельно:
+     1. Append в `debug.md` `## Slice Gate Decisions`:
+        ```markdown
+        ### Slice S<N> — <имя> (YYYY-MM-DD)
+        Срез: S<N> — <имя>
+        Решение: awaiting-acceptance
+        Обоснование: все non-test задачи реализованы и прошли автопроверки; приёмочный тест S<N>.T<M> передан пользователю на ручной прогон.
+        Изменения tasks: нет (S<N>.T<M> остаётся [ ])
+        Связанный отчёт: —
+        ```
+     2. Session Handoff Summary по шаблону шага 7 — но с заголовком "## Paused for Acceptance — S<N>". Секция "Что проверить СЕЙЧАС" заполняется сценарием из S<N>.T<M> (та же информация, что в Acceptance Handoff Card).
+     3. Завершить сессию.
+   - **Manual acceptance shortcut:**
+     Если пользователь в любой момент сессии явно говорит "принято S<N>" / "accept S<N>" / "S<N> принят" (для среза, у которого все non-test задачи [x] и T<M> [ ]):
+     1. Не генерировать Acceptance Handoff Card.
+     2. Отметить S<N>.T<M> = [x].
+     3. Append в debug.md "решение: принят (manual shortcut)".
+     4. Continue к S<N+1>.
+
+   - **Ранний выход ("стоп" в любой момент):**
+     Пользователь явно: "стоп" / "stop" / "прекрати" / "прерви" / "пока хватит".
+     1. Завершить текущий task/subagent.
+     2. Append debug.md "решение: стоп" (если прерван на Slice Gate) или просто запись в debug.md секции "Interrupted sessions" (если в середине).
+     3. Session Handoff Summary.
+     4. Завершить apply.
+
+   - **Slice Gate log (mandatory for all options):** After the user's decision at a slice gate, append a record to `debug.md` (create section `## Slice Gate Decisions` if absent):
+     ```
+     ### Slice S<N> — <имя> (YYYY-MM-DD)
+     Срез: S<N> — <slice name>
+     Решение: awaiting-acceptance / принят / принят (manual shortcut) / не принят / fix предыдущего S<K> / стоп
      Обоснование: <user's rationale or "без замечаний">
-     Изменения tasks: <"нет" / "N задач добавлено, M удалено, K переформулировано">
+     Изменения tasks: <"нет" / "N задач добавлено" / "создан S<K>.fix">
+     Связанный отчёт: reports/slice-acceptance-S<N>-YYYY-MM-DD.md (если принят)
      ```
    - Show which task is being worked on
    - **Classify** (Task Dispatch table above) — announce type and executor
@@ -218,22 +275,25 @@ Implement tasks from an OpenSpec change.
    - Orchestrator role: prepare prompt with context, delegate, spot-check result
    - **Spot-check (post-verification):** After the agent reports completion, verify the change: Grep for a pattern that confirms the fix (e.g. after "replace ТекущаяДата with ТекущаяДатаСеанса" → Grep for `ТекущаяДата()` in that file must return 0 matches). For batch tasks (5+ files), spot-check at least 3 files (first, middle, last in the list). If the result does not match expectations → STOP, report to user, do NOT mark task complete.
    - Mark task complete in the tasks file: `- [ ]` → `- [x]`
-   - **Step-by-step checkpoint (if step-by-step mode):** After marking task complete, ОБЯЗАТЕЛЬНАЯ ПАУЗА. For **code/form tasks** (completed by agent): show "Задача N.M выполнена", "Что изменено" (path, строки, описание), "Что проверить" (из критериев приёмки). Options: [Подтвердить / Проблема / Пропустить]. Подтвердить → proceed; Проблема → user describes issue, create follow-up task in tasks.md (phase-gates.mdc for phased insertion), do NOT proceed until resolved or "Пропустить"; Пропустить → proceed, add "(не проверено пользователем)" note, include in Session Summary as unverified. For **manual test tasks** (P4): show "Задача N.M — ручной тест (ваше действие)", "Сценарий" (шаги из задачи), "Зависимости: M.K [x], M.L [x]" or "M.K [ ] — НЕ выполнена". Options: [Тест пройден / Тест не пройден / Отложить]. Тест пройден → mark [x]; Тест не пройден → debug flow (tasks.md or debug.md); Отложить → leave [ ], proceed.
+   - **Step-by-step checkpoint (if step-by-step mode):** After marking task complete, ОБЯЗАТЕЛЬНАЯ ПАУЗА. For **code/form tasks** (completed by agent): show "Задача S<N>.<M> выполнена", "Что изменено" (path, строки, описание), "Что проверить" (из критериев приёмки). Options: [Подтвердить / Проблема / Пропустить]. Подтвердить → proceed; Проблема → user describes issue, create follow-up task in the same slice (before `S<N>.T<M>`), do NOT proceed until resolved or "Пропустить"; Пропустить → proceed, add "(не проверено пользователем)" note, include in Session Summary as unverified. For **acceptance tasks** (`S<N>.T<M>`): show "Срез S<N>.T<M> — ручной тест (ваше действие)", "Сценарий" (шаги из задачи), "Зависимости: S<N>.<M> [x]...". Options: [Тест пройден → Slice Gate [1] / Тест не пройден → Slice Gate [2] / Отложить]. Это эквивалент Slice Gate; шаги описаны выше.
    - **If this was a verification/decision task** (identified in Conditional Task Detection) → trigger ОБЯЗАТЕЛЬНАЯ ПАУЗА above before proceeding
    - Continue to next task
 
    **Pause if:**
+   - **Slice Gate reached** (все non-test задачи среза `[x]`, остался только `S<N>.T<M>` или первый task следующего среза) — ОБЯЗАТЕЛЬНАЯ карточка приёмки (см. Slice Gate check выше)
    - **Step-by-step mode:** after every task completion (step-by-step checkpoint above)
    - Task is unclear → ask for clarification
    - Implementation reveals a design issue → suggest updating artifacts
    - Error or blocker encountered → report and wait for guidance
    - User interrupts
    - **Verification/decision task completed** → conditional task checkpoint (see above)
-   - **Phase Gate reached** → before first task of next phase (see Phase Gate check above)
 
 7. **On completion or pause — Session Handoff Summary**
 
-   Generate three-section summary:
+   Generate three-section summary with one of the following headers based on context:
+   - `## Paused for Acceptance — S<N>` (handoff в конце среза, default)
+   - `## Stopped — <причина>` (пользовательский стоп)
+   - `## Implementation Complete` (все срезы приняты)
 
    **Section 1 — "Выполнено агентами":**
    For each task completed this session:

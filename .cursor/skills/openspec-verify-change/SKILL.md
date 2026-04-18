@@ -1,17 +1,20 @@
 ---
 name: openspec-verify-change
-description: Universal quality gate for OpenSpec changes. Pre-apply — artifact quality, task specificity, phase coherence (QC before Architect), conditional TZ generation, gates, scope gate. Post-apply — implementation completeness, correctness, coherence.
+description: Universal quality gate for OpenSpec changes. Pre-apply — artifact quality, task specificity, slice coherence (QC before Architect), conditional TZ generation, gates, scope gate. Post-apply — implementation completeness, correctness, coherence. Slice-pre/slice-post — per-slice verify via --slice. Migrate — restructure legacy tasks.md to vertical slices.
 license: MIT
 compatibility: Requires openspec CLI.
 metadata:
   author: openspec
-  version: "6.0"
+  version: "7.0"
   generatedBy: "1.1.1"
 ---
 
-Universal quality gate for OpenSpec changes. Works in two modes determined automatically:
-- **Pre-apply**: artifact format, task quality, manual config checklist, **phase coherence (Quality Controller)** — **строго до** architect readiness review (шаг 7.7), **mandatory architect readiness review**, **TZ generation** (при пороге задач или явном запросе, шаг 7.8), Architect Gate, Design Review, TZ Review, project constraints
-- **Post-apply**: implementation completeness, correctness, coherence
+Universal quality gate for OpenSpec changes. Mode is determined automatically from tasks.md structure and completion status:
+- **Pre-apply** (slice mode: `slice-pre`): artifact format, task quality, manual config checklist, **slice coherence (Quality Controller)** — **строго до** architect readiness review (шаг 7.7), **mandatory architect readiness review**, **TZ generation** (при пороге задач или явном запросе, шаг 7.8), Architect Gate, Design Review, TZ Review, project constraints
+- **Post-apply** (slice mode: `slice-post`): implementation completeness per accepted slice, correctness, coherence; remaining slices получают pre-checks
+- **Slice-scoped** (`--slice S<N>`): verify для одного среза — артефакты, связанные Requirements/Scenarios, файлы реализованных задач среза
+- **Migrate** (`--migrate-to-slices`): реструктуризация плоского/фазового tasks.md в вертикальные срезы через architect «Architect — slice restructuring»
+- **Legacy**: tasks.md без `# Срез` — режим совместимости: mechanical checks работают, QC — в legacy-режиме (предупреждение `no-slices`)
 
 **Input**: Optionally specify a change name. If omitted, check if it can be inferred from conversation context. If vague or ambiguous you MUST prompt for available changes.
 
@@ -65,76 +68,91 @@ Universal quality gate for OpenSpec changes. Works in two modes determined autom
 
 4. **Determine verification mode**
 
-   Parse tasks.md:
+   **Flag handling (before structural analysis):**
+   - `--migrate-to-slices` — явный запрос миграции: set mode = **migrate-to-slices**, skip обычные проверки, перейти к шагу 7.M (миграция). Автодетект также может включить этот режим — см. ниже.
+   - `--slice S<N>` — verify одного среза: set mode = **slice-scoped** для указанного S<N>, сузить область проверок (артефакты, связанные Requirements, файлы реализованных задач среза).
+
+   **Структурный анализ tasks.md:**
+   - Grep `tasks.md` на `^# Срез S\d+` — если найдено хотя бы одно вхождение → ЗНИ в **slice mode**. Иначе → **legacy mode**.
+   - Grep `tasks.md` на `<!-- phase-gate -->` — если найдено в legacy mode → emit SUGGESTION `deprecated-phase-gate` и предложить `--migrate-to-slices`.
    - Count lines matching `- [ ]` (incomplete checkboxes)
    - Count lines matching `- [x]` (complete checkboxes)
-   - Count lines matching `- N.M` without checkbox (bare task lines)
+   - Count lines matching `S<N>.T<M>` acceptance tests (total / `[x]` — принятые срезы / `[ ]` — ожидающие приёмки).
 
-   **Mode decision:**
+   **Mode decision (slice mode):**
 
-   | Checkboxes found | `[x]` count | `[ ]` count | Mode |
+   | `[x]` total | `[ ]` total | Принятых S<N>.T<M> | Mode |
    |---|---|---|---|
-   | 0 (bare lines only) | — | — | **pre-apply** |
-   | >0 | 0 | >0 | **pre-apply** |
-   | >0 | >0 | >0 | **mixed** or **phase-transition** (see below) |
-   | >0 | >0 | 0 | **post-apply** |
+   | 0 | >0 | 0 | **slice-pre** (ЗНИ ещё не стартовала) |
+   | >0 | >0 | 0 | **slice-pre** (идёт реализация первого среза, ни один не принят) |
+   | >0 | >0 | ≥ 1, есть `[ ]` | **slice-post** (часть срезов принята, остальные ожидают) |
+   | >0 | 0 | все S<N>.T<M> = `[x]` | **slice-post (final)** |
 
-   **Phase-transition mode detection:**
+   **Mode decision (legacy mode):**
 
-   Phase-transition activates in ANY of these cases:
-   1. User or apply explicitly requested phase-transition review (e.g. "verify in phase-transition mode", "phase gate review")
-   2. The prompt indicates this run was triggered from apply at a phase gate
-   3. **Auto-detect:** tasks.md contains `<!-- phase-gate -->` markers AND there exist `[x]` tasks before a gate AND `[ ]` tasks after that gate (= a phase boundary has been crossed)
+   | `[x]` count | `[ ]` count | Mode |
+   |---|---|---|
+   | 0 | >0 | **pre-apply (legacy)** |
+   | >0 | >0 | **mixed (legacy)** |
+   | >0 | 0 | **post-apply (legacy)** |
 
-   For case 3 (auto-detect): automatically set mode = phase-transition. Announce: "Обнаружены phase gates. Фаза N завершена (K задач [x] до gate, M задач [ ] после). Режим: phase-transition (mixed + проверка актуальности оставшихся задач)."
+   **Slice-transition mode detection:**
 
-   When phase-transition:
-   - Mode = **phase-transition**
-   - Inherit mixed-mode checks and ADD phase-specific checks (step 7.6b)
-   - Otherwise mixed (both [x] and [ ] present) = **mixed**
+   Slice-transition activates in ANY of these cases:
+   1. User or apply explicitly requested slice-transition review (e.g. "verify after slice S2", "slice-transition review", `/opsx:verify <name> --after-slice S2`).
+   2. The prompt indicates this run was triggered from apply at a slice gate (apply передаёт `Mode: slice-transition` и `Accepted slice: S<N>`).
+   3. **Auto-detect:** tasks.md slice-mode, есть принятый `S<N>.T<M>` = `[x]` без задач `[ ]` в срезе S<N>, а в S<N+1> все задачи `[ ]` (граница среза пересечена в последней apply-сессии).
+
+   Для case 3 — announce: "Обнаружен принятый срез S<N>. Режим: slice-transition (проверка актуальности задач S<N+1>+)."
 
    Announce mode to user:
    ```
-   Режим: pre-apply (артефакты не реализованы)
-   Режим: mixed (N/M задач выполнено — pre-проверки для оставшихся, post-проверки для выполненных)
-   Режим: phase-transition (ревью на границе фазы — актуальность оставшихся задач)
-   Режим: post-apply (все задачи выполнены)
+   Режим: slice-pre (ЗНИ подготовлена / в работе, ни один срез не принят)
+   Режим: slice-post (принятых срезов: K/M — pre-проверки для непринятых, post-проверки для принятых)
+   Режим: slice-post (final) — все срезы приняты
+   Режим: slice-transition — проверка актуальности следующего среза после принятого
+   Режим: slice-scoped --slice S<N>
+   Режим: migrate-to-slices — реструктуризация в срезы
+   Режим: pre-apply (legacy) / mixed (legacy) / post-apply (legacy) — tasks.md без срезов
    ```
 
 4b. **Determine verification tier**
 
    | Tier | Условие | QC (7.6) | Architect (7.7) | TZ (7.8) |
    |------|---------|----------|-----------------|----------|
-   | Lite | <=5 задач AND 1 фаза (все P_x одинаковы или P_x + P4) | SKIP | YES (compact) | SKIP (порог 6+) |
-   | Standard | 6-15 задач OR 2+ фазы | YES | YES | YES (порог 6+) |
-   | Full | 15+ задач OR phase gates OR phase-transition | YES | YES | YES |
+   | Lite | ≤ 5 задач AND 1 срез (или legacy без группировки) | SKIP | YES (compact) | SKIP (порог 6+) |
+   | Standard | 6–15 задач OR 2+ срезов | YES | YES | YES (порог 6+) |
+   | Full | ≥ 16 задач OR 3+ срезов OR slice-transition mode | YES | YES | YES |
 
    Tier выбирается автоматически. Пользователь может повысить:
    `/opsx:verify <name> --full` или `--standard`.
    Понижение недопустимо — только повышение.
 
-   Объявить пользователю: "Tier: Lite (5 задач, одна фаза P3+P4)"
+   В режимах `--slice S<N>` и `slice-transition` tier автоматически = Standard (минимум), повышается до Full при обнаружении 3+ срезов в ЗНИ.
+
+   Объявить пользователю: "Tier: Lite (5 задач, один срез S1)" или "Tier: Standard (8 задач, 3 среза)".
 
 5. **Initialize report structure**
 
    Create a report structure with sections:
-   - **Artifact Format** (pre-apply, mixed)
-   - **Task Quality** (pre-apply, mixed)
-   - **Manual Configuration Sufficiency** (pre-apply, mixed) — structured checklist with proof
-   - **Phase Coherence (Quality Controller)** (pre-apply, mixed) — phase classification, dependency graph, false start detection, rework risk
-   - **Task Readiness (Architect)** (pre-apply, mixed) — mandatory architect holistic assessment of realizability
-   - **TZ (Functional Requirements)** (pre-apply, mixed) — generated TZ document, gap analysis
-   - **Gates** (pre-apply, mixed): Architect Gate, Design Review, TZ Review, Project Constraints
-   - **Completeness** (post-apply, mixed)
-   - **Correctness** (post-apply, mixed)
-   - **Coherence** (post-apply, mixed)
+   - **Artifact Format** (slice-pre / slice-post / legacy: pre-apply, mixed)
+   - **Task Quality** (same modes)
+   - **Manual Configuration Sufficiency** (same modes) — structured checklist with proof
+   - **Slice Coherence (Quality Controller)** (slice mode pre/post; legacy → `no-slices` SUGGESTION) — scenario coverage, slice independence, completeness, dependency graph, slice gate integrity, rework risk
+   - **Task Readiness (Architect)** — mandatory architect holistic assessment of realizability
+   - **TZ (Functional Requirements)** — generated TZ document, gap analysis
+   - **Gates**: Architect Gate, Design Review, TZ Review, Project Constraints
+   - **Slice Acceptance Status** (slice-post / slice-transition / migrate-to-slices) — таблица S<N> → принят/в работе/ожидает
+   - **Completeness** (slice-post, slice-post final, legacy mixed/post-apply) — для принятых срезов / выполненных задач
+   - **Correctness** (same)
+   - **Coherence** (same)
    - **Развёрнутые объяснения замечаний** (если есть любые CRITICAL/WARNING/SUGGESTION) — обязательная секция в **файле** отчёта и в сообщении пользователю; см. шаг 16
 
    Each section can have CRITICAL, WARNING, or SUGGESTION issues.
 
 ---
 
-## Pre-apply checks (modes: pre-apply, mixed)
+## Pre-apply checks (modes: slice-pre, slice-post (для непринятых срезов), slice-scoped, legacy pre-apply / mixed)
 
 6. **Artifact Format Check**
 
@@ -205,10 +223,11 @@ Universal quality gate for OpenSpec changes. Works in two modes determined autom
 
    **7F.1 Functional dependency extraction (all tasks):**
    For each task line, extract implied preconditions:
-   - P4 tasks: Grep for `заполнить`, `запустить`, `отправить`, `открыть`, `убедиться` + object name → map to P2/P3 tasks implementing that object
-   - P2/P3 tasks: Grep for references to procedures/functions from other modules (pattern `МодульИмя.МетодИмя`) → map to tasks that create/modify those procedures
-   - P1 tasks: Grep for data attribute references → map to P0 tasks that create the object
-   - Any task: Grep for `Зависимости:` or `Зависимость:` → explicit deps
+   - Tasks with verbs `заполнить`, `запустить`, `отправить`, `открыть`, `убедиться` + object name → map to tasks implementing that object (within the same or earlier slice).
+   - Tasks referencing procedures/functions from other modules (pattern `МодульИмя.МетодИмя`) → map to tasks that create/modify those procedures.
+   - Tasks referencing data attributes → map to tasks that create the object.
+   - Acceptance task `S<N>.T<M>` → implicitly depends on **all** other tasks of `S<N>` (slice-internal).
+   - Any task: Grep for `Зависимости:` or `Зависимость:` → explicit deps.
 
    For each found dependency (после Actionability Gate при финализации отчёта):
    - Dep task `[ ]` AND current task `[ ]`:
@@ -223,10 +242,15 @@ Universal quality gate for OpenSpec changes. Works in two modes determined autom
    - Check each ID exists in tasks.md and its status
    - Flag contradictions with file order
 
-   **7F.3 Phase gate named task check:**
-   For each `<!-- phase-gate: ... -->`:
-   - Extract task IDs from marker text
-   - Check status of each → flag `[ ]` tasks
+   **7F.3 Slice acceptance task check:**
+   For each `# Срез S<N>` header:
+   - Find the `S<N>.T<M>` acceptance task (must exist — см. QC criterion 5).
+   - Extract task IDs referenced in the slice's `**Зависимости:**` line.
+   - Check that all referenced slice dependencies exist as slices in tasks.md; flag stale refs as WARNING.
+   - Check presence of `<!-- slice-gate: ... -->` marker at end of slice; missing → WARNING `missing-slice-gate-marker`.
+
+   **7F.4 Deprecated phase-gate detection:**
+   Grep tasks.md for `<!-- phase-gate` markers. If found → SUGGESTION `deprecated-phase-gate`: "устаревший маркер фазового gate — рекомендуется `/opsx:verify --migrate-to-slices`".
 
    Pass all 7F results to Quality Controller (step 7.6) and Architect (step 7.7): "Executability issues (verify 7F): <list or 'замечаний нет'>".
 
@@ -286,9 +310,9 @@ Universal quality gate for OpenSpec changes. Works in two modes determined autom
 
    **IMPORTANT:** The filled checklist table is the **proof** of this check. It MUST be included verbatim in the verification report (section "Полнота ручной конфигурации"). Writing "OK — design describes scenario" without the table is a verification failure.
 
-7.6. **Quality Controller — Phase Coherence Review (Standard/Full tiers ONLY)**
+7.6. **Quality Controller — Slice Coherence Review (Standard/Full tiers ONLY)**
 
-   **This step executes in Standard and Full tiers (skipped in Lite).** Domain-agnostic assessment of task ordering, dependencies, and execution risk. Complements the architect's realizability review (step 7.7).
+   **This step executes in Standard and Full tiers (skipped in Lite).** Domain-agnostic assessment of slice coherence, scenario coverage, slice independence, dependencies and rework risk. Complements the architect's realizability review (step 7.7).
 
    **Prepare repository state** (before calling the controller):
    For each task in tasks.md that mentions a file path or object name:
@@ -297,66 +321,64 @@ Universal quality gate for OpenSpec changes. Works in two modes determined autom
    - Record: if code file (`.bsl`) is non-empty while prerequisite tasks are still `- [ ]`
 
    **What to pass to the Quality Controller:**
-   - Full text of: tasks.md, design.md, proposal.md
+   - Full text of: tasks.md (including `# Срез` headers и метаданные), design.md (including `## Slices`), proposal.md
    - Paths to specs/ files
    - Checklist table from step 7.5 (if manual config markers were found), or "маркеров ручной конфигурации не найдено"
    - List of issues from steps 7A-7E (if any), or "механических замечаний нет"
    - Executability issues from step 7F (if any), or "замечаний выполнимости нет"
    - Repository state (object/file existence and emptiness list)
 
-   **Quality Controller prompt** (use template from `1c-agent-patterns/SKILL.md`, section "Quality Controller — phase coherence review"):
+   **Quality Controller prompt** (use agent file `.cursor/agents/openspec-quality-controller.md`):
 
-   Call via `Task(subagent_type="openspec-quality-controller")`. Agent file: `.cursor/agents/openspec-quality-controller.md` (model: Opus, readonly). The controller evaluates 4 criteria:
-   1. **Phase Classification** — classify every task as P0 (Infrastructure) / P1 (Specification-UI) / P2 (Implementation) / P3 (Integration) / P4 (Verification)
-   2. **Dependency Graph** — explicit refs between tasks, artifact deps (task uses object from another task), phase deps (implicit P2→P0)
-   3. **False Start Detection** — code exists but prerequisite task pending = CRITICAL; object exists but "create" task pending = WARNING
-   4. **Rework Risk** — P2 task depends on incomplete P1 spec = HIGH risk; depends on hypothesis = MEDIUM risk
+   Call via `Task(subagent_type="openspec-quality-controller")`. Agent file: `.cursor/agents/openspec-quality-controller.md` (model: Opus, readonly). The controller evaluates 6 criteria (slice mode) + 1 compat criterion:
+   1. **Scenario Coverage** — каждый `#### Scenario:` из spec покрыт ≥1 срезом.
+   2. **Slice Independence** — срезы принимаемы без следующих; нет циклов; нет forward-deps; нет coupling.
+   3. **Slice Completeness** — в каждом срезе есть все слои, нужные для его приёмочного сценария.
+   4. **Slice Dependency Graph** — объявленные зависимости корректны, implicit deps не пропущены, циклов нет.
+   5. **Slice Gate Integrity** — в каждом срезе есть `S<N>.T<M>` и маркер `<!-- slice-gate -->`, тест конкретен.
+   6. **Rework Risk** — срезы в работе до принятия зависимостей, overlap по Scenarios, hypothesis-deps.
+   + **Legacy fallback**: если `# Срез` не найдены — эмитируется `no-slices` и остальные критерии пропускаются.
 
    **After receiving the controller's report:**
    1. Save full report to `reports/quality-control-YYYY-MM-DD.md`.
-   2. Include verdict and phase classification table in the verification report (section "Фазовая когерентность (Quality Controller)").
+   2. Include verdict and slice summary + scenario coverage matrix in the verification report (section "Когерентность срезов (Quality Controller)").
    3. Map each alert to verification issues (затем **Actionability Gate**):
-      - `false-start`, `phase-violation`, `cycle` → CRITICAL (Gate: обычно actionable — дефект постановки или кода)
-      - `rework-risk` HIGH / MEDIUM:
-        - Если в `tasks.md` зависимости между затронутыми задачами **явно заданы** и **не противоречат** графу QC → переклассифицировать в **INFO** (риск снимается соблюдением порядка apply; пользователю нечего менять в артефактах ради порядка)
-        - Если зависимость **отсутствует** или **противоречит** графу → **WARNING** (нужна правка tasks/design)
-      - `missing-dependency` → WARNING (actionable: дополнить tasks)
-      - `missing-phase-gate` → SUGGESTION
-      - `phase-gate-blocked`, `task-validity-drift` → WARNING (phase-transition), затем Gate
-      - `ordering-mismatch`, `iteration-drift`, `phase-gate-named-task-blocked`, `phase-gate-stale-ref`, `execution-order-contradiction`:
-        - Если граф зависимостей в tasks **согласован** с топологическим порядком — **INFO**; иначе **WARNING**
-      - `ordering-cosmetic` → SUGGESTION
+      - `scenario-uncovered` → WARNING (actionable: добавить срез или задачу в существующий).
+      - `dependency-cycle`, `coupling-violation`, `missing-slice-test`, `backward-reference` → CRITICAL.
+      - `stale-slice-dep`, `forward-slice-dep`, `undeclared-slice-dep`, `slice-incomplete`, `rework-risk-on-unaccepted` → WARNING.
+      - `missing-slice-gate-marker`, `vague-slice-test`, `unaccepted-slice-in-progress`, `slice-overlap`, `hypothesis-dep` → SUGGESTION.
+      - `no-slices`, `deprecated-phase-gate` → SUGGESTION с рекомендацией `/opsx:verify --migrate-to-slices`.
 
-7.6b. **Phase Transition Review (phase-transition mode ONLY)**
+7.6b. **Slice Transition Review (slice-transition mode ONLY)**
 
-   **This step executes ONLY in phase-transition mode.** Assesses whether remaining tasks are still valid after completing the current phase.
+   **This step executes ONLY in slice-transition mode.** Assesses whether remaining slices are still valid after acceptance of the previous slice.
 
    **Context to collect:**
-   - Completed tasks (current phase): list from tasks.md marked `[x]` that belong to the phase just finished (tasks before the last crossed phase-gate)
-   - Upcoming tasks (next phases): list from tasks.md marked `[ ]` that follow the next `<!-- phase-gate -->`
-   - debug.md (if exists): implementation issues discovered during the phase
-   - Recent architecture/exploration reports in change `reports/`
+   - Accepted slice (current): tasks of the just-accepted `S<N>` (все `[x]`, включая `S<N>.T<M>` приёмочный тест)
+   - Upcoming slices (next): tasks of `S<N+1>+`, all `[ ]`
+   - debug.md (если есть), особенно секция `## Slice Gate Decisions` — что было принято / отклонено / переопределено в предыдущих gate
+   - Recent architecture/exploration/review reports в `reports/`
 
    **Quality Controller call (enhanced):**
    Pass the same inputs as step 7.6, plus:
-   - "Mode: phase-transition"
-   - "Completed phase tasks: [list]"
-   - "Upcoming phase tasks: [list]"
-   - "Implementation notes (debug.md): <content or 'none'>"
-   QC evaluates criterion #5 (Phase Gate Review) in addition to standard criteria. Use template from `1c-agent-patterns/SKILL.md` (QC prompt with optional phase-transition context block).
+   - "Mode: slice-transition"
+   - "Accepted slice: S<N> (all tasks `[x]`, S<N>.T<M> = `[x]`)"
+   - "Upcoming slices: S<N+1>, S<N+2>, ..."
+   - "Implementation notes (debug.md / Slice Gate Decisions): <content or 'none'>"
+   QC проверяет все 6 критериев + специально оценивает Slice Independence и Rework Risk на оставшихся срезах в свете того, что выяснилось в S<N>.
 
-   **Порядок:** enhanced QC (абзац выше) MUST завершиться **до** вызова Architect phase-transition (аналогично запрету параллели 7.6/7.7).
+   **Порядок:** enhanced QC (абзац выше) MUST завершиться **до** вызова Architect slice-transition (аналогично запрету параллели 7.6/7.7).
 
-   **Architect call (phase-transition focus):**
-   Use template from `1c-agent-patterns/SKILL.md`, section "Architect — phase transition review (verify шаг 7.6b)".
-   Pass: tasks.md, design.md, proposal.md, path to debug.md, paths to recent reports.
-   Focus: are upcoming tasks still valid given implementation results? Any design drift? Need restructuring?
-   Save architect result to `reports/phase-transition-YYYY-MM-DD.md`.
+   **Architect call (slice-transition focus):**
+   Use template from `1c-agent-patterns/SKILL.md`, section "Architect — slice transition review (verify шаг 7.6b)".
+   Pass: tasks.md, design.md (включая `## Slices`), proposal.md, путь к debug.md, paths to recent reports, ID принятого среза.
+   Focus: остаются ли upcoming срезы валидными в свете результатов S<N>? Есть ли design drift? Нужно ли пере-разрезать (rebrick) S<N+1>+?
+   Save architect result to `reports/slice-transition-YYYY-MM-DD.md`.
 
 7.7. **Task Readiness Architect Review (MANDATORY)**
 
-   **Порядок выполнения (Standard/Full):** шаг **7.6** (Quality Controller) MUST завершиться **до** запуска шага **7.7** (Architect). Архитектор получает результат QC (фазовая таблица и alerts из 7.6) как входной параметр. **Параллельный** запуск QC (7.6) и Architect (7.7) **запрещён**.
-   **В Lite tier:** шаг 7.6 пропускается, архитектор выполняет compact-ревью (совмещает фазовую оценку и реализуемость).
+   **Порядок выполнения (Standard/Full):** шаг **7.6** (Quality Controller) MUST завершиться **до** запуска шага **7.7** (Architect). Архитектор получает результат QC (slice summary, scenario coverage, alerts из 7.6) как входной параметр. **Параллельный** запуск QC (7.6) и Architect (7.7) **запрещён**.
+   **В Lite tier:** шаг 7.6 пропускается, архитектор выполняет compact-ревью (совмещает оценку срезов и реализуемость).
 
    **This step executes ALWAYS in pre-apply and mixed modes.** It is not remediation — it is part of the verification pipeline. The architect provides the expert holistic assessment that mechanical checks cannot.
 
@@ -366,7 +388,7 @@ Universal quality gate for OpenSpec changes. Works in two modes determined autom
    - Checklist table from step 7.5 (if manual config markers were found), or "маркеров ручной конфигурации не найдено"
    - List of issues from steps 7A-7E (if any), or "механических замечаний нет"
    - Executability issues from step 7F (if any), or "замечаний выполнимости нет"
-   - Quality Controller result: phase classification table and alerts from step 7.6 (or "Quality Controller пропущен (Lite tier)")
+   - Quality Controller result: slice summary, scenario coverage matrix, alerts from step 7.6 (or "Quality Controller пропущен (Lite tier)")
 
    **Architect prompt (Standard/Full tier)** (use template from `1c-agent-patterns/SKILL.md`, section "Architect — task readiness review (verify шаг 7.7)"):
 
@@ -385,7 +407,7 @@ Universal quality gate for OpenSpec changes. Works in two modes determined autom
    - specs: <путь>
    - Чеклист ручной конфигурации (verify, шаг 7.5): <чеклист-таблица или «маркеров не найдено»>
    - Замечания механических проверок (verify, шаги 7A-7E): <список или «замечаний нет»>
-   - Фазовая когерентность (verify, шаг 7.6 Quality Controller): <фазовая таблица и alerts или «замечаний нет»>
+   - Когерентность срезов (verify, шаг 7.6 Quality Controller): <slice summary + scenario coverage matrix + alerts или «замечаний нет»>
 
    ## Критерии оценки
 
@@ -394,6 +416,22 @@ Universal quality gate for OpenSpec changes. Works in two modes determined autom
    1. **Реализуемость кодовых задач.** Может ли writer (1С-разработчик по промпту)
       реализовать каждую задачу из tasks.md, имея только design.md + spec + текст задачи?
       Есть ли задачи, где непонятно ЧТО делать или ГДЕ делать?
+
+      **1.b Читаемость формулировки (Task Readability).** Каждая задача (кроме
+      приёмочных `S<N>.T<M>`) SHALL содержать файл/модуль/процедуру и бизнес-результат
+      в первых 12 значимых словах заголовка. **GAP `task-opaque-title`**, если задача
+      начинается с широкого глагола + голого идентификатора решения без контекста:
+      - «Реализовать инвариант D<N>», «Обеспечить D<N>», «Закрыть OQ<N>»;
+      - «Выполнить /opsx:verify» / «Запустить validate» без указания цели;
+      - «Обновить» / «Проверить» / «Учесть сценарий» без объекта.
+
+      При GAP предоставь готовый **сниппет-переформулировку** по шаблону:
+      `<Глагол> <файл/процедура>: <что меняем> <бизнес-результат> [(D<N>/OQ<N>/ADR)]`.
+      Используй детали из тела задачи + design.md. Исключения: `S<N>.T<M>`
+      (приёмочные тесты — другой жанр), Follow-up задачи с явной ссылкой на ЗНИ,
+      prerequisites с явным указанием артефакта (`Выгрузить BusinessProcesses/X.xml`).
+
+      Каноническое правило: `.cursor/rules/task-readability.mdc`.
 
    2. **Реализуемость форм и метаданных.** Может ли form-generator построить каждую форму
       по описанию в design? Может ли пользователь создать каждый объект метаданных
@@ -452,7 +490,7 @@ Universal quality gate for OpenSpec changes. Works in two modes determined autom
    ```
 
    **Architect prompt (Lite tier compact review)**:
-   Используй сокращённый промпт (без критериев 2 и 4, с добавлением фазовой оценки):
+   Используй сокращённый промпт (без критериев 2 и 4, с добавлением оценки срезов / legacy-кохерентности):
 
    ```
    ## Задача
@@ -469,8 +507,8 @@ Universal quality gate for OpenSpec changes. Works in two modes determined autom
 
    ## Критерии оценки
 
-   1. **Фазовая когерентность.** Классифицируй задачи по фазам (P0-P4). Есть ли false start (код есть, задача [ ]) или rework risk (зависимость от неполной спецификации)?
-   2. **Реализуемость кодовых задач.** Понятно ли ЧТО и ГДЕ делать?
+   1. **Когерентность срезов.** Если в tasks.md есть `# Срез` — оцени корректность срезов (независимость, полнота, наличие S<N>.T<M>). Если срезов нет — отметь legacy-режим и проверь, нет ли false start (код есть, задача [ ]) или rework risk.
+   2. **Реализуемость кодовых задач.** Понятно ли ЧТО и ГДЕ делать? **Task Readability (1.b):** задачи (кроме `T<M>`) содержат файл/процедуру и бизнес-результат в первых 12 словах? Формулировки вида «Реализовать инвариант D<N>», «Обеспечить D<N>» → GAP `task-opaque-title`, предоставь сниппет-переформулировку. См. `.cursor/rules/task-readability.mdc`.
    3. **Разрешённость решений.** Все ли альтернативы разрешены?
    4. **Согласованность.** Нет ли противоречий между tasks, design и spec?
    5. **Качество фиксов.** Направлен ли фикс на корневую причину?
@@ -481,8 +519,8 @@ Universal quality gate for OpenSpec changes. Works in two modes determined autom
    ### Вердикт
    ГОТОВО / ГОТОВО С ЗАМЕЧАНИЯМИ / НЕ ГОТОВО
 
-   ### Фазы и риски
-   | Задача | Фаза | Риски |
+   ### Срезы и риски (или Задачи и риски — в legacy)
+   | Срез / Задача | Сценарий | Риски |
    |---|---|---|
    | ... | ... | ... |
 
@@ -507,11 +545,37 @@ Universal quality gate for OpenSpec changes. Works in two modes determined autom
       - GAP ("Можно реализовать, но неоднозначно") → WARNING
       - SUBOPTIMAL (Архитектурный запах / Design Smell) → WARNING
 
-7.8. **TZ Generation (conditional in pre-apply / mixed)**
+7.M. **Migrate to slices (mode: migrate-to-slices ONLY)**
+
+   Этот шаг **заменяет** шаги 7.5–7.8 в режиме `migrate-to-slices`. Запускается, когда:
+   - пользователь явно передал `--migrate-to-slices`, **или**
+   - QC выдал alert `no-slices` и пользователь выбрал миграцию в карточке решения,
+   - **или** в legacy ЗНИ найдены `<!-- phase-gate -->` маркеры и пользователь подтвердил миграцию.
+
+   **Шаги:**
+   1. Прочитать `tasks.md`, `design.md`, `proposal.md`, `specs/`.
+   2. Вызвать `Task(subagent_type="onec-code-architect")` с шаблоном **«Architect — slice restructuring»** из `1c-agent-patterns/SKILL.md`. Передать:
+      - текущий tasks.md (плоский / фазовый);
+      - design.md, proposal.md, specs;
+      - список уже выполненных задач (`[x]`) — должны попасть в **первый** срез S1 (или быть распределены по срезам с пометкой `(уже реализовано)`).
+   3. Architect возвращает:
+      - обновлённую секцию `## Slices` для design.md;
+      - перестроенный tasks.md с `# Срез S<N>` заголовками, метаданными, `S<N>.T<M>` тестами и `<!-- slice-gate -->` маркерами.
+   4. **Проверка пользователя**: показать пользователю diff (не применять автоматически):
+      - таблицу старых задач → новые срезы;
+      - список новых slice-gate тестов;
+      - предупреждение, если architect не смог отнести часть задач к сценариям.
+   5. После явного подтверждения пользователя — `StrReplace`/`Write` для `tasks.md` и секции `## Slices` в `design.md`.
+   6. Сохранить отчёт миграции в `reports/migrate-to-slices-YYYY-MM-DD.md`: исходное состояние, итоговое, изменения.
+   7. Запустить **обычный** `/opsx:verify <name>` (без флага миграции), чтобы прогнать новый tasks.md через QC и Architect.
+
+   В отчёте verify основная секция: `### Миграция в срезы` (status: completed / aborted, ссылка на `migrate-to-slices-YYYY-MM-DD.md`).
+
+7.8. **TZ Generation (conditional in slice-pre / slice-post / legacy pre-apply / mixed)**
 
    Generates a human-readable technical specification (ТЗ) document from change artifacts. The TZ serves as a functional requirements artifact oriented at stakeholder review. Gaps in TZ generation reveal gaps in source artifacts.
 
-   **Порог обязательности (только для режимов pre-apply и mixed):**
+   **Порог обязательности (для режимов slice-pre, slice-post (для непринятых срезов) и legacy pre-apply / mixed):**
    - Подсчитать в `tasks.md` строки с `- [ ]` и `- [x]` (каждая строка задачи с чекбоксом = одна задача).
    - **4 и более** задач → ТЗ **генерируется обязательно** (выполнить **Logic** ниже).
    - **1–3** задачи → ТЗ **не генерировать**, если пользователь **явно** не запросил ТЗ в том же сообщении (фразы вроде «с ТЗ», «сгенерируй ТЗ», «нужно ТЗ», «включи ТЗ») и не указывал отдельно `/opsx:doc-tz`. В отчёте verify: «ТЗ: не генерировалось (3 или менее задач по чекбоксам). При необходимости: `/opsx:doc-tz <name>`.» Перейти к шагу 9 без записи `ТЗ.md`.
@@ -520,7 +584,7 @@ Universal quality gate for OpenSpec changes. Works in two modes determined autom
 
    **Перезапись `ТЗ.md`:** если файл уже существует — **перезаписывать** только при фактической генерации в этом прогоне (порог выполнен или явный запрос). Если генерация **пропущена** по порогу — **сохранить** существующий `ТЗ.md` без изменений; в отчёте: «ТЗ: существующий файл сохранён (ниже порога обязательности / генерация не требовалась).»
 
-   **Режимы post-apply и phase-transition:** при чистом post-apply (все задачи `[x]`) шаг 7.8 обычно не применяется; если verify запускается в **mixed**, использовать тот же подсчёт задач по всему `tasks.md`.
+   **Режимы slice-post (final), slice-transition, legacy post-apply:** при финальном post-apply (все задачи `[x]` или все срезы приняты) шаг 7.8 обычно не применяется; если verify запускается в **slice-post / mixed** с непринятыми срезами / задачами, использовать тот же подсчёт задач по всему `tasks.md`. В режиме `slice-scoped` ТЗ не генерируется.
 
    **Logic:** (выполнять только если генерация ТЗ обязательна или запрошена по правилам выше)
    1. Вызвать алгоритм из `.cursor/skills/openspec-docs/SKILL.md` (генерация ТЗ через `openspec-doc-writer` и опциональное ревью).
@@ -609,31 +673,39 @@ Universal quality gate for OpenSpec changes. Works in two modes determined autom
 
 ---
 
-## Post-apply checks (modes: post-apply, mixed)
+## Post-apply checks (modes: slice-post, slice-post (final), slice-transition, legacy post-apply / mixed)
 
-In **mixed** mode, post-apply checks apply **only to tasks marked `[x]`**.
+В **slice-post** post-apply checks применяются **только к принятым срезам** (где `S<N>.T<M>` = `[x]`); для непринятых срезов — pre-apply checks.
+В legacy **mixed** mode, post-apply checks apply **only to tasks marked `[x]`**.
 
 13. **Verify Completeness**
 
     **Task Completion**:
     - Parse checkboxes: `- [ ]` (incomplete) vs `- [x]` (complete)
     - Count complete vs total tasks
-    - If incomplete tasks exist:
-      - **post-apply mode (все задачи должны быть закрыты):** Add CRITICAL issue for each incomplete task; Recommendation: "Complete task: <description>" or "Mark as done if already implemented"
+    - **Slice mode** — оценивать по срезам:
+      - Для каждого среза S<N> определить статус: «принят» (`S<N>.T<M>` = `[x]` и все задачи среза `[x]`), «в работе» (часть задач `[x]`), «ожидает» (все `[ ]`).
+      - Принятый срез — нормально, входит в Slice Acceptance Status.
+      - Срез «в работе» с **пропущенными** задачами при `S<N>.T<M>` = `[x]` → **CRITICAL** `slice-accepted-with-unfinished-tasks`.
+      - Срез «ожидает» — **INFO** «срез S<N> ожидает реализации».
+    - **Legacy mode**:
+      - **post-apply (все задачи должны быть закрыты):** Add CRITICAL issue for each incomplete task; Recommendation: "Complete task: <description>" or "Mark as done if already implemented"
       - **mixed mode:** незавершённые `[ ]` задачи — **не** CRITICAL/WARNING. Добавить **INFO**: «N задач с `[ ]` ожидают реализации через `/opsx:apply`» (Actionability Gate: следствие режима, не дефект верификации)
 
     **Spec Coverage**:
     - If delta specs exist in `openspec/changes/<name>/specs/`:
-      - Extract all requirements (marked with "### Requirement:")
-      - **mixed mode:** проверять покрытие **только** для требований, которые **целиком** относятся к уже выполненным `[x]` задачам (по смысловому сопоставлению tasks ↔ spec). Требования, относящиеся к невыполненным задачам — **INFO**: «M requirements ожидают реализации (связанные задачи `[ ]`)»
-      - **post-apply mode:** для каждого requirement — поиск в коде; если не реализовано → CRITICAL: "Requirement not found: <requirement name>"
+      - Extract all requirements (marked with "### Requirement:") и сценарии (`#### Scenario:`).
+      - **Slice mode:** для каждого принятого среза — все Scenarios, заявленные в его метаданных (`**Связь со spec:**`), должны быть реализованы в коде. Не найдены → CRITICAL «scenario not implemented in accepted slice». Для непринятых срезов — INFO.
+      - **Legacy mixed:** проверять покрытие **только** для требований, которые **целиком** относятся к уже выполненным `[x]` задачам (по смысловому сопоставлению tasks ↔ spec). Требования, относящиеся к невыполненным задачам — **INFO**: «M requirements ожидают реализации (связанные задачи `[ ]`)»
+      - **Legacy post-apply:** для каждого requirement — поиск в коде; если не реализовано → CRITICAL: "Requirement not found: <requirement name>"
       - Для **mixed**, если requirement относится к `[x]`-задачам, но реализация не найдена → **WARNING** (расхождение: задача отмечена выполненной, код/spec не сходятся)
 
 14. **Verify Correctness**
 
     **Requirement Implementation Mapping**:
-    - **mixed mode:** выполнять **только** для требований/частей spec, отнесённых к задачам с `[x]`. Для остальных — не выдавать WARNING «не реализовано»; при необходимости одна **INFO**-строка в духе «сценарии невыполненных задач не проверялись в коде»
-    - For each requirement from delta specs (в **post-apply** — все; в **mixed** — только связанные с `[x]`):
+    - **Slice mode:** выполнять **только** для требований, относящихся к **принятым** срезам (S<N>.T<M> = `[x]`). Для непринятых — INFO/skip.
+    - **Legacy mixed:** выполнять **только** для требований/частей spec, отнесённых к задачам с `[x]`. Для остальных — не выдавать WARNING «не реализовано»; при необходимости одна **INFO**-строка в духе «сценарии невыполненных задач не проверялись в коде»
+    - For each requirement (slice-mode: связанный с принятым срезом; legacy post-apply: все; legacy mixed: связанные с `[x]`):
       - Search codebase for implementation evidence
       - If found, note file paths and line ranges
       - Assess if implementation matches requirement intent
@@ -642,11 +714,12 @@ In **mixed** mode, post-apply checks apply **only to tasks marked `[x]`**.
         - Recommendation: "Review <file>:<lines> against requirement X"
 
     **Scenario Coverage**:
-    - **mixed mode:** для сценариев, относящихся к **невыполненным** задачам — **INFO** или пропуск, не WARNING
-    - For each scenario in delta specs (marked with "#### Scenario:") — в **post-apply** полный проход; в **mixed** только сценарии для `[x]`-контекста:
+    - **Slice mode:** для каждого принятого среза — все Scenarios из его метаданных должны быть покрыты тестами/кодом. Не покрыты → WARNING.
+    - **Legacy mixed:** для сценариев, относящихся к **невыполненным** задачам — **INFO** или пропуск, не WARNING
+    - For each scenario (slice-mode: из принятого среза; legacy post-apply: все; legacy mixed: только `[x]`-контекста):
       - Check if conditions are handled in code
       - Check if tests exist covering the scenario
-      - If scenario appears uncovered **и** задачи для него уже `[x]`:
+      - If scenario appears uncovered **и** задачи для него уже `[x]` (или срез принят):
         - Add WARNING: "Scenario not covered: <scenario name>"
         - Recommendation: "Add test or implementation for scenario: <description>"
 
@@ -724,7 +797,9 @@ In **mixed** mode, post-apply checks apply **only to tasks marked `[x]`**.
 | Missing checkboxes (6A) | mechanical | Формат, не меняет содержание |
 | TZ lexicon violation (7.8 / 11) | mechanical | Замена слов по реестру, детерминировано |
 | Repo Consistency wording (7E) | mechanical | `создать X` → `доработать X` при доказанном существовании объекта |
-| missing-dependency (QC) — зависимость P4→P3 или верификация→реализация | mechanical | Единственно допустимый вариант; не меняет scope |
+| Missing slice-gate marker (QC `missing-slice-gate-marker`) | mechanical | Добавить `<!-- slice-gate: ... -->` в конец среза по тексту S<N>.T<M> |
+| Stale slice dependency (QC `stale-slice-dep`) | mechanical | Удалить ссылку на несуществующий срез из `**Зависимости:**` |
+| `deprecated-phase-gate` (legacy) | mechanical → или предлагать `--migrate-to-slices` при больших ЗНИ | Удалить устаревший маркер; миграция — отдельный режим |
 | Опциональная задача без явного N/A-критерия | mechanical | Добавить «N/A если не воспроизведено» — детерминировано |
 | Неверная метка типа задачи (BSL code вместо manual) | mechanical | Замена слова, не меняет содержание |
 | Missing paths/subsystems | mechanical | Если путь или подсистему можно однозначно найти в `project.md` или репозитории |
@@ -732,17 +807,19 @@ In **mixed** mode, post-apply checks apply **only to tasks marked `[x]`**.
 | Task quality — ambiguity, missing details (7B / 7C) | judgment | Architect может переформулировать scope (если деталь не выводится однозначно из проекта) |
 | Architect Gate not closed (9) | judgment | Архитектурный отчёт может изменить подход |
 | Design Review not done (10) | judgment | Ревью может выявить пробелы в design |
-| Phase violation / false start (QC 7.6) | judgment | Переупорядочивание меняет что делается первым |
+| `scenario-uncovered` (QC 7.6) | judgment | Решение: добавить срез или расширить существующий — меняет состав работ |
+| `dependency-cycle`, `coupling-violation`, `forward-slice-dep`, `backward-reference` (QC) | judgment | Требует перестройки графа срезов |
+| `slice-incomplete`, `missing-slice-test` (QC) | judgment | Нужно либо добавить недостающие задачи, либо переразрезать |
+| `rework-risk-on-unaccepted`, `unaccepted-slice-in-progress` (QC) | judgment | Решение: ждать приёмки или принять риск переделки |
 | Executability issues (7F) | judgment | Зависимости влияют на порядок реализации |
-| Rework risk (QC 7.6) | judgment | Вопрос: сначала спецификация или сразу код |
-| Missing phase gates (QC) | judgment | Структура фаз меняет точки остановки |
+| `no-slices` (QC) | judgment | Решение: запустить `--migrate-to-slices` или продолжить в legacy |
 | Project constraints violation (12) | judgment | Меняет целевые каталоги |
 | Suboptimal architecture / Design Smell (7.7) | judgment | Требует перепроектирования (изменение scope и подхода) |
 | TZ generation gaps (7.8) | footnote | ТЗ — документ для заказчика, не для apply |
 | TZ review remarks (11) | footnote | Не влияет на реализацию |
-| Incomplete tasks (post-apply, 13) | footnote | Рекомендация `/opsx:apply` |
+| Incomplete tasks / срезы «ожидает» (slice-post / legacy 13) | footnote | Рекомендация `/opsx:apply` |
 | Spec/design divergence (post-apply, 15) | footnote | Информационное расхождение |
-| rework-risk — hypothesis в Open Questions, fallback безопасен (design) | footnote | Информация о риске, не требует правки артефакта |
+| `hypothesis-dep` — гипотеза в Open Questions, fallback безопасен (design) | footnote | Информация о риске, не требует правки артефакта |
 
 **Класс footnote:** замечания с severity SUGGESTION, не влияющие на ход реализации. Показываются пользователю в секции «К сведению» (одна строка каждое) — не как карточка решения и не как авто-исправление.
 
@@ -774,7 +851,7 @@ In **mixed** mode, post-apply checks apply **only to tasks marked `[x]`**.
     **Summary Scorecard (после Executive Summary):**
     ```
     ## Verification Report: <change-name>
-    ### Режим: pre-apply | mixed | post-apply | phase-transition
+    ### Режим: slice-pre | slice-post | slice-post (final) | slice-transition | slice-scoped (S<N>) | migrate-to-slices | legacy pre-apply | legacy mixed | legacy post-apply
 
     ### Формат артефактов
     | Проверка | Статус |
@@ -794,7 +871,7 @@ In **mixed** mode, post-apply checks apply **only to tasks marked `[x]`**.
     - [INFO] порядок N.M → M.K обеспечен явными **Зависимостями:** в tasks (не требует действий пользователя до apply)
     - [WARNING] N.M — нет явной зависимости от M.K при выявленной потребности — дополнить tasks.md
     - [SUGGESTION] N.M — расположен до зависимости M.K в файле (при этом граф может быть OK)
-    - [WARNING] Phase Gate: задача N.M [ ], K.L [ ] (именованы в маркере gate)
+    - [WARNING] Slice Gate: задача N.M [ ] помечена как зависимость S<N>.T<M>, но среза S<N>.T<M> нет
     - [SUGGESTION] «Порядок выполнения» не покрывает задачи: [list]
     (или: замечаний выполнимости нет)
 
@@ -826,35 +903,44 @@ In **mixed** mode, post-apply checks apply **only to tasks marked `[x]`**.
 
     (повторить для каждого маркера; при отсутствии маркеров — «маркеров не найдено»)
 
-    ### Фазовая когерентность (Quality Controller)
+    ### Когерентность срезов (Quality Controller)
 
     **Вердикт:** OK / WARNING / CRITICAL
     **Полный отчёт:** reports/quality-control-YYYY-MM-DD.md
 
-    | Задача | Фаза | Зависит от | Статус |
-    |--------|------|-----------|--------|
-    | 1.1    | P0   | -         | OK     |
-    | 2.1    | P1   | 1.1       | OK     |
-    | 3.1    | P2   | 1.1       | OK     |
-    ...
+    **Slice Summary**
+
+    | Срез | Сценарий | Статус | Зависит от | Acceptance test |
+    |------|----------|--------|-----------|-----------------|
+    | S1   | <scenario> | принят | -         | S1.T9 [x] |
+    | S2   | <scenario> | в работе | S1      | S2.T6 [ ] |
+    | S3   | <scenario> | ожидает | S2       | S3.T7 [ ] |
+
+    **Scenario Coverage Matrix**
+
+    | Scenario (spec) | Срез |
+    |-----------------|------|
+    | Базовая печать  | S1   |
+    | Контроль прав   | S2   |
 
     Alerts:
-    - [CRITICAL] false-start: задача N.M (P2) — код существует, но предшественник K.L (P0) не завершён
-    - [WARNING] rework-risk: задача N.M (P2) зависит от незавершённой спецификации P1
+    - [CRITICAL] dependency-cycle: S2 → S3 → S2
+    - [WARNING] scenario-uncovered: «Печать с подписью» не покрыт ни одним срезом
+    - [SUGGESTION] vague-slice-test: S<N>.T<M> «работает корректно» — переформулировать
     ...
 
-    ### Phase Transition Review (phase-transition only)
+    ### Slice Transition Review (slice-transition only)
 
-    **Текущая фаза:** N (завершена)
-    **Следующая фаза:** N+1
+    **Принятый срез:** S<N>
+    **Следующие срезы:** S<N+1>, S<N+2>, ...
 
     | Проверка | Статус |
     |---|---|
-    | Актуальность задач следующей фазы | OK / WARNING |
-    | Design drift | OK / WARNING |
-    | Необходимость перепроектирования | Нет / Да (рекомендация) |
+    | Актуальность задач следующих срезов | OK / WARNING |
+    | Design drift по `## Slices` | OK / WARNING |
+    | Необходимость пере-разреза (rebrick) | Нет / Да (рекомендация) |
 
-    Детали: см. reports/phase-transition-YYYY-MM-DD.md и quality-control (критерий #5).
+    Детали: см. reports/slice-transition-YYYY-MM-DD.md и quality-control (Slice Independence + Rework Risk).
 
     ### Готовность к реализации (архитектор)
 
@@ -868,6 +954,8 @@ In **mixed** mode, post-apply checks apply **only to tasks marked `[x]`**.
     | 3 | Разрешённость решений | OK / GAP |
     | 4 | Полнота покрытия | OK / GAP |
     | 5 | Согласованность | OK / GAP |
+    | 6 | Качество фиксов | OK / GAP |
+    | 7 | Архитектурная эстетика | OK / SUBOPTIMAL |
 
     Пробелы:
     - [CRITICAL/WARNING] ...
@@ -1015,11 +1103,13 @@ In **mixed** mode, post-apply checks apply **only to tasks marked `[x]`**.
     | Task quality (7B / 7C) | a) Запустить архитектора для доработки tasks.md b) Принять как есть — writer додумает |
     | Architect Gate not closed (9) | a) Запустить архитектурный анализ (→ `reports/architecture-verify-YYYY-MM-DD.md`) b) Принять как есть — реализация без архитектурного ревью |
     | Design Review not done (10) | a) Запустить ревью постановки (→ `reports/design-review-YYYY-MM-DD.md`) b) Принять как есть — возможны пробелы в design |
-    | Phase violation / false start (QC 7.6) | a) Переупорядочить задачи по фазам b) Отметить реализованные как `[x]` c) Принять как есть |
-    | Executability issues (7F) | a) Добавить `Зависимости:` в tasks b) Переупорядочить секции c) Принять — apply разберётся |
-    | Rework risk (QC 7.6) | a) Завершить спецификацию P1 в design.md b) Принять — начать кодирование с риском переделки |
-    | Missing phase gates (QC) | a) Запустить архитектора для реструктуризации (шаблон «Architect — phase gate restructuring» из `1c-agent-patterns/SKILL.md`) b) Принять — работать без phase gates |
-    | Phase transition issues (7.6b) | a) Реструктурировать через архитектора b) Обновить design.md c) Принять как есть |
+    | `scenario-uncovered` (QC 7.6) | a) Расширить существующий срез — добавить задачи под сценарий b) Создать новый срез c) Принять — сценарий не покрыт |
+    | `dependency-cycle` / `forward-slice-dep` / `coupling-violation` (QC) | a) Запустить архитектора для пере-разреза (шаблон «Architect — slice restructuring») b) Перенумеровать срезы / переместить задачи c) Принять — работать с риском |
+    | `slice-incomplete` / `missing-slice-test` (QC) | a) Архитектор добавляет недостающие задачи / S<N>.T<M> b) Принять как есть — срез не приёмопригоден |
+    | `rework-risk-on-unaccepted` / `unaccepted-slice-in-progress` (QC) | a) Дождаться приёмки зависимости b) Принять — начать кодирование с риском переделки |
+    | Executability issues (7F) | a) Добавить `Зависимости:` в tasks b) Переупорядочить задачи в срезе c) Принять — apply разберётся |
+    | `no-slices` (QC, legacy ЗНИ) | a) `/opsx:verify --migrate-to-slices` (architect перерезает в срезы) b) Принять — продолжить в legacy режиме |
+    | Slice transition issues (7.6b) | a) Архитектор реструктурирует upcoming срезы b) Обновить design.md `## Slices` c) Принять как есть |
     | Project constraints violation (12) | a) Переписать задачи на разрешённые каталоги b) Обосновать исключение |
     | Suboptimal architecture / Design Smell (7.7) | a) Запустить архитектора для перепроектирования (обновление design.md и tasks.md) b) Принять как есть — реализовать неоптимальный подход |
 
@@ -1132,7 +1222,7 @@ In **mixed** mode, post-apply checks apply **only to tasks marked `[x]`**.
 18. **Save verification report**
 
     Save the report to `reports/verification-<mode>-YYYY-MM-DD.md` in the change directory,
-    where `<mode>` is `pre`, `mixed`, `post`, or `phase-N` (N = completed phase number when in phase-transition mode).
+    where `<mode>` is one of: `slice-pre`, `slice-post`, `slice-post-final`, `slice-S<N>` (slice-scoped), `slice-trans-S<N>` (slice-transition после среза S<N>), `migrate-to-slices`, `legacy-pre`, `legacy-mixed`, `legacy-post`.
 
 ---
 

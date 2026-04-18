@@ -83,15 +83,21 @@ Fast-forward through artifact creation - generate everything needed to start imp
         - `outputPath`: Where to write the artifact
         - `dependencies`: Completed artifacts to read for context
       - Read any completed dependency files for context
-      - **Special case: `tasks` artifact (task decomposition)**:
-        Instead of writing tasks directly, delegate to **onec-code-architect** with the
-        "Architect — task decomposition" template (`1c-agent-patterns/SKILL.md`).
-        Pass: paths to proposal.md, design.md, specs/, and the `template` from instructions.
-        The architect's prompt includes phase ordering requirements (P0→P1→P2→P3→P4)
-        and **phase gate generation**: for changes with 10+ tasks spanning P0–P3+, the
-        architect must insert `<!-- phase-gate: description -->` markers between logical
-        phases and wrap groups in `# Фаза N: Name` headers. See rule `.cursor/rules/phase-gates.mdc` for format.
-        Explicit dependencies between tasks required.
+      - **Special case: `tasks` artifact (slice-aware task decomposition)**:
+        Before delegating tasks, the **Slice Generation Gate** must have been passed (see step 5e.1 below) and design.md MUST contain a `## Slices` section.
+
+        Delegate to **onec-code-architect** with the "Architect — slice-aware task decomposition" template (`1c-agent-patterns/SKILL.md`).
+        Pass: paths to proposal.md, design.md (with approved `## Slices` section), specs/, and the `template` from instructions.
+
+        The architect produces tasks.md with:
+        - H1 headers `# Срез S<N>: <имя>` (one per slice from design)
+        - metadata blocks under each slice header (Сценарий, Приёмка, Связь со spec, Зависимости)
+        - task IDs with slice prefix `S<N>.<M>`
+        - acceptance tasks `S<N>.T<M>` inside each slice
+        - slice-gate markers `<!-- slice-gate: <critérion> -->`
+
+        No classification P0–P4, no `# Фаза N`, no `<!-- phase-gate -->`. See `.cursor/rules/vertical-slices.mdc`.
+
         Architect reads files independently and returns tasks.md content.
         Save the result to `outputPath`.
         If architect Task fails — apply error handling above (retry once, then create yourself).
@@ -137,6 +143,40 @@ Fast-forward through artifact creation - generate everything needed to start imp
          - Option 2 → document skip: add note to design.md footer: `<!-- Architect Gate: triggers [...] fired, skipped by user at ff -->`
       4. **If triggers fired AND architecture report exists** → OK, continue
       5. **If no triggers fired** → continue without pause
+
+   e.1. **Slice Generation Gate (MANDATORY — after Design Gate, before `specs`/`tasks`):**
+
+      After the `design` artifact is created (and Design Gate passed), **before** proceeding to any artifact whose creation depends on design (notably `tasks`, but also before further specs refinement):
+
+      1. Read the just-created `design.md` and all `specs/**/spec.md`.
+      2. Count likely tasks volume from design scope (rough estimate — files, procedures, UI elements).
+         - If estimated ≤ 5 tasks (Lite tier) — slice decomposition is OPTIONAL; may proceed with a single container slice `S1`.
+         - If estimated ≥ 6 tasks — slice decomposition is **MANDATORY**.
+      3. Grep `design.md` for existing `## Slices` section.
+      4. **If `## Slices` section is absent (or empty) AND tier ≥ Standard:**
+         - Delegate to **onec-code-architect** with the "Architect — slice decomposition" template (`1c-agent-patterns/SKILL.md`).
+         - Pass: paths to proposal.md, design.md (without Slices), specs/.
+         - The architect returns the `## Slices` block (table of slices + scenarios + files + acceptance + dependency graph + coverage matrix).
+         - Insert the returned block into `design.md` (append after existing sections, before "Risks" if present).
+         - Show the user a compact summary:
+           ```
+           Предложенная декомпозиция на срезы:
+           - S1: <имя> — <сценарий одной строкой>
+           - S2: <имя> — <сценарий>
+           - ...
+           Всего срезов: N. Сценариев покрыто: K/M.
+           ```
+         - AskQuestion: `[Принять] / [Скорректировать (указать замечание)] / [Пересобрать срезы]`.
+           - `Принять` → перейти к `tasks`.
+           - `Скорректировать` → принять пользовательский комментарий, повторно делегировать architect с этим комментарием, обновить `design.md`.
+           - `Пересобрать срезы` → повторить делегирование со сменой модели или указанием «другое группирование».
+      5. **If `## Slices` section is present:**
+         - Validate with Quality Controller (quick check — criteria 1, 3, 5 from QC), see `openspec-quality-controller.md`.
+         - If critical issues — show the user and AskQuestion whether to regenerate.
+         - Otherwise — proceed.
+      6. **Guardrail:** do NOT invoke the tasks architect template until `design.md` contains the `## Slices` section (or Lite tier was explicitly chosen).
+
+      **Error handling:** if architect Task fails (error / timeout after retry), create a minimal single-slice draft yourself (1 container slice covering all tasks) and log a warning to the user. The user may run `/opsx:verify --migrate-to-slices` later to decompose.
 
 6. **Show final status**
    ```bash

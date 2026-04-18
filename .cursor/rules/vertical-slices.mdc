@@ -88,37 +88,17 @@ priority: 150
 
 - **Обнаружение срезов:** Grep `tasks.md` на `^# Срез S\d+`. Если найдены — step-by-slice режим (default).
 - **Выполнение среза:** оркестратор запускает все задачи среза (параллелизация по файлам там, где возможно); финальным — `S<N>.T<M>` (приёмочный тест).
-- **Slice-gate (ОБЯЗАТЕЛЬНАЯ ПАУЗА):** после последнего `S<N>.<M>` (кроме `T<M>`) — показать пользователю:
-  ```
-  === Slice Gate: S<N> — <имя> ===
-  
-  Сценарий: <из метаданных>
-  Приёмка: <сценарий S<N>.T<M>>
-  Критерий slice-gate: <из маркера>
-  
-  Что изменено в срезе:
-  - файлы: <список>
-  - задачи выполнены: K/M
-  
-  Выберите:
-  [1] Принят — отметить S<N>.T<M> как [x], перейти к S<N+1>
-  [2] Не принят — описать что не работает, вернуться в rework внутри S<N>
-  [3] Дефект в предыдущем срезе S<K> — создать мини-срез S<K>.fix
-  [4] Стоп — прекратить apply
-  ```
-- **Фиксация решения:** независимо от выбора, append в `debug.md` секция `## Slice Gate Decisions`:
-  ```markdown
-  ### Slice S<N> — <имя> (YYYY-MM-DD)
-  Решение: принят / не принят / fix предыдущего S<K> / стоп
-  Обоснование: <текст пользователя или «без замечаний»>
-  Изменения tasks: <нет / N задач добавлено / M задач переформулировано>
-  Связанный отчёт: reports/slice-acceptance-S<N>-YYYY-MM-DD.md
-  ```
-- **Режимы выбора:**
-  - **[1] Принят** — `S<N>.T<M>` → `[x]`, slice-gate пройден, сохранить отчёт `reports/slice-acceptance-S<N>-YYYY-MM-DD.md` (summary изменений и результата теста), перейти к S<N+1>.
-  - **[2] Не принят** — запросить у пользователя описание проблемы, зафиксировать в `debug.md` секции `## Debug — S<N>`, делегировать writer/reviewer или architect. Rework **внутри** текущего среза (не создавать новый, если это не дефект предыдущего).
-  - **[3] Дефект в предыдущем S<K>** — вставить новый срез `S<K>.fix` между S<K> и S<K+1> в `tasks.md` (через StrReplace); переоткрыть `S<K>.T*` как `[ ]`; после фикса продолжить с S<N>.
-  - **[4] Стоп** — session handoff summary; apply завершается с незакрытым slice-gate.
+- **Slice-gate (передача на приёмку):** после последней non-test задачи среза агент НЕ задаёт вопрос о вердикте в текущей сессии. Вместо этого:
+  1. Append в `debug.md` `## Slice Gate Decisions` запись `Решение: awaiting-acceptance`.
+  2. Сгенерировать Acceptance Handoff Card — что сделано + сценарий S<N>.T<M> в императиве + явная инструкция вернуться командой `/opsx:apply <name>`.
+  3. Сгенерировать Session Handoff Summary с заголовком `## Paused for Acceptance — S<N>`.
+  4. Завершить apply.
+
+- **Slice-gate (вердикт, при следующем /opsx:apply):** см. `.cursor/skills/openspec-apply-change/SKILL.md`, шаг 5 "Resume with pending verdict". Первым действием агент задаёт AskQuestion с 3 опциями — [1] Принят / [2] Не принят / [3] Дефект в предыдущем срезе S<K>. До ответа — никаких других действий (не читает tasks помимо необходимого, не запускает writer/reviewer).
+
+- **Shortcut (опционально):** пользователь может явной командой "принято S<N>" / "accept S<N>" в середине сессии отметить `S<N>.T<M>` = `[x]` без handoff-карточки. Используется, когда приёмка проведена параллельно.
+
+- **Стоп (отдельно):** запрос "стоп" / "прекрати" от пользователя — завершает apply в любой точке, не связан с acceptance-флоу.
 
 ## ПОВЕДЕНИЕ VERIFY
 
@@ -173,7 +153,7 @@ Replace старого Phase Classification. Новые критерии QC:
 
 ## ФИКСАЦИЯ РЕШЕНИЙ И ОТЧЁТОВ
 
-- **`debug.md#Slice Gate Decisions`** — append при каждом slice-gate (см. формат выше).
+- **`debug.md#Slice Gate Decisions`** — append при каждом slice-gate (см. формат выше). Поле `Решение` принимает значения: `awaiting-acceptance` (handoff на приёмку), `принят`, `принят (manual shortcut)`, `не принят`, `fix предыдущего S<K>`, `стоп`.
 - **`reports/slice-acceptance-S<N>-YYYY-MM-DD.md`** — отчёт приёмки среза: изменения, тест, результат.
 - **`reports/verification-slice-S<N>-YYYY-MM-DD.md`** — per-slice verify.
 - **`reports/quality-control-YYYY-MM-DD.md`** — содержимое перестроено под Slice Coherence (имя файла то же).
@@ -194,4 +174,4 @@ Replace старого Phase Classification. Новые критерии QC:
 
 ---
 
-**Last updated:** 2026-04-18 | **Version:** 1.0 | **Changes:** first version (replaces `phase-gates.mdc`)
+**Last updated:** 2026-04-18 | **Version:** 1.1 | **Changes:** rework slice-gate into two-turn handoff (acceptance card in current session, verdict AskQuestion as first action of next session); add awaiting-acceptance state and manual acceptance shortcut.

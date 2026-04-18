@@ -439,7 +439,7 @@ _При `full-extension` эту секцию не включать._ При `cha
 
 Использовать **AskUserQuestion tool**:
 
-> «Обнаружено N замечаний уровня CRITICAL/HIGH/MEDIUM. Добавить задачи устранения в `tasks.md` существующего change `<change-name>`? (Соблюдать [.cursor/rules/phase-gates.mdc](../../rules/phase-gates.mdc): классификация фазы P0–P4, вставка в нужную секцию, обновление «Порядок выполнения» при наличии.)»
+> «Обнаружено N замечаний уровня CRITICAL/HIGH/MEDIUM. Добавить задачи устранения в `tasks.md` существующего change `<change-name>`? (Соблюдать [.cursor/rules/vertical-slices.mdc](../../rules/vertical-slices.mdc): если ЗНИ в slice mode — каждая группа замечаний оформляется как fix-срез `S<N+1>: Исправление prerelease-замечаний (<категория>)` либо вставляется в подходящий непринятый срез; если legacy — в подходящую секцию.)»
 
 **Варианты:**
 - Да, дополнить tasks.md

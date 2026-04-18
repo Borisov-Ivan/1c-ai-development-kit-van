@@ -96,8 +96,17 @@ Common artifact patterns:
 - **proposal.md**: Ask user about the change if not clear. Fill in Why, What Changes, Capabilities, Impact.
   - The Capabilities section is critical - each capability listed will need a spec file.
 - **specs/<capability>/spec.md**: Create one spec per capability listed in the proposal's Capabilities section (use the capability name, not the change name).
-- **design.md**: Document technical decisions, architecture, and implementation approach.
-- **tasks.md**: Break down implementation into checkboxed tasks.
+- **design.md**: Document technical decisions, architecture, and implementation approach. **Включает обязательную секцию `## Slices`** (для ЗНИ ≥6 задач) с описанием вертикальных срезов — см. `.cursor/rules/vertical-slices.mdc`.
+- **tasks.md**: Break down implementation into checkboxed tasks **по срезам**: H1-заголовки `# Срез S<N>: ...`, метаданные среза (`**Сценарий:**`, `**Приёмка:**`, `**Связь со spec:**`, `**Зависимости:**`), задачи `S<N>.<M>`, обязательный приёмочный тест `S<N>.T<M>` и маркер `<!-- slice-gate: ... -->`.
+
+**Slice Generation Gate (МАНДАТОРНО, между design и tasks):**
+Если создаётся `tasks.md` и в `design.md` нет секции `## Slices`, а у ЗНИ ожидается ≥6 задач — **СТОП**. Сначала вызвать `Task(subagent_type="onec-code-architect")` с шаблоном «Architect — slice decomposition» из `.cursor/skills/1c-agent-patterns/SKILL.md`, получить `## Slices`, добавить в design.md (StrReplace), показать пользователю, дождаться подтверждения. Только после этого переходить к генерации tasks через шаблон «Architect — slice-aware task decomposition». Подробнее — `.cursor/skills/openspec-ff-change/SKILL.md` (шаг 5e.1) и `.cursor/skills/openspec-new-change/SKILL.md` (Guardrails).
+
+**Дополнение задач после старта реализации:**
+Если пользователь просит «добавить задачу X» в уже стартовавшую ЗНИ:
+1. Спросить (или вывести из контекста): к какому срезу относится X?
+2. Вставить задачу с ID `S<N>.<M+1>` в нужный срез **перед** приёмочным `S<N>.T<M>`.
+3. Если задача относится к **уже принятому** срезу (S<N>.T<M> = `[x]`) — это новый дефект; создать **fix-срез** `S<N>.fix-<K>` или новый `S<M+1>` с пометкой `(исправление S<N>)` — **не** переоткрывать принятый срез.
 
 For other schemas, follow the `instruction` field from the CLI output.
 

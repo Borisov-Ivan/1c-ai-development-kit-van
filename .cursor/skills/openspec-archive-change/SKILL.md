@@ -47,11 +47,40 @@ Archive a completed change in the experimental workflow.
    Count tasks marked with `- [ ]` (incomplete) vs `- [x]` (complete).
 
    **If incomplete tasks found:**
-   - Parse task IDs from lines (e.g. `- [ ] 3.1 ...` → include `3.1` in the warning list when present)
-   - Append to warnings: count and, when identifiable, IDs (e.g. `4 incomplete tasks in tasks.md (3.1, 3.2, 4.1, 5.3)`)
+   - Parse task IDs from lines (e.g. `- [ ] 3.1 ...` или `- [ ] S2.4 ...` → include `3.1` / `S2.4` in the warning list when present)
+   - Append to warnings: count and, when identifiable, IDs (e.g. `4 incomplete tasks in tasks.md (S1.3, S2.1, S2.4, S3.7)`)
    - **Do not** use AskUserQuestion; continue automatically
 
    **If no tasks file exists:** Proceed without task-related warning.
+
+3.5. **Check slice acceptance status (slice mode only — HARD BLOCKER)**
+
+   Detect slice mode: grep `tasks.md` for `^# Срез S\d+`.
+
+   **If slice mode detected:**
+   - Для каждого среза S<N> определить статус приёмки: найти задачу `S<N>.T<M>` (приёмочный тест) и проверить, отмечена ли она `[x]`.
+   - **Если есть хотя бы один срез с непринятым `S<N>.T<M>` (`[ ]`)** — это **блокер архива** (override auto-yes):
+     - Не выполнять шаги 4–7. Показать пользователю:
+       ```
+       ## Архив заблокирован: непринятые срезы
+       
+       | Срез | Статус | Acceptance test |
+       |------|--------|-----------------|
+       | S1   | принят | S1.T9 [x]       |
+       | S2   | в работе / не принят | S2.T6 [ ] |
+       
+       Архив возможен только после приёмки **всех** срезов (S<N>.T<M> = `[x]`).
+       Варианты:
+       1. Завершить срезы через `/opsx:apply <name>`.
+       2. Запустить `/opsx:verify <name>` — проверить, что мешает приёмке.
+       3. Переключить ЗНИ в legacy: явно отметить все принятые задачи и запустить `/opsx:archive <name> --force-legacy` (рискованно — теряется контракт срезов).
+       ```
+     - Использовать **AskUserQuestion** с этими тремя вариантами **(исключение из auto-yes для slice mode)**.
+     - Пользователь выбирает 1 или 2 → завершить archive (return), посоветовать команду.
+     - Пользователь выбирает 3 → продолжить шаги 4–7, добавить в warnings: `Archived with --force-legacy: K непринятых срезов (S<N>, ...) — контракт срезов нарушен`.
+   - **Если все срезы приняты** (все `S<N>.T<M>` = `[x]`) — продолжить со шага 4. В summary указать: `Slices: K/K приняты`.
+
+   **Legacy mode (нет `# Срез`):** пропустить шаг 3.5.
 
 4. **Assess delta spec sync state**
 
@@ -126,6 +155,7 @@ Use this template; adapt lines to facts (omit `### Warnings` when there are none
 **Change:** <change-name>
 **Schema:** <schema-name>
 **Archived to:** openspec/changes/archive/YYYY-MM-DD-<name>/
+**Slices:** K/K приняты | N/A (legacy mode) | Force-legacy archive (нарушен контракт срезов)
 **Specs:** ✓ Synced to main specs (N requirements updated) | Already up to date | No delta specs
 **ADR:** ✓ Extracted N ADRs (ADR-NNNN, ...) | No architecture reports | No ADR-worthy decisions extracted
 
@@ -137,6 +167,7 @@ Use this template; adapt lines to facts (omit `### Warnings` when there are none
 - Always prompt for change selection if not provided (step 1 only)
 - Use artifact graph (`openspec status --json`) for completion checking
 - **Don't block archive on warnings** — inform in the final summary (`### Warnings`) and proceed automatically
+- **EXCEPTION (slice mode, step 3.5):** **Hard block** archive when slice mode is detected and any `S<N>.T<M>` is `[ ]`. Override auto-yes for this case. Только пользователь может выбрать `--force-legacy` для продолжения, и это явно фиксируется в warnings.
 - **Recommended actions are automatic:** delta spec sync when merge is needed; ADR extraction for all ADR-worthy decisions from `reports/architecture-*.md`
 - Preserve `.openspec.yaml` when moving to archive (it moves with the directory)
 - Show clear summary of what happened
