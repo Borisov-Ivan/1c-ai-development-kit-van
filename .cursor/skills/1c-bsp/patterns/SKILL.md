@@ -7,7 +7,7 @@ description: "SSL/БСП subsystems guidance. Use when working with standard lib
 
 This skill provides guidance for using SSL subsystems via `ssl_search` MCP tool.
 
-For basic SSL usage (attribute access, user messages) — see `1c-coding-standards.mdc`.
+For basic SSL usage (attribute access, user messages) — see `.cursor/docs/1c-coding-standards.md`.
 
 ## When to Use
 
@@ -47,7 +47,7 @@ When implementing new functionality:
 - **ВерсионированиеОбъектов** — object history
 - **РаботаСПочтовымиСообщениями** — email sending
 - **ОбщегоНазначения** / **ОбщегоНазначенияКлиентСервер** — common utilities
-- **Проверка наличия реквизита**: см. `.cursor/rules/1c-coding-standards.mdc` (правила проверки заполнения и доступа к реквизитам)
+- **Проверка наличия реквизита**: см. `.cursor/rules/.cursor/docs/1c-coding-standards.md` (правила проверки заполнения и доступа к реквизитам)
 - **СтроковыеФункцииКлиентСервер** — string functions
 
 ---

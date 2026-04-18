@@ -62,7 +62,11 @@ Implement tasks from an OpenSpec change.
 
    **Pre-flight: verify check**
 
-   Glob `reports/verification-pre-*.md` or `reports/verification-mixed-*.md` in change dir.
+   Glob в change dir (любой из):
+   - `reports/verification-slice-pre-*.md`
+   - `reports/verification-legacy-pre-*.md`
+   - `reports/verification-legacy-mixed-*.md`
+
    - **If found** → show summary line from report (first CRITICAL/WARNING counts). Continue.
    - **If NOT found** → soft warning:
      ```
@@ -154,14 +158,20 @@ Implement tasks from an OpenSpec change.
    - После последней non-test задачи среза — ОБЯЗАТЕЛЬНАЯ ПАУЗА на slice-gate (карточка приёмки, см. шаг 6).
    - Не начинать следующий срез до принятия (или явного пропуска) текущего.
 
-   **Step-by-step mode** — более жёсткий режим, активируется когда:
-   - User explicitly requests: «по одной», «step-by-step», «пошагово», «по шагам», «одну задачу».
-   - Debug session: debug.md exists AND was modified today (current session is actively debugging).
-   - В режиме step-by-step — пауза также после КАЖДОЙ завершённой задачи (не только на slice-gate).
+   **Step-by-step mode** — более жёсткий режим, активируется когда выполнено **хотя бы одно** из условий (триггеры):
+   - `explicit-request` — пользователь прямо попросил: «по одной», «step-by-step», «пошагово», «по шагам», «одну задачу».
+   - `debug-session` — `debug.md` существует AND был изменён сегодня (активная отладка).
+   - `fix-slice` — имя среза начинается с `Fix ` / `Фикс `, либо срез создан из `/opsx:debug` (секция «Fix-задачи» в debug.md).
+   - `slice-size-threshold` — в принимаемом срезе ≥5 задач (включая `S<N>.T<M>`).
+
+   В режиме step-by-step — пауза также после КАЖДОЙ завершённой задачи (не только на slice-gate).
 
    **Batch mode** активируется ТОЛЬКО в legacy mode (без срезов) и по явному запросу пользователя — sequential execution с паузами только на ошибках/условных задачах.
 
-   Announce mode: "Режим: step-by-slice (пауза на каждом slice-gate)" / "Режим: step-by-step (пауза после каждой задачи и на slice-gate)" / "Режим: batch/legacy (пауза только на ошибках)".
+   **Announce mode (обязательно, с явной причиной):**
+   - "Режим: step-by-slice (пауза на каждом slice-gate)" — по умолчанию в slice mode без триггеров step-by-step.
+   - "Режим: step-by-step (триггер: `<id-триггера>`; пауза после каждой задачи и на slice-gate)" — выбрать один из: `explicit-request`, `debug-session`, `fix-slice`, `slice-size-threshold`. При нескольких одновременно — указать все через запятую.
+   - "Режим: batch/legacy (пауза только на ошибках)".
 
    Launch up to 3 independent tasks in parallel via **Task** tool when applicable внутри одного среза. Делегирование субагентам — через инструмент **Task** (см. `.cursor/rules/tool-name-guard.mdc`).
 

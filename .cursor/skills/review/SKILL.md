@@ -98,10 +98,10 @@ Baseline: <краткое описание из п.1.5.1>
 
 ## Шаг 2. Контекст для ревьювера
 
-- Прочитать `.cursor/rules/1c-coding-standards.mdc`. Ссылка на `.cursor/agents/onec-code-reviewer.md` для категорий, Phase 0 и **Review Boundaries Protocol**.
+- Прочитать `.cursor/rules/.cursor/docs/1c-coding-standards.md`. Ссылка на `.cursor/agents/onec-code-reviewer.md` для категорий, Phase 0 и **Review Boundaries Protocol**.
 - Сформировать бриф:
   - Список файлов (пути).
-  - Стандарты: 1c-coding-standards.mdc.
+  - Стандарты: .cursor/docs/1c-coding-standards.md.
   - Задача: «Полный подробный ревью (все категории). Без mode=prerelease.» + при `diff-focused`: «Соблюдать секцию ## Review Boundaries (замечания только в границах).»
   - Для scope «расширение» (`full`): префикс расширения и полная директория расширения (для Grep при проверке неиспользуемого кода).
   - При **`diff-focused`:** вставить в промпт блок **`## Review Boundaries`** из шага 1.5 **только для файлов, входящих в данный вызов/батч**.
@@ -117,7 +117,7 @@ Baseline: <краткое описание из п.1.5.1>
 Вызвать **Task**(`subagent_type="onec-code-reviewer"`) с промптом по шаблону «Reviewer (ревью кода)» из `.cursor/skills/1c-agent-patterns/SKILL.md`:
 
 - Файлы: список из шага 1 (для батча — подмножество).
-- Стандарты: 1c-coding-standards.mdc.
+- Стандарты: .cursor/docs/1c-coding-standards.md.
 - Диагностики линтера: «линтер не выявил ошибок» (до правок линт не запускался).
 - Base-файл(ы): из шага 2 для файлов с &ИзменениеИКонтроль.
 - **Review Boundaries:** при `diff-focused` — блок из шага 1.5, отфильтрованный по файлам батча; при полном `full` батче — не вставлять.

@@ -89,7 +89,7 @@
 
 ### Ссылки
 
-- 1c-coding-standards.mdc, секция «Клиент-Сервер / Директивы компиляции»
+- .cursor/docs/1c-coding-standards.md, секция «Клиент-Сервер / Директивы компиляции»
 - Вендорный стандарт: std-клиент-сервер (директивы компиляции в модулях форм)
 
 ---
@@ -144,7 +144,7 @@
 
 ### Ссылки
 
-- 1c-coding-standards.mdc, rule 19 (Оповестить только на клиенте)
+- .cursor/docs/1c-coding-standards.md, rule 19 (Оповестить только на клиенте)
 
 ---
 
@@ -190,7 +190,7 @@
 
 ### Ссылки
 
-- 1c-coding-standards.mdc, секция «Клиент-Сервер / Асинхронные методы»
+- .cursor/docs/1c-coding-standards.md, секция «Клиент-Сервер / Асинхронные методы»
 
 ---
 
@@ -199,7 +199,7 @@
 **Категория:** contract
 **Severity:** HIGH
 **Дата добавления:** 2026-03-12
-**Источник:** извлечено из onec-code-reviewer.md cat.10 + 1c-coding-standards.mdc rule 14
+**Источник:** извлечено из onec-code-reviewer.md cat.10 + .cursor/docs/1c-coding-standards.md rule 14
 
 ### Правило
 
@@ -252,7 +252,7 @@
 
 ### Ссылки
 
-- 1c-coding-standards.mdc, rule 14 (контракт источника данных и защитные проверки)
+- .cursor/docs/1c-coding-standards.md, rule 14 (контракт источника данных и защитные проверки)
 
 ---
 
@@ -261,7 +261,7 @@
 **Категория:** contract
 **Severity:** HIGH
 **Дата добавления:** 2026-03-12
-**Источник:** извлечено из onec-code-reviewer.md cat.10 + 1c-coding-standards.mdc rule 14
+**Источник:** извлечено из onec-code-reviewer.md cat.10 + .cursor/docs/1c-coding-standards.md rule 14
 
 ### Правило
 
@@ -295,7 +295,7 @@ Runtime-ошибка «Метод объекта не обнаружен (Сво
 
 ### Ссылки
 
-- 1c-coding-standards.mdc, rule 14 (дерево решений проверки наличия поля)
+- .cursor/docs/1c-coding-standards.md, rule 14 (дерево решений проверки наличия поля)
 
 ---
 
@@ -304,7 +304,7 @@ Runtime-ошибка «Метод объекта не обнаружен (Сво
 **Категория:** contract
 **Severity:** HIGH
 **Дата добавления:** 2026-03-12
-**Источник:** извлечено из onec-code-reviewer.md cat.10 + 1c-coding-standards.mdc rule 14
+**Источник:** извлечено из onec-code-reviewer.md cat.10 + .cursor/docs/1c-coding-standards.md rule 14
 
 ### Правило
 
@@ -405,7 +405,7 @@ Callee возвращает структуру «Успех/Данные» вм�
 
 ### Ссылки
 
-- 1c-coding-standards.mdc, rule 14 (антипаттерн «Defensive cake»)
+- .cursor/docs/1c-coding-standards.md, rule 14 (антипаттерн «Defensive cake»)
 - 1c-agent-patterns/SKILL.md, INTEGRATION_CONTRACT_GATE (cross-boundary)
 
 ---
@@ -415,7 +415,7 @@ Callee возвращает структуру «Успех/Данные» вм�
 **Категория:** contract
 **Severity:** HIGH (overwrite), MEDIUM (mutation)
 **Дата добавления:** 2026-03-12
-**Источник:** извлечено из onec-code-reviewer.md cat.4 + 1c-coding-standards.mdc rule 21
+**Источник:** извлечено из onec-code-reviewer.md cat.4 + .cursor/docs/1c-coding-standards.md rule 21
 
 ### Правило
 
@@ -456,7 +456,7 @@ Callee возвращает структуру «Успех/Данные» вм�
 
 ### Ссылки
 
-- 1c-coding-standards.mdc, rule 21 (Parameter Integrity)
+- .cursor/docs/1c-coding-standards.md, rule 21 (Parameter Integrity)
 
 ---
 
@@ -465,7 +465,7 @@ Callee возвращает структуру «Успех/Данные» вм�
 **Категория:** exception
 **Severity:** CRITICAL
 **Дата добавления:** 2026-03-12
-**Источник:** извлечено из onec-code-reviewer.md cat.10 + 1c-coding-standards.mdc rule 20
+**Источник:** извлечено из onec-code-reviewer.md cat.10 + .cursor/docs/1c-coding-standards.md rule 20
 
 ### Правило
 
@@ -503,7 +503,7 @@ Callee возвращает структуру «Успех/Данные» вм�
 
 ### Ссылки
 
-- 1c-coding-standards.mdc, rule 20 (Попытка Justification Gate)
+- .cursor/docs/1c-coding-standards.md, rule 20 (Попытка Justification Gate)
 
 ---
 
@@ -512,7 +512,7 @@ Callee возвращает структуру «Успех/Данные» вм�
 **Категория:** exception
 **Severity:** HIGH
 **Дата добавления:** 2026-03-12
-**Источник:** извлечено из onec-code-reviewer.md cat.10 + 1c-coding-standards.mdc rule 20
+**Источник:** извлечено из onec-code-reviewer.md cat.10 + .cursor/docs/1c-coding-standards.md rule 20
 
 ### Правило
 
@@ -555,7 +555,7 @@ Fallback в блоке `Исключение` возвращает/присва�
 
 ### Ссылки
 
-- 1c-coding-standards.mdc, rule 20 (Попытка Justification Gate — silent degradation)
+- .cursor/docs/1c-coding-standards.md, rule 20 (Попытка Justification Gate — silent degradation)
 
 ---
 
@@ -564,7 +564,7 @@ Fallback в блоке `Исключение` возвращает/присва�
 **Категория:** exception
 **Severity:** HIGH
 **Дата добавления:** 2026-03-12
-**Источник:** извлечено из onec-code-reviewer.md cat.10 + 1c-coding-standards.mdc rule 20
+**Источник:** извлечено из onec-code-reviewer.md cat.10 + .cursor/docs/1c-coding-standards.md rule 20
 
 ### Правило
 
@@ -602,7 +602,7 @@ Fallback в блоке `Исключение` возвращает/присва�
 
 ### Ссылки
 
-- 1c-coding-standards.mdc, rule 20 (антипаттерн 4 — бесследное подавление)
+- .cursor/docs/1c-coding-standards.md, rule 20 (антипаттерн 4 — бесследное подавление)
 
 ---
 
@@ -639,7 +639,7 @@ Fallback в блоке `Исключение` возвращает/присва�
 
 ### Ссылки
 
-- 1c-coding-standards.mdc, секция «Даты и время»
+- .cursor/docs/1c-coding-standards.md, секция «Даты и время»
 
 ---
 
@@ -648,7 +648,7 @@ Fallback в блоке `Исключение` возвращает/присва�
 **Категория:** api
 **Severity:** HIGH
 **Дата добавления:** 2026-03-12
-**Источник:** извлечено из onec-code-reviewer.md cat.10 + 1c-coding-standards.mdc
+**Источник:** извлечено из onec-code-reviewer.md cat.10 + .cursor/docs/1c-coding-standards.md
 
 ### Правило
 
@@ -677,7 +677,7 @@ Fallback в блоке `Исключение` возвращает/присва�
 
 ### Ссылки
 
-- 1c-coding-standards.mdc, секция «Сообщения и ошибки / Вывод сообщений»
+- .cursor/docs/1c-coding-standards.md, секция «Сообщения и ошибки / Вывод сообщений»
 
 ---
 
@@ -686,7 +686,7 @@ Fallback в блоке `Исключение` возвращает/присва�
 **Категория:** performance
 **Severity:** HIGH
 **Дата добавления:** 2026-03-12
-**Источник:** извлечено из onec-code-reviewer.md cat.2 + 1c-coding-standards.mdc
+**Источник:** извлечено из onec-code-reviewer.md cat.2 + .cursor/docs/1c-coding-standards.md
 
 ### Правило
 
@@ -724,7 +724,7 @@ Fallback в блоке `Исключение` возвращает/присва�
 
 ### Ссылки
 
-- 1c-coding-standards.mdc, секция «Производительность / Запросы в цикле»
+- .cursor/docs/1c-coding-standards.md, секция «Производительность / Запросы в цикле»
 
 ---
 
@@ -733,7 +733,7 @@ Fallback в блоке `Исключение` возвращает/присва�
 **Категория:** performance
 **Severity:** HIGH
 **Дата добавления:** 2026-03-12
-**Источник:** извлечено из 1c-coding-standards.mdc
+**Источник:** извлечено из .cursor/docs/1c-coding-standards.md
 
 ### Правило
 
@@ -765,7 +765,7 @@ Fallback в блоке `Исключение` возвращает/присва�
 
 ### Ссылки
 
-- 1c-coding-standards.mdc, секция «Производительность / Реквизиты из ссылки»
+- .cursor/docs/1c-coding-standards.md, секция «Производительность / Реквизиты из ссылки»
 
 ---
 
@@ -813,7 +813,7 @@ Fallback в блоке `Исключение` возвращает/присва�
 
 ### Ссылки
 
-- 1c-coding-standards.mdc, rule 18 (транзакционный паттерн)
+- .cursor/docs/1c-coding-standards.md, rule 18 (транзакционный паттерн)
 - Вендорный стандарт: std-02-locks-transactions.md
 
 ---
@@ -861,7 +861,7 @@ Fallback в блоке `Исключение` возвращает/присва�
 ### Ссылки
 
 - verified-cause-gate.mdc (HALT 1-3)
-- 1c-coding-standards.mdc, rule 14 (defensive checks gate)
+- .cursor/docs/1c-coding-standards.md, rule 14 (defensive checks gate)
 
 ---
 
@@ -870,7 +870,7 @@ Fallback в блоке `Исключение` возвращает/присва�
 **Категория:** design
 **Severity:** MEDIUM
 **Дата добавления:** 2026-03-12
-**Источник:** извлечено из 1c-coding-standards.mdc rule 23
+**Источник:** извлечено из .cursor/docs/1c-coding-standards.md rule 23
 
 ### Правило
 
@@ -905,7 +905,7 @@ Fallback в блоке `Исключение` возвращает/присва�
 
 ### Ссылки
 
-- 1c-coding-standards.mdc, rule 23 (условное действие vs инвертированный ранний выход)
+- .cursor/docs/1c-coding-standards.md, rule 23 (условное действие vs инвертированный ранний выход)
 
 ---
 
@@ -1066,7 +1066,7 @@ Runtime: **«Метод объекта не обнаружен (ТекущаяС
 
 ### Ссылки
 
-- 1c-coding-standards.mdc, секция «Клиент-Сервер / Директивы компиляции»
+- .cursor/docs/1c-coding-standards.md, секция «Клиент-Сервер / Директивы компиляции»
 - AP-001: серверная область по умолчанию (переменные); здесь — та же семантика для процедур/функций
 
 ---
@@ -1076,7 +1076,7 @@ Runtime: **«Метод объекта не обнаружен (ТекущаяС
 **Категория:** design
 **Severity:** HIGH
 **Дата добавления:** 2026-03-14
-**Источник:** 1c-coding-standards.mdc rule 16, onec-code-reviewer Phase 2 (P2.1)
+**Источник:** .cursor/docs/1c-coding-standards.md rule 16, onec-code-reviewer Phase 2 (P2.1)
 
 ### Правило
 
@@ -1117,7 +1117,7 @@ Runtime: **«Метод объекта не обнаружен (ТекущаяС
 
 ### Ссылки
 
-- 1c-coding-standards.mdc, rule 16 (Fail-fast вместо тихого пропуска)
+- .cursor/docs/1c-coding-standards.md, rule 16 (Fail-fast вместо тихого пропуска)
 
 ---
 
@@ -1126,7 +1126,7 @@ Runtime: **«Метод объекта не обнаружен (ТекущаяС
 **Категория:** extension
 **Severity:** CRITICAL
 **Дата добавления:** 2026-03-14
-**Источник:** onec-code-reviewer category 5 (5.1), 1c-coding-standards.mdc rule 15, 1c-extensions SKILL
+**Источник:** onec-code-reviewer category 5 (5.1), .cursor/docs/1c-coding-standards.md rule 15, 1c-extensions SKILL
 
 ### Правило
 
@@ -1161,7 +1161,7 @@ Runtime: **«Метод объекта не обнаружен (ТекущаяС
 
 ### Ссылки
 
-- 1c-coding-standards.mdc, rule 15 (аннотации расширений)
+- .cursor/docs/1c-coding-standards.md, rule 15 (аннотации расширений)
 - .cursor/skills/1c-extensions/SKILL.md
 
 ---
@@ -1171,7 +1171,7 @@ Runtime: **«Метод объекта не обнаружен (ТекущаяС
 **Категория:** concurrency
 **Severity:** HIGH
 **Дата добавления:** 2026-03-14
-**Источник:** 1c-coding-standards.mdc rule 18, onec-code-reviewer category 13 (13.1)
+**Источник:** .cursor/docs/1c-coding-standards.md rule 18, onec-code-reviewer category 13 (13.1)
 
 ### Правило
 
@@ -1220,7 +1220,7 @@ Runtime: **«Метод объекта не обнаружен (ТекущаяС
 
 ### Ссылки
 
-- 1c-coding-standards.mdc, rule 18 (транзакционный паттерн)
+- .cursor/docs/1c-coding-standards.md, rule 18 (транзакционный паттерн)
 - Вендорный стандарт: std-02-locks-transactions
 
 ---
@@ -1310,7 +1310,7 @@ Runtime: **«Метод объекта не обнаружен (ТекущаяС
 
 ### Ссылки
 
-- 1c-coding-standards.mdc, КЛЮЧЕВЫЕ ВЕНДОРСКИЕ ПРИНЦИПЫ (НСтр)
+- .cursor/docs/1c-coding-standards.md, КЛЮЧЕВЫЕ ВЕНДОРСКИЕ ПРИНЦИПЫ (НСтр)
 - Вендорный стандарт: std-локализация
 
 ---
@@ -1415,7 +1415,7 @@ Runtime: «Метод объекта не обнаружен» / «Процед�
 ### Ссылки
 
 - AP-008 (Попытка вокруг детерминированной операции), AP-009 (часто сопутствует — silent degradation в fallback)
-- 1c-coding-standards.mdc, rule 20 (Попытка Justification Gate)
+- .cursor/docs/1c-coding-standards.md, rule 20 (Попытка Justification Gate)
 
 ---
 
@@ -1465,7 +1465,7 @@ Runtime: «Метод объекта не обнаружен» / «Процед�
 ### Ссылки
 
 - AP-004 (Defensive check на фиксированном контракте), AP-005 (Свойство на не-Структуре), AP-006 (defensive cake)
-- 1c-coding-standards.mdc, rule 14 (контракт источника данных и защитные проверки)
+- .cursor/docs/1c-coding-standards.md, rule 14 (контракт источника данных и защитные проверки)
 
 ---
 
@@ -1531,7 +1531,7 @@ Writer не знает контракт внешнего API и компенси
 ### Ссылки
 
 - AP-008 (Попытка вокруг детерминированной операции), AP-004 (defensive check), AP-027 (guard-then-catch)
-- 1c-coding-standards.mdc, rule 20 (Попытка Justification Gate), rule 14 (контракт источника данных)
+- .cursor/docs/1c-coding-standards.md, rule 20 (Попытка Justification Gate), rule 14 (контракт источника данных)
 
 ---
 
@@ -1625,7 +1625,7 @@ Writer не знает контракт внешнего API и компенси
 
 ### Ссылки
 
-- 1c-coding-standards.mdc, rule 20 (Попытка Justification Gate), rule 24 (Partial Execution Gate: фиксация в design обязательна)
+- .cursor/docs/1c-coding-standards.md, rule 20 (Попытка Justification Gate), rule 24 (Partial Execution Gate: фиксация в design обязательна)
 - AP-009 (Silent degradation), AP-010 (бесследное подавление)
 
 ---
@@ -1704,7 +1704,7 @@ Writer не знает контракт внешнего API и компенси
 
 ### Ссылки
 
-- `1c-coding-standards.mdc`, секция ИМЕНОВАНИЕ — «Доменная релевантность»
+- `.cursor/docs/1c-coding-standards.md`, секция ИМЕНОВАНИЕ — «Доменная релевантность»
 - `onec-code-reviewer.md`, Phase 0: CLARITY_DEFICIT (пересечение — мета-имя часто делает намерение блока непрозрачным); Supporting: AP-031
 
 ---
@@ -1803,7 +1803,7 @@ Writer не знает контракт внешнего API и компенси
 
 ### Ссылки
 
-- `1c-coding-standards.mdc`, rule 20 (Попытка Justification Gate), rule 24
+- `.cursor/docs/1c-coding-standards.md`, rule 20 (Попытка Justification Gate), rule 24
 - AP-030 (скрытый частичный результат — UX-слой; AP-032 — integrity-слой)
 - AP-009 (silent degradation — return value; AP-032 — persistent state)
 

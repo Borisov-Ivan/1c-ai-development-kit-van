@@ -46,7 +46,7 @@ Only change:
 
 ```yaml
 Read and follow:
-  - 1c-coding-standards.mdc (ALL rules)
+  - .cursor/docs/1c-coding-standards.md (ALL rules)
   - This is the ONLY source of truth
   - Every rule is mandatory
 ```
@@ -511,7 +511,7 @@ Don't document:
 ## CRITICAL RULES
 
 1. ✅ **Preserve functionality** - NEVER change behavior
-2. ✅ **Follow 1c-coding-standards.mdc** - Every rule
+2. ✅ **Follow .cursor/docs/1c-coding-standards.md** - Every rule
 3. ✅ **Focus on changed code** - Don't refactor everything
 4. ✅ **Maintain balance** - Clarity over brevity
 5. ✅ **Use existing code** - Reuse БСП and common modules

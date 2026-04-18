@@ -125,7 +125,7 @@ Evaluate:
   - Testability
   - Stub/placeholder code returning empty or dummy values (empty Thumbprint, hardcoded "TODO", always-false conditions) — HIGH — AP-024. See anti-pattern registry
   - AP-007: Parameter overwrite / collection mutation — HIGH/MEDIUM. See anti-pattern registry
-  - Duplicated magic constant: same numeric literal (not 0/1/-1) or same string literal appears 2+ times in module — MEDIUM. Exception: query text, structure keys, metadata names, 0/1/-1/Истина/Ложь. See 1c-coding-standards.mdc rule 22
+  - Duplicated magic constant: same numeric literal (not 0/1/-1) or same string literal appears 2+ times in module — MEDIUM. Exception: query text, structure keys, metadata names, 0/1/-1/Истина/Ложь. See .cursor/docs/1c-coding-standards.md rule 22
   - Mixed responsibilities: procedure >40 lines combining 3+ distinct concerns (rights check, transaction management, business logic, persistence/write, logging, UI feedback) — MEDIUM. Sign: procedure could be split into independent functions without passing internal state
 ```
 
@@ -474,7 +474,7 @@ Completeness gate: 6 строк в таблице. Меньше — Phase 0 не
    - Design authority: design.md decisions do NOT exempt code from anti-pattern checks. Tag: "design-prescribed anti-pattern".
    - Detect stub/placeholder code: empty Thumbprint, hardcoded "TODO" return values, always-false conditions — HIGH — AP-024 (always, not prerelease-only). See anti-pattern registry
    - Parameter integrity: → see AP-007 in anti-pattern registry (category 16)
-   - Magic constants: detect same numeric (not 0/1/-1) or string literal appearing 2+ times in module. See 1c-coding-standards.mdc rule 22
+   - Magic constants: detect same numeric (not 0/1/-1) or string literal appearing 2+ times in module. See .cursor/docs/1c-coding-standards.md rule 22
    - Mixed responsibilities: detect procedures >40 lines combining 3+ concerns (rights, transaction, business logic, persistence, logging, UI)
 
 4.5. Попытка/Исключение audit — see Phase 2.5 (dedicated pass).

@@ -40,6 +40,17 @@ Archive a completed change in the experimental workflow.
    - Append to warnings: list each incomplete artifact by name and status (e.g. `Artifact "debug" was not marked done`)
    - **Do not** use AskUserQuestion; continue automatically
 
+2a. **Verify freshness check (soft-gate, не блокирующий)**
+
+   Grep в `openspec/changes/<name>/reports/` по маскам:
+   - `verification-slice-post-final-*.md` (slice mode)
+   - `verification-legacy-post-*.md` (legacy mode)
+
+   **Если свежий финальный отчёт verify не найден** — добавить в warnings строку:
+   `Final verify report not found. Рекомендуется запустить /opsx:verify <name> до архива, чтобы зафиксировать статус completeness/correctness/coherence.`
+
+   Не блокирует архив — только предупреждает. Если отчёт найден — в summary шага 7 вывести строку `Verify: <имя последнего отчёта> (<дата>)`.
+
 3. **Check task completion status**
 
    Read the tasks file (typically `tasks.md`) to check for incomplete tasks.

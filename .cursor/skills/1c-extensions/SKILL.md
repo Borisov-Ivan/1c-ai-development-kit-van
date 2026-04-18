@@ -186,6 +186,6 @@ description: Аннотации расширений 1С — выбор анно
 
 ## Интеграция
 
-- **Стандарты кодирования:** [.cursor/rules/1c-coding-standards.mdc](.cursor/rules/1c-coding-standards.mdc) — раздел «Аннотации расширений».
+- **Стандарты кодирования:** [.cursor/rules/.cursor/docs/1c-coding-standards.md](.cursor/rules/.cursor/docs/1c-coding-standards.md) — раздел «Аннотации расширений».
 - **Паттерны делегирования:** [.cursor/skills/1c-agent-patterns/SKILL.md](.cursor/skills/1c-agent-patterns/SKILL.md) — выбор аннотации при проектировании, реализация через onec-code-writer.
 - **Загрузка расширения после правок:** через Конфигуратор (Конфигурация → Расширения → Загрузить из файлов).

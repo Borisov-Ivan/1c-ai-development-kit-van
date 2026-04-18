@@ -13,8 +13,47 @@ Universal quality gate for OpenSpec changes. Mode is determined automatically fr
 - **Pre-apply** (slice mode: `slice-pre`): artifact format, task quality, manual config checklist, **slice coherence (Quality Controller)** — **строго до** architect readiness review (шаг 7.7), **mandatory architect readiness review**, **TZ generation** (при пороге задач или явном запросе, шаг 7.8), Architect Gate, Design Review, TZ Review, project constraints
 - **Post-apply** (slice mode: `slice-post`): implementation completeness per accepted slice, correctness, coherence; remaining slices получают pre-checks
 - **Slice-scoped** (`--slice S<N>`): verify для одного среза — артефакты, связанные Requirements/Scenarios, файлы реализованных задач среза
-- **Migrate** (`--migrate-to-slices`): реструктуризация плоского/фазового tasks.md в вертикальные срезы через architect «Architect — slice restructuring»
+- **Slice-transition** (`--after-slice S<N>`, явный флаг или вызов из apply): проверка актуальности задач `S<N+1>+` после принятия среза S<N>
+- **Migrate** (`--migrate-to-slices`): реструктуризация плоского/фазового tasks.md в вертикальные срезы через architect «Architect — slice restructuring» (подробности — `.cursor/skills/openspec-migrate-slices/SKILL.md`, команда `/opsx:migrate-slices`)
 - **Legacy**: tasks.md без `# Срез` — режим совместимости: mechanical checks работают, QC — в legacy-режиме (предупреждение `no-slices`)
+
+## Порядок шагов (обзор)
+
+```mermaid
+flowchart TD
+  A[1 Select change] --> B[1b Scope Gate]
+  B --> C[2-3 Load artifacts]
+  C --> D[4 Determine mode]
+  D --> E[4b Determine tier]
+  E --> F[5 Init report]
+  F --> G[6 Artifact format]
+  G --> H[7 Task quality]
+  H --> I[7.5 Manual config]
+  I --> J{Tier}
+  J -- Lite --> M[7.7 Architect compact]
+  J -- Standard/Full --> K[7.6 QC Slice Coherence]
+  K --> M
+  M --> N[7.8 TZ generation]
+  N --> O[8 Acceptance status]
+  O --> P[9-12 Gates]
+  P --> Q[13-15 Post-apply checks]
+  Q --> R[16 Generate report]
+  R --> S[16a Phase A mechanical autofix]
+  S --> T[17 Phase B decision cards]
+  T --> U[17a Re-verify after judgment]
+  U --> V[17b Final verdict]
+  V --> W[18 Save report]
+```
+
+**Контракт режима/tier:** первые **три строки** ответа verify пользователю — фиксированная шапка, например:
+
+```
+Режим: slice-pre (ЗНИ подготовлена; срезов принятых: 0/3)
+Tier: Standard (12 задач, 3 среза)
+Этап: Pre-apply проверки формата/качества/когерентности → Architect readiness → ТЗ
+```
+
+Без этого блока ответ считается неполным.
 
 **Input**: Optionally specify a change name. If omitted, check if it can be inferred from conversation context. If vague or ambiguous you MUST prompt for available changes.
 
@@ -29,23 +68,25 @@ Universal quality gate for OpenSpec changes. Mode is determined automatically fr
 
    Always announce: "Using change: <name>" and how to override (e.g., `/opsx:verify <other>`).
 
-1b. **Scope Gate — новое требование vs verify**
+1b. **Scope Gate — новое требование vs verify (read-only gate)**
 
    Если в сообщении пользователя **помимо** выбора change и команды `/opsx:verify` есть:
    - новое функциональное требование (формулировки вроде «нужно предусмотреть», «добавить», «учесть сценарий», «не забудь», «доработай постановку»);
    - явный запрос расширить scope change (новые задачи, требования, сценарии в свободной форме).
 
-   **СТОП** до разрешения. Использовать **AskUserQuestion** (или эквивалент):
+   **СТОП** до разрешения. Использовать **AskUserQuestion**:
 
-   - Текст: «В запросе обнаружено новое требование: „<краткая формулировка>“. Verify — quality gate для **существующих** артефактов. Выберите вариант:»
-   - **Вариант 1:** Сначала дополнить артефакты (оркестратор вносит правки → подтверждение пользователя), затем verify полного scope.
-   - **Вариант 2:** Verify текущего scope как есть; новое требование — отдельно после (`/opsx:explore`, `/opsx:ff`, ручное дополнение).
-   - **Вариант 3:** Verify текущего scope as-is; новое требование зафиксировать как TODO в отчёте verify (Executive Summary), без правки артефактов в этой сессии.
+   - Текст: «В запросе обнаружено новое требование: „<краткая формулировка>“. Verify — **quality gate** для существующих артефактов, он не редактирует их. Выберите вариант:»
+   - **Вариант A (as-is):** Verify текущего scope как есть; новое требование оставить на будущее (`/opsx:extend <name>`, `/opsx:explore`, `/opsx:ff`).
+   - **Вариант B (TODO в отчёте):** Verify текущего scope as-is; новое требование зафиксировать как TODO в отчёте verify (Executive Summary), без правки артефактов.
+   - **Вариант C (расширить перед verify):** завершить verify без прогона; рекомендовать `/opsx:extend <name>` для контролируемого расширения, затем вернуться к `/opsx:verify`.
 
    **Поведение по выбору:**
-   - **1:** Внести правки в proposal/design/spec/tasks по согласованию; получить явное подтверждение пользователя («ок», «да» и т.п.); продолжить verify с шага 2. В итоговом отчёте — секция `## Изменения артефактов в ходе verify` (перечень файлов и сути правок). Маркер: «Артефакты модифицированы перед верификацией. QC и Architect оценивали **изменённую** версию.»
-   - **2:** Продолжить verify без правок; в конце отчёта — «Не включено в scope: <требование>. Рекомендация: `/opsx:explore` или `/opsx:ff`.»
-   - **3:** Продолжить verify без правок; в Executive Summary — «TODO (не верифицировано в этом прогоне): <требование>.»
+   - **A:** Продолжить verify без правок; в конце отчёта — «Не включено в scope: <требование>. Рекомендация: `/opsx:extend`, `/opsx:explore` или `/opsx:ff`.»
+   - **B:** Продолжить verify без правок; в Executive Summary — «TODO (не верифицировано в этом прогоне): <требование>.»
+   - **C:** Завершить verify **до** выполнения проверок: вывести одну строку-предложение `/opsx:extend <name>` и остановиться. Не создавать отчёт verify для этого прогона.
+
+   **Ранее существовавший «Вариант 1: внести правки → продолжить verify» удалён.** Verify не модифицирует артефакты; любое расширение scope — через отдельные команды (`/opsx:extend`, `/opsx:continue`, `/opsx:explore`).
 
    Если **только** `/opsx:verify` / `/opsx:verify <change>` без дополнительного текста требований — шаг 1b **пропустить**.
 
@@ -96,14 +137,13 @@ Universal quality gate for OpenSpec changes. Mode is determined automatically fr
    | >0 | >0 | **mixed (legacy)** |
    | >0 | 0 | **post-apply (legacy)** |
 
-   **Slice-transition mode detection:**
+   **Slice-transition mode (explicit only):**
 
-   Slice-transition activates in ANY of these cases:
-   1. User or apply explicitly requested slice-transition review (e.g. "verify after slice S2", "slice-transition review", `/opsx:verify <name> --after-slice S2`).
+   Slice-transition activates **only** in these cases:
+   1. User or apply explicitly requested slice-transition review (e.g. "verify after slice S2", "slice-transition review", `/opsx:verify <name> --after-slice S<N>`).
    2. The prompt indicates this run was triggered from apply at a slice gate (apply передаёт `Mode: slice-transition` и `Accepted slice: S<N>`).
-   3. **Auto-detect:** tasks.md slice-mode, есть принятый `S<N>.T<M>` = `[x]` без задач `[ ]` в срезе S<N>, а в S<N+1> все задачи `[ ]` (граница среза пересечена в последней apply-сессии).
 
-   Для case 3 — announce: "Обнаружен принятый срез S<N>. Режим: slice-transition (проверка актуальности задач S<N+1>+)."
+   **Auto-detect отключён** (ранее case 3 — «пересечённая граница среза» — давал ложные срабатывания, когда пользователь отметил `[x]` вручную). Если в tasks.md виден принятый срез без явного флага — верифицировать в режиме `slice-post`, не в `slice-transition`. Для тяжёлой проверки актуальности следующего среза — пользователь явно вызывает `/opsx:verify <name> --after-slice S<N>`.
 
    Announce mode to user:
    ```
@@ -163,13 +203,14 @@ Universal quality gate for OpenSpec changes. Mode is determined automatically fr
      - Add CRITICAL: "Задачи без чекбоксов: N строк. apply/estimate/archive не смогут отслеживать прогресс"
      - Set `autofix_checkboxes = true` for step 17
 
-   **6B. Task numbering:**
-   - Tasks should follow `N.M` numbering within `## N. Group` sections
-   - If numbering absent or inconsistent: WARNING
+   **6B. Task numbering (режим-зависимая проверка):**
+   - **Slice mode** (есть `# Срез S<N>` в tasks.md): задачи должны иметь префикс `S<N>.<M>` (и `S<N>.T<M>` для acceptance-тестов) внутри своего среза. Несоответствие (плоская `N.M` нумерация внутри среза, дубли, пропуски) → WARNING `slice-numbering-inconsistent`.
+   - **Legacy mode** (нет `# Срез`): задачи должны иметь префикс `N.M` внутри `## N. Group` секций. Отсутствие/несогласованность → WARNING `legacy-numbering-inconsistent`.
+   - **Смешанная нумерация** (одновременно `N.M` и `S<N>.<M>` без явного slice-контекста) → CRITICAL `mixed-numbering` с рекомендацией `/opsx:migrate-slices`.
 
-   **6C. Group headers:**
-   - Sections should be `## N. Название`
-   - If tasks exist without group headers: SUGGESTION
+   **6C. Group / Slice headers:**
+   - Slice mode: заголовки формата `# Срез S<N>: <Название>` с метаданными (см. `vertical-slices.mdc`). Отсутствие метаданных → WARNING.
+   - Legacy mode: секции формата `## N. Название`. Отсутствие группировки → SUGGESTION.
 
 7. **Task Quality Check**
 
@@ -545,31 +586,16 @@ Universal quality gate for OpenSpec changes. Mode is determined automatically fr
       - GAP ("Можно реализовать, но неоднозначно") → WARNING
       - SUBOPTIMAL (Архитектурный запах / Design Smell) → WARNING
 
-7.M. **Migrate to slices (mode: migrate-to-slices ONLY)**
+7.M. **Migrate to slices — делегирование на `/opsx:migrate-slices`**
 
-   Этот шаг **заменяет** шаги 7.5–7.8 в режиме `migrate-to-slices`. Запускается, когда:
-   - пользователь явно передал `--migrate-to-slices`, **или**
-   - QC выдал alert `no-slices` и пользователь выбрал миграцию в карточке решения,
-   - **или** в legacy ЗНИ найдены `<!-- phase-gate -->` маркеры и пользователь подтвердил миграцию.
+   Миграция legacy/фазового `tasks.md` в вертикальные срезы **вынесена в отдельную команду** и скилл `.cursor/skills/openspec-migrate-slices/SKILL.md`. Verify не перестраивает артефакты самостоятельно.
 
-   **Шаги:**
-   1. Прочитать `tasks.md`, `design.md`, `proposal.md`, `specs/`.
-   2. Вызвать `Task(subagent_type="onec-code-architect")` с шаблоном **«Architect — slice restructuring»** из `1c-agent-patterns/SKILL.md`. Передать:
-      - текущий tasks.md (плоский / фазовый);
-      - design.md, proposal.md, specs;
-      - список уже выполненных задач (`[x]`) — должны попасть в **первый** срез S1 (или быть распределены по срезам с пометкой `(уже реализовано)`).
-   3. Architect возвращает:
-      - обновлённую секцию `## Slices` для design.md;
-      - перестроенный tasks.md с `# Срез S<N>` заголовками, метаданными, `S<N>.T<M>` тестами и `<!-- slice-gate -->` маркерами.
-   4. **Проверка пользователя**: показать пользователю diff (не применять автоматически):
-      - таблицу старых задач → новые срезы;
-      - список новых slice-gate тестов;
-      - предупреждение, если architect не смог отнести часть задач к сценариям.
-   5. После явного подтверждения пользователя — `StrReplace`/`Write` для `tasks.md` и секции `## Slices` в `design.md`.
-   6. Сохранить отчёт миграции в `reports/migrate-to-slices-YYYY-MM-DD.md`: исходное состояние, итоговое, изменения.
-   7. Запустить **обычный** `/opsx:verify <name>` (без флага миграции), чтобы прогнать новый tasks.md через QC и Architect.
+   **Поведение verify:**
+   - Если пользователь передал `--migrate-to-slices` → предложить `/opsx:migrate-slices <name>` в карточке решения и завершить текущий verify-прогон без прогона проверок.
+   - Если найдены `<!-- phase-gate -->` маркеры в legacy ЗНИ → SUGGESTION `deprecated-phase-gate` с рекомендацией `/opsx:migrate-slices <name>`. Verify продолжается в legacy-режиме.
+   - Если QC выдал alert `no-slices` → в карточке решения (шаг 17) опция «Мигрировать в срезы» — команда предлагается к ручному запуску; verify не вызывает её автоматически.
 
-   В отчёте verify основная секция: `### Миграция в срезы` (status: completed / aborted, ссылка на `migrate-to-slices-YYYY-MM-DD.md`).
+   В отчёте verify секция `### Миграция в срезы`: status = `recommended` / `skipped` / `n/a`, со ссылкой на команду. Исполнение и отчёт `migrate-to-slices-YYYY-MM-DD.md` — ответственность скилла `openspec-migrate-slices`.
 
 7.8. **TZ Generation (conditional in slice-pre / slice-post / legacy pre-apply / mixed)**
 
@@ -577,8 +603,8 @@ Universal quality gate for OpenSpec changes. Mode is determined automatically fr
 
    **Порог обязательности (для режимов slice-pre, slice-post (для непринятых срезов) и legacy pre-apply / mixed):**
    - Подсчитать в `tasks.md` строки с `- [ ]` и `- [x]` (каждая строка задачи с чекбоксом = одна задача).
-   - **4 и более** задач → ТЗ **генерируется обязательно** (выполнить **Logic** ниже).
-   - **1–3** задачи → ТЗ **не генерировать**, если пользователь **явно** не запросил ТЗ в том же сообщении (фразы вроде «с ТЗ», «сгенерируй ТЗ», «нужно ТЗ», «включи ТЗ») и не указывал отдельно `/opsx:doc-tz`. В отчёте verify: «ТЗ: не генерировалось (3 или менее задач по чекбоксам). При необходимости: `/opsx:doc-tz <name>`.» Перейти к шагу 9 без записи `ТЗ.md`.
+   - **6 и более** задач → ТЗ **генерируется обязательно** (выполнить **Logic** ниже). Порог согласован с `sdd-workflow.mdc` (секция Scale thresholds).
+   - **1–5** задач → ТЗ **не генерировать**, если пользователь **явно** не запросил ТЗ в том же сообщении (фразы вроде «с ТЗ», «сгенерируй ТЗ», «нужно ТЗ», «включи ТЗ») и не указывал отдельно `/opsx:doc-tz`. В отчёте verify: «ТЗ: не генерировалось (5 или менее задач по чекбоксам). При необходимости: `/opsx:doc-tz <name>`.» Перейти к шагу 9 без записи `ТЗ.md`.
    - **0** задач с чекбоксами (например, только bare-строки) → трактовать как «меньше порога»; ТЗ не генерировать, если нет явного запроса.
    - **Явный запрос ТЗ** в сообщении пользователя → генерировать **независимо** от количества задач.
 
@@ -834,11 +860,17 @@ Universal quality gate for OpenSpec changes. Mode is determined automatically fr
     ```
     ## Executive Summary
 
+    **Режим:** <slice-pre | slice-post | slice-post (final) | slice-scoped (S<N>) | slice-transition (после S<N>) | migrate-to-slices | legacy pre-apply | legacy mixed | legacy post-apply>
+    **Tier:** <Lite | Standard | Full> (<K задач, M срезов>)
+    **Этап:** <pre-apply | post-apply | slice transition | migration>
+
     **Вердикт:** N CRITICAL, M WARNING, K SUGGESTION
     **Контекст (INFO):** <число> пометок — см. секцию «Контекст (INFO)» ниже *(только если INFO > 0; иначе строку опустить)*
     **Решений от пользователя:** <число> — <перечень решений или «не требуется»>
     **Статус:** <одна фраза>
     ```
+
+    Первые три строки (Режим / Tier / Этап) **обязательны** и **должны совпадать** с объявлением пользователю на шаге 1. См. единую нотацию срезов в `verify-user-communication.mdc` правила 10–11.
 
     Правила заполнения:
     - Счётчики **Вердикта** учитывают только CRITICAL / WARNING / SUGGESTION. **INFO не входят** в N, M, K.

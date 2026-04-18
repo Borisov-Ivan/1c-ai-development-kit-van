@@ -52,6 +52,21 @@ alwaysApply: false
 
 9. **After judgment remediation** (шаг 17b): Before/After scorecard для устранённых замечаний + таблица «Принятые риски» для карточек с выбором «Принять как есть» + финальный вердикт.
 
+10. **Единая нотация срезов.** Во всех секциях (Executive Summary, Scorecard, карточки решений, «К сведению», файл отчёта):
+    - Срез — `S<N>` (без пробела, без точки после). Заголовок среза — `S<N>: <Название>` при необходимости контекста.
+    - Задача среза — `S<N>.<M>` (например `S2.3`).
+    - Приёмочный тест — `S<N>.T<M>` (например `S2.T6`).
+    - Идентификатор сценария spec — цитировать `#### Scenario: <текст>` в одинарных кавычках.
+    - Запрещено смешивать `Фаза N` / `P<N>` / `slice N` / `слайс N` / `S<N>.M` без точки — только одна форма на отчёт.
+
+11. **Фиксированный заголовок отчёта (три строки).** После `## Executive Summary` обязателен блок, синхронный с шагом 1 verify:
+    ```
+    **Режим:** <slice-pre | slice-post | slice-post (final) | slice-scoped (S<N>) | slice-transition (после S<N>) | migrate-to-slices | legacy pre-apply | legacy mixed | legacy post-apply>
+    **Tier:** <Lite | Standard | Full> (<K задач, M срезов>)
+    **Этап:** <pre-apply | post-apply | slice transition | migration>
+    ```
+    Эти строки должны быть идентичны тому, что verify вывел пользователю в начале прогона (шаг 1). Несоответствие — CRITICAL `report-header-mismatch`.
+
 ---
 
-**Last updated**: 2026-04-03 | **Version**: 3.0
+**Last updated**: 2026-04-18 | **Version**: 3.1

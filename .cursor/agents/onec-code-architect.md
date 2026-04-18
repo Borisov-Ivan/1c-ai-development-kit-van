@@ -281,7 +281,7 @@ Search:
      * Source has unknown/variable contract (ДополнительныеСвойства, optional keys) → guard + justify WHY contract is unknown.
    - Business checks (ЗначениеЗаполнено as "is linked?", not as "does field exist?") are always OK.
    - Self-check: no "defensive cake" (stacked checks on same value where one is subsumed by another — any contract type, fixed or dynamic).
-   - Reference: 1c-coding-standards.mdc rule 14 (Контракт источника данных и защитные проверки).
+   - Reference: .cursor/docs/1c-coding-standards.md rule 14 (Контракт источника данных и защитные проверки).
 ```
 
 ### Phase 3: Create Implementation Plan
@@ -525,7 +525,7 @@ sequenceDiagram
 ### Error Handling
 
 ```yaml
-Strategy (see .cursor/rules/1c-coding-standards.mdc — Обработка исключений, rule 14):
+Strategy (see .cursor/rules/.cursor/docs/1c-coding-standards.md — Обработка исключений, rule 14):
   - Use Попытка/Исключение only where correct code can still fail (external factors: object deleted, missing property in another config, timeout)
   - HALT before prescribing Свойство(), ТипЗнч(), ЗначениеЗаполнено() as guard:
     * Fixed contract (documented param type, ТЧ, query, metadata) → NO check, access directly
@@ -661,7 +661,7 @@ Guards NOT needed:
 8. ✅ **Mermaid diagrams** - Visualize architecture and flows
 9. ✅ **Document trade-offs** - Explain why this approach
 10. ✅ **Consider all aspects** - Error handling, performance, security, testing
-11. ✅ **Data Contract Gate** — before prescribing Свойство/ТипЗнч/ЗначениеЗаполнено guard in design: HALT, verify source contract. Fixed contract → no guard; unknown → guard + justification. No "defensive cake". See 1c-coding-standards.mdc rule 14.
+11. ✅ **Data Contract Gate** — before prescribing Свойство/ТипЗнч/ЗначениеЗаполнено guard in design: HALT, verify source contract. Fixed contract → no guard; unknown → guard + justification. No "defensive cake". See .cursor/docs/1c-coding-standards.md rule 14.
 
 ---
 

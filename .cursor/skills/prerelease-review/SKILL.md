@@ -64,7 +64,7 @@ openspec list --json
 
 ### 1.1 Прочитать стандарты проекта
 
-- `.cursor/rules/1c-coding-standards.mdc` — стандарты BSL проекта.
+- `.cursor/rules/.cursor/docs/1c-coding-standards.md` — стандарты BSL проекта.
 - `.cursor/agents/onec-code-reviewer.md` — категории и правила ревью (в т.ч. отсылка к вендорским стандартам).
 - **Вендорские стандарты 1С** (для полноты предрелизной проверки): `.cursor/skills/1c-vendor-standards/SKILL.md` — чеклисты по доменам; навигация — `.cursor/docs/standard/1c-standards-navigator.md`; полный текст по доменам — `.cursor/docs/standard/std-*.md` (метаданные, запросы, транзакции, формы и т.д.). Согласовано с AGENTS.md и onec-code-reviewer.
 
@@ -174,7 +174,7 @@ openspec instructions apply --change "<name>" --json
 - **Файлы в scope (Tier 1):** по батчу — список .bsl с путями (из 1.6: группы A/B/C).
 - **Директория расширения (полный путь):** `src/*/cfe/<название>/` — для Grep по вызовам процедур/функций при проверке **unused code** (категория 15). **Всегда** передавать явно: область поиска вызовов — **вся** директория расширения. При **`change-scoped`** с шагом 1.3b ревьювер в промпте должен выполнять Grep по имени **только для процедур/функций, перечисленных в `## Review Boundaries` для данного файла**, а не для всех процедур модуля (см. дополнение к шагу 2.1).
 - **Review Boundaries (`change-scoped`):** в каждый промпт батча (шаг 2.1) вставить блок `## Review Boundaries` для файлов батча; протокол — `.cursor/agents/onec-code-reviewer.md` (Review Boundaries). **Полный** Tier 1 без границ — только если для всех файлов батча `Focus: full` (fallback 1.3b); тогда секцию можно не дублировать или указать пофайлово `Focus: full`.
-- **Стандарты:** 1c-coding-standards.mdc, 1c-vendor-standards/SKILL.md, конфигурация onec-code-reviewer.md.
+- **Стандарты:** .cursor/docs/1c-coding-standards.md, 1c-vendor-standards/SKILL.md, конфигурация onec-code-reviewer.md.
 - **Whitelist форматов комментариев (project.md):** из шага 1.1a — перечень имён и правил (префикс/regex) или «нет».
 - **Обязательный контроль комментариев (project.md):** из шага 1.1a — ID, где проверять, пример допустимой строки, regex (если есть), уровень/kind; или «нет».
 - **Режим ревью:** mode=prerelease; для каждого замечания указывать kind (functional / style / release-hygiene).
@@ -337,7 +337,7 @@ rg -i "//.*\b(fail-fast|feature.toggle|workaround|fallback|downstream|re-raise|f
 **Дата:** [дата]
 **Scope:** [full-extension: «N файлов (A: n, B: n, C: n), M процедур/функций» | change-scoped: «change-scoped (<change-name>), Tier 1: K файлов из V задач [x]; Review Boundaries (diff-focused по процедурам, шаг 1.3b); A/B/C по этим файлам; Tier 2: всё расширение»]
 **Режим:** предрелизный (Tier 1: code review + Tier 2: architecture review; эскалация: LOW→MEDIUM, MEDIUM→HIGH для kind=functional, release-hygiene и style — код заказчику)
-**Стандарты:** 1c-coding-standards.mdc (rules 1-22), вендорские (1c-vendor-standards, .cursor/docs/standard/ при необходимости), [спецификация расширения]
+**Стандарты:** .cursor/docs/1c-coding-standards.md (rules 1-22), вендорские (1c-vendor-standards, .cursor/docs/standard/ при необходимости), [спецификация расширения]
 
 ### Файлы в scope
 
@@ -537,7 +537,7 @@ openspec new change "prerelease-fix-<расширение-kebab>" --schema prere
 - **Режимы:** `full-extension` (по умолчанию, обратная совместимость) и **`change-scoped`** (второй аргумент — имя каталога ЗНИ): Tier 1 и механика 1.7–1.7c по `change_files` + **Review Boundaries** (шаг 1.3b, diff-focused по изменённым процедурам); фильтр строк в 1.7/1.7b по границам; Tier 2 по полному каталогу расширения (`extension_all_bsl`); шаг 4A/4B — см. выше.
 - **Tier 1 (Code Review):** `onec-code-reviewer` v1.6 с поддержкой `mode=prerelease`, категориями 1-15 и новыми проверками (parameter mutation, magic constants, mixed responsibilities, prefix consistency, excessive logging).
 - **Tier 2 (Architecture Review):** `onec-code-explorer` — кросс-модульный анализ (error strategy, implicit contracts, type-dispatch, semantic duplication, scope creep). Запускается параллельно с Tier 1. Только в prerelease.
-- Стандарты кода: `1c-coding-standards.mdc` v1.4 (rules 1-22, включая rule 21 Parameter Integrity и rule 22 No Duplicated Literals).
+- Стандарты кода: `.cursor/docs/1c-coding-standards.md` v1.4 (rules 1-22, включая rule 21 Parameter Integrity и rule 22 No Duplicated Literals).
 - Стандарты вендора и навигация: `AGENTS.md` → секция «Стандарты вендора 1С»; `.cursor/docs/standard/` (1c-standards-navigator.md, std-*.md) и `.cursor/skills/1c-vendor-standards/SKILL.md` — единый набор для предрелизной проверки.
 - Если после ревью обнаружены архитектурные замечания (новые объекты, изменение API, структуры хранения) — не создавать задачи writer, остановиться и показать пользователю.
 - Отчёт сохраняется согласно `preserve-subagent-reports.mdc`.

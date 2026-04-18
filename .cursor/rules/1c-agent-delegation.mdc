@@ -24,8 +24,11 @@ priority: 999
 
 ## ПРИНЦИП
 
-**Инвариант BSL:** см. `.cursor/rules/bsl-write-guard.mdc` — правка .bsl только через onec-code-writer + обязательный onec-code-reviewer.
-**Tool Name Guard:** Для вызова субагентов использовать инструмент **Task**. При `Invalid enum value` — см. `.cursor/rules/tool-name-guard.mdc`.
+   Инварианты загружены соседними always-apply правилами:
+- BSL write guard → `bsl-write-guard.mdc`
+- Tool name (использовать **Task**) → `tool-name-guard.mdc`
+- Project paths (cf/cfe) → `project-paths.mdc`
+
 **Explore-mode guard:** В режиме `/opsx:explore` без активного change — onec-code-writer и onec-code-reviewer НЕ вызываются. Сначала ЗНИ (`/opsx:new` или `/opsx:ff`).
 
 ## APPLY GATE
@@ -65,12 +68,7 @@ Architect может рекомендовать новые объекты в des
 
 ## PROJECT PATHS
 
-Перед вызовом onec-code-explorer, onec-code-architect, onec-code-writer, onec-code-reviewer, onec-trace-analyst, если контекст касается файлов в `src/` (пути к модулям, поиск по коду, проверка выгрузки):
-
-1. Прочитать `openspec/project.md`, из секции **«Структура репозитория»** извлечь пути к cf и cfe (по таблице, колонка «Путь»).
-2. Включить в промпт субагента блок: «Project paths (from openspec/project.md): base=<путь к cf>, extensions=<список путей cfe>. Use these paths for file search and base/cfe resolution; do not assume src/cf/ or src/cfe/.»
-
-См. `.cursor/rules/project-paths.mdc`.
+Перед вызовом 1С-агентов включать в их промпт блок путей из `openspec/project.md` (секция «Структура репозитория»). Протокол извлечения и формат блока — в `.cursor/rules/project-paths.mdc`.
 
 ## LIGHT MODE (точечная правка)
 
@@ -157,118 +155,19 @@ Workflow: прямая правка (StrReplace) + Grep-верификация +
 
 Поток: `writer → ReadLints → [fix if errors] → API EXISTENCE CHECK → [AskQuestion if WARNING] → reviewer (+ lint output + API check results)`
 
-## API EXISTENCE CHECK
+## WRITER PIPELINE (детали)
 
-**После LINT GATE, до вызова reviewer.** Проверяет, что вызовы `МодульИмя.МетодИмя()`, появившиеся в **новых строках diff** после writer, реально определены в коде репозитория. Поиск ведётся по **всему src/** (cf + все cfe).
+API EXISTENCE CHECK, EXTENSION GATE + VERIFICATION, CONTRACT RESOLUTION (формат Resolved Contracts и investigation loop) — в on-demand правиле `.cursor/rules/1c-writer-pipeline.mdc` (подгружается по globs `**/*.bsl`).
 
-### Шаг 1. Извлечь новые вызовы
+Сквозной поток пайплайна:
 
-Из изменённых строк (diff writer) regex-ом собрать уникальные пары `МодульИмя.МетодИмя(`. Дедупликация по паре.
-
-**Пропускать:**
-- Вызовы менеджеров платформы: `Справочники.X.`, `Документы.X.`, `Перечисления.X.`, `РегистрыСведений.X.`, `Обработки.X.Создать()`
-- Вызовы `Элементы.X.` (элементы формы)
-- Вызовы `ЭтотОбъект.X`, `ЭтаФорма.X`
-
-### Шаг 2. Для каждой пары — поиск определения
-
-Область поиска — **весь src/** (все подкаталоги, содержащие cf и cfe). Фактические пути к cf/cfe могут отличаться от `src/cf/` и `src/cfe/`; см. `openspec/project.md`.
-
-- Общий модуль: Grep `Функция МетодИмя|Процедура МетодИмя` в `src/**/CommonModules/МодульИмя*/Ext/Module.bsl`
-- Объект (обработка, документ и т.д.): Grep `Функция МетодИмя|Процедура МетодИмя` в `src/**/МодульИмя/**/Module.bsl` и `src/**/МодульИмя/**/ObjectModule.bsl`
-
-### Шаг 3. Вердикт
-
-| Результат | Категория | Действие |
-|-----------|-----------|----------|
-| Метод найден в src/ | VERIFIED | Тихо; передать reviewer: `API_VERIFIED: МодульИмя.МетодИмя` |
-| Модуль найден, метод НЕ найден | WARNING | AskQuestion пользователю (шаг 4) |
-| Модуль НЕ найден в src/ | WARNING | AskQuestion пользователю (шаг 4) |
-
-### Шаг 4. Эскалация к пользователю (при WARNING)
-
-AskQuestion:
-
-«Метод `МодульИмя.МетодИмя()` не найден в репозитории (src/).
-
-Варианты:
-1. Метод существует — указать путь к файлу (модуль/конфигурация)
-2. Метод не существует — вернуть writer на исправление
-3. Пропустить проверку (метод в другом репозитории / подключаемой библиотеке)»
-
-- **Вариант 1:** пользователь указывает путь; оркестратор grep-ит для подтверждения, передаёт reviewer как VERIFIED.
-- **Вариант 2:** **СТОП**, возврат writer с замечанием «метод не существует, исправить вызов».
-- **Вариант 3:** передать reviewer как `UNCHECKED_API` (info, не warning).
-
-### Ограничения
-
-- Только **новые строки** из diff (не весь файл).
-- Только **точечная нотация** `Модуль.Метод(` (платформенные built-in без точки не попадают).
-- Дедупликация по паре (типичный diff: 1–5 уникальных вызовов).
-- При отсутствии diff (Mechanical Mode) — пропустить шаг.
-
-## CONTRACT RESOLUTION (формат и investigation loop)
-
-**Назначение:** описывает формат блока Resolved Contracts и протокол reviewer-driven investigation loop. Это **не шаг** перед writer/reviewer — резолв запускается **по запросу ревьювера** (секция Investigation Request в отчёте).
-
-**Цель:** определить, фиксирован ли контракт возврата внешних вызовов (fixed — конструируется в коде; dynamic — десериализация, внешний API), чтобы reviewer мог квалифицировать defensive checks (AP-004 при fixed) и Попытка-блоки (contract-compensating-try при unknown).
-
-### Триггер
-
-Ревьювер после Phase 0–2.5 включает в отчёт секцию `## Investigation Request` с таблицей источников, требующих резолва контракта. Оркестратор парсит эту секцию и запускает investigation loop (шаг 3.5 в `review/SKILL.md`).
-
-Без секции Investigation Request — CONTRACT RESOLUTION не выполняется.
-
-### Формат Resolved Contracts
-
-Блок для вставки в промпт повторного ревью:
-
-```markdown
-## Resolved Contracts
-
-### МетодИмя (ИмяМодуляИлиОбъекта)
-- Returns: тип (Структура | Соответствие | Массив | примитив | Произвольный)
-- Values/Keys: при структуре — перечень ключей, при вложенности — кратко (например Доверитель(Структура: ИНН, ...))
-- Contract: fixed | dynamic
-- Evidence: файл, строки (источник: explorer)
+```
+writer → ReadLints → [fix if errors] → API EXISTENCE CHECK →
+  [AskQuestion if WARNING] → EXTENSION VERIFICATION (если &ИзменениеИКонтроль) →
+  reviewer (+ lint output + API check results + base path + verification result)
 ```
 
-Если контракт не удалось определить — запись: `Contract: unknown`; reviewer трактует как динамический (допустима минимальная проверка).
-
-### Резолв контракта (только explorer)
-
-Оркестратор **не** резолвит контракты сам. Для всех точек из таблицы Investigation Request — один вызов **onec-code-explorer** по глубокому шаблону «Explorer — contract resolution (deep)» из `1c-agent-patterns/SKILL.md`.
-
-### Передача результата
-
-- **Reviewer (повторный прогон):** секция `## Resolved Contracts` в промпте. Блок при наличии берётся из сохранённого отчёта в reports/ (см. review/SKILL.md шаг 3.5) или из вывода explorer. Использовать для Phase 2.5 Defensive Checks Audit: колонка Contract verified? = resolved-fixed или resolved-dynamic.
-- **Writer (при устранении замечаний):** при устранении замечаний ревью после Investigation Loop оркестратор **обязательно** передаёт writer полный блок `## Resolved Contracts` из файла `reports/resolved-contract-<scope-slug>-YYYY-MM-DD.md`. Без блока writer не вызывать для замечаний, затрагивающих resolved-контракты.
-
-**Сохранение.** Resolved Contracts после investigation loop сохраняются оркестратором в `openspec/changes/<id>/reports/resolved-contract-<scope-slug>-YYYY-MM-DD.md` (или `temp/reports/` без change) как артифакт ЗНИ. Reviewer и writer при всех последующих вызовах по этому scope получают блок из файла.
-
-Поток `/review`: `resolve scope → контекст → reviewer → [Investigation Request?] → explorer → reviewer (+ Resolved Contracts) → отчёт`.
-Поток `/opsx:apply`: `writer → ... → reviewer → [Investigation Request?] → explorer → reviewer (+ Resolved Contracts) → отчёт`.
-
-## EXTENSION GATE
-
-При делегировании writer для файла в cfe/ (расширение):
-1. Grep файл на наличие &ИзменениеИКонтроль.
-2. Если найдено — в промпт writer ОБЯЗАТЕЛЬНО включить блок EXTENSION_GUARD
-   из `1c-agent-patterns/SKILL.md` (секция Shared instruction blocks).
-3. В промпт reviewer ОБЯЗАТЕЛЬНО включить: путь к base-файлу в cf/ для верификации
-   (заменить cfe/<ExtName>/ на cf/ в пути к файлу).
-
-### EXTENSION VERIFICATION (после writer, до reviewer)
-
-Если файл содержит &ИзменениеИКонтроль — **до вызова reviewer** выполнить верификацию:
-
-1. Определить base-путь: заменить `cfe/<ExtName>/` на `cf/` в пути к файлу.
-2. Прочитать base-файл (Read), найти тело перехваченной процедуры/функции.
-3. В файле расширения: визуально выделить код ВНЕ директив `#Вставка`/`#Удаление`/`#КонецВставки`/`#КонецУдаления`.
-4. Сравнить код вне директив с base. При расхождении — **СТОП**, вернуть writer на исправление.
-5. Путь к base-файлу и результат проверки («verified: совпадает» или «расхождение в строках N-M») передать в промпт reviewer.
-
-Поток: `detect &ИзменениеИКонтроль → enrich writer prompt → writer → EXTENSION VERIFICATION → ReadLints → reviewer (+ base path + verification result)`
+Investigation loop (резолв контрактов) запускается **только** по запросу ревьювера (секция `## Investigation Request` в его отчёте) — см. детали в `1c-writer-pipeline.mdc` и `review/SKILL.md` шаг 3.5.
 
 ## ИСКЛЮЧЕНИЯ
 

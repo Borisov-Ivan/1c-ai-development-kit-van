@@ -45,7 +45,7 @@ alwaysApply: false
 - `architecture` — отчёт onec-code-architect
 - `exploration` — отчёт onec-code-explorer
 - `trace-analysis` — отчёт onec-trace-analyst
-- `resolved-contract` — результат резолва контрактов (investigation loop, onec-code-explorer)
+- `resolved-contract` — результат резолва контрактов (investigation loop, onec-code-explorer). **Канонический путь:** `openspec/changes/<id>/reports/resolved-contract-<scope-slug>-ГГГГ-ММ-ДД.md`; fallback `temp/reports/resolved-contract-<scope-slug>-ГГГГ-ММ-ДД.md` **только** при отсутствии активного change. Этот путь — единственный источник правды для reviewer (повторный прогон) и writer (review-fix); AGENTS.md и `1c-agent-delegation.mdc` ссылаются на тот же формат.
 
 ## ИСКЛЮЧЕНИЯ
 

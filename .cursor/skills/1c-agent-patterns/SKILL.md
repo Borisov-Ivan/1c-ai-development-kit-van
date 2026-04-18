@@ -54,15 +54,11 @@ description: Reference guide for 1C agent delegation patterns - complexity asses
 
 ---
 
-## ВЫЗОВ АГЕНТОВ (КРИТИЧНО)
+## ВЫЗОВ АГЕНТОВ
 
-**Для вызова субагентов используй инструмент `Task`.** Все subagent_type из таблицы ниже (onec-code-writer, onec-code-reviewer, onec-code-architect, onec-code-architect-2nd, onec-code-explorer, onec-trace-analyst и др.) доступны через Task. См. `.cursor/rules/tool-name-guard.mdc`.
+Вызов субагентов — через инструмент **Task** (формат, допустимые `subagent_type`, поведение при `Invalid enum value` — `.cursor/rules/tool-name-guard.mdc`). Подробностей здесь не дублируем.
 
-Формат вызова: `Task(subagent_type="...", description="...", ...)`.
-
-**Fallback для архитектора:** Во всех шаблонах ниже, где указан `subagent_type="onec-code-architect"`, оркестратор может и должен использовать `subagent_type="onec-code-architect-2nd"`, если основной вызов завершился ошибкой недоступности модели, таймаутом, или если пользователь явно запросил использование Gemini.
-
-Если получена ошибка Invalid enum value — проверить, что вызван именно **Task** (в других контекстах могут встречаться иные имена — здесь корректно только Task). См. секцию «ПРИ ОШИБКЕ ВЫЗОВА АГЕНТА».
+**Fallback для архитектора:** в шаблонах ниже с `subagent_type="onec-code-architect"` оркестратор использует `subagent_type="onec-code-architect-2nd"`, если основной вызов завершился ошибкой недоступности модели, таймаутом или пользователь явно попросил Gemini.
 
 ---
 
@@ -83,7 +79,7 @@ HALT. Не знаешь тип — прочитай метаданные (XML в
 Свойство() — ИСКЛЮЧИТЕЛЬНО Структура / ФиксированнаяСтруктура; на любом
 другом типе (ссылка, объект, строка ТЗ) — runtime-ошибка. Defensive cake
 (стек 2+ проверок на одном значении, где одна поглощается другой) запрещён
-при ЛЮБОМ контракте (fixed и dynamic). См. rule 14 в 1c-coding-standards.mdc.
+при ЛЮБОМ контракте (fixed и dynamic). См. rule 14 в .cursor/docs/1c-coding-standards.md.
 ```
 
 #### INTEGRATION_CONTRACT_GATE
@@ -144,7 +140,7 @@ Conditional action gate: если вся оставшаяся логика пр�
 к выходу, а не к действию. Ранний выход (guard clause) допустим
 только как предусловие В НАЧАЛЕ процедуры, после которого идёт
 основная логика из нескольких действий.
-См. rule 23 в 1c-coding-standards.mdc.
+См. rule 23 в .cursor/docs/1c-coding-standards.md.
 ```
 
 #### ORCHESTRATOR_IMPLEMENTATION_GATE
@@ -845,7 +841,7 @@ Task(
          [Вставить блок CONTEXT_SAFETY — если файл в cfe/]
 
          ## 5. СТАНДАРТЫ
-         Следуй 1c-coding-standards.mdc.
+         Следуй .cursor/docs/1c-coding-standards.md.
 
          ## 6. САМОКОНТРОЛЬ
          Перед завершением проверь:
@@ -897,7 +893,7 @@ Task(
          [Вставить блок CONTEXT_SAFETY — если файл в cfe/]
 
          ## 6. СТАНДАРТЫ
-         Следуй 1c-coding-standards.mdc.
+         Следуй .cursor/docs/1c-coding-standards.md.
 
          ## 7. САМОКОНТРОЛЬ
          Перед завершением проверь:
@@ -1012,7 +1008,7 @@ Task(
          [Вставить блок EXTENSION_GUARD — если файл в cfe/]
 
          ## 5. СТАНДАРТЫ
-         Следуй 1c-coding-standards.mdc.
+         Следуй .cursor/docs/1c-coding-standards.md.
 
          ## 6. САМОКОНТРОЛЬ
          - Каждое замечание из списка адресовано (или обосновано, почему нет)
@@ -1032,7 +1028,7 @@ Task(
   prompt="Проверь качество кода для [feature].
 
          Файлы: [список изменённых .bsl]
-         Стандарты: 1c-coding-standards.mdc
+         Стандарты: .cursor/docs/1c-coding-standards.md
          Диагностики линтера: [вывод ReadLints или 'линтер не выявил ошибок']
          Base-файл (для &ИзменениеИКонтроль): [путь к base в cf/ или 'не применимо']
          [Если оркестратор передал блок ## Resolved Contracts — включить его сюда. Использовать для Phase 2.5 Defensive Checks Audit: для каждого источника данных из Contract Map, для которого есть запись в Resolved Contracts, в колонке Contract verified? указать resolved-fixed или resolved-dynamic по полю Contract записи. resolved-fixed + наличие defensive check (ТипЗнч/Свойство) → AP-004. resolved-dynamic + корректная минимальная проверка → OK.]
@@ -1155,7 +1151,7 @@ Task(
   prompt="Проверь качество исправления ошибки для [feature/модуль].
 
          Файлы: [список изменённых .bsl]
-         Стандарты: 1c-coding-standards.mdc
+         Стандарты: .cursor/docs/1c-coding-standards.md
          Диагностики линтера: [вывод ReadLints или 'линтер не выявил ошибок']
          Base-файл (для &ИзменениеИКонтроль): [путь к base в cf/ или 'не применимо']
 
@@ -1305,7 +1301,7 @@ Task(
          [Вставить блок EXTENSION_GUARD — если файл в cfe/]
 
          ## 5. СТАНДАРТЫ
-         Следуй 1c-coding-standards.mdc.
+         Следуй .cursor/docs/1c-coding-standards.md.
 
          ## 6. САМОКОНТРОЛЬ
          - Поведение кода до и после рефакторинга идентично?
