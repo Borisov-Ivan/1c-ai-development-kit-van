@@ -1,5 +1,5 @@
 ---
-description: "OpenSpec workflow — explore, plan, apply, verify, archive"
+description: "OpenSpec workflow — explore, plan, apply, verify, archive (vertical slices)"
 alwaysApply: false
 ---
 
@@ -8,17 +8,17 @@ alwaysApply: false
 ## FLOW
 
 ```
-explore → new/ff → verify → apply → verify → archive
+explore → new/ff → verify → apply (по срезам) → verify → archive
 ```
 
 | Этап | Команда | Что происходит | Агенты |
 |------|---------|----------------|--------|
-| **Исследование** | `/opsx:explore` | Понять задачу, исследовать код, принять решения | onec-code-explorer, onec-code-architect |
-| **Создание change** | `/opsx:new` или `/opsx:ff` | proposal → design → specs → tasks | onec-code-architect (tasks) |
-| **Проверка** | `/opsx:verify` | Pre-apply: формат tasks, качество задач, Architect Gate, Design Review, ТЗ, project constraints. Post-apply: completeness, correctness, coherence. Авто-устранение замечаний | onec-code-architect (при устранении) |
-| **Реализация** | `/opsx:apply` | Выполнение задач из tasks.md. Soft redirect на verify если не проводился | onec-code-writer + onec-code-reviewer |
-| **Архивация** | `/opsx:archive` | Синхронизация specs, перенос в archive/ | — |
-| **Отладка** | `/opsx:debug` | RCA + fix tasks в контексте change (без реализации кода) | onec-trace-analyst, onec-code-explorer |
+| **Исследование** | `/opsx:explore` | Понять задачу, исследовать код, принять решения, сформировать slice hints в Explore Summary | onec-code-explorer, onec-code-architect |
+| **Создание change** | `/opsx:new` или `/opsx:ff` | proposal → design (вкл. `## Slices`) → specs → tasks (с `# Срез S<N>`) | onec-code-architect (slice decomposition + slice-aware task decomposition) |
+| **Проверка** | `/opsx:verify` | slice-pre / slice-post / slice-scoped (`--slice S<N>`) / migrate-to-slices / legacy. Quality Controller проверяет когерентность срезов; Architect — реализуемость. Авто-устранение mechanical, карточки решений judgment | onec-code-architect, openspec-quality-controller |
+| **Реализация** | `/opsx:apply` | **Step-by-slice** (default): один срез — карточка приёмки — следующий срез. Опции: step-by-step / batch | onec-code-writer + onec-code-reviewer |
+| **Архивация** | `/opsx:archive` | Hard-block при непринятых срезах (`S<N>.T<M>` = `[ ]`); синхронизация specs, перенос в archive/ | — |
+| **Отладка** | `/opsx:debug` | RCA + fix tasks с привязкой к срезу (новый fix-срез или задача в непринятом срезе) | onec-trace-analyst, onec-code-explorer |
 | **Предрелизное ревью** | `/prerelease-review` | Батчевый ревью расширения | onec-code-reviewer |
 | **Ревью кода** | `/review` | Ревью по контексту запроса | onec-code-reviewer |
 
@@ -28,32 +28,52 @@ explore → new/ff → verify → apply → verify → archive
 
 | Фраза пользователя | Что выполнять |
 |---------------------|---------------|
-| «создай ЗНИ», «заведи ЗНИ», «новый change» | **СТОП.** Если активна сессия explore — Change Creation Gate (Explore Summary + redirect). Иначе — `/opsx:ff` (scaffold + все артефакты с делегированием и gates). **Запрещено** создавать артефакты change вручную в обход `/opsx:ff`. |
+| «создай ЗНИ», «заведи ЗНИ», «новый change» | **СТОП.** Если активна сессия explore — Change Creation Gate (Explore Summary + redirect). Иначе — `/opsx:ff` (scaffold + все артефакты с делегированием, slice decomposition и gates). **Запрещено** создавать артефакты change вручную в обход `/opsx:ff`. |
+
+## ВЕРТИКАЛЬНЫЕ СРЕЗЫ (модель работы)
+
+ЗНИ режутся на **вертикальные срезы** — приёмопригодные сценарии, каждый со своим S<N>.T<M> приёмочным тестом и slice-gate. Единый источник истины — `.cursor/rules/vertical-slices.mdc`.
+
+- **design.md** содержит секцию `## Slices` с описанием каждого среза (Сценарий, Приёмка, Связь со spec, Зависимости).
+- **tasks.md** структурирован по срезам: `# Срез S<N>: ...` → метаданные → задачи `S<N>.<M>` → приёмочный `S<N>.T<M>` → `<!-- slice-gate: ... -->`.
+- **apply** по умолчанию — step-by-slice: реализовали → пользователь принимает → следующий.
+- **verify** оценивает когерентность срезов (Quality Controller, 6 критериев), а не фазовую структуру.
+- **archive** возможен **только** при принятых всех срезах.
 
 ## ДОБАВЛЕНИЕ ЗАДАЧ К СУЩЕСТВУЮЩЕМУ CHANGE
 
-См. таблицу и правила в `phase-gates.mdc` (секция «ДОБАВЛЕНИЕ ЗАДАЧ В PHASED TASKS»). `/opsx:ff` создаёт **новый** change — не используется для добавления задач к существующему.
+| Случай | Действие |
+|--------|----------|
+| Slice mode, дефект в **непринятом** срезе S<N> | Вставить новую задачу `S<N>.<M+1>` **перед** `S<N>.T<M>` |
+| Slice mode, дефект в **принятом** срезе S<K> | Создать **fix-срез** `S<N+1>: Исправление дефекта S<K>` (зависит от S<K>) |
+| Slice mode, новая функциональность | Новый срез `S<N+1>` или расширение существующего непринятого |
+| Legacy mode (`# Срез` нет) | Вставить в подходящую секцию или «7. Рефакторинг и качество». При накоплении исправлений — рекомендовать `/opsx:verify --migrate-to-slices` |
+
+`/opsx:ff` создаёт **новый** change — не используется для добавления задач к существующему. Подробности — `.cursor/skills/openspec-continue-change/SKILL.md` и `.cursor/skills/openspec-debug/SKILL.md`.
 
 ## ПОРОГИ МАСШТАБА ЗНИ
 
 | Порог (задач в tasks.md) | Поведение в workflow |
 |--------------------------|----------------------|
-| **≤ 5 задач** | **Lite verify**: пропускается Quality Controller (openspec-quality-controller), компактный вызов архитектора. |
+| **≤ 5 задач** | **Lite verify**: пропускается Quality Controller, компактный вызов архитектора. Срезов может быть 1 (или legacy без срезов). |
 | **≥ 6 задач** | **Генерация ТЗ**: шаг 7.8 в verify автоматически генерирует `ТЗ.md` (если не Lite). |
-| **10+ задач** | **Phase Gates**: рекомендуется разбиение на фазы (`<!-- phase-gate -->`). Verify выдаёт алерт `missing-phase-gate`. |
+| **≥ 6 задач** | **Slice Generation Gate**: design.md обязан содержать `## Slices`. ff/new не разрешают переход к tasks без срезов. Если ЗНИ legacy — `/opsx:verify --migrate-to-slices`. |
 
 ## ПРИНЦИПЫ
 
-- Архитектура до кода: design.md ревьюируется architect-ом до реализации. Триггеры — `architect-gate.mdc`. Основная точка проверки — `/opsx:verify` (pre-apply режим)
-- Атомарные задачи с критериями приемки в tasks.md
+- Архитектура до кода: design.md ревьюируется architect-ом до реализации. Триггеры — `architect-gate.mdc`. Основная точка проверки — `/opsx:verify` (slice-pre режим)
+- **Вертикальная декомпозиция**: каждый срез доставляет приёмопригодную ценность; смешение слоёв (UI без логики, инфраструктура без сценария) не допускается
+- Атомарные задачи с критериями приёмки в tasks.md, ID по схеме `S<N>.<M>`
+- Каждый срез заканчивается приёмочным тестом `S<N>.T<M>` и `<!-- slice-gate: ... -->`
 - BSL — только через агентов (onec-code-writer → onec-code-reviewer)
-- Для точечных правок (2–10 строк, 1 файл) — Light Mode (см. 1c-agent-delegation.mdc)
-- Для больших ЗНИ (10+ задач, P0–P3+) — Phase Gates (`phase-gates.mdc`): фазовое исполнение с контрольными точками
+- Для точечных правок (2–10 строк, 1 файл) — Light Mode (см. 1c-agent-delegation.mdc); для slice mode оформить как минимальный срез S<N> с одной задачей и приёмочным тестом
 
 ## СПРАВОЧНИК ПАТТЕРНОВ
 
 Оценка сложности, шаблоны промптов для агентов, интеграция со скиллами: `.cursor/skills/1c-agent-patterns/SKILL.md`
 
+Vertical slices framework: `.cursor/rules/vertical-slices.mdc`
+
 ---
 
-**Last updated:** 2026-03-14 | **Version:** 2.3 | **Changes:** секция "Добавление задач к существующему change", принцип Phase Gates
+**Last updated:** 2026-04-18 | **Version:** 3.0 | **Changes:** Полный переход на vertical slices framework — удалены P0–P4 фазы и phase-gates; step-by-slice как default execution mode; archive блокирует непринятые срезы; verify режимы slice-pre/slice-post/slice-scoped/migrate-to-slices/legacy.
