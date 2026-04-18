@@ -9,7 +9,9 @@ priority: 997
 ## TRIGGER
 
 Команда (`.cursor/commands/*.md`) инструктирует прочитать скилл-файл:
-- "Read and follow", "Read the skill file", "Прочитай skill", "follow its instructions"
+- EN: "Read and follow", "Read the skill file", "follow its instructions", "FIRST AND ONLY action: Read"
+- RU: "Прочитай skill", "Прочитать skill", "Первое действие: прочитать", "идти по его шагам", "следовать шагам скилла"
+- Общий паттерн: явное указание пути к `.cursor/skills/**/SKILL.md` в инструктивном контексте («до прочтения — никаких других чтений» и т. п.).
 
 ## ACTION
 

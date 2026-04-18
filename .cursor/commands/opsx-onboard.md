@@ -2,14 +2,10 @@
 name: /opsx:onboard
 id: opsx-onboard
 category: Workflow
-description: Guided onboarding - walk through a complete OpenSpec workflow cycle with narration
+description: Интерактивный онбординг по workflow OpenSpec
 ---
 
-**FIRST AND ONLY action**: Read `.cursor/skills/openspec-onboard/SKILL.md`.
-Do NOT read any other files in the same tool call.
-After reading the skill, follow its instructions step by step before taking any other action.
+**Первое действие:** прочитать `.cursor/skills/openspec-onboard/SKILL.md` и далее идти по его шагам. До прочтения скилла — никаких других чтений.
 
 **Input**:
 - `/opsx:onboard` — без аргументов: начинает интерактивный онбординг по workflow.
-
-Input: $input

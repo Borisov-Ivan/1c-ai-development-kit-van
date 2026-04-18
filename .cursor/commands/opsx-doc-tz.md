@@ -10,6 +10,4 @@ description: "Сгенерировать ТЗ по ЗНИ с архитекту�
 **Input**:
 - `/opsx:doc-tz <name>` — сгенерировать ТЗ по указанному ЗНИ. Имя ЗНИ (например: `pav-exclusion-two-level-settings`) — это имя каталога в `openspec/changes/`. Если имя не указано — запроси его.
 
-**FIRST AND ONLY action**: Read `.cursor/skills/openspec-docs/SKILL.md`.
-Do NOT read any other files in the same tool call.
-After reading the skill, follow its instructions for document type `change-tz`.
+**Первое действие:** прочитать `.cursor/skills/openspec-docs/SKILL.md` и далее идти по его шагам для document type `change-tz`. До прочтения скилла — никаких других чтений.

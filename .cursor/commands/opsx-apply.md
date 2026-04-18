@@ -2,14 +2,12 @@
 name: /opsx:apply
 id: opsx-apply
 category: Workflow
-description: Implement tasks from an OpenSpec change по срезам (step-by-slice default)
+description: Реализация задач OpenSpec change по срезам (по умолчанию — step-by-slice)
 ---
 
 Implement tasks from an OpenSpec change. По умолчанию работает в режиме **step-by-slice**: реализация одного среза → карточка приёмки → следующий срез. См. `.cursor/rules/vertical-slices.mdc`.
 
-**FIRST AND ONLY action**: Read `.cursor/skills/openspec-apply-change/SKILL.md`.
-Do NOT read any other files, traces, or modules in the same tool call.
-After reading the skill, follow its instructions step by step before taking any other action.
+**Первое действие:** прочитать `.cursor/skills/openspec-apply-change/SKILL.md` и далее идти по его шагам. До прочтения скилла — никаких чтений артефактов, трасс, модулей.
 
 **Input:**
 - `<change-name>` (optional, e.g. `/opsx:apply add-auth`) — если пропущено, скилл предложит выбор.

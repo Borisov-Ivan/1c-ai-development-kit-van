@@ -2,15 +2,20 @@
 name: /opsx:explore
 id: opsx-explore
 category: Workflow
-description: "Enter explore mode - think through ideas, investigate problems, clarify requirements"
+description: "Режим исследования: обдумывание идей, анализ проблем, уточнение требований"
 ---
 
-**FIRST AND ONLY action**: Read `.cursor/skills/openspec-explore/SKILL.md`.
-Do NOT read any other files, traces, or modules in the same tool call.
-After reading the skill, follow its instructions step by step before taking any other action.
+**Первое действие:** прочитать `.cursor/skills/openspec-explore/SKILL.md` и далее идти по его шагам. До прочтения скилла — никаких чтений артефактов, трасс, модулей.
 
-If the user provides trace files (.pff, *_TRACE_*.txt) or error stacks:
-after reading the skill, your FIRST visible output MUST be the delegation brief (skill step 2).
-Do NOT read traces, modules, designs, or any other files before outputting the brief and ending your turn.
+Если пользователь приложил трассу (`.pff`, `*_TRACE_*.txt`) или стек ошибки — **первый видимый вывод** после прочтения скилла должен быть delegation brief (step 2 скилла). Не читать трассы, модули, design до вывода брифа и end turn.
 
-Input: argument after the command is whatever the user wants to explore.
+**Что можно передать:**
+
+- текст вопроса / идеи — основной ввод;
+- скриншоты — attachment (drag-and-drop);
+- путь к трассе (`.pff`, `*_TRACE_*.txt`) — текстом.
+
+**Примеры:**
+
+- `/opsx:explore как сделать автоподстановку ролей без правки cf`
+- `/opsx:explore см. скриншот — что вызывает падение на ПередЗаписью` (+ картинка)

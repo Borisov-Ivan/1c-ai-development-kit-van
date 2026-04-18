@@ -2,7 +2,7 @@
 name: /prerelease-review
 id: prerelease-review
 category: Quality
-description: Pre-release code review for 1C extensions with severity escalation and openspec change creation
+description: Предрелизное ревью расширения 1С с эскалацией серьёзности и привязкой к change
 ---
 
 Провести предрелизное ревью расширения 1С.
@@ -15,6 +15,4 @@ description: Pre-release code review for 1C extensions with severity escalation 
 
 `<change-name>` — каталог change в `openspec/changes/<name>/` или `openspec/changes/archive/<name>/` (полное имя папки, например `2026-03-25-edo-ea-batch-signing-rs-elektronnye-podpisi`).
 
-**FIRST AND ONLY action**: Read `.cursor/skills/prerelease-review/SKILL.md`.
-Do NOT read any other files, traces, or modules in the same tool call.
-After reading the skill, follow its instructions step by step before taking any other action.
+**Первое действие:** прочитать `.cursor/skills/prerelease-review/SKILL.md` и далее идти по его шагам. До прочтения скилла — никаких чтений артефактов, трасс, модулей.

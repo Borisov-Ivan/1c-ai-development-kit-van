@@ -9,7 +9,7 @@ description: Миграция legacy/фазового tasks.md в вертика
 
 Отделена от `/opsx:verify` — это самостоятельная реструктурирующая операция с явным подтверждением diff пользователем. Verify при обнаружении `<!-- phase-gate -->` или плоских tasks.md в slice-совместимой ЗНИ предлагает запустить эту команду.
 
-**FIRST AND ONLY action:** Read `.cursor/skills/openspec-migrate-slices/SKILL.md`. Do NOT read other files in the same tool call. После чтения — следовать шагам скилла.
+**Первое действие:** прочитать `.cursor/skills/openspec-migrate-slices/SKILL.md` и далее идти по шагам скилла. До прочтения — никаких других чтений.
 
 **Input:**
 - `<change-name>` — обязательно. Если не указано — AskUserQuestion по списку активных changes.

@@ -9,7 +9,7 @@ description: Контролируемое расширение scope сущес�
 
 Отделена от `/opsx:verify` — verify не редактирует артефакты (read-only gate). Extend отвечает за изменение артефактов.
 
-**FIRST AND ONLY action:** Read `.cursor/skills/openspec-continue-change/SKILL.md` и `.cursor/rules/vertical-slices.mdc` (секция «Поведение continue»). Не читать другие файлы в том же tool-call.
+**Первое действие:** прочитать `.cursor/skills/openspec-continue-change/SKILL.md` и `.cursor/rules/vertical-slices.mdc` (секция «Поведение continue»), далее идти по их шагам. До прочтения — никаких других чтений.
 
 **Input:**
 - `<change-name>` — обязательно.

@@ -12,7 +12,7 @@ description: Снимок текущего состояния OpenSpec change �
 - понимания, где мы в workflow без запуска тяжёлого `/opsx:verify`;
 - сверки перед `/opsx:apply`, `/opsx:archive`, `/opsx:extend`.
 
-**FIRST AND ONLY action:** Read `.cursor/skills/openspec-status/SKILL.md`. Не читать другие файлы в том же tool-call.
+**Первое действие:** прочитать `.cursor/skills/openspec-status/SKILL.md` и далее идти по шагам скилла. До прочтения — никаких других чтений.
 
 **Input:**
 - `<change-name>` — опционально. Если не указано — AskUserQuestion по списку активных changes (`openspec list --json`).
