@@ -292,7 +292,19 @@ Tier: Standard (12 задач, 3 среза)
    - Check that all referenced slice dependencies exist as slices in tasks.md; flag stale refs as WARNING.
    - Check presence of `<!-- slice-gate: ... -->` marker at end of slice; missing → WARNING `missing-slice-gate-marker`.
 
-   **7F.4 Deprecated phase-gate detection:**
+   **7F.4 Fix-slice sanity (defect placement invariant):**
+   Для каждого заголовка `# Срез S<N>`, если выполняется **любое** из условий:
+   - в заголовке или в первых строках метаданных среза есть подстроки **«Исправление»**, **«Fix»**, **«fix-срез»** (регистронезависимо); **или**
+   - в блоке метаданных есть строка `**Зависимости:**` со ссылкой на другой срез `S<K>` (не «нет»),
+   то трактовать срез как **кандидат в fix-срез** и выполнить:
+   1. Извлечь из метаданных или заголовка идентификатор зависимого среза `S<K>` (если несколько — проверить каждый).
+   2. Найти в `tasks.md` строку приёмки `S<K>.T<M>` этого `S<K>`.
+   3. Если `S<K>.T<M>` = **`[ ]`** (срез S<K> **не** принят) **и** в метаданных кандидата **нет** строки `**Причина fix-среза:** cross-slice` → **CRITICAL** `fix-slice-on-unaccepted`:
+      «Fix-срез `S<N>` указывает на непринятый `S<K>`. По `.cursor/rules/vertical-slices.mdc` (**ИНВАРИАНТ: Defect placement**) задачи фикса должны быть **внутри** `S<K>` перед `S<K>.T<M>`. Миграция: перенести задачи `S<N>.*` в `S<K>`, удалить заголовок `# Срез S<N>`, синхронизировать `design.md` `## Slices` и при необходимости `debug.md`.»
+   4. Если `S<K>.T<M>` = **`[x]`** — допустимый fix-срез (frozen-slice); при отсутствии явной причины cross-slice в метаданных — **INFO** (не блокер).
+   5. Если кандидат помечен `**Причина fix-среза:** cross-slice`, но зависимости не покрывают ≥2 среза по сценарию — **WARNING** `fix-slice-cross-slice-unsubstantiated`.
+
+   **7F.5 Deprecated phase-gate detection:**
    Grep tasks.md for `<!-- phase-gate` markers. If found → SUGGESTION `deprecated-phase-gate`: "устаревший маркер фазового gate — рекомендуется `/opsx:verify --migrate-to-slices`".
 
    Pass all 7F results to Quality Controller (step 7.6) and Architect (step 7.7): "Executability issues (verify 7F): <list or 'замечаний нет'>".
@@ -389,8 +401,8 @@ Tier: Standard (12 задач, 3 среза)
    2. Include verdict and slice summary + scenario coverage matrix in the verification report (section "Когерентность срезов (Quality Controller)").
    3. Map each alert to verification issues (затем **Actionability Gate**):
       - `scenario-uncovered` → WARNING (actionable: добавить срез или задачу в существующий).
-      - `dependency-cycle`, `coupling-violation`, `missing-slice-test`, `backward-reference` → CRITICAL.
-      - `stale-slice-dep`, `forward-slice-dep`, `undeclared-slice-dep`, `slice-incomplete`, `rework-risk-on-unaccepted` → WARNING.
+      - `dependency-cycle`, `coupling-violation`, `missing-slice-test`, `backward-reference`, `fix-slice-on-unaccepted` → CRITICAL.
+      - `stale-slice-dep`, `forward-slice-dep`, `undeclared-slice-dep`, `slice-incomplete`, `rework-risk-on-unaccepted`, `fix-slice-cross-slice-unsubstantiated` → WARNING.
       - `missing-slice-gate-marker`, `vague-slice-test`, `unaccepted-slice-in-progress`, `slice-overlap`, `hypothesis-dep` → SUGGESTION.
       - `no-slices`, `deprecated-phase-gate` → SUGGESTION с рекомендацией `/opsx:verify --migrate-to-slices`.
 

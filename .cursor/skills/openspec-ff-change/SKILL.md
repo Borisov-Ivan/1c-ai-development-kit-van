@@ -100,7 +100,7 @@ Fast-forward through artifact creation - generate everything needed to start imp
         - acceptance tasks `S<N>.T<M>` inside each slice
         - slice-gate markers `<!-- slice-gate: <critérion> -->`
 
-        No classification P0–P4, no `# Фаза N`, no `<!-- phase-gate -->`. See `.cursor/rules/vertical-slices.mdc`.
+        No classification P0–P4, no `# Фаза N`, no `<!-- phase-gate -->`. See `.cursor/rules/vertical-slices.mdc` (в т.ч. **ИНВАРИАНТ: Defect placement** — не плодить `# Срез S<N+1>` для дефекта непринятого среза без cross-slice / frozen-slice).
 
         Architect reads files independently and returns tasks.md content.
         Save the result to `outputPath`.

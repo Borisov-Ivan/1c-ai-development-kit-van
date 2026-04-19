@@ -115,4 +115,4 @@ After completing the steps, summarize:
   4. Результат (таблица срезов + сценарии + граф зависимостей + покрытие Scenarios) вставить в `design.md`.
   5. Показать пользователю компактное резюме декомпозиции и AskQuestion: `[Принять] / [Скорректировать] / [Пересобрать]`.
   6. Генерация `tasks.md` (через «Architect — slice-aware task decomposition») запрещена, пока `## Slices` не принята.
-  Формат и детали — `.cursor/rules/vertical-slices.mdc`.
+  Формат и детали — `.cursor/rules/vertical-slices.mdc` (в т.ч. **ИНВАРИАНТ: Defect placement** для fix-задач после старта реализации).

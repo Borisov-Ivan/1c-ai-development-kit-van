@@ -249,15 +249,19 @@ Keep the RCA compact; the split ensures apply/debug can later enforce the verifi
 
 **Artifact steps:**
 - Добавить или уточнить задачи в `openspec/changes/<change>/tasks.md` **с привязкой к срезу**:
-  - **Если ЗНИ в slice mode** (есть `# Срез S<N>`): определить, к какому срезу относится фикс.
-    - Дефект в **непринятом** срезе S<N> (есть задачи `[ ]` или S<N>.T<M> = `[ ]`) → добавить задачу как `S<N>.<M+1>` **перед** приёмочным `S<N>.T<M>`.
-    - Дефект в **уже принятом** срезе S<K> (S<K>.T<M> = `[x]`) → **не** переоткрывать его. Создать **fix-срез**: новый раздел `# Срез S<N+1>: Исправление дефекта S<K> — <короткое описание>` с метаданными (`**Сценарий:** воспроизведение дефекта, проверка фикса`, `**Зависимости:** S<K>`, `**Связь со spec:**` — те же сценарии, что в S<K>) и собственным `S<N+1>.T<M>`. Альтернатива — в рамках уже идущего следующего среза добавить «fix» задачи с пометкой `(исправление S<K>)` если они не нарушают сценарий этого среза.
-    - Дефект, не относящийся ни к одному существующему срезу — создать новый срез аналогично.
+  - **Если ЗНИ в slice mode** (есть `# Срез S<N>`): **перед записью в tasks.md** выполнить **mechanical placement gate** (источник истины — `.cursor/rules/vertical-slices.mdc`, раздел **«ИНВАРИАНТ: Defect placement»** и decision tree):
+    1. Определить целевой срез воспроизведения `S<K>` (по сценарию / spec / явной директиве пользователя; при неоднозначности — AskQuestion).
+    2. Grep `tasks.md`: строка приёмки `S<K>.T<M>` — чекбокс **`[x]`** или **`[ ]`**?
+       - **`[ ]`** (срез не принят, включая `awaiting-acceptance` / «не принят») → **только** inside-slice: добавить `S<K>.<M+1>` **перед** `S<K>.T<M>`. **Запрещено** создавать `# Срез S<N+1>` для этого дефекта, если фикс **не** cross-slice (не затрагивает ≥2 среза по файлам/сценариям/spec).
+       - **`[x]`** (срез принят) → **fix-срез** `S<N+1>` с отдельным `S<N+1>.T<M>` по инварианту в `vertical-slices.mdc` (frozen-slice).
+    3. Cross-slice (≥2 среза) → новый срез `S<N+1>` **только** с метаданной `**Причина fix-среза:** cross-slice` и отдельной приёмкой; иначе — не оправдан.
+    4. Дефект вне любого существующего среза → новый срез только после AskQuestion (имя, сценарий, приёмка) и проверки, что это **не** случай ошибочного определения `S<K>`.
+  - **Запрещено:** добавлять fix-задачи «в следующий по порядку срез» или плодить `S<N+1>` без прохождения чеклиста **«Fix-срез разрешён?»** из `vertical-slices.mdc`.
   - **Если ЗНИ в legacy mode** (нет `# Срез`): вставлять в соответствующую секцию или «7. Рефакторинг и качество» как «7.x Исправить: …»; при наличии устаревших `<!-- phase-gate` маркеров — рекомендовать `/opsx:verify --migrate-to-slices` отдельным сообщением (но **не** автоматически).
 - При выявленном пробеле в design — краткая заметка в `design.md` (для slice-mode — обязательно обновить `## Slices`, если меняется состав срезов).
 - **Hypothesis gate:** если корневая причина в **## Hypotheses**: первая задача плана — верификация (логирование, воспроизведение, проверка трассы) **или** явная пометка «hypothesis-based fix» + задача follow-up верификации после фикса. Если корневая причина в **## Verified facts** — переходить к задачам фикса.
 
-**Slice Gate Decisions log:** если фикс — следствие неуспешной приёмки среза в `/opsx:apply` (пользователь выбрал `[3] Дефект в предыдущем срезе` или `[2] Не принят`), эта debug-сессия должна оставить запись в `debug.md` секции `## Slice Gate Decisions`: дата, ID среза, решение, RCA, ссылки на отчёты trace-analyst/explorer/architect, новые задачи фикса.
+**Slice Gate Decisions log:** если фикс — следствие неуспешной приёмки среза в `/opsx:apply` (пользователь выбрал `[3] Дефект в предыдущем срезе` или `[2] Не принят`), эта debug-сессия должна оставить запись в `debug.md` секции `## Slice Gate Decisions`: дата, ID среза, решение (`inside-slice rework` при вставке задач в `S<K>` до подписанной приёмки, либо иное по словарю `vertical-slices.mdc`), RCA, ссылки на отчёты trace-analyst/explorer/architect, новые задачи фикса.
 
 **Default:** после плана выполнить 7b (артефакты) и hand off. Не спрашивать подтверждение перед правкой артефактов, если пользователь не просил «plan only». **Если пользователь явно:** "plan only" — не править артефакты.
 
@@ -266,7 +270,7 @@ Keep the RCA compact; the split ensures apply/debug can later enforce the verifi
 **7b. Update artifacts.** Обновить `tasks.md` и при необходимости `design.md`. Формирование задач в tasks.md:
 - Каждая задача — одна конкретная правка (файл, процедура, что менять, почему — ссылка на RCA).
 - В тексте задачи указать корневую причину (Verified / Hypothesis), чтобы apply при вызове writer мог передать Root Cause Context.
-- Slice-aware вставка: применяются правила из 7a (slice mode → правильный срез / fix-срез; legacy → плоский список). Для slice mode каждая новая задача получает ID `S<N>.<M>` в рамках своего среза.
+- Slice-aware вставка: применяются правила из 7a и **инвариант** из `.cursor/rules/vertical-slices.mdc` (slice mode → inside-slice по умолчанию; fix-срез только по инварианту; legacy → плоский список). Для slice mode каждая новая задача получает ID `S<N>.<M>` **в рамках выбранного среза** (не «следующего свободного номера среза»).
 - Задачи на верификацию гипотезы или follow-up — по Hypothesis gate в 7a.
 
 ### 8) Hand off
@@ -288,7 +292,8 @@ Keep the RCA compact; the split ensures apply/debug can later enforce the verifi
 - **context-strategy-gate.mdc:** при исследовании 3+ файлов или файлов данных — загружать `.cursor/skills/context-strategy/SKILL.md` и следовать Entry Protocol до чтения файлов.
 - **1c-error-analysis.mdc:** не читать трассу вручную; делегировать onec-trace-analyst с путём и брифом. TRACE_FULL по запросу агента — запросить у пользователя.
 - **verified-cause-gate.mdc:** перед фиксом — разделение Verified facts / Hypotheses, цепочка «Почему», корневая причина; hypothesis-based fix только с задачей верификации или follow-up.
+- **vertical-slices.mdc:** placement fix-задач в `tasks.md` — только по **ИНВАРИАНТ: Defect placement** и mechanical gate шага 7a (не плодить `# Срез` до подписанной приёмки без cross-slice / frozen-slice).
 
 ---
 
-**Last updated**: 2026-03-16 | **Version**: 2.1 | **Changes**: Debug не реализует код — убраны 7b–7g (writer, LINT, API, EXTENSION, reviewer, Investigation Loop). Остаётся RCA + задачи в tasks.md + hand off на /opsx:apply. APPLY GATE в Integration.
+**Last updated**: 2026-04-19 | **Version**: 2.2 | **Changes**: шаг 7a — mechanical placement gate + ссылка на `vertical-slices.mdc`; запрет альтернативного «fix в следующий срез»; Slice Gate log — `inside-slice rework`; Integration — vertical-slices.

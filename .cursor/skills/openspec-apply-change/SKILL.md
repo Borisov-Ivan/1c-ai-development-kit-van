@@ -95,12 +95,14 @@ Implement tasks from an OpenSpec change.
 
       [1] Принят — отметить S<N>.T<M> [x], перейти к S<N+1>
       [2] Не принят — опишу что не работает, rework внутри S<N>
-      [3] Дефект в предыдущем срезе S<K> — создать мини-срез S<K>.fix
+      [3] Дефект в предыдущем срезе S<K> — укажу S<K> и суть дефекта
 
    4. По ответу:
       - [1] → mark [x], append debug.md "решение: принят", сгенерировать reports/slice-acceptance-S<N>-YYYY-MM-DD.md, перейти к задачам S<N+1>.
       - [2] → запросить описание проблемы; append debug.md "решение: не принят" + секция ## Debug — S<N>; создать fix-задачи перед S<N>.T<M>; начать их выполнение.
-      - [3] → запросить описание дефекта; создать S<K>.fix срез (по правилу vertical-slices.mdc); снять [x] с S<K>.T<M>.
+      - [3] → запросить **S<K>** и описание дефекта; **Grep** в `tasks.md` строку приёмки `S<K>.T<M>`:
+        - Если `S<K>.T<M>` = **`[ ]`** (срез S<K> **не** принят) → **inside-slice rework** по `.cursor/rules/vertical-slices.mdc` (**ИНВАРИАНТ: Defect placement**): добавить fix-задачи **внутрь** `S<K>` **перед** `S<K>.T<M>`; **не** создавать `# Срез S<N+1>` без cross-slice; append в `debug.md` `Решение: inside-slice rework` + RCA-кратко; начать выполнение fix-задач.
+        - Если `S<K>.T<M>` = **`[x]`** (срез S<K> принят, frozen) → создать **fix-срез** `# Срез S<N+1>: …` с отдельным `S<N+1>.T<M>` по `vertical-slices.mdc`; **снять** `[x]` с `S<K>.T<M>` только если инвариант/постановка явно требует повторной приёмки S<K> (зафиксировать в `debug.md`); иначе — только приёмка нового среза.
 
    5. Если awaiting-acceptance не обнаружено — перейти к обычному "Show current progress" ниже.
 
@@ -409,6 +411,7 @@ Working on task 4/7: <task description>
 - **Task Dispatch:** classify each task before implementation; delegate to the correct executor per dispatch table. Orchestrator MUST NOT implement BSL or Form tasks directly — only prepare context and delegate.
 - **Form tasks:** STOP — produce manual configuration instructions (1c-xml-write-guard.mdc); do not edit Form.xml or continue until user has performed configuration and re-exported.
 - Reference: `1c-agent-delegation.mdc` (BSL gate), `1c-utility-agents.mdc` (forms, queries, tests).
+- **vertical-slices.mdc:** вердикт Slice Gate **[3]** и любое добавление `# Срез` — только по **ИНВАРИАНТ: Defect placement** (не создавать fix-срез при `S<K>.T<M>` = `[ ]` без cross-slice).
 
 **Fluid Workflow Integration**
 
