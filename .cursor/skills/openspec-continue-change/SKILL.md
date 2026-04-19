@@ -13,6 +13,10 @@ Continue working on a change by creating the next artifact.
 
 **Input**: Optionally specify a change name. If omitted, check if it can be inferred from conversation context. If vague or ambiguous you MUST prompt for available changes.
 
+**Output style:**
+- Сводка в чате после создания артефакта — **T-CONFIRM** из `.cursor/docs/opsx-output-style.md` §5.5 (действие → изменённые файлы → следующий шаг).
+- **Изменения в артефактах** (`proposal.md`, `design.md`, `tasks.md`, spec deltas) подчиняются §1 «Три слоя» и §3: пользовательские секции артефактов без `S<N>.T<M>/D<N>/R<N>`/номеров задач; внутренние ID — только в `## Slices`, `## Decisions`, `## Tasks`, `## Risks`. Перечисления — нумерованные списки. Перед записью — self-check-5 (§7).
+
 **Steps**
 
 1. **Select the change**

@@ -10,6 +10,8 @@
 Паттерны агентов: `.cursor/skills/1c-agent-patterns/SKILL.md`.
 Документы: `/opsx:doc-tz <name>` (ТЗ по ЗНИ с архитектурным ревью и контролем качества артефактов) — `.cursor/skills/openspec-docs/SKILL.md`. Шаблон: `.cursor/skills/openspec-docs/prompts/change-tz.md`.
 
+**Output style (единый стиль выводов opsx):** `.cursor/docs/opsx-output-style.md` — 3 слоя (UX / код / процесс), типография, запрет внутренних ID (`S<N>.T<M>`, `D<N>`, `R<N>`, номера задач) в пользовательских полях, 5 общих шаблонов: **T-BRIEF** (debug, explore), **T-HANDOFF** (apply), **T-REPORT** (verify, estimate, doc-tz, onboard), **T-STATUS** (status), **T-CONFIRM** (archive, bulk-archive, sync, migrate-slices, continue, ff). Перед каждым пользовательским выводом opsx-скилл обязан проходить self-check-5 (§7 гайда).
+
 ### Decision tree команд
 
 Краткая навигация — какую команду использовать. Полный глоссарий: `openspec/glossary.md`.

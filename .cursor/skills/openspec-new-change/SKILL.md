@@ -13,6 +13,10 @@ Start a new change using the experimental artifact-driven approach.
 
 **Input**: The user's request may include a change name (kebab-case), a description of what they want to build, or nothing (auto-detect from context).
 
+**Output style:**
+- Пользовательские сообщения в чате (AskQuestion-блоки, сводка после генерации артефактов) — шаблон **T-BRIEF** / **T-CONFIRM** по контексту, см. `.cursor/docs/opsx-output-style.md`.
+- **Генерируемые артефакты** `proposal.md`, `design.md`, `tasks.md`, spec deltas — подчиняются §1 «Три слоя» и §3 «Запрет внутренних ID в пользовательских полях»: поля `Why`, `What Changes`, `Scope`, `Scenarios`, `Requirements` — UX-слой без утечки `S<N>.T<M>`, `D<N>`, `R<N>`, номеров задач `12.9`; внутренние ID допустимы только в `## Slices`, `## Decisions`, `## Tasks`, `## Risks`. Любое перечисление ≥2 пунктов — нумерованный список. Перед записью артефакта — self-check-5 (§7).
+
 **Steps**
 
 1. **Determine change name and brief**

@@ -12,6 +12,8 @@ Estimate man-hours for an OpenSpec change. Method: three-point PERT. Target: hum
 
 **Input**: Change name (kebab-case), any search context (path, module name, keyword), or omit to auto-detect.
 
+**Output style:** файл `estimate.md` и сообщение пользователю оформляются по шаблону **T-REPORT** из `.cursor/docs/opsx-output-style.md` §5.3. Сопоставление слотов: Summary → секция `## Сводка`; группы по уровню → `## Детализация` / `## Допущения` / `## Риски`; Action items → одна строка рекомендации после `## История оценок`. Термины PERT (`O`, `M`, `P`, `E`) — в backticks; не вкладывать их в середину русских предложений без отделения словом. Перед выводом — self-check-5 (§7 стайл-гайда).
+
 ## Steps
 
 ### 1. Select the change

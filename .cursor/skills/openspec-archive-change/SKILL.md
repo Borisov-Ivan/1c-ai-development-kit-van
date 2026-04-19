@@ -11,6 +11,8 @@ metadata:
 
 Archive a completed change in the experimental workflow.
 
+**Output style:** итоговое сообщение пользователю (что архивировано, куда, Warnings) — шаблон **T-CONFIRM** из `.cursor/docs/opsx-output-style.md` §5.5: действие → изменённые файлы (новый путь в `archive/`, затронутые specs) → следующий шаг. Блок Warnings — нумерованный список коротких пунктов (см. §4 стайл-гайда). Перед выводом — self-check-5 (§7).
+
 **Auto-yes policy:** Invoking archive means the user accepts the recommended path: proceed despite incomplete artifacts/tasks, **sync delta specs to main** when a delta exists, and **extract all ADR-worthy decisions** from architecture reports. Do **not** use **AskUserQuestion** for these steps—collect issues into the **Warnings** block in the final summary (step 7). Only step 1 may prompt when the target change is ambiguous.
 
 **Input**: Optionally specify a change name. If omitted, check if it can be inferred from conversation context. If vague or ambiguous you MUST prompt for available changes.

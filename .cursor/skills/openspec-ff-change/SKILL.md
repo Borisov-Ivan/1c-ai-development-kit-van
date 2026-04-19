@@ -13,6 +13,10 @@ Fast-forward through artifact creation - generate everything needed to start imp
 
 **Input**: The user's request may include a change name (kebab-case), a description of what they want to build, or nothing (auto-detect from context).
 
+**Output style:**
+- Сводка в чате («что создано», ссылки на артефакты, следующий шаг) — шаблон **T-CONFIRM** из `.cursor/docs/opsx-output-style.md` §5.5.
+- **Генерируемые артефакты** `proposal.md`, `design.md`, `tasks.md`, spec deltas — подчиняются §1 «Три слоя» и §3 «Запрет внутренних ID в пользовательских полях»: секции для заказчика/приёмки (`Why`, `What Changes`, `Scope`, `Scenarios`, `Requirements`) — UX-слой; внутренние ID (`S<N>.T<M>`, `D<N>`, `R<N>`, `I<N>`, номера задач `12.9`) — только в `## Slices`, `## Decisions`, `## Tasks`, `## Risks`. Перечисления — нумерованные списки. Перед записью — self-check-5 (§7).
+
 **Steps**
 
 1. **Determine change name**

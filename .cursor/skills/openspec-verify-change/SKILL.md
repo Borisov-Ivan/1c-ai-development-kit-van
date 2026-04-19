@@ -17,6 +17,8 @@ Universal quality gate for OpenSpec changes. Mode is determined automatically fr
 - **Migrate** (`--migrate-to-slices`): реструктуризация плоского/фазового tasks.md в вертикальные срезы через architect «Architect — slice restructuring» (подробности — `.cursor/skills/openspec-migrate-slices/SKILL.md`, команда `/opsx:migrate-slices`)
 - **Legacy**: tasks.md без `# Срез` — режим совместимости: mechanical checks работают, QC — в legacy-режиме (предупреждение `no-slices`)
 
+**Output style:** отчёт верификации выводится по шаблону **T-REPORT** из `.cursor/docs/opsx-output-style.md` §5.3 (Summary → группы Severity → Action items → ссылки). Перед отправкой — self-check-5 (§7 стайл-гайда). Подробности маппинга — в секции «Report and remediation».
+
 ## Порядок шагов (обзор)
 
 ```mermaid
@@ -852,6 +854,8 @@ Tier: Standard (12 задач, 3 среза)
 ---
 
 ## Report and remediation
+
+**Output style:** отчёт верификации строится по шаблону **T-REPORT** из `.cursor/docs/opsx-output-style.md` §5.3 — «Summary → группы по уровню (CRITICAL/WARNING/SUGGESTION/INFO) → Action items → ссылки на отчёты». Executive Summary ниже — слот «Summary»; Summary Scorecard и разделы по категориям — слот «группы по уровню». Пользовательские формулировки замечаний — в начале пункта, идентификаторы категорий (вида `N.M`, `R<N>`, `SC<N>`) — в скобках в конце пункта; не перемешивать их в одном предложении. Перед выводом — self-check-5 (§7 стайл-гайда).
 
 16. **Generate Verification Report**
 

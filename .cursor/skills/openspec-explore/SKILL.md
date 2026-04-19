@@ -74,28 +74,32 @@ Enter explore mode. Think deeply. Visualize freely. Follow the conversation wher
 
 **КРИТИЧНО: После показа брифа — ЗАВЕРШИТЬ ХОД (END TURN).** НЕ вызывать Task/агента в этом же сообщении. Дождаться явного подтверждения пользователя в **следующем** сообщении.
 
-#### Шаблон брифа
+#### Шаблон брифа (формат — T-BRIEF по `.cursor/docs/opsx-output-style.md`)
 
 ```
 ---
 **Бриф для делегирования**
 
-- **Контекст:** [что за система, расширение, процесс]
-- **Сценарий:** [шаг → ожидание → реальность]
-- **Артефакты:** [пути к трассам, скриншотам, файлам]
+- **Контекст:** [UX-слой, 1 предложение: что за система, расширение, процесс; без внутренних ID OpenSpec]
+- **Сценарий:** [UX-слой: шаг → ожидание → реальность; нумерованный список на 2+ пунктов]
+- **Симптом / Вход:** [UX-слой, только факты; для explore без бага — фактический вход пользователя; без «должно быть»]
+- **Технический контекст:** [Код-слой: модули/функции/метаданные в backticks; без UX-надписей в том же предложении]
+- **Артефакты:** [пути к трассам, скриншотам, файлам — по одному на строку]
 
-**План исследования:**
+**План исследования** (разрешены ID агентов и шагов):
 1. → `agent-name`: [что исследуем, 1 строка]
 2. → По результатам п.1: `agent-name` — [условие / что оцениваем]
 3. → Синтез: [что делаем с результатами]
 
 **Шаг 1 → Агент:** `onec-code-explorer`
-- **Что искать:** [конкретные вопросы — 3-5 пунктов]
-- **Контракты и альтернативы:** для каждой функции/компонента, которые предлагается использовать — входной контракт (что принимает, что обрабатывает внутри). Альтернативные точки реализации, если есть (можно ли решить задачу изменением существующей функции вместо добавления логики в вызывающем коде).
+- **Что искать:** [конкретные вопросы — 3-5 пунктов, нумерованный список]
+- **Контракты и альтернативы:** для каждой функции/компонента, которые предлагается использовать — входной контракт (что принимает, что обрабатывает внутри); альтернативные точки реализации, если есть.
 
 Бриф верный? Подтвердите — начну с шага 1.
 ---
 ```
+
+**Self-check перед выводом** (см. `.cursor/docs/opsx-output-style.md` §7): (1) в полях «Контекст/Сценарий/Симптом» нет внутренних ID OpenSpec (`D<N>/S<N>.T<M>/R<N>/I<N>/SC<N>`, номера задач `12.9`); (2) UX-надписи — в «ёлочках», идентификаторы кода — в backticks, без цепочки 3+ разнотипных терминов подряд; (3) перечисления ≥2 пунктов — нумерованный список, не поток через `;`; (4) «Симптом» — только факты; (5) каждое поле ≤3 строк или ≤7 пунктов.
 
 Если данных недостаточно для полного брифа — задать уточняющие вопросы пользователю (AskQuestion).
 
@@ -557,6 +561,7 @@ Explore Summary — входной артефакт для ff/new. Design Gate �
 
 ## Guardrails
 
+- **Output style:** все брифы, карточки делегирования и Explore Summary выводятся по шаблону **T-BRIEF** из `.cursor/docs/opsx-output-style.md`; перед отправкой — self-check-5 (§7).
 - **Don't bypass Entry Protocol** - Never Read code, artifacts, traces, or modules before showing the brief. The only tool calls before brief output are: Read SKILL.md (command-skill-gate batch) and Shell `openspec list --json` (step 0 batch). Everything else — after brief confirmation on step 3. Reading change artifacts (proposal.md, design.md, tasks.md) is also forbidden before brief.
 - **Don't skip brief confirmation** - Never call Task/delegate to an agent in the same message where you show the brief. Always END TURN after showing the brief and wait for explicit user confirmation in the next message.
 - **Don't implement** - Never write code or implement features. Creating OpenSpec artifacts is fine, writing application code is not.

@@ -13,6 +13,8 @@ Archive multiple completed changes in a single operation.
 
 This skill allows you to batch-archive changes, handling spec conflicts intelligently by checking the codebase to determine what's actually implemented.
 
+**Output style:** финальная сводка (что архивировано, какие конфликты были разрешены, следующие рекомендации) — шаблон **T-CONFIRM** из `.cursor/docs/opsx-output-style.md` §5.5. Перечень архивированных changes — нумерованный список (один change на строку, имя + новый путь). Конфликты и предупреждения — отдельная нумерованная секция. Перед выводом — self-check-5 (§7).
+
 **Input**: None required (prompts for selection)
 
 **Steps**

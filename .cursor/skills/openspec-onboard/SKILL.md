@@ -11,6 +11,8 @@ metadata:
 
 Guide the user through their first complete OpenSpec workflow cycle. This is a teaching experience—you'll do real work in their codebase while explaining each step.
 
+**Output style:** все промежуточные сообщения о пройденных шагах — шаблон **T-CONFIRM** из `.cursor/docs/opsx-output-style.md` §5.5 (что сделано → изменённые файлы → следующий шаг). Брифы делегирования (если onboarding касается `/opsx:debug` или `/opsx:explore`) — шаблон **T-BRIEF** (§5.1). Итоговая сводка онбординга — **T-REPORT** (§5.3): Summary → группы «что узнали / что создали / что проверили» → Action items. Перед каждым выводом — self-check-5 (§7).
+
 ---
 
 ## Preflight

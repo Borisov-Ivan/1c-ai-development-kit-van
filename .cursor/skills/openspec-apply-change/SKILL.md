@@ -219,29 +219,29 @@ Implement tasks from an OpenSpec change.
    - **Slice Gate (после последней non-test задачи среза):**
      Детектор: все задачи S<N>.<M> = [x], S<N>.T<M> = [ ].
 
-     Действие — сгенерировать Acceptance Handoff Card (НЕ вызывать AskQuestion):
+     Действие — сгенерировать T-HANDOFF вариант `acceptance` (формат — `.cursor/docs/opsx-output-style.md` §5.2; НЕ вызывать AskQuestion):
 
      ```
-     === Acceptance Handoff — S<N>: <имя среза> ===
+     ## Срез S<N> — передача на приёмку: <change-name>
 
-     Что реализовано:
-     - Задачи: N/N non-test done (S<N>.1, S<N>.2, ..., всё [x])
-     - Файлы: <список с краткой пометкой "что изменилось">
-     - Автопроверки: линтер чист / reviewer PASS (или замечания перечислить)
+     **Прогресс:** N/N non-test задач [x]; `S<N>.T<M>` — `[ ]` (ручная приёмка).
 
-     Что я прошу проверить — СЦЕНАРИЙ S<N>.T<M>:
-     <переписать критерии приёмки из S<N>.T<M> в императиве, по пунктам>
+     ### 1. Что реализовано
+     1. [x] S<N>.<M> — <одно предложение>
+        - Файл: `<path>`, строки X-Y
+        - Авто-проверка: OK | линтер чист | reviewer PASS | <замечания одной строкой>
+
+     ### 2. Что проверить СЕЙЧАС
+     Сценарий `S<N>.T<M>` в императиве (переписать критерии приёмки по пунктам; внутренние ID регрессий — в скобках в конце пункта):
      1. Открыть <что>
      2. Выполнить <действие>
-     3. Убедиться <ожидаемый результат>
-     (R1/R2/R3 или другие ссылки — развернуть человечески)
+     3. Убедиться <ожидаемый результат> (регрессия R<N>, если применима)
 
-     Как вернуться:
-       /opsx:apply <change-name>
-     В начале новой сессии я сразу спрошу вердикт (принят / не принят / дефект в предыдущем срезе).
-     Пока ты проверяешь — я ничего не делаю.
+     ### 3. Как вернуться
+     `/opsx:apply <change-name>` — новая сессия начнётся с запроса вердикта (принят / не принят / дефект в предыдущем срезе). Пока вы проверяете — оркестратор ничего не делает.
 
-     Если сейчас уже всё проверено и принято — напиши "принято S<N>" / "accept S<N>", я отмечу без handoff.
+     ### 4. Short-cut
+     Если уже проверено и принято — напишите `принято S<N>` / `accept S<N>`, отмечу без полного handoff.
      ```
 
      Параллельно:
@@ -254,7 +254,7 @@ Implement tasks from an OpenSpec change.
         Изменения tasks: нет (S<N>.T<M> остаётся [ ])
         Связанный отчёт: —
         ```
-     2. Session Handoff Summary по шаблону шага 7 — но с заголовком "## Paused for Acceptance — S<N>". Секция "Что проверить СЕЙЧАС" заполняется сценарием из S<N>.T<M> (та же информация, что в Acceptance Handoff Card).
+     2. T-HANDOFF вариант `acceptance` по шаблону шага 7 (заголовок — `## Срез S<N> — передача на приёмку: <change-name>`). Секция «Что проверить СЕЙЧАС» заполняется сценарием из `S<N>.T<M>` (та же информация, что в Acceptance Handoff Card выше).
      3. Завершить сессию.
    - **Manual acceptance shortcut:**
      Если пользователь в любой момент сессии явно говорит "принято S<N>" / "accept S<N>" / "S<N> принят" (для среза, у которого все non-test задачи [x] и T<M> [ ]):
@@ -267,7 +267,7 @@ Implement tasks from an OpenSpec change.
      Пользователь явно: "стоп" / "stop" / "прекрати" / "прерви" / "пока хватит".
      1. Завершить текущий task/subagent.
      2. Append debug.md "решение: стоп" (если прерван на Slice Gate) или просто запись в debug.md секции "Interrupted sessions" (если в середине).
-     3. Session Handoff Summary.
+     3. T-HANDOFF вариант `pause` (по шаблону шага 7).
      4. Завершить apply.
 
    - **Slice Gate log (mandatory for all options):** After the user's decision at a slice gate, append a record to `debug.md` (create section `## Slice Gate Decisions` if absent):
@@ -298,36 +298,26 @@ Implement tasks from an OpenSpec change.
    - User interrupts
    - **Verification/decision task completed** → conditional task checkpoint (see above)
 
-7. **On completion or pause — Session Handoff Summary**
+7. **On completion or pause — T-HANDOFF (единый шаблон)**
 
-   Generate three-section summary with one of the following headers based on context:
-   - `## Paused for Acceptance — S<N>` (handoff в конце среза, default)
-   - `## Stopped — <причина>` (пользовательский стоп)
-   - `## Implementation Complete` (все срезы приняты)
+   Формат — **T-HANDOFF** из `.cursor/docs/opsx-output-style.md` §5.2. Заголовок выбирается по варианту:
+   - `acceptance` → `## Срез S<N> — передача на приёмку: <change-name>` (handoff в конце среза, default)
+   - `pause` → `## Сессия приостановлена: <change-name>` (issue / пользовательский стоп)
+   - `final` → `## Реализация завершена: <change-name>` (все срезы приняты)
 
-   **Section 1 — "Выполнено агентами":**
-   For each task completed this session:
-   - [x] N.M — краткое описание
-     - Файл: `path`, строки X-Y
-     - Что изменено: одно предложение (было → стало)
-     - Авто-проверка: результат spot-check (OK / расхождение)
+   **Имена секций одинаковы во всех трёх вариантах** (см. раздел «Output — T-HANDOFF» ниже):
 
-   **Section 2 — "Что проверить СЕЙЧАС":**
-   For each completed task that has acceptance criteria with user-facing actions (markers: `убедиться`, `проверить`, `критерий приёмки`, `Критерий приёмки`):
-   - Extract the acceptance criteria from the task description
-   - Rewrite as concrete user steps (imperative mood): 1. Открыть ... → Выполнить ... → Ожидаемый результат: ...
-   - If task type was "Ручной тест" (dispatched as manual) — include the full test scenario with expected results
+   - `### 1. Что реализовано` — за каждую задачу этого сеанса: `[x] N.M — описание`, файл `path` со строками, «что изменено» одним предложением, авто-проверка (spot-check) OK/расхождение.
+   - `### 2. Что проверить СЕЙЧАС` — для каждой закрытой задачи с критериями приёмки (маркеры `убедиться`, `проверить`, `критерий приёмки`, `Критерий приёмки`): переписать критерии в императиве нумерованным списком (1. Открыть… 2. Выполнить… 3. Убедиться…). Для задач типа «Ручной тест» — полный сценарий с ожидаемыми результатами. Если ничего не требуется от пользователя — одна строка «Ручная проверка не требуется для задач этого сеанса».
+   - `### 3. Следующие задачи` — таблица `Задача | Тип | Исполнитель | Зависит от | Статус`; 3–5 следующих. Для каждой: Type (BSL / Form / Manual test / Metadata / …), Executor (agent / user), статус зависимостей (`[x]`/`[ ]`); если зависимость `[ ]` — пометить «невыполнима до N.M».
+   - `### 4. Как вернуться` — `/opsx:apply <change-name>`, одна строка.
+   - `### 5. Blockers` — нумерованный список задач, которые не могут продолжаться, и почему.
+   - `### 6. Issue` — **только в варианте `pause`**: описание проблемы 1 абзац + нумерованные **Options** из 2–3 вариантов решения.
+   - `### 7. Short-cut` — **только в варианте `acceptance`**: строка про `принято S<N>` / `accept S<N>`.
 
-   If no acceptance criteria require user action → "Ручная проверка не требуется для задач этого сеанса."
+   Если все срезы приняты (`final`) — добавить строку «All tasks complete. Ready to archive: `/opsx:archive <change-name>`». Если `pause` — ждать ответа пользователя. Если `acceptance` — end turn.
 
-   **Section 3 — "Следующие задачи":**
-   | Задача | Тип | Исполнитель | Зависит от | Статус зависимости |
-   Show only the next 3-5 tasks. For each: Type (BSL / Form / Manual test / Metadata / etc.), Executor (agent / user), Dependencies and their status ([x] / [ ]). If dependency is [ ] → flag "невыполнима до N.M"
-
-   **Blockers (if any):**
-   List tasks that cannot proceed and why.
-
-   If all done: suggest archive. If paused: explain why and wait for guidance.
+   **Self-check** (см. §7 стайл-гайда) перед выводом: слои разделены, нумерованные списки, одинаковые имена секций, длина в пределах лимитов.
 
 **Output During Implementation**
 
@@ -343,66 +333,70 @@ Working on task 4/7: <task description>
 ✓ Task complete
 ```
 
-**Output On Completion**
+**Output — T-HANDOFF (единый шаблон, см. `.cursor/docs/opsx-output-style.md` §5.2)**
+
+Три варианта заголовка при одинаковых именах секций — выбирается по состоянию:
+
+| Вариант | Заголовок | Когда |
+|---------|-----------|-------|
+| `acceptance` | `## Срез S<N> — передача на приёмку: <change-name>` | Slice Gate: все non-test задачи `[x]`, `S<N>.T<M>` ждёт ручной приёмки |
+| `pause` | `## Сессия приостановлена: <change-name>` | Issue / неясное требование / пользователь «стоп» |
+| `final` | `## Реализация завершена: <change-name>` | Все задачи `[x]`, включая все `S<N>.T<M>` |
+
+**Общая структура вывода (секции 1–5; секции 6–7 — только в указанных вариантах):**
 
 ```
-## Implementation Complete
+## <Заголовок варианта>
 
 **Change:** <change-name>
 **Schema:** <schema-name>
-**Progress:** N/M tasks complete ✓
+**Прогресс:** N/M задач [x] (срез S<N>.T<M>: <статус>)
 
-### 1. Выполнено агентами
-- [x] N.M — <краткое описание>
-  - Файл: `path`, строки X-Y
-  - Что изменено: <одно предложение>
-  - Авто-проверка: OK / расхождение
+### 1. Что реализовано
+1. [x] <id задачи> — <одно предложение>
+   - Файл: `<path>`, строки X-Y
+   - Что изменено: <одно предложение>
+   - Авто-проверка: OK | расхождение <описание>
 
 ### 2. Что проверить СЕЙЧАС
-1. <конкретный шаг из критериев приёмки> → Ожидаемый результат: ...
-(или: Ручная проверка не требуется для задач этого сеанса.)
+1. <шаг 1 в императиве> → <ожидаемый результат> (регрессия R<N>, если применима)
+2. <шаг 2> → <ожидаемый результат>
+(или: «Ручная проверка не требуется для задач этого сеанса».)
 
 ### 3. Следующие задачи
 | Задача | Тип | Исполнитель | Зависит от | Статус |
 |--------|-----|-------------|------------|--------|
 | ...    | ... | ...         | ...        | [x]/[ ] |
 
-### Blockers (если есть)
-<список>
+### 4. Как вернуться
+`/opsx:apply <change-name>` — продолжит с первого непринятого среза.
 
-All tasks complete! Ready to archive this change.
-```
+### 5. Blockers (если есть)
+1. <блокер> — <чем закрывается>
 
-**Output On Pause (Issue Encountered)**
-
-```
-## Implementation Paused
-
-**Change:** <change-name>
-**Schema:** <schema-name>
-**Progress:** N/M tasks complete
-
-### 1. Выполнено агентами (этот сеанс)
-<как в Output On Completion>
-
-### 2. Что проверить СЕЙЧАС
-<шаги для пользователя>
-
-### 3. Следующие задачи
-<таблица>
-
-### Issue Encountered
-<description of the issue>
+<!-- только для варианта `pause` -->
+### 6. Issue
+<1 абзац: описание проблемы>
 
 **Options:**
-1. <option 1>
-2. <option 2>
-3. Other approach
+1. <вариант 1>
+2. <вариант 2>
+3. Другой подход (описать)
 
-What would you like to do?
+<!-- только для варианта `acceptance` -->
+### 7. Short-cut
+Если уже проверено и принято — напишите `принято S<N>` / `accept S<N>`, отмечу без полного handoff.
+
+<!-- только для варианта `final` -->
+> All tasks complete. Ready to archive: `/opsx:archive <change-name>`.
 ```
 
+**Имена секций** (`### 1. Что реализовано`, `### 2. Что проверить СЕЙЧАС`, `### 3. Следующие задачи`, `### 4. Как вернуться`, `### 5. Blockers`) — **одинаковы во всех трёх вариантах**; это же именование используется в `debug.md` `## Slice Gate Decisions` → «Связанный отчёт».
+
+**Self-check перед выводом** (§7 стайл-гайда): (1) в «Что проверить СЕЙЧАС» нет внутренних ID (`R<N>/SC<N>/D<N>`) в тексте пункта — только в скобках в конце; (2) имена команд / модулей / UI — по типографическим правилам §2; (3) перечисления — нумерованный список; (4) «Что проверить» — императивы, без формулировок гипотез; (5) каждая секция ≤7 пунктов; длиннее — выносить в отчёт `reports/`.
+
 **Guardrails**
+- **Output style:** все пользовательские сообщения (Acceptance Handoff, pause, final, Implementation summary) выводятся по единому шаблону **T-HANDOFF** из `.cursor/docs/opsx-output-style.md` §5.2; имена секций одинаковы во всех вариантах; перед отправкой — self-check-5 (§7).
 - Keep going through tasks until done or blocked
 - Always read context files before starting (from the apply instructions output)
 - **Spot-check after each task:** Grep (or Read) to confirm the change; for 5+ files, check at least 3. Do not mark task complete if verification fails.
