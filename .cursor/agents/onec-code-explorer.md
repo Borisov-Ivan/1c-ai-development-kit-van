@@ -2,7 +2,7 @@
 priority: high
 capabilities: [1c-code-analysis, 1c-architecture, 1c-patterns]
 name: onec-code-explorer
-model: gpt-5.4-medium
+model: default
 description: Deep analysis of 1C codebase - tracing execution paths, finding patterns, understanding architecture
 ---
 

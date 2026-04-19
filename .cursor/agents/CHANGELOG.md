@@ -1,5 +1,12 @@
 # Changelog — 1C Agent Ecosystem
 
+## [4.1] - 2026-04-19
+
+### Changed (AP-001, onec-code-reviewer, bsl-antipatterns)
+- AP-001: расширена карточка — двуконтекстное использование одной модульной `Перем` (граф по директивам), маркеры false-negative в комментариях, ремедиация, контр-сигналы, второй пример BAD, ссылка на [ИТС 639](https://its.1c.ru/db/v8std/content/639/hdoc), явное «не HIGH» только для чисто серверной `Перем`; кейс: change `do2-cf-partial-repeat-params-do3-ui`
+- `bsl-antipatterns.mdc`: уточнена колонка Детектирование для AP-001
+- `onec-code-reviewer.md`: чеклист из 3 пунктов у строки AP-001 в category 10
+
 ## [4.0] - 2026-04-17
 
 ### Removed

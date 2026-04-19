@@ -202,6 +202,7 @@ Check:
 ```yaml
 Check via Anti-pattern Registry (see category 16):
   AP-001: Server scope by default in form modules (Перем/Тип without &НаКлиенте) — HIGH
+    Checklist: (1) thin-client static check «Переменная не определена»; (2) usage graph — same module Перем touched from both server and client procedures (dual-context) = HIGH even if static check silent; (3) do NOT waive because of author comments («общая/shared» for server+client)
   AP-002: Client-only methods in server context — HIGH
   AP-003: ЭтаФорма instead of ЭтотОбъект in callbacks — HIGH
   AP-004: Defensive check on fixed-contract source — HIGH
