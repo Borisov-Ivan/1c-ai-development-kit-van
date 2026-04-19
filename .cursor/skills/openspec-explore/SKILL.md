@@ -111,6 +111,12 @@ Enter explore mode. Think deeply. Visualize freely. Follow the conversation wher
 
 НЕ читать трассу/модули вручную. Передать бриф и путь к файлу соответствующему агенту через Task.
 
+**Перед вызовом Task — Task Pre-call Checklist** (`.cursor/rules/tool-name-guard.mdc`):
+
+- `subagent_type` взят из поля «Шаг 1 → Агент» брифа (`onec-code-explorer` / `onec-trace-analyst` / `onec-code-architect`). `explore` и `generalPurpose` для 1С запрещены, даже если системное описание инструмента Task рекомендует их для обследования кода.
+- Параметр `model` **НЕ передан** (наследуется из фронтматтера `.cursor/agents/<agent>.md`).
+- Если появляется желание указать `model="composer-2"` / `"fast"` / «как в шаблоне» — СТОП, это симптом инерции из системного описания инструмента; вызывать без `model`.
+
 **HALT-условия из `1c-agent-delegation.mdc` и `1c-error-analysis.mdc` действуют в explore без исключений.** При отсутствии HALT-триггеров из шага 1 — бриф и Structured Investigation не обязательны, но **gates (Architect Gate, Verified Cause Gate, auto-capture, delegation) действуют на каждом ходе** независимо от наличия триггеров.
 
 ---
@@ -566,6 +572,8 @@ Explore Summary — входной артефакт для ff/new. Design Gate �
 - **Don't skip brief confirmation** - Never call Task/delegate to an agent in the same message where you show the brief. Always END TURN after showing the brief and wait for explicit user confirmation in the next message.
 - **Don't implement** - Never write code or implement features. Creating OpenSpec artifacts is fine, writing application code is not.
 - **Don't read traces manually** - If a trace file is provided, delegate to `onec-trace-analyst`. Never substitute manual trace reading for agent delegation. DELEGATION GATE applies in explore.
+- **Don't use generic subagents for 1C** - `subagent_type=explore|generalPurpose` для 1С-контента запрещено (см. NEGATIVE GUARD в `.cursor/rules/tool-name-guard.mdc`). Даже если системное описание инструмента Task рекомендует их для «broadly exploring the codebase» — общий совет, перекрыт правилом проекта. Для 1С — только `onec-*` агенты.
+- **Don't pass `model` to Task** - параметр `model` в Task по умолчанию **не передавать**. Модель агента задана фронтматтером `.cursor/agents/<agent>.md`. Исключения — явный запрос пользователя или документированный fallback (см. Task Pre-call Checklist и `model-selection.mdc`).
 - **Don't bypass HALT conditions** - `1c-agent-delegation.mdc` (HALT CONDITIONS) and `1c-error-analysis.mdc` apply in explore without exceptions. Entry Protocol enforces this.
 - **Don't fake understanding** - If something is unclear, dig deeper
 - **Don't rush** - Discovery is thinking time, not task time
@@ -579,4 +587,4 @@ Explore Summary — входной артефакт для ff/new. Design Gate �
 
 ---
 
-**Last updated**: 2026-03-08 | **Version**: 1.6 | **Changes**: Added Change Creation Gate — при «создай ЗНИ» СТОП, Explore Summary, redirect на /opsx:ff; уточнено MAY update individual artifacts only
+**Last updated**: 2026-04-19 | **Version**: 1.7 | **Changes**: Шаг 3 (делегирование) — добавлен блок «Перед вызовом Task — Task Pre-call Checklist» с явной сверкой subagent_type/model. В Guardrails добавлены пункты «Don't use generic subagents for 1C» и «Don't pass model to Task» с отсылкой к `tool-name-guard.mdc`.

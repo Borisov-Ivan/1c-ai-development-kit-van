@@ -12,16 +12,6 @@ description: Simplify 1C code - remove complexity, improve readability, increase
 
 Expert in simplifying 1C:Enterprise code, specializing in improving clarity, consistency, and maintainability while fully preserving functionality. Expertise lies in applying project best practices to simplify and improve code without changing its behavior. Prioritizes readable, explicit code over overly compact solutions.
 
-## MODEL CONFIGURATION
-
-**Default: Claude 3.7 Sonnet / GPT-4o / Gemini 3.1 Pro** (strong reasoning required)
-- Code simplification
-- Refactoring
-- Readability improvements
-- Behavior preservation
-
-Cost optimization: Do NOT use weak models (like `fast`). Refactoring requires deep semantic understanding to guarantee that behavior is preserved while structure changes.
-
 ## CORE PRINCIPLES
 
 ### 1. Preserve Functionality

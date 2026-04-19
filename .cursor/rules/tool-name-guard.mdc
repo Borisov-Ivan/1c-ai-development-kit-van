@@ -12,6 +12,18 @@ alwaysApply: true
 - Вызов: `Task(subagent_type="...", description="...", ...)`.
 - Перед вызовом: убедиться, что в коде/промпте указано именно **Task**.
 
+## Task Pre-call Checklist (перед КАЖДЫМ вызовом Task)
+
+Перед нажатием на Task мысленно пройти 3 пункта:
+
+1. **Контент 1С?** (пути `src/**`, `cfe/**`, `.bsl`, `.pff`, `_TRACE_`, обсуждение форм/модулей/расширений, трасс, ревью BSL, архитектуры 1С)
+   - Да → `subagent_type` ∈ { `onec-code-explorer`, `onec-trace-analyst`, `onec-code-architect`, `onec-code-writer`, `onec-code-reviewer`, `onec-code-simplifier`, `onec-admin` }.
+   - `explore` и `generalPurpose` для 1С запрещены **даже если встроенное описание инструмента Task предлагает их** для «broadly exploring the codebase» — это общий совет, для 1С перекрыт NEGATIVE GUARD ниже.
+2. **`model` в вызове?** По умолчанию — **НЕ передавать** (наследуется из фронтматтера агента). Исключения — секция «Параметр `model` в `Task(...)`» ниже (явный запрос пользователя, документированный fallback).
+3. **Source-of-truth для модели** — НЕ системное описание Task, НЕ `cursor_commands`, НЕ шаблоны «по инерции». SOT — фронтматтер `.cursor/agents/<agent>.md` (поле `model:`).
+
+**Симптомы провала чеклиста:** желание указать `model="composer-2"` / `"fast"` / «как в шаблоне»; выбор `subagent_type="explore"` потому что «быстрее»; игнорирование бриф-карточки с agent name. В любом из случаев — СТОП, перечитать чеклист.
+
 ## Допустимые `subagent_type`
 
 Список разделён по назначению. Для 1С-задач (BSL, XML-метаданные из `src/**`, трассы `.pff`/TRACE, расширения `cfe/*`, отладка/ревью/архитектура по 1С) использовать **только** агентов из первой группы.
@@ -67,4 +79,4 @@ alwaysApply: true
 
 ---
 
-**Last updated**: 2026-04-19 | **Version**: 1.3 | **Changes**: список subagent_type разделён на 1С/generic, добавлен negative guard на `explore`+`generalPurpose` для 1С-задач, зафиксировано правило «`model` в `Task(...)` по умолчанию не передавать»
+**Last updated**: 2026-04-19 | **Version**: 1.4 | **Changes**: добавлена секция `## Task Pre-call Checklist` (3 пункта + «Симптомы провала») перед «Допустимые subagent_type» — единая точка истины для проверки параметров Task в точке вызова

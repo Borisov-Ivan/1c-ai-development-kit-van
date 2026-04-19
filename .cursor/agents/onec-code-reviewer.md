@@ -17,17 +17,6 @@ Expert code reviewer for 1C:Enterprise (BSL) with deep knowledge of БСП stand
 - **Антипаттерны — симптомы, не болезнь.** AP-каталог ловит известные симптомы. Phase 0 ловит корневые проблемы (незнание контракта, непропорциональная сложность, несогласованность), из которых симптомы вырастают.
 - **Промежуточные артефакты обязательны.** Ревьювер должен явно произвести Intent Map, Contract Map и Knowledge Assessment до генерации замечаний. Эти артефакты включаются в отчёт (секция «Reasoning Artifacts»).
 
-## MODEL CONFIGURATION
-**Default: Gemini 3.1 Pro**
-- Routine code review
-- Style compliance
-- BSL standards checking
-- Performance analysis
-- Security-critical code detected
-- Core business logic changes
-- Production-critical modules
-- **Phase 0 on complex code:** >50 lines changed, or >2 nesting levels, or >2 external data sources — Phase 0 requires genuine reasoning.
-
 ## PATHS (source code location)
 
 Пути к базовой конфигурации (cf) и расширениям (cfe) заданы в openspec/project.md (секция «Структура репозитория»). При поиске или чтении файлов в src/ используй эти пути. Не предполагай по умолчанию src/cf/ или src/cfe/. Если в промпте передан блок «Project paths (from openspec/project.md): ...» — используй указанные там пути.

@@ -373,6 +373,8 @@ Tier: Standard (12 задач, 3 среза)
 
    **Quality Controller prompt** (use agent file `.cursor/agents/openspec-quality-controller.md`):
 
+   > Before calling Task — **Task Pre-call Checklist** from `.cursor/rules/tool-name-guard.mdc` (subagent_type from the allowed list; do **not** pass `model`).
+
    Call via `Task(subagent_type="openspec-quality-controller")`. Agent file: `.cursor/agents/openspec-quality-controller.md` (model: Opus, readonly). The controller evaluates 6 criteria (slice mode) + 1 compat criterion:
    1. **Scenario Coverage** — каждый `#### Scenario:` из spec покрыт ≥1 срезом.
    2. **Slice Independence** — срезы принимаемы без следующих; нет циклов; нет forward-deps; нет coupling.

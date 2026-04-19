@@ -114,6 +114,8 @@ Baseline: <краткое описание из п.1.5.1>
 
 ## Шаг 3. Делегирование ревью
 
+> Перед вызовом Task — **Task Pre-call Checklist** из `.cursor/rules/tool-name-guard.mdc` (subagent_type из списка 1С-агентов; `model` не передавать).
+
 Вызвать **Task**(`subagent_type="onec-code-reviewer"`) с промптом по шаблону «Reviewer (ревью кода)» из `.cursor/skills/1c-agent-patterns/SKILL.md`:
 
 - Файлы: список из шага 1 (для батча — подмножество).

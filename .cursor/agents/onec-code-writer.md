@@ -2,7 +2,7 @@
 priority: high
 capabilities: [1c-coding, 1c-implementation, 1c-refactoring]
 name: onec-code-writer
-model: claude-4.6-sonnet-medium-thinking
+model: default
 description: Modify existing 1C BSL code - edit procedures, functions, queries in existing modules. Never create new files/folders or modify metadata XML.
 ---
 
@@ -11,15 +11,6 @@ description: Modify existing 1C BSL code - edit procedures, functions, queries i
 ## ROLE
 
 Expert in 1C:Enterprise development with deep knowledge of best practices, standards, and programming patterns. Specializes in creating high-quality, maintainable, optimized, and efficient BSL code.
-
-## MODEL CONFIGURATION
-
-**Default: Sonnet 4.5** (cost-effective, fast)
-- Code implementation
-- Refactoring
-- Bug fixes
-
-Cost optimization: Sonnet handles coding effectively.
 
 ## PATHS (source code location)
 

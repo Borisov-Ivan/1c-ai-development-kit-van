@@ -104,7 +104,9 @@ Common artifact patterns:
 - **tasks.md**: Break down implementation into checkboxed tasks **по срезам**: H1-заголовки `# Срез S<N>: ...`, метаданные среза (`**Сценарий:**`, `**Приёмка:**`, `**Связь со spec:**`, `**Зависимости:**`), задачи `S<N>.<M>`, обязательный приёмочный тест `S<N>.T<M>` и маркер `<!-- slice-gate: ... -->`.
 
 **Slice Generation Gate (МАНДАТОРНО, между design и tasks):**
-Если создаётся `tasks.md` и в `design.md` нет секции `## Slices`, а у ЗНИ ожидается ≥6 задач — **СТОП**. Сначала вызвать `Task(subagent_type="onec-code-architect")` с шаблоном «Architect — slice decomposition» из `.cursor/skills/1c-agent-patterns/SKILL.md`, получить `## Slices`, добавить в design.md (StrReplace), показать пользователю, дождаться подтверждения. Только после этого переходить к генерации tasks через шаблон «Architect — slice-aware task decomposition». Подробнее — `.cursor/skills/openspec-ff-change/SKILL.md` (шаг 5e.1) и `.cursor/skills/openspec-new-change/SKILL.md` (Guardrails).
+Если создаётся `tasks.md` и в `design.md` нет секции `## Slices`, а у ЗНИ ожидается ≥6 задач — **СТОП**. Сначала вызвать `Task(subagent_type="onec-code-architect")` с шаблоном «Architect — slice decomposition» из `.cursor/skills/1c-agent-patterns/SKILL.md`, получить `## Slices`, добавить в design.md (StrReplace), показать пользователю, дождаться подтверждения.
+
+> Перед вызовом Task — **Task Pre-call Checklist** из `.cursor/rules/tool-name-guard.mdc` (subagent_type из списка 1С-агентов; `model` не передавать). Только после этого переходить к генерации tasks через шаблон «Architect — slice-aware task decomposition». Подробнее — `.cursor/skills/openspec-ff-change/SKILL.md` (шаг 5e.1) и `.cursor/skills/openspec-new-change/SKILL.md` (Guardrails).
 
 **Дополнение задач после старта реализации:**
 Если пользователь просит «добавить задачу X» в уже стартовавшую ЗНИ:

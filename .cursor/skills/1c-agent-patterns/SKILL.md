@@ -181,14 +181,7 @@ Orchestrator implementation gate: если промпт описывает ко�
 
 Детали — в `.cursor/rules/model-selection.mdc` (секция «Как применяется модель») и `.cursor/rules/tool-name-guard.mdc` (секция «Параметр `model` в `Task(...)`»).
 
-**Частный случай writer** (осталось для обратной совместимости с LIGHT MODE):
-
-| Условие | model в `Task(...)` |
-|---|---|
-| Light Mode, Mechanical Mode, простая задача (1-2 файла, очевидная реализация) | не указывать (наследует фронтматтер `claude-4.6-sonnet-medium-thinking`) |
-| Extension Guard (обнаружен &ИзменениеИКонтроль) | не указывать |
-| Bug fix с root cause | не указывать |
-| Средняя+ сложность (3+ файлов, архитектурные решения) | не указывать |
+**Частный случай writer.** Во всех режимах (Light Mode, Mechanical Mode, Extension Guard, bug fix с root cause, средняя+ сложность) — `model` **не передавать**. Writer наследует модель `claude-4.6-sonnet-medium-thinking` из фронтматтера `.cursor/agents/onec-code-writer.md`. Шаблоны промптов writer ниже не содержат `model=...` по этой же причине.
 
 ---
 
@@ -876,8 +869,7 @@ Task(
          - Контекст выполнения корректен (клиент/сервер)
          - Нет инвертированных ранних выходов перед единственным действием (rule 23)
          - Для новых функций/процедур: параметры не перезаписываются (AP-007); при нормализации ввести локальную переменную",
-  subagent_type="onec-code-writer",
-  model=<см. таблицу «Выбор модели для writer»>
+  subagent_type="onec-code-writer"
 )
 ```
 
@@ -928,8 +920,7 @@ Task(
          - Нет дублирования логики вызываемых функций
          - Нет инвертированных ранних выходов перед единственным действием (rule 23)
          - Для новых функций/процедур: параметры не перезаписываются (AP-007); при нормализации ввести локальную переменную",
-  subagent_type="onec-code-writer",
-  model=<см. таблицу «Выбор модели для writer»>
+  subagent_type="onec-code-writer"
 )
 ```
 
@@ -1039,8 +1030,7 @@ Task(
          - Для новых функций: параметры не перезаписываются (AP-007)
          - Для НСтр: кавычки внутри строки экранированы двойными
          - Нет побочных изменений за пределами замечаний",
-  subagent_type="onec-code-writer",
-  model=<см. таблицу «Выбор модели для writer»>
+  subagent_type="onec-code-writer"
 )
 ```
 
@@ -1570,6 +1560,6 @@ Task(
 ---
 
 **Last updated**: 2026-04-19
-**Version**: 3.1
-**Changes**: Убран `model="fast"` из шаблонов Task для `onec-code-explorer` (x2) и `onec-code-architect` (x2) — переопределял фронтматтер агентов. Секция «Выбор модели для writer» переписана в общий раздел «Выбор модели (все 1С-агенты)» с принципом «`model` в `Task(...)` по умолчанию не передавать». (v3.0 — Vertical Slices Framework.)
+**Version**: 3.2
+**Changes**: Убран остаточный `model=<см. таблицу «Выбор модели для writer»>` из трёх шаблонов writer (Writer generic, Writer — bug fix, Writer — review fix) — согласовано с правилом «model в Task по умолчанию не передавать». Таблица «Частный случай writer» свёрнута в один абзац (все режимы — не передавать, наследование из фронтматтера `onec-code-writer`). См. Task Pre-call Checklist в `.cursor/rules/tool-name-guard.mdc`. (v3.1 — убран `model="fast"` из шаблонов explorer/architect.)
 **Source**: Extracted from 1c-feature-dev-enhanced v2.2 (Phase 0-8 workflow replaced by OpenSpec)

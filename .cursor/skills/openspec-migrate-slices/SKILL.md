@@ -28,6 +28,8 @@ metadata:
    - Собрать список уже выполненных задач (`[x]`).
 
 3. **Вызов архитектора** (`Task(subagent_type="onec-code-architect")`, fallback `onec-code-architect-2nd`) по шаблону «Architect — slice restructuring» из `.cursor/skills/1c-agent-patterns/SKILL.md`:
+
+   > Перед вызовом Task — **Task Pre-call Checklist** из `.cursor/rules/tool-name-guard.mdc` (subagent_type из списка 1С-агентов; `model` не передавать, кроме документированного fallback на `onec-code-architect-2nd`).
    - Цель: перестроить задачи в `# Срез S<N>` структуру с метаданными и `S<N>.T<M>` приёмочными тестами.
    - Уже выполненные задачи попадают в первый срез S1 (или распределяются с пометкой `(уже реализовано)`).
    - Маркер `<!-- slice-gate -->` проставляется автоматически в конце каждого среза.

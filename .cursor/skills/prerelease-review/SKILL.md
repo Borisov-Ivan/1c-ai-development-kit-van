@@ -267,6 +267,8 @@ rg -i "//.*\b(fail-fast|feature.toggle|workaround|fallback|downstream|re-raise|f
 
 ### 2.1 Параллельные вызовы onec-code-reviewer (до 4 одновременно)
 
+> Перед вызовом Task — **Task Pre-call Checklist** из `.cursor/rules/tool-name-guard.mdc` (subagent_type из списка 1С-агентов; `model` не передавать).
+
 Вызвать **Task** с `subagent_type: onec-code-reviewer` для каждого батча. Запускать батчи параллельно, где возможно. Если группа **A** пуста — батчи **1a** и **1b** не вызывать. Если группа **B** или **C** пуста — батчи **2** или **3** не вызывать.
 
 **Префикс промпта при `review_mode = change-scoped`** (вставить **в начало** каждого промпта батчей 1a, 1b, 2, 3, перед основным текстом):
@@ -292,6 +294,8 @@ rg -i "//.*\b(fail-fast|feature.toggle|workaround|fallback|downstream|re-raise|f
 Если группа A разбита на A1 и A2 — выполнить два отдельных вызова для A1 и A2 с тем же «глубоким» промптом (батчи 1a и 1b для каждого подмножества); батчи B и C можно запускать параллельно с A.
 
 ### 2.5 Архитектурный анализ (Tier 2, параллельно с шагом 2.1)
+
+> Перед вызовом Task — **Task Pre-call Checklist** из `.cursor/rules/tool-name-guard.mdc` (subagent_type из списка 1С-агентов; `model` не передавать).
 
 Запустить **Task** с `subagent_type: onec-code-explorer` **параллельно** с батчами reviewer (шаг 2.1). Explorer читает ВСЕ .bsl файлы расширения разом (не батчами) и выполняет кросс-модульные проверки, недоступные пофайловому reviewer.
 
