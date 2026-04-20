@@ -337,17 +337,11 @@ when_available:
   - Performance patterns
 ```
 
-### MCP Servers
+### Опциональные инструменты сессии
 
 ```yaml
 Check names:
   user-1c-help-docsearch("variable name")
-
-Find existing code:
-  user-PROJECT-codemetadata (project-specific MCP)-codesearch("similar logic")
-
-БСП search:
-  user-1c-ssl-ssl_search("functionality")
 ```
 
 ---
@@ -522,4 +516,4 @@ Don't document:
 
 **Last updated**: 2026-02-27  
 **Version**: 1.1  
-**Source**: AndreevED/1c-ai-feature-dev-workflow (1c-code-simplifier) + improvements (BSL LSP, MCP)
+**Source**: AndreevED/1c-ai-feature-dev-workflow (1c-code-simplifier) + improvements (BSL LSP)

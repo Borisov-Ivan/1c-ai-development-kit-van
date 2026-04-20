@@ -109,6 +109,15 @@ AskQuestion:
 Поток `/review`: `resolve scope → контекст → reviewer → [Investigation Request?] → explorer → reviewer (+ Resolved Contracts) → отчёт`.
 Поток `/opsx:apply`: `writer → ... → reviewer → [Investigation Request?] → explorer → reviewer (+ Resolved Contracts) → отчёт`.
 
+## INPUT CONTRACT (writer)
+
+Оркестратор обязан передать writer'у полный набор блоков по таблице 
+`.cursor/agents/onec-code-writer.md → ## INPUT CONTRACT`. 
+Валидация — на стороне оркестратора (при сборке промпта) и на стороне 
+writer'а (HALT с MISSING_INPUT при получении).
+
+Конкретные блоки и триггеры — см. таблицу в агенте.
+
 ## EXTENSION GATE
 
 При делегировании writer для файла в cfe/ (расширение):
@@ -130,4 +139,4 @@ AskQuestion:
 
 ---
 
-**Last updated**: 2026-04-18 | **Version**: 1.0 | **Changes**: вынесено из `1c-agent-delegation.mdc` как on-demand правило для сжатия always-apply контекста.
+**Last updated**: 2026-04-20 | **Version**: 1.1 | **Changes**: добавлена секция INPUT CONTRACT (writer) для синхронизации с onec-code-writer.

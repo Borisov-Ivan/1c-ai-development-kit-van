@@ -2,10 +2,11 @@
 name: prerelease-review
 description: Pre-release code review for 1C extensions (full-extension or change-scoped by OpenSpec change name). Delegates to onec-code-reviewer with prerelease mode (severity escalation), produces a structured report, then offers openspec follow-up. Use when user requests "/opsx:prerelease-review", "/prerelease-review", "предрелизное ревью", "проверить перед релизом", "review before release".
 license: MIT
-compatibility: Requires openspec CLI. Delegates to onec-code-reviewer.
+compatibility: Requires openspec CLI. Delegates to onec-code-reviewer v3.0 (prompt_contract_version=3).
+expected_reviewer_prompt_contract_version: 3
 metadata:
   author: project
-  version: "1.4"
+  version: "1.5"
 ---
 
 Провести предрелизное ревью расширения 1С. Результат — структурированный отчёт с замечаниями по уровням. После — предложение создать openspec change на устранение (или дополнение существующего ЗНИ в режиме change-scoped).
@@ -192,7 +193,7 @@ openspec instructions apply --change "<name>" --json
 
 ### 1.7 Механическая проверка: ссылки на артефакты разработки
 
-До батчевого ревью — запустить Grep для обнаружения процессных ссылок в комментариях (rule 17, категория 9 reviewer). Совпадения автоматически включаются в отчёт как HIGH [release-hygiene] без ожидания от ревьювера.
+До батчевого ревью — запустить Grep для обнаружения процессных ссылок в комментариях (AP-040, AP-041). Совпадения автоматически включаются в отчёт как HIGH [release-hygiene] без ожидания от ревьювера.
 
 **Scope файлов для `rg`:**
 
@@ -224,7 +225,7 @@ rg "//.*Decision\s+\d+" --glob "*.bsl" <dir>
 
 При обнаружении (после фильтра whitelist и фильтра границ) — добавить в сводку (шаг 2.2) с `kind=release-hygiene`, уровень HIGH. Формат замечания: `файл:строка — [release-hygiene] Ссылка на артефакт разработки в комментарии. Рекомендация: переписать комментарий в доменных терминах.`
 
-### 1.7b Механическая проверка: англоязычный жаргон в комментариях
+### 1.7b Механическая проверка: англоязычный жаргон в комментариях (AP-041)
 
 До батчевого ревью — запустить Grep на **англоязычный технический жаргон** в однострочных комментариях `//` (не в строковых литералах `НСтр` и многострочных блоках — возможны ложные срабатывания; при сомнении сверить строку вручную). **Scope:** как в шаге 1.7 (`full-extension` — каталог + `--glob "*.bsl"`; `change-scoped` — список путей `change_files`).
 
@@ -243,7 +244,7 @@ rg -i "//.*\b(fail-fast|feature.toggle|workaround|fallback|downstream|re-raise|f
 
 Совпадения после фильтра whitelist и фильтра границ — **HIGH [release-hygiene]** в сводку (шаг 2.2), `kind=release-hygiene`. Формат: `файл:строка — [release-hygiene] Англоязычный жаргон в комментарии. Рекомендация: переписать на русском (допустимы аббревиатуры HTTP, XML, API, XDTO, COM, JSON, UUID, MD5, RFC и ссылки на типы платформы).`
 
-### 1.7c Механическая проверка: обязательные форматы комментариев (project.md)
+### 1.7c Механическая проверка: обязательные форматы комментариев (project.md / Mandatory Control)
 
 Если в [openspec/project.md](../../../openspec/project.md) в таблице **«Обязательный контроль»** есть активные строки с непустым **Regex допустимой строки** — выполнить проверку. **Scope:** при `full-extension` — по каталогу расширения `<dir>`; при `change-scoped` — только по файлам из `change_files` (для шага 1: `rg "#Вставка" -n` с перечислением путей или фильтрация результатов grep по каталогу до путей из `change_files`). При **нескольких** правилах с разными условиями — выполнить проверку **отдельно для каждого ID** по колонке «Где проверять» (ниже — базовая механика для правил вида «первый `//` после `#Вставка`»).
 
@@ -256,6 +257,59 @@ rg -i "//.*\b(fail-fast|feature.toggle|workaround|fallback|downstream|re-raise|f
 Если таблица обязательного контроля пуста или все строки — заглушки — шаг 1.7c пропустить.
 
 **Важно:** в `project.md` должны оставаться только правила, которые команда реально требует; иначе возможны массовые замечания.
+
+### 1.8 Linter / LSP pass (evidence)
+
+Выполнить ДО вызова ревьювера. Собрать статические диагностики как **сигналы** (reviewer решает, что с ними делать).
+
+**Инструменты (порядок предпочтения):**
+1. `user-1c-syntax-checker-syntaxcheck(code)` для каждого `.bsl` в scope (с учётом Review Boundaries — можно передавать усечённый фрагмент или весь файл).
+2. `user-1c-code-checker-check_1c_code(code, check_type)` для logic checks.
+3. `bsl_lsp_diagnostics` (если BSL LSP доступен в сессии) — платформенная диагностика.
+4. Fallback: `ReadLints` по изменённым файлам (Cursor-native).
+
+**Обработка:**
+- Если инструменты недоступны (LSP офлайн, linter не найден) — gracefully degrade: в промпт ревьювера вставить `## Linter Signals (evidence)` с комментарием `Linter unavailable: <reason>`. В Summary отчёта — warning.
+- Если инструмент выдал диагностики — агрегировать в единый блок:
+
+```markdown
+## Linter Signals (evidence)
+
+| # | Tool | File:Line | Severity (tool) | Message | Suggested AP/Category |
+|---|------|-----------|-----------------|---------|-----------------------|
+| 1 | syntax-checker | X.bsl:45 | error | Unclosed НачатьТранзакцию | AP-015 |
+```
+
+- Блок передаётся ревьюверу. Ревьювер в Phase 1 применяет confirm/dismiss/reclassify: диагностики → findings (с AP-ID, severity из каталога, risk axes).
+
+**Важно:** оркестратор НЕ переводит сигналы в findings. Это работа ревьювера.
+
+### 1.9 Prior Findings History
+
+Цель — дать ревьюверу видеть повторяющиеся замечания.
+
+1. Определить `scope-slug` (совпадает с именем сохраняемого отчёта из шага 4).
+2. Glob:
+   - `openspec/changes/*/reports/prerelease-review-*.md`
+   - `openspec/changes/archive/**/reports/prerelease-review-*.md`
+   - `temp/reports/prerelease-review-*.md`
+3. Отфильтровать по дате ≤ 90 дней (mtime файла).
+4. Из каждого отчёта извлечь список findings (таблица или нумерация; парсить списки CRITICAL/HIGH/MEDIUM/LOW).
+5. Передать в промпт блок:
+
+```markdown
+## Prior Findings History
+
+Отчёты ≤ 90 дней по тому же scope. Ревьювер обязан для каждого совпадающего finding (по file:Anchor:AP-NNN) добавить tag `recurrent` и применить эвристику risk model (scope up, confidence ≥ 0.9).
+
+### Отчёт: <путь/имя файла> (<дата>)
+
+| # | AP | Procedure | Anchor | Action | Severity | Status |
+|---|----|-----------|--------|--------|----------|--------|
+| 1 | AP-015 | ЗаписатьДокументы | НачатьТранзакцию(); | MUST_FIX | CRITICAL | unknown |
+```
+
+Если отчётов нет — блок не вставлять (или вставить `## Prior Findings History — none`).
 
 ---
 
@@ -271,9 +325,30 @@ rg -i "//.*\b(fail-fast|feature.toggle|workaround|fallback|downstream|re-raise|f
 
 Вызвать **Task** с `subagent_type: onec-code-reviewer` для каждого батча. Запускать батчи параллельно, где возможно. Если группа **A** пуста — батчи **1a** и **1b** не вызывать. Если группа **B** или **C** пуста — батчи **2** или **3** не вызывать.
 
-**Префикс промпта при `review_mode = change-scoped`** (вставить **в начало** каждого промпта батчей 1a, 1b, 2, 3, перед основным текстом):
+**Префикс промпта для каждого батча (1a, 1b, 2, 3)** (вставить **в начало** промпта, перед основным текстом):
 
-> «ЗНИ (change-scoped): `<change-name>`. Файлы в этом батче — доработки по этому ЗНИ. Цель и контракты — из `design.md` / `proposal.md` (кратко перескажи в ходе ревью из прочитанных артефактов). Проверяй код в контексте ожидаемого поведения из design. **Сразу после этого абзаца** оркестратор вставляет блок `## Review Boundaries` (шаг 1.3b) для файлов **этого** батча. Соблюдай Review Boundaries Protocol в `onec-code-reviewer.md`: читай каждый файл целиком для контекста; замечания (включая Phase 0, Phase 2.5, prerelease kind) — **только** внутри границ; не «полируй» неизменённый код. **Неиспользуемый код / пустые процедуры / пустые вставки:** Grep по имени процедуры выполняй по **всей** директории расширения, но **только для процедур/функций, перечисленных в Review Boundaries** для соответствующего файла (не перебирай все процедуры модуля). Исключения: обработчики событий, БСП-команды, callback — как в тексте батча ниже.»
+```markdown
+expected_reviewer_prompt_contract_version: 3
+mode=prerelease
+
+## Whitelist & Mandatory Controls (from project.md)
+<таблицы из шага 1.1a, один раз; агент применяет сам>
+
+## Linter Signals (evidence)
+<из шага 1.8, фильтр по файлам батча>
+
+## Prior Findings History
+<из шага 1.9 — пустой или список>
+
+## Architectural Context
+<design.md extracted summary — только при change-scoped>
+
+## Review Boundaries
+<из шага 1.3b — только при change-scoped>
+```
+
+При `review_mode = change-scoped` дополнительно добавить после блоков evidence:
+> «ЗНИ (change-scoped): `<change-name>`. Файлы в этом батче — доработки по этому ЗНИ. Проверяй код в контексте ожидаемого поведения из Architectural Context. Соблюдай Review Boundaries Protocol в `onec-code-reviewer.md`: читай каждый файл целиком для контекста; замечания (включая Phase 0, Phase 2.5, prerelease kind) — **только** внутри границ; не «полируй» неизменённый код. **Неиспользуемый код / пустые процедуры / пустые вставки:** Grep по имени процедуры выполняй по **всей** директории расширения, но **только для процедур/функций, перечисленных в Review Boundaries** для соответствующего файла (не перебирай все процедуры модуля). Исключения: обработчики событий, БСП-команды, callback — как в тексте батча ниже.»
 
 **Батч 1a — Группа A, логика и безопасность:**
 - Файлы: список модулей группы A (или A1, если A разбита).
@@ -299,7 +374,7 @@ rg -i "//.*\b(fail-fast|feature.toggle|workaround|fallback|downstream|re-raise|f
 
 Запустить **Task** с `subagent_type: onec-code-explorer` **параллельно** с батчами reviewer (шаг 2.1). Explorer читает ВСЕ .bsl файлы расширения разом (не батчами) и выполняет кросс-модульные проверки, недоступные пофайловому reviewer.
 
-**Входные данные:** **всегда** полный список `.bsl` каталога расширения: при `full-extension` — из Glob шага 1.3; при `change-scoped` — список **`extension_all_bsl`** из шага 1.3 (не подменять списком `change_files`). Контекст из шага 1.5 (имя расширения, префикс).
+**Входные данные:** **всегда** полный список `.bsl` каталога расширения: при `full-extension` — из Glob шага 1.3; при `change-scoped` — список **`extension_all_bsl`** из шага 1.3 (не подменять списком `change_files`). Контекст из шага 1.5 (имя расширения, префикс). При `change-scoped` также передать блок `## Architectural Context` и список `change_files`.
 
 **Промпт explorer:**
 
@@ -323,11 +398,21 @@ rg -i "//.*\b(fail-fast|feature.toggle|workaround|fallback|downstream|re-raise|f
 
 ### 2.2 Сведение отчётов
 
+- Распарсить ответы агентов: разделить `## === MAIN REPORT ===` и `## === REASONING APPENDIX ===`.
 - Объединить выводы всех батчей Tier 1 (1a, 1b, 2, 3), **механические находки шагов 1.7, 1.7b, 1.7c** и **результат архитектурного анализа Tier 2 (шаг 2.5)** в один список замечаний.
-- Дедуплицировать по ключу «файл:строка:категория» (одно и то же место — одно замечание). Батчи 1a и 1b пересекаются по файлам — дедупликация особенно важна.
+- Дедуплицировать по ключу `(file, anchor_hash, ap_id)` (см. review/SKILL.md шаг 4.2). Батчи 1a и 1b пересекаются по файлам — дедупликация особенно важна. При дубликатах — оставить finding с большим `risk_score`.
+- Сортировка findings — по `risk_score` desc.
 - Сохранить атрибут **kind** (functional / style / release-hygiene / architecture) у каждого замечания для шага 3 и 4.
 - Сохранять категории **empty-unused**, **empty-body**, **empty-handler** у замечаний — они используются в секции отчёта «Пустые процедуры и функции» и при формировании задач (шаг 4).
 - Замечания из Tier 2 маркировать `kind=architecture`.
+
+### 2.6 Обработка Investigation Request (light)
+
+Если в ответе любого reviewer-батча (1a/1b/2/3) есть секция `## Investigation Request`:
+
+- Залогировать в Summary отчёта (шаг 3): «Contract resolution needed for N sources».
+- В предрелизе **не** запускать полноценный Investigation Loop. Вместо этого — warning: «Рекомендуется отдельный `/review --full <scope>` для резолва контрактов до релиза».
+- Сохранить список в `reports/prerelease-review-<scope>-YYYY-MM-DD-unresolved-contracts.md`.
 
 ---
 
@@ -340,7 +425,7 @@ rg -i "//.*\b(fail-fast|feature.toggle|workaround|fallback|downstream|re-raise|f
 
 **Дата:** [дата]
 **Scope:** [full-extension: «N файлов (A: n, B: n, C: n), M процедур/функций» | change-scoped: «change-scoped (<change-name>), Tier 1: K файлов из V задач [x]; Review Boundaries (diff-focused по процедурам, шаг 1.3b); A/B/C по этим файлам; Tier 2: всё расширение»]
-**Режим:** предрелизный (Tier 1: code review + Tier 2: architecture review; эскалация: LOW→MEDIUM, MEDIUM→HIGH для kind=functional, release-hygiene и style — код заказчику)
+**Режим:** предрелизный (Tier 1: code review + Tier 2: architecture review)
 **Стандарты:** .cursor/docs/1c-coding-standards.md (rules 1-22), вендорские (1c-vendor-standards, .cursor/docs/standard/ при необходимости), [спецификация расширения]
 
 ### Файлы в scope
@@ -352,26 +437,31 @@ _При `full-extension` эту секцию не включать._ При `cha
 
 ### Сводка
 
-| Уровень  | functional | release-hygiene | architecture | style |
-|----------|------------|----------------|--------------|-------|
-| CRITICAL | N          | —              | —            | —     |
-| HIGH     | N          | N              | N            | N     |
-| MEDIUM   | N          | N              | N            | N     |
-| LOW      | N          | N              | N            | N     |
+| Уровень  | functional | release-hygiene | architecture | style | max risk_score |
+|----------|------------|----------------|--------------|-------|----------------|
+| CRITICAL | N          | —              | —            | —     |                |
+| HIGH     | N          | N              | N            | N     |                |
+| MEDIUM   | N          | N              | N            | N     |                |
+| LOW      | N          | N              | N            | N     |                |
 
-(Эскалация: LOW→MEDIUM, MEDIUM→HIGH для kind=functional, release-hygiene и style — код предназначен заказчику. kind=style помечается тегом [style] и эскалируется так же, как functional/release-hygiene. kind=architecture — кросс-модульные замечания Tier 2; уровни по отчёту explorer, в эскалацию style/functional не включаются.)
+(Примечание: агент выполняет эскалацию сам по `Prerelease escalation` из AP-каталога. kind=architecture — кросс-модульные замечания Tier 2; уровни по отчёту explorer.)
+
+**Top-risk items:**
+1. `AP-XXX` `risk=5.0` `ProcedureName`
+2. `AP-YYY` `risk=4.5` `ProcedureName`
+3. `AP-ZZZ` `risk=4.2` `ProcedureName`
 
 ### CRITICAL — блокеры релиза
 
-- **`файл.bsl:строка`** — [Категория]  
+- **`файл.bsl:строка`** — [Категория] `risk=<score>`
   Проблема: описание.  
   Рекомендация: что сделать.
 
 ### HIGH — исправить до релиза
 
-- **functional:** ...
-- **release-hygiene:** ...
-- **[style]:** ...
+- **functional:** ... `risk=<score>`
+- **release-hygiene:** ... `risk=<score>`
+- **[style]:** ... `risk=<score>`
 
 ### MEDIUM — желательно исправить
 
@@ -420,7 +510,8 @@ _При `full-extension` эту секцию не включать._ При `cha
 
 ### Итог
 
-[Готов к релизу / Не готов к релизу]
+**Release verdict:** [READY / BLOCKED_BY_CRITICAL / BLOCKED_BY_RISK / NEEDS_CONTRACT_RESOLUTION]
+(READY — нет CRITICAL, нет `risk_score ≥ 4.0`, нет `contract-compensating-try` / `AP-032` без Evidence)
 
 Блокеры (CRITICAL): [список или «нет»]
 Обязательны до релиза (HIGH functional): [список или «нет»]
@@ -449,9 +540,9 @@ _При `full-extension` эту секцию не включать._ При `cha
 - Да, дополнить tasks.md
 - Нет, только отчёт
 
-**Если «Да»:** отредактировать `change_dir/tasks.md` по правилам группировки из блока **«3. Сформировать tasks.md по правилам»** (ниже), без создания нового каталога change. Сохранить отчёт в `change_dir/reports/prerelease-review-ГГГГ-ММ-ДД.md` (если каталога `reports/` нет — создать).
+**Если «Да»:** отредактировать `change_dir/tasks.md` по правилам группировки из блока **«3. Сформировать tasks.md по правилам»** (ниже), без создания нового каталога change. Сохранить отчёт в `change_dir/reports/prerelease-review-ГГГГ-ММ-ДД.md` (если каталога `reports/` нет — создать) и рядом `...-reasoning.md`.
 
-**Если «Нет, только отчёт»:** сохранить отчёт в `change_dir/reports/prerelease-review-ГГГГ-ММ-ДД.md` или в `temp/reports/prerelease-review-<расширение>-<change-slug>-ГГГГ-ММ-ДД.md` по выбору пользователя.
+**Если «Нет, только отчёт»:** сохранить отчёт в `change_dir/reports/prerelease-review-ГГГГ-ММ-ДД.md` (и `...-reasoning.md`) или в `temp/reports/prerelease-review-<расширение>-<change-slug>-ГГГГ-ММ-ДД.md` (и `...-reasoning.md`) по выбору пользователя.
 
 ### 4B. `review_mode = full-extension` **или** `change-scoped` с **`change_in_archive = true`**
 
@@ -513,7 +604,7 @@ openspec new change "prerelease-fix-<расширение-kebab>" --schema prere
    - [ ] [MEDIUM] [architecture] Описание (Tier 2) — ...
    ```
 
-4. Сохранить отчёт ревью в `openspec/changes/prerelease-fix-<расширение>/reports/prerelease-review-ГГГГ-ММ-ДД.md`.
+4. Сохранить отчёт ревью в `openspec/changes/prerelease-fix-<расширение>/reports/prerelease-review-ГГГГ-ММ-ДД.md` (и `...-reasoning.md`).
 
 5. Сообщить пользователю:
    - Название созданного change.
@@ -533,15 +624,18 @@ openspec new change "prerelease-fix-<расширение-kebab>" --schema prere
 - **Change-scoped: после tasks + git список файлов пуст**: предупредить; предложить **`full-extension`** или СТОП.
 - **Change-scoped: пути из задач не под `cfe/<расширение>/`**: шаг 1.3a — AskUserQuestion об включении cf/cfe в scope; зафиксировать решение в отчёте.
 - **Замечаний нет при `change-scoped`**: шаг 4 не применять; отчёт сохранить в `change_dir/reports/` или `temp/reports/` по согласованию с пользователем.
+- **Linter недоступен**: warning в Summary, продолжить ревью.
+- **Reviewer выдал `prompt_contract_version mismatch`**: warning в Summary, продолжить (fail-open).
+- **`## Investigation Request` непуст**: залогировать warning, сохранить список в отдельный файл (шаг 2.6).
 
 ---
 
 ## Интеграция
 
 - **Режимы:** `full-extension` (по умолчанию, обратная совместимость) и **`change-scoped`** (второй аргумент — имя каталога ЗНИ): Tier 1 и механика 1.7–1.7c по `change_files` + **Review Boundaries** (шаг 1.3b, diff-focused по изменённым процедурам); фильтр строк в 1.7/1.7b по границам; Tier 2 по полному каталогу расширения (`extension_all_bsl`); шаг 4A/4B — см. выше.
-- **Tier 1 (Code Review):** `onec-code-reviewer` v1.6 с поддержкой `mode=prerelease`, категориями 1-15 и новыми проверками (parameter mutation, magic constants, mixed responsibilities, prefix consistency, excessive logging).
+- **Tier 1 (Code Review):** `onec-code-reviewer` v3.0 (Phase 0 Intent/Contract/Knowledge, Phase 2.5 Попытка+Defensive, Phase 3.5 self-review, risk model, Main+Appendix). Передаваемые evidence-блоки: Version contract / Whitelist & Mandatory / Linter Signals / Prior Findings History / Architectural Context / Review Boundaries / Resolved Contracts (если активирован contract resolution).
 - **Tier 2 (Architecture Review):** `onec-code-explorer` — кросс-модульный анализ (error strategy, implicit contracts, type-dispatch, semantic duplication, scope creep). Запускается параллельно с Tier 1. Только в prerelease.
-- Стандарты кода: `.cursor/docs/1c-coding-standards.md` v1.4 (rules 1-22, включая rule 21 Parameter Integrity и rule 22 No Duplicated Literals).
+- Стандарты кода: `.cursor/docs/1c-coding-standards.md` v1.4 (rules 1-22, включая rule 21 Parameter Integrity и rule 22 No Duplicated Literals). AP-каталог: `.cursor/rules/bsl-antipatterns.mdc` и `.cursor/docs/antipatterns/bsl-antipatterns.md`.
 - Стандарты вендора и навигация: `AGENTS.md` → секция «Стандарты вендора 1С»; `.cursor/docs/standard/` (1c-standards-navigator.md, std-*.md) и `.cursor/skills/1c-vendor-standards/SKILL.md` — единый набор для предрелизной проверки.
 - Если после ревью обнаружены архитектурные замечания (новые объекты, изменение API, структуры хранения) — не создавать задачи writer, остановиться и показать пользователю.
 - Отчёт сохраняется согласно `preserve-subagent-reports.mdc`.

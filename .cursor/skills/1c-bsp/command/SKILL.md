@@ -173,6 +173,6 @@ If procedure already exists — add `ElsIf` branch.
 6. If handler (`ExecuteCommand` / `Print`) already exists — add branch, do not duplicate the procedure
 7. Use tabs for indentation
 
-## MCP Integration
+## Поиск в репозитории
 
-Use `ssl_search` MCP tool to verify SSL method names. Use `codesearch` to find existing handler patterns in the codebase.
+Используй поиск по репозиторию (Grep/SemanticSearch) для проверки имён методов БСП и нахождения существующих паттернов обработчиков в кодовой базе.

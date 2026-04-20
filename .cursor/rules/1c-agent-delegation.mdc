@@ -59,7 +59,7 @@ Architect может рекомендовать новые объекты в des
 
 | Тип задачи | Агент | Обязательно |
 |------------|-------|-------------|
-| Написание/правка BSL | **onec-code-writer** | Да |
+| Написание/правка BSL | **onec-code-writer** | Да (Требования к промпту writer — `.cursor/agents/onec-code-writer.md → INPUT CONTRACT`) |
 | Ревью после правок | **onec-code-reviewer** | Да, задача НЕ завершена до ревью |
 | Архитектура (не точечная правка) | **onec-code-architect** (primary) / **onec-code-architect-2nd** (fallback) | Да, до реализации. Триггеры — `architect-gate.mdc` |
 | Исследование 3+ модулей | **onec-code-explorer** | Рекомендуется |
@@ -105,7 +105,7 @@ Workflow: прямая правка (StrReplace) + Grep-верификация +
 
 ## АВТО-ИСПРАВЛЕНИЕ РЕВЬЮ
 
-Все кодовые замечания (critical/high/medium/low) → автоматически writer с замечаниями → повторный reviewer (макс. 2 итерации).
+Все кодовые замечания (critical/high/medium/low) → автоматически writer с замечаниями → повторный reviewer. Макс. 2 итерации — согласовано с Phase 7 агента writer.
 Архитектурные замечания (новый объект, API, структура хранения, RLS) → СТОП, к пользователю.
 
 **Без прямого StrReplace.** Все кодовые замечания — через writer. Оркестратор НЕ исправляет замечания ревью напрямую (StrReplace), даже если правка кажется «однострочной». Spot-check corrections после writer — тоже через writer.
@@ -181,4 +181,4 @@ Investigation loop (резолв контрактов) запускается **
 
 ---
 
-**Last updated**: 2026-04-19 | **Version**: 3.10 | **Changes**: HALT-строка запрета `explore`/`generalPurpose` для 1С переформулирована с явной отсылкой к **Task Pre-call Checklist** (`tool-name-guard.mdc`) — единая точка истины для предвызывной проверки параметров Task
+**Last updated**: 2026-04-20 | **Version**: 3.11 | **Changes**: HALT-строка запрета `explore`/`generalPurpose` для 1С переформулирована с явной отсылкой к **Task Pre-call Checklist** (`tool-name-guard.mdc`) — единая точка истины для предвызывной проверки параметров Task. Добавлена сноска на INPUT CONTRACT и согласован iteration limit.

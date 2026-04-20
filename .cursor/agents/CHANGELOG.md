@@ -47,7 +47,7 @@
 ## [1.1] - 2026-02-27
 
 ### Changed
-- All agents: BSL LSP marked as NOT_CONNECTED with MCP fallback
+- All agents: BSL LSP marked as NOT_CONNECTED with fallback to session tools
 - All agents: RLM marked as NOT_CONNECTED
 - sdd-workflow.mdc: reduced to navigation document
 - onec-code-explorer: added depth control, report levels, anti-patterns

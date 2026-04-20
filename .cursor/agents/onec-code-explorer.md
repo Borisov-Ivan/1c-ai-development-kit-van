@@ -222,35 +222,18 @@ Breadth-first for initial discovery, depth-first for specific call chains.
   - Performance patterns
 ```
 
-### MCP Servers
+### Справка и поиск по коду
 
 ```yaml
-Metadata search:
-  user-PROJECT-codemetadata-metadatasearch (project-specific MCP)("Справочники.Клиенты.Реквизиты")
-  user-PROJECT-graph (project-specific MCP)-search_metadata("Справочник Клиенты")
-  user-mcparqa24-codemetadata-metadatasearch("Клиенты")
-
-Code search:
-  user-PROJECT-codemetadata (project-specific MCP)-codesearch("функция или паттерн")
-  user-mcparqa24-codemetadata-codesearch("ПолучитьДанные")
-  user-mcparqa24-graph-search_code("расчет скидки", search_type="semantic")
-
-Help search:
-  user-PROJECT-codemetadata (project-specific MCP)-helpsearch("описание функциональности")
-  user-mcparqa24-codemetadata-helpsearch("работа с документами")
-
-Graph queries:
-  user-PROJECT-graph (project-specific MCP)-answer_metadata_question("Какие объекты связаны с Клиентами?")
-  user-mcparqa24-graph-answer_metadata_question("Где используется реквизит ИНН?")
-
-Business search:
-  user-PROJECT-graph (project-specific MCP)-business_search("справочник для хранения клиентов")
-  user-mcparqa24-graph-business_search("документ продажи")
-
-Fallback (если project-specific MCP недоступен):
+Поиск по репозиторию:
   - Grep(pattern="ИмяПроцедуры", type="bsl") — поиск по коду
   - Glob(glob_pattern="**/ИмяМодуля/**/*.bsl") — поиск файлов
   - SemanticSearch — когда точное имя неизвестно
+  - Read — чтение модулей и XML-метаданных
+
+Опциональные инструменты сессии (если подключены):
+  - project-specific MCP серверы для поиска по метаданным и коду
+  - RLM интеграция для загрузки/сохранения контекста
 ```
 
 ### RLM Integration (когда подключен)
@@ -326,8 +309,9 @@ Before reading any code:
    - Search for procedures: Grep("Процедура.*[Feature]")
 
 3. Identify main objects:
-   - Metadata search: user-PROJECT-codemetadata-metadatasearch (project-specific MCP)("[Feature]")
-   - Graph search: user-PROJECT-graph (project-specific MCP)-search_metadata("[Feature]")
+   - Search metadata XML files: Glob("**/[Feature]/*.xml")
+   - Search references: Grep("[Feature]")
+   - Если в сессии доступны project-specific инструменты метаданных — использовать их.
 
 4. Если RLM доступен: Load context from RLM (rlm_route_context, rlm_search_facts).
    Иначе: пропустить.
@@ -358,8 +342,8 @@ Before reading any code:
 
 ```yaml
 1. Identify patterns:
-   - Similar implementations: user-PROJECT-codemetadata (project-specific MCP)-codesearch("паттерн")
-   - БСП usage: user-1c-ssl-ssl_search("функциональность")
+   - Similar implementations: Grep / SemanticSearch("паттерн")
+   - БСП usage: поиск по подсистемам БСП в репозитории
    - Architecture patterns: Document in notes
 
 2. Compare with best practices:
@@ -709,7 +693,7 @@ Output: Compact report
 5. ✅ **Note dependencies** - Internal and external
 6. ✅ **Identify issues** - Technical debt, anti-patterns
 7. ✅ **Use RLM when available** - Load and save context (NOT_CONNECTED by default)
-8. ✅ **Use MCP** - Search metadata and code; use Grep/Glob/SemanticSearch if project MCP unavailable
+8. ✅ **Use Search Tools** - Search metadata and code using Grep/Glob/SemanticSearch/Read
 9. ✅ **Be thorough** - Deep understanding, not surface
 10. ✅ **Be practical** - Actionable insights
 
@@ -733,5 +717,5 @@ Output: Compact report
 
 **Last updated**: 2026-03-08  
 **Version**: 2.0  
-**Source**: AndreevED/1c-ai-feature-dev-workflow (1c-code-explorer) + improvements (RLM, MCP, BSL LSP)  
-**Changes v2.0**: Task Classification (Focused/Hypothesis/Full), Phase 0 (caller context), Extension Analysis (cf/cfe), Verified/Hypotheses format, anti-pattern refinement, realistic examples
+**Source**: AndreevED/1c-ai-feature-dev-workflow (1c-code-explorer) + improvements (RLM, BSL LSP)  
+**Changes v2.1**: Убрана жесткая зависимость от MCP, приоритет на встроенные инструменты поиска.

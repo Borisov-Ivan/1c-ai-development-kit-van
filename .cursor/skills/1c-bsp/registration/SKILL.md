@@ -201,6 +201,6 @@ EndProcedure
 - Add a template: use configurator or project scripts for layout management.
 - Build EPF: use Конфигуратор (Конфигурация → Загрузить конфигурацию из файлов).
 
-## MCP Integration
+## Поиск в репозитории
 
-Use `ssl_search` MCP tool to find SSL module methods for BSP registration and verify correct API method names. Use `search_metadata` to verify target metadata object names.
+Используй поиск по репозиторию (Grep/SemanticSearch) для нахождения методов БСП для регистрации и проверки имён API. Используй Glob/Read для проверки имён целевых объектов метаданных.

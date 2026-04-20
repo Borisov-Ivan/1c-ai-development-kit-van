@@ -200,6 +200,6 @@ Templates — at the end of Rights.xml, after all `<object>` blocks:
 
 Background jobs do not require Interactive/View/Edit rights or configuration rights (ThinClient, WebClient, etc.) — only programmatic rights (Read, Insert, Update, Delete, Posting).
 
-## MCP Integration
+## Поиск в репозитории
 
-Use `search_metadata` MCP tool to verify metadata object names when defining rights. Use `ssl_search` to find SSL role patterns.
+Используй поиск по репозиторию (Glob/Read) для проверки имён объектов метаданных при определении прав. Используй Grep/SemanticSearch для нахождения паттернов ролей БСП.

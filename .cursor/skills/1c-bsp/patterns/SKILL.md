@@ -5,7 +5,7 @@ description: "SSL/БСП subsystems guidance. Use when working with standard lib
 
 # 1C SSL/БСП Subsystems Reference
 
-This skill provides guidance for using SSL subsystems via `ssl_search` MCP tool.
+This skill provides guidance for using SSL subsystems via repository search tools (Grep/SemanticSearch).
 
 For basic SSL usage (attribute access, user messages) — see `.cursor/docs/1c-coding-standards.md`.
 
@@ -28,11 +28,11 @@ Invoke this skill when:
 
 When implementing new functionality:
 
-1. **First, search SSL** — use `ssl_search` MCP tool with keywords describing your need
-   - Example: `ssl_search("фоновое задание прогресс")`
-   - Example: `ssl_search("копирование структуры")`
+1. **First, search SSL** — use Grep/SemanticSearch with keywords describing your need
+   - Example: `Grep("фоновое задание прогресс")`
+   - Example: `SemanticSearch("копирование структуры")`
 
-2. **Check existing patterns** — use `codesearch` to find how similar tasks are solved in the codebase
+2. **Check existing patterns** — use Grep/SemanticSearch to find how similar tasks are solved in the codebase
 
 3. **Use SSL if available** — it's tested, optimized, and maintained
 

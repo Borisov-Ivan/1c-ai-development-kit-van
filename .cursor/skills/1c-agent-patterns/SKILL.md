@@ -173,6 +173,7 @@ Orchestrator implementation gate: если промпт описывает ко�
 
 - Явный запрос пользователя («используй gemini», «используй opus»).
 - Документированный fallback (`onec-code-architect` недоступен → вызов `onec-code-architect-2nd`).
+- Second-level fallback: если `onec-code-architect-2nd` (Gemini) тоже недоступен → вызов `onec-code-architect-2nd` с `model="default"`.
 
 **Чего нельзя:**
 
@@ -310,7 +311,9 @@ Task(
 ```
 Task(
   description="Спроектировать [feature]",
-  prompt="Спроектируй архитектуру для [feature].
+  prompt="mode=design tier=[simple|medium|complex|critical]
+         
+         Спроектируй архитектуру для [feature].
          
          Артефакты: [пути к proposal.md, design.md если есть]
          Результат исследования: [резюме от explorer]
@@ -322,7 +325,8 @@ Task(
          не подошли при выборе уровня 3 или 4).
          
          Создай план с этапами реализации (атомарные, с критериями приемки).
-         Используй Mermaid диаграммы.",
+         Используй Mermaid диаграммы.
+         Обязательно добавь YAML front-matter, Evidence для каждого паттерна и Test Scenarios.",
   subagent_type="onec-code-architect" // или "onec-code-architect-2nd" при fallback
 )
 ```
@@ -332,7 +336,9 @@ Task(
 ```
 Task(
   description="Ревью плана [feature]",
-  prompt="Проверь design.md для [feature].
+  prompt="mode=plan-review review_mode=peer
+         
+         Проверь design.md для [feature].
          
          Артефакты: [пути к proposal.md, design.md, tasks.md]
          
@@ -340,7 +346,8 @@ Task(
          чёткость критериев приемки, правильность зависимостей.
          Все задачи на verified facts? Если на hypotheses — есть ли задача верификации?
          
-         Если проблемы — опиши и предложи исправления.",
+         Если проблемы — опиши и предложи исправления.
+         Обязательно добавь YAML front-matter.",
   subagent_type="onec-code-architect"
 )
 ```
@@ -350,7 +357,9 @@ Task(
 ```
 Task(
   description="Глубокий анализ [область]",
-  prompt="Проанализируй результаты исследования кода.
+  prompt="mode=deep-analysis
+         
+         Проанализируй результаты исследования кода.
          
          Отчёт explorer: [путь к exploration-*.md]
          Контекст задачи: [из брифа / proposal]
@@ -370,6 +379,7 @@ Task(
          
          Результат: дополненный анализ (gap analysis,
          верифицированные контракты, рекомендации).
+         Обязательно добавь YAML front-matter.
          Сохранить в reports/deep-analysis-YYYY-MM-DD.md.",
   subagent_type="onec-code-architect"
 )
@@ -382,8 +392,10 @@ Used by `/opsx:verify` step 7.7 — MANDATORY in every pre-apply verification. T
 ```
 Task(
   description="Ревью готовности задач [change-name]",
-  prompt="## Задача
-
+  prompt="mode=task-readiness
+         
+         ## Задача
+         
          Оцени готовность ЗНИ `<name>` к реализации.
          Не детали кода — целостная оценка: можно ли по этим
          артефактам реализовать ЗНИ силами агентов (writer,
@@ -530,8 +542,10 @@ Used by `/opsx:verify` in slice-transition mode (after a slice is accepted, befo
 ```
 Task(
   description="Slice transition review [change-name]",
-  prompt="## Задача
-
+  prompt="mode=slice-transition
+         
+         ## Задача
+         
          Оцени актуальность задач и сценария следующего среза
          (S<N+1>) ЗНИ `<name>` после принятия среза S<N>.
 
@@ -607,8 +621,10 @@ Used by `/opsx:verify` in mode `migrate-to-slices` (автодетект по о
 ```
 Task(
   description="Slice restructuring [change-name]",
-  prompt="## Задача
-
+  prompt="mode=slice-restructuring
+         
+         ## Задача
+         
          Перестрой tasks.md ЗНИ `<name>` в структуру вертикальных
          срезов (см. .cursor/rules/vertical-slices.mdc).
          Исходный tasks.md может быть плоским, либо организован
@@ -702,7 +718,9 @@ Used BEFORE task decomposition: architect produces the `## Slices` section of `d
 ```
 Task(
   description="Декомпозиция на срезы [feature]",
-  prompt="Декомпозируй ЗНИ на вертикальные пользовательские срезы.
+  prompt="mode=slice-decomposition
+         
+         Декомпозируй ЗНИ на вертикальные пользовательские срезы.
 
          Артефакты:
          - proposal: [путь]
@@ -778,7 +796,9 @@ Used AFTER slice decomposition: architect produces `tasks.md` with H1 slice head
 ```
 Task(
   description="Декомпозиция задач по срезам [feature]",
-  prompt="Декомпозируй design.md на атомарные задачи, сгруппированные
+  prompt="mode=task-decomposition
+         
+         Декомпозируй design.md на атомарные задачи, сгруппированные
          по срезам (`## Slices` из design).
 
          Артефакты:
@@ -862,7 +882,11 @@ Task(
          Только правка существующих .bsl, без новых файлов и метаданных.
          При отсутствии нужного модуля/объекта — СТОП с указанием что добавить.
 
-         ## 4. GATES
+         ## 4. INPUT CONTRACT
+         [Вставить блок ## Project paths из project-paths.mdc]
+         [Вставить блок ## BSL_LSP Status: connected|not_connected]
+
+         ## 5. GATES
          [Вставить блок DATA_CONTRACT_GATE]
          [Вставить блок INTEGRATION_CONTRACT_GATE]
          [Вставить блок EXISTING_MECHANISM_GATE]
@@ -871,18 +895,26 @@ Task(
          [Вставить блок EXTENSION_GUARD — если файл в cfe/]
          [Вставить блок CONTEXT_SAFETY — если файл в cfe/]
 
-         ## 5. СТАНДАРТЫ
+         ## 6. СТАНДАРТЫ
          Следуй .cursor/docs/1c-coding-standards.md.
 
-         ## 6. САМОКОНТРОЛЬ
+         ## 7. САМОКОНТРОЛЬ
          Перед завершением проверь:
          - Каждая защитная проверка обоснована контрактом (не компенсация незнания)
          - Каждая Попытка обоснована внешним фактором (rule 20); нет silent degradation
-         - Код вне #Вставка/#Удаление не изменён (для &ИзменениеИКонтроль)
+         - Код вне #Вставка/#Удаление не изменён (для &ИзменениеИКонтроль); используй rollback protocol из onec-code-writer.md → Phase 5 п.6 при обнаружении нарушения
          - Нет дублирования логики вызываемых функций
          - Контекст выполнения корректен (клиент/сервер)
          - Нет инвертированных ранних выходов перед единственным действием (rule 23)
-         - Для новых функций/процедур: параметры не перезаписываются (AP-007); при нормализации ввести локальную переменную",
+         - Для новых функций/процедур: параметры не перезаписываются (AP-007); при нормализации ввести локальную переменную
+
+         ## 8. OUTPUT REQUIREMENTS
+         В финальном ответе обязательны блоки:
+         - ## Changes (с полными code fences или diff)
+         - ## Gate Results (G14, G16, G18, G19, G20)
+         - ## Self-Assessment (Readability/Correctness/Standards: 1-5)
+         - ## Key Decisions
+         - ## Next Steps",
   subagent_type="onec-code-writer"
 )
 ```
@@ -913,7 +945,11 @@ Task(
          ## 4. ОГРАНИЧЕНИЯ
          Только правка существующих .bsl, без новых файлов и метаданных.
 
-         ## 5. GATES
+         ## 5. INPUT CONTRACT
+         [Вставить блок ## Project paths из project-paths.mdc]
+         [Вставить блок ## BSL_LSP Status: connected|not_connected]
+
+         ## 6. GATES
          [Вставить блок DATA_CONTRACT_GATE]
          [Вставить блок INTEGRATION_CONTRACT_GATE]
          [Вставить блок EXISTING_MECHANISM_GATE]
@@ -922,18 +958,26 @@ Task(
          [Вставить блок EXTENSION_GUARD — если файл в cfe/]
          [Вставить блок CONTEXT_SAFETY — если файл в cfe/]
 
-         ## 6. СТАНДАРТЫ
+         ## 7. СТАНДАРТЫ
          Следуй .cursor/docs/1c-coding-standards.md.
 
-         ## 7. САМОКОНТРОЛЬ
+         ## 8. САМОКОНТРОЛЬ
          Перед завершением проверь:
          - Фикс устраняет корневую причину, а не маскирует симптом
          - Каждая защитная проверка обоснована контрактом (не компенсация незнания)
          - Каждая Попытка обоснована внешним фактором (rule 20); нет silent degradation
-         - Код вне #Вставка/#Удаление не изменён (для &ИзменениеИКонтроль)
+         - Код вне #Вставка/#Удаление не изменён (для &ИзменениеИКонтроль); используй rollback protocol из onec-code-writer.md → Phase 5 п.6 при обнаружении нарушения
          - Нет дублирования логики вызываемых функций
          - Нет инвертированных ранних выходов перед единственным действием (rule 23)
-         - Для новых функций/процедур: параметры не перезаписываются (AP-007); при нормализации ввести локальную переменную",
+         - Для новых функций/процедур: параметры не перезаписываются (AP-007); при нормализации ввести локальную переменную
+
+         ## 9. OUTPUT REQUIREMENTS
+         В финальном ответе обязательны блоки:
+         - ## Changes (с полными code fences или diff)
+         - ## Gate Results (G14, G16, G18, G19, G20)
+         - ## Self-Assessment (Readability/Correctness/Standards: 1-5)
+         - ## Key Decisions
+         - ## Next Steps",
   subagent_type="onec-code-writer"
 )
 ```
@@ -945,7 +989,9 @@ Used by `/opsx:debug` step 5.5 when Architect Gate triggers fire. The architect 
 ```
 Task(
   description="Ревью качества фикса [краткое описание]",
-  prompt="## Контекст
+  prompt="mode=fix-quality
+         
+         ## Контекст
          Change: [name]. RCA: [путь к debug.md или секция в нём].
          Отчёты: [пути к trace-analysis-*.md, exploration-*.md]
 
@@ -1005,18 +1051,32 @@ Task(
          Устрани кодовые замечания ревью в файле [путь].
 
          ## 2. ЗАМЕЧАНИЯ (MUST_FIX)
-         Для каждого замечания:
+         Для каждого замечания (отсортированы по risk_score desc — начинай с верха списка):
          - ID: [порядковый номер]
+         - AP: [AP-NNN или Phase0-TYPE / release-hygiene-TAG]
          - Type: CODE
-         - Severity: [HIGH/MEDIUM/LOW]
+         - Severity: [CRITICAL/HIGH/MEDIUM/LOW]
+         - Risk: [risk_score + оси: scope/blast_radius/frequency/confidence]
          - Procedure: [имя процедуры]
          - Anchor: [фрагмент кода для поиска]
          - Issue: [описание]
          - Fix: [рекомендация ревьювера]
 
+         Правила приоритизации (новая модель риска из onec-code-reviewer v3.0):
+         - Начинай с верхних findings (high risk_score) — они несут больший совокупный риск
+           с учётом scope (blast-radius вовне), blast_radius (от cosmetic до security),
+           frequency (hot-path > rare) и confidence.
+         - Severity (CRITICAL/HIGH/MEDIUM/LOW) — база, но не единственный критерий порядка.
+         - Recurrent tag (если есть) — finding встречался в предыдущих ревью того же scope;
+           уделить особое внимание root cause, а не симптомам.
+
          [Список замечаний с Action=MUST_FIX и Type=CODE]
 
-         ## 2a. RESOLVED CONTRACTS (если переданы оркестратором)
+         ## 3. INPUT CONTRACT
+         [Вставить блок ## Project paths из project-paths.mdc]
+         [Вставить блок ## BSL_LSP Status: connected|not_connected]
+
+         ## 3a. RESOLVED CONTRACTS (если переданы оркестратором)
          [Вставить блок ## Resolved Contracts из reports/resolved-contract-*.md]
 
          Как использовать:
@@ -1029,44 +1089,72 @@ Task(
          - Если замечание ревьювера касается контракта из блока —
            использовать Evidence и Keys для корректной правки.
 
-         ## 3. ОГРАНИЧЕНИЯ
+         ## 4. ОГРАНИЧЕНИЯ
          - Правь только по перечисленным замечаниям.
          - Не менять логику за пределами замечаний.
          - Если замечание требует вынос в новую функцию — проверь
            AP-007 (не перезаписывать параметры: ввести локальную
            переменную).
 
-         ## 4. GATES
+         ## 5. GATES
          [Вставить блок DATA_CONTRACT_GATE]
          [Вставить блок INTEGRATION_CONTRACT_GATE]
          [Вставить блок CONDITIONAL_ACTION_GATE]
          [Вставить блок ORCHESTRATOR_IMPLEMENTATION_GATE]
          [Вставить блок EXTENSION_GUARD — если файл в cfe/]
 
-         ## 5. СТАНДАРТЫ
+         ## 6. СТАНДАРТЫ
          Следуй .cursor/docs/1c-coding-standards.md.
 
-         ## 6. САМОКОНТРОЛЬ
+         ## 7. САМОКОНТРОЛЬ
          - Каждое замечание из списка адресовано (или обосновано, почему нет)
          - Для новых функций: параметры не перезаписываются (AP-007)
          - Для НСтр: кавычки внутри строки экранированы двойными
-         - Нет побочных изменений за пределами замечаний",
+         - Нет побочных изменений за пределами замечаний
+         - Код вне #Вставка/#Удаление не изменён (для &ИзменениеИКонтроль); используй rollback protocol из onec-code-writer.md → Phase 5 п.6 при обнаружении нарушения
+
+         ## 8. OUTPUT REQUIREMENTS
+         В финальном ответе обязательны блоки:
+         - ## Changes (с полными code fences или diff)
+         - ## Gate Results (G14, G16, G18, G19, G20)
+         - ## Self-Assessment (Readability/Correctness/Standards: 1-5)
+         - ## Key Decisions
+         - ## Next Steps",
   subagent_type="onec-code-writer"
 )
 ```
 
 ### Reviewer (ревью кода)
 
+**Контракт v3:** reviewer агент v3.0 (`.cursor/agents/onec-code-reviewer.md`) сам читает AP-каталог `.cursor/rules/bsl-antipatterns.mdc`, применяет prerelease-эскалацию и risk-модель. Оркестратор передаёт **evidence-блоки** (linter signals, whitelist, prior history, architectural context, boundaries, resolved contracts), а не готовые findings. См. шаги 1.6–2.2 в `.cursor/skills/review/SKILL.md`.
+
 ```
 Task(
   description="Ревью кода [feature]",
   prompt="Проверь качество кода для [feature].
 
+         expected_reviewer_prompt_contract_version: 3
+
          Файлы: [список изменённых .bsl]
          Стандарты: .cursor/docs/1c-coding-standards.md
-         Диагностики линтера: [вывод ReadLints или 'линтер не выявил ошибок']
          Base-файл (для &ИзменениеИКонтроль): [путь к base в cf/ или 'не применимо']
-         [Если оркестратор передал блок ## Resolved Contracts — включить его сюда. Использовать для Phase 2.5 Defensive Checks Audit: для каждого источника данных из Contract Map, для которого есть запись в Resolved Contracts, в колонке Contract verified? указать resolved-fixed или resolved-dynamic по полю Contract записи. resolved-fixed + наличие defensive check (ТипЗнч/Свойство) → AP-004. resolved-dynamic + корректная минимальная проверка → OK.]
+
+         ## Linter Signals (evidence)
+         [Блок из шага 1.8 review/SKILL.md — таблица диагностик от bsl_lsp_diagnostics / syntax-checker / code-checker; либо 'Linter unavailable: <reason>'. Reviewer обязан дать confirm/dismiss/reclassify для каждой строки.]
+
+         ## Whitelist & Mandatory Controls (from project.md)
+         [Блок из шага 1.6.1 — две таблицы (Whitelist предрелиза, Обязательный контроль) для release-hygiene rules AP-040..AP-043.]
+
+         ## Mandatory Control Signals (evidence)
+         [Опционально — из шага 1.6.2, если есть regex-нарушения. Таблица Rule ID / File:Line / Observed / Expected.]
+
+         ## Prior Findings History
+         [Опционально — из шага 2.1: глоб предыдущих review-<scope-slug>-*.md ≤ 90 дней. Таблица по отчётам. Reviewer для совпадающих findings ставит tag 'recurrent' и повышает риск.]
+
+         ## Architectural Context
+         [Опционально — из design.md / architecture-*.md активного change. Оценивать решения в коде на соответствие контексту.]
+
+         [Если оркестратор передал блок ## Resolved Contracts — включить его сюда. Использовать для Phase 2.5 Defensive Checks Audit: resolved-fixed + guard → AP-004; resolved-dynamic + минимальная проверка → OK.]
 
          [Если оркестратор собрал diff-focused scope — вставить блок ## Review Boundaries целиком (см. `.cursor/skills/review/SKILL.md`, шаг 1.5). При полном ревью (focus=full для всех файлов батча) секцию ## Review Boundaries не вставлять. В смешанном батче — по подзаголовку ### Файл: <path> и Focus: full | diff-focused на каждый файл. Соблюдай Review Boundaries Protocol в onec-code-reviewer.md.]
 
@@ -1096,6 +1184,9 @@ Task(
          Баги, БСП compliance, производительность, безопасность,
          аннотации расширений, структура модуля, документация методов.
          Если линтер выявил ошибки — включить их в категорию critical.
+         Category 9 Code Cleanliness включая log-literal artefacts: имя события ЖР и текст сообщения/СтрШаблон не должны содержать маркеры постановки (S<N>, D<N>, kebab-case change, Decision); отладочный ЗаписьЖурналаРегистрации (Информация/Предупреждение/Примечание) без требования в tasks.md/design.md — удалить или оформить требование. Action: MUST_FIX.
+         Пустые процедуры/функции/обработчики (empty-unused / empty-body / empty-handler) в границах ревью — Action: MUST_FIX (обработчики без привязки к элементу — инструкция правки Form.xml вручную).
+         Если в промпте есть блок ## Mechanical findings (orchestrator) — не дублировать эти строки в findings; при необходимости дополнить контекстом (процедура, вызов).
 
          ## Проверка соблюдения gates (HALT-compliance)
          Проверить, что writer следовал gates из промпта.
@@ -1353,7 +1444,9 @@ Used at archive time when `reports/architecture-*.md` exists and user confirms A
 ```
 Task(
   description="Извлечь ADR из [architecture report]",
-  prompt="Извлеки архитектурные решения из отчёта для создания ADR.
+  prompt="mode=adr-extraction
+         
+         Извлеки архитектурные решения из отчёта для создания ADR.
 
          Отчёт архитектора: [путь к architecture-*.md]
          Design: [путь к design.md]
@@ -1405,6 +1498,28 @@ Task(
 )
 ```
 
+### Architect — multisampling arbiter
+
+Used for Critical tasks after 2-3 parallel design runs.
+
+```
+Task(
+  description="Арбитраж архитектурных решений [feature]",
+  prompt="mode=design
+         
+         Ты выступаешь в роли арбитра. Проведи арбитраж предложенных архитектурных решений.
+         
+         Решение 1: [путь к architecture-run1.md]
+         Решение 2: [путь к architecture-run2.md]
+         
+         Задача:
+         1. Сравни подходы (Alternatives matrix).
+         2. Выбери лучший или синтезируй гибридный.
+         3. Сформируй итоговый Architecture Document (с YAML front-matter, Tier=Critical).",
+  subagent_type="onec-code-architect"
+)
+```
+
 ### Architect — ТЗ quality review (ревью ТЗ по ЗНИ)
 
 Used after generating ТЗ via `/opsx:doc-tz`. Reviews the document against source artifacts for consistency, completeness, and correctness.
@@ -1412,7 +1527,9 @@ Used after generating ТЗ via `/opsx:doc-tz`. Reviews the document against sour
 ```
 Task(
   description="Ревью ТЗ по ЗНИ [name]",
-  prompt="Проведи ревью технического задания по ЗНИ с позиции архитектора
+  prompt="mode=tz-review
+         
+         Проведи ревью технического задания по ЗНИ с позиции архитектора
          целевой системы, не погружённого в проект.
 
          Текст ТЗ:
@@ -1580,7 +1697,7 @@ Task(
 
 ---
 
-**Last updated**: 2026-04-19
-**Version**: 3.2
-**Changes**: Убран остаточный `model=<см. таблицу «Выбор модели для writer»>` из трёх шаблонов writer (Writer generic, Writer — bug fix, Writer — review fix) — согласовано с правилом «model в Task по умолчанию не передавать». Таблица «Частный случай writer» свёрнута в один абзац (все режимы — не передавать, наследование из фронтматтера `onec-code-writer`). См. Task Pre-call Checklist в `.cursor/rules/tool-name-guard.mdc`. (v3.1 — убран `model="fast"` из шаблонов explorer/architect.)
+**Last updated**: 2026-04-20
+**Version**: 3.3
+**Changes**: Добавлены блоки INPUT CONTRACT, OUTPUT REQUIREMENTS и rollback protocol в шаблоны writer.
 **Source**: Extracted from 1c-feature-dev-enhanced v2.2 (Phase 0-8 workflow replaced by OpenSpec)

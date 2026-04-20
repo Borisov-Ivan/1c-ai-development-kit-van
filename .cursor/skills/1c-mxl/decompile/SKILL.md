@@ -48,6 +48,6 @@ The script automatically generates meaningful names:
 
 If a row has empty cells (no parameters/text) and all of them share the same format — that format is recognized as `rowStyle`, and empty cells are excluded from output.
 
-## MCP Integration
+## Поиск в репозитории
 
-Use `search_metadata` MCP tool to find template paths in the configuration. Use `1c-mxl-info` skill to analyze layout structure before decompiling.
+Используй поиск по репозиторию (Glob/Grep) для нахождения путей к макетам в конфигурации. Используй скилл `1c-mxl-info` для анализа структуры макета перед декомпиляцией.

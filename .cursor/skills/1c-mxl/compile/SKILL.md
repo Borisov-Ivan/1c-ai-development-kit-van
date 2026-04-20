@@ -56,6 +56,6 @@ Key rules:
 - Fill type is determined automatically: `param` → Parameter, `text` → Text, `template` → Template
 - `rowspan` — vertical cell merging (rowStyle accounts for occupied cells)
 
-## MCP Integration
+## Поиск в репозитории
 
-Use `templatesearch` MCP tool to find existing layout examples. Use `search_metadata` to verify object names used in parameters.
+Используй поиск по репозиторию (Grep/SemanticSearch) для нахождения примеров существующих макетов. Используй Glob/Read для проверки имён объектов, используемых в параметрах.
