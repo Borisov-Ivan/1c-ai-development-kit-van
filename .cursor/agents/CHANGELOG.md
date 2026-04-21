@@ -1,5 +1,12 @@
 # Changelog — 1C Agent Ecosystem
 
+## [4.2] - 2026-04-21
+
+### Changed (onec-code-reviewer, bsl-antipatterns, openspec/project)
+- `onec-code-reviewer`: расширение release-hygiene набора — AP-040 AI-typography, AP-044 narration, AP-045 date+time.
+- `bsl-antipatterns.mdc`: v4.2, три правила добавлены, полные карточки дописаны в `.cursor/docs/antipatterns/bsl-antipatterns.md`.
+- `openspec/project.md`: активированы три строки обязательного контроля комментариев.
+
 ## [4.1] - 2026-04-19
 
 ### Changed (AP-001, onec-code-reviewer, bsl-antipatterns)

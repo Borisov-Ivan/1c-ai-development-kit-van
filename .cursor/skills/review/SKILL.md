@@ -144,7 +144,7 @@ Baseline: <из п.1.5.1>
 
 ## Шаг 1.6. Whitelist и обязательный контроль (ТОЛЬКО чтение project.md)
 
-**Только чтение `openspec/project.md`** для передачи ревьюверу как evidence. Механические grep-проходы (прошлые 1.6.2/1.6.3/1.6.5/1.6.6) перенесены в агент (AP-040..AP-043 каталога, Phase 2 «Release-hygiene pass»).
+**Только чтение `openspec/project.md`** для передачи ревьюверу как evidence. Механические grep-проходы (прошлые 1.6.2/1.6.3/1.6.5/1.6.6) перенесены в агент (AP-040..AP-045 каталога, Phase 2 «Release-hygiene pass»).
 
 ### 1.6.1 Whitelist и обязательный контроль
 
@@ -168,7 +168,7 @@ Baseline: <из п.1.5.1>
 
 Ревьювер обязан для каждой строки выдать confirm/dismiss/reclassify.
 
-**Прочие grep-эвристики (kebab-case, жаргон, log-literal, empty methods) оркестратор НЕ выполняет.** Они делегированы агенту (AP-040..AP-043 + AP-031 naming) с использованием Intent Map / Contract Map.
+**Прочие grep-эвристики (kebab-case, жаргон, log-literal, empty methods) оркестратор НЕ выполняет.** Они делегированы агенту (AP-040..AP-045 + AP-031 naming) с использованием Intent Map / Contract Map.
 
 ---
 
@@ -432,7 +432,7 @@ Baseline: <из п.1.5.1>
 - **bsl-write-guard / 1c-agent-delegation:** правки `.bsl` только через writer/simplifier; после правок — обязательный reviewer; LINT GATE и API EXISTENCE CHECK; EXTENSION GATE и EXTENSION VERIFICATION при `&ИзменениеИКонтроль`. **Investigation Loop** (шаг 3.5) — multi-iteration (max 3). Формат — секция CONTRACT RESOLUTION в `1c-agent-delegation.mdc`.
 - **Review Focus Boundaries:** при `diff-focused` оркестратор формирует `## Review Boundaries`; reviewer следует Review Boundaries Protocol.
 - **Evidence separation:** все механические проверки (linter, whitelist, mandatory controls, prior history) — **evidence**; вердикты (severity/kind/action/risk) — **reviewer**.
-- **Release-hygiene:** AP-040..AP-043 каталога (не grep оркестратора); reviewer использует Intent Map / Contract Map.
+- **Release-hygiene:** AP-040..AP-045 каталога (не grep оркестратора); reviewer использует Intent Map / Contract Map.
 - **APPLY GATE:** writer и reviewer в `/review` разрешён без `/opsx:apply` — исключение в `.cursor/rules/1c-agent-delegation.mdc` (секция APPLY GATE).
 
 ---
