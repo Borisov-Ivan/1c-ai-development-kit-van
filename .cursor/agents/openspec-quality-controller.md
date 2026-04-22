@@ -73,6 +73,29 @@ For each slice S<N>:
 - The slice ends with marker `<!-- slice-gate: <critérion> -->`. Missing → WARNING `missing-slice-gate-marker`. Empty critérion → SUGGESTION.
 - The acceptance task text describes a concrete user-observable scenario, not just "проверить" / "протестировать". Vague test → SUGGESTION `vague-slice-test`.
 
+### 5b. Acceptance ↔ Scenario Mapping (правило среза 6, Acceptance Scope Tightness)
+
+Source of truth: `.cursor/rules/vertical-slices.mdc` (правило среза 6). Each `S<N>.T<M>` SHALL be a 1:1 mapping to a `#### Scenario:` declared in the slice's `**Связь со spec:**` metadata.
+
+**Algorithm (per slice S<N>):**
+
+1. Collect the set `Scenarios(S<N>)` from the slice's `**Связь со spec:**` line. Parse scenario names inside guillemets (`«…»`) or after explicit `Scenario:` / `сценарий:` markers. Normalise whitespace and lowercase for comparison.
+2. Collect the set `AcceptanceTasks(S<N>)` — all `- [ ] S<N>.T<M>` and `- [x] S<N>.T<M>` lines.
+3. For each `T<M>` extract the trailing reference `(Scenario: «…»)` / `(Scenarios: «…», «…»)`. Multiple scenarios in one `T<M>` are allowed (aggregated acceptance).
+4. Compare:
+
+| Condition | Alert | Severity |
+|---|---|---|
+| `T<M>` references a scenario that is **not** in `Scenarios(S<N>)` but **is** declared in another slice's `**Связь со spec:**` | `acceptance-scenario-duplication` | **WARNING** |
+| `T<M>` has no `(Scenario: …)` reference at all, or references a scenario not found in **any** slice's `**Связь со spec:**` | `acceptance-without-scenario` | **WARNING** |
+| `|AcceptanceTasks(S<N>)| > 2 × |Scenarios(S<N>)|` (including the case `|Scenarios(S<N>)| = 1` and `|AcceptanceTasks(S<N>)| ≥ 3`) | `acceptance-overload` | **SUGGESTION** |
+| A scenario from `Scenarios(S<N>)` is not referenced by **any** `T<M>` of this slice | `scenario-uncovered-by-acceptance` | **WARNING** |
+
+5. For `acceptance-without-scenario`, the recommendation MUST include the row from правило среза 6 («Куда переносить non-scenario проверки»): инвариант → `design.md#Assumptions`; NFR/перф → обычная задача `S<N>.<M>` «верифицировать по коду/ТЖ»; ручной замер на релизе → `## Follow-up`.
+6. For `acceptance-scenario-duplication`, the recommendation MUST name the slice-источник that already covers this Scenario (`S<K>.T<L>`), so the user can decide: delete, merge with source slice, or accept duplication.
+
+Do NOT emit these alerts in Lite tier (`no-slices` or single container slice) — the invariant assumes a slice-based structure with `**Связь со spec:**` populated.
+
 ### 6. Rework Risk Assessment
 
 For each slice S<N>:
@@ -112,9 +135,23 @@ Recommendation snippet in alert:
 
 **`task-no-file-ref` (SUGGESTION)** — title longer than 8 words but contains no file path, module name, or procedure reference. Often co-occurs with `task-opaque-title`; emit only if `task-opaque-title` not applicable.
 
+**`task-opaque-acceptance` (WARNING)** — applies **only** to acceptance tasks `S<N>.T<M>` (this is the one readability alert that *does* apply to T<M>). Fires when any of the following is true:
+
+- Acceptance task text has no trailing `(Scenario: «…»)` or `(Scenarios: «…», «…»)` reference.
+- The referenced scenario name does not match any Scenario declared in the slice's `**Связь со spec:**`.
+- The first 12 meaningful words do not contain a user action + observable result (e.g. bare `Проверить X` without the user sequence).
+
+Recommendation snippet:
+```
+Переформулировать: «<Пользовательское действие> — <наблюдаемый результат> (Scenario: «<имя из Связь со spec>»)».
+Если проверка не является пользовательским сценарием (инвариант / NFR / код-уровневое свойство) — перенести в design.md#Assumptions / обычную задачу S<N>.<M> / ## Follow-up по правилу среза 6 (`.cursor/rules/vertical-slices.mdc`).
+```
+
+Этот alert работает совместно с критерием 5b (`acceptance-without-scenario`): 5b эмитирует WARNING на уровне когерентности приёмки среза, `task-opaque-acceptance` — на уровне формулировки задачи.
+
 **Exceptions (do NOT emit readability alerts):**
 
-1. Acceptance tasks `S<N>.T<M>` — they follow a different template (user scenario), checked by criterion 5 `vague-slice-test`.
+1. Acceptance tasks `S<N>.T<M>` — не эмитировать `task-opaque-title` / `task-too-short` / `task-no-file-ref`. Для них действует **только** `task-opaque-acceptance` (см. выше) и критерий 5 `vague-slice-test`.
 2. Follow-up tasks prefixed with `Follow-up:` — they reference future changes and are allowed to be brief if the change scope is named.
 3. Tasks in **legacy mode** tasks.md (no `# Срез S<N>` headers) — emit readability alerts as SUGGESTION only (not WARNING), since legacy changes are not the primary enforcement target.
 
@@ -166,7 +203,7 @@ Show slice-to-slice edges. Highlight cycles, forward deps, undeclared implicit d
 
 For each issue:
 - **Slice / task affected**
-- **Type**: scenario-uncovered / dependency-cycle / stale-slice-dep / forward-slice-dep / coupling-violation / slice-incomplete / undeclared-slice-dep / backward-reference / missing-slice-test / missing-slice-gate-marker / vague-slice-test / unaccepted-slice-in-progress / rework-risk-on-unaccepted / slice-overlap / hypothesis-dep / no-slices / deprecated-phase-gate / task-opaque-title / task-too-short / task-no-file-ref
+- **Type**: scenario-uncovered / dependency-cycle / stale-slice-dep / forward-slice-dep / coupling-violation / slice-incomplete / undeclared-slice-dep / backward-reference / missing-slice-test / missing-slice-gate-marker / vague-slice-test / acceptance-scenario-duplication / acceptance-without-scenario / acceptance-overload / scenario-uncovered-by-acceptance / unaccepted-slice-in-progress / rework-risk-on-unaccepted / slice-overlap / hypothesis-dep / no-slices / deprecated-phase-gate / task-opaque-title / task-opaque-acceptance / task-too-short / task-no-file-ref
 - **Severity**: CRITICAL / WARNING / SUGGESTION
 - **Recommendation**
 
@@ -196,6 +233,7 @@ Only evaluate: slice coherence, scenario coverage, slice independence, dependenc
 7. Validate criterion 3 (Slice Completeness): for each slice, enumerate required layers from acceptance scenario.
 8. Validate criterion 4 (Slice Dependency Graph).
 9. Validate criterion 5 (Slice Gate Integrity).
+9.1. Validate criterion 5b (Acceptance ↔ Scenario Mapping) — compare `**Связь со spec:**` scenarios with trailing `(Scenario: «…»)` references on each `S<N>.T<M>`; emit `acceptance-scenario-duplication` / `acceptance-without-scenario` / `acceptance-overload` / `scenario-uncovered-by-acceptance` as defined in criterion 5b. Skip in Lite / no-slices mode.
 10. Assess criterion 6 (Rework Risk) for in-progress and upcoming slices.
 11. Evaluate criterion 7 (Task Readability) across all non-`T<M>` tasks (excluding exceptions listed in criterion 7).
 12. Produce report in output format.

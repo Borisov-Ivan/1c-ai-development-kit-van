@@ -91,13 +91,18 @@ Fast-forward through artifact creation - generate everything needed to start imp
         Before delegating tasks, the **Slice Generation Gate** must have been passed (see step 5e.1 below) and design.md MUST contain a `## Slices` section.
 
         Delegate to **onec-code-architect** with the "Architect — slice-aware task decomposition" template (`1c-agent-patterns/SKILL.md`).
-        Pass: paths to proposal.md, design.md (with approved `## Slices` section), specs/, and the `template` from instructions.
+        Pass: paths to proposal.md, design.md (with approved `## Slices` section, включая `### Матрица приёмки` если есть), specs/, and the `template` from instructions.
+
+        **Acceptance Scope Tightness context (правило среза 6):** в промпт архитектору явно передать:
+        - Извлечённый список Scenarios per slice из design.md `## Slices` (столбец «Scenarios из spec» и/или матрица приёмки).
+        - Требование: каждый `S<N>.T<M>` SHALL иметь хвостовую ссылку `(Scenario: «<имя>»)` на Scenario из `**Связь со spec:**` **этого же** среза; количество `T<M>` ≤ 2 × количество Scenarios; инварианты/NFR/перф-проверки — НЕ в приёмку среза, а в `design.md#Assumptions` / обычную задачу / `## Follow-up`.
+        - Ссылки: `.cursor/rules/vertical-slices.mdc` (правило среза 6), `.cursor/rules/task-readability.mdc` (Исключение 1 для `T<M>`), `.cursor/skills/1c-agent-patterns/SKILL.md` (шаблон slice-aware task decomposition, правило 10.1).
 
         The architect produces tasks.md with:
         - H1 headers `# Срез S<N>: <имя>` (one per slice from design)
         - metadata blocks under each slice header (Сценарий, Приёмка, Связь со spec, Зависимости)
         - task IDs with slice prefix `S<N>.<M>`
-        - acceptance tasks `S<N>.T<M>` inside each slice
+        - acceptance tasks `S<N>.T<M>` inside each slice, каждая с `(Scenario: «…»)` в хвосте
         - slice-gate markers `<!-- slice-gate: <critérion> -->`
 
         No classification P0–P4, no `# Фаза N`, no `<!-- phase-gate -->`. See `.cursor/rules/vertical-slices.mdc` (в т.ч. **ИНВАРИАНТ: Defect placement** — не плодить `# Срез S<N+1>` для дефекта непринятого среза без cross-slice / frozen-slice).
@@ -105,6 +110,18 @@ Fast-forward through artifact creation - generate everything needed to start imp
         Architect reads files independently and returns tasks.md content.
         Save the result to `outputPath`.
         If architect Task fails — apply error handling above (retry once, then create yourself).
+
+        **Post-tasks self-check (Acceptance Scope Tightness):**
+        После сохранения `tasks.md` — mechanical self-check:
+        1. Grep `tasks.md` на `^- \[[ x]\] S\d+\.T\d+` — собрать все acceptance tasks.
+        2. Для каждого `T<M>` проверить наличие хвостовой скобки `(Scenario: «…»)` или `(Scenarios: «…», …)`.
+        3. Сверить имя(имена) Scenario с `**Связь со spec:**` соответствующего среза.
+        4. Зафиксировать mismatches:
+           - `T<M>` без ссылки → **WARNING** в сводке ff.
+           - `T<M>` со Scenario не из `**Связь со spec:**` → **WARNING**.
+           - `|T<M>| > 2 × |Scenarios|` в срезе → **SUGGESTION**.
+        5. Если есть WARNING — в финальной сводке ff: «Обнаружены замечания Acceptance Scope Tightness. Рекомендую `/opsx:verify <name>` для полной проверки критерием 5b QC и получения карточек решений.»
+        6. Если mismatches нет — лог «Acceptance ↔ Scenario mapping OK».
       - **All other artifacts**: Create the artifact file using `template` as the structure
       - Apply `context` and `rules` as constraints - but do NOT copy them into the file
       - Show brief progress: "✓ Created <artifact-id>"
@@ -178,7 +195,13 @@ Fast-forward through artifact creation - generate everything needed to start imp
          - Validate with Quality Controller (quick check — criteria 1, 3, 5 from QC), see `openspec-quality-controller.md`.
          - If critical issues — show the user and AskQuestion whether to regenerate.
          - Otherwise — proceed.
-      6. **Guardrail:** do NOT invoke the tasks architect template until `design.md` contains the `## Slices` section (or Lite tier was explicitly chosen).
+      6. **Acceptance Scope Tightness pre-check (правило среза 6):**
+         - Read the `## Slices` block from `design.md`. For each slice row, extract the Scenarios column (ссылки на `#### Scenario:` из spec).
+         - Validate per slice:
+           * Scenarios count SHALL be ≥1 and ≤3. Если >3 — предупредить архитектора и предложить раздробить срез. Если 0 — это не срез, а prereq-слой (см. правило декомпозиции 7).
+           * Если в таблице есть отдельная `### Матрица приёмки (Acceptance ↔ Scenario)` — проверить, что каждый `T<M>` привязан к Scenario из того же среза; отсутствие матрицы при Standard/Full tier — рекомендация архитектору дополнить.
+         - Эти проверки — «hint» для следующего шага `slice-aware task decomposition`: архитектор должен соблюдать Acceptance Scope Tightness при генерации `tasks.md`.
+      7. **Guardrail:** do NOT invoke the tasks architect template until `design.md` contains the `## Slices` section (or Lite tier was explicitly chosen).
 
       **Error handling:** if architect Task fails (error / timeout after retry), create a minimal single-slice draft yourself (1 container slice covering all tasks) and log a warning to the user. The user may run `/opsx:verify --migrate-to-slices` later to decompose.
 

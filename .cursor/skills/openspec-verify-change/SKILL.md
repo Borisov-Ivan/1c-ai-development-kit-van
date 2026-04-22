@@ -292,6 +292,24 @@ Tier: Standard (12 задач, 3 среза)
    - Check that all referenced slice dependencies exist as slices in tasks.md; flag stale refs as WARNING.
    - Check presence of `<!-- slice-gate: ... -->` marker at end of slice; missing → WARNING `missing-slice-gate-marker`.
 
+   **7F.3b Acceptance-to-scenario mapping (Acceptance Scope Tightness, правило среза 6):**
+
+   Mechanical pre-check, дополняет QC criterion 5b. Источник истины — `.cursor/rules/vertical-slices.mdc` (правило среза 6) и `.cursor/agents/openspec-quality-controller.md` (критерий 5b).
+
+   Для каждого `# Срез S<N>`:
+   1. Извлечь множество Scenarios из строки `**Связь со spec:**` (regex `«([^»]+)»` или имена после `Scenario:` / `сценарий:`). Normalise lowercase + trim.
+   2. Найти все acceptance-задачи `- [ ] S<N>.T<M>` / `- [x] S<N>.T<M>` этого среза.
+   3. Для каждого `T<M>` извлечь хвостовую ссылку `(Scenario: «…»)` или `(Scenarios: «…», «…»)`.
+   4. Сравнить множества и зафиксировать mismatches:
+      - `T<M>` без ссылки или с именем Scenario, отсутствующим во всех `**Связь со spec:**` документа → кандидат на `acceptance-without-scenario`.
+      - `T<M>` ссылается на Scenario, заявленный в `**Связь со spec:**` **другого** среза (не текущего) → кандидат на `acceptance-scenario-duplication`.
+      - `|T<M>| > 2 × |Scenarios(S<N>)|` → кандидат на `acceptance-overload`.
+      - Scenario из `**Связь со spec:**` не упомянут ни одним `T<M>` данного среза → кандидат на `scenario-uncovered-by-acceptance`.
+   5. Передать список mismatches в QC (шаг 7.6) отдельной строкой: «Acceptance mapping issues (verify 7F.3b): <перечень или "нет">». QC валидирует по критерию 5b и финализирует severity.
+   6. Также передать этот же список в architect readiness review (шаг 7.7) как контекст — архитектор может рекомендовать перенос non-scenario проверок в `design.md#Assumptions` / обычные задачи / `## Follow-up` согласно таблице правила среза 6.
+
+   В Lite tier (`no-slices` или единственный container slice) шаг 7F.3b **пропускается** — инвариант предполагает slice-структуру с заполненным `**Связь со spec:**`.
+
    **7F.4 Fix-slice sanity (defect placement invariant):**
    Для каждого заголовка `# Срез S<N>`, если выполняется **любое** из условий:
    - в заголовке или в первых строках метаданных среза есть подстроки **«Исправление»**, **«Fix»**, **«fix-срез»** (регистронезависимо); **или**
@@ -381,6 +399,7 @@ Tier: Standard (12 задач, 3 среза)
    - Checklist table from step 7.5 (if manual config markers were found), or "маркеров ручной конфигурации не найдено"
    - List of issues from steps 7A-7E (if any), or "механических замечаний нет"
    - Executability issues from step 7F (if any), or "замечаний выполнимости нет"
+   - Acceptance mapping issues (verify 7F.3b): per-slice list of mismatches between `**Связь со spec:**` Scenarios и `T<M>` Scenario-ссылок, or "замечаний по приёмке нет". QC использует это как вход критерия 5b.
    - Repository state (object/file existence and emptiness list)
 
    **Quality Controller prompt** (use agent file `.cursor/agents/openspec-quality-controller.md`):
@@ -445,6 +464,7 @@ Tier: Standard (12 задач, 3 среза)
    - Checklist table from step 7.5 (if manual config markers were found), or "маркеров ручной конфигурации не найдено"
    - List of issues from steps 7A-7E (if any), or "механических замечаний нет"
    - Executability issues from step 7F (if any), or "замечаний выполнимости нет"
+   - Acceptance mapping issues (verify 7F.3b): per-slice list of mismatches `T<M>` ↔ Scenario, or "замечаний по приёмке нет". Архитектор может рекомендовать перенос non-scenario проверок в `design.md#Assumptions` / обычные задачи / `## Follow-up` (таблица правила среза 6, `.cursor/rules/vertical-slices.mdc`).
    - Quality Controller result: slice summary, scenario coverage matrix, alerts from step 7.6 (or "Quality Controller пропущен (Lite tier)")
 
    **Architect prompt (Standard/Full tier)** (use template from `1c-agent-patterns/SKILL.md`, section "Architect — task readiness review (verify шаг 7.7)"):
@@ -852,6 +872,11 @@ Tier: Standard (12 задач, 3 среза)
 | `scenario-uncovered` (QC 7.6) | judgment | Решение: добавить срез или расширить существующий — меняет состав работ |
 | `dependency-cycle`, `coupling-violation`, `forward-slice-dep`, `backward-reference` (QC) | judgment | Требует перестройки графа срезов |
 | `slice-incomplete`, `missing-slice-test` (QC) | judgment | Нужно либо добавить недостающие задачи, либо переразрезать |
+| `acceptance-scenario-duplication` (QC 5b / verify 7F.3b) | judgment | Решение: удалить `T<M>`, объединить с срезом-источником или принять дублирование |
+| `acceptance-without-scenario` (QC 5b / verify 7F.3b) | judgment | Решение: перенести в `design.md#Assumptions` / обычную задачу / `## Follow-up`, или привязать `T<M>` к Scenario (требует обновить spec) |
+| `scenario-uncovered-by-acceptance` (QC 5b / verify 7F.3b) | judgment | Scenario заявлен в `**Связь со spec:**`, но ни один `T<M>` его не покрывает — добавить `T<M>` или снять Scenario из `**Связь со spec:**` |
+| `acceptance-overload` (QC 5b / verify 7F.3b) | footnote | Признак раздутой приёмки: |T<M>| > 2 × |Scenarios|; показать «К сведению», не блокировать |
+| `task-opaque-acceptance` (QC 7 / task-readability) | judgment | `T<M>` без `(Scenario: «…»)` или без пользовательского действия в первых 12 словах — переформулировать или перенести non-scenario проверку |
 | `rework-risk-on-unaccepted`, `unaccepted-slice-in-progress` (QC) | judgment | Решение: ждать приёмки или принять риск переделки |
 | Executability issues (7F) | judgment | Зависимости влияют на порядок реализации |
 | `no-slices` (QC) | judgment | Решение: запустить `--migrate-to-slices` или продолжить в legacy |
@@ -1156,6 +1181,10 @@ Tier: Standard (12 задач, 3 среза)
     | `scenario-uncovered` (QC 7.6) | a) Расширить существующий срез — добавить задачи под сценарий b) Создать новый срез c) Принять — сценарий не покрыт |
     | `dependency-cycle` / `forward-slice-dep` / `coupling-violation` (QC) | a) Запустить архитектора для пере-разреза (шаблон «Architect — slice restructuring») b) Перенумеровать срезы / переместить задачи c) Принять — работать с риском |
     | `slice-incomplete` / `missing-slice-test` (QC) | a) Архитектор добавляет недостающие задачи / S<N>.T<M> b) Принять как есть — срез не приёмопригоден |
+    | `acceptance-scenario-duplication` (QC 5b) | a) Удалить дублирующий `T<M>` из текущего среза — проверка остаётся в срезе-источнике b) Перенести `T<M>` в срез-источник (если там ещё нет соответствующего теста) c) Принять как есть — оба среза формально проверяют один Scenario |
+    | `acceptance-without-scenario` (QC 5b) | a) Перенести non-scenario проверку в `design.md#Assumptions` (для инвариантов) b) Переоформить как обычную задачу `S<N>.<M>` «верифицировать по коду/ТЖ» (для NFR/перф) c) Перенести в блок `## Follow-up` (для ручных замеров на релизе) d) Добавить соответствующий Scenario в spec и привязать `T<M>` e) Принять как есть |
+    | `scenario-uncovered-by-acceptance` (QC 5b) | a) Добавить `S<N>.T<M>` для покрытия заявленного Scenario b) Снять Scenario из `**Связь со spec:**` среза (если по факту он не закрывается здесь) c) Принять как есть |
+    | `task-opaque-acceptance` (QC 7) | a) Переформулировать `T<M>` по шаблону «Пользовательское действие — наблюдаемый результат (Scenario: «…»)» b) Перенести non-scenario проверку (если это инвариант/NFR) по правилу среза 6 c) Принять как есть |
     | `rework-risk-on-unaccepted` / `unaccepted-slice-in-progress` (QC) | a) Дождаться приёмки зависимости b) Принять — начать кодирование с риском переделки |
     | Executability issues (7F) | a) Добавить `Зависимости:` в tasks b) Переупорядочить задачи в срезе c) Принять — apply разберётся |
     | `no-slices` (QC, legacy ЗНИ) | a) `/opsx:verify --migrate-to-slices` (architect перерезает в срезы) b) Принять — продолжить в legacy режиме |
