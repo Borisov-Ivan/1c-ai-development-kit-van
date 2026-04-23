@@ -216,6 +216,20 @@ Depending on what the user brings, you might:
 
 ---
 
+## Knowledge Discovery
+
+**Выполняется перед Structured Investigation (пост-бриф фаза)**
+
+0. Если `openspec/knowledge/_taxonomy.yaml` отсутствует — **не выполнять** шаги 1–6 (весь блок Knowledge Discovery; graceful skip), в итоговом Explore Summary добавить warning и подсказку `/opsx:knowledge-init`.
+1. Определить domain/subdomain задачи (из user query + recently viewed files).
+2. Read `openspec/knowledge/_index.yaml`, фильтр по domain + anchor-paths.
+3. Взять Top-10 по релевантности.
+4. Read выбранные `.md` файлы фактов, включить их суть в контекст investigation.
+5. **Verify в scope:** для каждого факта, чьи anchor-paths ∈ {файлы, которые explorer уже планирует читать}, запустить verify (проверка сигнатур/путей).
+6. Обнаруженный drift складируется в `knowledge-drift-accumulator` (не обрабатывается сразу — агент продолжает investigation).
+
+---
+
 ## Structured Investigation
 
 **Пост-бриф фаза.** Structured Investigation начинается **после шага 3 Entry Protocol** — подтверждение брифа пользователем и делегирование агенту. Это НЕ замена Entry Protocol и НЕ параллельный путь. Последовательность: Entry Protocol (бриф → подтверждение → делегирование) → Structured Investigation (исследование → решение → планирование).
@@ -539,6 +553,14 @@ There's no required ending. Discovery might:
 - Какие агенты вызывались: [trace-analyst / explorer / architect / нет]
 - Отчёты: [пути к файлам в reports/]
 
+**Knowledge findings:**
+### Использованные факты (active)
+- KB-NNNN: <title> — применимо к <scope>
+### Обнаруженный drift
+- KB-MMMM: <type> drift по anchor <name>. Proposal:
+  <diff представления факта>
+*(Если taxonomy отсутствовала: ⚠ Knowledge Discovery пропущен, таксономия не найдена. Рекомендуется /opsx:knowledge-init)*
+
 **Ключевые решения:**
 - [решение 1]
 - [решение 2]
@@ -587,4 +609,4 @@ Explore Summary — входной артефакт для ff/new. Design Gate �
 
 ---
 
-**Last updated**: 2026-04-19 | **Version**: 1.7 | **Changes**: Шаг 3 (делегирование) — добавлен блок «Перед вызовом Task — Task Pre-call Checklist» с явной сверкой subagent_type/model. В Guardrails добавлены пункты «Don't use generic subagents for 1C» и «Don't pass model to Task» с отсылкой к `tool-name-guard.mdc`.
+**Last updated**: 2026-04-23 | **Version**: 1.8 | **Changes**: Добавлен блок Knowledge Discovery перед Structured Investigation и секция Knowledge findings в Explore Summary.

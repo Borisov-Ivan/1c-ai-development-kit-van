@@ -13,11 +13,11 @@ explore → new/ff → verify → apply (по срезам) → verify → archi
 
 | Этап | Команда | Что происходит | Агенты |
 |------|---------|----------------|--------|
-| **Исследование** | `/opsx:explore` | Понять задачу, исследовать код, принять решения, сформировать slice hints в Explore Summary | onec-code-explorer, onec-code-architect |
-| **Создание change** | `/opsx:new` или `/opsx:ff` | proposal → design (вкл. `## Slices`) → specs → tasks (с `# Срез S<N>`) | onec-code-architect (slice decomposition + slice-aware task decomposition) |
-| **Проверка** | `/opsx:verify` | slice-pre / slice-post / slice-scoped (`--slice S<N>`) / migrate-to-slices / legacy. Quality Controller проверяет когерентность срезов; Architect — реализуемость. Авто-устранение mechanical, карточки решений judgment | onec-code-architect, openspec-quality-controller |
+| **Исследование** | `/opsx:explore` | Понять задачу, исследовать код, принять решения, сформировать slice hints в Explore Summary. **Knowledge Discovery** (read-repair). | onec-code-explorer, onec-code-architect |
+| **Создание change** | `/opsx:new` или `/opsx:ff` | proposal → design (вкл. `## Slices`) → specs → tasks (с `# Срез S<N>`). **Knowledge Discovery** (в Architect Gate). | onec-code-architect (slice decomposition + slice-aware task decomposition) |
+| **Проверка** | `/opsx:verify` | slice-pre / slice-post / slice-scoped (`--slice S<N>`) / migrate-to-slices / legacy. Quality Controller проверяет когерентность срезов; Architect — реализуемость. Авто-устранение mechanical, карточки решений judgment. **Knowledge Discovery** (в Architect Gate). | onec-code-architect, openspec-quality-controller |
 | **Реализация** | `/opsx:apply` | **Step-by-slice** (default): один срез — карточка приёмки — следующий срез. Опции: step-by-step / batch | onec-code-writer + onec-code-reviewer |
-| **Архивация** | `/opsx:archive` | Hard-block при непринятых срезах (`S<N>.T<M>` = `[ ]`); синхронизация specs, перенос в archive/ | — |
+| **Архивация** | `/opsx:archive` | Hard-block при непринятых срезах (`S<N>.T<M>` = `[ ]`); синхронизация specs, перенос в archive/. **Facts extraction** (извлечение KB-фактов). | — |
 | **Отладка** | `/opsx:debug` | RCA + fix tasks с привязкой к срезу (новый fix-срез или задача в непринятом срезе) | onec-trace-analyst, onec-code-explorer |
 | **Предрелизное ревью** | `/prerelease-review` | Батчевый ревью расширения | onec-code-reviewer |
 | **Ревью кода** | `/review` | Ревью по контексту запроса | onec-code-reviewer |

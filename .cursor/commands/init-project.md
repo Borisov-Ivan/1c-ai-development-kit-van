@@ -48,7 +48,7 @@ description: "Диагностика проекта, бутстрап струк
 | Чего нет | Действие |
 |---|---|
 | `src/` пуст или нет `Configuration.xml` | **СТОП.** Подсказать: «Выгрузите конфигурацию через Конфигуратор: Конфигурация → Выгрузить конфигурацию в файлы. Путь: `src/<ИмяКонфигурации>/cf/`. Для расширений: Конфигурация → Расширения → <Имя> → Выгрузить в файлы. Путь: `src/<ИмяКонфигурации>/cfe/<ИмяРасширения>/`.» Ждать, пока пользователь выгрузит |
-| `openspec/` | Агент создаёт сам: `openspec/`, `openspec/changes/`, `openspec/changes/_template/`, `openspec/specs/`, `openspec/docs/`, `openspec/adrs/`, пустой `openspec/project.md`, `openspec/config.yaml` |
+| `openspec/` | Агент создаёт сам: `openspec/`, `openspec/changes/`, `openspec/changes/_template/`, `openspec/specs/`, `openspec/docs/`, `openspec/adrs/`, `openspec/knowledge/` (+ `_archive/`, стартовый `README.md`, пустой `_index.yaml` с `facts: []`), пустой `openspec/project.md`, `openspec/config.yaml`. `openspec/knowledge/_taxonomy.yaml` создаётся в Phase 5 (после разведки архитектуры) |
 | `.cursor/agents/` | Подсказать: «Скопируйте промпты агентов из шаблонного проекта в `.cursor/agents/`» |
 | `AGENTS.md` | Агент создаёт |
 
@@ -362,6 +362,12 @@ src/
 ## Ключевые модули
 <таблица: модуль / расширение / назначение / тип>
 ```
+
+**Шаг 6 — Генерация таксономии (`openspec/knowledge/_taxonomy.yaml`).**
+1. **Вход:** карта расширений и границ доменов из выхода `onec-code-architect` (и при необходимости `openspec/specs/architecture.md`, `project.md`).
+2. **Автогенерация draft `_taxonomy.yaml`:** по одному `domain` на каждое расширение из `src/*/cfe/*` с корректным `source`; `subdomains` — из подсистем / ключевых общих модулей (эвристика + ручная правка в draft); обязательный блок `cross` из шаблона `openspec/knowledge/_taxonomy.template.yaml`.
+3. **Confirm пользователя** перед записью (показ diff или краткого summary).
+4. **При повторном запуске `/init-project`:** не перезаписывать файл вслепую — предложить **sync** (diff к текущему `_taxonomy.yaml`), merge по решению пользователя. (Делегируется процедуре, описанной в `/opsx:knowledge-init`).
 
 **При повторном запуске /init-project:** если `openspec/specs/architecture.md` уже существует — Phase 5 **предложить** обновить (если project.md изменился) или пропустить. Не пересоздавать автоматически без согласия.
 

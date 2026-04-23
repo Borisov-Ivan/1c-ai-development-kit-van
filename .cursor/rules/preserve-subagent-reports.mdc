@@ -57,7 +57,8 @@ alwaysApply: false
 
 - **1c-agent-delegation.mdc:** после вызова architect/explorer/trace-analyst применяется это правило.
 - **AGENTS.md:** при реализации change отчёты субагентов сохраняются в reports/.
+- **Knowledge Base:** KB-факты (в `openspec/knowledge/`) ссылаются на эти отчёты как на источник истины (`source.report`), но **не заменяют** их. Отчёты остаются полным контекстом исследования.
 
 ---
 
-**Last updated**: 2026-03-11 | **Version**: 1.1 | **Changes**: alwaysApply: false (was false), added version metadata
+**Last updated**: 2026-04-23 | **Version**: 1.2 | **Changes**: added Knowledge Base integration

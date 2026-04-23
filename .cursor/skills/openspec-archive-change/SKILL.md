@@ -53,6 +53,18 @@ Archive a completed change in the experimental workflow.
 
    Не блокирует архив — только предупреждает. Если отчёт найден — в summary шага 7 вывести строку `Verify: <имя последнего отчёта> (<дата>)`.
 
+2b. **Knowledge verify в scope ЗНИ (soft-gate, не блокирующий)**
+
+   Определить изменённые файлы: `git diff --name-only <merge-base>...HEAD` (точка ответвления change-ветки от main).
+
+   Найти KB-факты, чьи anchor-paths пересекают этот diff:
+   Read `openspec/knowledge/_index.yaml`, фильтр по `anchor-paths` ∈ `diff.files`.
+
+   Verify каждый (алгоритм §3 из knowledge-format.mdc). Для каждого drift:
+   - Добавить в warnings accumulator: `KB-NNNN: <drift type> — <title>`
+   - Не блокировать archive
+   В summary шага 7 вывести: `Knowledge: verified N, drift K (см. /opsx:knowledge-audit)`
+
 3. **Check task completion status**
 
    Read the tasks file (typically `tasks.md`) to check for incomplete tasks.
@@ -131,6 +143,30 @@ Archive a completed change in the experimental workflow.
 
    **If no architecture reports found:** Skip this step; summary: `ADR: No architecture reports`.
 
+5.5. **Facts extraction (single-decision)**
+
+   **Preflight:** если `openspec/knowledge/_taxonomy.yaml` отсутствует и по reports есть knowledge-worthy факты к извлечению — **STOP**, archive не завершать; указать пользователю `/opsx:knowledge-init` (или Phase 5 `/init-project`). Если извлекать нечего — шаг 5.5 не требует taxonomy.
+
+   Читать `reports/exploration-*.md`, `reports/trace-analysis-*.md`, `reports/resolved-contract-*.md`. Качество фактов — ответственность самих reports: агент не переоценивает их содержимое, а агрегирует. Критерии knowledge-worthy применяются как фильтр отсева, а не как материал для обсуждения с пользователем.
+
+   Подготовить батч: до 5 KB-кандидатов с полностью готовыми полями (domain, subdomain, anchors по taxonomy, tentative TTL). Дедупликация по title/anchor.path относительно `_index.yaml`.
+
+   Для каждого кандидата до показа:
+   1. Автоподбор domain/subdomain по `taxonomy.yaml` (нет совпадения → skip этого кандидата + warning в отчёт; кандидат не показывается).
+   2. Извлечение signature-anchors из reports (path, name, declaration).
+   3. Verify anchors по текущему коду. Если уже stale — кандидат отбрасывается, в warnings одна строка.
+   4. Если факт близок к существующему (fuzzy match по title/name) — кандидат готовится как supersede-proposal существующего KB (в превью отмечается пометкой "SUPERSEDES KB-NNNN").
+
+   Показ пользователю (single AskQuestion, одно решение на весь батч):
+   "Сохранить N извлечённых KB-фактов? [yes | no]"
+   В теле вопроса — компактный список: id, title, domain/subdomain, anchors (без per-fact чекбоксов, без уточнений по каждому).
+
+   - `yes` → сгенерировать все `KB-NNNN-slug.md` + атомарное обновление `_index.yaml`
+   - `no`  → ничего не пишется; в отчёте архивации одна строка "Knowledge: declined"
+
+   Отсутствие кандидатов после фильтров (taxonomy/verify/duplicate) — шаг завершается тихо, без вопроса пользователю.
+   Дедупликация: если один факт встречается в нескольких reports — создаётся один KB, второй report идёт в `source.also-mentioned-in`.
+
 6. **Perform the archive**
 
    Create the archive directory if it doesn't exist:
@@ -156,6 +192,7 @@ Archive a completed change in the experimental workflow.
    - Archive location
    - Whether specs were synced / up to date / no delta
    - Whether ADRs were extracted (count and numbers) or skipped with reason
+   - Whether Knowledge facts were saved, declined, or skipped
    - **`### Warnings`** — only if the warnings accumulator from steps 2–3 is non-empty; list each bullet. If empty, **omit** the Warnings section entirely.
 
 **Output On Success**
@@ -171,6 +208,7 @@ Use this template; adapt lines to facts (omit `### Warnings` when there are none
 **Slices:** K/K приняты | N/A (legacy mode) | Force-legacy archive (нарушен контракт срезов)
 **Specs:** ✓ Synced to main specs (N requirements updated) | Already up to date | No delta specs
 **ADR:** ✓ Extracted N ADRs (ADR-NNNN, ...) | No architecture reports | No ADR-worthy decisions extracted
+**Knowledge:** ✓ Saved N KB-facts (KB-NNNN, ...) | Declined by user | No candidates | Skipped (warnings)
 
 ### Warnings
 - <only when applicable: incomplete artifacts, incomplete tasks with IDs, etc.>

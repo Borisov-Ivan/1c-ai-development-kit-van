@@ -124,6 +124,12 @@ Quality Controller (шаг 7.6): **Slice Coherence** (6 критериев из 
 Индекс: `openspec/adrs/README.md`. Создаются при archive (шаг 5), обнаруживаются при explore/ff/new (ADR Discovery).
 Интеграция: `architect-gate.mdc` (ADR Discovery при срабатывании), `1c-agent-patterns/SKILL.md` (шаблон extraction).
 
+## Knowledge Base
+`openspec/knowledge/` — структурированная база знаний с механизмом read-repair.
+`.cursor/rules/knowledge-format.mdc` — структура KB-файла, anchor spec, статусы, TTL.
+Индекс: `openspec/knowledge/_index.yaml`. Создаются при archive (шаг 5.5) и audit.
+Интеграция: `/opsx:explore` (Knowledge Discovery), `architect-gate.mdc` (Knowledge Discovery), `/opsx:knowledge-audit` (сверка и обновление), `/opsx:knowledge-init` (bootstrap таксономии).
+
 ## Оценка трудозатрат
 `.cursor/skills/openspec-estimate/SKILL.md` — `/opsx:estimate <name>`. Трёхточечная PERT-оценка по tasks.md. Авторежимы: первичная оценка / переоценка / калибровка по факту. Ставки встроены в скилл, опциональный оверрайд — `openspec/estimate-rates.md`.
 

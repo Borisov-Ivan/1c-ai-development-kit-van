@@ -52,6 +52,25 @@ priority: 200
 
 Формат ADR: `.cursor/rules/adr-format.mdc`.
 
+## KNOWLEDGE DISCOVERY (при срабатывании Gate)
+
+Перед вызовом архитектора — поднять релевантные KB-факты:
+
+0. Если нет openspec/knowledge/_taxonomy.yaml — не блокировать Gate; одна строка
+   warning в преамбуле контекста («taxonomy отсутствует, KB Discovery пропущен»).
+
+1. Read openspec/knowledge/_index.yaml
+2. Фильтр: domain ∈ {scope}, anchor-paths ∈ {файлы задачи}
+3. Top-10 по релевантности
+4. В промпт архитектора:
+   - `active` факты → как верифицированные утверждения о системе
+   - `stale` факты → с пометкой "⚠ TTL истёк DD дней назад / drift detected, проверить"
+   - `deprecated`/`superseded` → не передаются
+5. Если архитектор в своём report противоречит `active` факту — добавить
+   в architecture-report секцию "## Knowledge conflicts" с указанием KB-ID
+
+Формат: .cursor/rules/knowledge-format.mdc
+
 ## ДЕЙСТВИЕ ПРИ СРАБАТЫВАНИИ
 
 Зависит от контекста вызова (определяется в каждом скилле):
