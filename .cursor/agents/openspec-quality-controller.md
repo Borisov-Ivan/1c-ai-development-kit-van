@@ -108,7 +108,15 @@ For each slice S<N>:
 - If a task inside S<N> references objects/contracts hypothesized in design but not yet resolved:
   → alert `hypothesis-dep` (WARNING).
 
-### 7. Task Readability
+### 8. Textual Divergence between Design and Tasks
+
+Compare `design.md` (specifically `## Decisions`, `## Design Rationale`, and `## Open Questions`) with the confirmed approach in `tasks.md`.
+
+- If a decision or approach in `design.md` clearly contradicts the specific tasks listed in `tasks.md` (e.g., tasks implement search by role, but design says use index 0; tasks implement synchronous change, but design lists it as an open question), AND the tasks represent the actual agreed-upon plan:
+  → alert `design-tasks-divergence` (SUGGESTION).
+  "Формулировка в design.md устарела относительно утверждённых задач в tasks.md. Это расхождение будет устранено автоматически."
+
+This alert acts as a mechanical trigger for Verify Phase A to automatically rewrite the outdated `design.md` text.
 
 For each task `- [ ] S<N>.<M>` or `- [x] S<N>.<M>` (EXCLUDING acceptance tests `S<N>.T<M>` and legacy numeric IDs like `12.8` in legacy mode):
 

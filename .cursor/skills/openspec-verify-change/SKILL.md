@@ -827,6 +827,7 @@ Tier: Standard (12 задач, 3 среза)
 | Опциональная задача без явного N/A-критерия | auto | Добавить «N/A если не воспроизведено» — детерминировано |
 | Неверная метка типа задачи (BSL code вместо manual) | auto | Замена слова, не меняет содержание |
 | Missing paths/subsystems | auto | Если путь или подсистему можно однозначно найти в `project.md` или репозитории |
+| Design/Tasks textual divergence (устаревший текст) | auto | Синхронизация описания (Decisions, Rationale) с уже утверждёнными `tasks.md` и закрытыми `Open Questions` не меняет scope, устраняет долг |
 | Design/Tasks divergence (пропущенная задача) | auto | Если решение уже утверждено в `design.md` (например, D4, D5), авто-добавление задачи — это синхронизация, а не изменение scope |
 | Task quality — ambiguity, missing details (QC Task Readability) | decision | Architect может переформулировать scope (если деталь не выводится однозначно из проекта) |
 | Architect & Design Gate not closed (9) | decision | Архитектурный отчёт может изменить подход |
@@ -1078,6 +1079,7 @@ Tier: Standard (12 задач, 3 среза)
     | TZ lexicon violation (7.8 / 11) | StrReplace запрещённых слов в `ТЗ.md` по `.cursor/docs/tz-lexicon-dictionary.md` |
     | Repo Consistency wording (7E) | StrReplace: `создать X` → `доработать X` / `наполнить содержимым` в tasks.md |
     | Missing paths/subsystems | Использовать инструменты `Read`, `Glob`, `Grep` для поиска нужных путей и подсистем в репозитории или `openspec/project.md`, затем применить `StrReplace` или `Write` для обогащения `tasks.md` и `design.md` найденными данными |
+    | Design/Tasks textual divergence (устаревший текст) | При получении алерта `design-tasks-divergence` от QC (текст отстаёт от задач/решений), самостоятельно переписать устаревший абзац в `design.md` через `StrReplace`, чтобы он соответствовал `tasks.md` или статусу `Open Questions` |
     | Design/Tasks divergence (пропущенная задача) | При выявлении пропущенных задач, описанных в `design.md` (напр. D4, D5), самостоятельно сгенерировать формулировку задачи (или использовать сниппет от архитектора) и вставить в соответствующий раздел `tasks.md` через `StrReplace` или `Write` |
 
     **Ре-верификация Phase A:**
