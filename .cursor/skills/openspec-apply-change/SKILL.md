@@ -24,13 +24,19 @@ Implement tasks from an OpenSpec change.
 
    Always announce: "Using change: <name>" and how to override (e.g., `/opsx:apply <other>`).
 
-2. **Check status to understand the schema**
+2. **Check status to understand the schema and verify Metadata**
    ```bash
    openspec status --change "<name>" --json
    ```
    Parse the JSON to understand:
    - `schemaName`: The workflow being used (e.g., "spec-driven")
    - Which artifact contains the tasks (typically "tasks" for spec-driven, check status for others)
+
+   **Metadata Prep (MANDATORY):** Before writing any code, check `proposal.md` for comment marker placeholders:
+   - Read or Grep `openspec/changes/<name>/proposal.md` for `<developer>`, `<zni_id>`, «Уточнить до `/opsx:apply`» or «Уточнить».
+   - If any placeholders are found, STOP and use **AskQuestion** to request the missing developer/zni_id.
+   - Replace the placeholders in `proposal.md` with the user's answers.
+   - If `tasks.md` has an `F1` Follow-up task for this, mark it as completed.
 
 3. **Get apply instructions**
 

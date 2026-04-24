@@ -39,15 +39,34 @@ Fast-forward through artifact creation - generate everything needed to start imp
 
    **IMPORTANT**: Do NOT proceed without a confirmed change name.
 
-1.5. **Сбор метаданных маркеров (Metadata)**
-   После подтверждения имени ЗНИ запросить данные для маркеров разработчика (если они не очевидны из контекста):
-   AskQuestion:
-   ```
-   Для оформления комментариев в коде (// +++ ... [ID#...]) укажите:
-   1. Разработчик (ФИО, например "Борисов И.Г."):
-   2. Идентификатор ЗНИ (например "ID#79714"):
-   3. Название ЗНИ (для комментария, например "Сохранение участников Согласования при частичном повторе 2.1 - развитие"):
-   ```
+1.5. **Metadata Gate (MANDATORY)**
+
+   После подтверждения имени ЗНИ запросить данные для маркеров разработчика.
+   **Это обязательный шаг перед scaffold.**
+   
+   1. Сначала выведите текстовый запрос в чат (без вызова инструментов):
+      ```
+      Для оформления комментариев в коде (// +++ ... [ID#...]) укажите:
+      1. Разработчик (ФИО, например «Борисов И.Г.»):
+      2. Идентификатор ЗНИ (например «ID#79714»):
+      3. Название ЗНИ для комментария (короткое):
+      ```
+   2. В том же ответе вызовите `AskQuestion` с опциями:
+      - `[Указать сейчас]`
+      - `[Пропустить с плейсхолдерами]`
+      - `[Отмена ff]`
+   
+   **STOP: дождаться ответа.**
+   
+   **Guardrail:** Выполнение шага 2 (`openspec new change`) до завершения Metadata Gate СТРОГО ЗАПРЕЩЕНО.
+   
+   - **Если выбрано «Указать сейчас»:** Запомните введённые данные. На шаге 5 при генерации `proposal.md` заполните блок `## Metadata (comment markers)` реальными значениями (не используйте «Уточнить до»).
+   - **Если выбрано «Пропустить»:** На шаге 5 при генерации `proposal.md` запишите нормализованные плейсхолдеры:
+     - `developer: <developer>`
+     - `zni_id: <zni_id>`
+     - `zni_name: <заполняется из темы>`
+     А также при генерации `tasks.md` добавьте в блок `## Follow-up` (или создайте его в конце файла) задачу:
+     `- [ ] F1 Заполнить Metadata (developer / zni_id) в proposal.md до первого кода`
 
 2. **Create the change directory**
    ```bash
@@ -242,6 +261,7 @@ After completing all artifacts, summarize:
 - **Existing Mechanisms (for design artifact)**: если создаётся новый объект, workflow или хранилище при интеграции с базой — обязательна секция `## Existing Mechanisms`: какие штатные механизмы обследованы, почему не подошли, какой уровень Preference Hierarchy выбран. Шаблон секции — в `existing-mechanism-priority.mdc`.
 
 **Guardrails**
+- **Metadata Gate MUST NOT be silently skipped**: Do not run `openspec new change` without getting an answer to the developer/zni_id prompt. Before showing the final summary, verify `proposal.md` for placeholders like "Уточнить до", `<developer>`, `<zni_id>`. If found and the user did NOT choose "Пропустить", add a WARNING to the summary.
 - Create ALL artifacts needed for implementation (as defined by schema's `apply.requires`)
 - Always read dependency artifacts before creating a new one
 - If context is critically unclear, ask the user - but prefer making reasonable decisions to keep momentum
