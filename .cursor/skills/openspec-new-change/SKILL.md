@@ -53,13 +53,16 @@ Start a new change using the experimental artifact-driven approach.
    **IMPORTANT**: Do NOT proceed without a confirmed change name.
 
 1.5. **Сбор метаданных маркеров (Metadata)**
-   После подтверждения имени и брифа, запросить данные для маркеров разработчика (если они не очевидны из контекста):
+   После подтверждения имени и брифа, запросить данные для маркеров разработчика и генерации ТЗ (если они не очевидны из контекста):
    AskQuestion:
    ```
    Для оформления комментариев в коде (// +++ ... [ID#...]) укажите:
    1. Разработчик (ФИО, например "Борисов И.Г."):
    2. Идентификатор ЗНИ (например "ID#79714"):
    3. Название ЗНИ (для комментария, например "Сохранение участников Согласования при частичном повторе 2.1 - развитие"):
+   
+   Генерация ТЗ.md (документ для согласования с заказчиком):
+   [Нужно при verify] / [Не нужно — не тратить контекст] / [Решить позже]
    ```
    *Примечание: Название ЗНИ можно предзаполнить на основе брифа/имени.*
 
@@ -110,6 +113,7 @@ Start a new change using the experimental artifact-driven approach.
    developer: <ФИО>
    zni_id: <ID>
    zni_name: <Название>
+   generate_tz: <auto | no | deferred>
    ```
 
 **Output**
@@ -128,7 +132,7 @@ After completing the steps, summarize:
 - If a change with that name already exists, suggest continuing that change instead
 - Pass --schema if using a non-default workflow
 - **ADR Discovery**: при создании design — Glob `openspec/adrs/ADR-*.md`, Grep по области задачи. Если релевантные ADR найдены — включить ссылки в Context/Design Rationale секцию design.md. Если подход противоречит ADR — отметить в Risks. Формат: `.cursor/rules/adr-format.mdc`
-- **Design Gate**: при пошаговом создании design — проверить триггеры `architect-gate.mdc` перед переходом к следующему артефакту (аналогично Design Gate в ff). Если триггеры сработали и architecture-*.md отсутствует — ПАУЗА, AskQuestion пользователю
+- **Design Gate**: при пошаговом создании design — проверить триггеры `architect-gate.mdc` перед переходом к следующему артефакту (аналогично Design Gate в ff). Если триггеры сработали и architecture-*.md отсутствует — ПАУЗА. Вывести сообщение об обязательности архитектурного ревью и запустить архитектора (с fallback на self-review в случае ошибки). Пропуск возможен только через создание файла `.gate-override.yaml` (см. `openspec-ff-change/SKILL.md`).
 - **Slice Generation Gate (MANDATORY)**: после создания `design.md` и до генерации `tasks.md` (или любых артефактов, зависящих от tasks):
   1. Определить объём ЗНИ. Если ≥ 6 задач — декомпозиция на срезы **обязательна**; если ≤ 5 — опциональна (один срез-контейнер).
   2. Проверить, содержит ли `design.md` секцию `## Slices`.

@@ -41,7 +41,7 @@ Fast-forward through artifact creation - generate everything needed to start imp
 
 1.5. **Metadata Gate (MANDATORY)**
 
-   После подтверждения имени ЗНИ запросить данные для маркеров разработчика.
+   После подтверждения имени ЗНИ запросить данные для маркеров разработчика и генерации ТЗ.
    **Это обязательный шаг перед scaffold.**
    
    1. Сначала выведите текстовый запрос в чат (без вызова инструментов):
@@ -50,6 +50,9 @@ Fast-forward through artifact creation - generate everything needed to start imp
       1. Разработчик (ФИО, например «Борисов И.Г.»):
       2. Идентификатор ЗНИ (например «ID#79714»):
       3. Название ЗНИ для комментария (короткое):
+      
+      Генерация ТЗ.md (документ для согласования с заказчиком):
+      [Нужно при verify] / [Не нужно — не тратить контекст] / [Решить позже]
       ```
    2. В том же ответе вызовите `AskQuestion` с опциями:
       - `[Указать сейчас]`
@@ -60,11 +63,12 @@ Fast-forward through artifact creation - generate everything needed to start imp
    
    **Guardrail:** Выполнение шага 2 (`openspec new change`) до завершения Metadata Gate СТРОГО ЗАПРЕЩЕНО.
    
-   - **Если выбрано «Указать сейчас»:** Запомните введённые данные. На шаге 5 при генерации `proposal.md` заполните блок `## Metadata (comment markers)` реальными значениями (не используйте «Уточнить до»).
+   - **Если выбрано «Указать сейчас»:** Запомните введённые данные. На шаге 5 при генерации `proposal.md` заполните блок `## Metadata (comment markers)` реальными значениями (не используйте «Уточнить до»). Также добавьте поле `generate_tz: auto | no | deferred` в зависимости от ответа про ТЗ (`auto` = нужно при verify, `no` = не нужно, `deferred` = решить позже).
    - **Если выбрано «Пропустить»:** На шаге 5 при генерации `proposal.md` запишите нормализованные плейсхолдеры:
      - `developer: <developer>`
      - `zni_id: <zni_id>`
      - `zni_name: <заполняется из темы>`
+     - `generate_tz: auto` (по умолчанию)
      А также при генерации `tasks.md` добавьте в блок `## Follow-up` (или создайте его в конце файла) задачу:
      `- [ ] F1 Заполнить Metadata (developer / zni_id) в proposal.md до первого кода`
 
@@ -153,7 +157,7 @@ Fast-forward through artifact creation - generate everything needed to start imp
         6. Если mismatches нет — лог «Acceptance ↔ Scenario mapping OK».
       - **All other artifacts**: Create the artifact file using `template` as the structure
       - Apply `context` and `rules` as constraints - but do NOT copy them into the file
-      - **Metadata block**: When creating `proposal.md`, ALWAYS add the `## Metadata (comment markers)` block (with developer, zni_id, zni_name) immediately after `## Why`.
+      - **Metadata block**: When creating `proposal.md`, ALWAYS add the `## Metadata (comment markers)` block (with developer, zni_id, zni_name, generate_tz) immediately after `## Why`.
       - Show brief progress: "✓ Created <artifact-id>"
 
    b. **Continue until all `applyRequires` artifacts are complete**
@@ -183,15 +187,21 @@ Fast-forward through artifact creation - generate everything needed to start imp
          - **Structural triggers**: >1 file affected, >10 lines of change, contract/API changes
       2. Check if `architecture-*.md` already exists in `reports/` (from prior explore session)
       3. **If triggers fired AND no architecture report**:
-         - **MANDATORY PAUSE** — AskQuestion:
+         - **MANDATORY PAUSE** — Если пользователь не передал флаг `--skip-architect <причина>`, вывести информационное сообщение (без AskQuestion с выбором пропуска):
            ```
            Design создан. Сработали триггеры Architect Gate: [list].
-           Рекомендуется архитектурное ревью перед продолжением.
-           1. Запустить архитектора
-           2. Пропустить (задокументировать отказ)
+           Архитектурный анализ обязателен и запускается сейчас.
+           Если нужно сознательно отложить — завершите ff и запустите его повторно с флагом `--skip-architect <причина>`.
            ```
-         - Option 1 → delegate to `onec-code-architect` with design review brief. Save report to `reports/architecture-ff-YYYY-MM-DD.md`. If architect suggests design changes — apply them to design.md, show diff to user.
-         - Option 2 → document skip: add note to design.md footer: `<!-- Architect Gate: triggers [...] fired, skipped by user at ff -->`
+         - Delegate to `onec-code-architect` with design review brief. Save report to `reports/architecture-ff-YYYY-MM-DD.md`. If architect suggests design changes — apply them to design.md, show diff to user.
+         - **Error handling for architect:** Если агент упал (после 1 retry), оркестратор проводит self-review по шаблону архитектора (структура отчёта + пометка «self-review fallback, agent unavailable») и обязательно пишет файл `reports/architecture-ff-selfreview-YYYY-MM-DD.md`.
+         - **If `--skip-architect <причина>` was provided:** Создать файл `.gate-override.yaml` в корне change с содержимым:
+           ```yaml
+           gate: architect
+           reason: "<причина>"
+           timestamp: <текущая дата ISO>
+           ```
+           Продолжить без вызова архитектора.
       4. **If triggers fired AND architecture report exists** → OK, continue
       5. **If no triggers fired** → continue without pause
 

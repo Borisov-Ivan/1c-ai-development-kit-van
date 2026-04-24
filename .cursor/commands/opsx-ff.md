@@ -12,3 +12,4 @@ Fast-forward through artifact creation - generate everything needed to start imp
 **Второе действие:** Metadata Gate. Запросите developer, zni_id и zni_name. Без ответа пользователя команда `openspec new change` не запускается.
 
 Input: argument after the command is the change name (kebab-case) or a description of what the user wants to build.
+Optional flag: `--skip-architect "<причина>"` to bypass mandatory Architect Gate.

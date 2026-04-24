@@ -7,7 +7,7 @@ description: "Универсальный quality gate: slice-pre / slice-post / 
 
 Universal quality gate for OpenSpec changes. Режим определяется автоматически по структуре `tasks.md`:
 
-- **slice-pre** — ЗНИ в slice mode, ни один срез ещё не принят (артефакты, качество задач, когерентность срезов через Quality Controller, Architect readiness, ТЗ при пороге, gates).
+- **slice-pre** — ЗНИ в slice mode, ни один срез ещё не принят (артефакты, качество задач, когерентность срезов через Quality Controller, Architect readiness, ТЗ (опционально по `generate_tz`), gates).
 - **slice-post** — часть срезов принята; для принятых выполняются post-checks (completeness, correctness, coherence), для непринятых — pre-checks.
 - **slice-post (final)** — все срезы приняты, готов к archive.
 - **slice-transition** — после `S<N>.T<M>` = `[x]` оценка актуальности upcoming срезов (вызывается apply на slice-gate или вручную).

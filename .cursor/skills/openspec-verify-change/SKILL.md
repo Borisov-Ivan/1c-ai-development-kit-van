@@ -160,19 +160,11 @@ Tier: Standard (12 задач, 3 среза)
 
 4b. **Determine verification tier**
 
-   | Tier | Условие | QC (7.6) | Architect (7.7) | TZ (7.8) |
-   |------|---------|----------|-----------------|----------|
-   | Lite | ≤ 5 задач AND 1 срез (или legacy без группировки) | SKIP | YES (compact) | SKIP (порог 6+) |
-   | Standard | 6–15 задач OR 2+ срезов | YES | YES | YES (порог 6+) |
-   | Full | ≥ 16 задач OR 3+ срезов OR slice-transition mode | YES | YES | YES |
+   Все ЗНИ верифицируются по единому стандарту (Standard/Full).
+   - QC (шаг 7.6) и Architect (шаг 7.7) вызываются всегда.
+   - ТЗ (шаг 7.8) генерируется в зависимости от параметра `generate_tz`.
 
-   Tier выбирается автоматически. Пользователь может повысить:
-   `/opsx:verify <name> --full` или `--standard`.
-   Понижение недопустимо — только повышение.
-
-   В режимах `--slice S<N>` и `slice-transition` tier автоматически = Standard (минимум), повышается до Full при обнаружении 3+ срезов в ЗНИ.
-
-   Объявить пользователю: "Tier: Lite (5 задач, один срез S1)" или "Tier: Standard (8 задач, 3 среза)".
+   Объявить пользователю: "Tier: Standard (<N> задач, <M> срезов)".
 
 5. **Initialize report structure**
 
@@ -219,48 +211,24 @@ Tier: Standard (12 задач, 3 среза)
    For each task line (matching `- [ ] N.M` or bare `- N.M`):
 
    **7A. Classify task type:**
-   - **Code task**: mentions `.bsl`, `процедур`, `функци`, `реализовать`, `добавить`, `изменить`, `перехват`, `аннотаци` — requires file path and acceptance criteria
-   - **Metadata task**: mentions `создать в расширении`, `регистр`, `обработк`, `справочник`, `форм` without `.bsl` path — requires action description and expected result
-   - **Test task**: mentions `тест`, `проверить`, `убедиться`, `регрессия` — requires action steps and expected result
-   - **Investigation task**: mentions `обследова`, `найти`, `проверить путь`, `зафиксировать` — requires what to find and acceptance criteria
+   - **Code task**: mentions `.bsl`, `процедур`, `функци`, `реализовать`, `добавить`, `изменить`, `перехват`, `аннотаци`
+   - **Metadata task**: mentions `создать в расширении`, `регистр`, `обработк`, `справочник`, `форм` without `.bsl` path
+   - **Test task**: mentions `тест`, `проверить`, `убедиться`, `регрессия`
+   - **Investigation task**: mentions `обследова`, `найти`, `проверить путь`, `зафиксировать`
 
-   **7B. Check required elements by task type:**
+   *(Примечание: проверки на наличие путей, критериев приёмки и размытых формулировок делегированы Quality Controller в критерий Task Readability).*
 
-   | Element | Code task | Metadata task | Test task | Investigation task |
-   |---|---|---|---|---|
-   | File path (`src/...` or backticked path) | CRITICAL if absent | SUGGESTION | N/A | SUGGESTION |
-   | Acceptance criteria (`Критерии приёмки` / `Что проверить` / bullet list under task) | CRITICAL if absent | WARNING if absent | WARNING if absent | WARNING if absent |
-   | Specific action (`Что делать` / `Что менять` or clear verb phrase) | WARNING if vague | WARNING if vague | WARNING if vague | WARNING if vague |
-   | Dependencies (`Зависимости` when task refs other groups) | WARNING if absent | WARNING if absent | N/A | WARNING if absent |
-
-   **7C. Ambiguity markers (Grep on tasks.md):**
-   Search for patterns indicating vagueness:
-   - `или аналог` — CRITICAL: which one exactly?
-   - `при необходимости` — WARNING: what condition triggers necessity?
-   - `и т.д.`, `и т.п.`, `и др.` — WARNING: incomplete enumeration
-   - `при наличии` — WARNING: presence of what?
-   - `по возможности` — WARNING: is this optional?
-   - `примерно`, `ориентировочно` — WARNING: imprecise
-   - `какой-либо`, `подобн` — WARNING: which one?
-   - `(или ...)` — WARNING: alternatives not resolved
-   - `переиспользовать логику X или Y` — CRITICAL: decision not made
-   - `X/Y` (слэш между существительными рядом с глаголами действия: `вернуть`, `использовать`, `установить`, `записать`) — WARNING: альтернатива не разрешена
-   - `Неопределено`, `Null`, `""`, `пустая строка`, `пустое значение` без указания контракта возврата — CRITICAL: какой контракт возврата?
-   - `X или Y` при двух глаголах действия (`добавить X или получать Y`, `создать X или использовать Y`) — CRITICAL: решение не принято
-
-   For each found marker: report the task number, the marker, and a recommendation to clarify.
-
-   **7D. Atomicity check:**
+   **7B. Atomicity check:**
    If a single task line (before sub-items) contains 3+ distinct verbs of action (`создать`, `реализовать`, `добавить`, `обернуть`, `проверить`, etc.): WARNING "task may not be atomic — consider splitting".
 
-   **7E. Repo Consistency:**
+   **7C. Repo Consistency:**
    For tasks containing «создать» + object type (`регистр`, `обработк`, `справочник`, `документ`, `форм`):
    - Extract the object name from the task description
    - Glob the repository for a directory or file matching that name (e.g., `**/InformationRegisters/<Name>`, `**/DataProcessors/<Name>`, `**/Catalogs/<Name>`)
    - If object **already exists**: WARNING — "Задача N.M говорит «создать X», но X уже существует в репозитории (`path`). Уточнить: «доработать» / «наполнить содержимым»?"
    - If object **does not exist**: OK (consistent with «создать»)
 
-   **7F. Executability & Ordering Check:**
+   **7D. Executability & Ordering Check:**
 
    Mechanical pre-check for all tasks (enriches data for QC step 7.6).
 
@@ -325,7 +293,7 @@ Tier: Standard (12 задач, 3 среза)
    **7F.5 Deprecated phase-gate detection:**
    Grep tasks.md for `<!-- phase-gate` markers. If found → SUGGESTION `deprecated-phase-gate`: "устаревший маркер фазового gate — рекомендуется `/opsx:verify --migrate-to-slices`".
 
-   Pass all 7F results to Quality Controller (step 7.6) and Architect (step 7.7): "Executability issues (verify 7F): <list or 'замечаний нет'>".
+   Pass all 7D results to Quality Controller (step 7.6) and Architect (step 7.7): "Executability issues (verify 7D): <list or 'замечаний нет'>".
 
    **Reference format** (for recommendations):
    ```
@@ -397,9 +365,9 @@ Tier: Standard (12 задач, 3 среза)
    - Full text of: tasks.md (including `# Срез` headers и метаданные), design.md (including `## Slices`), proposal.md
    - Paths to specs/ files
    - Checklist table from step 7.5 (if manual config markers were found), or "маркеров ручной конфигурации не найдено"
-   - List of issues from steps 7A-7E (if any), or "механических замечаний нет"
-   - Executability issues from step 7F (if any), or "замечаний выполнимости нет"
-   - Acceptance mapping issues (verify 7F.3b): per-slice list of mismatches between `**Связь со spec:**` Scenarios и `T<M>` Scenario-ссылок, or "замечаний по приёмке нет". QC использует это как вход критерия 5b.
+   - List of issues from steps 7A-7C (if any), or "механических замечаний нет"
+   - Executability issues from step 7D (if any), or "замечаний выполнимости нет"
+   - Acceptance mapping issues (verify 7D.3b): per-slice list of mismatches between `**Связь со spec:**` Scenarios и `T<M>` Scenario-ссылок, or "замечаний по приёмке нет". QC использует это как вход критерия 5b.
    - Repository state (object/file existence and emptiness list)
 
    **Quality Controller prompt** (use agent file `.cursor/agents/openspec-quality-controller.md`):
@@ -462,9 +430,9 @@ Tier: Standard (12 задач, 3 среза)
    - Full text of: tasks.md, design.md, proposal.md
    - Paths to specs/ files (architect reads them)
    - Checklist table from step 7.5 (if manual config markers were found), or "маркеров ручной конфигурации не найдено"
-   - List of issues from steps 7A-7E (if any), or "механических замечаний нет"
-   - Executability issues from step 7F (if any), or "замечаний выполнимости нет"
-   - Acceptance mapping issues (verify 7F.3b): per-slice list of mismatches `T<M>` ↔ Scenario, or "замечаний по приёмке нет". Архитектор может рекомендовать перенос non-scenario проверок в `design.md#Assumptions` / обычные задачи / `## Follow-up` (таблица правила среза 6, `.cursor/rules/vertical-slices.mdc`).
+   - List of issues from steps 7A-7C (if any), or "механических замечаний нет"
+   - Executability issues from step 7D (if any), or "замечаний выполнимости нет"
+   - Acceptance mapping issues (verify 7D.3b): per-slice list of mismatches `T<M>` ↔ Scenario, or "замечаний по приёмке нет". Архитектор может рекомендовать перенос non-scenario проверок в `design.md#Assumptions` / обычные задачи / `## Follow-up` (таблица правила среза 6, `.cursor/rules/vertical-slices.mdc`).
    - Quality Controller result: slice summary, scenario coverage matrix, alerts from step 7.6 (or "Quality Controller пропущен (Lite tier)")
 
    **Architect prompt (Standard/Full tier)** (use template from `1c-agent-patterns/SKILL.md`, section "Architect — task readiness review (verify шаг 7.7)"):
@@ -483,7 +451,7 @@ Tier: Standard (12 задач, 3 среза)
    - tasks: <путь>
    - specs: <путь>
    - Чеклист ручной конфигурации (verify, шаг 7.5): <чеклист-таблица или «маркеров не найдено»>
-   - Замечания механических проверок (verify, шаги 7A-7E): <список или «замечаний нет»>
+   - Замечания механических проверок (verify, шаги 7A-7C): <список или «замечаний нет»>
    - Когерентность срезов (verify, шаг 7.6 Quality Controller): <slice summary + scenario coverage matrix + alerts или «замечаний нет»>
 
    ## Критерии оценки
@@ -579,7 +547,7 @@ Tier: Standard (12 задач, 3 среза)
    - design: <путь>
    - tasks: <путь>
    - specs: <путь>
-   - Замечания механических проверок (verify, шаги 7A-7E): <список или «замечаний нет»>
+   - Замечания механических проверок (verify, шаги 7A-7C): <список или «замечаний нет»>
    - Проблемы выполнимости (verify, шаг 7F): <список или «замечаний нет»>
 
    ## Критерии оценки
@@ -638,11 +606,15 @@ Tier: Standard (12 задач, 3 среза)
    Generates a human-readable technical specification (ТЗ) document from change artifacts. The TZ serves as a functional requirements artifact oriented at stakeholder review. Gaps in TZ generation reveal gaps in source artifacts.
 
    **Порог обязательности (для режимов slice-pre, slice-post (для непринятых срезов) и legacy pre-apply / mixed):**
-   - Подсчитать в `tasks.md` строки с `- [ ]` и `- [x]` (каждая строка задачи с чекбоксом = одна задача).
-   - **6 и более** задач → ТЗ **генерируется обязательно** (выполнить **Logic** ниже). Порог согласован с `sdd-workflow.mdc` (секция Scale thresholds).
-   - **1–5** задач → ТЗ **не генерировать**, если пользователь **явно** не запросил ТЗ в том же сообщении (фразы вроде «с ТЗ», «сгенерируй ТЗ», «нужно ТЗ», «включи ТЗ») и не указывал отдельно `/opsx:doc-tz`. В отчёте verify: «ТЗ: не генерировалось (5 или менее задач по чекбоксам). При необходимости: `/opsx:doc-tz <name>`.» Перейти к шагу 9 без записи `ТЗ.md`.
-   - **0** задач с чекбоксами (например, только bare-строки) → трактовать как «меньше порога»; ТЗ не генерировать, если нет явного запроса.
-   - **Явный запрос ТЗ** в сообщении пользователя → генерировать **независимо** от количества задач.
+   - Прочитать поле `generate_tz` из блока `## Metadata` в `proposal.md`.
+   - Если `generate_tz: no` → ТЗ **не генерировать**. В отчёте verify: «ТЗ: не генерировалось (отключено пользователем).» Перейти к шагу 9.
+   - Если `generate_tz: deferred` → ТЗ **не генерировать**. В отчёте verify: «ТЗ: отложено. При необходимости: `/opsx:doc-tz <name>`.» Перейти к шагу 9.
+   - Если `generate_tz: auto` (или поле отсутствует):
+     - Подсчитать в `tasks.md` строки с `- [ ]` и `- [x]` (каждая строка задачи с чекбоксом = одна задача).
+     - **6 и более** задач → ТЗ **генерируется обязательно** (выполнить **Logic** ниже). Порог согласован с `sdd-workflow.mdc` (секция Scale thresholds).
+     - **1–5** задач → ТЗ **не генерировать**, если пользователь **явно** не запросил ТЗ в том же сообщении (фразы вроде «с ТЗ», «сгенерируй ТЗ», «нужно ТЗ», «включи ТЗ») и не указывал отдельно `/opsx:doc-tz`. В отчёте verify: «ТЗ: не генерировалось (5 или менее задач по чекбоксам). При необходимости: `/opsx:doc-tz <name>`.» Перейти к шагу 9 без записи `ТЗ.md`.
+     - **0** задач с чекбоксами (например, только bare-строки) → трактовать как «меньше порога»; ТЗ не генерировать, если нет явного запроса.
+   - **Явный запрос ТЗ** в сообщении пользователя → генерировать **независимо** от количества задач и значения `generate_tz`.
 
    **Перезапись `ТЗ.md`:** если файл уже существует — **перезаписывать** только при фактической генерации в этом прогоне (порог выполнен или явный запрос). Если генерация **пропущена** по порогу — **сохранить** существующий `ТЗ.md` без изменений; в отчёте: «ТЗ: существующий файл сохранён (ниже порога обязательности / генерация не требовалась).»
 
@@ -657,7 +629,7 @@ Tier: Standard (12 задач, 3 среза)
 
    Если шаг 7.8 пропущен по порогу — в отчёте указать статус **skipped (threshold)** и не выполнять пункты 4–5b Logic для ТЗ.
 
-9. **Architect Gate Check**
+9. **Architect & Design Gate Check**
 
    Check triggers from `architect-gate.mdc`:
 
@@ -669,10 +641,13 @@ Tier: Standard (12 задач, 3 среза)
    - Grep design.md for new metadata: `новый регистр`, `создать регистр`, `новый документ`, `создать документ`, `новый справочник`, `создать справочник`, `новый БП`, `создать БП`
 
    **Semantic triggers:**
-   - Grep design.md for: `&Вместо`, `&После`, `&Перед`
+   - Grep design.md for: `&Вместо`, `&После`, `&Перед`, `&ИзменениеИКонтроль`
    - Check if design mentions alternative approaches without resolution
    - Grep design.md for missing `## Existing Mechanisms` when integration is described
    - Grep design.md for missing `## Design Rationale` when integration is described
+   - Grep tasks.md for conditional branching: `При отрицательн`, `Если в п.`, `Альтернатив`, `workaround`, `Иначе →`, `Иначе —`
+   - Grep design.md for `вероятно`, `возможно`, `скорее всего`, `гипотеза` without `## Hypotheses` section
+   - Grep tasks.md for manual config markers + check design.md for exhaustive instructions (names, types, form elements). If tasks require manual config but design lacks full description → trigger fires
 
    **Structural triggers:**
    - Count distinct files in tasks.md — >1 file affected?
@@ -680,6 +655,7 @@ Tier: Standard (12 задач, 3 среза)
 
    **Gate closure check:**
    - Glob `reports/architecture-*.md` in change dir and `temp/reports/`
+   - Check for `.gate-override.yaml` in change dir.
 
    **Debug fix check (дополнительно):**
    - Grep tasks.md на маркеры: `(исправление)`, `RCA:`, `корневая причина`, `reports/trace-analysis`, `reports/exploration`
@@ -688,27 +664,13 @@ Tier: Standard (12 задач, 3 среза)
 
    **Result:**
    - No triggers fired AND (no debug fix markers OR architecture-*.md exists) → `OK`
-   - Triggers fired AND `architecture-*.md` exists → `OK (отчёт: <filename>)`
-   - Triggers fired AND NO `architecture-*.md` → CRITICAL: "Сработали маркеры Architect Gate: [list]. Архитектурный анализ не найден. Рекомендация: запустить `/opsx:verify` с опцией устранения или onec-code-architect вручную"
+   - Triggers fired AND `architecture-*.md` exists (но не `selfreview`) → `OK (отчёт: <filename>)`
+   - Triggers fired AND `architecture-ff-selfreview-*.md` exists → `OK (отчёт: <filename>)` + SUGGESTION: "Архитектурное ревью выполнено оркестратором (self-review fallback). Рекомендуется повторить ревью настоящим агентом до apply."
+   - Triggers fired AND NO `architecture-*.md` AND `.gate-override.yaml` exists → 
+     - Прочитать `timestamp` из `.gate-override.yaml`. Если прошло ≤ 7 дней → WARNING: "Architect Gate отложен пользователем (причина: <reason>). Отсрочка истекает через <N> дней."
+     - Если прошло > 7 дней → CRITICAL: "Отсрочка Architect Gate истекла. Архитектурный анализ не найден. Рекомендация: запустить `/opsx:verify` с опцией устранения или onec-code-architect вручную."
+   - Triggers fired AND NO `architecture-*.md` AND NO `.gate-override.yaml` → CRITICAL: "Сработали маркеры Architect Gate: [list]. Архитектурный анализ не найден. Рекомендация: запустить `/opsx:verify` с опцией устранения или onec-code-architect вручную."
    - Debug fix markers in tasks AND NO `architecture-*.md` → CRITICAL (см. Debug fix check выше)
-
-10. **Design Review Gate Check**
-
-   Check triggers from `architect-gate.mdc` (DESIGN REVIEW section):
-   1. Glob `reports/trace-analysis-*.md` + `reports/exploration-*.md` — total >= 2?
-   2. Grep design.md / proposal.md for bug fix markers
-   3. Grep design.md / proposal.md for `&ИзменениеИКонтроль`
-   4. Grep tasks.md for conditional branching: `При отрицательн`, `Если в п.`, `Альтернатив`, `workaround`, `Иначе →`, `Иначе —`
-   5. Grep design.md for `вероятно`, `возможно`, `скорее всего`, `гипотеза` without `## Hypotheses` section
-   6. Grep tasks.md for manual config markers (`создать в расширении`, `добавить форму`, `создать обработку`, `создать регистр`, `добавить реквизит`, `создать справочник`) + check design.md for exhaustive instructions (names, types, form elements). If tasks require manual config but design lacks full description → trigger fires
-
-   **Gate closure check:**
-   - Glob `reports/design-review-*.md` in change dir
-
-   **Result:**
-   - No triggers fired → `OK`
-   - Triggers fired AND `design-review-*.md` exists → `OK (отчёт: <filename>)`
-   - Triggers fired AND no review → WARNING: "Сработали маркеры Design Review: [list]. Ревью постановки не проводилось. Рекомендация: запустить ревью"
 
 11. **TZ Review Check**
 
@@ -846,49 +808,48 @@ Tier: Standard (12 задач, 3 среза)
 Зафиксировать в отчёте: «Reclassified: <тип> judgment → mechanical
 (determinism test: единственное допустимое исправление)».
 
-## Issue Classification (mechanical / judgment)
+## Issue Classification (auto / decision / INFO)
 
 После Promotion Test каждое замечание с severity CRITICAL / WARNING / SUGGESTION дополнительно классифицируется для маршрутизации в Phase A (авто-исправление) или Phase B (карточки решений). Классификация определяет **кто** принимает решение: машина или пользователь.
 
-**Критерий mechanical:** исправление детерминировано (однозначная замена), не меняет scope / логику / порядок задач, обратимо через git.
+**Критерий auto:** исправление детерминировано (однозначная замена), не меняет scope / логику / порядок задач, обратимо через git.
 
-**Критерий judgment:** правка меняет scope, порядок, подход, архитектуру или контракт — решение пользователя приведёт к **разному коду** при apply.
+**Критерий decision:** правка меняет scope, порядок, подход, архитектуру или контракт — решение пользователя приведёт к **разному коду** при apply.
 
 | Тип замечания | Класс | Обоснование |
 |---|---|---|
-| Missing checkboxes (6A) | mechanical | Формат, не меняет содержание |
-| TZ lexicon violation (7.8 / 11) | mechanical | Замена слов по реестру, детерминировано |
-| Repo Consistency wording (7E) | mechanical | `создать X` → `доработать X` при доказанном существовании объекта |
-| Missing slice-gate marker (QC `missing-slice-gate-marker`) | mechanical | Добавить `<!-- slice-gate: ... -->` в конец среза по тексту S<N>.T<M> |
-| Stale slice dependency (QC `stale-slice-dep`) | mechanical | Удалить ссылку на несуществующий срез из `**Зависимости:**` |
-| `deprecated-phase-gate` (legacy) | mechanical → или предлагать `--migrate-to-slices` при больших ЗНИ | Удалить устаревший маркер; миграция — отдельный режим |
-| Опциональная задача без явного N/A-критерия | mechanical | Добавить «N/A если не воспроизведено» — детерминировано |
-| Неверная метка типа задачи (BSL code вместо manual) | mechanical | Замена слова, не меняет содержание |
-| Missing paths/subsystems | mechanical | Если путь или подсистему можно однозначно найти в `project.md` или репозитории |
-| Design/Tasks divergence (пропущенная задача) | mechanical | Если решение уже утверждено в `design.md` (например, D4, D5), авто-добавление задачи — это синхронизация, а не изменение scope |
-| Task quality — ambiguity, missing details (7B / 7C) | judgment | Architect может переформулировать scope (если деталь не выводится однозначно из проекта) |
-| Architect Gate not closed (9) | judgment | Архитектурный отчёт может изменить подход |
-| Design Review not done (10) | judgment | Ревью может выявить пробелы в design |
-| `scenario-uncovered` (QC 7.6) | judgment | Решение: добавить срез или расширить существующий — меняет состав работ |
-| `dependency-cycle`, `coupling-violation`, `forward-slice-dep`, `backward-reference` (QC) | judgment | Требует перестройки графа срезов |
-| `slice-incomplete`, `missing-slice-test` (QC) | judgment | Нужно либо добавить недостающие задачи, либо переразрезать |
-| `acceptance-scenario-duplication` (QC 5b / verify 7F.3b) | judgment | Решение: удалить `T<M>`, объединить с срезом-источником или принять дублирование |
-| `acceptance-without-scenario` (QC 5b / verify 7F.3b) | judgment | Решение: перенести в `design.md#Assumptions` / обычную задачу / `## Follow-up`, или привязать `T<M>` к Scenario (требует обновить spec) |
-| `scenario-uncovered-by-acceptance` (QC 5b / verify 7F.3b) | judgment | Scenario заявлен в `**Связь со spec:**`, но ни один `T<M>` его не покрывает — добавить `T<M>` или снять Scenario из `**Связь со spec:**` |
-| `acceptance-overload` (QC 5b / verify 7F.3b) | footnote | Признак раздутой приёмки: |T<M>| > 2 × |Scenarios|; показать «К сведению», не блокировать |
-| `task-opaque-acceptance` (QC 7 / task-readability) | judgment | `T<M>` без `(Scenario: «…»)` или без пользовательского действия в первых 12 словах — переформулировать или перенести non-scenario проверку |
-| `rework-risk-on-unaccepted`, `unaccepted-slice-in-progress` (QC) | judgment | Решение: ждать приёмки или принять риск переделки |
-| Executability issues (7F) | judgment | Зависимости влияют на порядок реализации |
-| `no-slices` (QC) | judgment | Решение: запустить `--migrate-to-slices` или продолжить в legacy |
-| Project constraints violation (12) | judgment | Меняет целевые каталоги |
-| Suboptimal architecture / Design Smell (7.7) | judgment | Требует перепроектирования (изменение scope и подхода) |
-| TZ generation gaps (7.8) | footnote | ТЗ — документ для заказчика, не для apply |
-| TZ review remarks (11) | footnote | Не влияет на реализацию |
-| Incomplete tasks / срезы «ожидает» (slice-post / legacy 13) | footnote | Рекомендация `/opsx:apply` |
-| Spec/design divergence (post-apply, 15) | footnote | Информационное расхождение |
-| `hypothesis-dep` — гипотеза в Open Questions, fallback безопасен (design) | footnote | Информация о риске, не требует правки артефакта |
+| Missing checkboxes (6A) | auto | Формат, не меняет содержание |
+| TZ lexicon violation (7.8 / 11) | auto | Замена слов по реестру, детерминировано |
+| Repo Consistency wording (7E) | auto | `создать X` → `доработать X` при доказанном существовании объекта |
+| Missing slice-gate marker (QC `missing-slice-gate-marker`) | auto | Добавить `<!-- slice-gate: ... -->` в конец среза по тексту S<N>.T<M> |
+| Stale slice dependency (QC `stale-slice-dep`) | auto | Удалить ссылку на несуществующий срез из `**Зависимости:**` |
+| `deprecated-phase-gate` (legacy) | auto → или предлагать `--migrate-to-slices` при больших ЗНИ | Удалить устаревший маркер; миграция — отдельный режим |
+| Опциональная задача без явного N/A-критерия | auto | Добавить «N/A если не воспроизведено» — детерминировано |
+| Неверная метка типа задачи (BSL code вместо manual) | auto | Замена слова, не меняет содержание |
+| Missing paths/subsystems | auto | Если путь или подсистему можно однозначно найти в `project.md` или репозитории |
+| Design/Tasks divergence (пропущенная задача) | auto | Если решение уже утверждено в `design.md` (например, D4, D5), авто-добавление задачи — это синхронизация, а не изменение scope |
+| Task quality — ambiguity, missing details (QC Task Readability) | decision | Architect может переформулировать scope (если деталь не выводится однозначно из проекта) |
+| Architect & Design Gate not closed (9) | decision | Архитектурный отчёт может изменить подход |
+| `scenario-uncovered` (QC 7.6) | decision | Решение: добавить срез или расширить существующий — меняет состав работ |
+| `dependency-cycle`, `coupling-violation`, `forward-slice-dep`, `backward-reference` (QC) | decision | Требует перестройки графа срезов |
+| `slice-incomplete`, `missing-slice-test` (QC) | decision | Нужно либо добавить недостающие задачи, либо переразрезать |
+| `acceptance-scenario-duplication` (QC 5b / verify 7D.3b) | decision | Решение: удалить `T<M>`, объединить с срезом-источником или принять дублирование |
+| `acceptance-without-scenario` (QC 5b / verify 7D.3b) | decision | Решение: перенести в `design.md#Assumptions` / обычную задачу / `## Follow-up`, или привязать `T<M>` к Scenario (требует обновить spec) |
+| `scenario-uncovered-by-acceptance` (QC 5b / verify 7D.3b) | decision | Scenario заявлен в `**Связь со spec:**`, но ни один `T<M>` его не покрывает — добавить `T<M>` или снять Scenario из `**Связь со spec:**` |
+| `acceptance-overload` (QC 5b / verify 7D.3b) | INFO | Признак раздутой приёмки: |T<M>| > 2 × |Scenarios|; показать «К сведению», не блокировать |
+| `task-opaque-acceptance` (QC 7 / task-readability) | decision | `T<M>` без `(Scenario: «…»)` или без пользовательского действия в первых 12 словах — переформулировать или перенести non-scenario проверку |
+| `rework-risk-on-unaccepted`, `unaccepted-slice-in-progress` (QC) | decision | Решение: ждать приёмки или принять риск переделки |
+| Executability issues (7D) | decision | Зависимости влияют на порядок реализации |
+| `no-slices` (QC) | decision | Решение: запустить `--migrate-to-slices` или продолжить в legacy |
+| Project constraints violation (12) | decision | Меняет целевые каталоги |
+| Suboptimal architecture / Design Smell (7.7) | decision | Требует перепроектирования (изменение scope и подхода) |
+| TZ generation gaps (7.8) | INFO | ТЗ — документ для заказчика, не для apply |
+| TZ review remarks (11) | INFO | Не влияет на реализацию |
+| Incomplete tasks / срезы «ожидает» (slice-post / legacy 13) | INFO | Рекомендация `/opsx:apply` |
+| Spec/design divergence (post-apply, 15) | INFO | Информационное расхождение |
+| `hypothesis-dep` — гипотеза в Open Questions, fallback безопасен (design) | INFO | Информация о риске, не требует правки артефакта |
 
-**Класс footnote:** замечания с severity SUGGESTION, не влияющие на ход реализации. Показываются пользователю в секции «К сведению» (одна строка каждое) — не как карточка решения и не как авто-исправление.
+**Класс INFO:** замечания, не влияющие на ход реализации. Показываются пользователю в секции «К сведению» (одна строка каждое) — не как карточка решения и не как авто-исправление.
 
 ---
 
@@ -903,17 +864,9 @@ Tier: Standard (12 задач, 3 среза)
     ```
     ## Executive Summary
 
-    **Режим:** <slice-pre | slice-post | slice-post (final) | slice-scoped (S<N>) | slice-transition (после S<N>) | migrate-to-slices | legacy pre-apply | legacy mixed | legacy post-apply>
-    **Tier:** <Lite | Standard | Full> (<K задач, M срезов>)
-    **Этап:** <pre-apply | post-apply | slice transition | migration>
-
-    **Вердикт:** N CRITICAL, M WARNING, K SUGGESTION
-    **Контекст (INFO):** <число> пометок — см. секцию «Контекст (INFO)» ниже *(только если INFO > 0; иначе строку опустить)*
-    **Решений от пользователя:** <число> — <перечень решений или «не требуется»>
-    **Статус:** <одна фраза>
+    **Режим:** <mode> | **Tier:** <tier> | **Этап:** <этап>
+    **Вердикт:** N CRITICAL, M WARNING, K SUGGESTION. Решений от пользователя: <число>. Статус: <статус>
     ```
-
-    Первые три строки (Режим / Tier / Этап) **обязательны** и **должны совпадать** с объявлением пользователю на шаге 1. См. единую нотацию срезов в `verify-user-communication.mdc` правила 10–11.
 
     Правила заполнения:
     - Счётчики **Вердикта** учитывают только CRITICAL / WARNING / SUGGESTION. **INFO не входят** в N, M, K.
@@ -921,7 +874,7 @@ Tier: Standard (12 задач, 3 среза)
     - Только WARNING (INFO допускаются) → Статус: «Готов при принятии рисков: [перечень WARNING]»
     - Только SUGGESTION (INFO допускаются) → Статус: «Готов. Предложения к сведению»
     - Нет CRITICAL, нет WARNING, нет SUGGESTION (возможны только INFO) → Статус: «Все проверки пройдены. Готов к apply/archive»
-    - «Решений от пользователя» — перечислить конкретные решения, которые не может принять машина (выбор подхода, отложить/реализовать задачу, принять риск). Если таких нет — «не требуется». INFO **не** считаются запросом решения.
+    - «Решений от пользователя» — перечислить конкретные решения, которые не может принять машина (выбор подхода, отложить/реализовать задачу, принять риск). Если таких нет — «0». INFO **не** считаются запросом решения.
 
     **Summary Scorecard (после Executive Summary):**
     ```
