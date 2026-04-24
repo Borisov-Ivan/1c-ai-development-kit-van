@@ -78,7 +78,30 @@ Archive a completed change in the experimental workflow.
 
    **If no tasks file exists:** Proceed without task-related warning.
 
-3.5. **Check slice acceptance status (slice mode only — HARD BLOCKER)**
+   3.2. **Check developer comment markers balance (HARD BLOCKER)**
+
+   Read `proposal.md` and check for the `## Metadata (comment markers)` block.
+   - If the block exists, extract `zni_id`.
+   - Build a diff of all `*.bsl` files in the change relative to the baseline (merge-base with main/master).
+   - In the diff, count the number of added lines matching the open marker pattern containing `[{zni_id}]` (e.g., `// +++ ... [{zni_id}]`).
+   - Count the number of added lines matching the close marker pattern containing `[{zni_id}]` (e.g., `// --- ... [{zni_id}]`).
+   - **If the counts do not match:**
+     - This is a **hard blocker** (override auto-yes).
+     - Do not execute steps 4–7. Show the user:
+       ```
+       ## Архив заблокирован: дисбаланс маркеров комментариев
+       
+       Обнаружено несовпадение парных маркеров разработчика для ЗНИ {zni_id}:
+       - Открывающих маркеров (// +++): {count_open}
+       - Закрывающих маркеров (// ---): {count_close}
+       
+       Архив возможен только при строгом равенстве.
+       Пожалуйста, проверьте код и добавьте недостающие маркеры.
+       ```
+     - Stop execution (return).
+   - **If counts match (or no markers found):** proceed to the next step.
+
+   3.5. **Check slice acceptance status (slice mode only — HARD BLOCKER)**
 
    Detect slice mode: grep `tasks.md` for `^# Срез S\d+`.
 

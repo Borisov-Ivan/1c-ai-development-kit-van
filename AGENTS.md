@@ -40,6 +40,9 @@
 ## Фиксация договорённостей
 `.cursor/rules/capture-to-project.mdc` — «зафиксируй в проекте» → Read `openspec/project.md` → адаптация под формат секции → подтверждение → запись.
 
+## Маркеры разработчика
+Секция в `openspec/project.md`; метаданные — в `proposal.md` (Metadata); размещение — `onec-code-writer.md`; проверка пар — reviewer/prerelease/archive, scope = diff по zni_id.
+
 ## BSL write guard
 `.cursor/rules/bsl-write-guard.mdc` — глобальный инвариант: правка .bsl только через onec-code-writer + обязательный onec-code-reviewer (любой диалог). `.cursor/rules/1c-agent-delegation.mdc` — детальная диспетчеризация: APPLY GATE, DELEGATION GATE, LINT GATE, API CHECK, EXTENSION GATE.
 

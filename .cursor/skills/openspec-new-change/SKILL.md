@@ -52,6 +52,17 @@ Start a new change using the experimental artifact-driven approach.
 
    **IMPORTANT**: Do NOT proceed without a confirmed change name.
 
+1.5. **Сбор метаданных маркеров (Metadata)**
+   После подтверждения имени и брифа, запросить данные для маркеров разработчика (если они не очевидны из контекста):
+   AskQuestion:
+   ```
+   Для оформления комментариев в коде (// +++ ... [ID#...]) укажите:
+   1. Разработчик (ФИО, например "Борисов И.Г."):
+   2. Идентификатор ЗНИ (например "ID#79714"):
+   3. Название ЗНИ (для комментария, например "Сохранение участников Согласования при частичном повторе 2.1 - развитие"):
+   ```
+   *Примечание: Название ЗНИ можно предзаполнить на основе брифа/имени.*
+
 2. **Determine the workflow schema**
 
    Use the default schema (omit `--schema`) unless the user explicitly requests a different workflow.
@@ -90,6 +101,16 @@ Start a new change using the experimental artifact-driven approach.
    This outputs the template and context for creating the first artifact.
 
 7. **STOP and wait for user direction**
+
+8. **Вставка блока Metadata**
+   При создании `proposal.md` (или сразу после его генерации) обязательно добавить блок метаданных после секции `## Why`:
+   ```markdown
+   ## Metadata (comment markers)
+
+   developer: <ФИО>
+   zni_id: <ID>
+   zni_name: <Название>
+   ```
 
 **Output**
 

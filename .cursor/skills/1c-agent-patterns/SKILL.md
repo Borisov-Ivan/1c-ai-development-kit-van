@@ -964,6 +964,12 @@ Task(
          Только правка существующих .bsl, без новых файлов и метаданных.
          При отсутствии нужного модуля/объекта — СТОП с указанием что добавить.
 
+         ## 3a. COMMENT MARKERS
+         Все новые вставки кода должны быть обёрнуты в маркеры:
+         Open: [вставить open_marker]
+         Close: [вставить close_marker]
+         (Правила размещения — см. твой системный промпт).
+
          ## 4. INPUT CONTRACT
          [Вставить блок ## Project paths из project-paths.mdc]
          [Вставить блок ## BSL_LSP Status: connected|not_connected]
@@ -1026,6 +1032,12 @@ Task(
 
          ## 4. ОГРАНИЧЕНИЯ
          Только правка существующих .bsl, без новых файлов и метаданных.
+
+         ## 4a. COMMENT MARKERS
+         Все новые вставки кода должны быть обёрнуты в маркеры:
+         Open: [вставить open_marker]
+         Close: [вставить close_marker]
+         (Правила размещения — см. твой системный промпт).
 
          ## 5. INPUT CONTRACT
          [Вставить блок ## Project paths из project-paths.mdc]
@@ -1178,6 +1190,12 @@ Task(
            AP-007 (не перезаписывать параметры: ввести локальную
            переменную).
 
+         ## 4a. COMMENT MARKERS
+         Если исправление требует добавления новых строк — оберни их в маркеры:
+         Open: [вставить open_marker]
+         Close: [вставить close_marker]
+         (Правила размещения — см. твой системный промпт).
+
          ## 5. GATES
          [Вставить блок DATA_CONTRACT_GATE]
          [Вставить блок INTEGRATION_CONTRACT_GATE]
@@ -1227,6 +1245,9 @@ Task(
          ## Whitelist & Mandatory Controls (from project.md)
          [Блок из шага 1.6.1 — две таблицы (Whitelist предрелиза, Обязательный контроль) для release-hygiene rules AP-040..AP-043.]
 
+         ## Comment Markers Metadata (from proposal.md)
+         [Если review_mode = change-scoped: извлечь блок `## Metadata (comment markers)` из proposal.md (developer, zni_id, zni_name). Передать ревьюверу для проверки парности маркеров по BORDER-PAIR-001.]
+
          ## Mandatory Control Signals (evidence)
          [Опционально — из шага 1.6.2, если есть regex-нарушения. Таблица Rule ID / File:Line / Observed / Expected.]
 
@@ -1269,6 +1290,7 @@ Task(
          Category 9 Code Cleanliness включая log-literal artefacts: имя события ЖР и текст сообщения/СтрШаблон не должны содержать маркеры постановки (S<N>, D<N>, kebab-case change, Decision); отладочный ЗаписьЖурналаРегистрации (Информация/Предупреждение/Примечание) без требования в tasks.md/design.md — удалить или оформить требование. Action: MUST_FIX.
          Пустые процедуры/функции/обработчики (empty-unused / empty-body / empty-handler) в границах ревью — Action: MUST_FIX (обработчики без привязки к элементу — инструкция правки Form.xml вручную).
          Если в промпте есть блок ## Mechanical findings (orchestrator) — не дублировать эти строки в findings; при необходимости дополнить контекстом (процедура, вызов).
+         Если передан блок ## Comment Markers Metadata — проверить BORDER-PAIR-001: на каждый найденный в изменённом коде маркер `// +++ ... [{zni_id}]` должен быть парный `// --- ... [{zni_id}]` с тем же `zni_id`. Если пары нет — HIGH [release-hygiene]. Чужие маркеры (с другим zni_id) не проверять.
 
          ## Проверка соблюдения gates (HALT-compliance)
          Проверить, что writer следовал gates из промпта.

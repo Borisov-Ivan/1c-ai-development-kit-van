@@ -39,6 +39,16 @@ Fast-forward through artifact creation - generate everything needed to start imp
 
    **IMPORTANT**: Do NOT proceed without a confirmed change name.
 
+1.5. **Сбор метаданных маркеров (Metadata)**
+   После подтверждения имени ЗНИ запросить данные для маркеров разработчика (если они не очевидны из контекста):
+   AskQuestion:
+   ```
+   Для оформления комментариев в коде (// +++ ... [ID#...]) укажите:
+   1. Разработчик (ФИО, например "Борисов И.Г."):
+   2. Идентификатор ЗНИ (например "ID#79714"):
+   3. Название ЗНИ (для комментария, например "Сохранение участников Согласования при частичном повторе 2.1 - развитие"):
+   ```
+
 2. **Create the change directory**
    ```bash
    openspec new change "<name>"
@@ -124,6 +134,7 @@ Fast-forward through artifact creation - generate everything needed to start imp
         6. Если mismatches нет — лог «Acceptance ↔ Scenario mapping OK».
       - **All other artifacts**: Create the artifact file using `template` as the structure
       - Apply `context` and `rules` as constraints - but do NOT copy them into the file
+      - **Metadata block**: When creating `proposal.md`, ALWAYS add the `## Metadata (comment markers)` block (with developer, zni_id, zni_name) immediately after `## Why`.
       - Show brief progress: "✓ Created <artifact-id>"
 
    b. **Continue until all `applyRequires` artifacts are complete**

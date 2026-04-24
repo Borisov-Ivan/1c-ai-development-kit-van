@@ -60,7 +60,7 @@ Implement tasks from an OpenSpec change.
    
    Writer subagents receive **paths** to design.md and specs/ in their prompt and read needed sections independently. This keeps orchestrator context lean.
 
-   **Pre-flight: verify check**
+   **Pre-flight: verify check & Metadata**
 
    Glob в change dir (любой из):
    - `reports/verification-slice-pre-*.md`
@@ -78,6 +78,22 @@ Implement tasks from an OpenSpec change.
      - Option 2 → continue implementation
 
    Verify check is advisory — does not block apply.
+
+   **Metadata (comment markers) check:**
+   Прочитать `proposal.md`. Найти секцию `## Metadata (comment markers)`.
+   - Если секция есть — извлечь `developer`, `zni_id`, `zni_name`. Сформировать строки:
+     `open_marker` = `// +++ {developer} {date} {zni_name} [{zni_id}]` (где date — текущая дата `dd.MM.yyyy`)
+     `close_marker` = `// --- {developer} [{zni_id}]`
+   - Если секции нет — **AskQuestion**:
+     ```
+     В proposal.md отсутствует блок Metadata для маркеров комментариев.
+     Укажите:
+     1. Разработчик (ФИО):
+     2. Идентификатор ЗНИ (например ID#12345):
+     3. Название ЗНИ:
+     ```
+     Дописать блок `## Metadata (comment markers)` в `proposal.md` после `## Why`. Сформировать `open_marker` и `close_marker`.
+   Эти строки будут передаваться в промпт `onec-code-writer`.
 
 5. **Resume with pending verdict & Show current progress**
 

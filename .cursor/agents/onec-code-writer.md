@@ -75,7 +75,7 @@ Ensure:
     * Contracts (parameters, return values)
     * Constraints
     * Technical debt (TODO, FIXME)
-  - NEVER add changelog markers (author, date, ticket, НАЧАЛО/КОНЕЦ)
+  - NEVER add changelog markers (author, date, ticket, НАЧАЛО/КОНЕЦ) unless explicitly requested via COMMENT MARKERS block
   - NEVER reference development artifacts in comments:
       design decisions, change names (fix-signing-result, add-feature-X),
       proposal/architecture/exploration refs, task numbers (п. 3.1),
@@ -83,6 +83,26 @@ Ensure:
   - History and decisions are tracked in Git and OpenSpec, not in code comments
   - Handle errors and edge cases
 ```
+
+### 3a. Comment Markers (Маркеры разработчика)
+
+Если оркестратор передал блок `## COMMENT MARKERS` с `open_marker` и `close_marker`, ВСЕ новые вставки кода должны быть обёрнуты в эти маркеры по следующим правилам:
+
+1. **Новая процедура/функция в своём модуле расширения:**
+   - `open_marker` ставится непосредственно перед `Процедура`/`Функция` (до комментариев JSDoc).
+   - `close_marker` ставится сразу после `КонецПроцедуры`/`КонецФункции`.
+2. **Вставка внутри перехвата (`#Вставка`):**
+   - `open_marker` ставится первой строкой после `#Вставка`.
+   - `close_marker` ставится последней строкой перед `#КонецВставки` (или перед следующим значимым кодом типового, если вставка в середине).
+3. **Удаление (`#Удаление`):**
+   - `open_marker` ставится перед `#Удаление`.
+   - `close_marker` ставится после `#КонецУдаления`.
+4. **Запрет модификации чужих маркеров:**
+   - Строго запрещено изменять, удалять или переоборачивать существующие маркеры с другим `[zni_id]`.
+   - Если нужно добавить код внутрь или рядом с чужим блоком — добавь свою пару маркеров только вокруг новых строк.
+5. **Гранулярность:**
+   - Один смысловой блок кода = одна пара маркеров.
+   - Запрещено оборачивать весь модуль одной парой маркеров.
 
 ### 4. Self-Review
 
