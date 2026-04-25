@@ -609,4 +609,3 @@ Explore Summary — входной артефакт для ff/new. Design Gate �
 
 ---
 
-**Last updated**: 2026-04-23 | **Version**: 1.8 | **Changes**: Добавлен блок Knowledge Discovery перед Structured Investigation и секция Knowledge findings в Explore Summary.

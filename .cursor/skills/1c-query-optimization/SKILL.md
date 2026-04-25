@@ -29,7 +29,7 @@ Use temporary tables for:
 ### Join vs Subquery
 
 ```bsl
-// ✅ PREFERRED: Join (usually faster)
+// PREFERRED: Join (usually faster)
 "ВЫБРАТЬ
 |	Заказы.Ссылка КАК Заказ,
 |	Контрагенты.ИНН КАК ИНН
@@ -38,7 +38,7 @@ Use temporary tables for:
 |		ЛЕВОЕ СОЕДИНЕНИЕ Справочник.Контрагенты КАК Контрагенты
 |		ПО Заказы.Контрагент = Контрагенты.Ссылка"
 
-// ⚠️ AVOID: Subquery in SELECT (N+1 problem)
+// AVOID: Subquery in SELECT (N+1 problem)
 "ВЫБРАТЬ
 |	Заказы.Ссылка КАК Заказ,
 |	(ВЫБРАТЬ К.ИНН ИЗ Справочник.Контрагенты КАК К 
@@ -50,14 +50,14 @@ Use temporary tables for:
 ### Avoid Aggregation in Subqueries
 
 ```bsl
-// ❌ SLOW: Subquery with aggregation
+// SLOW: Subquery with aggregation
 "ВЫБРАТЬ
 |	Номенклатура.Ссылка,
 |	(ВЫБРАТЬ СУММА(Остатки.Количество) ...) КАК Остаток
 |ИЗ
 |	Справочник.Номенклатура КАК Номенклатура"
 
-// ✅ FAST: Join with pre-aggregated data
+// FAST: Join with pre-aggregated data
 "ВЫБРАТЬ
 |	Номенклатура.Ссылка КАК Номенклатура,
 |	ЕСТЬNULL(Остатки.КоличествоОстаток, 0) КАК Остаток
@@ -72,7 +72,7 @@ Use temporary tables for:
 Use virtual table parameters instead of WHERE for better performance:
 
 ```bsl
-// ✅ CORRECT: Uses virtual table parameters (fast)
+// CORRECT: Uses virtual table parameters (fast)
 "ВЫБРАТЬ
 |	Остатки.Номенклатура КАК Номенклатура,
 |	Остатки.КоличествоОстаток КАК Остаток
@@ -81,7 +81,7 @@ Use virtual table parameters instead of WHERE for better performance:
 |		&Дата,
 |		Номенклатура В (&СписокНоменклатуры)) КАК Остатки"
 
-// ❌ WRONG: Virtual table then filter (slow)
+// WRONG: Virtual table then filter (slow)
 "ВЫБРАТЬ
 |	Остатки.Номенклатура КАК Номенклатура,
 |	Остатки.КоличествоОстаток КАК Остаток
@@ -117,19 +117,19 @@ Use virtual table parameters instead of WHERE for better performance:
 Avoid dereferencing composite type reference fields directly — the system creates queries for **ALL** possible types.
 
 ```bsl
-// ❌ SLOW: Dereferences ALL registrar types (can be hundreds)
+// SLOW: Dereferences ALL registrar types (can be hundreds)
 "ВЫБРАТЬ
 |	ТоварыНаСкладах.Регистратор.Дата КАК ДатаДокумента
 |ИЗ
 |	РегистрНакопления.ТоварыНаСкладах КАК ТоварыНаСкладах"
 
-// ✅ FAST: Use ВЫРАЗИТЬ to specify exact type
+// FAST: Use ВЫРАЗИТЬ to specify exact type
 "ВЫБРАТЬ
 |	ВЫРАЗИТЬ(ТоварыНаСкладах.Регистратор КАК Документ.ПоступлениеТоваровУслуг).Дата КАК ДатаДокумента
 |ИЗ
 |	РегистрНакопления.ТоварыНаСкладах КАК ТоварыНаСкладах"
 
-// ✅ For multiple known types, use ВЫБОР/КОГДА
+// For multiple known types, use ВЫБОР/КОГДА
 "ВЫБРАТЬ
 |	ВЫБОР
 |		КОГДА ТоварыНаСкладах.Регистратор ССЫЛКА Документ.ПоступлениеТоваровУслуг
@@ -146,13 +146,13 @@ Avoid dereferencing composite type reference fields directly — the system crea
 When you only need text representation, use `ПРЕДСТАВЛЕНИЕ()` to avoid extra joins:
 
 ```bsl
-// ❌ Creates additional subquery for Справочник.Склады
+// Creates additional subquery for Справочник.Склады
 "ВЫБРАТЬ
 |	ТоварыНаСкладах.Склад.Наименование
 |ИЗ
 |	РегистрНакопления.ТоварыНаСкладах КАК ТоварыНаСкладах"
 
-// ✅ Optimal: No extra join
+// Optimal: No extra join
 "ВЫБРАТЬ
 |	ПРЕДСТАВЛЕНИЕ(ТоварыНаСкладах.Склад) КАК СкладПредставление
 |ИЗ
@@ -164,7 +164,7 @@ When you only need text representation, use `ПРЕДСТАВЛЕНИЕ()` to av
 Never use subqueries in JOIN — use temporary tables instead:
 
 ```bsl
-// ❌ WRONG: Join with subquery
+// WRONG: Join with subquery
 "ВЫБРАТЬ ...
 |ИЗ
 |	Документ.Заказ КАК Заказы
@@ -175,7 +175,7 @@ Never use subqueries in JOIN — use temporary tables instead:
 |		) КАК ИтогиТоваров
 |		ПО Заказы.Ссылка = ИтогиТоваров.Заказ"
 
-// ✅ CORRECT: Use temporary table
+// CORRECT: Use temporary table
 "ВЫБРАТЬ
 |	Товары.Ссылка КАК Заказ,
 |	СУММА(Товары.Сумма) КАК Сумма
@@ -199,14 +199,14 @@ Never use subqueries in JOIN — use temporary tables instead:
 Extract virtual table results to temporary table before joining:
 
 ```bsl
-// ⚠️ May be slow: Direct join with virtual table
+// May be slow: Direct join with virtual table
 "ВЫБРАТЬ ...
 |ИЗ
 |	Справочник.Номенклатура КАК Номенклатура
 |		ЛЕВОЕ СОЕДИНЕНИЕ РегистрНакопления.ТоварыНаСкладах.Остатки(&Дата,) КАК Остатки
 |		ПО Номенклатура.Ссылка = Остатки.Номенклатура"
 
-// ✅ BETTER: First extract to temporary table
+// BETTER: First extract to temporary table
 "ВЫБРАТЬ
 |	Остатки.Номенклатура КАК Номенклатура,
 |	Остатки.КоличествоОстаток КАК Остаток
@@ -228,7 +228,7 @@ Extract virtual table results to temporary table before joining:
 `OR` in `WHERE` prevents index usage. Split into UNION queries:
 
 ```bsl
-// ❌ SLOW: OR prevents index usage
+// SLOW: OR prevents index usage
 "ВЫБРАТЬ
 |	Товары.Ссылка
 |ИЗ
@@ -237,7 +237,7 @@ Extract virtual table results to temporary table before joining:
 |	Товары.Артикул = &Артикул
 |	ИЛИ Товары.Код = &Код"
 
-// ✅ FAST: Two indexed queries with UNION
+// FAST: Two indexed queries with UNION
 "ВЫБРАТЬ
 |	Товары.Ссылка
 |ИЗ
@@ -260,12 +260,12 @@ Extract virtual table results to temporary table before joining:
 Prefer `ОБЪЕДИНИТЬ ВСЕ` when no duplicate rows expected:
 
 ```bsl
-// ⚠️ SLOWER: ОБЪЕДИНИТЬ performs additional grouping
+// SLOWER: ОБЪЕДИНИТЬ performs additional grouping
 "ВЫБРАТЬ ... ИЗ Документ.Приход
 |ОБЪЕДИНИТЬ
 |ВЫБРАТЬ ... ИЗ Документ.Расход"
 
-// ✅ FASTER: ОБЪЕДИНИТЬ ВСЕ skips grouping
+// FASTER: ОБЪЕДИНИТЬ ВСЕ skips grouping
 "ВЫБРАТЬ ... ИЗ Документ.Приход
 |ОБЪЕДИНИТЬ ВСЕ
 |ВЫБРАТЬ ... ИЗ Документ.Расход"
@@ -283,13 +283,13 @@ Ensure query conditions match available indexes:
 ```bsl
 // Given index: (Организация, Контрагент, Дата)
 
-// ✅ Index will be used — fields are at the beginning
+// Index will be used — fields are at the beginning
 "ГДЕ Организация = &Орг И Контрагент = &Контр"
 
-// ❌ Index NOT used — skipped first field
+// Index NOT used — skipped first field
 "ГДЕ Контрагент = &Контр И Дата = &Дата"
 
-// ⚠️ Partial use — gap in fields
+// Partial use — gap in fields
 "ГДЕ Организация = &Орг И Дата = &Дата"
 ```
 

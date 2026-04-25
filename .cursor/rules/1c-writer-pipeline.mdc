@@ -139,4 +139,3 @@ writer'а (HALT с MISSING_INPUT при получении).
 
 ---
 
-**Last updated**: 2026-04-20 | **Version**: 1.1 | **Changes**: добавлена секция INPUT CONTRACT (writer) для синхронизации с onec-code-writer.

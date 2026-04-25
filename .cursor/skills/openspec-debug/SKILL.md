@@ -296,4 +296,3 @@ Keep the RCA compact; the split ensures apply/debug can later enforce the verifi
 
 ---
 
-**Last updated**: 2026-04-19 | **Version**: 2.2 | **Changes**: шаг 7a — mechanical placement gate + ссылка на `vertical-slices.mdc`; запрет альтернативного «fix в следующий срез»; Slice Gate log — `inside-slice rework`; Integration — vertical-slices.

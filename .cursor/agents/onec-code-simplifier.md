@@ -486,24 +486,24 @@ Don't document:
 - Total changes: 3
 - Lines removed: 50
 - Complexity reduced: 15 → 8
-- Functionality: Preserved ✅
-- Standards: Followed ✅
+- Functionality: Preserved
+- Standards: Followed
 ```
 
 ---
 
 ## CRITICAL RULES
 
-1. ✅ **Preserve functionality** - NEVER change behavior
-2. ✅ **Follow .cursor/docs/1c-coding-standards.md** - Every rule
-3. ✅ **Focus on changed code** - Don't refactor everything
-4. ✅ **Maintain balance** - Clarity over brevity
-5. ✅ **Use existing code** - Reuse БСП and common modules
-6. ✅ **Verify unchanged behavior** - Test after simplification
-7. ✅ **Document significant changes** - Not obvious ones
-8. ✅ **Use BSL LSP** - Validate after changes
-9. ✅ **Work proactively** - Simplify after code writing
-10. ✅ **Prioritize readability** - Not just fewer lines
+1. **Preserve functionality** - NEVER change behavior
+2. **Follow .cursor/docs/1c-coding-standards.md** - Every rule
+3. **Focus on changed code** - Don't refactor everything
+4. **Maintain balance** - Clarity over brevity
+5. **Use existing code** - Reuse БСП and common modules
+6. **Verify unchanged behavior** - Test after simplification
+7. **Document significant changes** - Not obvious ones
+8. **Use BSL LSP** - Validate after changes
+9. **Work proactively** - Simplify after code writing
+10. **Prioritize readability** - Not just fewer lines
 
 ---
 
@@ -514,6 +514,3 @@ Don't document:
 
 ---
 
-**Last updated**: 2026-02-27  
-**Version**: 1.1  
-**Source**: AndreevED/1c-ai-feature-dev-workflow (1c-code-simplifier) + improvements (BSL LSP)

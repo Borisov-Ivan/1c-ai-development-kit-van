@@ -188,8 +188,8 @@ User: "Deploy MCP for MinimKG"
 
 Agent: [Проверяет порты автоматически]
 "Проверка свободных портов...
-✅ Порты 7500-7502 свободны
-✅ Порты 7510-7512 свободны
+OK: Порты 7500-7502 свободны
+OK: Порты 7510-7512 свободны
 
 Создать MCP для конфигурации (mcp/base/)?"
 User: "Да"
@@ -214,13 +214,13 @@ Agent: "Развёртываю 4 сервера:
 [Обновляет mcp.json]
 [Запускает индексацию]
 
-Agent: "✅ Развёртывание завершено!
+Agent: "Развёртывание завершено.
 
 Проверка доступности:
-- minimkg-codemetadata: http://YOUR_SERVER:7500 ✅
-- minimkg-graph: http://YOUR_SERVER:7501 ✅
-- minimkg-minim-codemetadata: http://YOUR_SERVER:7510 ✅
-- minimkg-minim-graph: http://YOUR_SERVER:7511 ✅
+- minimkg-codemetadata: http://YOUR_SERVER:7500 OK
+- minimkg-graph: http://YOUR_SERVER:7501 OK
+- minimkg-minim-codemetadata: http://YOUR_SERVER:7510 OK
+- minimkg-minim-graph: http://YOUR_SERVER:7511 OK
 
 Индексация запущена (~60 минут).
 Перезапусти Cursor для загрузки новых MCP серверов."
@@ -258,7 +258,7 @@ ssh YOUR_SERVER "pct exec 100 -- bash -c 'for port in {7500..7522}; do if ss -tu
 7511: свободен
 7512: свободен
 
-✅ Выбраны порты для MinimKG:
+Выбраны порты для MinimKG:
 - minimkg-codemetadata: 7510
 - minimkg-graph: 7511-7512
 ```

@@ -319,6 +319,5 @@ This skill works with:
 
 ---
 
-**Last updated:** 2026-03-06
 **Version:** 2.0
 **Status:** Converted from rule to skill

@@ -62,7 +62,3 @@ Grep(pattern="работа с файлами", path="src/")
 Grep(pattern="пользователи и права", path="src/")
 ```
 
----
-
-**Last updated**: 2026-02-11  
-**Version**: 1.0

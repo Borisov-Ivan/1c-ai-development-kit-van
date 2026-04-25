@@ -181,4 +181,3 @@ Investigation loop (резолв контрактов) запускается **
 
 ---
 
-**Last updated**: 2026-04-20 | **Version**: 3.11 | **Changes**: HALT-строка запрета `explore`/`generalPurpose` для 1С переформулирована с явной отсылкой к **Task Pre-call Checklist** (`tool-name-guard.mdc`) — единая точка истины для предвызывной проверки параметров Task. Добавлена сноска на INPUT CONTRACT и согласован iteration limit.

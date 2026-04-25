@@ -76,4 +76,3 @@ Vertical slices framework: `.cursor/rules/vertical-slices.mdc`
 
 ---
 
-**Last updated:** 2026-04-18 | **Version:** 3.0 | **Changes:** Полный переход на vertical slices framework — удалены P0–P4 фазы и phase-gates; step-by-slice как default execution mode; archive блокирует непринятые срезы; verify режимы slice-pre/slice-post/slice-scoped/migrate-to-slices/legacy.

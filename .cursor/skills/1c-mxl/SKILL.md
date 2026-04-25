@@ -7,7 +7,7 @@ description: Complete toolkit for 1C spreadsheet templates (MXL) - compile from 
 
 Полный набор инструментов для работы с макетами табличных документов 1С (Template.xml). Поддержка JSON DSL для быстрого создания печатных форм.
 
-## 🎯 Quick Start
+## Quick Start
 
 ### Создать макет из JSON
 ```bash
@@ -24,7 +24,7 @@ description: Complete toolkit for 1C spreadsheet templates (MXL) - compile from 
 1c-mxl decompile Documents/ЗаказКлиента/Templates/ПечатнаяФорма/Ext/Template.xml template.json
 ```
 
-## 📦 Включенные Skills
+## Включенные Skills
 
 ### 1. compile - Компиляция из JSON DSL
 **Путь**: `1c-mxl/compile/SKILL.md`
@@ -50,7 +50,7 @@ description: Complete toolkit for 1C spreadsheet templates (MXL) - compile from 
 - Валидирует ссылки на области
 - Проверяет параметры
 
-## 🔄 Workflow
+## Workflow
 
 ```yaml
 Создание печатной формы:
@@ -66,7 +66,3 @@ description: Complete toolkit for 1C spreadsheet templates (MXL) - compile from 
   4. Валидировать: 1c-mxl validate
 ```
 
----
-
-**Last updated**: 2026-02-11  
-**Version**: 1.0

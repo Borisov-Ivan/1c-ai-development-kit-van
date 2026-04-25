@@ -75,6 +75,3 @@ priority: 140
 
 ---
 
-**Last updated:** 2026-04-22 | **Version:** 1.1 | **Changes:** специальное правило для `S<N>.T<M>` — обязательная ссылка `(Scenario: «…»)` из `**Связь со spec:**` среза; новый alert `task-opaque-acceptance` (WARNING); примеры OK/BAD для приёмки; связь с Acceptance Scope Tightness (правило среза 6 в `vertical-slices.mdc`).
-
-**Last updated:** 2026-04-18 | **Version:** 1.0 | **Changes:** first version.

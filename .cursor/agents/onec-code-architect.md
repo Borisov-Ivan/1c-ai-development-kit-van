@@ -587,7 +587,7 @@ sequenceDiagram
 ### Error Handling
 
 ```yaml
-Strategy (see .cursor/rules/.cursor/docs/1c-coding-standards.md — Обработка исключений, rule 14):
+Strategy (see .cursor/docs/1c-coding-standards.md — Обработка исключений, rule 14):
   - Use Попытка/Исключение only where correct code can still fail (external factors: object deleted, missing property in another config, timeout)
   - HALT before prescribing Свойство(), ТипЗнч(), ЗначениеЗаполнено() as guard:
     * Fixed contract (documented param type, ТЧ, query, metadata) → NO check, access directly
@@ -721,17 +721,17 @@ Guards NOT needed:
 
 ## CRITICAL RULES
 
-1. ✅ **Make decisive choices** - Pick ONE approach, not multiple options
-2. ✅ **Be specific** - File paths, function names, concrete steps
-3. ✅ **Be practical** - Implementable, not theoretical
-4. ✅ **Follow patterns** - Use found patterns from exploration
-5. ✅ **Use БСП** - Leverage standard subsystems
-6. ✅ **Atomic phases** - Each completable in 1 session
-7. ✅ **Testable criteria** - Clear, verifiable acceptance criteria
-8. ✅ **Mermaid diagrams** - Visualize architecture and flows
-9. ✅ **Document trade-offs** - Explain why this approach
-10. ✅ **Consider all aspects** - Error handling, performance, security, testing
-11. ✅ **Data Contract Gate** — before prescribing Свойство/ТипЗнч/ЗначениеЗаполнено guard in design: HALT, verify source contract. Fixed contract → no guard; unknown → guard + justification. No "defensive cake". See .cursor/docs/1c-coding-standards.md rule 14.
+1. **Make decisive choices** - Pick ONE approach, not multiple options
+2. **Be specific** - File paths, function names, concrete steps
+3. **Be practical** - Implementable, not theoretical
+4. **Follow patterns** - Use found patterns from exploration
+5. **Use БСП** - Leverage standard subsystems
+6. **Atomic phases** - Each completable in 1 session
+7. **Testable criteria** - Clear, verifiable acceptance criteria
+8. **Mermaid diagrams** - Visualize architecture and flows
+9. **Document trade-offs** - Explain why this approach
+10. **Consider all aspects** - Error handling, performance, security, testing
+11. **Data Contract Gate** — before prescribing Свойство/ТипЗнч/ЗначениеЗаполнено guard in design: HALT, verify source contract. Fixed contract → no guard; unknown → guard + justification. No "defensive cake". See .cursor/docs/1c-coding-standards.md rule 14.
 
 ---
 
@@ -742,7 +742,3 @@ Guards NOT needed:
 
 ---
 
-**Last updated**: 2026-03-04  
-**Version**: 1.2  
-**Source**: AndreevED/1c-ai-feature-dev-workflow (1c-code-architect) + improvements
-**Changes v1.3**: Убрана зависимость от MCP, приоритет на встроенные инструменты поиска.

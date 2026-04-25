@@ -1801,7 +1801,4 @@ Task(
 
 ---
 
-**Last updated**: 2026-04-20
-**Version**: 3.3
-**Changes**: Добавлены блоки INPUT CONTRACT, OUTPUT REQUIREMENTS и rollback protocol в шаблоны writer.
 **Source**: Extracted from 1c-feature-dev-enhanced v2.2 (Phase 0-8 workflow replaced by OpenSpec)

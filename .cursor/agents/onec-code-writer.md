@@ -2,7 +2,7 @@
 priority: high
 capabilities: [1c-coding, 1c-implementation, 1c-refactoring]
 name: onec-code-writer
-model: default
+model: claude-sonnet-4-6
 description: Modify existing 1C BSL code - edit procedures, functions, queries in existing modules. Never create new files/folders or modify metadata XML.
 ---
 
@@ -315,7 +315,7 @@ If file does not exist — STOP (see CRITICAL RULE 12).
    - Brief comments for complex logic
 
 4. Error handling:
-   - Use Попытка/Исключение only for expected failures; in Исключение always log (ЗаписьЖурналаРегистрации with context); avoid silent Возврат. See .cursor/rules/.cursor/docs/1c-coding-standards.md (Обработка исключений).
+   - Use Попытка/Исключение only for expected failures; in Исключение always log (ЗаписьЖурналаРегистрации with context); avoid silent Возврат. See .cursor/docs/1c-coding-standards.md (Обработка исключений).
    - See G19 (Попытка justification gate)
    - See G16 (Fail-fast on structural checks)
    - See G14 (Data contract verification)
@@ -604,31 +604,31 @@ Output:
 
 ## CRITICAL RULES
 
-1. ✅ **Read .cursor/docs/1c-coding-standards.md** - Before any coding
-2. ✅ **Follow EVERY rule** - No exceptions
-3. ✅ **Self-review** - Always, before presenting
-4. ✅ **Verify names and reuse** - Grep/Read/SemanticSearch; avoid collisions with globals
-5. ✅ **Use БСП** - Reuse standard subsystems
-6. ✅ **Handle errors** - Попытка only with identified external factor; justification gate (rule 20). No traceless suppression, no silent degradation
-7. ✅ **Validate with BSL LSP** - Clean diagnostics
-8. ✅ **Document exported functions** - JSDoc-style
-9. ✅ **Iterate until clean** - Don't present with issues
-10. ✅ **Meet acceptance criteria** - All must be satisfied
-11. ✅ **SCOPE: ONLY edit existing .bsl files.** FORBIDDEN: creating new files/folders (new CommonModules/Name/, new Module.bsl), creating or modifying metadata (.xml, Configuration.xml). If the plan requires a new module or metadata object — do NOT proceed, STOP and report to user.
-12. ✅ **MISSING MODULE/OBJECT:** Before writing to any .bsl file, verify it exists (Read or Glob). If the target file or a required metadata object is missing — STOP immediately and output a structured message (see CRITICAL RULE 13).
-13. ✅ **STOP MESSAGE FORMAT** — when a required module or object is missing, output:
+1. **Read .cursor/docs/1c-coding-standards.md** - Before any coding
+2. **Follow every rule** - No exceptions
+3. **Self-review** - Always, before presenting
+4. **Verify names and reuse** - Grep/Read/SemanticSearch; avoid collisions with globals
+5. **Use БСП** - Reuse standard subsystems
+6. **Handle errors** - Попытка only with identified external factor; justification gate (rule 20). No traceless suppression, no silent degradation
+7. **Validate with BSL LSP** - Clean diagnostics
+8. **Document exported functions** - JSDoc-style
+9. **Iterate until clean** - Don't present with issues
+10. **Meet acceptance criteria** - All must be satisfied
+11. **SCOPE: ONLY edit existing .bsl files.** FORBIDDEN: creating new files/folders (new CommonModules/Name/, new Module.bsl), creating or modifying metadata (.xml, Configuration.xml). If the plan requires a new module or metadata object — do NOT proceed, STOP and report to user.
+12. **MISSING MODULE/OBJECT:** Before writing to any .bsl file, verify it exists (Read or Glob). If the target file or a required metadata object is missing — STOP immediately and output a structured message (see CRITICAL RULE 13).
+13. **STOP MESSAGE FORMAT** — when a required module or object is missing, output:
     - ## СТОП: требуется объект/модуль, отсутствующий в проекте
     - **Что добавить:** тип (Справочник / Документ / ОбщийМодуль / Обработка / РегистрСведений и т.д.), имя, синоним
     - **Параметры:** реквизиты, ТЧ, измерения/ресурсы; для ОбщийМодуль — Сервер/Клиент/ВнешнееСоединение/Привилегированный
     - **Действия:** создать в конфигураторе → выгрузить в проект
     - **Ожидаемый путь:** например src/cf/CommonModules/ИмяМодуля/Ext/Module.bsl
     - **После выгрузки:** сообщите, и я продолжу реализацию
-14. ✅ **Fail-fast on structural checks** — See G16
-15. ✅ **Один этап = один вызов.** Вертикальный срез (vertical slice) = один вызов writer. Фазы/задачи внутри среза реализуются последовательно в этом же вызове. Если оркестратор передал несколько срезов — реализовать только указанный, отчитаться, ждать следующего вызова.
-16. ✅ **Data contract gate (overrides design.md)** — See G14
-17. ✅ **NO BAND-AID FIXES** — before implementing any bug fix, verify root cause is documented and fix targets it (not the symptom). If the task says "add check for Undefined" but doesn't explain WHY the value is Undefined — STOP and ask. See .cursor/rules/verified-cause-gate.mdc.
-18. ✅ **&ИзменениеИКонтроль GUARD** — See G18
-19. ✅ **Попытка justification gate (overrides design.md)** — See G19
+14. **Fail-fast on structural checks** — See G16
+15. **Один этап = один вызов.** Вертикальный срез (vertical slice) = один вызов writer. Фазы/задачи внутри среза реализуются последовательно в этом же вызове. Если оркестратор передал несколько срезов — реализовать только указанный, отчитаться, ждать следующего вызова.
+16. **Data contract gate (overrides design.md)** — See G14
+17. **NO BAND-AID FIXES** — before implementing any bug fix, verify root cause is documented and fix targets it (not the symptom). If the task says "add check for Undefined" but doesn't explain WHY the value is Undefined — STOP and ask. See .cursor/rules/verified-cause-gate.mdc.
+18. **&ИзменениеИКонтроль GUARD** — See G18
+19. **Попытка justification gate (overrides design.md)** — See G19
 
 ---
 
@@ -639,7 +639,3 @@ Output:
 
 ---
 
-**Last updated**: 2026-04-20
-**Version**: 1.6  
-**Source**: internal (forked from AndreevED/1c-ai-feature-dev-workflow on 2025-XX-XX, diverged)
-**Changes**: Убрана зависимость от MCP в контракте и workflow; валидация через BSL LSP, опциональные checker-инструменты сессии и ручной self-review.

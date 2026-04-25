@@ -92,10 +92,10 @@ Quality Controller (шаг 7.6): **Slice Coherence** (6 критериев из 
 `.cursor/rules/existing-mechanism-priority.mdc` — Preference Hierarchy, Mandatory Discovery, anti-patterns. Срабатывает при создании нового объекта или интеграции с базой. Обязательная секция Existing Mechanisms в design.md / architecture-отчёте.
 
 ## Quality Controller (OpenSpec)
-`.cursor/agents/openspec-quality-controller.md` — домен-агностичный агент (Opus, readonly). **Slice Coherence** (6 критериев из `vertical-slices.mdc`): Scenario Coverage, Slice Independence, Slice Completeness, Slice Dependency Graph, Slice Gate Integrity, Rework Risk. Вызывается из `/opsx:verify` шаг 7.6 через `Task(subagent_type="openspec-quality-controller")`. Шаблон промпта: `1c-agent-patterns/SKILL.md` (секция «Quality Controller — slice coherence review»).
+`.cursor/agents/openspec-quality-controller.md` — домен-агностичный readonly-агент для Slice Coherence. Активная модель задаётся frontmatter агента. Критерии — в `vertical-slices.mdc`; вызывается из `/opsx:verify` шаг 7.6.
 
 ## Phase Gates (DEPRECATED — см. Vertical Slices)
-Фазовая модель (`# Фаза N`, `<!-- phase-gate -->`, P0–P4) **устарела**. Актуальная декомпозиция — вертикальные срезы: `.cursor/rules/vertical-slices.mdc` (формат `# Срез S<N>` / `<!-- slice-gate -->`, метаданные среза, приёмочный тест `S<N>.T<M>`). Миграция существующих plain tasks → срезы выполняется через `/opsx:verify --migrate-to-slices` (см. `openspec-verify-change/SKILL.md` шаг 7.M). Ранее размещённый файл `.cursor/rules/phase-gates.mdc` удалён; обратная совместимость с legacy-артефактами описана в `vertical-slices.mdc` (секция «Обратная совместимость»).
+Фазовая модель (`# Фаза N`, `<!-- phase-gate -->`, P0–P4) **устарела**. Актуальная декомпозиция — вертикальные срезы: `.cursor/rules/vertical-slices.mdc`. `.cursor/rules/phase-gates.mdc` сохранён только как legacy-reference без `alwaysApply`; новые ЗНИ используют `/opsx:migrate-slices` для перехода на срезы.
 
 ## Session Handoff и Step-by-step mode
 `.cursor/skills/openspec-apply-change/SKILL.md` (шаги 5.6, 6, 7) — Session Handoff Summary (три секции: код / действия пользователя / следующие задачи), Step-by-step mode (пауза после каждой задачи с подтверждением, обработка ручных тестов с ожиданием результата). Триггеры step-by-step: явный запрос; debug-сессия (`debug.md` изменялся сегодня); slice-mode с ожидающим приёмочным тестом (`S<N>.T<M>`) в текущей пачке; fix-срез (`S<N>.fix`); размер среза ≥ 5 задач.
@@ -141,7 +141,7 @@ Quality Controller (шаг 7.6): **Slice Coherence** (6 критериев из 
 `.cursor/rules/context-strategy-gate.mdc` — триггер при 3+ файлах, данных, крупных модулях.
 
 ## Стандарты BSL
-`.cursor/docs/1c-coding-standards.md` — стандарты кода 1С/BSL (структура, именование, запросы, Попытка, защитные проверки, валидация имён метаданных). Загружается writer/reviewer по FIRST ACTION при работе с `.bsl`. Ранее правило `.cursor/rules/1c-coding-standards.mdc` удалено — стандарты перенесены в docs для on-demand чтения.
+`.cursor/docs/1c-coding-standards.md` — стандарты кода 1С/BSL. `.cursor/rules/1c-coding-standards.mdc` — только thin loader по `**/*.bsl`, без полного тела стандартов.
 
 ## Реестр антипаттернов BSL
 `.cursor/rules/bsl-antipatterns.mdc` — краткий индекс (AP-NNN ID, detection rule, severity). **Reviewer-only** (`alwaysApply: false`, без `globs`), не загружается для writer. Writer не должен видеть антипаттерны — они могут быть неверно интерпретированы как паттерны.

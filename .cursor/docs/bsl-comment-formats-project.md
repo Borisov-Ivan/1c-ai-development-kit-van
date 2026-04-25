@@ -1,6 +1,6 @@
 # Соглашения по комментариям BSL — навигация
 
-Таблица **Whitelist предрелиза** в [openspec/project.md](../../openspec/project.md) (секция «Форматы и соглашения по комментариям BSL») — это **project-level override** для rule 17 в `.cursor/rules/.cursor/docs/1c-coding-standards.md` и для release-hygiene в `.cursor/agents/onec-code-reviewer.md`: комментарии, подпадающие под whitelist в указанном scope (glob), **не** считаются нарушением.
+Таблица **Whitelist предрелиза** в [openspec/project.md](../../openspec/project.md) (секция «Форматы и соглашения по комментариям BSL») — это **project-level override** для rule 17 в `.cursor/docs/1c-coding-standards.md` и для release-hygiene в `.cursor/agents/onec-code-reviewer.md`: комментарии, подпадающие под whitelist в указанном scope (glob), **не** считаются нарушением.
 
 **Источник истины:** таблицы и правила — в **[openspec/project.md](../../openspec/project.md)** — секция **«Форматы и соглашения по комментариям BSL»** (whitelist + обязательный контроль).
 

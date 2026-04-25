@@ -47,7 +47,7 @@ When implementing new functionality:
 - **ВерсионированиеОбъектов** — object history
 - **РаботаСПочтовымиСообщениями** — email sending
 - **ОбщегоНазначения** / **ОбщегоНазначенияКлиентСервер** — common utilities
-- **Проверка наличия реквизита**: см. `.cursor/rules/.cursor/docs/1c-coding-standards.md` (правила проверки заполнения и доступа к реквизитам)
+- **Проверка наличия реквизита**: см. `.cursor/docs/1c-coding-standards.md` (правила проверки заполнения и доступа к реквизитам)
 - **СтроковыеФункцииКлиентСервер** — string functions
 
 ---

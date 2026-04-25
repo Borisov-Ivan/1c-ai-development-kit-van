@@ -79,4 +79,3 @@ alwaysApply: true
 
 ---
 
-**Last updated**: 2026-04-19 | **Version**: 1.4 | **Changes**: добавлена секция `## Task Pre-call Checklist` (3 пункта + «Симптомы провала») перед «Допустимые subagent_type» — единая точка истины для проверки параметров Task в точке вызова

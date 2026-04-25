@@ -7,7 +7,7 @@ description: Toolkit for 1C roles - create from JSON DSL, analyze rights. Use wh
 
 Инструменты для работы с ролями и правами доступа в 1С. Поддержка JSON DSL для быстрого создания ролей.
 
-## 🎯 Quick Start
+## Quick Start
 
 ### Создать роль из JSON
 ```bash
@@ -22,7 +22,7 @@ description: Toolkit for 1C roles - create from JSON DSL, analyze rights. Use wh
 1c-roles info Roles/Администратор/Rights.xml
 ```
 
-## 📦 Включенные Skills
+## Включенные Skills
 
 ### 1. compile - Создание роли из JSON DSL
 **Путь**: `1c-roles/compile/SKILL.md`
@@ -38,7 +38,7 @@ description: Toolkit for 1C roles - create from JSON DSL, analyze rights. Use wh
 - Выводит RLS ограничения
 - Анализирует шаблоны ограничений
 
-## 🔄 Workflow
+## Workflow
 
 ```yaml
 Создание роли:
@@ -52,7 +52,3 @@ description: Toolkit for 1C roles - create from JSON DSL, analyze rights. Use wh
   3. Скорректировать при необходимости
 ```
 
----
-
-**Last updated**: 2026-02-11  
-**Version**: 1.0

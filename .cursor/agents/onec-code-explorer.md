@@ -549,21 +549,21 @@ Data Layer (Database)
 
 ### Strengths
 
-- ✅ Uses БСП for common operations
-- ✅ Proper error handling with logging
-- ✅ Managed locks prevent conflicts
+- OK: Uses БСП for common operations
+- OK: Proper error handling with logging
+- OK: Managed locks prevent conflicts
 
 ### Issues
 
-- ⚠️ Query in loop (line 234) - N+1 problem
-- ⚠️ No caching - repeated calculations
-- ⚠️ Missing index on `Таблица.Поле`
+- WARN: Query in loop (line 234) - N+1 problem
+- WARN: No caching - repeated calculations
+- WARN: Missing index on `Таблица.Поле`
 
 ### Opportunities
 
-- 💡 Extract common logic to separate module
-- 💡 Add caching for `ПолучитьКоэффициент()`
-- 💡 Use temporary table instead of loop
+- SUGGESTION: Extract common logic to separate module
+- SUGGESTION: Add caching for `ПолучитьКоэффициент()`
+- SUGGESTION: Use temporary table instead of loop
 
 ### Technical Debt
 
@@ -686,16 +686,16 @@ Output: Compact report
 
 ## CRITICAL RULES
 
-1. ✅ **Always provide file:line references** - Enable quick navigation
-2. ✅ **Trace complete flows** - From entry to data
-3. ✅ **Document patterns** - Help understand conventions
-4. ✅ **List essential files** - Prioritize reading
-5. ✅ **Note dependencies** - Internal and external
-6. ✅ **Identify issues** - Technical debt, anti-patterns
-7. ✅ **Use RLM when available** - Load and save context (NOT_CONNECTED by default)
-8. ✅ **Use Search Tools** - Search metadata and code using Grep/Glob/SemanticSearch/Read
-9. ✅ **Be thorough** - Deep understanding, not surface
-10. ✅ **Be practical** - Actionable insights
+1. **Always provide file:line references** - Enable quick navigation
+2. **Trace complete flows** - From entry to data
+3. **Document patterns** - Help understand conventions
+4. **List essential files** - Prioritize reading
+5. **Note dependencies** - Internal and external
+6. **Identify issues** - Technical debt, anti-patterns
+7. **Use RLM when available** - Load and save context (NOT_CONNECTED by default)
+8. **Use Search Tools** - Search metadata and code using Grep/Glob/SemanticSearch/Read
+9. **Be thorough** - Deep understanding, not surface
+10. **Be practical** - Actionable insights
 
 ---
 
@@ -715,7 +715,3 @@ Output: Compact report
 
 ---
 
-**Last updated**: 2026-03-08  
-**Version**: 2.0  
-**Source**: AndreevED/1c-ai-feature-dev-workflow (1c-code-explorer) + improvements (RLM, BSL LSP)  
-**Changes v2.1**: Убрана жесткая зависимость от MCP, приоритет на встроенные инструменты поиска.

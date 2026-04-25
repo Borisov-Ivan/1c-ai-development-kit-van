@@ -1,3 +1,8 @@
+---
+name: openspec-knowledge-audit
+description: Audit OpenSpec Knowledge Base facts, TTL, anchors, indexes, metrics, and taxonomy sync.
+---
+
 # Skill: openspec-knowledge-audit
 
 ## Описание
