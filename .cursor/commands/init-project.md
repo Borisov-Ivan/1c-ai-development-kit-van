@@ -27,6 +27,17 @@ description: "Диагностика проекта, бутстрап струк
 | Скиллы | `.cursor/skills/*/SKILL.md` (количество файлов) | `[V]` / `[X]` |
 | AGENTS.md | `AGENTS.md` в корне | `[V]` / `[X]` |
 
+**Дополнительно: KB состояние.** Отдельный мини-чеклист по `openspec/knowledge/` (проверять каждый запуск `/init-project`, не только при отсутствии `openspec/`):
+
+| Что | Как проверить | Критерий валидности | Статус |
+|---|---|---|---|
+| Каталог `openspec/knowledge/` | Glob/наличие | Каталог существует | `[V]` / `[X]` |
+| `openspec/knowledge/_index.yaml` | Read + parse YAML | Парсится; есть `version: 1`; есть поле `facts:` (даже если пустое) | `[V]` / `[X]` |
+| `openspec/knowledge/_taxonomy.yaml` | Read + parse YAML | Парсится; есть `version`; `domains:` непустой | `[V]` / `[X]` |
+| `openspec/knowledge/README.md` | Read | Файл существует и непустой | `[V]` / `[X]` |
+| `openspec/knowledge/_archive/` | Glob | Каталог существует | `[V]` / `[X]` |
+| Whitelist соблюдён | Glob по `openspec/knowledge/` | Только `<domain>/`, `_archive/`, служебные `_index.yaml` / `_taxonomy.yaml` / `_taxonomy.template.yaml` / `README.md` (см. `.cursor/rules/knowledge-format.mdc` секция РАСПОЛОЖЕНИЕ) | `[V]` / `[X] <список нарушений>` |
+
 ### Шаг 2 — Вывести чеклист
 
 ```
@@ -39,6 +50,14 @@ description: "Диагностика проекта, бутстрап струк
   [V] .cursor/rules/         — N правил
   [V] .cursor/skills/        — N скиллов
   [V] AGENTS.md              — индекс
+
+KB состояние:
+  [V] openspec/knowledge/                — каталог
+  [V] openspec/knowledge/_index.yaml     — индекс (valid, N фактов)
+  [V] openspec/knowledge/_taxonomy.yaml  — таксономия (M доменов)
+  [V] openspec/knowledge/README.md       — описание модели
+  [V] openspec/knowledge/_archive/       — каталог архива
+  [X] openspec/knowledge/<нарушение>     — посторонний файл/каталог (см. шаг 3)
 ```
 
 Имена и версии конфигураций/расширений — из `Configuration.xml` (теги `<Name>`, `<Synonym>`, `<Version>`).
@@ -48,15 +67,27 @@ description: "Диагностика проекта, бутстрап струк
 | Чего нет | Действие |
 |---|---|
 | `src/` пуст или нет `Configuration.xml` | **СТОП.** Подсказать: «Выгрузите конфигурацию через Конфигуратор: Конфигурация → Выгрузить конфигурацию в файлы. Путь: `src/<ИмяКонфигурации>/cf/`. Для расширений: Конфигурация → Расширения → <Имя> → Выгрузить в файлы. Путь: `src/<ИмяКонфигурации>/cfe/<ИмяРасширения>/`.» Ждать, пока пользователь выгрузит |
-| `openspec/` | Агент создаёт сам: `openspec/`, `openspec/changes/`, `openspec/changes/_template/`, `openspec/specs/`, `openspec/docs/`, `openspec/adrs/`, `openspec/knowledge/` (+ `_archive/`, стартовый `README.md`, пустой `_index.yaml` с `facts: []`), пустой `openspec/project.md`, `openspec/config.yaml`. `openspec/knowledge/_taxonomy.yaml` создаётся в Phase 5 (после разведки архитектуры) |
+| `openspec/` | Агент создаёт сам: `openspec/`, `openspec/changes/`, `openspec/changes/_template/`, `openspec/specs/`, `openspec/docs/`, `openspec/adrs/`, `openspec/knowledge/` (+ `_archive/` с `.gitkeep`, стартовый `README.md` из шаблона `.cursor/skills/openspec-knowledge-init/templates/README-template.md`, пустой `_index.yaml` с `version: 1`, `facts: []`, актуальный `updated-at`), пустой `openspec/project.md`, `openspec/config.yaml`. `openspec/knowledge/_taxonomy.yaml` создаётся в Phase 5 (после разведки архитектуры) |
 | `.cursor/agents/` | Подсказать: «Скопируйте промпты агентов из шаблонного проекта в `.cursor/agents/`» |
 | `AGENTS.md` | Агент создаёт |
 
+**Действия по `[X]` в KB-чеклисте (self-healing).** Выполняются автоматически при каждом запуске `/init-project`, без ручных действий пользователя за пределами AskQuestion:
+
+| Чего нет / что не так | Действие |
+|---|---|
+| Нет `openspec/knowledge/` | Создать каталог + `_archive/` (с `.gitkeep`), а также служебные файлы из строк ниже |
+| Нет `_index.yaml` или невалиден (не парсится / нет `version: 1` / нет `facts:`) | Если файл есть, но невалиден — сделать backup в `temp/backups/_index-<timestamp>.yaml`. Затем создать/перезаписать минимальный: `version: 1`, `facts: []`, актуальный `updated-at` (ISO-now) |
+| Нет `README.md` или пустой | Создать из стандартного шаблона `.cursor/skills/openspec-knowledge-init/templates/README-template.md` (Read шаблона → Write в `openspec/knowledge/README.md`) |
+| Нет `_archive/` | Создать каталог + `.gitkeep` |
+| Нет `_taxonomy.yaml` | Если Phase 5 будет выполнена — оставить (сгенерируется в Phase 5 шаг 6). Если Phase 5 пропускается (по решению пользователя или при повторном запуске с уже существующей `architecture.md` без обновления) — выдать предупреждение в Phase 6 и предложить запустить `/opsx:knowledge-init` отдельно |
+| Whitelist нарушен (посторонние файлы / каталоги в корне `knowledge/`) | AskQuestion: «В `openspec/knowledge/` найдены файлы вне формата: <список>. Для каждого выберите: Перенести в `temp/reports/` / Перенести в архив соответствующего ЗНИ (если узнаваемо) / Оставить (только подтверждение, тогда warning сохраняется)». По выбору пользователя выполнить перенос |
+
 **Логика перехода:**
-- Все `[V]` → Phase 1.
-- `[X]` только в openspec/ / AGENTS.md → агент создаёт и продолжает в Phase 1.
+- Все `[V]` (включая KB-чеклист) → Phase 1.
+- `[X]` только в openspec/ / AGENTS.md / KB → агент создаёт/чинит и продолжает в Phase 1.
 - `[X]` в src/ (нет выгрузки) → СТОП, дать инструкции, ждать.
 - `[X]` в .cursor/agents/ — предупреждение (агенты не будут работать), но не блокирует.
+- `[X]` в KB whitelist (посторонние файлы) — не блокирует, но требует AskQuestion из таблицы выше.
 
 ### Эталонная структура каталогов
 
@@ -363,17 +394,29 @@ src/
 <таблица: модуль / расширение / назначение / тип>
 ```
 
-**Шаг 6 — Генерация таксономии (`openspec/knowledge/_taxonomy.yaml`).**
-1. **Вход:** карта расширений и границ доменов из выхода `onec-code-architect` (и при необходимости `openspec/specs/architecture.md`, `project.md`).
-2. **Автогенерация draft `_taxonomy.yaml`:** по одному `domain` на каждое расширение из `src/*/cfe/*` с корректным `source`; `subdomains` — из подсистем / ключевых общих модулей (эвристика + ручная правка в draft); обязательный блок `cross` из шаблона `openspec/knowledge/_taxonomy.template.yaml`.
-3. **Confirm пользователя** перед записью (показ diff или краткого summary).
-4. **При повторном запуске `/init-project`:** не перезаписывать файл вслепую — предложить **sync** (diff к текущему `_taxonomy.yaml`), merge по решению пользователя. (Делегируется процедуре, описанной в `/opsx:knowledge-init`).
+**Шаг 6 — Генерация таксономии (`openspec/knowledge/_taxonomy.yaml`).** Шаг идемпотентен: безопасно запускать повторно.
 
-**При повторном запуске /init-project:** если `openspec/specs/architecture.md` уже существует — Phase 5 **предложить** обновить (если project.md изменился) или пропустить. Не пересоздавать автоматически без согласия.
+1. **Вход:** карта расширений и границ доменов из выхода `onec-code-architect` (и при необходимости `openspec/specs/architecture.md`, `project.md`).
+2. **Проверка идемпотентности.** Если `openspec/knowledge/_taxonomy.yaml` уже существует:
+   - Сравнить набор расширений в `src/*/cfe/*` с `domains[*].source` в текущем `_taxonomy.yaml`.
+   - **Если совпадает** — пропустить с сообщением «taxonomy актуальна, расширения совпадают, sync не требуется».
+   - **Если расширения добавлены/удалены** — предложить sync через `/opsx:knowledge-init` (diff + merge), не перезаписывать вслепую.
+3. **Если файла нет — автогенерация draft `_taxonomy.yaml`:** по одному `domain` на каждое расширение из `src/*/cfe/*` с корректным `source`; `subdomains` — из подсистем / ключевых общих модулей (эвристика + ручная правка в draft); обязательный блок `cross` из шаблона `openspec/knowledge/_taxonomy.template.yaml`.
+4. **Confirm пользователя** перед записью (показ diff или краткого summary).
+
+**При повторном запуске /init-project:** если `openspec/specs/architecture.md` уже существует — Phase 5 **предложить** обновить (если project.md изменился) или пропустить. Не пересоздавать автоматически без согласия. Шаг 6 (taxonomy) выполняется отдельно от пересоздания `architecture.md` — таксономия идемпотентна и проверяется всегда, даже если `architecture.md` не обновлялся.
 
 ---
 
 ## Phase 6 — Завершение
+
+**KB warning.** Перед предложением следующих шагов проверить `openspec/knowledge/_taxonomy.yaml`:
+
+- Если файл отсутствует и Phase 5 была пропущена (или Phase 5 шаг 6 не дошёл до записи) — вывести предупреждение:
+
+  > KB не сможет принимать факты без таксономии. Запустите `/opsx:knowledge-init` отдельно, чтобы сгенерировать `_taxonomy.yaml`. До этого шаги archive 5.5 и `/opsx:knowledge-audit --from-archive` будут выдавать `Blocked — taxonomy missing` при появлении кандидатов.
+
+- Если файл есть — KB готова, дополнительных действий не нужно.
 
 Предложить следующие шаги:
 

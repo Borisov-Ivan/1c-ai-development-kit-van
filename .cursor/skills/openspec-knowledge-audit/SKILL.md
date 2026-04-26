@@ -27,10 +27,17 @@ description: Audit OpenSpec Knowledge Base facts, TTL, anchors, indexes, metrics
 *   `--reindex` — пересобрать `openspec/knowledge/_index.yaml` на основе `.md` файлов (файлы — источник истины).
 *   `--metrics` — показать отчёт по счётчикам (used-count, drift-history).
 *   `--taxonomy-sync` — только отчёт: поиск несоответствий между `openspec/knowledge/_taxonomy.yaml` и структурой каталогов `src/*/cfe/*`.
+*   `--from-archive <name>` — легализованный ретро-пилот: повторно применить протокол `openspec-archive-change` шаг 5.5 к уже **архивированной** ЗНИ (`openspec/changes/archive/<YYYY-MM-DD-name>/`). См. алгоритм 5. Не путать с `--reindex` (тот пересобирает индекс из существующих `.md`-файлов, а `--from-archive` создаёт новые KB из аналитических reports архивной ЗНИ).
+*   `--structure-check` — отдельный режим: проверка whitelist содержимого `openspec/knowledge/` без верификации фактов. Структурная проверка также автоматически выполняется в начале основного аудита и в `--reindex` (см. шаг 0 алгоритма 1).
 
 ## Алгоритмы работы
 
 ### 1. Основной алгоритм аудита (без флагов или с фильтрами)
+0.  **Structure check (perform always before main audit):** Прочитать содержимое `openspec/knowledge/` и сверить с whitelist из `knowledge-format.mdc` (раздел РАСПОЛОЖЕНИЕ).
+    *   Разрешённые подкаталоги: `<domain>/` (по `_taxonomy.yaml`), `_archive/`.
+    *   Разрешённые файлы в корне: `_index.yaml`, `_taxonomy.yaml`, `_taxonomy.template.yaml`, `README.md`.
+    *   Любой иной файл/каталог → строка в Warnings отчёта: `Structure: <path> вне формата. Перенести в temp/reports/ или openspec/changes/<name>/reports/`.
+    *   Не блокировать audit; продолжить шаги 1–7.
 1.  **Чтение индекса:** Прочитать `openspec/knowledge/_index.yaml`.
 2.  **Фильтрация:** Отфильтровать факты согласно переданным флагам (`--domain`, `--status`, `--overdue`, `--ids`).
 3.  **Верификация:** Для каждого отфильтрованного KB-файла выполнить алгоритм Verify (описан в `.cursor/rules/knowledge-format.mdc`).
@@ -67,6 +74,28 @@ description: Audit OpenSpec Knowledge Base facts, TTL, anchors, indexes, metrics
     *   **orphan domain:** В YAML объявлен `source`, но соответствующего каталога не существует.
 4.  **Режим report only:** Автоматически YAML не править!
 5.  Вывести отчёт о найденных несоответствиях. Если найдены расхождения, **обязательно порекомендовать** запуск `/opsx:knowledge-init` для согласованного diff и записи.
+
+### 5. Алгоритм `--from-archive <name>` (ретро-пилот)
+
+Цель: легализованно применить протокол archive шаг 5.5 к **уже архивированной** ЗНИ. Повторно использует тот же extraction pipeline и единый AskQuestion с per-candidate карточками.
+
+1.  **Resolve archive path:**
+    *   Если `<name>` уже содержит дату (`YYYY-MM-DD-<slug>`), искать `openspec/changes/archive/<name>/`.
+    *   Иначе — найти каталог с суффиксом `-<name>` среди `openspec/changes/archive/*/`. При нескольких совпадениях — взять самый свежий (по дате в префиксе) и сообщить выбор.
+    *   Если не найден — вернуть ошибку: «Archive `<name>` не найден в `openspec/changes/archive/`».
+2.  **Preflight (taxonomy):** если `openspec/knowledge/_taxonomy.yaml` отсутствует — STOP, сообщить пользователю команду `/opsx:knowledge-init`. Это не auto-yes контекст, аудит подразумевает наличие таксономии.
+3.  **Inputs:** искать в `<archive-path>/reports/` файлы по маскам `exploration-*.md`, `trace-analysis-*.md`, `resolved-contract-*.md`. Если ни один не найден — вернуть отчёт `No analytical reports in archive <name>` и завершить.
+4.  **Apply archive шаг 5.5 Path C** дословно (см. `openspec-archive-change/SKILL.md`):
+    *   Подготовить ≤5 KB-кандидатов с полностью готовыми полями (domain, subdomain, anchors, tentative TTL).
+    *   Для каждого: автоподбор domain/subdomain по `_taxonomy.yaml`, извлечение anchors, verify по текущему `src/`, dedup относительно `_index.yaml`, `why-knowledge`, `source.report:lines`.
+    *   `source.report` указывает на путь внутри архива (`openspec/changes/archive/<YYYY-MM-DD-name>/reports/...`).
+5.  **Если кандидатов нет** — вернуть отчёт с указанием причины (taxonomy mismatch / verify drift / dedup) для каждого отбракованного кандидата, без AskQuestion. State = `No candidates after filters`.
+6.  **Если есть кандидаты** — вывести их per-candidate карточками (формат идентичен archive 5.5 Path C) и **один AskQuestion** на весь батч: «Сохранить N извлечённых KB-фактов из архива `<name>`? [yes | no]».
+7.  **Save:**
+    *   `yes` → сгенерировать `KB-NNNN-slug.md` в соответствующих доменах + атомарно перезаписать `_index.yaml`. State = `Saved N`.
+    *   `no` → ничего не пишется. State = `Declined by user`.
+8.  **Отчёт:** `openspec/reports/knowledge-audit-from-archive-<archive-slug>-<date>.md` с полным списком кандидатов, причинами отбраковки, итоговым state, structure check warnings (из шага 0 алгоритма 1).
+9.  **Ограничение:** одна `--from-archive` сессия = одна ЗНИ. Массовая ретро-миграция запрещена политикой `knowledge-format.mdc` («Ретроактивная миграция НЕ делается»).
 
 ## Правила и ограничения
 - **Writer contract:** Скилл аудита имеет право обновлять KB-файлы и `_index.yaml`.

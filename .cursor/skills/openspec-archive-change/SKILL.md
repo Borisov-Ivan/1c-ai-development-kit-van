@@ -168,9 +168,17 @@ Archive a completed change in the experimental workflow.
 
 5.5. **Facts extraction (single-decision)**
 
-   **Preflight:** если `openspec/knowledge/_taxonomy.yaml` отсутствует и по reports есть knowledge-worthy факты к извлечению — **STOP**, archive не завершать; указать пользователю `/opsx:knowledge-init` (или Phase 5 `/init-project`). Если извлекать нечего — шаг 5.5 не требует taxonomy.
+   **Inputs:** `reports/exploration-*.md`, `reports/trace-analysis-*.md`, `reports/resolved-contract-*.md` в каталоге архивируемой ЗНИ. Качество фактов — ответственность самих reports: агент не переоценивает их содержимое, а агрегирует. Критерии knowledge-worthy применяются как фильтр отсева, а не как материал для обсуждения с пользователем.
 
-   Читать `reports/exploration-*.md`, `reports/trace-analysis-*.md`, `reports/resolved-contract-*.md`. Качество фактов — ответственность самих reports: агент не переоценивает их содержимое, а агрегирует. Критерии knowledge-worthy применяются как фильтр отсева, а не как материал для обсуждения с пользователем.
+   **Final state setter:** на каждом из путей ниже шаг 5.5 устанавливает ровно одно `Knowledge:` state из пяти, см. шаг 7 (Output On Success). Archive **не блокируется** ни в одном из состояний.
+
+   **Path A — нет аналитических reports:**
+   - Если в каталоге архива не найдено ни одного из перечисленных файлов → state = `Skipped — no analytical reports`. Шаг 5.5 завершается тихо, без AskQuestion.
+
+   **Path B — taxonomy отсутствует:**
+   - Если есть аналитические reports, но `openspec/knowledge/_taxonomy.yaml` отсутствует → state = `Blocked — taxonomy missing`. В warnings добавить: `Knowledge: blocked — _taxonomy.yaml отсутствует. Запустите /opsx:knowledge-init или /init-project для генерации.` AskQuestion не показывается, KB-файлы не пишутся, archive продолжается.
+
+   **Path C — нормальный путь (reports есть, taxonomy есть):**
 
    Подготовить батч: до 5 KB-кандидатов с полностью готовыми полями (domain, subdomain, anchors по taxonomy, tentative TTL). Дедупликация по title/anchor.path относительно `_index.yaml`.
 
@@ -179,16 +187,38 @@ Archive a completed change in the experimental workflow.
    2. Извлечение signature-anchors из reports (path, name, declaration).
    3. Verify anchors по текущему коду. Если уже stale — кандидат отбрасывается, в warnings одна строка.
    4. Если факт близок к существующему (fuzzy match по title/name) — кандидат готовится как supersede-proposal существующего KB (в превью отмечается пометкой "SUPERSEDES KB-NNNN").
+   5. Подготовить **why-knowledge** — одно предложение, объясняющее, почему этот факт **не** дублирует ADR / spec / project / debug-context (используется в карточке).
+   6. Сохранить ссылку на источник в формате `<report-file>:<line-range>` для поля `source.report:lines`.
 
-   Показ пользователю (single AskQuestion, одно решение на весь батч):
-   "Сохранить N извлечённых KB-фактов? [yes | no]"
-   В теле вопроса — компактный список: id, title, domain/subdomain, anchors (без per-fact чекбоксов, без уточнений по каждому).
+   **Если после всех фильтров кандидатов не осталось** → state = `No candidates after filters`. AskQuestion не показывается. Если по дороге были отбраковки (taxonomy mismatch, stale anchors) — добавить их в warnings одной строкой.
 
-   - `yes` → сгенерировать все `KB-NNNN-slug.md` + атомарное обновление `_index.yaml`
-   - `no`  → ничего не пишется; в отчёте архивации одна строка "Knowledge: declined"
+   **Если кандидаты остались (1..5)** — единый AskQuestion на весь батч. В теле вопроса для **каждого** кандидата выводится **per-candidate карточка** (markdown-блок) с полями:
 
-   Отсутствие кандидатов после фильтров (taxonomy/verify/duplicate) — шаг завершается тихо, без вопроса пользователю.
+   ```
+   ### KB-<next-id>: <title>
+   - **Domain / subdomain:** <domain> / <subdomain>
+   - **Anchors:** <file>:<line> (+ дополнительные при наличии)
+   - **Why knowledge:** <one sentence — почему это не ADR / spec / project / debug-context>
+   - **Source:** <report-file>:<line-range>
+   - **Supersedes:** KB-NNNN  (только если применимо)
+   ```
+
+   Под карточками — единый вопрос: «Сохранить N извлечённых KB-фактов? [yes | no]».
+
+   - `yes` → сгенерировать все `KB-NNNN-slug.md` + атомарное обновление `_index.yaml` → state = `Saved N (KB-NNNN, ...)`.
+   - `no`  → ничего не пишется → state = `Declined by user`.
+
    Дедупликация: если один факт встречается в нескольких reports — создаётся один KB, второй report идёт в `source.also-mentioned-in`.
+
+   **Mapping состояний (резюме):**
+
+   | Условие | Knowledge state |
+   |---|---|
+   | Saved (yes на AskQuestion) | `Saved N (KB-NNNN, ...)` |
+   | Declined (no на AskQuestion) | `Declined by user` |
+   | Reports есть, кандидатов нет после фильтров | `No candidates after filters` |
+   | Reports не найдены вовсе | `Skipped — no analytical reports` |
+   | Reports есть, taxonomy отсутствует | `Blocked — taxonomy missing` |
 
 6. **Perform the archive**
 
@@ -215,7 +245,7 @@ Archive a completed change in the experimental workflow.
    - Archive location
    - Whether specs were synced / up to date / no delta
    - Whether ADRs were extracted (count and numbers) or skipped with reason
-   - Whether Knowledge facts were saved, declined, or skipped
+   - Knowledge state — одно из пяти: `Saved N`, `Declined by user`, `No candidates after filters`, `Skipped — no analytical reports`, `Blocked — taxonomy missing` (см. шаг 5.5)
    - **`### Warnings`** — only if the warnings accumulator from steps 2–3 is non-empty; list each bullet. If empty, **omit** the Warnings section entirely.
 
 **Output On Success**
@@ -231,7 +261,7 @@ Use this template; adapt lines to facts (omit `### Warnings` when there are none
 **Slices:** K/K приняты | N/A (legacy mode) | Force-legacy archive (нарушен контракт срезов)
 **Specs:** ✓ Synced to main specs (N requirements updated) | Already up to date | No delta specs
 **ADR:** ✓ Extracted N ADRs (ADR-NNNN, ...) | No architecture reports | No ADR-worthy decisions extracted
-**Knowledge:** ✓ Saved N KB-facts (KB-NNNN, ...) | Declined by user | No candidates | Skipped (warnings)
+**Knowledge:** ✓ Saved N (KB-NNNN, ...) | Declined by user | No candidates after filters | Skipped — no analytical reports | Blocked — taxonomy missing
 
 ### Warnings
 - <only when applicable: incomplete artifacts, incomplete tasks with IDs, etc.>

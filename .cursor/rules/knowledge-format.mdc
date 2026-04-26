@@ -11,10 +11,37 @@ alwaysApply: false
 
 - **Корень:** `openspec/knowledge/`
 - **Файл:** `openspec/knowledge/<domain>/KB-NNNN-slug.md` (NNNN — четырёхзначный номер, slug — kebab-case)
-- **Индекс:** `openspec/knowledge/README.md` — таблица всех KB
+- **Индекс:** `openspec/knowledge/README.md` — описание модели + (опционально) таблица всех KB
 - **Машиночитаемый индекс:** `openspec/knowledge/_index.yaml` — для быстрого Discovery
 - **Таксономия:** `openspec/knowledge/_taxonomy.yaml` — словарь доменов/субдоменов
+- **Шаблон таксономии:** `openspec/knowledge/_taxonomy.template.yaml` — заготовка для `/opsx:knowledge-init`
 - **Архив:** `openspec/knowledge/_archive/` — deprecated/superseded KB
+
+### Whitelist содержимого корня `openspec/knowledge/`
+
+Корень `openspec/knowledge/` имеет **строгий whitelist**. Любой файл/каталог, которого нет в списке, считается посторонним и подлежит выносу:
+
+**Разрешённые подкаталоги:**
+- `<domain>/` — один подкаталог на каждый домен из `_taxonomy.yaml`. Внутри — `KB-NNNN-slug.md` или вложенные `<subdomain>/KB-NNNN-slug.md`.
+- `_archive/` — единственный служебный подкаталог (deprecated/superseded KB).
+
+**Разрешённые файлы в корне:**
+- `_index.yaml`
+- `_taxonomy.yaml`
+- `_taxonomy.template.yaml`
+- `README.md`
+
+**Запрещено:**
+- Произвольные подкаталоги (`meta/`, `tmp/`, `notes/`, `drafts/`, `process/`, `audit/` и т. п.).
+- Произвольные `.md` в корне, кроме `README.md` (любые `audit-*.md`, `report-*.md`, `notes-*.md` и т. п.).
+- Файлы любых других расширений (`.txt`, `.json`, `.log`).
+
+**Куда переносить посторонние файлы:**
+- Процессные отчёты, аудит процесса, заметки → `temp/reports/`.
+- Артефакты ЗНИ → `openspec/changes/<name>/reports/` (или соответствующий архив).
+- Архитектурные решения → `openspec/adrs/`.
+
+Проверка whitelist выполняется в `/opsx:knowledge-audit` (structure check) и в `/init-project` (Phase 0).
 
 ## ФОРМАТ KB-ФАЙЛА
 
@@ -215,6 +242,7 @@ CASE anchor.type:
 | Пустой `_index.yaml` | Discovery возвращает пустой список, не ошибка |
 | `anchor-missing` но `name` найден в другом модуле (фаззи) | `anchor-missing` + hint «найдено в X — возможно перенесено» |
 | Переименование процедуры | `anchor-missing` → audit: `supersede-by` или `update` |
+| Не-KB файл/каталог в `openspec/knowledge/` (вне whitelist) | Warning в audit-отчёте: `Structure: <path> вне формата. Перенести в temp/reports/ или openspec/changes/<name>/reports/`. Не блокирует audit. `/init-project` Phase 0 предлагает action через AskQuestion |
 
 ## БЮДЖЕТ VERIFY
 
@@ -307,7 +335,7 @@ facts:
 - Старые `reports/` могут содержать устаревшие данные — верификация дорогая.
 - Фокус — новый поток, agent-driven extraction на свежем контексте.
 
-Исключение: точечный пилот на 2-3 свежих архивах для проверки формата.
+Исключение: точечный пилот на 2-3 свежих архивах для проверки формата. Запускается через `/opsx:knowledge-audit --from-archive <name>` — повторное применение протокола archive шаг 5.5 к уже архивированной ЗНИ. Это **не** массовая миграция: каждый запуск ограничен одной ЗНИ и единым AskQuestion (см. `openspec-knowledge-audit/SKILL.md`).
 
 ### KB-archive policy (борьба с перенаселением)
 
