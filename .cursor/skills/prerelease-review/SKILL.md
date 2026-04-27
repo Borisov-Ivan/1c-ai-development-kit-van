@@ -6,7 +6,7 @@ compatibility: Requires openspec CLI. Delegates to onec-code-reviewer v3.0 (prom
 expected_reviewer_prompt_contract_version: 3
 metadata:
   author: project
-  version: "1.5"
+  version: "1.6"
 ---
 
 Провести предрелизное ревью расширения 1С. Результат — структурированный отчёт с замечаниями по уровням. После — предложение создать openspec change на устранение (или дополнение существующего ЗНИ в режиме change-scoped).
@@ -15,7 +15,7 @@ metadata:
 
 - **Без аргументов** — определить расширение из контекста или спросить; режим **`full-extension`** (как раньше).
 - **Один аргумент** — имя расширения (папка в `src/*/cfe/`); режим **`full-extension`**.
-- **Два аргумента** — `<расширение> <change-name>`; режим **`change-scoped`**: Tier 1 и механика 1.7/1.7b/1.7c только по файлам ЗНИ; Tier 2 (explorer) — по всему расширению.
+- **Два аргумента** — `<расширение> <change-name>`; режим **`change-scoped`**: Tier 1 и механика 1.7/1.7b/1.7c только по `target_files` ЗНИ (multi-source resolver: `architecture-*.md` → `tasks.md` → `design.md`, git fallback); reference-файлы используются только как контекст; Tier 2 (explorer) — по всему расширению.
 
 ---
 
@@ -105,53 +105,85 @@ openspec list --json
 
 ### 1.3a Извлечение файлов ЗНИ (только `review_mode = change-scoped`)
 
-Цель — список **`change_files`**: уникальные пути к `.bsl`, относящиеся к **выполненным** задачам (`[x]`).
+Цель — построить четыре списка с provenance:
 
-#### Основной путь: `tasks.md` в `change_dir`
+- **`target_files`** — `.bsl` внутри выбранного `src/*/cfe/<расширение>/`; идут в Tier 1 и механику 1.7–1.7c.
+- **`reference_files`** — `.bsl` вне выбранного cfe (cf, старое расширение-источник, другие cfe); передаются reviewer-у только как read-only context, findings по ним запрещены.
+- **`doc_files`** — markdown/spec/project-артефакты; не идут в BSL reviewer.
+- **`ambiguous_files`** — сокращённые пути (`.../Form/Module.bsl`) и пути без `src/`, которые не удалось однозначно восстановить.
 
-1. Прочитать `change_dir/tasks.md`.
-2. Разбить текст на блоки задач: строки вида `- [x] ...` (выполненные). Задачи с `[ ]` **не** участвуют в извлечении путей.
-3. Для **каждой** задачи с `[x]` в её теле (до следующей задачи того же уровня или до заголовка `##`):
-   - Из строк `**Файл:**` / `**Файлы:**` извлечь пути, заключённые в обратные кавычки `` `...` ``, содержащие `src/` и оканчивающиеся на `.bsl`.
-   - Дополнительно найти в теле задачи все вхождения по regex: `` `src/[^`]*\.bsl` `` или `src/[^\s`]+\.bsl` (пути без кавычек в скобках — по согласованности с текстом задачи).
-   - Если в задаче явно указано **«тот же»** / **«тот же файл»** / **«тот же Module.bsl»** (регистр не важен) и новый путь не извлечён — **наследовать** последний известный путь `.bsl` из **той же секции** `## N.` (последний заголовок `##` выше по файлу).
-4. Нормализовать пути относительно корня репозитория; дедупликация; отсортировать.
-5. **Проверка принадлежности расширению:** путь должен находиться под каталогом выбранного расширения `src/*/cfe/<название>/` **или** (если ЗНИ трогает базовую cf) — под соответствующим `cf/` из [openspec/project.md](../../../openspec/project.md). Собрать множество **`files_outside_extension`**: `.bsl` из `change_files`, которые **не** лежат под `src/*/cfe/<название>/`. Если `files_outside_extension` не пусто — **AskUserQuestion**: включить эти файлы в scope ревью (cf/cfe по ЗНИ) или ограничиться только модулями под `cfe/<название>/`. По ответу пользователя скорректировать `change_files`.
+Каждый элемент хранит `path`, `source` (`architecture` / `tasks` / `design` / `git` / `debug-soft` / `slice-soft`) и при необходимости `warning`.
 
-#### Подсчёт выполненных задач
+#### Источники и приоритет
 
-**`completed_task_count`** — число строк `- [x]` в `tasks.md` (грубая метрика для отчёта). **`files_from_tasks_count`** — число уникальных `.bsl`, извлечённых из тел задач с `[x]` до шага fallback.
+1. **`reports/architecture-*.md`** — YAML front-matter `scope.files`. Если найден хотя бы один релевантный отчёт, его `scope.files` задаёт **canonical target set**: это primary-источник для `target_files`; `tasks.md` и `design.md` могут добавлять файлы, но не сужают список.
+2. **`tasks.md`** — пути из выполненных задач (`[x]`). Задачи с `[ ]` не участвуют.
+3. **`design.md`** — `## Slices`, колонка «Файлы / модули» (если есть).
+4. **`debug.md`** — soft-источник: только warning «упомянут в debug, но отсутствует в target/reference»; **не** расширяет `target_files`.
+5. **`reports/slice-acceptance-*.md`** — soft-источник: только warning; **не** расширяет `target_files`.
+6. **git fallback** — использовать только если источники 1–3 не дали ни одного `.bsl`: `git log --all --oneline --grep="<slug>"`, затем `git diff --name-only <commit>~1 <commit>` или `git show --name-only --pretty="" <commit>`.
 
-#### Fallback: git (если после шага выше `change_files` пуст)
+#### Извлечение по источникам
 
-1. Из `change-name` взять **slug** для grep: последний сегмент после даты, если имя вида `YYYY-MM-DD-<slug>` (например `2026-03-25-edo-ea-batch-signing-rs-elektronnye-podpisi` → кандидаты: полное имя и `edo-ea-batch-signing-rs-elektronnye-podpisi`); иначе использовать `<change-name>` целиком.
-2. Выполнить: `git log --all --oneline --grep="<slug>"` (при необходимости повторить с укороченным slug).
-3. Для каждого найденного коммита (сверху вниз, пока не наберутся `.bsl`): `git diff --name-only <commit>~1 <commit>` (или `git show --name-only --pretty="" <commit>`), отобрать строки, оканчивающиеся на `.bsl`, пересечь с деревом репозитория.
-4. Отфильтровать по scope расширения: оставить только пути под `src/*/cfe/<название>/` **или** (по согласованию с п.5 выше) cf из project.md, если пользователь согласился на cf.
-5. Если список не пуст — **обязательно** сообщить пользователю: «Пути из `tasks.md` для `[x]` не извлечены; использован git-fallback; файлы: … Продолжить?» При отказе — СТОП или переключение на `full-extension` по выбору пользователя.
+- `architecture`: прочитать все `change_dir/reports/architecture-*.md`; извлечь только значения `scope.files` из YAML front-matter. Если отчётов несколько — объединить, сохранив provenance `architecture:<filename>`.
+- `tasks`: прочитать `change_dir/tasks.md`; считать `completed_task_count` по строкам `- [x]`; в теле каждой выполненной задачи извлечь пути из `**Файл:**` / `**Файлы:**`, из обратных кавычек и по regex ``src/[^\s`]+\.bsl``. Если задача содержит «тот же» / «тот же файл» / «тот же Module.bsl» и нового пути нет — наследовать последний известный `.bsl` в той же секции `## N.`.
+- `design`: прочитать `change_dir/design.md`; из таблицы `## Slices` взять значения колонки «Файлы / модули»; из ячеек извлечь `.bsl` в обратных кавычках и plain-text пути.
+- `debug-soft` и `slice-soft`: извлечь `.bsl` тем же способом, но сохранять только в `scope_warnings`, если путь не вошёл в `target_files` / `reference_files` / `doc_files`.
+- `git`: из `change-name` взять полный slug и slug без даты; результаты пометить `source=git` и обязательно показать предупреждение в Scope Preview.
+
+#### Нормализация, восстановление и классификация
+
+1. Нормализовать разделители `/`, убрать внешние кавычки, дедуплицировать по относительному пути от корня репозитория.
+2. Если путь начинается с `src/` и оканчивается `.bsl`:
+   - под выбранным `src/*/cfe/<расширение>/` → `target_files`;
+   - вне выбранного cfe → `reference_files`.
+3. Если путь указывает на `.md`, `specs/`, `proposal.md`, `design.md`, `tasks.md`, `project.md` → `doc_files`.
+4. Если путь сокращённый (`.../Form/Module.bsl`, `Form/Module.bsl`, путь без `src/`) — выполнить suffix matching по корню выбранного расширения:
+   - взять последние 2–3 сегмента пути;
+   - Glob по `src/*/cfe/<расширение>/**/<suffix>`;
+   - ровно 1 совпадение → auto-resolve в `target_files` с warning `restored by suffix from <source>`;
+   - 0 совпадений → оставить в `ambiguous_files`;
+   - 2+ совпадений → **AskUserQuestion** с конкретными вариантами; не угадывать.
+5. Если source=git использован как fallback — в Scope Preview обязательно показать: «Источники architecture/tasks/design не дали BSL; использован git fallback».
 
 #### Граничные случаи `change-scoped`
 
-- В `tasks.md` **нет** ни одной строки `- [x]`: предупредить «Нет выполненных задач — нет файлов в scope для Tier 1». Предложить **`full-extension`** или СТОП.
-- После tasks + git **`change_files` всё ещё пуст**: предупредить; предложить **`full-extension`** или СТОП.
+- В `tasks.md` нет ни одной строки `- [x]`: предупредить «Нет выполненных задач — tasks не добавил файлов в Tier 1»; продолжить только если `architecture` или `design` дали `target_files`, иначе предложить **`full-extension`** или СТОП.
+- После sources 1–3 и git fallback **`target_files` пуст**: предупредить; предложить **`full-extension`** или СТОП.
+- Если `reference_files` не пуст — не спрашивать, включать ли их в findings: это всегда read-only context. Если пользователь хочет ревью cf/другого cfe как target — это отдельный `full-extension`/другой запуск.
 
 ### 1.3b Review Boundaries и diff (только `review_mode = change-scoped`)
 
-После формирования **`change_files`** (шаг 1.3a), **до** батчевого ревью (шаг 2.1):
+После формирования **`target_files`** (шаг 1.3a), **до** батчевого ревью (шаг 2.1):
 
 1. **Режим Tier 1:** ревьювер получает **`diff-focused`** по умолчанию: замечания functional / style / release-hygiene только в изменённых процедурах/функциях и `[module-level]` участках. **Tier 2** (шаг 2.5) — по-прежнему **всё** расширение (`extension_all_bsl`).
-2. **Baseline и `git diff`:** применить логику [.cursor/skills/review/SKILL.md](../review/SKILL.md) **шаг 1.5.1** для набора файлов `change_files` (ветка ≠ основной → `merge-base` с `main` / `master` / `origin/main`; на основной ветке + ЗНИ → коммиты по slug из шага 1.3a fallback; при неудаче — fallback с `git log` и AskQuestion или **`Focus: full`** для затронутых файлов с предупреждением). При необходимости учесть незакоммиченные правки: объединить с `git diff HEAD -- <file>` (как в review шаг 1.5.1 п.1).
+2. **Baseline и `git diff`:** применить логику [.cursor/skills/review/SKILL.md](../review/SKILL.md) **шаг 1.5.1** только для набора файлов `target_files` (ветка ≠ основной → `merge-base` с `main` / `master` / `origin/main`; на основной ветке + ЗНИ → коммиты по slug из шага 1.3a fallback; при неудаче — **`Focus: full`** для затронутых target-файлов с предупреждением). При необходимости учесть незакоммиченные правки: объединить с `git diff HEAD -- <file>` (как в review шаг 1.5.1 п.1).
 3. **Извлечение строк и маппинг на процедуры:** как review **шаги 1.5.3–1.5.4** (строки с префиксом `+`, границы `Процедура`/`Функция` … `КонецПроцедуры`/`КонецФункции`, иначе `[module-level]`).
-4. **Новый файл** в diff → для этого файла в `## Review Boundaries` указать `Focus: full`.
-5. **Пустой diff** по файлу при наличии в `change_files` → предупредить в сводке/отчёте; для файла выставить **`Focus: full`** или уточнить baseline у пользователя.
-6. **Сборка `## Review Boundaries`:** как review **шаг 1.5.5**, отдельно для каждого **батча** (только файлы батча). Сохранить блоки для вставки в промпты шага 2.1.
+4. **Новый файл** в diff или отсутствует baseline → для этого файла в `## Review Boundaries` указать `Focus: full` и warning в Scope Preview/отчёте.
+5. **Пустой diff** по target-файлу → предупредить в сводке/отчёте; для файла выставить **`Focus: full`** или уточнить baseline у пользователя.
+6. **Сборка `## Review Boundaries`:** как review **шаг 1.5.5**, отдельно для каждого **батча** (только target-файлы батча). `reference_files` и `doc_files` в boundaries не попадают. Сохранить блоки для вставки в промпты шага 2.1.
 
-**Артефакт:** для каждого пути из `change_files` — набор диапазонов строк «в фокусе» (процедуры + module-level) для **фильтрации** механик 1.7 и 1.7b.
+**Артефакт:** для каждого пути из `target_files` — набор диапазонов строк «в фокусе» (процедуры + module-level) для **фильтрации** механик 1.7 и 1.7b.
+
+### 1.3c Scope Preview (только `review_mode = change-scoped`)
+
+До запуска механики 1.7–1.8 и агентов показать пользователю краткий Scope Preview:
+
+- **Tier 1 target files:** список `target_files` с provenance (`architecture` / `tasks` / `design` / `git`) и warning по `Focus: full` / suffix matching.
+- **Reference files:** список `reference_files` с пометкой `read-only context; no findings`.
+- **Doc files:** кратко, только если были извлечены.
+- **Tier 2 directory:** полный каталог выбранного расширения (`src/*/cfe/<расширение>/`).
+- **Warnings:** git fallback, soft-источники (`debug.md`, `slice-acceptance-*.md`), восстановленные пути, пустые источники.
+
+Если после suffix matching остались `ambiguous_files`:
+
+- 0 target-файлов → **AskUserQuestion**: перейти в `full-extension` / остановиться / указать путь вручную.
+- Есть target-файлы → **AskUserQuestion**: продолжить с найденным scope / перейти в `full-extension` / остановиться и уточнить пути.
 
 ### 1.3 Собрать список .bsl файлов
 
 - **`review_mode = full-extension`:** Glob по директории расширения (`src/*/cfe/<название>/`). Перечислить все `.bsl` с путями. Этот список используется для Tier 1, механики 1.7–1.7c и Tier 2.
-- **`review_mode = change-scoped`:** список для Tier 1 и механики 1.7–1.7c = **`change_files`** из шага 1.3a. **Дополнительно** (только для Tier 2, шаг 2.5): выполнить Glob по всему каталогу расширения и сохранить как **`extension_all_bsl`** — полный перечень `.bsl` расширения; не подменять им шаг 1.6 для классификации Tier 1.
+- **`review_mode = change-scoped`:** список для Tier 1 и механики 1.7–1.7c = **`target_files`** из шага 1.3a. **Дополнительно** (только для Tier 2, шаг 2.5): выполнить Glob по всему каталогу расширения и сохранить как **`extension_all_bsl`** — полный перечень `.bsl` расширения; не подменять им шаг 1.6 для классификации Tier 1. `reference_files` передавать только в отдельном read-only evidence-блоке.
 
 ### 1.4 Загрузить артефакты change
 
@@ -163,27 +195,28 @@ openspec instructions apply --change "<name>" --json
 
 Прочитать `design.md`, `tasks.md` — для понимания контрактов и ожидаемого поведения.
 
-- **`review_mode = change-scoped`:** шаг выполняется **всегда**. Прочитать из `change_dir`: `tasks.md`, `design.md`, при наличии — `proposal.md`. Опционально: `openspec instructions apply --change "<name>" --json`, если CLI знает change (для активных change); иначе достаточно чтения файлов из `change_dir`.
+- **`review_mode = change-scoped`:** шаг выполняется **всегда**. `tasks.md`, `design.md`, `reports/architecture-*.md`, `debug.md` и `reports/slice-acceptance-*.md` уже использовались resolver-ом 1.3a; для брифа прочитать/суммаризировать `proposal.md` (при наличии), `design.md`, `tasks.md`, а также кратко зафиксировать provenance `target_files` / `reference_files`. Опционально: `openspec instructions apply --change "<name>" --json`, если CLI знает change (для активных change); иначе достаточно чтения файлов из `change_dir`.
 
 ### 1.5 Сформировать контекст для ревьювера
 
 Подготовить структурированный бриф. Использовать его в промптах батчей (шаг 2.1). Шаблон:
 
 - **Режим scope:** `full-extension` или `change-scoped (<change-name>)`.
-- При **`change-scoped`:** кратко: цель ЗНИ из `proposal.md`/`design.md`; **N** файлов в scope Tier 1 из **M** выполненных задач (`[x]`); перечень путей `change_files` (или ссылка «см. список в промпте»).
+- При **`change-scoped`:** кратко: цель ЗНИ из `proposal.md`/`design.md`; **N** файлов в scope Tier 1 из **M** выполненных задач (`[x]`); перечень `target_files` с provenance; `reference_files` как read-only context; warnings из Scope Preview.
 - **Расширение:** название, префикс, префикс журнала (если есть).
-- **Файлы в scope (Tier 1):** по батчу — список .bsl с путями (из 1.6: группы A/B/C).
+- **Файлы в scope (Tier 1):** по батчу — список `target_files` с путями (из 1.6: группы A/B/C).
 - **Директория расширения (полный путь):** `src/*/cfe/<название>/` — для Grep по вызовам процедур/функций при проверке **unused code** (категория 15). **Всегда** передавать явно: область поиска вызовов — **вся** директория расширения. При **`change-scoped`** с шагом 1.3b ревьювер в промпте должен выполнять Grep по имени **только для процедур/функций, перечисленных в `## Review Boundaries` для данного файла**, а не для всех процедур модуля (см. дополнение к шагу 2.1).
-- **Review Boundaries (`change-scoped`):** в каждый промпт батча (шаг 2.1) вставить блок `## Review Boundaries` для файлов батча; протокол — `.cursor/agents/onec-code-reviewer.md` (Review Boundaries). **Полный** Tier 1 без границ — только если для всех файлов батча `Focus: full` (fallback 1.3b); тогда секцию можно не дублировать или указать пофайлово `Focus: full`.
+- **Review Boundaries (`change-scoped`):** в каждый промпт батча (шаг 2.1) вставить блок `## Review Boundaries` только для `target_files` батча; протокол — `.cursor/agents/onec-code-reviewer.md` (Review Boundaries). **Полный** Tier 1 без границ — только если для всех файлов батча `Focus: full` (fallback 1.3b); тогда секцию можно не дублировать или указать пофайлово `Focus: full`.
 - **Стандарты:** .cursor/docs/1c-coding-standards.md, 1c-vendor-standards/SKILL.md, конфигурация onec-code-reviewer.md.
 - **Whitelist форматов комментариев (project.md):** из шага 1.1a — перечень имён и правил (префикс/regex) или «нет».
 - **Обязательный контроль комментариев (project.md):** из шага 1.1a — ID, где проверять, пример допустимой строки, regex (если есть), уровень/kind; или «нет».
+- **Reference Files (`change-scoped`):** отдельный блок `## Reference Files (read-only context)` со списком `reference_files`; findings по ним запрещены, цитирование строк допустимо только как evidence.
 - **Режим ревью:** mode=prerelease; для каждого замечания указывать kind (functional / style / release-hygiene).
 - **Naming quality:** AP-031 — доменный тест + тест уровня абстракции + контрастный тест (см. onec-code-reviewer.md Phase 0 Q6 и bsl-antipatterns AP-031). Применять ко всем идентификаторам в ревьюируемом scope.
 
 ### 1.6 Классификация модулей
 
-Автоматически разбить **список .bsl для Tier 1** (при `full-extension` — все файлы расширения; при `change-scoped` — только `change_files`) на группы:
+Автоматически разбить **список .bsl для Tier 1** (при `full-extension` — все файлы расширения; при `change-scoped` — только `target_files`) на группы:
 
 - **Группа A (глубокий ревью):** собственные модули расширения — путь содержит префикс расширения (например `рг` в имени папки/модуля: `ргСервисКриптографии*`, `ргЭкземпляры*` и т.д.). Содержат оригинальный код проекта.
 - **Группа B (стандартный ревью):** перехваты типовых модулей — общие/объектные модули с аннотациями &Вместо/&Перед/&После/&ИзменениеИКонтроль, но не в группе A. Проверка: аннотации, корректность структуры #Вставка/#Удаление (директивы не удалять — это синтаксис переопределения), минимальные паттерны.
@@ -198,12 +231,12 @@ openspec instructions apply --change "<name>" --json
 **Scope файлов для `rg`:**
 
 - **`full-extension`:** `<dir>` = каталог расширения `src/*/cfe/<название>/` с `--glob "*.bsl"` (как раньше).
-- **`change-scoped`:** передать **конкретные пути** из `change_files` (без `--glob` по каталогу): `rg "<pattern>" путь1 путь2 ...` (в PowerShell пути в кавычках). Если один файл — один аргумент пути. Если список длинный — разбить на несколько вызовов `rg` по подмножествам путей.
+- **`change-scoped`:** передать **конкретные пути** из `target_files` (без `--glob` по каталогу): `rg "<pattern>" путь1 путь2 ...` (в PowerShell пути в кавычках). Если один файл — один аргумент пути. Если список длинный — разбить на несколько вызовов `rg` по подмножествам путей.
 
 ```bash
 # Kebab-case идентификаторы в комментариях (имена changes: fix-signing-result и т.п.)
 rg "//.*[a-z]+-[a-z]+-[a-z]+" --glob "*.bsl" <dir>   # full-extension
-# change-scoped: без --glob, в конце перечислить пути change_files
+# change-scoped: без --glob, в конце перечислить пути target_files
 
 # Англоязычные процессные термины в комментариях
 rg -i "//.*\b(design|decision|proposal|architecture|exploration)\b" --glob "*.bsl" <dir>
@@ -227,7 +260,7 @@ rg "//.*Decision\s+\d+" --glob "*.bsl" <dir>
 
 ### 1.7b Механическая проверка: англоязычный жаргон в комментариях (AP-041)
 
-До батчевого ревью — запустить Grep на **англоязычный технический жаргон** в однострочных комментариях `//` (не в строковых литералах `НСтр` и многострочных блоках — возможны ложные срабатывания; при сомнении сверить строку вручную). **Scope:** как в шаге 1.7 (`full-extension` — каталог + `--glob "*.bsl"`; `change-scoped` — список путей `change_files`).
+До батчевого ревью — запустить Grep на **англоязычный технический жаргон** в однострочных комментариях `//` (не в строковых литералах `НСтр` и многострочных блоках — возможны ложные срабатывания; при сомнении сверить строку вручную). **Scope:** как в шаге 1.7 (`full-extension` — каталог + `--glob "*.bsl"`; `change-scoped` — список путей `target_files`).
 
 ```bash
 # Жаргон и устойчивые англ. термины в комментариях (расширяемый набор)
@@ -246,9 +279,9 @@ rg -i "//.*\b(fail-fast|feature.toggle|workaround|fallback|downstream|re-raise|f
 
 ### 1.7c Механическая проверка: обязательные форматы комментариев (project.md / Mandatory Control)
 
-Если в [openspec/project.md](../../../openspec/project.md) в таблице **«Обязательный контроль»** есть активные строки с непустым **Regex допустимой строки** — выполнить проверку. **Scope:** при `full-extension` — по каталогу расширения `<dir>`; при `change-scoped` — только по файлам из `change_files` (для шага 1: `rg "#Вставка" -n` с перечислением путей или фильтрация результатов grep по каталогу до путей из `change_files`). При **нескольких** правилах с разными условиями — выполнить проверку **отдельно для каждого ID** по колонке «Где проверять» (ниже — базовая механика для правил вида «первый `//` после `#Вставка`»).
+Если в [openspec/project.md](../../../openspec/project.md) в таблице **«Обязательный контроль»** есть активные строки с непустым **Regex допустимой строки** — выполнить проверку. **Scope:** при `full-extension` — по каталогу расширения `<dir>`; при `change-scoped` — только по файлам из `target_files` (для шага 1: `rg "#Вставка" -n` с перечислением путей или фильтрация результатов grep по каталогу до путей из `target_files`). При **нескольких** правилах с разными условиями — выполнить проверку **отдельно для каждого ID** по колонке «Где проверять» (ниже — базовая механика для правил вида «первый `//` после `#Вставка`»).
 
-1. `rg "#Вставка" --glob "*.bsl" -n <dir>` — список вхождений (**`change-scoped`:** те же пути, что в 1.7 — без glob по всему каталогу, только `change_files`).
+1. `rg "#Вставка" --glob "*.bsl" -n <dir>` — список вхождений (**`change-scoped`:** те же пути, что в 1.7 — без glob по всему каталогу, только `target_files`).
 2. Для каждого вхождения: открыть файл, идти **вниз** от строки с `#Вставка`, пропуская пустые строки; первую строку, начинающуюся с `//` (после возможных пробелов в начале строки), сравнить с **Regex допустимой строки** из соответствующего правила (для правила EX-001 и аналогов — «первый `//` после `#Вставка`»; если в `project.md` для другого ID указано иное «Где проверять» — следовать ему, даже если механика сложнее одного прохода — тогда зафиксировать остаток проверки ревьюеру).
 3. Если первый значимый однострочный комментарий `//` после блока не совпадает с regex допустимой строки — добавить в сводку (шаг 2.2) замечание с **ID правила** из таблицы, **уровнем** и **kind** из таблицы, `файл:строка`, краткое описание несоответствия и ссылку на колонку «Требование / пример».
 
@@ -317,7 +350,7 @@ rg -i "//.*\b(fail-fast|feature.toggle|workaround|fallback|downstream|re-raise|f
 
 ### 2.0 Входные данные
 
-Использовать группы A/B/C из шага 1.6 и общий контекст из 1.5. Имя расширения, префикс, стандарты, режим mode=prerelease — едины для всех батчей. Набор файлов батчей = **Tier 1 scope** из шага 1.3 (при `change-scoped` — только `change_files`). При **`change-scoped`** подготовить из шага **1.3b** блок `## Review Boundaries` **на каждый батч** (подмножество файлов батча).
+Использовать группы A/B/C из шага 1.6 и общий контекст из 1.5. Имя расширения, префикс, стандарты, режим mode=prerelease — едины для всех батчей. Набор файлов батчей = **Tier 1 scope** из шага 1.3 (при `change-scoped` — только `target_files`). При **`change-scoped`** подготовить из шага **1.3b** блок `## Review Boundaries` **на каждый батч** (подмножество target-файлов батча).
 
 ### 2.1 Параллельные вызовы onec-code-reviewer (до 4 одновременно)
 
@@ -343,12 +376,15 @@ mode=prerelease
 ## Architectural Context
 <design.md extracted summary — только при change-scoped>
 
+## Reference Files (read-only context)
+<таблица reference_files: Path | Role/Source; только при change-scoped; findings по этим файлам запрещены>
+
 ## Review Boundaries
-<из шага 1.3b — только при change-scoped>
+<из шага 1.3b — только при change-scoped; только target_files>
 ```
 
 При `review_mode = change-scoped` дополнительно добавить после блоков evidence:
-> «ЗНИ (change-scoped): `<change-name>`. Файлы в этом батче — доработки по этому ЗНИ. Проверяй код в контексте ожидаемого поведения из Architectural Context. Соблюдай Review Boundaries Protocol в `onec-code-reviewer.md`: читай каждый файл целиком для контекста; замечания (включая Phase 0, Phase 2.5, prerelease kind) — **только** внутри границ; не «полируй» неизменённый код. **Неиспользуемый код / пустые процедуры / пустые вставки:** Grep по имени процедуры выполняй по **всей** директории расширения, но **только для процедур/функций, перечисленных в Review Boundaries** для соответствующего файла (не перебирай все процедуры модуля). Исключения: обработчики событий, БСП-команды, callback — как в тексте батча ниже.»
+> «ЗНИ (change-scoped): `<change-name>`. Файлы в этом батче — `target_files`, доработки по этому ЗНИ. `Reference Files` — только read-only context; не выдавай findings по ним. Проверяй код в контексте ожидаемого поведения из Architectural Context. Соблюдай Review Boundaries Protocol в `onec-code-reviewer.md`: читай каждый файл целиком для контекста; замечания (включая Phase 0, Phase 2.5, prerelease kind) — **только** внутри границ; не «полируй» неизменённый код. **Неиспользуемый код / пустые процедуры / пустые вставки:** Grep по имени процедуры выполняй по **всей** директории расширения, но **только для процедур/функций, перечисленных в Review Boundaries** для соответствующего файла (не перебирай все процедуры модуля). Исключения: обработчики событий, БСП-команды, callback — как в тексте батча ниже.»
 
 **Батч 1a — Группа A, логика и безопасность:**
 - Файлы: список модулей группы A (или A1, если A разбита).
@@ -374,7 +410,7 @@ mode=prerelease
 
 Запустить **Task** с `subagent_type: onec-code-explorer` **параллельно** с батчами reviewer (шаг 2.1). Explorer читает ВСЕ .bsl файлы расширения разом (не батчами) и выполняет кросс-модульные проверки, недоступные пофайловому reviewer.
 
-**Входные данные:** **всегда** полный список `.bsl` каталога расширения: при `full-extension` — из Glob шага 1.3; при `change-scoped` — список **`extension_all_bsl`** из шага 1.3 (не подменять списком `change_files`). Контекст из шага 1.5 (имя расширения, префикс). При `change-scoped` также передать блок `## Architectural Context` и список `change_files`.
+**Входные данные:** **всегда** полный список `.bsl` каталога расширения: при `full-extension` — из Glob шага 1.3; при `change-scoped` — список **`extension_all_bsl`** из шага 1.3 (не подменять списком `target_files`). Контекст из шага 1.5 (имя расширения, префикс). При `change-scoped` также передать блок `## Architectural Context`, список `target_files` и `reference_files` как read-only context.
 
 **Промпт explorer:**
 
@@ -390,7 +426,7 @@ mode=prerelease
 
 5. **Scope creep в обработчиках расширений:** Для каждого перехвата (&Перед/&После/&Вместо) определи, какую функциональность расширения он реализует (по именам вызываемых процедур с префиксом расширения). Если обработчик содержит вызовы, не связанные ни с одной функциональностью расширения (другой префикс, другой домен) — флаг: scope creep. Уровень: MEDIUM.
 
-**Если сессия change-scoped (ЗНИ указан):** расширение анализируется **целиком**; доработки по ЗНИ затронули файлы: [перечислить `change_files`]. Замечания, относящиеся **только** к этим файлам и напрямую к доработке ЗНИ, помечай в описании тегом **`[change-scope]`** в начале строки описания (для приоритизации устранения).
+**Если сессия change-scoped (ЗНИ указан):** расширение анализируется **целиком**; доработки по ЗНИ затронули target-файлы: [перечислить `target_files`]. Замечания помечай тегом **`[change-scope]`** в начале строки описания **только** если они касаются `target_files` или прямого поведения ЗНИ. Файлы из `reference_files` используй только для сравнения/контекста; не считай их scope расширения и не помечай findings по ним.
 
 Для каждого замечания укажи: файлы (все затронутые), уровень, kind=architecture, категорию (error-strategy / implicit-contract / type-dispatch / semantic-duplication / scope-creep), описание, рекомендацию. РЕЖИМ: mode=prerelease.»
 
@@ -424,7 +460,7 @@ mode=prerelease
 ## Предрелизное ревью: [название расширения]
 
 **Дата:** [дата]
-**Scope:** [full-extension: «N файлов (A: n, B: n, C: n), M процедур/функций» | change-scoped: «change-scoped (<change-name>), Tier 1: K файлов из V задач [x]; Review Boundaries (diff-focused по процедурам, шаг 1.3b); A/B/C по этим файлам; Tier 2: всё расширение»]
+**Scope:** [full-extension: «N файлов (A: n, B: n, C: n), M процедур/функций» | change-scoped: «change-scoped (<change-name>), Tier 1: K target-файлов из V задач [x]; sources: architecture/tasks/design/git; Review Boundaries (diff-focused по процедурам, шаг 1.3b); A/B/C по target_files; reference_files: R; Tier 2: всё расширение»]
 **Режим:** предрелизный (Tier 1: code review + Tier 2: architecture review)
 **Стандарты:** .cursor/docs/1c-coding-standards.md (rules 1-22), вендорские (1c-vendor-standards, .cursor/docs/standard/ при необходимости), [спецификация расширения]
 
@@ -432,7 +468,8 @@ mode=prerelease
 
 _При `full-extension` эту секцию не включать._ При `change-scoped`:
 
-- Перечень путей `change_files` (Tier 1 и механика 1.7–1.7c).
+- Перечень путей `target_files` (Tier 1 и механика 1.7–1.7c) с provenance.
+- Reference files (если есть): read-only context, не являлись scope findings.
 - Примечание: Tier 2 выполнялся по полному каталогу расширения (`extension_all_bsl`).
 
 ### Сводка
@@ -526,7 +563,7 @@ _При `full-extension` эту секцию не включать._ При `cha
 
 Если обнаружены замечания уровня **CRITICAL**, **HIGH** или **MEDIUM** (включая kind=style, release-hygiene, architecture Tier 2):
 
-**Маршрутизация:** если **`review_mode = change-scoped`** и **`change_in_archive = false`** — выполнить **только** раздел **4A**. Во всех остальных случаях (`full-extension` или change-scoped с ЗНИ в `archive/`) — раздел **4B** (создание `prerelease-fix-*` при согласии пользователя).
+**Маршрутизация:** если **`review_mode = change-scoped`** и **`change_in_archive = false`** — выполнить **только** раздел **4A**. Во всех остальных случаях (`full-extension` или change-scoped с ЗНИ в `archive/`) — раздел **4B**. Для 4B новый `prerelease-fix-*` предлагать только при CRITICAL/HIGH или явных release blockers; MEDIUM-only сохранять в отчёт как optional backlog suggestion без AskUserQuestion.
 
 ### 4A. `review_mode = change-scoped` и change **не** в `archive/`
 
@@ -546,15 +583,19 @@ _При `full-extension` эту секцию не включать._ При `cha
 
 ### 4B. `review_mode = full-extension` **или** `change-scoped` с **`change_in_archive = true`**
 
-Использовать **AskUserQuestion tool**:
+Разделить по максимальному уровню замечаний:
 
-> «Обнаружено N замечаний уровня CRITICAL/HIGH/MEDIUM (в т.ч. стиль и гигиена комментариев). Создать openspec change `prerelease-fix-<расширение-kebab>` для их устранения? MEDIUM войдут в tasks.md и proposal кратким списком.»
+- **Есть CRITICAL/HIGH или явные release blockers:** использовать **AskUserQuestion tool**:
 
-(Для **архивного** ЗНИ причина: change уже заархивирован — новые задачи вносятся в отдельный change.)
+  > «Обнаружено N замечаний уровня CRITICAL/HIGH (и M MEDIUM). Создать openspec change `prerelease-fix-<расширение-kebab>` для устранения блокеров релиза? MEDIUM войдут в tasks.md и proposal кратким списком.»
 
-**Варианты:**
-- Да, создать change
-- Нет, только отчёт
+  (Для **архивного** ЗНИ причина: change уже заархивирован — новые задачи вносятся в отдельный change.)
+
+  **Варианты:**
+  - Да, создать change
+  - Нет, только отчёт
+
+- **MEDIUM-only:** **не** задавать AskUserQuestion о создании `prerelease-fix-*`. Сохранить отчёт. В отчёт добавить секцию `Backlog suggestion (optional)` со списком MEDIUM по категориям и текстом: «Можно оформить отдельный backlog change при необходимости; релизный gate не требует автоматического `prerelease-fix-*` только из-за MEDIUM.»
 
 ### Если пользователь выбрал «Да» (новый prerelease-fix change)
 
@@ -621,8 +662,9 @@ openspec new change "prerelease-fix-<расширение-kebab>" --schema prere
 - **Нет активного change** (`full-extension`): ревью выполняется в standalone-режиме; отчёт сохранить в `temp/reports/prerelease-review-<расширение>-ГГГГ-ММ-ДД.md`.
 - **Change-scoped: каталог change не найден** после поиска в `openspec/changes/` и `openspec/changes/archive/`: СТОП; вывести список доступных имён (по подкаталогам с `tasks.md`).
 - **Change-scoped: в `tasks.md` нет `[x]`**: предупредить; предложить **`full-extension`** или СТОП (см. шаг 1.3a).
-- **Change-scoped: после tasks + git список файлов пуст**: предупредить; предложить **`full-extension`** или СТОП.
-- **Change-scoped: пути из задач не под `cfe/<расширение>/`**: шаг 1.3a — AskUserQuestion об включении cf/cfe в scope; зафиксировать решение в отчёте.
+- **Change-scoped: после architecture/tasks/design + git fallback список `target_files` пуст**: предупредить; предложить **`full-extension`** или СТОП.
+- **Change-scoped: есть `ambiguous_files` после suffix matching**: Scope Preview + AskUserQuestion (продолжить с найденным scope / full-extension / остановиться).
+- **Change-scoped: пути вне `cfe/<расширение>`**: классифицировать как `reference_files`; передавать только read-only context, не включать в findings.
 - **Замечаний нет при `change-scoped`**: шаг 4 не применять; отчёт сохранить в `change_dir/reports/` или `temp/reports/` по согласованию с пользователем.
 - **Linter недоступен**: warning в Summary, продолжить ревью.
 - **Reviewer выдал `prompt_contract_version mismatch`**: warning в Summary, продолжить (fail-open).
@@ -632,11 +674,12 @@ openspec new change "prerelease-fix-<расширение-kebab>" --schema prere
 
 ## Интеграция
 
-- **Режимы:** `full-extension` (по умолчанию, обратная совместимость) и **`change-scoped`** (второй аргумент — имя каталога ЗНИ): Tier 1 и механика 1.7–1.7c по `change_files` + **Review Boundaries** (шаг 1.3b, diff-focused по изменённым процедурам); фильтр строк в 1.7/1.7b по границам; Tier 2 по полному каталогу расширения (`extension_all_bsl`); шаг 4A/4B — см. выше.
-- **Tier 1 (Code Review):** `onec-code-reviewer` v3.0 (Phase 0 Intent/Contract/Knowledge, Phase 2.5 Попытка+Defensive, Phase 3.5 self-review, risk model, Main+Appendix). Передаваемые evidence-блоки: Version contract / Whitelist & Mandatory / Linter Signals / Prior Findings History / Architectural Context / Review Boundaries / Resolved Contracts (если активирован contract resolution).
+- **Режимы:** `full-extension` (по умолчанию, обратная совместимость) и **`change-scoped`** (второй аргумент — имя каталога ЗНИ): multi-source resolver `architecture-*.md` → `tasks.md` → `design.md` (git fallback; `debug.md`/`slice-acceptance` только soft warnings), Tier 1 и механика 1.7–1.7c по `target_files` + **Review Boundaries** (шаг 1.3b, diff-focused по изменённым процедурам); `reference_files` — read-only context; фильтр строк в 1.7/1.7b по границам; Tier 2 по полному каталогу расширения (`extension_all_bsl`); шаг 4A/4B — см. выше.
+- **Tier 1 (Code Review):** `onec-code-reviewer` v3.0 (Phase 0 Intent/Contract/Knowledge, Phase 2.5 Попытка+Defensive, Phase 3.5 self-review, risk model, Main+Appendix). Передаваемые evidence-блоки: Version contract / Whitelist & Mandatory / Linter Signals / Prior Findings History / Architectural Context / Reference Files (read-only context) / Review Boundaries / Resolved Contracts (если активирован contract resolution).
 - **Tier 2 (Architecture Review):** `onec-code-explorer` — кросс-модульный анализ (error strategy, implicit contracts, type-dispatch, semantic duplication, scope creep). Запускается параллельно с Tier 1. Только в prerelease.
 - Стандарты кода: `.cursor/docs/1c-coding-standards.md` v1.4 (rules 1-22, включая rule 21 Parameter Integrity и rule 22 No Duplicated Literals). AP-каталог: `.cursor/rules/bsl-antipatterns.mdc` и `.cursor/docs/antipatterns/bsl-antipatterns.md`.
 - Стандарты вендора и навигация: `AGENTS.md` → секция «Стандарты вендора 1С»; `.cursor/docs/standard/` (1c-standards-navigator.md, std-*.md) и `.cursor/skills/1c-vendor-standards/SKILL.md` — единый набор для предрелизной проверки.
 - Если после ревью обнаружены архитектурные замечания (новые объекты, изменение API, структуры хранения) — не создавать задачи writer, остановиться и показать пользователю.
 - Отчёт сохраняется согласно `preserve-subagent-reports.mdc`.
 - **Соглашения по комментариям BSL:** [openspec/project.md](../../../openspec/project.md) — whitelist (шаг 1.1a; механика 1.7 / 1.7b не флагует совпадения whitelist) и **обязательный контроль** (механика 1.7c + ревьюер в батчах 1b/2). Памятка по колонкам: `.cursor/docs/bsl-comment-formats-project.md`.
+- **Scope resolver split with `/review`:** resolver `/prerelease-review` намеренно multi-source и release-gate oriented. Resolver `/review` не изменяется; унификация resolver-ов — отдельная задача при явном запросе.
