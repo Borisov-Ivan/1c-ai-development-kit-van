@@ -168,47 +168,19 @@ Archive a completed change in the experimental workflow.
 
 5.5. **Facts extraction (single-decision)**
 
-   **Inputs:** `reports/exploration-*.md`, `reports/trace-analysis-*.md`, `reports/resolved-contract-*.md` в каталоге архивируемой ЗНИ. Качество фактов — ответственность самих reports: агент не переоценивает их содержимое, а агрегирует. Критерии knowledge-worthy применяются как фильтр отсева, а не как материал для обсуждения с пользователем.
+   Использовать единый extraction-протокол из `.cursor/skills/openspec-knowledge-add/SKILL.md` (разделы `Extraction Contract`, `Candidate Validation`, `Preview / AskQuestion`, `Save Protocol`) с archive-specific overrides ниже. Это единственный источник истины для отбора KB-кандидатов, проверки anchors, dedup, TTL и отказных состояний.
 
-   **Final state setter:** на каждом из путей ниже шаг 5.5 устанавливает ровно одно `Knowledge:` state из пяти, см. шаг 7 (Output On Success). Archive **не блокируется** ни в одном из состояний.
+   **Inputs:** `reports/exploration-*.md`, `reports/trace-analysis-*.md`, `reports/resolved-contract-*.md` в каталоге архивируемой ЗНИ. Качество фактов — ответственность самих reports: archive агрегирует verified-факты и применяет фильтры `knowledge-worthy`, но не проводит новое обследование кода.
 
-   **Path A — нет аналитических reports:**
-   - Если в каталоге архива не найдено ни одного из перечисленных файлов → state = `Skipped — no analytical reports`. Шаг 5.5 завершается тихо, без AskQuestion.
-
-   **Path B — taxonomy отсутствует:**
-   - Если есть аналитические reports, но `openspec/knowledge/_taxonomy.yaml` отсутствует → state = `Blocked — taxonomy missing`. В warnings добавить: `Knowledge: blocked — _taxonomy.yaml отсутствует. Запустите /opsx:knowledge-init или /init-project для генерации.` AskQuestion не показывается, KB-файлы не пишутся, archive продолжается.
-
-   **Path C — нормальный путь (reports есть, taxonomy есть):**
-
-   Подготовить батч: до 5 KB-кандидатов с полностью готовыми полями (domain, subdomain, anchors по taxonomy, tentative TTL). Дедупликация по title/anchor.path относительно `_index.yaml`.
-
-   Для каждого кандидата до показа:
-   1. Автоподбор domain/subdomain по `taxonomy.yaml` (нет совпадения → skip этого кандидата + warning в отчёт; кандидат не показывается).
-   2. Извлечение signature-anchors из reports (path, name, declaration).
-   3. Verify anchors по текущему коду. Если уже stale — кандидат отбрасывается, в warnings одна строка.
-   4. Если факт близок к существующему (fuzzy match по title/name) — кандидат готовится как supersede-proposal существующего KB (в превью отмечается пометкой "SUPERSEDES KB-NNNN").
-   5. Подготовить **why-knowledge** — одно предложение, объясняющее, почему этот факт **не** дублирует ADR / spec / project / debug-context (используется в карточке).
-   6. Сохранить ссылку на источник в формате `<report-file>:<line-range>` для поля `source.report:lines`.
-
-   **Если после всех фильтров кандидатов не осталось** → state = `No candidates after filters`. AskQuestion не показывается. Если по дороге были отбраковки (taxonomy mismatch, stale anchors) — добавить их в warnings одной строкой.
-
-   **Если кандидаты остались (1..5)** — единый AskQuestion на весь батч. В теле вопроса для **каждого** кандидата выводится **per-candidate карточка** (markdown-блок) с полями:
-
-   ```
-   ### KB-<next-id>: <title>
-   - **Domain / subdomain:** <domain> / <subdomain>
-   - **Anchors:** <file>:<line> (+ дополнительные при наличии)
-   - **Why knowledge:** <one sentence — почему это не ADR / spec / project / debug-context>
-   - **Source:** <report-file>:<line-range>
-   - **Supersedes:** KB-NNNN  (только если применимо)
-   ```
-
-   Под карточками — единый вопрос: «Сохранить N извлечённых KB-фактов? [yes | no]».
-
-   - `yes` → сгенерировать все `KB-NNNN-slug.md` + атомарное обновление `_index.yaml` → state = `Saved N (KB-NNNN, ...)`.
-   - `no`  → ничего не пишется → state = `Declined by user`.
-
-   Дедупликация: если один факт встречается в нескольких reports — создаётся один KB, второй report идёт в `source.also-mentioned-in`.
+   **Archive-specific overrides:**
+   - Planned stable source для `source.report`: `openspec/changes/archive/YYYY-MM-DD-<change-name>/reports/<report>.md` (тот же путь, куда report попадёт после шага 6).
+   - Source bundle **не создаётся**: архивный report сам является стабильным source.
+   - Если reports не найдены → state = `Skipped — no analytical reports`.
+   - Если taxonomy отсутствует → state = `Blocked — taxonomy missing`, warning: `Knowledge: blocked — _taxonomy.yaml отсутствует. Запустите /opsx:knowledge-init или /init-project для генерации.`
+   - Если кандидатов нет после фильтров → state = `No candidates after filters`; archive продолжается.
+   - Если кандидаты есть → показать per-candidate карточки из `openspec-knowledge-add` и один AskQuestion: «Сохранить N извлечённых KB-фактов? [yes | no]».
+   - `yes` → сгенерировать `KB-NNNN-slug.md` + атомарно обновить `_index.yaml` → state = `Saved N (KB-NNNN, ...)`.
+   - `no` → ничего не писать → state = `Declined by user`.
 
    **Mapping состояний (резюме):**
 

@@ -4,7 +4,7 @@
 
 ## OpenSpec Workflow
 `.cursor/rules/sdd-workflow.mdc` — explore → new/ff → verify → apply → verify → archive.
-Команды: `/opsx:explore`, `/opsx:new`, `/opsx:ff`, `/opsx:apply`, `/opsx:verify`, `/opsx:archive`, `/opsx:debug`, `/opsx:estimate`, `/prerelease-review`, `/review`, `/opsx:status`, `/opsx:extend`, `/opsx:migrate-slices`.
+Команды: `/opsx:explore`, `/opsx:new`, `/opsx:ff`, `/opsx:apply`, `/opsx:verify`, `/opsx:archive`, `/opsx:debug`, `/opsx:estimate`, `/prerelease-review`, `/review`, `/opsx:status`, `/opsx:extend`, `/opsx:migrate-slices`, `/opsx:knowledge-add`.
 `/review` — ревью по контексту запроса (модуль/файлы/расширение/ЗНИ) с опцией устранения замечаний; скилл `.cursor/skills/review/SKILL.md`. **Review Focus Boundaries:** без аргументов — scope по изменённым `.bsl` в git (`diff-focused`, границы по процедурам из diff); явный файл/каталог/расширение — полное ревью (`full`); ЗНИ — `diff-focused` по `tasks.md` `[x]` + git diff и маппинг на процедуры; в промпт ревьювера передаётся `## Review Boundaries` (протокол в `.cursor/agents/onec-code-reviewer.md`).
 Дополнительные: `/opsx:continue`, `/opsx:sync`, `/opsx:bulk-archive`, `/opsx:onboard`, `/init-project`.
 Паттерны агентов: `.cursor/skills/1c-agent-patterns/SKILL.md`.
@@ -33,6 +33,7 @@
 | «Ревью кода» | `/review` | Без change — по git diff; с аргументом — по файлу/модулю/расширению/ЗНИ |
 | «Оценить трудозатраты» | `/opsx:estimate <name>` | PERT по tasks.md |
 | «Архивировать завершённый change» | `/opsx:archive <name>` | Hard-block при непринятых `S<N>.T<M>` в slice mode |
+| «Зафиксировать verified-факты из отчёта/файлов вне ЗНИ» | `/opsx:knowledge-add <path>` | Не требует ЗНИ; bundle source + KB-карточка |
 
 ## Глоссарий
 `openspec/glossary.md` — единый словарь ключевых терминов (ЗНИ, срез, slice-gate, tier, режимы verify, acceptance handoff и др.). Использовать для сверки терминологии в артефактах, отчётах и сообщениях пользователю.
@@ -130,8 +131,8 @@ Quality Controller (шаг 7.6): **Slice Coherence** (6 критериев из 
 ## Knowledge Base
 `openspec/knowledge/` — структурированная база знаний с механизмом read-repair.
 `.cursor/rules/knowledge-format.mdc` — структура KB-файла, anchor spec, статусы, TTL.
-Индекс: `openspec/knowledge/_index.yaml`. Создаются при archive (шаг 5.5) и audit.
-Интеграция: `/opsx:explore` (Knowledge Discovery), `architect-gate.mdc` (Knowledge Discovery), `/opsx:knowledge-audit` (сверка и обновление), `/opsx:knowledge-init` (bootstrap таксономии).
+Индекс: `openspec/knowledge/_index.yaml`. Создаются при archive (шаг 5.5), `/opsx:knowledge-add` и audit.
+Интеграция: `/opsx:explore` (Knowledge Discovery), `architect-gate.mdc` (Knowledge Discovery), `/opsx:knowledge-add` (standalone capture из reports/markdown вне ЗНИ), `/opsx:knowledge-audit` (сверка и обновление), `/opsx:knowledge-init` (bootstrap таксономии).
 
 ## Оценка трудозатрат
 `.cursor/skills/openspec-estimate/SKILL.md` — `/opsx:estimate <name>`. Трёхточечная PERT-оценка по tasks.md. Авторежимы: первичная оценка / переоценка / калибровка по факту. Ставки встроены в скилл, опциональный оверрайд — `openspec/estimate-rates.md`.
