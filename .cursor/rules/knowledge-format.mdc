@@ -16,7 +16,7 @@ alwaysApply: false
 - **Таксономия:** `openspec/knowledge/_taxonomy.yaml` — словарь доменов/субдоменов
 - **Шаблон таксономии:** `openspec/knowledge/_taxonomy.template.yaml` — заготовка для `/opsx:knowledge-init`
 - **Архив:** `openspec/knowledge/_archive/` — deprecated/superseded KB
-- **Стабильные первоисточники standalone-capture:** `openspec/reports/knowledge-add/<YYYY-MM-DD-slug>/sources/` — копии reports/заметок, из которых `/opsx:knowledge-add` создал KB.
+- **Стабильные первоисточники standalone-capture:** `openspec/knowledge/_sources/knowledge-add/<YYYY-MM-DD-slug>/sources/` — копии reports/заметок, из которых `/opsx:knowledge-add` создал KB.
 
 ### Whitelist содержимого корня `openspec/knowledge/`
 
@@ -24,7 +24,8 @@ alwaysApply: false
 
 **Разрешённые подкаталоги:**
 - `<domain>/` — один подкаталог на каждый домен из `_taxonomy.yaml`. Внутри — `KB-NNNN-slug.md` или вложенные `<subdomain>/KB-NNNN-slug.md`.
-- `_archive/` — единственный служебный подкаталог (deprecated/superseded KB).
+- `_archive/` — служебный подкаталог для deprecated/superseded KB.
+- `_sources/` — служебный подкаталог для стабильных первоисточников standalone-capture. Разрешённая структура: `_sources/knowledge-add/<YYYY-MM-DD-slug>/sources/...` и `_sources/knowledge-add/<YYYY-MM-DD-slug>/knowledge-add-report.md`.
 
 **Разрешённые файлы в корне:**
 - `_index.yaml`
@@ -243,7 +244,7 @@ CASE anchor.type:
 | Пустой `_index.yaml` | Discovery возвращает пустой список, не ошибка |
 | `anchor-missing` но `name` найден в другом модуле (фаззи) | `anchor-missing` + hint «найдено в X — возможно перенесено» |
 | Переименование процедуры | `anchor-missing` → audit: `supersede-by` или `update` |
-| Не-KB файл/каталог в `openspec/knowledge/` (вне whitelist) | Warning в audit-отчёте: `Structure: <path> вне формата. Перенести в temp/reports/ или openspec/changes/<name>/reports/`. Не блокирует audit. `/init-project` Phase 0 предлагает action через AskQuestion |
+| Не-KB файл/каталог в `openspec/knowledge/` (вне whitelist; `_sources/` разрешён только в структуре `knowledge-add/<YYYY-MM-DD-slug>/...`) | Warning в audit-отчёте: `Structure: <path> вне формата. Перенести в temp/reports/ или openspec/changes/<name>/reports/`. Не блокирует audit. `/init-project` Phase 0 предлагает action через AskQuestion |
 
 ## БЮДЖЕТ VERIFY
 
@@ -321,7 +322,7 @@ facts:
 
 **Пишут в KB и `_index.yaml`:**
 - `/opsx:archive` — шаг 5.5 (Facts extraction), шаг 2b-follow-up (только warnings).
-- `/opsx:knowledge-add` — standalone extraction из reports/markdown вне ЗНИ; при необходимости стабилизирует source в `openspec/reports/knowledge-add/...`.
+- `/opsx:knowledge-add` — standalone extraction из reports/markdown вне ЗНИ; при необходимости стабилизирует source в `openspec/knowledge/_sources/knowledge-add/...`.
 - `/opsx:knowledge-audit` — все режимы.
 
 **НЕ пишут** (только read + proposal):

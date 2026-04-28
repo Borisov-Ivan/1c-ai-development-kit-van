@@ -16,7 +16,7 @@ description: Добавить verified KB-факты из отчётов или 
 - Без аргументов команда должна показать краткую ошибку и примеры вызова.
 
 **Флаги:**
-- `--no-bundle` — не копировать source в `openspec/reports/knowledge-add/...`; допустимо только для стабильных источников из `openspec/changes/archive/.../reports/` или `openspec/reports/knowledge-add/.../sources/`.
+- `--no-bundle` — не копировать source в `openspec/knowledge/_sources/knowledge-add/...`; допустимо только для стабильных источников из `openspec/changes/archive/.../reports/` или `openspec/knowledge/_sources/knowledge-add/.../sources/`.
 - `--ttl <days>` — явный override TTL для всех сохраняемых кандидатов; по умолчанию TTL определяется по типу факта из `knowledge-format.mdc`.
 
 **Примеры:**

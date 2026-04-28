@@ -40,7 +40,7 @@ description: Add verified OpenSpec Knowledge Base facts from standalone reports 
 
 - `--no-bundle` — не копировать source. Допустим только если все входные пути уже стабильны:
   - `openspec/changes/archive/<YYYY-MM-DD-name>/reports/...`
-  - `openspec/reports/knowledge-add/<YYYY-MM-DD-slug>/sources/...`
+  - `openspec/knowledge/_sources/knowledge-add/<YYYY-MM-DD-slug>/sources/...`
   Иначе остановиться: `Blocked — --no-bundle requires stable sources`.
 - `--ttl <days>` — явный override TTL для всех сохраняемых кандидатов. Без флага TTL выбирать по таблице `knowledge-format.mdc` (`TTL POLICY`).
 
@@ -159,7 +159,7 @@ KB хранит короткую карточку и ссылку на source, �
 Стабильные sources:
 
 - `openspec/changes/archive/<YYYY-MM-DD-name>/reports/...`
-- `openspec/reports/knowledge-add/<YYYY-MM-DD-slug>/sources/...`
+- `openspec/knowledge/_sources/knowledge-add/<YYYY-MM-DD-slug>/sources/...`
 
 Все остальные sources считаются нестабильными и копируются в bundle **только после подтверждения сохранения**.
 
@@ -168,7 +168,7 @@ KB хранит короткую карточку и ссылку на source, �
 До показа AskQuestion вычислить итоговый путь source:
 
 ```text
-openspec/reports/knowledge-add/<YYYY-MM-DD>-<slug>/sources/<original-name>
+openspec/knowledge/_sources/knowledge-add/<YYYY-MM-DD>-<slug>/sources/<original-name>
 ```
 
 Именно этот planned path показывать в карточке preview и записывать в будущий `source.report`.
@@ -178,7 +178,7 @@ openspec/reports/knowledge-add/<YYYY-MM-DD>-<slug>/sources/<original-name>
 При `yes` и хотя бы одном нестабильном source:
 
 ```text
-openspec/reports/knowledge-add/<YYYY-MM-DD>-<slug>/
+openspec/knowledge/_sources/knowledge-add/<YYYY-MM-DD>-<slug>/
   sources/
     <original-name-1>
     <original-name-2>
@@ -193,18 +193,18 @@ openspec/reports/knowledge-add/<YYYY-MM-DD>-<slug>/
 - при коллизии каталога добавлять `-2`, `-3`;
 - если один факт подтверждён несколькими sources, `source.report` — самый подробный source, остальные → `source.also-mentioned-in`.
 
-## Preview / AskQuestion
+## Preview / Confirmation
 
 Если после validation нет кандидатов:
 
-1. Не задавать AskQuestion.
+1. Не задавать AskQuestion и не переводить сессию в `awaiting confirmation`.
 2. Ничего не писать.
 3. Вывести `Saved 0` и список причин:
    - `No candidates after filters`
    - `Skipped — ...`
    - `Blocked — ...`
 
-Если кандидаты есть, показать per-candidate карточки и один вопрос:
+Если кандидаты есть, в **одном пользовательском ответе** сначала показать per-candidate карточки всех кандидатов, затем сразу задать единый вопрос подтверждения. Карточки не переносить в финальный T-CONFIRM: финал сообщает только результат сохранения.
 
 ```markdown
 ### KB-<next-id-preview>: <title>
@@ -220,20 +220,46 @@ openspec/reports/knowledge-add/<YYYY-MM-DD>-<slug>/
 
 Options:
 
-- `yes`
-- `no`
+- `yes` — сохранить все кандидаты
+- `no` — отменить сохранение
+- `select` — выбрать подмножество текстом в следующем сообщении
 
 Preview ID не считается зарезервированным. Окончательная нумерация выполняется только при save.
+
+### Confirmation channels
+
+Подтверждение принимается двумя каналами:
+
+1. **AskQuestion** — нормальный путь. `yes` запускает Save Protocol для всех кандидатов, `no` завершает команду как `Declined by user`, `select` переводит сессию в ожидание текстового выбора.
+2. **Текстовый ответ пользователя на следующем ходе** — fallback для случаев, когда форма закрыта или инструмент вернул `Questions skipped by the user`. Допустимые ответы:
+   - `да`, `yes`, `сохранить`, `сохранить все` → Save Protocol для всех кандидатов;
+   - `нет`, `no`, `отмена`, `cancel` → `Declined by user`;
+   - `сохранить KB-0005, KB-0007` или список номеров/preview-id → Save Protocol только для выбранных кандидатов.
+
+`Questions skipped by the user` **не равно отказу**. В этом случае ничего не писать, кроме краткой строки: `Ожидаю подтверждение: ответьте "да", "нет" или перечислите KB-кандидаты`. Состояние сессии = `awaiting confirmation`; на следующем ходе skill сначала обрабатывает подтверждение, а не начинает новую extraction-сессию.
+
+### Awaiting confirmation state
+
+При показе кандидатов создать/обновить TodoWrite-чекпоинт:
+
+```yaml
+id: kb-confirm
+content: "Ожидается подтверждение сохранения KB-кандидатов"
+status: in_progress
+```
+
+Пока `kb-confirm` в статусе `in_progress`, каждый следующий ход этой командной сессии начинается с разбора ответа пользователя как подтверждения. После `yes`/`no`/выбора подмножества чекпоинт переводится в `completed` или `cancelled`, затем выполняется соответствующий результат.
 
 ## Save Protocol
 
 Только при `yes`.
 
 1. Определить следующие номера: Glob `openspec/knowledge/**/KB-*.md` включая `_archive/`, max + 1.
-2. Создать bundle, если нужен.
-3. Создать `openspec/knowledge/<domain>/KB-NNNN-slug.md` для каждого кандидата.
-4. Пересобрать `openspec/knowledge/_index.yaml` из фактических KB-файлов на диске.
-5. Создать `knowledge-add-report.md` в bundle (если bundle был создан) со списком:
+2. Перед созданием bundle проверить, что директория `openspec/knowledge/_sources/` отсутствует или соответствует whitelist из `knowledge-format.mdc`; при нарушении — rollback, warning, без записи KB.
+3. Создать bundle, если нужен.
+4. Создать `openspec/knowledge/<domain>/KB-NNNN-slug.md` для каждого кандидата.
+5. Пересобрать `openspec/knowledge/_index.yaml` из фактических KB-файлов на диске.
+6. Создать `knowledge-add-report.md` в bundle (если bundle был создан) со списком:
    - сохранённых KB;
    - skipped/blocked candidates;
    - structure warnings;
