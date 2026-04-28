@@ -76,6 +76,7 @@ alwaysApply: true
 3. Не переключаться на `generalPurpose` / `explore` как на «запасной вариант» — это маскирует причину.
 4. **Fallback-перехват:** Если вызов `onec-code-architect` падает с ошибкой недоступности модели или таймаутом, не останавливаться, а выполнить повторный вызов с `subagent_type="onec-code-architect-2nd"`.
 5. Если retry не помог — СТОП, сообщить пользователю.
+6. **Схема `Task` без `onec-*` (ожидаются только `generalPurpose` / `explore` / `shell` / …):** кастомные субагенты из `.cursor/agents/*.md` не подхватились. Проверить по [документации Cursor (subagents)](https://cursor.com/docs/subagents.md): в YAML frontmatter поле **`model`** допустимо только `inherit`, `fast` или **идентификатор модели** — значение `default` и прочие нестандартные строки могут приводить к тому, что файл агента не регистрируется. Исправить frontmatter, **Developer: Reload Window**, убедиться что корень рабочей области — репозиторий с каталогом `.cursor/agents/`. Если после этого `onec-code-explorer` по-прежнему не в enum — обновить Cursor и проверить ограничения плана / Team admin на субагенты.
 
 ---
 

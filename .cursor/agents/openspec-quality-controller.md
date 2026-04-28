@@ -2,7 +2,7 @@
 priority: critical
 capabilities: [openspec-quality-control, slice-coherence, dependency-graph]
 name: openspec-quality-controller
-model: default
+model: inherit
 description: Evaluate slice coherence, scenario coverage, slice independence and rework risk for OpenSpec changes
 ---
 

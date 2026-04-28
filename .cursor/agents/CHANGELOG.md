@@ -2,6 +2,9 @@
 
 ## [4.2] - 2026-04-21
 
+### Fixed (subagent registration / Task enum)
+- `onec-code-explorer`, `onec-trace-analyst`, `openspec-quality-controller`: в frontmatter `model: default` заменён на **`model: inherit`** (допустимые значения по [Cursor subagents](https://cursor.com/docs/subagents.md)). Нестандартное `default` могло приводить к тому, что кастомные субагенты не попадали в enum инструмента `Task`, и вызов `onec-code-explorer` завершался `Invalid enum value`.
+
 ### Changed (onec-code-reviewer, bsl-antipatterns, openspec/project)
 - `onec-code-reviewer`: расширение release-hygiene набора — AP-040 AI-typography, AP-044 narration, AP-045 date+time.
 - `bsl-antipatterns.mdc`: v4.2, три правила добавлены, полные карточки дописаны в `.cursor/docs/antipatterns/bsl-antipatterns.md`.
