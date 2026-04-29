@@ -248,6 +248,9 @@ Keep the RCA compact; the split ensures apply/debug can later enforce the verifi
 **Code steps** (конкретные, мелкие): какие файлы менять, что менять, что логировать / граничные случаи.
 
 **Artifact steps:**
+- Если RCA показывает **постановочный дефект** (причина в `proposal.md` / `design.md` / `tasks.md` / spec, а не в реализации), не превращать его сразу в code fix. Сформировать раздел `Scope/design rework` и предложить:
+  `/opsx:extend <change> --from-debug openspec/changes/<change>/debug.md`
+  Затем: `/opsx:verify <change>` → `/opsx:apply <change>` при необходимости.
 - Добавить или уточнить задачи в `openspec/changes/<change>/tasks.md` **с привязкой к срезу**:
   - **Если ЗНИ в slice mode** (есть `# Срез S<N>`): **перед записью в tasks.md** выполнить **mechanical placement gate** (источник истины — `.cursor/rules/vertical-slices.mdc`, раздел **«ИНВАРИАНТ: Defect placement»** и decision tree):
     1. Определить целевой срез воспроизведения `S<K>` (по сценарию / spec / явной директиве пользователя; при неоднозначности — AskQuestion).
@@ -277,6 +280,9 @@ Keep the RCA compact; the split ensures apply/debug can later enforce the verifi
 
 После обновления артефактов:
 - Предложить: `/opsx:apply <change>` для реализации задач. При наличии hypothesis-based задач — предупредить о необходимости верификации (или задачи follow-up в tasks.md).
+- Если debug зафиксировал постановочный дефект или необходимость пересмотреть scope/design, вместо прямого apply (или перед ним) предложить:
+  `/opsx:extend <change> --from-debug openspec/changes/<change>/debug.md`
+  Extend покажет обязательный бриф, обновит ЗНИ и вернёт в `/opsx:verify`.
 
 ---
 

@@ -9,6 +9,8 @@ alwaysApply: false
 
 ```
 explore → new/ff → verify → apply (по срезам) → verify → archive
+                 ↘ extend ↗
+review/debug/verify/apply/explore → extend → verify → apply
 ```
 
 | Этап | Команда | Что происходит | Агенты |
@@ -16,13 +18,14 @@ explore → new/ff → verify → apply (по срезам) → verify → archi
 | **Исследование** | `/opsx:explore` | Понять задачу, исследовать код, принять решения, сформировать slice hints в Explore Summary. **Knowledge Discovery** (read-repair). | onec-code-explorer, onec-code-architect |
 | **Создание change** | `/opsx:new` или `/opsx:ff` | proposal → design (вкл. `## Slices`) → specs → tasks (с `# Срез S<N>`). **Knowledge Discovery** (в Architect Gate). | onec-code-architect (slice decomposition + slice-aware task decomposition) |
 | **Проверка** | `/opsx:verify` | slice-pre / slice-post / slice-scoped (`--slice S<N>`) / migrate-to-slices / legacy. Quality Controller проверяет когерентность срезов; Architect — реализуемость. Авто-устранение mechanical, карточки решений judgment. **Knowledge Discovery** (в Architect Gate). | onec-code-architect, openspec-quality-controller |
+| **Расширение scope** | `/opsx:extend` | Контролируемо обновляет существующий change по новому требованию или отчёту (`--from-review`, `--from-debug`, `--from-verify`, `--from-architecture`, `--from-explore`). Всегда начинает с брифа, затем обновляет артефакты и возвращает в `/opsx:verify`. | onec-code-architect (при Architect Gate), onec-code-explorer (при обследовании) |
 | **Реализация** | `/opsx:apply` | **Step-by-slice** (default): один срез — карточка приёмки — следующий срез. Опции: step-by-step / batch | onec-code-writer + onec-code-reviewer |
 | **Архивация** | `/opsx:archive` | Hard-block при непринятых срезах (`S<N>.T<M>` = `[ ]`); синхронизация specs, перенос в archive/. **Facts extraction** (извлечение KB-фактов). | — |
 | **Отладка** | `/opsx:debug` | RCA + fix tasks с привязкой к срезу (новый fix-срез или задача в непринятом срезе) | onec-trace-analyst, onec-code-explorer |
 | **Предрелизное ревью** | `/prerelease-review` | Батчевый ревью расширения | onec-code-reviewer |
 | **Ревью кода** | `/review` | Ревью по контексту запроса | onec-code-reviewer |
 
-Дополнительные действия: `continue` (следующий артефакт), `sync` (дельта-спеки → main), `bulk-archive` (пакетная архивация).
+Дополнительные действия: `continue` (следующий артефакт), `extend` (расширить существующий change), `sync` (дельта-спеки → main), `bulk-archive` (пакетная архивация).
 
 ## АЛИАСЫ КОМАНД
 
@@ -47,6 +50,7 @@ explore → new/ff → verify → apply (по срезам) → verify → archi
 | Slice mode, дефект в **непринятом** срезе S<N> | Вставить новую задачу `S<N>.<M+1>` **перед** `S<N>.T<M>` |
 | Slice mode, дефект в **принятом** срезе S<K> | Создать **fix-срез** `S<N+1>: Исправление дефекта S<K>` (зависит от S<K>) |
 | Slice mode, новая функциональность | Новый срез `S<N+1>` или расширение существующего непринятого |
+| Новое требование / отчёт ревью / архитектурное замечание в существующем change | `/opsx:extend <name> [--from-review <path>|--from-architecture <path>|--from-verify <path>]` → бриф → правка артефактов → `/opsx:verify` |
 | Legacy mode (`# Срез` нет) | Вставить в подходящую секцию или «7. Рефакторинг и качество». При накоплении исправлений — рекомендовать `/opsx:verify --migrate-to-slices` |
 
 `/opsx:ff` создаёт **новый** change — не используется для добавления задач к существующему. Подробности — `.cursor/skills/openspec-continue-change/SKILL.md` и `.cursor/skills/openspec-debug/SKILL.md`.

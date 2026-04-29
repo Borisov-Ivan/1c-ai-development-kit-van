@@ -79,8 +79,9 @@ Tier: Standard (12 задач, 3 среза)
    **СТОП** до разрешения. Использовать **AskUserQuestion**:
 
    - Текст: «В запросе обнаружено новое требование: „<краткая формулировка>“. Verify — **quality gate** для существующих артефактов, он не редактирует их. Выберите вариант:»
-   - **Вариант A (as-is):** Verify текущего scope как есть; новое требование оставить на будущее (`/opsx:extend <name>`, `/opsx:explore`, `/opsx:ff`).
-   - **Вариант B (TODO в отчёте):** Verify текущего scope as-is; новое требование зафиксировать как TODO в отчёте verify (Executive Summary), без правки артефактов.
+   - **Вариант A (extend):** перейти к `/opsx:extend <name>` — команда покажет бриф, обновит артефакты, затем вернёт в verify.
+   - **Вариант B (as-is):** Verify текущего scope как есть; новое требование оставить на будущее (`/opsx:extend <name>`, `/opsx:explore`, `/opsx:ff`).
+   - **Вариант C (TODO в отчёте):** Verify текущего scope as-is; новое требование зафиксировать как TODO в отчёте verify (Executive Summary), без правки артефактов.
    - **Вариант C (расширить перед verify):** завершить verify без прогона; рекомендовать `/opsx:extend <name>` для контролируемого расширения, затем вернуться к `/opsx:verify`.
 
    **Поведение по выбору:**
@@ -1133,9 +1134,9 @@ Tier: Standard (12 задач, 3 среза)
     | Task quality (7B / 7C) | a) Запустить архитектора для доработки tasks.md b) Принять как есть — writer додумает |
     | Architect Gate not closed (9) | a) Запустить архитектурный анализ (→ `reports/architecture-verify-YYYY-MM-DD.md`) b) Принять как есть — реализация без архитектурного ревью |
     | Design Review not done (10) | a) Запустить ревью постановки (→ `reports/design-review-YYYY-MM-DD.md`) b) Принять как есть — возможны пробелы в design |
-    | `scenario-uncovered` (QC 7.6) | a) Расширить существующий срез — добавить задачи под сценарий b) Создать новый срез c) Принять — сценарий не покрыт |
+    | `scenario-uncovered` (QC 7.6) | a) `/opsx:extend <name> --from-verify <verification-report>` — расширить существующий срез или создать новый с обязательным брифом b) Принять — сценарий не покрыт |
     | `dependency-cycle` / `forward-slice-dep` / `coupling-violation` (QC) | a) Запустить архитектора для пере-разреза (шаблон «Architect — slice restructuring») b) Перенумеровать срезы / переместить задачи c) Принять — работать с риском |
-    | `slice-incomplete` / `missing-slice-test` (QC) | a) Архитектор добавляет недостающие задачи / S<N>.T<M> b) Принять как есть — срез не приёмопригоден |
+    | `slice-incomplete` / `missing-slice-test` (QC) | a) `/opsx:extend <name> --from-verify <verification-report>` — добавить недостающие задачи / S<N>.T<M> b) Принять как есть — срез не приёмопригоден |
     | `acceptance-scenario-duplication` (QC 5b) | a) Удалить дублирующий `T<M>` из текущего среза — проверка остаётся в срезе-источнике b) Перенести `T<M>` в срез-источник (если там ещё нет соответствующего теста) c) Принять как есть — оба среза формально проверяют один Scenario |
     | `acceptance-without-scenario` (QC 5b) | a) Перенести non-scenario проверку в `design.md#Assumptions` (для инвариантов) b) Переоформить как обычную задачу `S<N>.<M>` «верифицировать по коду/ТЖ» (для NFR/перф) c) Перенести в блок `## Follow-up` (для ручных замеров на релизе) d) Добавить соответствующий Scenario в spec и привязать `T<M>` e) Принять как есть |
     | `scenario-uncovered-by-acceptance` (QC 5b) | a) Добавить `S<N>.T<M>` для покрытия заявленного Scenario b) Снять Scenario из `**Связь со spec:**` среза (если по факту он не закрывается здесь) c) Принять как есть |
@@ -1144,8 +1145,8 @@ Tier: Standard (12 задач, 3 среза)
     | Executability issues (7F) | a) Добавить `Зависимости:` в tasks b) Переупорядочить задачи в срезе c) Принять — apply разберётся |
     | `no-slices` (QC, legacy ЗНИ) | a) `/opsx:verify --migrate-to-slices` (architect перерезает в срезы) b) Принять — продолжить в legacy режиме |
     | Slice transition issues (7.6b) | a) Архитектор реструктурирует upcoming срезы b) Обновить design.md `## Slices` c) Принять как есть |
-    | Project constraints violation (12) | a) Переписать задачи на разрешённые каталоги b) Обосновать исключение |
-    | Suboptimal architecture / Design Smell (7.7) | a) Запустить архитектора для перепроектирования (обновление design.md и tasks.md) b) Принять как есть — реализовать неоптимальный подход |
+    | Project constraints violation (12) | a) `/opsx:extend <name> --from-verify <verification-report>` — переписать задачи на разрешённые каталоги b) Обосновать исключение |
+    | Suboptimal architecture / Design Smell (7.7) | a) `/opsx:extend <name> --from-verify <verification-report>` — пересмотреть design/tasks через обязательный бриф и architect gate b) Принять как есть — реализовать неоптимальный подход |
 
     Если judgment-замечаний нет — блок опустить.
 
@@ -1161,7 +1162,7 @@ Tier: Standard (12 задач, 3 среза)
     ```
     ## Вердикт: <ГОТОВ / ГОТОВ С ОГОВОРКОЙ / БЛОКИРОВАНО>
     Решений от вас: N. Напишите номера выбранных вариантов (например: «1a, 2c»).
-    Следующий шаг: `/opsx:apply <name>` или `/opsx:archive <name>`.
+    Следующий шаг: `/opsx:extend <name> --from-verify <verification-report>` при изменении scope/design/tasks; иначе `/opsx:apply <name>` или `/opsx:archive <name>`.
     ```
 
     Если judgment-замечаний нет → «Решений от вас не требуется».

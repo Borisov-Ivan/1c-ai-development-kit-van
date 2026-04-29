@@ -262,7 +262,7 @@ Implement tasks from an OpenSpec change.
      3. Убедиться <ожидаемый результат> (регрессия R<N>, если применима)
 
      ### 3. Как вернуться
-     `/opsx:apply <change-name>` — новая сессия начнётся с запроса вердикта (принят / не принят / дефект в предыдущем срезе). Пока вы проверяете — оркестратор ничего не делает.
+     `/opsx:apply <change-name>` — новая сессия начнётся с запроса вердикта (принят / не принят / дефект в предыдущем срезе). Если при проверке выяснится, что нужно изменить scope/design/tasks, используйте `/opsx:extend <change-name>`; команда покажет бриф и вернёт в `/opsx:verify`. Пока вы проверяете — оркестратор ничего не делает.
 
      ### 4. Short-cut
      Если уже проверено и принято — напишите `принято S<N>` / `accept S<N>`, отмечу без полного handoff.
@@ -317,7 +317,7 @@ Implement tasks from an OpenSpec change.
    - **Slice Gate reached** (все non-test задачи среза `[x]`, остался только `S<N>.T<M>` или первый task следующего среза) — ОБЯЗАТЕЛЬНАЯ карточка приёмки (см. Slice Gate check выше)
    - **Step-by-step mode:** after every task completion (step-by-step checkpoint above)
    - Task is unclear → ask for clarification
-   - Implementation reveals a design issue → suggest updating artifacts
+   - Implementation reveals a design/scope issue → stop implementation and suggest `/opsx:extend <change-name>` (or `/opsx:extend <change-name> --from-review <report-path>` if the issue came from review), then `/opsx:verify <change-name>`
    - Error or blocker encountered → report and wait for guidance
    - User interrupts
    - **Verification/decision task completed** → conditional task checkpoint (see above)
@@ -334,12 +334,12 @@ Implement tasks from an OpenSpec change.
    - `### 1. Что реализовано` — за каждую задачу этого сеанса: `[x] N.M — описание`, файл `path` со строками, «что изменено» одним предложением, авто-проверка (spot-check) OK/расхождение.
    - `### 2. Что проверить СЕЙЧАС` — для каждой закрытой задачи с критериями приёмки (маркеры `убедиться`, `проверить`, `критерий приёмки`, `Критерий приёмки`): переписать критерии в императиве нумерованным списком (1. Открыть… 2. Выполнить… 3. Убедиться…). Для задач типа «Ручной тест» — полный сценарий с ожидаемыми результатами. Если ничего не требуется от пользователя — одна строка «Ручная проверка не требуется для задач этого сеанса».
    - `### 3. Следующие задачи` — таблица `Задача | Тип | Исполнитель | Зависит от | Статус`; 3–5 следующих. Для каждой: Type (BSL / Form / Manual test / Metadata / …), Executor (agent / user), статус зависимостей (`[x]`/`[ ]`); если зависимость `[ ]` — пометить «невыполнима до N.M».
-   - `### 4. Как вернуться` — `/opsx:apply <change-name>`, одна строка.
+   - `### 4. Как вернуться` — `/opsx:apply <change-name>`, одна строка. Если выявлен scope/design mismatch, добавить вторую строку: `Обновить scope: /opsx:extend <change-name>` (после extend — `/opsx:verify <change-name>`).
    - `### 5. Blockers` — нумерованный список задач, которые не могут продолжаться, и почему.
    - `### 6. Issue` — **только в варианте `pause`**: описание проблемы 1 абзац + нумерованные **Options** из 2–3 вариантов решения.
    - `### 7. Short-cut` — **только в варианте `acceptance`**: строка про `принято S<N>` / `accept S<N>`.
 
-   Если все срезы приняты (`final`) — добавить строку «All tasks complete. Ready to archive: `/opsx:archive <change-name>`». Если `pause` — ждать ответа пользователя. Если `acceptance` — end turn.
+   Если все срезы приняты (`final`) — добавить строку «All tasks complete. Ready to archive: `/opsx:archive <change-name>`». Если `pause` из-за design/scope mismatch — предложить `Follow-up: /opsx:extend <change-name>` рядом с вариантами решения. Если `pause` — ждать ответа пользователя. Если `acceptance` — end turn.
 
    **Self-check** (см. §7 стайл-гайда) перед выводом: слои разделены, нумерованные списки, одинаковые имена секций, длина в пределах лимитов.
 

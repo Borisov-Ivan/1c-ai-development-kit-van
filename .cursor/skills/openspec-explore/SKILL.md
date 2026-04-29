@@ -27,9 +27,12 @@ Enter explore mode. Think deeply. Visualize freely. Follow the conversation wher
 
 Выполнить `openspec list --json` и в том же батче Read `openspec/project.md` + `openspec/knowledge/_index.yaml` — загрузить ограничения проекта и быстрый индекс KB для Discovery. Это не артефакты change и не код — чтение разрешено до брифа. НЕ читать другие файлы (design.md, трассы, модули) в том же tool call batch, кроме `_taxonomy.yaml` и выбранных KB `.md` по шагу 1.5.
 
-Если есть активный change **И** вход содержит трассу/баг/ошибку **ИЛИ** ревизию/перепроектирование работы по change (маркеры: «пересмотреть», «перепроектировать», «переделать», «ревизия», «пересмотр ЗНИ», «ошибочна», «перепроектировать стройно») → предложить `/opsx:debug <change>`:
+Если есть активный change **И** вход содержит трассу/баг/ошибку **ИЛИ** ревизию/перепроектирование работы по change (маркеры: «пересмотреть», «перепроектировать», «переделать», «ревизия», «пересмотр ЗНИ», «ошибочна», «перепроектировать стройно») → предложить маршрут по типу входа:
 
-> «Вижу активный change **X** и [файл трассы (баг/ошибку) | запрос на ревизию работы по change]. Для анализа в контексте change рекомендую `/opsx:debug X` — он использует артефакты change для обогащённого брифа и автоматически обновит tasks.md/design.md. Продолжить в explore или переключиться на debug?»
+- трасса/баг/ошибка → `/opsx:debug <change>`;
+- новое требование / пересмотр scope / отчёт ревью или архитектуры → `/opsx:extend <change> [--from-review <path>|--from-architecture <path>]`.
+
+> «Вижу активный change **X** и [файл трассы / баг / новое требование / запрос на ревизию scope]. Для баг-анализа рекомендую `/opsx:debug X`; для изменения постановки или учёта отчёта ревью — `/opsx:extend X` (команда покажет бриф, обновит артефакты и вернёт в `/opsx:verify`). Продолжить в explore или переключиться?»
 
 - Пользователь выбирает debug → завершить explore, предложить ввести `/opsx:debug`.
 - Пользователь выбирает explore → продолжить со следующего шага.
@@ -166,7 +169,7 @@ Enter explore mode. Think deeply. Visualize freely. Follow the conversation wher
    - Создать **Explore Summary** (шаблон — секция «Explore Summary при переходе к change»)
    - Предложить пользователю: «Для создания ЗНИ с полным протоколом (шаблоны CLI, делегирование архитектору, Design Gate) используйте `/opsx:ff` (имя change будет предложено из Explore Summary). Explore Summary сохранён в `temp/explore-summary-<дата>.md`.»
    - **END TURN.** Дождаться, пока пользователь вызовет `/opsx:ff`.
-3. **Допустимо в explore без guard:** обновление **отдельного** артефакта существующего change (дописать решение в design.md, добавить сценарий в spec) — это capture, не создание change.
+3. **Если есть активный change и пользователь просит добавить новое требование / изменить scope / учесть отчёт ревью:** предложить `/opsx:extend <change>` вместо ручного редактирования нескольких артефактов. Допустимо в explore без guard только точечное capture-обновление **одного** артефакта (дописать решение в design.md, добавить одну заметку), если пользователь явно просит именно это и нет Architect Gate.
 
 **Почему:** при создании артефактов из explore минуется `openspec instructions` (шаблоны, context, rules), делегирование tasks архитектору и Design Gate / Design Review Gate. Полный протокол ff обеспечивает качество постановки.
 
@@ -287,7 +290,7 @@ Depending on what the user brings, you might:
 ### 3. Планирование (Plan)
 - Сформулировать scope и задачи
 - Предложить создать change: `/opsx:new <name>` или `/opsx:ff <name>`
-- Если change уже есть — предложить обновить артефакты (proposal, design, tasks)
+- Если change уже есть и обсуждение меняет scope/требования/подход — предложить `/opsx:extend <name>` (при наличии отчёта: `--from-review`, `--from-architecture`, `--from-explore`)
 
 ### Architect Gate (перед созданием change)
 
@@ -304,7 +307,8 @@ Depending on what the user brings, you might:
 3. **Триггеры не сработали** → продолжить без архитектора.
 
 ### 4. Переход к изменению
-- «Готово к реализации. `/opsx:apply <name>`?»
+- Если change уже обновлён и verify пройден: «Готово к реализации. `/opsx:apply <name>`?»
+- Если в explore появились новые требования к существующему change: «Зафиксировать в ЗНИ через `/opsx:extend <name>`?»
 - Или продолжить explore если остались вопросы
 
 ### Agent delegation в explore
@@ -548,6 +552,7 @@ You: That changes everything.
 There's no required ending. Discovery might:
 
 - **Flow into action**: "Ready to start? /opsx:new or /opsx:ff"
+- **Flow into existing change**: "This changes existing scope. Use `/opsx:extend <name>` so artifacts update through the guarded protocol."
 - **Result in artifact updates**: "Updated design.md with these decisions"
 - **Just provide clarity**: User has what they need, moves on
 - **Continue later**: "We can pick this up anytime"

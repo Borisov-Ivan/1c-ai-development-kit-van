@@ -336,6 +336,8 @@ Baseline: <из п.1.5.1>
 - Топ-3 по `risk_score`.
 - Разделение CODE / ARCHITECTURE.
 - Пути: main report, reasoning appendix, resolved-contract (если есть).
+- **Disposition recommendation:** если есть `ARCHITECTURE` findings, findings с `Action=MUST_FIX`, которые противоречат `design.md`/ADR/метаданным, или findings класса «постановочный дефект» — добавить строку:
+  `Обновить ЗНИ по отчёту: /opsx:extend <change-name> --from-review <main-report-path>` (затем `/opsx:verify <change-name>`).
 
 ---
 
@@ -415,9 +417,23 @@ Baseline: <из п.1.5.1>
 - Результат архитектора сохранить:
   - Активный change: `openspec/changes/<id>/reports/architecture-review-<scope-slug>-YYYY-MM-DD.md`.
   - Иначе: `temp/reports/architecture-review-<scope-slug>-YYYY-MM-DD.md`.
-- Уведомить пользователя о пути к отчёту архитектора; если архитектор рекомендует открыть ЗНИ / обновить design — вывести рекомендацию.
+- Уведомить пользователя о пути к отчёту архитектора; если архитектор рекомендует обновить `design.md` / `specs/` / `tasks.md` или finding оказался дефектом постановки, вывести handoff:
+  `Follow-up: /opsx:extend <change-name> --from-review <main-report-path>` (и при наличии архитектора: `--from-architecture <architecture-review-path>`). После extend — `/opsx:verify <change-name>`.
 
-**При «Нет»:** оставить ARCH-findings в отчёте без действия; сообщить: «ARCH-findings требуют ручного решения; рекомендуется `/opsx:explore` или `/opsx:debug` при готовности».
+**При «Нет»:** оставить ARCH-findings в отчёте без действия; сообщить: «ARCH-findings требуют ручного решения; рекомендуется `/opsx:extend <change-name> --from-review <main-report-path>` для обновления ЗНИ, либо `/opsx:explore` для обсуждения подхода».
+
+### 7.2b Scope/design rework trigger
+
+Если в финальном отчёте нет `Type: ARCHITECTURE`, но есть одно из:
+- finding `MUST_FIX`, исправление которого противоречит `design.md`, ADR, `tasks.md` или проверенным метаданным;
+- finding указывает, что постановка стимулирует плохой код (например, локальная копия типового поведения, альтернативная точка расширения, несогласованность `proposal`/`design`/`tasks`);
+- reviewer просит изменить scope, контракт или подход, а не только код;
+
+не передавать это writer как обычный CODE fix. В Summary добавить **Review disposition required** и предложить:
+
+`/opsx:extend <change-name> --from-review <main-report-path>`
+
+Цель extend: показать обязательный бриф, классифицировать findings (accepted/rejected/deferred), при необходимости вызвать architect, обновить `proposal.md` / `design.md` / `specs/` / `tasks.md`, затем вернуть в `/opsx:verify`.
 
 ### 7.3 Remaining Unresolved Contracts (S11)
 
