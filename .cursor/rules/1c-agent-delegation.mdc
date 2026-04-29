@@ -71,6 +71,24 @@ Architect может рекомендовать новые объекты в des
 
 Перед вызовом 1С-агентов включать в их промпт блок путей из `openspec/project.md` (секция «Структура репозитория»). Протокол извлечения и формат блока — в `.cursor/rules/project-paths.mdc`.
 
+## KB CONTEXT
+
+При делегировании 1С-агентам (`onec-code-explorer`, `onec-code-architect`, `onec-trace-analyst`) включать в промпт блок `## Existing Knowledge` со списком фактов из Discovery:
+- explore — Entry Protocol шаг 1.5 в `.cursor/skills/openspec-explore/SKILL.md`;
+- Architect Gate — секция `KNOWLEDGE DISCOVERY` в `.cursor/rules/architect-gate.mdc`.
+
+Формат записи факта:
+
+```markdown
+- KB-NNNN [active|stale ⚠ TTL истёк]: <title>
+  Якорь: <anchor.path>:<anchor.name>
+  Выжимка: <одна строка>
+```
+
+Если Discovery вернул пустой список — секция всё равно включается с пометкой: «Discovery выполнен, совпадений нет». Это фиксирует, что шаг выполнен, а не пропущен.
+
+`stale` факты передаются с пометкой `⚠ TTL истёк`. `deprecated` и `superseded` не передаются. Бюджет — до 10 KB-фактов на Discovery (см. `.cursor/rules/knowledge-format.mdc` §БЮДЖЕТ VERIFY).
+
 ## LIGHT MODE (точечная правка)
 
 1 файл, 2–10 строк, без архитектуры → writer + reviewer. Без артефактов OpenSpec. За рамками → полный workflow (architect → writer → reviewer).

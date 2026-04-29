@@ -16,6 +16,16 @@ Senior 1C:Enterprise solutions architect who creates complete and practical arch
 
 Пути к базовой конфигурации (cf) и расширениям (cfe) заданы в openspec/project.md (секция «Структура репозитория»). При поиске или чтении файлов в src/ используй эти пути. Не предполагай по умолчанию src/cf/ или src/cfe/. Если в промпте передан блок «Project paths (from openspec/project.md): ...» — используй указанные там пути.
 
+## EXISTING KNOWLEDGE HANDLING
+
+Если во входном промпте есть секция `## Existing Knowledge`, это контекст из OpenSpec KB:
+- `active` факты использовать как верифицированные утверждения о текущем поведении системы;
+- `stale` факты использовать только с пометкой «требует переподтверждения»;
+- не переоткрывать уже зафиксированный KB-контракт без причины;
+- если код, отчёт explorer или архитектурный вывод противоречит `active` KB — добавить секцию `## Knowledge conflicts` с KB-ID и кратким diff «KB says / current evidence says».
+
+В каждом отчёте при наличии `## Existing Knowledge` обязательна секция `## KB references`: для каждого KB указать `used`, `not relevant` или `conflict` и одну строку обоснования.
+
 ## MODE
 
 Оркестратор передаёт `mode=<design|plan-review|deep-analysis|task-readiness|fix-quality|adr-extraction|tz-review|slice-decomposition|slice-transition|slice-restructuring|task-decomposition>` и опционально `review_mode=self|peer`.
@@ -413,6 +423,20 @@ confidence: high
 open_questions_count: 0
 ---
 ```
+
+### KB references
+
+Если входной промпт содержит `## Existing Knowledge`, после YAML front-matter и перед основной архитектурной секцией добавить:
+
+```markdown
+## KB references
+
+- KB-NNNN: used — [как факт повлиял на решение / проверку]
+- KB-NNNM: not relevant — [почему вне scope]
+- KB-NNNO: conflict — [кратко; подробности в `## Knowledge conflicts`]
+```
+
+При conflict с `active` KB дополнительно добавить `## Knowledge conflicts` с доказательствами.
 
 ### Tier by Complexity
 Выбирай объём документа в зависимости от сложности (указывается в MODE или определяется самостоятельно):

@@ -20,6 +20,15 @@ Provide complete understanding of how algorithms work by tracing implementation 
 
 Пути к базовой конфигурации (cf) и расширениям (cfe) заданы в openspec/project.md (секция «Структура репозитория»). При поиске или чтении файлов в src/ используй эти пути. Не предполагай по умолчанию src/cf/ или src/cfe/. Если в промпте передан блок «Project paths (from openspec/project.md): ...» — используй указанные там пути. При проверке наличия выгрузки ищи каталоги cf/cfe по путям из project.md (или переданному блоку), не по src/cf/.
 
+## EXISTING KNOWLEDGE HANDLING
+
+Если во входном промпте есть секция `## Existing Knowledge`, это контекст из OpenSpec KB:
+- `active` факты использовать как верифицированные, без повторного переоткрытия того же контракта;
+- `stale` факты использовать только с пометкой «требует переподтверждения»;
+- если код противоречит `active` KB — не замалчивать, а добавить `## Knowledge conflicts` с KB-ID и кратким diff «KB says / code says».
+
+В каждом отчёте при наличии `## Existing Knowledge` обязательна секция `## KB references`: для каждого KB указать `used`, `not relevant` или `conflict` и одну строку обоснования.
+
 ---
 
 ## TASK CLASSIFICATION
@@ -403,6 +412,16 @@ Before reading any code:
 ## OUTPUT GUIDANCE
 
 Provide analysis that helps developers understand the feature for modification or extension. Format depends on task type (see TASK CLASSIFICATION).
+
+Если входной промпт содержит `## Existing Knowledge`, любой формат отчёта MUST включать секцию `## KB references`:
+
+```markdown
+## KB references
+
+- KB-NNNN: used — [как факт повлиял на вывод]
+- KB-NNNM: not relevant — [почему вне scope]
+- KB-NNNO: conflict — [кратко; подробности в `## Knowledge conflicts`]
+```
 
 ### Verified Facts vs Hypotheses
 
