@@ -231,6 +231,7 @@ Check via Anti-pattern Registry (see category 16):
   AP-029: Defense stack (Попытка + Свойство as contract uncertainty compensation) — HIGH/CRITICAL
   AP-030: Hidden partial result (Попытка+Продолжить/Возврат without user feedback) — HIGH
   AP-032: Inconsistent persistent state (Попытка + persistent write + no re-raise + downstream dependency) — CRITICAL
+  AP-047: Substituted Authority — local implementation replaces delegation to the owner of behavior (base/BSP/platform/common module) — HIGH
 
 Remain inline (not in registry):
   - Ternary operator ?() — MEDIUM
@@ -426,8 +427,9 @@ Evaluation Checklist (включить в отчёт в секции Reasoning A
 | 4 | Exploratory: поля с access=EXPLORATORY? | yes/no | | CONTRACT_INFERENCE |
 | 5 | Попытка as contract compensation: источник PARTIAL/ABSENT + Попытка на его полях? | yes/no | | KNOWLEDGE_DEFICIT + contract-compensating-try |
 | 6 | Naming: есть идентификаторы, чьё имя (a) отражает постановку/оркестрацию, (b) описывает роль в коде (контейнер, промежуточное, накопитель) без доменного квалификатора, или (c) при наличии в том же scope доменно названных данных — контейнер для них не отсылает к домену? Тест: мысленно убрать реализационное слово (Массив, Новый, Добавляемые) — остаётся ли доменный смысл? (см. AP-031) | yes/no | | CLARITY_DEFICIT + Supporting AP-031 (или отдельное finding AP-031 без дублирования с CLARITY в том же месте) |
+| 7 | Authority: код локально реализует поведение, у которого есть явный владелец (база, БСП, платформа, общий модуль, внешний контракт), и доступен механизм делегирования владельцу? | yes/no | | AUTHORITY_MISPLACEMENT + Supporting AP-047 |
 
-Completeness gate: 6 строк в таблице. Меньше — Phase 0 не завершена.
+Completeness gate: 7 строк в таблице. Меньше — Phase 0 не завершена.
 
 Каждый yes → замечание с counterfactual. Supporting: при совпадении с AP указать AP-NNN, не дублировать.
 
@@ -490,6 +492,7 @@ Completeness gate: 6 строк в таблице. Меньше — Phase 0 не
    - Detect &ИзменениеИКонтроль where code outside directives differs from base: variable renaming, formatting changes, refactoring outside #Вставка/#КонецВставки, adding/removing #Область in base (typed) code, NEW CODE added outside directive blocks
    - Detect business logic directly in #Вставка block
    - Detect AP-046: hook procedure starts with early Возврат under non-structural guard (feature-flag, business filter); body ≥ 5 lines or ≥ 2 distinct concerns. Exclude AP-021 (structural fail-fast). For &Вместо: early Возврат without subsequent ПродолжитьВызов = CRITICAL.
+   - Detect AP-047: code claims to preserve base/BSP/platform/common-module behavior but implements a local equivalent instead of delegating to the owner (`ПродолжитьВызов(...)`, штатный API, БСП-обёртка, общий модуль). Treat as AUTHORITY_MISPLACEMENT when found in Phase 0.
    - &ИзменениеИКонтроль VERIFICATION: for each method with this annotation, load base from cf/ path
      (replace cfe/<ExtName>/ with cf/), extract code outside directive blocks, diff against base.
      Any diff (added/deleted/modified lines outside directives) = CRITICAL (prerelease) / HIGH (normal).
@@ -526,7 +529,7 @@ Completeness gate: 6 строк в таблице. Меньше — Phase 0 не
    - Detect logic duplication between modules
    - Detect commented-out code without explanation
 
-10. Specific 1C patterns: → see AP-001..AP-031 in anti-pattern registry (category 16)
+10. Specific 1C patterns: → see AP-001..AP-047 in anti-pattern registry (category 16)
   AP-033: Export procedure/function in form module (Form-as-Service) — HIGH
     Remain inline:
     - Ternary operator ?() — MEDIUM
@@ -751,6 +754,7 @@ Required Improvements (вместо секции "Рекомендации"):
 | CONTRACT_INFERENCE | Одно семантическое значение получается перебором нескольких альтернативных путей | HIGH |
 | KNOWLEDGE_DEFICIT | Код компенсирует незнание контракта/домена вместо того, чтобы его выяснить | HIGH |
 | CLARITY_DEFICIT | Намерение блока невозможно определить из кода без внешнего контекста | MEDIUM |
+| AUTHORITY_MISPLACEMENT | Код берёт ответственность за поведение, владелец которого — другой слой (база, БСП, платформа, общий модуль, внешний контракт). Локальная реализация подменяет делегирование владельцу. | HIGH |
 
 Формат замечания Phase 0: Procedure (имя процедуры/функции), Anchor (1–2 уникальные строки кода для Grep-поиска после правок), Intent, Expected, Actual, Root cause, Counterfactual, Remediation, Action (MUST_FIX | VERIFIED_OK | OPTIONAL), Supporting (AP-NNN при совпадении).
 
@@ -774,6 +778,7 @@ Required Improvements (вместо секции "Рекомендации"):
 ### High (исправить до завершения задачи)
 ```yaml
 - Phase 0: DISPROPORTIONATE_COMPLEXITY, CONTRACT_INCONSISTENCY, CONTRACT_INFERENCE, KNOWLEDGE_DEFICIT
+- Phase 0: AUTHORITY_MISPLACEMENT (локальная реализация поведения, у которого есть владелец)
 - Logic errors
 - Missing error handling
 - Silent skip on structural check failure (Продолжить / silent Возврат / empty branch on type/property/size mismatch instead of ВызватьИсключение; business filtering is not a violation)
@@ -1032,7 +1037,7 @@ Overall: Исправить все замечания (...)
 
 **Artifacts:** Intent Map, Contract Map, Knowledge Assessment (кратко или структурированно).
 
-**Findings:** замечания типов DISPROPORTIONATE_COMPLEXITY, CONTRACT_INCONSISTENCY, CONTRACT_INFERENCE, KNOWLEDGE_DEFICIT, CLARITY_DEFICIT в формате:
+**Findings:** замечания типов DISPROPORTIONATE_COMPLEXITY, CONTRACT_INCONSISTENCY, CONTRACT_INFERENCE, KNOWLEDGE_DEFICIT, CLARITY_DEFICIT, AUTHORITY_MISPLACEMENT в формате:
 - Procedure, Anchor, Intent, Expected, Actual, Root cause, Counterfactual, Remediation, Action (MUST_FIX | VERIFIED_OK | OPTIONAL), Supporting (AP-NNN при совпадении).
 
 ### Standards & Patterns (Phase 1-2)
