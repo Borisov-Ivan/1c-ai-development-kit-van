@@ -131,6 +131,7 @@ Check:
   - &ИзменениеИКонтроль used by default without justification — HIGH. This annotation is brittle and should be avoided if the task can be solved via &После, &Перед, or &Вместо. Reviewer MUST demand justification for its use.
   - &ИзменениеИКонтроль: code outside #Вставка/#Удаление blocks differs from base — HIGH (prerelease: CRITICAL). Signs: variable renaming, formatting/indent changes, refactoring outside blocks, adding/removing #Область/#КонецОбласти in base (typed) code, NEW CODE added outside directive blocks. Any of these breaks extension applicability.
   - Business logic placed directly inside #Вставка block instead of delegating to a separate procedure — MEDIUM
+  - AP-046: Hook-scope early return — feature-flag or business guard suppresses entire body of intercepted procedure (&Перед/&После/&Вместо/&ИзменениеИКонтроль) — HIGH; for &Вместо without ПродолжитьВызов — CRITICAL. See anti-pattern registry
   - &ИзменениеИКонтроль VERIFICATION PROCEDURE (mandatory when such methods exist):
     1. Identify all methods with &ИзменениеИКонтроль in the reviewed file.
     2. For each: load the base method from cf/ (path: replace cfe/<ExtName>/ with cf/ in file path).
@@ -488,6 +489,7 @@ Completeness gate: 6 строк в таблице. Меньше — Phase 0 не
    - Detect &Вместо where &Перед/&После is sufficient
    - Detect &ИзменениеИКонтроль where code outside directives differs from base: variable renaming, formatting changes, refactoring outside #Вставка/#КонецВставки, adding/removing #Область in base (typed) code, NEW CODE added outside directive blocks
    - Detect business logic directly in #Вставка block
+   - Detect AP-046: hook procedure starts with early Возврат under non-structural guard (feature-flag, business filter); body ≥ 5 lines or ≥ 2 distinct concerns. Exclude AP-021 (structural fail-fast). For &Вместо: early Возврат without subsequent ПродолжитьВызов = CRITICAL.
    - &ИзменениеИКонтроль VERIFICATION: for each method with this annotation, load base from cf/ path
      (replace cfe/<ExtName>/ with cf/), extract code outside directive blocks, diff against base.
      Any diff (added/deleted/modified lines outside directives) = CRITICAL (prerelease) / HIGH (normal).
@@ -766,6 +768,7 @@ Required Improvements (вместо секции "Рекомендации"):
 - Missing ОтменитьТранзакцию() in Исключение block of transactional Попытка
 - Попытка wrapping deterministic operation (no external factor — rule 20)
 - Defense stack with phantom field (AP-029 + unverified field name)
+- AP-046 subcase: hook-scope early return under &Вместо without ПродолжитьВызов — silent override of base implementation
 ```
 
 ### High (исправить до завершения задачи)
@@ -805,6 +808,7 @@ Required Improvements (вместо секции "Рекомендации"):
 - Unused export procedure/function (no callers in extension scope) — category 15
 - Obsolete procedure still called from non-obsolete code — category 15
 - Parameter overwrite: parameter reassigned inside body, not documented as output — category 4 (rule 21)
+- AP-046: Hook-scope early return suppressing entire body of an intercepted extension procedure — risks silent disabling of future composing modifications
 ```
 
 ### Medium (исправить в текущей итерации)
