@@ -229,8 +229,27 @@ CASE anchor.type:
 | Verify-результат | Автоматическое изменение status |
 |------------------|--------------------------------|
 | `verified` (на HEAD через >7 дней после verified-at) | auto-refresh `verified-at` (mechanical) |
-| `signature-drift`, `behavioral-drift`, `anchor-missing`, `count-drift` | `active` → `stale`, ждёт audit |
+| `signature-drift`, `behavioral-drift`, `anchor-missing`, `count-drift` + `auto-repairable` | read-repair: обновить KB, оставить/вернуть `active`, refresh `verified-at` |
+| `signature-drift`, `behavioral-drift`, `anchor-missing`, `count-drift` + `review-required` | `active` → `stale`, отчёт содержит карточку решения |
+| `signature-drift`, `behavioral-drift`, `anchor-missing`, `count-drift` + `deprecate-candidate` | статус не удалять автоматически; отчёт содержит карточку `deprecate` / `merge` / `delete --force-delete` / `keep with justification` |
 | `verify-failed` (retry не помог) | `stale` + `verify-error` в metadata |
+
+### Read-repair classification
+
+`/opsx:knowledge-audit` не должен останавливаться на сыром `stale`, если найденный drift можно безопасно исправить по текущему `src/`.
+
+Классы drift:
+
+- `auto-repairable` — anchor найден, `declaration` совпал, факт остаётся тем же, а изменение ограничено `fingerprint`/`body-head` или очевидным добавлением уже принятой логики, которую можно верифицировать по текущему коду без доменных предположений.
+- `review-required` — anchor найден, но изменились контракт, цепочка вызовов, владелец поведения, пользовательский смысл или текст факта требует выбора человеком.
+- `deprecate-candidate` — anchor исчез, факт больше не описывает рабочее поведение, дублирует ADR/spec/комментарий или не проходит Reuse Value Test.
+
+Read-repair для `procedure` anchor:
+
+1. Если `declaration` совпал, процедура найдена, а `body-head` изменился, audit извлекает актуальные первые 5 непустых не-комментарий строк.
+2. Audit сравнивает текст факта с изменением: если достаточно синхронизировать отпечаток и 1–2 предложения без изменения смысла, это `auto-repairable`.
+3. При `auto-repairable` audit обновляет `fingerprint.body-head`, при необходимости минимально правит `## Факт`, выставляет `status: active`, обновляет `verified-at`, `verified-by: audit`, `_index.yaml` и фиксирует действие в отчёте `Read-repair выполнен`.
+4. Если факт требует нового решения или пересмотра связанного поведения, audit ставит `stale` только после классификации `review-required` и указывает конкретные варианты действий.
 
 ## FAILURE MODES
 

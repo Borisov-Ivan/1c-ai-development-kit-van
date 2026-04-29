@@ -58,7 +58,7 @@
 `.cursor/rules/1c-agent-delegation.mdc` (секция API EXISTENCE CHECK) — проверка существования вызываемых методов общих модулей в src/ (cf + cfe) после writer, до reviewer. AskQuestion при ненайденном методе.
 
 ## XML write guard
-`.cursor/rules/1c-xml-write-guard.mdc` — запрет прямой правки Form.xml, Template.xml, Rights.xml и прочих XML в src/. Form.xml → только инструкция ручного конфигурирования (не через скиллы/агентов). Template.xml, Rights.xml — через скиллы 1c-mxl, 1c-roles.
+`.cursor/rules/1c-xml-write-guard.mdc` — запрет прямой записи/генерации Form.xml, Template.xml, Rights.xml и прочих XML в src/. Form.xml → инструкция ручного конфигурирования или программное создание элементов в BSL модуля формы; read-only навыки `1c-forms/info` и `1c-forms/validate` допустимы для анализа выгрузки. Template.xml, Rights.xml — через скиллы 1c-mxl, 1c-roles.
 
 ## Tool Name Guard
 `.cursor/rules/tool-name-guard.mdc` — для вызова субагентов использовать инструмент **Task**. При `Invalid enum value` проверить имя инструмента (должен быть Task) и subagent_type; не переключаться на generalPurpose.
@@ -167,7 +167,7 @@ Quality Controller (шаг 7.6): **Slice Coherence** (6 критериев из 
 Навыки доступны через `available_skills`; вызываются из правил и агентов по типу задачи.
 - **1c-bsp** — `.cursor/skills/1c-bsp/SKILL.md` (и подскиллы command, patterns, registration): регистрация в БСП «Дополнительные отчёты и обработки», команды, паттерны подсистем.
 - **1c-extensions** — `.cursor/skills/1c-extensions/SKILL.md`: аннотации расширений (&Перед/&После, &ИзменениеИКонтроль, &Вместо), синтаксис директив.
-- **1c-forms** — `.cursor/skills/1c-forms/SKILL.md` (и подскиллы compile, edit, info, patterns, scaffold, validate): управляемые формы — создание, редактирование, анализ, валидация, компиляция из JSON DSL.
+- **1c-forms** — `.cursor/skills/1c-forms/SKILL.md` (подскиллы **info**, **validate**, **patterns**): управляемые формы — анализ и валидация выгрузки `Form.xml`, справочник паттернов; **без** генерации/правки `Form.xml` из JSON (генераторы удалены из фреймворка). Изменение форм — Конфигуратор + выгрузка и/или программное создание элементов в BSL модуля формы.
 - **1c-mxl** — `.cursor/skills/1c-mxl/SKILL.md` (и подскиллы compile, decompile, info, validate): табличные макеты (MXL) — компиляция, декомпиляция, анализ.
 - **1c-roles** — `.cursor/skills/1c-roles/SKILL.md` (и подскиллы compile, info): роли и права доступа — создание из JSON, анализ Rights.xml.
 - **1c-query-optimization** — `.cursor/skills/1c-query-optimization/SKILL.md`: продвинутые паттерны запросов (временные таблицы, DCS).

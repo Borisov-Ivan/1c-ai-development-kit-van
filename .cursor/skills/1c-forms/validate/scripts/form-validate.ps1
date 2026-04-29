@@ -471,7 +471,7 @@ if (-not $stopped) {
 	if ($titleNode) {
 		$v8items = $titleNode.SelectNodes("v8:item", $nsMgr)
 		if ($v8items.Count -eq 0 -and $titleNode.InnerText.Trim() -ne "") {
-			Report-Error "Form Title is plain text ('$($titleNode.InnerText.Trim())') — must be multilingual XML (<v8:item>). Use top-level 'title' key in form-compile DSL."
+			Report-Error "Form Title is plain text ('$($titleNode.InnerText.Trim())') — must be multilingual XML (<v8:item>). Fix in Configurator / metadata export."
 		} else {
 			Report-OK "Title: multilingual XML"
 		}

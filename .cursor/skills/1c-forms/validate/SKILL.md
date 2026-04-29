@@ -1,11 +1,13 @@
 ---
 name: 1c-form-validate
-description: "Validate structural correctness of a 1C managed form (Form.xml). Use after generating or editing Form.xml to check for structural errors."
+description: "Validate structural correctness of an exported 1C managed form (Form.xml). Read-only: use after Configurator export to check structural errors."
 ---
 
 # 1C Form Validate — Form Structure Validator
 
-Checks Form.xml of a managed form for structural errors: ID uniqueness, companion element presence, DataPath and command reference correctness.
+Checks exported `Form.xml` of a managed form for structural errors: ID uniqueness, companion element presence, DataPath and command reference correctness.
+
+**Read-only.** This skill validates the dump and does not create, edit, or generate `Form.xml`. If errors are found, fix the form in Configurator/metadata and re-export, or adjust BSL runtime element creation when the UI is built from code.
 
 ## Usage
 
@@ -21,7 +23,7 @@ Checks Form.xml of a managed form for structural errors: ID uniqueness, companio
 ## Command
 
 ```powershell
-powershell.exe -NoProfile -File skills/1c-forms/validate/scripts/form-validate.ps1 -FormPath "<path>"
+powershell.exe -NoProfile -File .cursor/skills/1c-forms/validate/scripts/form-validate.ps1 -FormPath "<path>"
 ```
 
 ## Checks Performed
@@ -66,13 +68,12 @@ Return code: 0 = all checks passed, 1 = errors found.
 
 ## When to Use
 
-- **After `1c-form-compile`**: verify correctness of generated form
-- **After manual Form.xml editing**: ensure IDs are unique, companions are present, references are valid
-- **When debugging**: identify structural errors before building
+- **After Configurator export** to `src/`: verify `Form.xml` from the dump
+- **When debugging** structural issues: IDs, companions, DataPath
 
 ## Workflow
 
-1. `1c-form-compile` or `1c-form-edit` — generate/modify form
-2. `1c-form-validate` — run validation
-3. Fix any reported errors
+1. Change form in **Configurator** (or adjust BSL that builds elements at runtime — no `Form.xml` diff from that path)
+2. `1c-form-validate` — run validation on shipped `Form.xml`
+3. Fix issues in Configurator / metadata, re-export
 4. `1c-form-info` — verify structure visually

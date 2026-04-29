@@ -141,7 +141,7 @@ Note: global processors do not have the `TargetObjects` parameter.
 1. Find `ObjectModule.bsl` via Glob: `src/{{ProcessorName}}/Ext/ObjectModule.bsl`
 2. Read the file
 3. If `ExternalDataProcessorInfo` already exists — inform user, do not duplicate
-4. If file not found — suggest using `1c-forms/scaffold` skill first (it can create EPF structure)
+4. If file not found — suggest creating the EPF structure in **Configurator** and exporting to `src/` (см. `1c-xml-write-guard.mdc`; scaffold/generators форм в репозитории не используются)
 5. Find the region `#Region PublicInterface` ... `#EndRegion`
 6. Insert `ExternalDataProcessorInfo()` function inside this region
 7. If kind requires server handler — insert it too, after the function
@@ -197,7 +197,7 @@ EndProcedure
 ## Next Steps
 
 - Add more commands: `1c-bsp-command` skill
-- Add a form: `1c-form-scaffold` skill
+- Add or change a form: use Configurator and export to `src/`, or implement runtime elements in the form module (BSL); form scaffold/generators are not used in this repository
 - Add a template: use configurator or project scripts for layout management.
 - Build EPF: use Конфигуратор (Конфигурация → Загрузить конфигурацию из файлов).
 

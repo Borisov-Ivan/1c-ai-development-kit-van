@@ -44,19 +44,35 @@ description: Audit OpenSpec Knowledge Base facts, TTL, anchors, indexes, metrics
     *   Без флагов scope = все факты из индекса (full-revisit).
     *   Если без флагов в KB > 50 фактов суммарно и не задан `--domain`, задать AskQuestion: `full` / `overdue-only` / `by-domain`. `full` продолжает полный аудит; `overdue-only` применяет фильтр `--overdue`; `by-domain` просит пользователя указать домен и завершает текущий ход без записи.
 3.  **Верификация:** Для каждого отфильтрованного KB-файла выполнить алгоритм Verify (описан в `.cursor/rules/knowledge-format.mdc`).
+3.1. **Drift classification:** Для каждого drift-результата классифицировать действие перед записью статуса:
+    *   `auto-repairable` — anchor найден, `declaration` совпал, факт остаётся тем же, а drift ограничен механическим `fingerprint`/`body-head` или очевидным добавлением уже принятой логики, которую можно верифицировать по текущему `src/` и описать без доменных догадок.
+    *   `review-required` — anchor найден, но изменился смысл факта, цепочка вызовов, контракт, владелец поведения или текст факта требует доменного решения.
+    *   `deprecate-candidate` — anchor исчез, факт дублирует ADR/spec/комментарий, не проходит Reuse Value Test или больше не описывает рабочее поведение.
+3.2. **Read-repair:** Для `auto-repairable` audit сам выполняет repair:
+    *   обновляет `fingerprint` (и минимально необходимый текст факта, если старый текст прямо противоречит коду);
+    *   возвращает `status: active`, обновляет `verified-at`, `verified-by: audit`, синхронизирует `_index.yaml`;
+    *   фиксирует в отчёте секцию `## Read-repair выполнен` с old/new summary.
+    Если автоматический repair меняет не только отпечаток, но и смысл карточки — это уже `review-required`, а не `auto-repairable`.
 3.5. **Reuse Value Re-evaluation:** Если не указан `--no-reuse-test`, для каждого отфильтрованного KB-файла применить `Reuse Value Test` из `.cursor/rules/knowledge-format.mdc`.
     *   Все 5 критериев = `да` → факт остаётся в рабочем состоянии.
-    *   Любой критерий = `нет` или `не уверен` → добавить факт в секцию отчёта `## Reuse Value Warnings` с проваленными критериями (`RVT-1`..`RVT-5`), кратким обоснованием и рекомендацией `deprecate` / `merge` / `keep with justification`.
+    *   Любой критерий = `нет` или `не уверен` → добавить факт в секцию отчёта `## Reuse Value Decisions` с проваленными критериями (`RVT-1`..`RVT-5`), кратким обоснованием и конкретным действием `deprecate` / `merge` / `keep with justification`.
     *   Reuse-failed **не переводится автоматически** в `deprecated` и не удаляется. Это read-only оценка ценности; решение требует ручного действия или явного `--action`.
 4.  **Auto-actions (без вопросов к пользователю):**
     *   Если статус верификации `verified` → выполнить silent auto-refresh поля `verified-at` в KB-файле и индексе (батчем, без AskQuestion).
-    *   Если обнаружен drift (`signature-drift`, `path-drift`, `anchor-missing`, `count-drift`) → изменить статус KB на `stale`, добавить факт в секцию Warnings отчёта.
+    *   Если обнаружен drift и он классифицирован как `auto-repairable` → выполнить read-repair из шага 3.2 без AskQuestion.
+    *   Если drift классифицирован как `review-required` → изменить статус KB на `stale`, добавить факт в секцию `## Требует решения` с карточкой: проблема / влияние / варианты (`update fact` / `supersede` / `keep stale with reason`).
+    *   Если drift классифицирован как `deprecate-candidate` → не удалять и не переводить в `deprecated` автоматически; добавить карточку решения `deprecate` / `merge` / `delete --force-delete` / `keep with justification`.
 5.  **Единый AskQuestion по итогам:**
-    *   Если хотя бы один KB перешёл в статус `stale` или попал в `Reuse Value Warnings`, задать **один вопрос на всю сессию**: «Открыть отчёт для ручной ревизии stale + reuse-failed? [yes | no]».
-    *   `yes` → открыть сгенерированный отчёт `openspec/reports/knowledge-audit-<date>.md` с построчным списком `stale` фактов, `Reuse Value Warnings` и рекомендациями (`update` / `deprecate` / `supersede` / `delete --force-delete` / `keep with justification`).
-    *   `no` → оставить KB в текущем состоянии; `stale` остаются stale, reuse-failed остаются active/stale до явного решения пользователя.
+    *   Если после read-repair не осталось `review-required` / `deprecate-candidate` / `Reuse Value Decisions`, AskQuestion не нужен.
+    *   Если остались решения, задать **один вопрос на всю сессию**: «Открыть отчёт для ручной ревизии нерешённых карточек? [yes | no]».
+    *   `yes` → открыть сгенерированный отчёт `openspec/reports/knowledge-audit-<date>.md` с разделами `Read-repair выполнен`, `Требует решения`, `Reuse Value Decisions` и конкретными вариантами действий.
+    *   `no` → оставить нерешённые KB в текущем состоянии; `stale` остаются stale, reuse-failed остаются active/stale до явного решения пользователя.
 6.  **Прямые действия:** Сам audit-скилл **без явного флага `--action` ничего деструктивного не пишет**. Прямые действия над KB пользователь делает вручную (правкой KB-файла) или запуском `/opsx:knowledge-audit --ids KB-NNNN --action <action>`.
-7.  **Отчёт:** Сгенерировать `openspec/reports/knowledge-audit-<date>.md` (статистика verified/refreshed/stale + `Reuse Value Warnings` + рекомендации).
+7.  **Отчёт:** Сгенерировать `openspec/reports/knowledge-audit-<date>.md` (статистика verified/refreshed/read-repaired/stale + `Reuse Value Decisions` + рекомендации).
+8.  **Финальный ответ пользователю:** Обязательно вывести коротко:
+    *   `Что сделано автоматически` — refresh, read-repair, reindex.
+    *   `Что осталось решить` — только нерешённые карточки; если пусто, прямо сказать «действий от пользователя не требуется».
+    *   `Что проверял audit` — 1–3 строки про scope (anchors, TTL, reuse value, structure).
 
 ### 2. Алгоритм `--reindex`
 1.  Найти все `.md` файлы фактов в `openspec/knowledge/` (исключая `_archive/`).
@@ -108,5 +124,5 @@ description: Audit OpenSpec Knowledge Base facts, TTL, anchors, indexes, metrics
 ## Правила и ограничения
 - **Writer contract:** Скилл аудита имеет право обновлять KB-файлы и `_index.yaml`.
 - **Удаление:** Запрещено удалять факты без явного флага `--force-delete` (вместе с `--action delete`). Рекомендуется переводить устаревшие факты в статус `deprecated`, после чего (если возраст > 6 мес) они будут автоматически перенесены в `_archive/` при следующем аудите.
-- **Деструктивные действия:** Любые действия, изменяющие суть факта или удаляющие его, требуют либо ручной правки пользователем, либо явного указания `--action`. Auto-actions применяются только для обновления `verified-at` и перевода в `stale`.
-- **Reuse Value Test:** Это read-only оценка ценности факта. Audit может рекомендовать `deprecate`, `merge` или `keep with justification`, но не переводит reuse-failed факты в `deprecated` автоматически.
+- **Деструктивные действия:** Любые действия, меняющие суть факта, переводящие факт в `deprecated`/`superseded` или удаляющие его, требуют либо ручной правки пользователем, либо явного указания `--action`. Read-repair `auto-repairable` не считается деструктивным: он синхронизирует verified-факт с текущим `src/` и обязан быть отражён в отчёте.
+- **Reuse Value Test:** Это оценка ценности факта с конкретным действием. Audit может рекомендовать `deprecate`, `merge` или `keep with justification`, но не переводит reuse-failed факты в `deprecated` автоматически.

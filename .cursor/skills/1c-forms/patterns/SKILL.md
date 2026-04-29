@@ -1,11 +1,11 @@
 ---
 name: 1c-form-patterns
-description: "Reference guide of managed form design patterns for 1C — archetypes, naming conventions, advanced techniques. Use before designing forms via 1c-form-compile when requirements lack UI layout details."
+description: "Reference guide of managed form design patterns for 1C — archetypes, naming conventions, advanced techniques. Use when designing or reviewing form UX before implementation in Configurator or programmatic form element creation in BSL."
 ---
 
 # 1C Form Patterns — Design Reference
 
-Reference of standard managed form design patterns for 1C. Load **before** designing a form via `1c-form-compile` when user requirements do not specify element placement details.
+Reference of standard managed form design patterns for 1C. Load when requirements lack UI layout details and the implementation path is **Configurator + выгрузка** and/or **programmatic elements in the form module (BSL)** — not generated `Form.xml`.
 
 **How to use:** pick a matching archetype, apply naming conventions, use advanced patterns as needed.
 

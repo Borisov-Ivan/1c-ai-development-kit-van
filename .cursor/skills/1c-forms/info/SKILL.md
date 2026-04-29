@@ -1,11 +1,13 @@
 ---
 name: 1c-form-info
-description: "Analyze 1C managed form structure (Form.xml) — elements, attributes, commands, events. Use to understand form layout before modifications or for navigation through large forms."
+description: "Analyze exported 1C managed form structure (Form.xml) — elements, attributes, commands, events. Read-only: use to understand existing layout before Configurator changes or BSL-created elements."
 ---
 
 # 1C Form Info — Compact Form Summary
 
-Reads a Form.xml of a managed form and outputs a compact summary: element tree, typed attributes, commands, events. Replaces the need to read thousands of XML lines.
+Reads an exported `Form.xml` of a managed form and outputs a compact summary: element tree, typed attributes, commands, events. Replaces the need to read thousands of XML lines.
+
+**Read-only.** This skill does not create, edit, or generate `Form.xml`. Form changes are made in Configurator and exported to `src/`, or implemented by programmatic element creation in the form module (BSL).
 
 ## Usage
 
@@ -22,12 +24,12 @@ Reads a Form.xml of a managed form and outputs a compact summary: element tree, 
 ## Command
 
 ```powershell
-powershell.exe -NoProfile -File skills/1c-forms/info/scripts/form-info.ps1 -FormPath "<path to Form.xml>"
+powershell.exe -NoProfile -File .cursor/skills/1c-forms/info/scripts/form-info.ps1 -FormPath "<path to Form.xml>"
 ```
 
 With pagination:
 ```powershell
-powershell.exe -NoProfile -File skills/1c-forms/info/scripts/form-info.ps1 -FormPath "<path>" -Offset 150
+powershell.exe -NoProfile -File .cursor/skills/1c-forms/info/scripts/form-info.ps1 -FormPath "<path>" -Offset 150
 ```
 
 ## Reading the Output
@@ -159,7 +161,8 @@ For detailed inspection — use grep on element name from the summary.
 
 ## When to Use
 
-- **Before modifying a form**: understand structure, find the right group for inserting an element
+- **Before Configurator changes**: understand structure, find the right group/element names
+- **Before BSL-created elements**: inspect existing table and element names for stable runtime placement
 - **Form analysis**: which attributes, commands, handlers are used
 - **Navigating large forms**: 28K lines of XML → 50-100 lines of context
 

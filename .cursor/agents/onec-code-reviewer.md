@@ -86,6 +86,8 @@ Check against:
 
 For deep vendor-standards compliance (transactions, event handlers, queries, locking): Read `.cursor/skills/1c-vendor-standards/SKILL.md`, check all domains touched by reviewed code. For details: Read the relevant domain file from `.cursor/docs/standard/` (see `1c-standards-navigator.md`). Do NOT read platform documentation routinely — only if the reviewed code uses an unfamiliar platform mechanism.
 
+Integration exchange trigger: if reviewed code prepares JSON/HTTP/RMQ messages or data exchange (`ЗаписатьJSON`, `ЗаписьJSON`, `ПрочитатьJSON`, `СтруктураСообщения`, `Вставить("GUID"`, `HTTP`, `RMQ`, `Обмен`, `Выгруз`, `Загруз`), read `.cursor/docs/standard/std-12-integration-exchange.md` and apply AP-048..AP-050 via the anti-pattern registry. Do not treat AP-050 as a mass lint for all user strings: only flag blocking messages that stop a scenario and do not explain actual/expected state.
+
 ### 2. Performance Analysis
 ```yaml
 Identify:
@@ -232,6 +234,9 @@ Check via Anti-pattern Registry (see category 16):
   AP-030: Hidden partial result (Попытка+Продолжить/Возврат without user feedback) — HIGH
   AP-032: Inconsistent persistent state (Попытка + persistent write + no re-raise + downstream dependency) — CRITICAL
   AP-047: Substituted Authority — local implementation replaces delegation to the owner of behavior (base/BSP/platform/common module) — HIGH
+  AP-048: Manual reference/GUID serialization in exchange code — HIGH
+  AP-049: Numeric string via Строка() + whitespace cleanup — MEDIUM
+  AP-050: Uninformative blocking user message — MEDIUM (REFACTOR by default; MUST_FIX when user cannot recover)
 
 Remain inline (not in registry):
   - Ternary operator ?() — MEDIUM
@@ -529,11 +534,17 @@ Completeness gate: 7 строк в таблице. Меньше — Phase 0 не
    - Detect logic duplication between modules
    - Detect commented-out code without explanation
 
-10. Specific 1C patterns: → see AP-001..AP-047 in anti-pattern registry (category 16)
+10. Specific 1C patterns: → see AP-001..AP-050 in anti-pattern registry (category 16)
   AP-033: Export procedure/function in form module (Form-as-Service) — HIGH
     Remain inline:
     - Ternary operator ?() — MEDIUM
     - Excessive info logging inside loop or 3+ info-level calls — LOW
+
+10.5. Integration exchange:
+   - If integration exchange trigger matched, read `.cursor/docs/standard/std-12-integration-exchange.md`.
+   - Detect AP-048: manual GUID/reference serialization in JSON/exchange; prefer `XMLСтрока(<Ссылка>)`.
+   - Detect AP-049: numeric string through `Строка()` + whitespace cleanup; prefer `Формат(<Число>, "ЧГ=0")`.
+   - Detect AP-050 only semantically for blocking messages near `Отказ = Истина`, `ВызватьИсключение`, `СообщитьПользователю`, `ПоказатьПредупреждение`. Do NOT flag neutral informational messages, administrator diagnostics, or strings where the form context already shows the field/action.
 
 11. Band-aid detection: → see AP-016 in anti-pattern registry (category 16)
     Remain inline:

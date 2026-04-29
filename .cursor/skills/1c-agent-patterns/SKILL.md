@@ -1789,7 +1789,7 @@ Task(
 
 | Тип задачи | Скилл | Что делает |
 |------------|-------|------------|
-| Создание формы | `1c-forms/SKILL.md` | scaffold → compile → validate |
+| Управляемая форма | `1c-forms/SKILL.md` | info / validate / patterns; изменение формы — Конфигуратор + выгрузка или BSL модуля формы |
 | Печатная форма | `1c-mxl/SKILL.md` | compile → validate |
 | Настройка прав | `1c-roles/SKILL.md` | compile из JSON DSL |
 | Интеграция с БСП | `1c-bsp/SKILL.md` | registration + commands + patterns |
