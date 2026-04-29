@@ -26,8 +26,8 @@ description: Add verified OpenSpec Knowledge Base facts from standalone reports 
 
 Без аргументов:
 
-1. Не выполнять поиск по `temp/reports/`.
-2. Не задавать AskQuestion со списком файлов.
+1. Выполнить **Session Context Fallback** (см. ниже): подобрать source только из путей, уже видимых в текущей командной сессии.
+2. Если fallback не нашёл кандидатов — не выполнять поиск по `temp/reports/` и не задавать AskQuestion со списком файлов.
 3. Вывести краткую ошибку и примеры:
 
 ```text
@@ -35,6 +35,60 @@ description: Add verified OpenSpec Knowledge Base facts from standalone reports 
 /opsx:knowledge-add temp/reports/report1.md temp/reports/report2.md
 /opsx:knowledge-add openspec/changes/archive/2026-04-25-name/reports/exploration-2026-04-25.md --no-bundle
 ```
+
+## Session Context Fallback
+
+Применяется только когда команда вызвана без путей. Цель — подхватить отчёт, который уже был явно показан пользователю в текущей командной сессии, не превращая пустой вызов в поиск по файловой системе.
+
+### Источники кандидатов
+
+Использовать только пути, уже видимые в контексте сессии:
+
+- пути к `.md`, упомянутые в сообщениях ассистента текущей командной сессии;
+- `<open_and_recently_viewed_files>` / focused file, если они относятся к каноническим source-каталогам ниже.
+
+Запрещено выполнять Glob/Grep/поиск по `temp/reports/`, `openspec/changes/**/reports/` или `openspec/knowledge/_sources/` для подбора кандидатов. Точечная проверка существования уже найденного пути разрешена и выполняется так же, как для явно переданного input.
+
+### Фильтры
+
+Каталоги:
+
+- `temp/reports/`;
+- `openspec/changes/<name>/reports/`;
+- `openspec/knowledge/_sources/knowledge-add/<YYYY-MM-DD-slug>/sources/`.
+
+Имена файлов:
+
+- `exploration-*.md`;
+- `trace-analysis-*.md`;
+- `resolved-contract-*.md`;
+- `architecture-*.md`;
+- `deep-analysis-*.md`;
+- `design-review-*.md`.
+
+Markdown вне этих масок при fallback отклоняется без warning: пользователь может передать такой source явно, если хочет применить обычное правило `Markdown вне канонических масок`.
+
+### Результат fallback
+
+- `0` кандидатов → вывести обычную ошибку и примеры из `## Input`, ничего не писать.
+- `1` кандидат → задать AskQuestion: «Использовать source `<path>`?»
+  - `yes` → передать этот путь в `Preflight` и дальше выполнять обычный pipeline.
+  - `no` → итог `Declined by user`, ничего не писать.
+  - `specify` → попросить пользователя прислать явный путь; ничего не писать.
+- `2+` кандидата → задать AskQuestion со списком путей и вариантами `all`, `cancel`, `specify`.
+  - `all` → передать все выбранные пути в `Preflight`.
+  - `cancel` → итог `Declined by user`, ничего не писать.
+  - `specify` → попросить пользователя прислать явный путь; ничего не писать.
+
+При показе вопроса создать/обновить TodoWrite-чекпоинт:
+
+```yaml
+id: kb-confirm
+content: "Ожидается выбор source из контекста сессии"
+status: in_progress
+```
+
+Пока этот чекпоинт в статусе `in_progress`, следующий ход командной сессии сначала трактуется как ответ на выбор source. После выбора source чекпоинт переводится в `completed` или `cancelled`, затем запускается обычный `Preflight`.
 
 ## Флаги
 
@@ -77,7 +131,7 @@ description: Add verified OpenSpec Knowledge Base facts from standalone reports 
 Применяется к пригодным источникам.
 
 1. Извлечь до 5 KB-кандидатов за сессию.
-2. Кандидат должен удовлетворять критериям `knowledge-format.mdc`:
+2. Кандидат должен удовлетворять критериям `knowledge-format.mdc`, включая обязательный `Reuse Value Test`:
    - verified факт о поведении, контракте, цепочке вызовов, метаданных или стабильном имени;
    - не ADR (нет решения с trade-off);
    - не spec (не требование к будущему поведению);
@@ -92,6 +146,7 @@ description: Add verified OpenSpec Knowledge Base facts from standalone reports 
    - `anchors`;
    - `source.report`, `source.lines`, `source.also-mentioned-in`;
    - `ttl-days`;
+   - `reuse-scenario` — одно предложение: где будущая ЗНИ/расследование переиспользует факт;
    - `why-knowledge`;
    - `supersedes` / `supersedes-by`, если это замена существующего KB;
    - текст секций `## Факт` и `## Почему это knowledge, а не ADR/spec`.
@@ -148,9 +203,18 @@ description: Add verified OpenSpec Knowledge Base facts from standalone reports 
 - цепочка вызовов / поведение внутри расширения → 90;
 - имя ЖР, константа, метаданные → 180.
 
+### Reuse Value
+
+Применить `Reuse Value Test` из `knowledge-format.mdc`.
+
+- Все 5 критериев = `да` → кандидат остаётся.
+- Любой критерий = `нет` или `не уверен` → `Deferred — reuse value not justified`.
+- Deferred-кандидат не показывается в preview, не сохраняется и добавляется в Warnings со списком проваленных критериев (`RVT-1`..`RVT-5`) и `source:lines`.
+- `reuse-scenario` обязателен. Если невозможно честно назвать будущую ЗНИ/расследование, где факт переиспользуется, считать проваленным `RVT-1`.
+
 ### Why Knowledge
 
-`why-knowledge` обязательно. Если невозможно написать честное предложение «почему это KB, а не ADR/spec/debug/project», кандидат отбрасывается: `Skipped — knowledge-worthy criterion not justified`.
+`why-knowledge` обязательно и должно включать `reuse-scenario` из Reuse Value Test. Если невозможно написать честное предложение «почему это KB, а не ADR/spec/debug/project», кандидат отбрасывается: `Skipped — knowledge-worthy criterion not justified`.
 
 ## Source Bundle
 
@@ -175,7 +239,7 @@ openspec/knowledge/_sources/knowledge-add/<YYYY-MM-DD>-<slug>/sources/<original-
 
 ### Bundle-on-save
 
-При `yes` и хотя бы одном нестабильном source:
+При подтверждённом сохранении (`all`/`yes` или выбранное подмножество) и хотя бы одном нестабильном source:
 
 ```text
 openspec/knowledge/_sources/knowledge-add/<YYYY-MM-DD>-<slug>/
@@ -188,7 +252,7 @@ openspec/knowledge/_sources/knowledge-add/<YYYY-MM-DD>-<slug>/
 Правила:
 
 - bundle создаётся только при сохранении хотя бы одного KB;
-- при `no` или `Saved 0` bundle не создаётся;
+- при `cancel`, `no`, `Declined by user` или `Saved 0` bundle не создаётся;
 - `<slug>` брать из title первого сохраняемого KB или объединяющей темы;
 - при коллизии каталога добавлять `-2`, `-3`;
 - если один факт подтверждён несколькими sources, `source.report` — самый подробный source, остальные → `source.also-mentioned-in`.
@@ -203,14 +267,18 @@ openspec/knowledge/_sources/knowledge-add/<YYYY-MM-DD>-<slug>/
    - `No candidates after filters`
    - `Skipped — ...`
    - `Blocked — ...`
+   - `Deferred — reuse value not justified`
 
 Если кандидаты есть, в **одном пользовательском ответе** сначала показать per-candidate карточки всех кандидатов, затем сразу задать единый вопрос подтверждения. Карточки не переносить в финальный T-CONFIRM: финал сообщает только результат сохранения.
+
+**Cards-first guardrail:** AskQuestion разрешён только после видимого вывода карточек в том же ходе. Перед вызовом AskQuestion выполнить self-check: в пользовательском ответе должны быть показаны ровно `N` блоков `### KB-<next-id-preview>: <title>`, где `N` — число кандидатов. Если карточки не выведены или их количество не совпадает с `N`, AskQuestion не вызывать, ничего не писать и завершить с итогом `Saved 0 — cards not rendered`.
 
 ```markdown
 ### KB-<next-id-preview>: <title>
 - **Domain / subdomain:** <domain> / <subdomain>
 - **TTL:** <days>
 - **Anchors:** <path>:<name> (+ дополнительные при наличии)
+- **Reuse scenario:** <one sentence>
 - **Why knowledge:** <one sentence>
 - **Source:** <planned-stable-source>:<line-range>
 - **Supersedes:** KB-NNNN (если применимо)
@@ -220,23 +288,38 @@ openspec/knowledge/_sources/knowledge-add/<YYYY-MM-DD>-<slug>/
 
 Options:
 
-- `yes` — сохранить все кандидаты
-- `no` — отменить сохранение
-- `select` — выбрать подмножество текстом в следующем сообщении
+- AskQuestion должен быть `allow_multiple: true`.
+- `all` — сохранить все `N` кандидатов (`KB-NNNN`, `KB-NNNN`, ...).
+- `KB-<next-id-preview>` — по одному option на каждого кандидата: `KB-<next-id-preview>: <title ≤60 символов>`.
+- `cancel` — отменить сохранение, ничего не писать.
 
 Preview ID не считается зарезервированным. Окончательная нумерация выполняется только при save.
+
+### Selection resolution
+
+Результат AskQuestion интерпретировать так:
+
+- выбран `cancel` в любой комбинации → `Declined by user`;
+- выбран `all` → Save Protocol для всех кандидатов;
+- выбраны только конкретные `KB-<next-id-preview>` → Save Protocol только для указанных кандидатов;
+- выбран `all` вместе с конкретными KB → Save Protocol для всех кандидатов, индивидуальный выбор игнорировать, в финальный summary добавить warning о конфликте выбора;
+- пустой выбор или `Questions skipped by the user` → ничего не писать, кроме краткой строки ожидания из `Confirmation channels`, состояние = `awaiting confirmation`.
 
 ### Confirmation channels
 
 Подтверждение принимается двумя каналами:
 
-1. **AskQuestion** — нормальный путь. `yes` запускает Save Protocol для всех кандидатов, `no` завершает команду как `Declined by user`, `select` переводит сессию в ожидание текстового выбора.
+1. **AskQuestion** — нормальный путь. `all` запускает Save Protocol для всех кандидатов, выбор конкретных `KB-<next-id-preview>` запускает Save Protocol только для указанных кандидатов, `cancel` завершает команду как `Declined by user`.
 2. **Текстовый ответ пользователя на следующем ходе** — fallback для случаев, когда форма закрыта или инструмент вернул `Questions skipped by the user`. Допустимые ответы:
-   - `да`, `yes`, `сохранить`, `сохранить все` → Save Protocol для всех кандидатов;
+   - `все`, `all`, `да`, `yes`, `сохранить`, `сохранить все` → Save Protocol для всех кандидатов;
    - `нет`, `no`, `отмена`, `cancel` → `Declined by user`;
-   - `сохранить KB-0005, KB-0007` или список номеров/preview-id → Save Protocol только для выбранных кандидатов.
+   - `сохранить KB-0005, KB-0007`, `0010 0012`, `10, 12` или другой список номеров/preview-id → Save Protocol только для выбранных кандидатов;
+   - `KB-0010..0012` или `0010-0012` → Save Protocol для кандидатов из диапазона;
+   - `все кроме KB-0011` или `all except 0011` → Save Protocol для всех кандидатов, кроме перечисленных.
 
-`Questions skipped by the user` **не равно отказу**. В этом случае ничего не писать, кроме краткой строки: `Ожидаю подтверждение: ответьте "да", "нет" или перечислите KB-кандидаты`. Состояние сессии = `awaiting confirmation`; на следующем ходе skill сначала обрабатывает подтверждение, а не начинает новую extraction-сессию.
+Номера без префикса `KB-` сопоставлять только с текущими preview-id: например, `10` соответствует `KB-0010`, если такой preview-id показан. Если текстовый ввод не содержит ни одного совпадения с текущими preview-id и не является `all`/`cancel`, ничего не сохранять и вывести: `Ожидаю выбор: "все", "отмена" или номера KB через запятую`.
+
+`Questions skipped by the user` **не равно отказу**. В этом случае ничего не писать, кроме краткой строки: `Ожидаю выбор: "все", "отмена" или номера KB через запятую`. Состояние сессии = `awaiting confirmation`; на следующем ходе skill сначала обрабатывает подтверждение, а не начинает новую extraction-сессию.
 
 ### Awaiting confirmation state
 
@@ -248,20 +331,21 @@ content: "Ожидается подтверждение сохранения KB-
 status: in_progress
 ```
 
-Пока `kb-confirm` в статусе `in_progress`, каждый следующий ход этой командной сессии начинается с разбора ответа пользователя как подтверждения. После `yes`/`no`/выбора подмножества чекпоинт переводится в `completed` или `cancelled`, затем выполняется соответствующий результат.
+Пока `kb-confirm` в статусе `in_progress`, каждый следующий ход этой командной сессии начинается с разбора ответа пользователя как подтверждения. После `all`/`cancel`/выбора подмножества чекпоинт переводится в `completed` или `cancelled`, затем выполняется соответствующий результат.
 
 ## Save Protocol
 
-Только при `yes`.
+Только при подтверждённом сохранении: `all`/`yes` для всех кандидатов или выбранное подмножество preview-id.
 
-1. Определить следующие номера: Glob `openspec/knowledge/**/KB-*.md` включая `_archive/`, max + 1.
-2. Перед созданием bundle проверить, что директория `openspec/knowledge/_sources/` отсутствует или соответствует whitelist из `knowledge-format.mdc`; при нарушении — rollback, warning, без записи KB.
-3. Создать bundle, если нужен.
-4. Создать `openspec/knowledge/<domain>/KB-NNNN-slug.md` для каждого кандидата.
-5. Пересобрать `openspec/knowledge/_index.yaml` из фактических KB-файлов на диске.
-6. Создать `knowledge-add-report.md` в bundle (если bundle был создан) со списком:
+1. Определить сохраняемый набор кандидатов: все кандидаты при `all`/`yes` или только выбранные preview-id при частичном выборе.
+2. Определить следующие номера: Glob `openspec/knowledge/**/KB-*.md` включая `_archive/`, max + 1.
+3. Перед созданием bundle проверить, что директория `openspec/knowledge/_sources/` отсутствует или соответствует whitelist из `knowledge-format.mdc`; при нарушении — rollback, warning, без записи KB.
+4. Создать bundle, если нужен.
+5. Создать `openspec/knowledge/<domain>/KB-NNNN-slug.md` для каждого сохраняемого кандидата, прошедшего Reuse Value Test; deferred-кандидаты не писать.
+6. Пересобрать `openspec/knowledge/_index.yaml` из фактических KB-файлов на диске.
+7. Создать `knowledge-add-report.md` в bundle (если bundle был создан) со списком:
    - сохранённых KB;
-   - skipped/blocked candidates;
+   - skipped/blocked/deferred candidates;
    - structure warnings;
    - sources.
 
@@ -287,8 +371,10 @@ status: in_progress
 Итоговые состояния:
 
 - `Saved N (KB-NNNN, ...)`
+- `Deferred N — reuse value not justified`
 - `Declined by user`
 - `Saved 0 — No candidates after filters`
+- `Saved 0 — cards not rendered`
 - `Blocked — taxonomy missing`
 - `Blocked — --no-bundle requires stable sources`
 
@@ -309,7 +395,9 @@ status: in_progress
 - inputs: `reports/exploration-*.md`, `reports/trace-analysis-*.md`, `reports/resolved-contract-*.md` из архивируемой ЗНИ;
 - source считается стабильным planned archive path: `openspec/changes/archive/YYYY-MM-DD-<change>/reports/<report>.md`;
 - bundle не создаётся;
-- auto-yes policy archive сохраняется: если кандидаты есть, archive показывает карточки и единый AskQuestion только для KB-кандидатов, как было в шаге 5.5; при `no` archive продолжается со state `Declined by user`.
+- Reuse Value Test применяется до preview; deferred-кандидаты попадают в Warnings archive, а не в AskQuestion;
+- archive сохраняет бинарный выбор `[yes | no]`: если кандидаты есть, archive показывает карточки и единый AskQuestion только для KB-кандидатов, как было в шаге 5.5; при `no` archive продолжается со state `Declined by user`.
+- cards-first guardrail обязателен и для archive: AskQuestion в archive нельзя задавать, пока per-candidate карточки не выведены в том же ходе.
 
 ## Guardrails
 
@@ -317,5 +405,6 @@ status: in_progress
 - Не писать в `src/`.
 - Не создавать новые domain/subdomain в taxonomy.
 - Не извлекать KB напрямую из BSL/XML/trace; сначала нужен аналитический report.
+- Session Context Fallback не запускает Glob/Grep по `temp/reports/` и не сканирует файловую систему; кандидаты — только пути, уже видимые в текущей командной сессии. Save по-прежнему требует подтверждения через AskQuestion.
 - Не создавать bundle и KB при `Saved 0` или `Declined by user`.
 - Не скрывать причины отказа: каждый skipped/blocked candidate должен быть отражён в summary или `knowledge-add-report.md` (если bundle создан).

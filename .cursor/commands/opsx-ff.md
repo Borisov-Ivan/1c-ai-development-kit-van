@@ -9,7 +9,7 @@ Fast-forward through artifact creation - generate everything needed to start imp
 
 **Первое действие:** прочитать `.cursor/skills/openspec-ff-change/SKILL.md` и далее идти по его шагам. До прочтения скилла — никаких чтений артефактов, трасс, модулей.
 
-**Второе действие:** Metadata Gate. Запросите developer, zni_id и zni_name. Без ответа пользователя команда `openspec new change` не запускается.
+**Второе действие:** Metadata Gate. Запросите developer, zni_id, zni_name и режим генерации ТЗ обычным сообщением в чат, без `AskQuestion`. Без текстового ответа пользователя команда `openspec new change` не запускается.
 
 Input: argument after the command is the change name (kebab-case) or a description of what the user wants to build.
 Optional flag: `--skip-architect "<причина>"` to bypass mandatory Architect Gate.

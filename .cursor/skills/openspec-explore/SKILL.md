@@ -19,13 +19,13 @@ Enter explore mode. Think deeply. Visualize freely. Follow the conversation wher
 
 При входе в explore **ПЕРВЫЙ шаг** — классификация входа и подготовка брифа. Не начинать исследование до завершения этого протокола.
 
-**STOP-GATE (БЕЗУСЛОВНЫЙ):** Вход содержит **любой** HALT-триггер (трасса, стек, баг, ссылки на код/модули/функции, архитектурный вопрос, исследование, ревизия change) — ваш ПЕРВЫЙ видимый вывод ОБЯЗАН быть блоком брифа (шаг 2). До вывода брифа ЗАПРЕЩЕНО: Read (артефактов, модулей, трасс, design.md/reports), Grep, SemanticSearch, Task. Единственные допустимые действия до брифа — Read SKILL.md (command-skill-gate), Read `openspec/project.md` (ограничения проекта) и Shell `openspec list --json` (шаг 0). После брифа — END TURN. Нарушение = провал протокола.
+**STOP-GATE (БЕЗУСЛОВНЫЙ):** Вход содержит **любой** HALT-триггер (трасса, стек, баг, ссылки на код/модули/функции, архитектурный вопрос, исследование, ревизия change) — ваш ПЕРВЫЙ видимый вывод ОБЯЗАН быть блоком брифа (шаг 2). До вывода брифа ЗАПРЕЩЕНО: Read (артефактов, модулей, трасс, design.md/reports), Grep, SemanticSearch, Task. Единственные допустимые действия до брифа — Read SKILL.md (command-skill-gate), Read `openspec/project.md` (ограничения проекта), Read `openspec/knowledge/_index.yaml` / `_taxonomy.yaml` и выбранных KB `.md` по шагу 1.5, Shell `openspec list --json` (шаг 0). После брифа — END TURN. Нарушение = провал протокола.
 
-**Пакетная дисциплина:** Батч после `openspec list --json` — ТОЛЬКО текстовый вывод (классификация + бриф при HALT, или начало свободного режима при отсутствии триггеров). Допустимый tool call — только AskQuestion (уточняющие вопросы). Read, Grep, Shell, SemanticSearch, Task — ЗАПРЕЩЕНЫ до завершения Entry Protocol (подтверждение брифа пользователем на шаге 3).
+**Пакетная дисциплина:** Батч после `openspec list --json` — ТОЛЬКО Knowledge Discovery из шага 1.5 (при необходимости Read `_taxonomy.yaml` и выбранных KB `.md`) и затем текстовый вывод (классификация + бриф при HALT, или начало свободного режима при отсутствии триггеров). Допустимый tool call помимо KB Discovery — только AskQuestion (уточняющие вопросы). Read артефактов change, модулей, трасс, Grep, Shell, SemanticSearch, Task — ЗАПРЕЩЕНЫ до завершения Entry Protocol (подтверждение брифа пользователем на шаге 3).
 
 ### 0. Проверить активные changes и предложить debug при необходимости
 
-Выполнить `openspec list --json` и в том же батче Read `openspec/project.md` — загрузить ограничения проекта (допустимые каталоги, правила редактирования, соглашения). Это не артефакт change и не код — чтение разрешено до брифа. НЕ читать другие файлы (design.md, трассы, модули) в том же tool call batch.
+Выполнить `openspec list --json` и в том же батче Read `openspec/project.md` + `openspec/knowledge/_index.yaml` — загрузить ограничения проекта и быстрый индекс KB для Discovery. Это не артефакты change и не код — чтение разрешено до брифа. НЕ читать другие файлы (design.md, трассы, модули) в том же tool call batch, кроме `_taxonomy.yaml` и выбранных KB `.md` по шагу 1.5.
 
 Если есть активный change **И** вход содержит трассу/баг/ошибку **ИЛИ** ревизию/перепроектирование работы по change (маркеры: «пересмотреть», «перепроектировать», «переделать», «ревизия», «пересмотр ЗНИ», «ошибочна», «перепроектировать стройно») → предложить `/opsx:debug <change>`:
 
@@ -54,14 +54,27 @@ Enter explore mode. Think deeply. Visualize freely. Follow the conversation wher
 
 **Правило:** если сомневаешься между HALT и свободным режимом — выбирай HALT. Ложный бриф = потеря одного хода; пропущенный бриф = потеря качества исследования.
 
+### 1.5. Knowledge Discovery (mechanical filter)
+
+Выполнить до формирования брифа. Цель — включить существующие верифицированные факты в бриф и последующий промпт агента, не переоткрывая уже известные контракты.
+
+0. Если `openspec/knowledge/_index.yaml` отсутствует или пуст — поле брифа `KB в scope` заполнить: «нет совпадений: индекс KB отсутствует/пуст».
+1. Собрать `scope-files` из `@`-ссылок, `<attached_files>`, `<code_selection>`, явных путей в `<user_query>` и recently viewed files, если они относятся к текущей задаче.
+2. **Tier 1 (primary, anchor-paths):** по `_index.yaml` найти факты, где `anchor-paths` точно совпадает с `scope-files`. Исключить `deprecated` и `superseded`.
+3. **Tier 2 (secondary, domain-hint):** только если Tier 1 пуст. Если есть `openspec/knowledge/_taxonomy.yaml`, определить domain по `domains[].source` для путей из `scope-files` / recently viewed files, затем внутри domain ранжировать факты по совпадению токенов из путей/запроса с `title` и `anchor-paths`, затем по `used-count`. Взять Top-5. Если `_taxonomy.yaml` отсутствует — не блокировать Entry Protocol; в поле `KB в scope` добавить warning «taxonomy отсутствует, domain fallback пропущен; рекомендуется `/opsx:knowledge-init`».
+4. **Tier 3 (fact read):** Read выбранные KB `.md` для Tier 1 hit'ов и для высокорелевантных Tier 2 hit'ов (обычно 0–5 файлов) и подготовить однострочную выжимку. Если чтение `.md` не нужно или бюджет исчерпан — использовать ID + title из `_index.yaml`.
+5. Бюджет — Top-10 фактов суммарно. Пустой результат допустим, но должен быть явно указан в брифе: «нет совпадений по anchor-paths и домену».
+6. Найденные факты сохранить как `Existing Knowledge` для шага 3: при делегировании агенту включить блок `## Existing Knowledge` по правилам `KB CONTEXT` из `.cursor/rules/1c-agent-delegation.mdc`.
+
 ### 2. Сформировать и ПОКАЗАТЬ бриф (STOP — END TURN)
 
 Сформировать бриф из ТОЛЬКО:
 1. Пользовательского ввода (текст, вложения, скриншоты)
 2. Уже загруженного контекста (recently viewed files, git status)
 3. Результата `openspec list` из шага 0
+4. Результатов Knowledge Discovery из шага 1.5
 
-**НЕ вызывать** Read, Grep, Shell, SemanticSearch, Task для подготовки брифа. Поля без данных — заполнить общей формулировкой или пометить `[уточнить]`.
+**НЕ вызывать** Read, Grep, Shell, SemanticSearch, Task для подготовки брифа, кроме разрешённых Read KB по шагу 1.5. Поля без данных — заполнить общей формулировкой или пометить `[уточнить]`.
 
 **Формирование плана исследования:**
 - Проанализировать все аспекты запроса: какие вопросы к каким агентам относятся
@@ -85,6 +98,7 @@ Enter explore mode. Think deeply. Visualize freely. Follow the conversation wher
 - **Симптом / Вход:** [UX-слой, только факты; для explore без бага — фактический вход пользователя; без «должно быть»]
 - **Технический контекст:** [Код-слой: модули/функции/метаданные в backticks; без UX-надписей в том же предложении]
 - **Артефакты:** [пути к трассам, скриншотам, файлам — по одному на строку]
+- **KB в scope:** [список `KB-NNNN: <title> — <одна строка выжимки>` или явное «нет совпадений по anchor-paths и домену»]
 
 **План исследования** (разрешены ID агентов и шагов):
 1. → `agent-name`: [что исследуем, 1 строка]
@@ -99,7 +113,7 @@ Enter explore mode. Think deeply. Visualize freely. Follow the conversation wher
 ---
 ```
 
-**Self-check перед выводом** (см. `.cursor/docs/opsx-output-style.md` §7): (1) в полях «Контекст/Сценарий/Симптом» нет внутренних ID OpenSpec (`D<N>/S<N>.T<M>/R<N>/I<N>/SC<N>`, номера задач `12.9`); (2) UX-надписи — в «ёлочках», идентификаторы кода — в backticks, без цепочки 3+ разнотипных терминов подряд; (3) перечисления ≥2 пунктов — нумерованный список, не поток через `;`; (4) «Симптом» — только факты; (5) каждое поле ≤3 строк или ≤7 пунктов.
+**Self-check перед выводом** (см. `.cursor/docs/opsx-output-style.md` §7): (1) в полях «Контекст/Сценарий/Симптом» нет внутренних ID OpenSpec (`D<N>/S<N>.T<M>/R<N>/I<N>/SC<N>`, номера задач `12.9`); (2) UX-надписи — в «ёлочках», идентификаторы кода — в backticks, без цепочки 3+ разнотипных терминов подряд; (3) перечисления ≥2 пунктов — нумерованный список, не поток через `;`; (4) «Симптом» — только факты; (5) каждое поле ≤3 строк или ≤7 пунктов; (6) поле «KB в scope» присутствует и заполнено: либо список фактов с выжимкой, либо явное «нет совпадений».
 
 Если данных недостаточно для полного брифа — задать уточняющие вопросы пользователю (AskQuestion).
 
@@ -218,15 +232,13 @@ Depending on what the user brings, you might:
 
 ## Knowledge Discovery
 
-**Выполняется перед Structured Investigation (пост-бриф фаза)**
+**Выполняется в Entry Protocol шаг 1.5 до брифа.** Этот раздел — навигационная ссылка, чтобы не было второго конкурирующего алгоритма.
 
-0. Если `openspec/knowledge/_taxonomy.yaml` отсутствует — **не выполнять** шаги 1–6 (весь блок Knowledge Discovery; graceful skip), в итоговом Explore Summary добавить warning и подсказку `/opsx:knowledge-init`.
-1. Определить domain/subdomain задачи (из user query + recently viewed files).
-2. Read `openspec/knowledge/_index.yaml`, фильтр по domain + anchor-paths.
-3. Взять Top-10 по релевантности.
-4. Read выбранные `.md` файлы фактов, включить их суть в контекст investigation.
-5. **Verify в scope:** для каждого факта, чьи anchor-paths ∈ {файлы, которые explorer уже планирует читать}, запустить verify (проверка сигнатур/путей).
-6. Обнаруженный drift складируется в `knowledge-drift-accumulator` (не обрабатывается сразу — агент продолжает investigation).
+- Алгоритм Tier 1/2/3: см. Entry Protocol шаг 1.5.
+- Универсальный алгоритм и бюджеты: `.cursor/rules/knowledge-format.mdc` §DISCOVERY и §БЮДЖЕТ VERIFY.
+- Передача агентам: `.cursor/rules/1c-agent-delegation.mdc` §KB CONTEXT.
+
+**Verify в scope (пост-бриф фаза):** если explorer/architect уже планирует читать anchor-файлы найденных KB, проверить актуальность факта по anchor spec из `knowledge-format.mdc`. Обнаруженный drift складируется в `knowledge-drift-accumulator` и отражается в Explore Summary; агент продолжает investigation.
 
 ---
 
@@ -590,7 +602,8 @@ Explore Summary — входной артефакт для ff/new. Design Gate �
 ## Guardrails
 
 - **Output style:** все брифы, карточки делегирования и Explore Summary выводятся по шаблону **T-BRIEF** из `.cursor/docs/opsx-output-style.md`; перед отправкой — self-check-5 (§7).
-- **Don't bypass Entry Protocol** - Never Read code, artifacts, traces, or modules before showing the brief. The only tool calls before brief output are: Read SKILL.md (command-skill-gate batch) and Shell `openspec list --json` (step 0 batch). Everything else — after brief confirmation on step 3. Reading change artifacts (proposal.md, design.md, tasks.md) is also forbidden before brief.
+- **Don't bypass Entry Protocol** - Never Read code, artifacts, traces, or modules before showing the brief. The only tool calls before brief output are: Read SKILL.md (command-skill-gate batch), Shell `openspec list --json`, Read `openspec/project.md`, Read `openspec/knowledge/_index.yaml`, and Read `_taxonomy.yaml` / selected KB `.md` only by Entry Protocol step 1.5. Everything else — after brief confirmation on step 3. Reading change artifacts (proposal.md, design.md, tasks.md) is also forbidden before brief.
+- **Don't skip Knowledge Discovery** - Read `_index.yaml` is mandatory in Entry Protocol step 0. The brief MUST contain `KB в scope`: either `KB-NNNN: <title> — <one-line summary>` entries or explicit «нет совпадений». Omitting the field is a failed self-check.
 - **Don't skip brief confirmation** - Never call Task/delegate to an agent in the same message where you show the brief. Always END TURN after showing the brief and wait for explicit user confirmation in the next message.
 - **Don't implement** - Never write code or implement features. Creating OpenSpec artifacts is fine, writing application code is not.
 - **Don't read traces manually** - If a trace file is provided, delegate to `onec-trace-analyst`. Never substitute manual trace reading for agent delegation. DELEGATION GATE applies in explore.

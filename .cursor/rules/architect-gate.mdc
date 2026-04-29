@@ -60,13 +60,15 @@ priority: 200
    warning в преамбуле контекста («taxonomy отсутствует, KB Discovery пропущен»).
 
 1. Read openspec/knowledge/_index.yaml
-2. Фильтр: domain ∈ {scope}, anchor-paths ∈ {файлы задачи}
-3. Top-10 по релевантности
-4. В промпт архитектора:
+2. Primary-фильтр: `anchor-paths` точно совпадает с файлами задачи. Это главный детерминированный сигнал.
+3. Fallback-фильтр: только если primary пусто — `domain` ∈ {scope domains, выведенные из путей через `_taxonomy.yaml`}; внутри domain ранжировать по совпадению токенов из файлов/запроса с `title` и `anchor-paths`, затем по `used-count`.
+4. Top-10 по релевантности
+5. В промпт архитектора:
    - `active` факты → как верифицированные утверждения о системе
    - `stale` факты → с пометкой "⚠ TTL истёк DD дней назад / drift detected, проверить"
    - `deprecated`/`superseded` → не передаются
-5. Если архитектор в своём report противоречит `active` факту — добавить
+5b. Передача в промпт архитектора — через блок `## Existing Knowledge` по правилам `KB CONTEXT` из `.cursor/rules/1c-agent-delegation.mdc`. Если Discovery пустой — в промпте фиксируется «Discovery выполнен, совпадений нет».
+6. Если архитектор в своём report противоречит `active` факту — добавить
    в architecture-report секцию "## Knowledge conflicts" с указанием KB-ID
 
 Формат: .cursor/rules/knowledge-format.mdc

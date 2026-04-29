@@ -170,7 +170,7 @@ Archive a completed change in the experimental workflow.
 
    Использовать единый extraction-протокол из `.cursor/skills/openspec-knowledge-add/SKILL.md` (разделы `Extraction Contract`, `Candidate Validation`, `Preview / AskQuestion`, `Save Protocol`) с archive-specific overrides ниже. Это единственный источник истины для отбора KB-кандидатов, проверки anchors, dedup, TTL и отказных состояний.
 
-   **Inputs:** `reports/exploration-*.md`, `reports/trace-analysis-*.md`, `reports/resolved-contract-*.md` в каталоге архивируемой ЗНИ. Качество фактов — ответственность самих reports: archive агрегирует verified-факты и применяет фильтры `knowledge-worthy`, но не проводит новое обследование кода.
+   **Inputs:** `reports/exploration-*.md`, `reports/trace-analysis-*.md`, `reports/resolved-contract-*.md` в каталоге архивируемой ЗНИ. Качество фактов — ответственность самих reports: archive агрегирует verified-факты и применяет фильтры `knowledge-worthy` + `Reuse Value Test`, но не проводит новое обследование кода.
 
    **Archive-specific overrides:**
    - Planned stable source для `source.report`: `openspec/changes/archive/YYYY-MM-DD-<change-name>/reports/<report>.md` (тот же путь, куда report попадёт после шага 6).
@@ -178,6 +178,7 @@ Archive a completed change in the experimental workflow.
    - Если reports не найдены → state = `Skipped — no analytical reports`.
    - Если taxonomy отсутствует → state = `Blocked — taxonomy missing`, warning: `Knowledge: blocked — _taxonomy.yaml отсутствует. Запустите /opsx:knowledge-init или /init-project для генерации.`
    - Если кандидатов нет после фильтров → state = `No candidates after filters`; archive продолжается.
+   - Если кандидаты отброшены Reuse Value Test → state = `Deferred N — reuse value not justified`; добавить в warnings краткий список source + проваленные RVT-критерии.
    - Если кандидаты есть → показать per-candidate карточки из `openspec-knowledge-add` и один AskQuestion: «Сохранить N извлечённых KB-фактов? [yes | no]».
    - `yes` → сгенерировать `KB-NNNN-slug.md` + атомарно обновить `_index.yaml` → state = `Saved N (KB-NNNN, ...)`.
    - `no` → ничего не писать → state = `Declined by user`.
@@ -189,6 +190,7 @@ Archive a completed change in the experimental workflow.
    | Saved (yes на AskQuestion) | `Saved N (KB-NNNN, ...)` |
    | Declined (no на AskQuestion) | `Declined by user` |
    | Reports есть, кандидатов нет после фильтров | `No candidates after filters` |
+   | Кандидаты есть, но все/часть отложены Reuse Value Test | `Deferred N — reuse value not justified` (+ Warnings) |
    | Reports не найдены вовсе | `Skipped — no analytical reports` |
    | Reports есть, taxonomy отсутствует | `Blocked — taxonomy missing` |
 
@@ -217,7 +219,7 @@ Archive a completed change in the experimental workflow.
    - Archive location
    - Whether specs were synced / up to date / no delta
    - Whether ADRs were extracted (count and numbers) or skipped with reason
-   - Knowledge state — одно из пяти: `Saved N`, `Declined by user`, `No candidates after filters`, `Skipped — no analytical reports`, `Blocked — taxonomy missing` (см. шаг 5.5)
+   - Knowledge state — одно из шести: `Saved N`, `Deferred N`, `Declined by user`, `No candidates after filters`, `Skipped — no analytical reports`, `Blocked — taxonomy missing` (см. шаг 5.5)
    - **`### Warnings`** — only if the warnings accumulator from steps 2–3 is non-empty; list each bullet. If empty, **omit** the Warnings section entirely.
 
 **Output On Success**
@@ -233,7 +235,7 @@ Use this template; adapt lines to facts (omit `### Warnings` when there are none
 **Slices:** K/K приняты | N/A (legacy mode) | Force-legacy archive (нарушен контракт срезов)
 **Specs:** ✓ Synced to main specs (N requirements updated) | Already up to date | No delta specs
 **ADR:** ✓ Extracted N ADRs (ADR-NNNN, ...) | No architecture reports | No ADR-worthy decisions extracted
-**Knowledge:** ✓ Saved N (KB-NNNN, ...) | Declined by user | No candidates after filters | Skipped — no analytical reports | Blocked — taxonomy missing
+**Knowledge:** ✓ Saved N (KB-NNNN, ...) | Deferred N — reuse value not justified | Declined by user | No candidates after filters | Skipped — no analytical reports | Blocked — taxonomy missing
 
 ### Warnings
 - <only when applicable: incomplete artifacts, incomplete tasks with IDs, etc.>

@@ -13,7 +13,7 @@ description: Добавить verified KB-факты из отчётов или 
 
 **Input:**
 - Один или несколько путей к источникам: `/opsx:knowledge-add <path1> [path2 ...]`.
-- Без аргументов команда должна показать краткую ошибку и примеры вызова.
+- Без аргументов выполняется Session Context Fallback (см. `SKILL.md`): команда подбирает кандидата из recently viewed / упомянутых в текущей сессии отчётов и спрашивает подтверждение через AskQuestion. Если кандидатов нет — показывает короткую ошибку с примерами.
 
 **Флаги:**
 - `--no-bundle` — не копировать source в `openspec/knowledge/_sources/knowledge-add/...`; допустимо только для стабильных источников из `openspec/changes/archive/.../reports/` или `openspec/knowledge/_sources/knowledge-add/.../sources/`.

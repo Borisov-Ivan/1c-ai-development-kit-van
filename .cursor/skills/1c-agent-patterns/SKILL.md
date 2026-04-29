@@ -66,7 +66,7 @@ description: Reference guide for 1C agent delegation patterns - complexity asses
 
 ### Shared instruction blocks
 
-Именованные блоки инструкций для вставки в промпты writer и reviewer. Оркестратор копирует текст блока в промпт агента. Единая точка редактирования — изменение блока автоматически обновляет все шаблоны.
+Именованные блоки инструкций для вставки в промпты 1С-агентов. Оркестратор копирует текст блока в промпт агента. Единая точка редактирования — изменение блока автоматически обновляет все шаблоны.
 
 #### DATA_CONTRACT_GATE
 
@@ -109,6 +109,22 @@ Preference Hierarchy:
 3) адаптировать паттерн базы,
 4) создать альтернативный механизм.
 Уровни 3-4 допустимы только с документированным обоснованием.
+```
+
+#### EXISTING_KNOWLEDGE
+
+```
+Existing knowledge: если во входном промпте есть секция `## Existing Knowledge`,
+каждый KB-NNNN использовать как верифицированный факт (active) или как факт,
+требующий переподтверждения (stale).
+
+В отчёте обязательно сослаться на каждый KB по ID:
+- used — факт использован в выводах;
+- not relevant — факт оказался вне scope, указать почему;
+- conflict — код противоречит active KB, добавить секцию `## Knowledge conflicts`.
+
+Не переоткрывать факты, для которых KB уже есть, без явной причины
+(например, behavioral-drift при чтении anchor-файла).
 ```
 
 #### EXTENSION_GUARD
@@ -205,7 +221,11 @@ Task(
          экспортные функции): что есть, какой контракт/API дают, можно ли
          использовать как есть или расширить без создания параллельного
          механизма.
-         
+
+         ## Existing Knowledge
+         [Вставить KB из Discovery по формату KB CONTEXT или: Discovery выполнен, совпадений нет]
+         Инструкция: применить блок EXISTING_KNOWLEDGE.
+
          Контекст задачи: [из proposal/design или описания пользователя]",
   subagent_type="onec-code-explorer"
 )
@@ -219,6 +239,10 @@ Used when trace-analyst report contains `## Verification queries for explorer`.
 Task(
   description="Верифицировать гипотезы трассы",
   prompt="Отчёт trace-analyst: [путь к trace-analysis-*.md]
+
+         ## Existing Knowledge
+         [Вставить KB из Discovery по формату KB CONTEXT или: Discovery выполнен, совпадений нет]
+         Инструкция: применить блок EXISTING_KNOWLEDGE.
 
          Trace-analyst проанализировал трассу выполнения и сформулировал
          гипотезы, которые не удалось верифицировать по коду в рамках
@@ -257,6 +281,10 @@ Task(
 Task(
   description="Глубокий резолв контрактов (батч)",
   prompt="Определи контракты возврата для списка функций. Это нужно ревьюверу для квалификации defensive checks и Попытка-блоков.
+
+         ## Existing Knowledge
+         [Вставить KB из Discovery по формату KB CONTEXT или: Discovery выполнен, совпадений нет]
+         Инструкция: применить блок EXISTING_KNOWLEDGE.
 
          ## Точки для резолва (из Investigation Request ревьювера)
 
@@ -312,18 +340,22 @@ Task(
 Task(
   description="Спроектировать [feature]",
   prompt="mode=design tier=[simple|medium|complex|critical]
-         
+
          Спроектируй архитектуру для [feature].
-         
+
          Артефакты: [пути к proposal.md, design.md если есть]
          Результат исследования: [резюме от explorer]
          Подход: [минимальные изменения / чистая архитектура / баланс]
-         
+
+         ## Existing Knowledge
+         [Вставить KB из Discovery по формату KB CONTEXT или: Discovery выполнен, совпадений нет]
+         Инструкция: применить блок EXISTING_KNOWLEDGE.
+
          Обязательная секция в результате: Existing Mechanisms
          (что найдено в базе, какой контракт/API у каждого механизма,
          какой уровень Preference Hierarchy выбран, почему уровни выше
          не подошли при выборе уровня 3 или 4).
-         
+
          Создай план с этапами реализации (атомарные, с критериями приемки).
          Используй Mermaid диаграммы.
          Обязательно добавь YAML front-matter, Evidence для каждого паттерна и Test Scenarios.",
@@ -337,15 +369,19 @@ Task(
 Task(
   description="Ревью плана [feature]",
   prompt="mode=plan-review review_mode=peer
-         
+
          Проверь design.md для [feature].
-         
+
          Артефакты: [пути к proposal.md, design.md, tasks.md]
-         
+
+         ## Existing Knowledge
+         [Вставить KB из Discovery по формату KB CONTEXT или: Discovery выполнен, совпадений нет]
+         Инструкция: применить блок EXISTING_KNOWLEDGE.
+
          Фокус: полнота, корректность, реалистичность, соответствие требованиям,
          чёткость критериев приемки, правильность зависимостей.
          Все задачи на verified facts? Если на hypotheses — есть ли задача верификации?
-         
+
          Если проблемы — опиши и предложи исправления.
          Обязательно добавь YAML front-matter.",
   subagent_type="onec-code-architect"
@@ -358,12 +394,16 @@ Task(
 Task(
   description="Глубокий анализ [область]",
   prompt="mode=deep-analysis
-         
+
          Проанализируй результаты исследования кода.
-         
+
          Отчёт explorer: [путь к exploration-*.md]
          Контекст задачи: [из брифа / proposal]
-         
+
+         ## Existing Knowledge
+         [Вставить KB из Discovery по формату KB CONTEXT или: Discovery выполнен, совпадений нет]
+         Инструкция: применить блок EXISTING_KNOWLEDGE.
+
          Фокус (АНАЛИЗ, не проектирование):
          1. Gap analysis: что explorer мог пропустить?
             Какие модули/вызовы не охвачены?

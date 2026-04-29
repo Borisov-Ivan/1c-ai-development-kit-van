@@ -244,16 +244,30 @@ CASE anchor.type:
 | Пустой `_index.yaml` | Discovery возвращает пустой список, не ошибка |
 | `anchor-missing` но `name` найден в другом модуле (фаззи) | `anchor-missing` + hint «найдено в X — возможно перенесено» |
 | Переименование процедуры | `anchor-missing` → audit: `supersede-by` или `update` |
+| Reuse value not justified | `Deferred — reuse value not justified`: при extraction не записывать KB и добавить Warnings; при audit добавить в `Reuse Value Warnings` с проваленными критериями |
 | Не-KB файл/каталог в `openspec/knowledge/` (вне whitelist; `_sources/` разрешён только в структуре `knowledge-add/<YYYY-MM-DD-slug>/...`) | Warning в audit-отчёте: `Structure: <path> вне формата. Перенести в temp/reports/ или openspec/changes/<name>/reports/`. Не блокирует audit. `/init-project` Phase 0 предлагает action через AskQuestion |
 
 ## БЮДЖЕТ VERIFY
 
 - **explore / Architect Gate:** не более 10 KB за Discovery, сортировка по релевантности.
 - **archive шаг 2b:** только KB, чьи `anchor.path` ∈ git-diff текущей ЗНИ.
-- **audit без флагов (`--overdue`):** только `stale` + TTL-просроченные.
+- **audit без флагов:** full-revisit всех KB: verify anchors + Reuse Value Test по каждому факту. Если в KB > 50 фактов суммарно и не задан `--domain`, audit сначала задаёт AskQuestion: `full` / `overdue-only` / `by-domain`.
+- **audit `--overdue`:** только `stale` + TTL-просроченные.
 - **audit `--domain X`:** все KB домена, верхний предел 100 (иначе предлагается `--overdue` внутри домена).
 
 ## KNOWLEDGE-WORTHY КРИТЕРИИ
+
+### Reuse Value Test (обязательный)
+
+Перед созданием KB и на full-revisit audit каждый факт проходит бинарный тест ценности переиспользования. Кандидат проходит только если на все 5 вопросов ответ **да**. Любой ответ **нет** или **не уверен** → `Deferred — reuse value not justified`: факт не записывается в KB, а попадает в Warnings extraction или секцию audit-отчёта `Reuse Value Warnings`.
+
+1. **Конкретный сценарий.** Можно назвать ≥1 будущую ЗНИ/ситуацию, где факт явно потребуется при принятии решения, расследовании или реализации. Формулировка «может пригодиться» не проходит.
+2. **Стабильный якорь.** Якорь привязан к устойчивому артефакту (`procedure`, `event-name`, `metadata-object`, `query-pattern`), а не к временной строке отчёта или одноразовому наблюдению.
+3. **Не восстанавливается Grep'ом за 30 секунд.** Ценность факта выше простого имени/местоположения; он экономит повторное понимание поведения, контракта, цепочки или инварианта.
+4. **Не покрывается ADR/spec/комментарием в коде.** Факт не дублирует архитектурное решение, требование, явный inline-комментарий или process-note.
+5. **Цена молчаливой потери.** Если факт исчезнет, устареет или будет проигнорирован, возможны баг, регрессия, неверный архитектурный выбор, сломанный мониторинг или дорогое повторное расследование.
+
+`why-knowledge` в KB-карточке обязан явно назвать `reuse-scenario` из критерия 1. Если честный сценарий переиспользования не формулируется, факт остаётся в source-report и не становится KB.
 
 ### Заслуживает KB (создавать)
 
@@ -309,12 +323,13 @@ facts:
 Универсальный алгоритм для explore / Architect Gate / archive шаг 2b:
 
 1. Read `openspec/knowledge/_index.yaml`.
-2. Фильтр: `domain` ∈ {scope domains} ИЛИ `anchor-paths` ∈ {scope files}.
-3. `deprecated` / `superseded` исключаются.
-4. Sort: `active` перед `stale`, затем по `used-count` (популярные выше).
-5. Top-10 по релевантности.
-6. Read выбранные `.md`-файлы.
-7. Для каждого прочитанного KB инкремент `used-count` и обновление `last-used-at` (через audit-протокол — запись только в writer-stages; read-stages добавляют в `metrics-queue` для следующего audit).
+2. Исключить `deprecated` / `superseded`.
+3. Primary-фильтр (`anchor-paths`): точное совпадение `anchor-paths` ∈ {scope files}. Это главный детерминированный сигнал Discovery.
+4. Secondary-фильтр (`domain`): выполнять только если primary пусто И в scope есть путь под зарегистрированным `domain.source` из `_taxonomy.yaml`. Выбрать факты этого domain, затем ранжировать по совпадению токенов из `scope-files` / user query с `title` и `anchor-paths` (например имя подсистемы/модуля), затем по `used-count`. Взять Top-5.
+5. Объединить результаты primary/secondary (обычно используется один слой), затем Sort: `active` перед `stale`, затем по lexical relevance, затем по `used-count` (популярные выше).
+6. Top-10 по релевантности.
+7. Read выбранные `.md`-файлы.
+8. Для каждого прочитанного KB инкремент `used-count` и обновление `last-used-at` (через audit-протокол — запись только в writer-stages; read-stages добавляют в `metrics-queue` для следующего audit).
 
 ## GOVERNANCE
 
@@ -385,10 +400,12 @@ facts:
 |----------------|----------|
 | **archive** (шаг 5.5) | Основная точка создания из `reports/`. Бюджет ≤5 KB. |
 | **archive** (шаг 2b) | Verify KB в scope git-diff. Drift в warnings, не создание. |
-| **knowledge-add** | Создание из standalone reports/markdown вне ЗНИ. Бюджет ≤5 KB, source bundle только после подтверждения пользователя. |
+| **knowledge-add** | Создание из standalone reports/markdown вне ЗНИ. Бюджет ≤5 KB, source bundle только после подтверждения пользователя. При пустом вызове разрешён Session Context Fallback: source берётся только из уже видимых в сессии путей и всё равно подтверждается через AskQuestion. |
 | **explore** (Knowledge Discovery) | Read-only + drift accumulator → Explore Summary. |
 | **Architect Gate** | Read-only, передача фактов в промпт архитектора. |
-| **knowledge-audit** | Массовая ревизия (TTL / drift / metrics / reindex). |
+| **knowledge-audit** | Массовая ревизия (TTL / drift / metrics / reindex) + full-revisit Reuse Value Test для отсева шума. |
+
+Reuse Value Test обязателен в `archive` шаг 5.5, `/opsx:knowledge-add` и `/opsx:knowledge-audit` full-revisit. В `explore` и `Architect Gate` он не меняет KB напрямую: сомнительные факты фиксируются только как рекомендации в отчётах.
 
 ## НУМЕРАЦИЯ
 
