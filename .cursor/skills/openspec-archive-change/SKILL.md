@@ -130,6 +130,34 @@ Archive a completed change in the experimental workflow.
 
    **Legacy mode (нет `# Срез`):** пропустить шаг 3.5.
 
+   3.6. **Code-Truth Gate (HARD BLOCKER for completed scope)**
+
+   Выполнить `.cursor/rules/code-truth-gate.mdc` для `design.md`, `tasks.md`, `debug.md`, `specs/**`:
+   - извлечь технические символы (`pav_*`, имена процедур/функций в backticks, аннотации расширения, стабильные имена элементов формы);
+   - проверить их `Grep`/`rg` по путям из `openspec/project.md` и явно затронутым файлам;
+   - игнорировать строки-флаги, ADR/KB/Scenario/Requirement, команды `/opsx:*`.
+
+   Если найден `phantom-symbol`, относящийся к `[x]` задаче, принятому срезу или завершённому legacy-scope:
+   - это **hard blocker** (override auto-yes);
+   - не выполнять шаги 4–7;
+   - показать пользователю:
+     ```markdown
+     ## Архив заблокирован: артефакты ссылаются на несуществующий код
+
+     Найдены технические имена в `design.md` / `tasks.md` / `debug.md` / `specs/**`, которых нет в выгрузке.
+
+     | Symbol | Artifact | Scope |
+     |--------|----------|-------|
+     | <symbol> | <path> | <task/slice> |
+
+     Варианты:
+     1. `/opsx:extend <name> --code-sync` — если код верен, а артефакты устарели.
+     2. `/opsx:apply <name>` — если артефакты верны, а код не реализован.
+     ```
+   - завершить archive (return).
+
+   Если `phantom-symbol` относится только к незавершённым follow-up задачам — добавить warning и продолжить.
+
 4. **Assess delta spec sync state**
 
    Check for delta specs at `openspec/changes/<name>/specs/`. If none exist, proceed without sync.

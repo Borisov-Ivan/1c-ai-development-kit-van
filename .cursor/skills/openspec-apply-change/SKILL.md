@@ -231,6 +231,20 @@ Implement tasks from an OpenSpec change.
 
    **HALT:** Оркестратор НЕ реализует задачи типов BSL-код и модули формы самостоятельно. Оркестратор готовит промпт и делегирует. Прямое использование Write/StrReplace для .bsl и **любая правка Form.xml** (включая скрипты/JSON-конвейеры) — запрещены. Для `Form.xml`/Конфигуратора: СТОП — инструкция ручного конфигурирования и WAIT до выгрузки/приёмки пользователя. Для программного создания элементов в `Form/Module.bsl`: обычный BSL pipeline (`onec-code-writer` → `ReadLints` → `onec-code-reviewer`). Ref: `1c-agent-delegation.mdc`, `1c-utility-agents.mdc`, `1c-xml-write-guard.mdc`.
 
+   **Code-Truth Journal (mandatory after writer/reviewer success):**
+   - После каждой BSL/form-module задачи извлечь из ответа `onec-code-writer` блок `created_or_modified_symbols`.
+   - Spot-check: Grep/Read каждый `evidence` или `name` в указанном файле. Если символ не найден — НЕ отмечать задачу `[x]`; pause с рекомендацией `/opsx:extend <change-name> --code-sync`.
+   - В `debug.md` записывать только факты из кода, не план:
+     ```markdown
+     ### Code-Truth — <task-id> — YYYY-MM-DD
+     - task: <S<N>.<M> / legacy id>
+     - symbols:
+       - <name> @ <file>:<lines>, annotation=<annotation>, action=<created|modified|removed>
+     - verification: grep/read OK | mismatch <details>
+     - source: writer.created_or_modified_symbols
+     ```
+   - Запрещено писать в `debug.md` имена процедур/хелперов, которых нет в `created_or_modified_symbols` или spot-check.
+
    **Investigation Loop при apply.** Если reviewer в отчёте включил секцию `## Investigation Request`:
    1. Вызвать explorer (contract resolution deep) по таблице из Investigation Request. Шаблон: «Explorer — contract resolution (deep)» из `1c-agent-patterns/SKILL.md`.
    2. Сохранить вывод в `reports/resolved-contract-<slug>-YYYY-MM-DD.md` (артифакт ЗНИ).
@@ -429,6 +443,7 @@ Working on task 4/7: <task description>
 - If implementation reveals issues, pause and suggest artifact updates
 - Keep code changes minimal and scoped to each task
 - Update task checkbox immediately after completing each task
+- **Code-Truth Journal:** for every writer-completed BSL/form task, append factual symbols from `created_or_modified_symbols` to `debug.md`; if code and artifacts diverge, pause and route to `/opsx:extend <change-name> --code-sync`.
 - Pause on errors, blockers, or unclear requirements - don't guess
 - Use contextFiles from CLI output, don't assume specific file names
 - **Task Dispatch:** classify each task before implementation; delegate to the correct executor per dispatch table. Orchestrator MUST NOT implement BSL or form-module tasks directly — only prepare context and delegate.

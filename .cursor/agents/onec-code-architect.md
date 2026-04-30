@@ -336,6 +336,11 @@ Before outputting the plan, verify:
    - Is every guard check (Свойство/ТипЗнч) justified by an unknown contract?
 4. Magic objects:
    - Are there any metadata objects or procedures used in the plan that were not listed in Found Patterns? (If yes → HALT, add to patterns or verify).
+5. Simplicity:
+   - Did I compare viable implementation options?
+   - Is the selected approach the simplest one that satisfies Behavior Contract, ADR, existing mechanisms, and verified contracts?
+   - Does the plan introduce extra helpers, hooks, storage, guards, or phases that can be removed without losing required behavior?
+   - If a simpler approach was rejected, is the rejection evidence-based?
 ```
 
 ### Phase 4: Review (if requested)
@@ -466,6 +471,21 @@ open_questions_count: 0
 - [Why this approach?]
 - [What trade-offs?]
 - [What alternatives considered?]
+
+## Simplicity Check
+
+- **Viable alternatives**:
+  1. [Option A — кратко, files/hooks/procedures]
+  2. [Option B — кратко, files/hooks/procedures]
+- **Selected simplest viable design**: [какой вариант выбран и почему он минимален]
+- **Why not simpler**: [почему ещё более простой вариант не покрывает Behavior Contract / ADR / verified contracts]
+- **Complexity budget**:
+  - Files touched: [N]
+  - Hooks/intercepts: [N]
+  - New procedures/functions: [N]
+  - Conditional branches / feature flags: [N]
+
+Если альтернативы отсутствуют, явно напиши: `Only one viable option`, затем докажи это ссылками на код/ADR/платформенный контракт.
 
 ## Found Patterns
 

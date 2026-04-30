@@ -28,6 +28,7 @@ metadata:
   - `--from-verify <path>` — отчёт `/opsx:verify`
   - `--from-architecture <path>` — отчёт архитектора
   - `--from-explore <path>` — Explore Summary
+  - `--code-sync` — штатная синхронизация OpenSpec-артефактов с фактическим кодом после ручного упрощения, writer/apply или Code-Truth Gate (`phantom-symbol`, устаревшие имена процедур, drift design/tasks/debug).
 
 Если текст требования отсутствует, но указан файл — извлечь намерение из файла и показать в брифе. Если намерение неоднозначно — спросить пользователя после брифа, до правок.
 
@@ -43,7 +44,7 @@ metadata:
    - иначе выполнить `openspec list --json` и выбрать активный / спросить пользователя.
 3. Выполнить `openspec instructions apply --change "<name>" --json`.
 4. Прочитать `openspec/project.md` и артефакты change из `contextFiles`: `proposal.md`, `design.md`, `tasks.md`, `specs/**` при наличии.
-5. Прочитать только явно переданные source-файлы (`--from-*`, `@path`, пути в запросе). Это не трассы; трассы остаются за `/opsx:debug`.
+5. Прочитать только явно переданные source-файлы (`--from-*`, `@path`, пути в запросе). Это не трассы; трассы остаются за `/opsx:debug`. Если указан `--code-sync`, source = артефакты change + `debug.md` + отчёты `reports/**` + результаты Code-Truth Gate; чтение BSL/XML до брифа всё равно запрещено.
 6. Сформировать и показать **бриф extend** по шаблону ниже.
 7. **END TURN.** До подтверждения пользователя запрещены: запись артефактов, вызовы writer/reviewer, вызовы architect/explorer, чтение BSL/XML для анализа логики.
 
@@ -72,9 +73,10 @@ metadata:
 
 **План**
 1. Уточнить неоднозначности (если есть) через AskQuestion.
-2. Проверить Architect Gate.
-3. Обновить артефакты change.
-4. Передать на `/opsx:verify <name>`.
+2. Проверить Architect Gate / Code-Truth Gate.
+3. Если `--code-sync` — после подтверждения делегировать `onec-code-explorer` на фактический код и сохранить отчёт `reports/exploration-code-sync-YYYY-MM-DD.md`.
+4. Обновить артефакты change.
+5. Передать на `/opsx:verify <name>`.
 
 Бриф верный? Подтвердите — начну обновление артефактов.
 ---
@@ -108,6 +110,7 @@ Self-check перед выводом: слои разделены; в UX-пол�
 | `verify` | `verification-*.md`, `Phase B`, `Decision`, `CRITICAL/WARNING/SUGGESTION` | decision cards, scope/design/task issues, recommended remediation |
 | `architecture` | `architecture-*.md`, `architecture-review-*` | рекомендуемые изменения design/spec/tasks/ADR, alternatives |
 | `explore` | `explore-summary-*`, `Explore Summary`, `Decisions`, `Open questions` | сформулированные требования, slice hints, unresolved questions |
+| `code-sync` | флаг `--code-sync`, `phantom-symbol`, расхождения `design/tasks/debug` с фактическим кодом | фактические символы, устаревшие рецепты, какие артефакты догнать до кода |
 | `other` | markdown/text без явных маркеров | факты и open questions; если непонятно — AskQuestion |
 
 Если файл содержит несколько типов (например raw review + reasoning appendix) — извлечь все, но в брифе отделить факты от рекомендаций.
@@ -138,6 +141,7 @@ Self-check перед выводом: слои разделены; в UX-пол�
   - пересмотр архитектурного решения;
   - постановочный дефект по результатам review/debug/verify;
   - перенос open question в решение.
+- Для `--code-sync`: перечислить потенциальные drift-точки без чтения BSL/XML: имена процедур из `tasks.md`/`debug.md`, отчёты writer/reviewer/explorer, файлы `src/**`, которые потребуется прочитать через `onec-code-explorer` после подтверждения.
 - Показать бриф и остановиться до подтверждения.
 
 ### 4. Ambiguity Gate
@@ -163,6 +167,8 @@ Architect обязателен, если:
 - есть несколько альтернатив реализации без выбранного решения;
 - пересматривается уже зафиксированный `design.md` approach;
 - решение затрагивает 2+ файла или UX-сценарий.
+
+Для `--code-sync` architect **не обязателен**, если не меняется Behavior Contract / ADR / точка расширения, а артефакты только догоняют фактический код. Если фактический код вводит новый подход (новая точка перехвата, новый контракт, сосуществование расширений), проверить обычные триггеры выше.
 
 Перед вызовом architect:
 
@@ -193,6 +199,20 @@ Architect обязателен, если:
    - ссылки на отчёты architect/explorer;
    - следующий шаг.
 
+### 6b. Code-sync update rules (`--code-sync`)
+
+После подтверждения брифа:
+
+1. Делегировать `onec-code-explorer` с точным списком файлов из `tasks.md`/`debug.md`/reports; запросить:
+   - реальные процедуры/функции/аннотации;
+   - порядок вызовов;
+   - расхождения `artifact says` vs `code says`;
+   - цитаты `file:line` для каждого вывода.
+2. Сохранить полный отчёт в `reports/exploration-code-sync-YYYY-MM-DD.md`.
+3. Оркестратор перепроверяет ключевые цитаты точечным `Read` перед правкой артефактов.
+4. Обновлять `proposal.md`, `design.md`, `specs/**`, `tasks.md`, `debug.md` так, чтобы они отражали код как source of truth.
+5. Если код противоречит Behavior Contract, не «догонять» артефакты молча: остановиться, сформировать decision card (код править через `/opsx:apply` или менять scope через extend).
+
 ### 7. Verification Gate
 
 После обновления артефактов:
@@ -200,6 +220,7 @@ Architect обязателен, если:
 - проверить, что tasks/spec/design согласованы по названиям срезов и сценариев;
 - если specs менялись — пройти Delta Specs Gate;
 - если добавлены задачи фикса — проверить defect placement invariant из `vertical-slices.mdc`;
+- если запуск был `--code-sync` — выполнить Code-Truth Gate из `.cursor/rules/code-truth-gate.mdc`; `phantom-symbol` после синхронизации = BLOCKER до повторной правки артефактов;
 - вернуть пользователю handoff на `/opsx:verify <name>`.
 
 ### 8. Handoff
@@ -229,6 +250,7 @@ Architect обязателен, если:
 - `1c-xml-write-guard.mdc`: extend не правит XML метаданных.
 - `openspec-specs-gate.mdc`: при изменении specs соблюдать delta-формат.
 - `vertical-slices.mdc`: все изменения `tasks.md` slice-aware.
+- `code-truth-gate.mdc`: `--code-sync` — штатный remediation path для `phantom-symbol` и drift code↔artifacts.
 - `verified-cause-gate.mdc`: если вход — defect/RCA, разделять Verified facts и Hypotheses.
 - `preserve-subagent-reports.mdc`: сохранять полные отчёты architect/explorer.
 

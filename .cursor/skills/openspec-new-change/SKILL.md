@@ -132,6 +132,10 @@ After completing the steps, summarize:
 - If a change with that name already exists, suggest continuing that change instead
 - Pass --schema if using a non-default workflow
 - **ADR Discovery**: при создании design — Glob `openspec/adrs/ADR-*.md`, Grep по области задачи. Если релевантные ADR найдены — включить ссылки в Context/Design Rationale секцию design.md. Если подход противоречит ADR — отметить в Risks. Формат: `.cursor/rules/adr-format.mdc`
+- **Behavior Contract / Implementation Options**: при создании `design.md` для UX-значимых, интеграционных, UI/form, перехватов и переносов поведения обязательно включить:
+  - `## Behavior Contract` — что пользователь/система наблюдает, какие инварианты должны выполняться, условия включения/выключения, без преждевременной фиксации имён процедур;
+  - `## Implementation Options` — 2+ варианта реализации или явное обоснование, почему вариант один; выбранный вариант должен быть самым простым исполнимым способом, совместимым с ADR и существующими механизмами.
+  Если пошаговый пользовательский ввод уже содержит «как сделать», перепроверь: это архитектурное ограничение или только возможный рецепт. Рецепт помещается в `Implementation Options`, не в `Behavior Contract`.
 - **Design Gate**: при пошаговом создании design — проверить триггеры `architect-gate.mdc` перед переходом к следующему артефакту (аналогично Design Gate в ff). Если триггеры сработали и architecture-*.md отсутствует — ПАУЗА. Вывести сообщение об обязательности архитектурного ревью и запустить архитектора (с fallback на self-review в случае ошибки). Пропуск возможен только через создание файла `.gate-override.yaml` (см. `openspec-ff-change/SKILL.md`).
 - **Slice Generation Gate (MANDATORY)**: после создания `design.md` и до генерации `tasks.md` (или любых артефактов, зависящих от tasks):
   1. Определить объём ЗНИ. Если ≥ 6 задач — декомпозиция на срезы **обязательна**; если ≤ 5 — опциональна (один срез-контейнер).

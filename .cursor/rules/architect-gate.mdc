@@ -86,6 +86,21 @@ priority: 200
 | **apply** (pre-flight) | Soft redirect на `/opsx:verify`. Если в change dir не найден ни один из `reports/verification-slice-pre-*.md`, `reports/verification-legacy-pre-*.md`, `reports/verification-legacy-mixed-*.md` — предупреждение. Не дублирует проверку триггеров |
 | **1c-agent-delegation** (правка .bsl вне OpenSpec) | При срабатывании → onec-code-architect до реализации |
 
+## SIMPLICITY CHECK (обязательный выход архитектора)
+
+Каждый отчёт `onec-code-architect` в режимах `design`, `plan-review`, `task-readiness`, `fix-quality`, `slice-decomposition`, `task-decomposition` обязан содержать секцию:
+
+```markdown
+## Simplicity Check
+
+- **Viable alternatives:** <2+ варианта или «единственный viable, потому что ...»>
+- **Selected simplest viable design:** <выбранный вариант>
+- **Why not simpler:** <почему ещё более простой путь не подходит>
+- **Complexity budget:** <количество точек перехвата / файлов / новых процедур / условных ветвлений>
+```
+
+Критерий: выбранный подход должен быть самым простым исполнимым вариантом, который сохраняет ADR, существующие механизмы и проверяемый `Behavior Contract`. Если отчёт предлагает рецепт реализации без сравнения альтернатив — Architect Gate считается пройденным по факту вызова, но `/opsx:verify` должен дать WARNING `architect-simplicity-missing`.
+
 ## ИСКЛЮЧЕНИЯ (Gate НЕ срабатывает)
 
 - Light Mode (см. 1c-agent-delegation.mdc) без семантических триггеров и без изменения UX-сценария

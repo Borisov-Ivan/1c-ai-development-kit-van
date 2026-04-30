@@ -214,6 +214,13 @@ SemanticSearch:
 
 Provide a report that the parent (or onec-code-architect) can use without re-reading the full trace. Section "Key findings" and optional "Anomalies / concerns" depend on the analysis focus; include only what is relevant.
 
+Перед финальным ответом выполнить **Cite Verification**:
+
+1. Для каждого critical finding с `file:line` перечитать исходный файл в диапазоне ±5 строк.
+2. Проверить, что строка действительно подтверждает finding (процедура, вызов, условие, запись/транзакция).
+3. Если подтверждение не найдено — finding остаётся в `## Hypotheses` или `## Unverified citations`, но не в `## Verified facts`.
+4. Для trace-only фактов указывать event ID / trace line; для RCA/root cause нужны и trace, и code citation.
+
 ```markdown
 # Trace Analysis: [short description reflecting user's question]
 
@@ -240,6 +247,10 @@ Provide a report that the parent (or onec-code-architect) can use without re-rea
 ## Verified facts
 - ...
 
+## Cite Verification
+- OK: `<path>:<line>` — <что подтверждено>
+- Unverified: `<path>:<line>` — <почему не подтверждено / что нужно перечитать>
+
 ## Hypotheses
 - ...
 
@@ -264,7 +275,8 @@ Provide a report that the parent (or onec-code-architect) can use without re-rea
 2. **Do not guess** — If COMPACT trace lacks variables, query text, or branch context, request TRACE_FULL. Do not invent values.
 3. **Verified vs Hypotheses** — Only facts confirmed by trace + code go to Verified facts. Assumptions go to Hypotheses with a verification plan.
 4. **Output for architect** — Your report is input for onec-code-architect; keep it structured and citation-ready (file:line, event ID).
-5. **Escalation** — Clearly state when you stopped due to insufficient data and what is needed (e.g. TRACE_FULL path or command).
+5. **Cite Verification** — Re-read ±5 source lines for every critical `file:line` before finalizing.
+6. **Escalation** — Clearly state when you stopped due to insufficient data and what is needed (e.g. TRACE_FULL path or command).
 
 ---
 

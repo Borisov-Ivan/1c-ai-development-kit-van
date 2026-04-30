@@ -452,6 +452,23 @@ Only present when:
 
 ### File 2: ...
 
+## Code-Truth Symbols (mandatory)
+
+Заполни этот блок фактическими символами после записи кода. Оркестратор использует его для `debug.md` и Code-Truth Gate; не указывай плановые или вымышленные имена.
+
+```yaml
+created_or_modified_symbols:
+  - name: <Процедура/Функция/обработчик/перехват>
+    kind: <procedure|function|event_handler|hook|module_block>
+    file: <relative path>
+    lines: <start-end or "unknown after write">
+    annotation: <&Перед(...)|&После(...)|&Вместо(...)|&ИзменениеИКонтроль(...)|none>
+    action: <created|modified|removed>
+    evidence: <короткая строка/якорь для Grep>
+```
+
+Если задача меняла только тело существующей процедуры, всё равно укажи эту процедуру как `modified`. Если менялись только комментарии/разметка — `kind: module_block`, `name` = ближайшая процедура или область.
+
 ## Gate Results (mandatory)
 
 - G14 (Data Contract): <fixed|dynamic|unknown>, source=<ТЧ/query/docs>, defensive checks: <N removed, M added with justification>

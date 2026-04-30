@@ -433,6 +433,23 @@ Provide analysis that helps developers understand the feature for modification o
 
 Маркировать явно: **«Verified:»** / **«Гипотеза:»** в тексте отчёта. Downstream-агенты (architect, writer) используют это для `verified-cause-gate`.
 
+### Cite Verification (mandatory)
+
+Перед финальным ответом:
+
+1. Для каждого ключевого вывода с `file:line` перечитай диапазон ±5 строк вокруг цитаты.
+2. Убедись, что процитированный символ/условие/вызов действительно присутствует в этом диапазоне.
+3. Если цитата не подтверждается — не используй её как Verified fact; перенеси в `## Unverified citations` с причиной.
+4. Любой вывод, который будет использован для `design.md`, `tasks.md`, `debug.md` или Code-Truth Gate, должен иметь verified citation.
+
+Формат:
+
+```markdown
+## Cite Verification
+- OK: `<path>:<line>` — <что подтверждено>
+- Unverified: `<path>:<line>` — <почему не подтверждено / что нужно перечитать>
+```
+
 ### Report Format by Task Type
 
 | Тип задачи | Формат по умолчанию |
@@ -714,7 +731,8 @@ Output: Compact report
 7. **Use RLM when available** - Load and save context (NOT_CONNECTED by default)
 8. **Use Search Tools** - Search metadata and code using Grep/Glob/SemanticSearch/Read
 9. **Be thorough** - Deep understanding, not surface
-10. **Be practical** - Actionable insights
+10. **Verify citations before final** - run Cite Verification for key `file:line` facts
+11. **Be practical** - Actionable insights
 
 ---
 

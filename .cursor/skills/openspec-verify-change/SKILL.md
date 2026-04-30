@@ -219,6 +219,12 @@ Tier: Standard (12 задач, 3 среза)
 
    *(Примечание: проверки на наличие путей, критериев приёмки и размытых формулировок делегированы Quality Controller в критерий Task Readability).*
 
+   **7A.1 Design Contract Split (D-CONTRACT-SPLIT):**
+   - Если `design.md` существует и change содержит UX-значимые, UI/form, интеграционные задачи, перехваты (`&Перед`, `&После`, `&Вместо`, `&ИзменениеИКонтроль`) или перенос поведения между расширениями:
+     - Отсутствует `## Behavior Contract` → WARNING `design-contract-missing`: design смешивает наблюдаемое поведение с рецептом реализации.
+     - Отсутствует `## Implementation Options` → SUGGESTION `implementation-options-missing`: не зафиксированы альтернативы и критерий выбора простейшего исполнимого варианта.
+   - Если `design.md` содержит конкретные имена новых процедур/функций в `## Behavior Contract`, но эти имена не найдены в коде и не помечены как стабильный контракт / пример → WARNING `recipe-leaked-into-contract`.
+
    **7B. Atomicity check:**
    If a single task line (before sub-items) contains 3+ distinct verbs of action (`создать`, `реализовать`, `добавить`, `обернуть`, `проверить`, etc.): WARNING "task may not be atomic — consider splitting".
 
@@ -725,6 +731,14 @@ Tier: Standard (12 задач, 3 среза)
       - **Legacy post-apply:** для каждого requirement — поиск в коде; если не реализовано → CRITICAL: "Requirement not found: <requirement name>"
       - Для **mixed**, если requirement относится к `[x]`-задачам, но реализация не найдена → **WARNING** (расхождение: задача отмечена выполненной, код/spec не сходятся)
 
+    **Symbol Existence Check (Code-Truth Gate):**
+    - Выполнить механический gate из `.cursor/rules/code-truth-gate.mdc` для `design.md`, `tasks.md`, `debug.md`, `specs/**`.
+    - Извлечь технические якоря (`pav_*`, `lvv_*`, имена процедур/функций в backticks, `&Перед/&После/&Вместо/&ИзменениеИКонтроль(...)`, стабильные имена элементов формы) и проверить `Grep`/`rg` по путям из `openspec/project.md` и явно затронутым файлам.
+    - Для каждого ненайденного символа добавить `phantom-symbol`:
+      - **pre-apply**: WARNING (код ещё может не существовать, но рецепт слишком конкретен);
+      - **mixed/post-apply**: WARNING для незавершённых задач; CRITICAL для `[x]` задач или принятых срезов.
+    - Рекомендация: если код верен, выполнить `/opsx:extend <name> --code-sync`; если артефакт верен, вернуть задачу в apply/rework.
+
 14. **Verify Correctness**
 
     **Requirement Implementation Mapping**:
@@ -749,6 +763,11 @@ Tier: Standard (12 задач, 3 среза)
         - Recommendation: "Add test or implementation for scenario: <description>"
 
 15. **Verify Coherence**
+
+    **Architect Simplicity Check (pre-apply / task readiness context)**:
+    - If change has `reports/architecture-*.md` relevant to current scope, inspect the freshest relevant report.
+    - If it does not contain `## Simplicity Check` and the change is not Light/Mechanical Mode: add WARNING `architect-simplicity-missing` — "Архитектурный отчёт не зафиксировал сравнение простейших исполнимых альтернатив".
+    - If `## Simplicity Check` exists but `Complexity budget` is absent for a UI/form/integration design: add SUGGESTION `complexity-budget-missing`.
 
     **Design Adherence**:
     - If design.md exists in contextFiles:
