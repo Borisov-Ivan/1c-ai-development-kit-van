@@ -420,7 +420,10 @@ Task(
          Результат: дополненный анализ (gap analysis,
          верифицированные контракты, рекомендации).
          Обязательно добавь YAML front-matter.
-         Сохранить в reports/deep-analysis-YYYY-MM-DD.md.",
+         Сохранить по правилу preserve-subagent-reports:
+         openspec/changes/<name>/reports/deep-analysis-YYYY-MM-DD.md
+         при активном change или
+         temp/reports/deep-analysis-YYYY-MM-DD.md вне change.",
   subagent_type="onec-code-architect"
 )
 ```
@@ -530,7 +533,7 @@ Task(
          Только: можно ли реализовать as-is.
 
          Результат: сохранить в
-         reports/task-readiness-review-YYYY-MM-DD.md.",
+         openspec/changes/<change-name>/reports/task-readiness-review-YYYY-MM-DD.md.",
   subagent_type="onec-code-architect"
 )
 ```
@@ -558,7 +561,7 @@ Task(
            mentioned in tasks, with empty/non-empty status>
 
          Save result to:
-         reports/quality-control-YYYY-MM-DD.md.",
+         openspec/changes/<change-name>/reports/quality-control-YYYY-MM-DD.md.",
   subagent_type="openspec-quality-controller"
 )
 ```
@@ -596,8 +599,8 @@ Task(
          - design: <путь> (с секцией ## Slices)
          - debug.md: <путь или «отсутствует»>,
            секция `## Slice Gate Decisions` — решения по принятым срезам
-         - reports/slice-acceptance-S<N>-*.md: <пути>
-         - Недавние отчёты: <пути к reports/*.md>
+         - openspec/changes/<change-name>/reports/slice-acceptance-S<N>-*.md: <пути>
+         - Недавние отчёты: <пути к openspec/changes/<change-name>/reports/*.md>
 
          ## Критерии
 
@@ -649,7 +652,7 @@ Task(
          Конкретные изменения в tasks.md и/или design.md ## Slices.
 
          Результат: сохранить в
-         reports/slice-transition-S<N+1>-YYYY-MM-DD.md.",
+         openspec/changes/<change-name>/reports/slice-transition-S<N+1>-YYYY-MM-DD.md.",
   subagent_type="onec-code-architect"
 )
 ```

@@ -273,7 +273,7 @@ Depending on what the user brings, you might:
 Если сложность >= Сложная (5+ файлов, несколько подсистем, интеграции) ИЛИ bug fix с hypothesis в отчёте:
 1. Запустить **onec-code-architect** в режиме "глубокий анализ" (шаблон в `1c-agent-patterns/SKILL.md`)
 2. Передать: путь к `exploration-*.md` (или `trace-analysis-*.md`) + контекст задачи из брифа
-3. Результат сохранить: `reports/deep-analysis-YYYY-MM-DD.md` (правило `preserve-subagent-reports.mdc`)
+3. Результат сохранить по правилу `preserve-subagent-reports.mdc`: `openspec/changes/<name>/reports/deep-analysis-YYYY-MM-DD.md` при активном change или `temp/reports/deep-analysis-YYYY-MM-DD.md` вне change
 4. Использовать в шаге 2 (Decide) для обоснования решений
 
 Если сложность < Сложная:
@@ -568,7 +568,7 @@ There's no required ending. Discovery might:
 
 **Исследование:**
 - Какие агенты вызывались: [trace-analyst / explorer / architect / нет]
-- Отчёты: [пути к файлам в reports/]
+- Отчёты: [пути к файлам в `temp/reports/` или `openspec/changes/<name>/reports/`]
 
 **Knowledge findings:**
 ### Использованные факты (active)

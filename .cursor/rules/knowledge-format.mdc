@@ -18,6 +18,14 @@ alwaysApply: false
 - **Архив:** `openspec/knowledge/_archive/` — deprecated/superseded KB
 - **Стабильные первоисточники standalone-capture:** `openspec/knowledge/_sources/knowledge-add/<YYYY-MM-DD-slug>/sources/` — копии reports/заметок, из которых `/opsx:knowledge-add` создал KB.
 
+### Где живут source-отчёты для KB
+
+- `temp/reports/` — короткоживущие standalone-отчёты вне ЗНИ; могут устаревать и очищаться, поэтому `/opsx:knowledge-add` при сохранении копирует их в bundle.
+- `openspec/changes/<name>/reports/` — отчёты активной ЗНИ; при archive становятся стабильным источником по пути `openspec/changes/archive/<YYYY-MM-DD-name>/reports/`.
+- `openspec/knowledge/_sources/knowledge-add/<YYYY-MM-DD-slug>/sources/` — стабильные первоисточники standalone-capture после подтверждённого bundle-on-save.
+
+Корневой каталог `reports/` и другие ad-hoc каталоги под корнем репозитория **запрещены** как место сохранения аналитических отчётов. При обнаружении `reports/` аудит/инициализация должны выдать warning: перенести содержимое в `temp/reports/` или в `openspec/changes/<name>/reports/` по контексту.
+
 ### Whitelist содержимого корня `openspec/knowledge/`
 
 Корень `openspec/knowledge/` имеет **строгий whitelist**. Любой файл/каталог, которого нет в списке, считается посторонним и подлежит выносу:
