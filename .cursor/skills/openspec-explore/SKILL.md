@@ -55,6 +55,12 @@ Enter explore mode. Think deeply. Visualize freely. Follow the conversation wher
 - Нет слов-маркеров исследования/отладки/перепроектирования
 - Примеры: абстрактная идея, сравнение технологий без привязки к коду, общий вопрос
 
+**Intake-router (мягкая маршрутизация, не HALT):** если HALT-триггеров нет, но вход выглядит как сырая постановка заказчика (длинный текст с цитатами/скриншотами/обходными путями, явная просьба «разобрать», «осмыслить», «разложить по полочкам»), первый видимый вывод — предложение использовать `/opsx:intake`. Не читать код и артефакты; завершить ход и дождаться выбора пользователя:
+
+> «Похоже на сырую постановку заказчика. Рекомендую сначала `/opsx:intake`: он отделит факты от шума, сформирует цель, scope, блокирующие вопросы и handoff для `/opsx:explore` или `/opsx:ff`. Запустить intake или продолжить в explore?»
+
+Если пользователь выбирает продолжить в explore — продолжить Entry Protocol как обычно.
+
 **Правило:** если сомневаешься между HALT и свободным режимом — выбирай HALT. Ложный бриф = потеря одного хода; пропущенный бриф = потеря качества исследования.
 
 ### 1.5. Knowledge Discovery (mechanical filter)
@@ -285,7 +291,7 @@ Depending on what the user brings, you might:
 - Обосновать выбор подхода: почему эта точка реализации, а не другая? Почему новый код, а не расширение существующей функции? Как подобные задачи решены в проекте — следуем паттерну или отклоняемся?
 - **Existing Mechanism check:** если решение затрагивает интеграцию с базой — классифицировать выбранный подход по Preference Hierarchy из `existing-mechanism-priority.mdc`. Для уровней 3-4 обязательно задокументировать, почему уровни выше не подходят.
 - **Fix Quality check (при bug fix / исправлении):** если решение — фикс (маркеры: «исправить», «баг», «ошибка», «не работает»), перед Architect Gate оценить по чеклисту: (1) Фикс направлен на корневую причину, а не на симптом? (2) Есть ли альтернативные подходы с меньшим числом условий/ветвлений? (3) Что делает прототип / существующий паттерн в аналогичном сценарии? (4) Меняется ли UX-сценарий (что видит/делает пользователь)? При отрицательном ответе на п.1 или п.4=Да → Architect Gate обязателен (не ждать срабатывания триггеров из architect-gate.mdc).
-- **Architect Gate (обязательная проверка):** проверить триггеры из `architect-gate.mdc` (объективные маркеры, семантические, структурные). При срабатывании **любого** триггера — архитектор **обязателен**: AskQuestion пользователю с перечислением сработавших триггеров. Агент НЕ принимает решение «пропустить» самостоятельно. При bug fix сценарии (см. Fix Quality check) — то же правило: оркестратор не обходит gate обоснованием «точечный фикс». Пользователь может отклонить — задокументировать в Explore Summary.
+- **Architect Gate (обязательная проверка):** проверить триггеры из `architect-gate.mdc` (объективные маркеры, семантические, структурные). При срабатывании **любого** триггера — архитектор **обязателен**: AskQuestion пользователю с перечислением сработавших триггеров и вариантом запуска архитектора. Агент НЕ принимает решение «пропустить» самостоятельно и не предлагает пропуск как равноправную опцию. При bug fix сценарии (см. Fix Quality check) — то же правило: оркестратор не обходит gate обоснованием «точечный фикс». Если пользователь явно отказывается — запросить причину и задокументировать статус `declined: <reason>` в Explore Summary.
 
 ### 3. Планирование (Plan)
 - Сформулировать scope и задачи
@@ -301,10 +307,11 @@ Depending on what the user brings, you might:
 1. **Проверить триггеры** из `architect-gate.mdc` (объективные маркеры, семантические, структурные).
 2. **Триггеры сработали → обязательно:**
    - Сформировать **краткий бриф** (3–5 предложений: что меняем, почему, предложенный подход, конкретные вопросы архитектору).
-   - AskQuestion пользователю: «Сработали триггеры Architect Gate: [перечисление]. Рекомендую запросить ревью архитектора перед созданием change. Вот бриф: [...]. Отправить?»
-   - **Пользователь подтверждает** → вызвать **onec-code-architect** с брифом. Результат (полный отчёт) сохранить по правилу `preserve-subagent-reports.mdc`. Учесть замечания в последующих артефактах.
-   - **Пользователь отклоняет** → задокументировать отказ в Explore Summary (причина, какие триггеры были пропущены).
-3. **Триггеры не сработали** → продолжить без архитектора.
+   - AskQuestion пользователю: «Сработали триггеры Architect Gate: [перечисление]. Архитектурный анализ обязателен перед созданием change. Вот бриф: [...]. Запустить архитектора?»
+   - **Пользователь подтверждает** → вызвать **onec-code-architect** с брифом. Результат (полный отчёт) сохранить по правилу `preserve-subagent-reports.mdc`. Учесть замечания в последующих артефактах. В Explore Summary указать `Architect Gate: passed: <path-to-architecture-report>`.
+   - **Пользователь явно отклоняет** → запросить причину отказа и задокументировать в Explore Summary `Architect Gate: declined: <reason>` вместе со списком сработавших триггеров. Это осознанный override; при последующем `/opsx:ff` причина должна быть подтверждена через `--skip-architect <причина>`, иначе ff снова остановится на Design Gate.
+   - **Архитектор не запущен и отказ не зафиксирован** → не рекомендовать `/opsx:ff`; в Explore Summary указать `Architect Gate: required-pending`.
+3. **Триггеры не сработали** → продолжить без архитектора. В Explore Summary указать `Architect Gate: not-required`.
 
 ### 4. Переход к изменению
 - Если change уже обновлён и verify пройден: «Готово к реализации. `/opsx:apply <name>`?»
@@ -551,7 +558,7 @@ You: That changes everything.
 
 There's no required ending. Discovery might:
 
-- **Flow into action**: "Ready to start? /opsx:new or /opsx:ff"
+- **Flow into action**: "Ready to start? Architect Gate: `<status>`. /opsx:new or /opsx:ff"
 - **Flow into existing change**: "This changes existing scope. Use `/opsx:extend <name>` so artifacts update through the guarded protocol."
 - **Result in artifact updates**: "Updated design.md with these decisions"
 - **Just provide clarity**: User has what they need, moves on
@@ -584,7 +591,7 @@ There's no required ending. Discovery might:
 
 **Architect Gate:**
 - Триггеры: [перечисление сработавших / «не сработали»]
-- Результат: [пройден (architecture-*.md) / не требовался / отклонён пользователем (причина)]
+- Статус: [ровно одно из: `not-required` / `required-pending` / `passed: <path-to-architecture-report>` / `declined: <reason>`]
 
 **Рекомендации по срезам (для ff/design `## Slices`):**
 - Сценарий 1 (минимально приёмопригодное поведение): [что пользователь видит/делает; объекты, формы, логика, тесты]
@@ -596,7 +603,7 @@ There's no required ending. Discovery might:
 **Open questions:** [если остались]
 ```
 
-Explore Summary — входной артефакт для ff/new. Design Gate в ff проверяет его наличие и содержание. Slice hints (секция «Рекомендации по срезам») заполняются из результатов обследования (агентов) или обсуждения (свободный режим). Если данных недостаточно — помечать `[определяется в ff]`. Эта секция помогает architect при slice decomposition в ff выстроить вертикальные срезы (см. `.cursor/rules/vertical-slices.mdc`).
+Explore Summary — входной артефакт для ff/new. Design Gate в ff проверяет его наличие и содержание, включая enum-статус `Architect Gate`. Slice hints (секция «Рекомендации по срезам») заполняются из результатов обследования (агентов) или обсуждения (свободный режим). Если данных недостаточно — помечать `[определяется в ff]`. Эта секция помогает architect при slice decomposition в ff выстроить вертикальные срезы (см. `.cursor/rules/vertical-slices.mdc`).
 
 **IMPORTANT (enforced by Change Creation Gate)**: Создание нового change из explore **ЗАПРЕЩЕНО**. При запросе «создай ЗНИ» и т.п. — СТОП, Explore Summary, redirect на `/opsx:ff`. См. секцию Change Creation Gate. Команда загрузит скилл, который обеспечит:
 - Для `/opsx:new`: scaffold через openspec CLI + показ шаблона первого артефакта + STOP
@@ -609,6 +616,7 @@ Explore Summary — входной артефакт для ff/new. Design Gate �
 - **Output style:** все брифы, карточки делегирования и Explore Summary выводятся по шаблону **T-BRIEF** из `.cursor/docs/opsx-output-style.md`; перед отправкой — self-check-5 (§7).
 - **Don't bypass Entry Protocol** - Never Read code, artifacts, traces, or modules before showing the brief. The only tool calls before brief output are: Read SKILL.md (command-skill-gate batch), Shell `openspec list --json`, Read `openspec/project.md`, Read `openspec/knowledge/_index.yaml`, and Read `_taxonomy.yaml` / selected KB `.md` only by Entry Protocol step 1.5. Everything else — after brief confirmation on step 3. Reading change artifacts (proposal.md, design.md, tasks.md) is also forbidden before brief.
 - **Don't skip Knowledge Discovery** - Read `_index.yaml` is mandatory in Entry Protocol step 0. The brief MUST contain `KB в scope`: either `KB-NNNN: <title> — <one-line summary>` entries or explicit «нет совпадений». Omitting the field is a failed self-check.
+- **Don't omit Architect Gate status** - Explore Summary MUST contain `Architect Gate: Статус` with exactly one enum value: `not-required`, `required-pending`, `passed: <path>`, or `declined: <reason>`. If the status is `required-pending`, do not recommend `/opsx:ff` until the architect is run or an explicit decline reason is captured.
 - **Don't skip brief confirmation** - Never call Task/delegate to an agent in the same message where you show the brief. Always END TURN after showing the brief and wait for explicit user confirmation in the next message.
 - **Don't implement** - Never write code or implement features. Creating OpenSpec artifacts is fine, writing application code is not.
 - **Don't read traces manually** - If a trace file is provided, delegate to `onec-trace-analyst`. Never substitute manual trace reading for agent delegation. DELEGATION GATE applies in explore.

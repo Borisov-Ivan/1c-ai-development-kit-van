@@ -39,6 +39,7 @@ priority: 996
    | explore | «создай ЗНИ» / «заведи ЗНИ» | Создать артефакты вручную (Write proposal, design, tasks) | СТОП (Change Creation Gate). Explore Summary + redirect на `/opsx:ff <name>` |
    | apply | «а может лучше по-другому?» | Начать explore-стиль обсуждение | Предложить вернуться в explore для перепроектирования |
    | ff/new | Пропустить Design Gate после design.md | Продолжить без проверки | СТОП, выполнить Design Gate по протоколу скилла |
+   | ff | Есть свежий `temp/explore-summary-*.md` | Использовать только имя change | Прочитать как source context: `Architect Gate`, ключевые решения, knowledge findings; передать в Design Gate и шаблоны артефактов |
    | ff | Follow-up с правкой артефакта | Обработать follow-up, забыв о незавершённых артефактах | Сначала `openspec status --json` — завершить незаконченные артефакты, затем обработать follow-up |
 
 ## WHY

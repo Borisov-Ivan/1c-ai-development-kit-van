@@ -24,6 +24,21 @@ Start a new change using the experimental artifact-driven approach.
    a. **If argument provided** — use it as change name (kebab-case). Proceed to step 2.
 
    b. **If no argument — auto-detect from context:**
+      0. Glob `temp/intake-brief-*.md` (exclude `temp/intake-brief-example-*.md`). If found, read the most recent one (by date in filename).
+         Extract change name from `### Рекомендованный следующий шаг` if it contains `/opsx:new <name>` or `/opsx:ff <name>`, or derive kebab-case from `**Тема:**` / `### Нормализованная цель`.
+         Extract brief from `### Нормализованная цель`, `### Scope`, and `### План исследования`.
+         AskQuestion:
+         ```
+         Из Intake Brief:
+         - **Имя ЗНИ:** `<kebab-name>`
+         - **Бриф:** <2-3 sentences from normalized goal/scope>
+         - **Источник:** intake-brief-YYYY-MM-DD.md
+
+         1. Подтвердить
+         2. Изменить имя
+         3. Сначала explore
+         ```
+         If the user chooses `Сначала explore`, stop and recommend `/opsx:explore @temp/intake-brief-...md`.
       1. Glob `temp/explore-summary-*.md`. If found, read the most recent one (by date in filename).
          Extract change name from line matching `Готово к созданию ЗНИ <name>`
          or derive kebab-case from `**Тема:**`.

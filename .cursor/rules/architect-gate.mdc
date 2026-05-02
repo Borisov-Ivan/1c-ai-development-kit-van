@@ -80,7 +80,7 @@ priority: 200
 
 | Контекст | Действие |
 |----------|----------|
-| **explore** (Structured Investigation, шаг Decide) | Архитектор **обязателен**. AskQuestion пользователю: «Сработали триггеры [...]. Запустить архитектора? [Рекомендуется / Пропустить]». При пропуске — задокументировать в Explore Summary |
+| **explore** (Structured Investigation, шаг Decide) | Архитектор **обязателен**. AskQuestion пользователю: «Сработали триггеры [...]. Запустить архитектора?» без равноправной опции пропуска. Отказ только через явный пользовательский ввод с причиной; фиксируется в Explore Summary как `declined: <reason>`. Если архитектор не запущен и отказ не зафиксирован — статус `required-pending`, `/opsx:ff` не рекомендовать |
 | **ff / new** (Design Gate) | Blocking. Без опции пропуска. Escape только через флаг `--skip-architect <причина>`, оставляющий явный аудит-след `.gate-override.yaml`. |
 | **verify** (pre-apply check, шаг 9) | CRITICAL в отчёте verify. Предложение запустить архитектора через авто-устранение (шаг 17). Основной рубеж проверки |
 | **apply** (pre-flight) | Soft redirect на `/opsx:verify`. Если в change dir не найден ни один из `reports/verification-slice-pre-*.md`, `reports/verification-legacy-pre-*.md`, `reports/verification-legacy-mixed-*.md` — предупреждение. Не дублирует проверку триггеров |
@@ -115,7 +115,7 @@ priority: 200
 Gate считается пройденным, если выполняется **любое** из:
 1. Файл `architecture-*.md` существует в `reports/` change или `temp/reports/`, и его `scope.files` или `scope.modules` в YAML front-matter пересекаются с текущей задачей. (Одиночный старый отчёт без пересечения scope — Gate НЕ закрыт).
 2. Отчёт зарегистрирован в `reports/_manifest.yaml` со статусом `active` и подходящим `scope`.
-3. Пользователь явно отклонил архитектора через флаг `--skip-architect` (задокументировано в `.gate-override.yaml`).
+3. Пользователь явно отклонил архитектора через флаг `--skip-architect` (задокументировано в `.gate-override.yaml`) или через `Architect Gate: declined: <reason>` в Explore Summary. При последующем `/opsx:ff` причина из Explore Summary должна быть подтверждена флагом `--skip-architect <причина>` и перенесена в `.gate-override.yaml`; без этого Design Gate снова срабатывает.
 4. Триггеры не сработали (ни один из трёх групп).
 
 **Design Rationale ≠ закрытие Gate.** Самописный Rationale агента без внешней валидации не закрывает Gate. Закрывает только файл architecture-*.md с релевантным scope или осознанное решение пользователя.

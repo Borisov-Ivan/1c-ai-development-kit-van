@@ -24,9 +24,16 @@ Fast-forward through artifact creation - generate everything needed to start imp
    a. **If argument provided** — use it as change name (kebab-case). Proceed to step 2.
 
    b. **If no argument — auto-detect from context:**
+      0. Glob `temp/intake-brief-*.md` (exclude `temp/intake-brief-example-*.md`). If found, read the most recent one (by date in filename).
+         Extract change name from `### Рекомендованный следующий шаг` if it contains `/opsx:ff <name>` or derive kebab-case from `**Тема:**` / `### Нормализованная цель`.
+         Extract brief from `### Нормализованная цель`, `### Scope`, and `### План исследования`.
+         AskQuestion: «Из Intake Brief: `<name>`. Использовать?
+         [Да / Другое имя / Сначала explore]».
+         If the user chooses `Сначала explore`, stop and recommend `/opsx:explore @temp/intake-brief-...md`.
       1. Glob `temp/explore-summary-*.md`. If found, read the most recent one (by date in filename).
          Extract change name from line matching `Готово к созданию ЗНИ <name>`
          or derive kebab-case from `**Тема:**`.
+         Extract `Architect Gate`, `Ключевые решения`, `Knowledge findings`, and `Рекомендации по срезам` into `exploreContext`. This context is authoritative input for `proposal`, `design`, `specs`, `tasks`, and Design Gate; do not use Explore Summary only for change-name detection.
          AskQuestion: «Из Explore Summary: `<name>`. Использовать?
          [Да / Другое имя]».
       2. If no Explore Summary — run `openspec list --json`.
@@ -38,6 +45,15 @@ Fast-forward through artifact creation - generate everything needed to start imp
          Derive kebab-case name from description.
 
    **IMPORTANT**: Do NOT proceed without a confirmed change name.
+
+1.25. **Explore Summary Context Gate**
+
+   После подтверждения имени change определить `exploreContext`:
+   - Если на шаге 1b.1 уже прочитан `temp/explore-summary-*.md` — использовать его.
+   - Если имя передано аргументом и `exploreContext` ещё не задан — Glob `temp/explore-summary-*.md`, взять самый свежий файл за последние 48 часов, если он относится к этой теме (совпадает имя change или `**Тема:**` явно соответствует запросу), и прочитать его как source context.
+   - Извлечь из Summary как минимум: `Architect Gate` (`not-required` / `required-pending` / `passed: <path>` / `declined: <reason>`), `Ключевые решения`, `Knowledge findings`, `Рекомендации по срезам`.
+   - Если Summary старше 48 часов или не относится к change — считать, что `exploreContext` отсутствует.
+   - Если `exploreContext` отсутствует, это не блокирует простой ff. Design Gate ниже выполнит hard-gate только при структурных триггерах.
 
 1.5. **Metadata Gate (MANDATORY)**
 
@@ -121,6 +137,8 @@ Fast-forward through artifact creation - generate everything needed to start imp
         - `outputPath`: Where to write the artifact
         - `dependencies`: Completed artifacts to read for context
       - Read any completed dependency files for context
+      - If the change name/brief was derived from `temp/intake-brief-*.md`, read that Intake Brief as source context for `proposal`, `design`, `specs`, and `tasks`. Use it as customer-intent context, not as a verified code investigation.
+      - If `exploreContext` exists, use it as source context for `proposal`, `design`, `specs`, and `tasks`: carry `Ключевые решения` into scope/design rationale, `Knowledge findings` into context/assumptions, `Рекомендации по срезам` into `## Slices`, and `Architect Gate` into Design Gate. Treat `exploreContext` as verified investigation context only to the extent its reports are referenced; do not invent code facts from prose.
       - **Special case: `tasks` artifact (slice-aware task decomposition)**:
         Before delegating tasks, the **Slice Generation Gate** must have been passed (see step 5e.1 below) and design.md MUST contain a `## Slices` section.
 
@@ -186,8 +204,19 @@ Fast-forward through artifact creation - generate everything needed to start imp
          - **Objective markers**: Grep design.md for bug fix markers, base procedure interception, new metadata objects
          - **Semantic triggers**: Grep for `&Вместо`, `&После`, `&Перед`; missing `## Existing Mechanisms` or `## Design Rationale` when integration is described
          - **Structural triggers**: >1 file affected, >10 lines of change, contract/API changes
-      2. Check if `architecture-*.md` already exists in `reports/` (from prior explore session)
-      3. **If triggers fired AND no architecture report**:
+      2. Check if `architecture-*.md` already exists in `reports/` (from prior explore session or current change).
+      3. Check `exploreContext.Architect Gate` if present:
+         - `passed: <path>` → treat as existing architecture report only if the path exists and scope intersects the current change; otherwise treat Architect Gate as fired.
+         - `required-pending` → Architect Gate is considered fired regardless of design.md wording.
+         - `declined: <reason>` → Architect Gate is considered fired unless the current ff invocation also includes `--skip-architect <причина>`.
+         - `not-required` → continue with normal trigger evaluation from design.md.
+      4. **Hard-gate when no recent Explore Summary exists:** if `exploreContext` is absent, structural triggers fired (`>1 file affected`, `>10 lines of change`, or contract/API change), no architecture report exists, and `--skip-architect <причина>` was not provided — stop ff after showing:
+         ```
+         Design создан. Сработали структурные триггеры Architect Gate, но свежий Explore Summary не найден.
+         Для сложной постановки сначала выполните `/opsx:explore` или сознательно повторите `/opsx:ff <name> --skip-architect <причина>`.
+         ff остановлен до создания specs/tasks.
+         ```
+      5. **If triggers fired AND no architecture report**:
          - **MANDATORY PAUSE** — Если пользователь не передал флаг `--skip-architect <причина>`, вывести информационное сообщение (без AskQuestion с выбором пропуска):
            ```
            Design создан. Сработали триггеры Architect Gate: [list].
@@ -203,8 +232,8 @@ Fast-forward through artifact creation - generate everything needed to start imp
            timestamp: <текущая дата ISO>
            ```
            Продолжить без вызова архитектора.
-      4. **If triggers fired AND architecture report exists** → OK, continue
-      5. **If no triggers fired** → continue without pause
+      6. **If triggers fired AND architecture report exists** → OK, continue
+      7. **If no triggers fired** → continue without pause
 
    e.1. **Slice Generation Gate (MANDATORY — after Design Gate, before `specs`/`tasks`):**
 
@@ -256,6 +285,7 @@ Fast-forward through artifact creation - generate everything needed to start imp
 After completing all artifacts, summarize:
 - Change name and location
 - List of artifacts created with brief descriptions
+- Architect Gate status: `not-required` / `passed: <path>` / `declined: <reason>` / `skipped via .gate-override.yaml` / `self-review fallback`
 - What's ready: "All artifacts created! Ready for implementation."
 - Prompt: "Рекомендуется: `/opsx:verify <name>` для проверки качества артефактов (фазовая когерентность, ТЗ, реализуемость, gates). Или сразу `/opsx:apply <name>` для начала реализации."
 
@@ -275,6 +305,7 @@ After completing all artifacts, summarize:
 
 **Guardrails**
 - **Metadata Gate MUST NOT be silently skipped**: Do not run `openspec new change` without getting an answer to the developer/zni_id prompt. Before showing the final summary, verify `proposal.md` for placeholders like "Уточнить до", `<developer>`, `<zni_id>`. If found and the user did NOT choose "Пропустить", add a WARNING to the summary.
+- **Explore Summary MUST NOT be used only for naming**: If a recent relevant `temp/explore-summary-*.md` exists, read it as source context and carry `Architect Gate`, key decisions, knowledge findings, and slice recommendations into artifact creation and Design Gate.
 - Create ALL artifacts needed for implementation (as defined by schema's `apply.requires`)
 - Always read dependency artifacts before creating a new one
 - If context is critically unclear, ask the user - but prefer making reasonable decisions to keep momentum
