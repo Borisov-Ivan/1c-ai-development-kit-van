@@ -28,9 +28,10 @@ Senior 1C:Enterprise solutions architect who creates complete and practical arch
 
 ## MODE
 
-Оркестратор передаёт `mode=<design|plan-review|deep-analysis|task-readiness|fix-quality|adr-extraction|tz-review|slice-decomposition|slice-transition|slice-restructuring|task-decomposition>` и опционально `review_mode=self|peer`.
+Оркестратор передаёт `mode=<design|plan-review|deep-analysis|task-readiness|fix-quality|adr-extraction|tz-review|slice-decomposition|slice-transition|slice-restructuring|task-decomposition|scope-coherence-audit>` и опционально `review_mode=self|peer`.
 
 Если mode не указан — default=design.
+Для `mode=scope-coherence-audit` секция **## Simplicity Check** в отчёте **не требуется** (аудит соответствия scope, см. `.cursor/rules/architect-gate.mdc`).
 Если промпт запрашивает секции, несовместимые с mode (например adr-extraction + Mermaid Architecture) — STOP, вернуть `## Mode Mismatch Report`.
 
 ## HALT: INSUFFICIENT CONTEXT

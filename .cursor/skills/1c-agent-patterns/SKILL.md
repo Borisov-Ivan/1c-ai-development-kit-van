@@ -428,6 +428,75 @@ Task(
 )
 ```
 
+### Architect — scope coherence audit (extend)
+
+Используется `/opsx:extend`, шаг **5a**, когда сработал семантический триггер (`Drift-check` ≠ pass) или объективный счётчик Extend без архитектора (см. `.cursor/skills/openspec-extend-change/SKILL.md`). Режим **`scope-coherence-audit`**: Simplicity Check не требуется.
+
+```
+Task(
+  description="Scope coherence audit [change-name]",
+  prompt="mode=scope-coherence-audit
+
+         Оцени, осталась ли ЗНИ `<name>` единой согласованной задачей или
+         расползлась в несколько слабосвязанных. Сравни текущие
+         proposal.md / design.md / tasks.md / debug.md с исходным замыслом
+         (Why, Non-Goals в proposal/design).
+
+         ## Артефакты и входы
+
+         - Текущие proposal, design, tasks, debug (полные тексты или пути)
+         - Исторический proposal (git show <hash>:... или явно «недоступен»)
+         - Блок «Соответствие исходному scope» из брифа extend (T-BRIEF)
+         - Список reports/*.md с датами
+         - debug.md: все секции «## Extend —» после последнего
+           architecture-extend-coherence-*.md или с начала change
+
+         ## Existing Knowledge
+         [KB Discovery по правилам architect-gate.mdc]
+
+         ## Existing ADR
+         [ADR Discovery по правилам architect-gate.mdc]
+
+         ## Вопросы (дай ответ по каждому)
+
+         1. Каждая значимая задача в tasks.md соответствует пункту Why?
+            Перечисли отклонения.
+         2. Нарушены ли Non-Goals? Перечисли.
+         3. Decisions в design.md согласованы между собой или есть «тихие»
+            противоречия?
+         4. Behavior Contract шире, чем покрывают приёмочные S<N>.T<M>?
+         5. Есть ли в debug.md Extend-секции, ведущие к объёму работ без
+            архитектурного сопровождения?
+         6. Это всё ещё одна цель ЗНИ или уже 2+ независимых?
+
+         ## Формат ответа (обязательно)
+
+         YAML front-matter:
+         mode: scope-coherence-audit
+         scope.files: [...]
+         scope.modules: [...]
+
+         ### Verdict
+         coherent | drift-warning | scope-violation
+
+         ### Findings
+         (по пунктам 1–6)
+
+         ### Recommendations
+         Конкретные действия: rebrick срезов, вынести в новую ЗНИ,
+         удалить избыточные задачи, обновить proposal/Non-Goals.
+
+         ### Closes
+         Какие scope-drift триггеры этот отчёт закрывает.
+
+         Simplicity Check не включать.
+
+         Сохранить полный отчёт в:
+         openspec/changes/<name>/reports/architecture-extend-coherence-YYYY-MM-DD.md",
+  subagent_type="onec-code-architect"
+)
+```
+
 ### Architect — task readiness review (verify шаг 7.7)
 
 Used by `/opsx:verify` step 7.7 — MANDATORY in every pre-apply verification. The architect evaluates holistic readiness: can the ЗНИ be implemented as-is by agents and users without returning for clarification?

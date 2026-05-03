@@ -19,6 +19,7 @@ priority: 200
 - Bug fix — маркеры см. `1c-agent-delegation.mdc`
 - Перехват/компенсация базовой платформенной процедуры (Grep design.md)
 - Новый объект метаданных в design (Grep design.md)
+- В `debug.md` change: **M ≥ 3** строк с `Architect Gate:\s*(не вызывался|не требовался|declined|—)` (см. `.cursor/skills/openspec-extend-change/SKILL.md`, п. 5a, Триггер 2) **и** (нет `reports/architecture-extend-coherence-*.md` **или** дата последней секции `## Extend — YYYY-MM-DD` в `debug.md` новее даты в имени новейшего `architecture-extend-coherence-*.md`)
 
 Детальные списки grep-фраз (объективные и семантические маркеры для design.md / tasks.md) — в `.cursor/skills/openspec-verify-change/SKILL.md` шаг 9 «Architect Gate Check».
 
@@ -34,6 +35,7 @@ priority: 200
 - Интеграция без `## Design Rationale` в design.md
 - Design Rationale без ссылки на `architecture-*.md` или подтверждения пользователя
 - Фикс меняет пользовательский сценарий (UX-значимый)
+- Бриф `/opsx:extend` фиксирует `Drift-check: drift-warning` или `Drift-check: scope-violation` (блок «Соответствие исходному scope» в T-BRIEF, см. `openspec-extend-change/SKILL.md`)
 
 ### Структурные
 
@@ -85,10 +87,11 @@ priority: 200
 | **verify** (pre-apply check, шаг 9) | CRITICAL в отчёте verify. Предложение запустить архитектора через авто-устранение (шаг 17). Основной рубеж проверки |
 | **apply** (pre-flight) | Soft redirect на `/opsx:verify`. Если в change dir не найден ни один из `reports/verification-slice-pre-*.md`, `reports/verification-legacy-pre-*.md`, `reports/verification-legacy-mixed-*.md` — предупреждение. Не дублирует проверку триггеров |
 | **1c-agent-delegation** (правка .bsl вне OpenSpec) | При срабатывании → onec-code-architect до реализации |
+| **extend** (Scope Coherence Audit) | При срабатывании scope-drift триггеров (см. `openspec-extend-change/SKILL.md` п. 5a) → onec-code-architect в режиме `scope-coherence-audit`; отчёт `reports/architecture-extend-coherence-*.md` |
 
 ## SIMPLICITY CHECK (обязательный выход архитектора)
 
-Каждый отчёт `onec-code-architect` в режимах `design`, `plan-review`, `task-readiness`, `fix-quality`, `slice-decomposition`, `task-decomposition` обязан содержать секцию:
+Каждый отчёт `onec-code-architect` в режимах `design`, `plan-review`, `task-readiness`, `fix-quality`, `slice-decomposition`, `task-decomposition` обязан содержать секцию ниже. Режим **`scope-coherence-audit`** Simplicity Check **не требует** — это аудит соответствия scope, а не выбор технического решения.
 
 ```markdown
 ## Simplicity Check
@@ -106,7 +109,7 @@ priority: 200
 - Light Mode (см. 1c-agent-delegation.mdc) без семантических триггеров и без изменения UX-сценария
 - Mechanical Mode (find-replace, #Область, удаление комментариев)
 - Пользователь явно отклонил архитектора через легальный путь (флаг `--skip-architect` в ff/new)
-- Архитектор уже вызывался по этой теме (файл `architecture-*.md` существует в reports/)
+- Архитектор уже вызывался по этой теме (файл `architecture-*.md` существует в reports/) — **не распространяется** на триггеры **scope-drift** из `/opsx:extend`; для них закрытие только по `architecture-extend-coherence-*.md` (см. ЗАКРЫТИЕ GATE п. 5)
 - Рефакторинг без изменения поведения
 - Опечатки, переименования, комментарии
 
@@ -117,6 +120,7 @@ Gate считается пройденным, если выполняется **
 2. Отчёт зарегистрирован в `reports/_manifest.yaml` со статусом `active` и подходящим `scope`.
 3. Пользователь явно отклонил архитектора через флаг `--skip-architect` (задокументировано в `.gate-override.yaml`) или через `Architect Gate: declined: <reason>` в Explore Summary. При последующем `/opsx:ff` причина из Explore Summary должна быть подтверждена флагом `--skip-architect <причина>` и перенесена в `.gate-override.yaml`; без этого Design Gate снова срабатывает.
 4. Триггеры не сработали (ни один из трёх групп).
+5. Для **scope-drift** триггеров (объективный счётчик Extend без архитектора и семантический `Drift-check` из брифа `/opsx:extend`): Gate закрывается **только** файлом `reports/architecture-extend-coherence-*.md`, созданным **после** события, поднявшего триггер. Обычные `architecture-*.md` и `architecture-extend-*.md` (без суффикса coherence) **не закрывают** отдельно зафиксированную scope-drift проблему.
 
 **Design Rationale ≠ закрытие Gate.** Самописный Rationale агента без внешней валидации не закрывает Gate. Закрывает только файл architecture-*.md с релевантным scope или осознанное решение пользователя.
 
