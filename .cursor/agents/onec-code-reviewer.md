@@ -182,6 +182,15 @@ Check:
   comments in files matching that scope that match the whitelist are NOT release-hygiene findings.
   Read project.md before flagging changelog-style markers (e.g. +++/---) in whitelisted lines.
 
+  Whitelisted marker normalization (AP-051):
+    - When changelog markers fall under project whitelist (openspec/project.md → Whitelist предрелиза),
+      they are NOT removed (AP-040 does not apply), but they MUST be compact:
+      adjacent +++/--- blocks for the same [ID#NNN] and the same semantic change
+      are merged into one outer block.
+    - When merged opening markers carry different dates, keep the latest.
+    - Do NOT propose marker merging where AP-040 applies (markers not in whitelist) —
+      correct finding there is removal, not merging.
+
   Release hygiene (process metadata in comments only):
     - Changelog markers in comments: author+date+ticket in comment lines
       (// +++ Author, // ---, // НАЧАЛО/КОНЕЦ Изменения внес:,
