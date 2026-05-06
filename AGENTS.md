@@ -10,7 +10,7 @@
 Паттерны агентов: `.cursor/skills/1c-agent-patterns/SKILL.md`.
 Документы: `/opsx:doc-tz <name>` (ТЗ по ЗНИ с архитектурным ревью и контролем качества артефактов) — `.cursor/skills/openspec-docs/SKILL.md`. Шаблон: `.cursor/skills/openspec-docs/prompts/change-tz.md`.
 
-**Output style (единый стиль выводов opsx):** `.cursor/docs/opsx-output-style.md` — 3 слоя (UX / код / процесс), типография, запрет внутренних ID (`S<N>.T<M>`, `D<N>`, `R<N>`, номера задач) в пользовательских полях, 5 общих шаблонов: **T-BRIEF** (debug, explore), **T-HANDOFF** (apply), **T-REPORT** (verify, estimate, doc-tz, onboard), **T-STATUS** (status), **T-CONFIRM** (archive, bulk-archive, sync, migrate-slices, continue, ff). Перед каждым пользовательским выводом opsx-скилл обязан проходить self-check-5 (§7 гайда).
+**Output style (единый стиль выводов opsx):** `.cursor/docs/opsx-output-style.md` — 3 слоя (UX / код / процесс), типография, запрет внутренних ID (`S<N>.T<M>`, `D<N>`, `R<N>`, номера задач) в пользовательских полях, 5 общих шаблонов: **T-BRIEF** (debug, explore), **T-HANDOFF** (apply), **T-REPORT** (verify, estimate, doc-tz, onboard), **T-STATUS** (status), **T-CONFIRM** (archive, bulk-archive, sync, migrate-slices, continue, ff). Перед каждым пользовательским выводом opsx-скилл обязан проходить self-check-5 (§7 гайда), включая обязательный **пункт 6 «канонический переход»**: последний абзац вывода предлагает конкретную команду `/opsx:*`, правку существующего файла или явное END — не промежуточный артефакт («могу выписать», «черновик в чате», «сам запустите команду с этим контекстом»).
 
 ### Decision tree команд
 
@@ -18,8 +18,8 @@
 
 | Задача пользователя | Команда | Чем отличается от соседних |
 |---------------------|---------|----------------------------|
-| «Распаковать сырую постановку заказчика» | `/opsx:intake` | Отделяет факты от шума, формирует цель/scope/вопросы и handoff; не читает код и не создаёт ЗНИ |
-| «Обсудить идею, пока change нет» | `/opsx:explore` | Без активного change; не вызывает writer/reviewer |
+| «Распаковать сырую постановку заказчика» | `/opsx:intake` | Отделяет факты от шума, подготавливает бриф и сразу запускает исследование |
+| «Обсудить идею, пока change нет» | `/opsx:explore` | Без активного change; не вызывает writer/reviewer; **Output Discipline** — каждый выход в одном из 5 канонических (диалог / capture / Explore Summary / KB / отчёт субагента); запрещено предлагать «черновик tasks/spec/design в чате» |
 | «Создать новый change пошагово» | `/opsx:new <name>` | Пошаговая последовательность артефактов |
 | «Создать change целиком разом» | `/opsx:ff <name>` | Все артефакты сразу, для уже понятной задачи |
 | «Быстро понять, где я в этом change» | `/opsx:status <name>` | Read-only снимок, без верификаций и субагентов |
@@ -75,7 +75,17 @@
 `.cursor/rules/architect-gate.mdc` — единые триггеры архитектурного ревью (объективные маркеры, семантические, структурные). **UX-значимый фикс** (меняет что видит/делает пользователь) — семантический триггер; локальная реализация поведения, владельцем которого является база/БСП/платформа/общий модуль, вместо делегирования владельцу — семантический триггер Substituted Authority. **Simplicity Check:** каждый architecture-отчёт фиксирует простейший viable design, альтернативы и complexity budget; отсутствие секции ловит verify. **debug:** при срабатывании триггеров architect обязателен до шага 7 (не AskQuestion), шаблон «Architect — fix quality review» в `1c-agent-patterns/SKILL.md`. Проверяется в explore (шаг Decide, Fix Quality check при bug fix), verify (pre-apply, шаг 9 + Debug fix check), apply (soft redirect на verify).
 
 ## Verify (универсальный quality gate)
-`.cursor/skills/openspec-verify-change/SKILL.md` — `/opsx:verify`. Pre-apply: формат tasks, качество задач, полнота ручной конфигурации, **Slice Coherence (Quality Controller)** — **строго до** шага реализуемости (Architect 7.7), **реализуемость (Architect)**, **генерация ТЗ (шаг 7.8, по параметру generate_tz)**, Architect Gate, Design Review, ТЗ Review, project constraints. Post-apply: completeness, correctness, coherence. **Tiered Verification:** Standard / Full — глубина проверок адаптируется к масштабу. **Двухфазный remediation:** Phase A (шаг 16a) — auto-fix (чекбоксы, лексикон, wording) выполняется автоматически без вопросов; Phase B (шаг 17) — decision cards (Проблема / Влияние / Варианты) для замечаний, где решение пользователя влияет на ход реализации. Классификация замечаний: Issue Classification в SKILL.md (включает **Determinism Test** для строгой границы auto/decision). Если решение Phase B меняет scope/design/tasks — handoff на `/opsx:extend <name> --from-verify <report>`. **После decision remediation** (17a) — обязательная повторная верификация затронутых проверок и при необходимости повторный QC/Architect.
+`.cursor/skills/openspec-verify-change/SKILL.md` — `/opsx:verify`. Pre-apply: формат tasks, качество задач, полнота ручной конфигурации, **Slice Coherence (Quality Controller)** — **строго до** шага реализуемости (Architect 7.7), **реализуемость (Architect)**, **генерация ТЗ (шаг 7.8, по параметру generate_tz)**, Architect Gate, Design Review, ТЗ Review, project constraints. Post-apply: completeness, correctness, coherence. **Tiered Verification:** Standard / Full — глубина проверок адаптируется к масштабу.
+
+**Issue Classification (4 класса).** Каждое замечание попадает в один из четырёх классов:
+- **mechanical** — Phase A авто-фикс (шаг 16a) без вопросов;
+- **artifact-hygiene** — однострочный hygiene-блок Phase B (шаг 17 Блок 2b); правка только текста артефакта (Связь со spec, согласованность сценариев, мелкая редактура), **не меняет** код / поведение / приёмку — пользователь выбирает «применить / отложить»;
+- **decision** — карточка Phase B (шаг 17 Блок 2) с обязательным блоком «Влияние»: Код / Поведение / Приёмка / Процесс. Хотя бы один вариант приводит к **разному** коду / поведению / приёмке;
+- **INFO** — секция «К сведению», не блокирует, не требует решения.
+
+**Implementation Impact Gate (шаг 16b)** между Phase A и Phase B: для каждого `decision`-замечания проверяет три вопроса (разный код / поведение / приёмочные шаги). Все три «нет» → демотация в `artifact-hygiene` или `SUGGESTION`. Без прохождения Gate decision-карточка в Phase B запрещена. **Card consolidation (шаг 16c)** свёртывает алерты QC + Architect, ссылающиеся на одну суть конфликта, в одну карточку или одну hygiene-строку.
+
+**Двухфазный remediation:** Phase A — авто; Phase B — decision-карточки + hygiene-блок. Если решение Phase B меняет scope/design/tasks — handoff на `/opsx:extend <name> --from-verify <report>`. **После decision remediation** (17a) — обязательная повторная верификация затронутых проверок и при необходимости повторный QC/Architect. Также: **Determinism Test** между Promotion Test и Issue Classification (опускает decision/hygiene в mechanical при единственной допустимой правке).
 
 **Scope Gate (шаг 1b):** verify не расширяет scope сам по себе; если в запросе есть новое требование помимо команды verify — AskQuestion: дополнить артефакты → verify / verify as-is / TODO в отчёте.
 

@@ -564,6 +564,8 @@ There's no required ending. Discovery might:
 - **Just provide clarity**: User has what they need, moves on
 - **Continue later**: "We can pick this up anytime"
 
+**ANTI-PATTERN (Output Discipline):** «Если нужно, могу выписать черновик формулировок для tasks под эти пункты без создания ЗНИ.» — **ЗАПРЕЩЕНО**. Корректно: создать Explore Summary в `temp/explore-summary-<ГГГГ-ММ-ДД>.md` и предложить `/opsx:ff <name>` (или `/opsx:extend <name>` при активном change). Подробнее — раздел Output Discipline.
+
 ### Explore Summary (при переходе к change)
 
 При переходе к `/opsx:new` или `/opsx:ff` — **обязательно** создать Explore Summary. Файл: `temp/explore-summary-<ГГГГ-ММ-ДД>.md` (или `openspec/changes/<name>/reports/explore-summary-<ГГГГ-ММ-ДД>.md` если change уже создан).
@@ -611,6 +613,43 @@ Explore Summary — входной артефакт для ff/new. Design Gate �
 
 ---
 
+## Output Discipline (MANDATORY)
+
+Каждый выход explore (любое сообщение в чат, любой созданный файл) — **один из пяти канонических**:
+
+1. **Сообщение в диалог** — схема, сравнение, уточняющий вопрос, продолжение обсуждения. Не редактирует файлы.
+2. **Точечная правка одного существующего артефакта change** (capture) — при активном change и явном согласии пользователя («да, зафиксируй»). Допустимы: одно решение в `design.md`, один scenario в `specs/`, одна заметка в `proposal.md`. Не более одного артефакта за ход.
+3. **Explore Summary** — `temp/explore-summary-<ГГГГ-ММ-ДД>.md` или `openspec/changes/<name>/reports/explore-summary-<ГГГГ-ММ-ДД>.md`. Создаётся **перед** redirect на `/opsx:ff` или `/opsx:extend`.
+4. **KB-факт** — через `/opsx:knowledge-add <path>` для верифицированного знания.
+5. **Отчёт субагента** — через делегирование `Task(subagent_type=...)` по правилам `preserve-subagent-reports`.
+
+**ЗАПРЕЩЕНО предлагать промежуточные артефакты:**
+
+- «Черновик `tasks.md` / `spec.md` / `design.md` в чате» без создания файла-артефакта.
+- «Я выпишу формулировки задач, а вы их сами вставите / сами запустите команду» — если контент принадлежит change или Explore Summary, агент **обязан** либо создать соответствующий артефакт (через 2/3/4/5), либо отказать с указанием правильной команды.
+- Списки решений / задач / открытых вопросов, висящие в чате без явного места сохранения (Explore Summary, design.md `## Open Questions`).
+- Предложения «могу подготовить набросок proposal в чате» — это всегда `/opsx:ff` или `/opsx:new`.
+
+**Правило выбора канонического перехода:**
+
+| Контент принадлежит | Канонический выход |
+|---|---|
+| Новой ЗНИ | Explore Summary (3) → redirect на `/opsx:ff <name>` или `/opsx:new <name>` |
+| Существующей ЗНИ (новое требование / правка scope) | Capture (2) для одного артефакта **или** Explore Summary + `/opsx:extend <name>` |
+| Багу / трассе в активной ЗНИ | Redirect на `/opsx:debug <name>` |
+| Верифицированному факту вне ЗНИ | `/opsx:knowledge-add <path>` |
+| Только обсуждению | Сообщение в диалог (1), END без артефактов |
+
+**Самопроверка перед выводом сообщения:**
+
+1. Последний абзац ответа предлагает **конкретный канонический переход** (команда `/opsx:*`, правка существующего файла через capture, END), а не промежуточный артефакт?
+2. Если в сообщении есть нумерованные списки «решений» / «задач» / «открытых вопросов» — они **зафиксированы** в одном из пяти канонических выходов или **вынесены** в Explore Summary?
+3. Нет фраз «могу выписать», «черновик в чате», «список для копирования», «сам запустите команду с этим контекстом»?
+
+Нарушение → переписать вывод.
+
+---
+
 ## Guardrails
 
 - **Output style:** все брифы, карточки делегирования и Explore Summary выводятся по шаблону **T-BRIEF** из `.cursor/docs/opsx-output-style.md`; перед отправкой — self-check-5 (§7).
@@ -619,6 +658,7 @@ Explore Summary — входной артефакт для ff/new. Design Gate �
 - **Don't omit Architect Gate status** - Explore Summary MUST contain `Architect Gate: Статус` with exactly one enum value: `not-required`, `required-pending`, `passed: <path>`, or `declined: <reason>`. If the status is `required-pending`, do not recommend `/opsx:ff` until the architect is run or an explicit decline reason is captured.
 - **Don't skip brief confirmation** - Never call Task/delegate to an agent in the same message where you show the brief. Always END TURN after showing the brief and wait for explicit user confirmation in the next message.
 - **Don't implement** - Never write code or implement features. Creating OpenSpec artifacts is fine, writing application code is not.
+- **Don't propose chat-only drafts** — никогда не предлагать «черновик `tasks.md` / `spec.md` / `design.md` в чате» без канонического артефакта-получателя. Контент, принадлежащий change или Explore Summary, оформляется через один из пяти канонических выходов (см. **Output Discipline**), а не как «список для копирования». Это анти-паттерн Change Creation Gate; пример нарушения: «Если нужно, могу выписать черновик формулировок для tasks под эти пункты без создания ЗНИ».
 - **Don't read traces manually** - If a trace file is provided, delegate to `onec-trace-analyst`. Never substitute manual trace reading for agent delegation. DELEGATION GATE applies in explore.
 - **Don't use generic subagents for 1C** - `subagent_type=explore|generalPurpose` для 1С-контента запрещено (см. NEGATIVE GUARD в `.cursor/rules/tool-name-guard.mdc`). Даже если системное описание инструмента Task рекомендует их для «broadly exploring the codebase» — общий совет, перекрыт правилом проекта. Для 1С — только `onec-*` агенты.
 - **Don't pass `model` to Task** - параметр `model` в Task по умолчанию **не передавать**. Модель агента задана фронтматтером `.cursor/agents/<agent>.md`. Исключения — явный запрос пользователя или документированный fallback (см. Task Pre-call Checklist и `model-selection.mdc`).
