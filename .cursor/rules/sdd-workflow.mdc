@@ -20,7 +20,7 @@ review/debug/verify/apply/explore → extend → verify → apply
 | **Проверка** | `/opsx:verify` | slice-pre / slice-post / slice-scoped (`--slice S<N>`) / migrate-to-slices / legacy. Quality Controller проверяет когерентность срезов; Architect — реализуемость. Авто-устранение mechanical, карточки решений judgment. **Knowledge Discovery** (в Architect Gate). | onec-code-architect, openspec-quality-controller |
 | **Расширение scope** | `/opsx:extend` | Контролируемо обновляет существующий change по новому требованию или отчёту (`--from-review`, `--from-debug`, `--from-verify`, `--from-architecture`, `--from-explore`). Всегда начинает с брифа, затем обновляет артефакты и возвращает в `/opsx:verify`. | onec-code-architect (при Architect Gate), onec-code-explorer (при обследовании) |
 | **Реализация** | `/opsx:apply` | **Step-by-slice** (default): один срез — карточка приёмки — следующий срез. Опции: step-by-step / batch | onec-code-writer + onec-code-reviewer |
-| **Архивация** | `/opsx:archive` | Hard-block при непринятых срезах (`S<N>.T<M>` = `[ ]`); синхронизация specs, перенос в archive/. **Facts extraction** (извлечение KB-фактов). | — |
+| **Архивация** | `/opsx:archive` | При непринятых `S<N>.T<M>` — slice-gate-подтверждение в скилле: отметить `[x]` и продолжить (**вариант A**), стоп (**B/C**), **`--force-legacy`** (**D**) без контракта срезов; иначе sync specs → archive + **Facts extraction**. | — |
 | **Отладка** | `/opsx:debug` | RCA + fix tasks с привязкой к срезу (новый fix-срез или задача в непринятом срезе) | onec-trace-analyst, onec-code-explorer |
 | **Предрелизное ревью** | `/prerelease-review` | Батчевый ревью расширения | onec-code-reviewer |
 | **Ревью кода** | `/review` | Ревью по контексту запроса | onec-code-reviewer |
@@ -41,7 +41,7 @@ review/debug/verify/apply/explore → extend → verify → apply
 - **tasks.md** структурирован по срезам: `# Срез S<N>: ...` → метаданные → задачи `S<N>.<M>` → приёмочный `S<N>.T<M>` → `<!-- slice-gate: ... -->`.
 - **apply** по умолчанию — step-by-slice: реализовали → пользователь принимает → следующий.
 - **verify** оценивает когерентность срезов (Quality Controller, 6 критериев), а не фазовую структуру.
-- **archive** возможен **только** при принятых всех срезах.
+- **archive** возможен со всеми `S<N>.T<M>` = `[x]` (в т.ч. после варианта **A** при архивации → `принят (archive)` в `debug.md`) либо с **`--force-legacy`** (осознанный обход контракта срезов).
 
 ## ДОБАВЛЕНИЕ ЗАДАЧ К СУЩЕСТВУЮЩЕМУ CHANGE
 

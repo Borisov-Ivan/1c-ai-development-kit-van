@@ -11,4 +11,6 @@ Archive a completed change in the experimental workflow.
 
 **Output style:** T-CONFIRM (`.cursor/docs/opsx-output-style.md` §5.5).
 
-Input: optionally specify a change name (e.g., `/opsx:archive add-auth`). If omitted, the skill will prompt for selection.
+Input:
+- Optionally specify a change name (e.g., `/opsx:archive add-auth`). If omitted, the skill will prompt for selection (step 1).
+- **`--force-legacy`:** пропуск slice-gate на шаге 3.5 при непринятых **`S<N>.T<M>`** (архив без отметки в `tasks.md`, warnings). Иначе при `[ ]` на приёмочных тестах — карточка и **AskQuestion** (подтверждение как на slice gate в apply: отметка и продолжение / стоп / force-legacy).

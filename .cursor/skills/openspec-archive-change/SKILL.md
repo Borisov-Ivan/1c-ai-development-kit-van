@@ -13,7 +13,7 @@ Archive a completed change in the experimental workflow.
 
 **Output style:** итоговое сообщение пользователю (что архивировано, куда, Warnings) — шаблон **T-CONFIRM** из `.cursor/docs/opsx-output-style.md` §5.5: действие → изменённые файлы (новый путь в `archive/`, затронутые specs) → следующий шаг. Блок Warnings — нумерованный список коротких пунктов (см. §4 стайл-гайда). Перед выводом — self-check-5 (§7).
 
-**Auto-yes policy:** Invoking archive means the user accepts the recommended path: proceed despite incomplete artifacts/tasks, **sync delta specs to main** when a delta exists, and **extract all ADR-worthy decisions** from architecture reports. Do **not** use **AskUserQuestion** for these steps—collect issues into the **Warnings** block in the final summary (step 7). Only step 1 may prompt when the target change is ambiguous.
+**Auto-yes policy:** Invoking archive means the user accepts the recommended path: proceed despite incomplete artifacts/tasks, **sync delta specs to main** when a delta exists, and **extract all ADR-worthy decisions** from architecture reports. Do **not** use **AskQuestion** for ADR/sync, gaps артефактов шага 2–3 или незакрытых обычных задач без slice-gate — переносить в **Warnings** (шаг 7). **Исключения (AskQuestion разрешён):** шаг 1 — выбор change при неоднозначности; шаг 3.5 — непринятые приёмочные тесты в slice mode; шаг 5.5 — сохранение KB-фактов.
 
 **Input**: Optionally specify a change name. If omitted, check if it can be inferred from conversation context. If vague or ambiguous you MUST prompt for available changes.
 
@@ -24,7 +24,7 @@ Archive a completed change in the experimental workflow.
    If a name is provided, use it. Otherwise:
    - Infer from conversation context if the user mentioned a change
    - Auto-select if only one active change exists
-   - If multiple active changes: run `openspec list --json`, show only active changes (not archived), include schema, and use **AskUserQuestion tool** to let user select
+   - If multiple active changes: run `openspec list --json`, show only active changes (not archived), include schema, and use **AskQuestion** to let user select
 
    Always announce: "Using change: <name>" and how to override (e.g., `/opsx:archive <other>`).
 
@@ -40,7 +40,7 @@ Archive a completed change in the experimental workflow.
 
    **If any artifacts are not `done`:**
    - Append to warnings: list each incomplete artifact by name and status (e.g. `Artifact "debug" was not marked done`)
-   - **Do not** use AskUserQuestion; continue automatically
+   - **Do not** use AskQuestion; continue automatically
 
 2a. **Verify freshness check (soft-gate, не блокирующий)**
 
@@ -74,7 +74,7 @@ Archive a completed change in the experimental workflow.
    **If incomplete tasks found:**
    - Parse task IDs from lines (e.g. `- [ ] 3.1 ...` или `- [ ] S2.4 ...` → include `3.1` / `S2.4` in the warning list when present)
    - Append to warnings: count and, when identifiable, IDs (e.g. `4 incomplete tasks in tasks.md (S1.3, S2.1, S2.4, S3.7)`)
-   - **Do not** use AskUserQuestion; continue automatically
+   - **Do not** use AskQuestion; continue automatically
 
    **If no tasks file exists:** Proceed without task-related warning.
 
@@ -105,30 +105,58 @@ Archive a completed change in the experimental workflow.
 
    Detect slice mode: grep `tasks.md` for `^# Срез S\d+`.
 
-   **If slice mode detected:**
-   - Для каждого среза S<N> определить статус приёмки: найти задачу `S<N>.T<M>` (приёмочный тест) и проверить, отмечена ли она `[x]`.
-   - **Если есть хотя бы один срез с непринятым `S<N>.T<M>` (`[ ]`)** — это **блокер архива** (override auto-yes):
-     - Не выполнять шаги 4–7. Показать пользователю:
-       ```
-       ## Архив заблокирован: непринятые срезы
-       
-       | Срез | Статус | Acceptance test |
-       |------|--------|-----------------|
-       | S1   | принят | S1.T9 [x]       |
-       | S2   | в работе / не принят | S2.T6 [ ] |
-       
-       Архив возможен только после приёмки **всех** срезов (S<N>.T<M> = `[x]`).
-       Варианты:
-       1. Завершить срезы через `/opsx:apply <name>`.
-       2. Запустить `/opsx:verify <name>` — проверить, что мешает приёмке.
-       3. Переключить ЗНИ в legacy: явно отметить все принятые задачи и запустить `/opsx:archive <name> --force-legacy` (рискованно — теряется контракт срезов).
-       ```
-     - Использовать **AskUserQuestion** с этими тремя вариантами **(исключение из auto-yes для slice mode)**.
-     - Пользователь выбирает 1 или 2 → завершить archive (return), посоветовать команду.
-     - Пользователь выбирает 3 → продолжить шаги 4–7, добавить в warnings: `Archived with --force-legacy: K непринятых срезов (S<N>, ...) — контракт срезов нарушен`.
-   - **Если все срезы приняты** (все `S<N>.T<M>` = `[x]`) — продолжить со шага 4. В summary указать: `Slices: K/K приняты`.
-
    **Legacy mode (нет `# Срез`):** пропустить шаг 3.5.
+
+   **Bypass `--force-legacy`:** Если в команде пользователя есть флаг **`--force-legacy`**, не показывать карточку и AskQuestion. Сразу добавить в warnings: `Archived with --force-legacy: контракт срезов нарушен; непринятые приёмочные тесты остаются с [ ]` (перечислить каждый `S<N>.T<M>` со статусом `[ ]`, если есть). Продолжить со шага 4.
+
+   **Если slice mode и нет `--force-legacy`:**
+
+   1. Парсинг `tasks.md` по блокам между заголовками `# Срез S<N>`.
+      - **Приёмочный тест** — строка чеклиста с ID **`S<N>.T<M>`** (после первой точки идёт буква **`T`**).
+      - **Рабочая задача среза** — строка с **`S<N>.<число>`**, где после точки только цифры (например `S1.3`), без `T`.
+      - Для каждого среза определить: есть ли **`S<N>.T<M>`** с **`[ ]`**. Если есть — пометить срез «есть непринятые T» и проверить: **все** рабочие задачи этого среза **`[x]`**? Если да — срез **готов к приёмке из archive**; если нет — срез **не готов** (перечислить незакрытые рабочие ID).
+
+   2. **Если все `S<N>.T<M>` = `[x]`** — продолжить со шага 3.6. В финальном summary: `Slices: K/K приняты`.
+
+   3. **Если есть `[ ]` на любом `S<N>.T<M>`:** показать **краткую карточку** (не полный T-HANDOFF из `/opsx:apply`; итоговый вывод archive остаётся **T-CONFIRM**, §5.5):
+
+      ```
+      ## Slice gate при архивации — непринятые приёмочные тесты
+
+      | Срез | Тест | Готовность среза | Строка (фрагмент) |
+      |------|------|------------------|-------------------|
+      | …    | …    | да / нет (+ незакрытые задачи при «нет») | … |
+      ```
+
+      Пояснение одной строкой: без **`[x]`** на **`S<N>.T<M>`** контракт среза формально не закрыт; подтверждение ниже фиксирует действие.
+
+   4. **Условие опции A:** опция **A** в AskQuestion допустима **только если** каждый срез, в котором есть **`[ ]`** на **`S<N>.T<M>`**, уже **«готов»** (все рабочие задачи среза **`[x]`**). Если условие не выполнено — перед AskQuestion вывести строку «**Вариант A недоступен:** есть срезы с незакрытыми задачами реализации; завершите через `/opsx:apply <name>`.» и выдать **AskQuestion только с опциями B, C, D**.
+
+   5. **AskQuestion** (исключение из auto-yes). Подписи опций должны явно содержать дисклеймер: подтверждение успешного прогона на ИБ — ответственность пользователя.
+
+      - **A.** *(если выполнено условие п.4)* Принято на ИБ — **отметить все перечисленные `S<N>.T<M>`** с **`[ ]`** как **`[x]`** в `tasks.md`, **продолжить архив** (шаги 4–7 после повторной проверки п.8).
+      - **B.** Тесты не пройдены / нужна доработка → **STOP**; рекомендовать `/opsx:apply <name>` или `/opsx:verify <name>`.
+      - **C.** Отложить архив → **STOP**.
+      - **D.** Принудительное продолжение **без** отметки в `tasks.md` (семантика **`--force-legacy`**) → шаги 4–7; в warnings: `Archived with --force-legacy: …` (перечислить непринятые `S<N>.T<M>`).
+
+   6. Обработка ответов: **B** или **C** → завершить archive (**return**). **D** → warnings как в п.5, продолжить шаг 4.
+
+   7. **Ответ A — обязательные артефакты (MUST):**
+      - Для каждой строки **`- [ ] S<N>.T<M>`** среди блокирующих заменить на **`- [x]`** (без изменения текста сценария).
+      - **Append** в `debug.md` секцию **`## Slice Gate Decisions`** — по **каждому** затронутому срезу отдельный подблок или один сводный с перечнем тестов; формат:
+        ```markdown
+        ### Slice S<N> — <краткое имя из заголовка среза> (YYYY-MM-DD)
+        Срез: S<N> — <имя>
+        Решение: принят (archive)
+        Обоснование: подтверждение пользователя при `/opsx:archive`; приёмочные тесты отмечены в tasks.md.
+        Изменения tasks: отмечены [x]: <S<N>.T<M>, …>
+        Связанный отчёт: reports/slice-acceptance-S<N>-YYYY-MM-DD.md
+        ```
+      - Для **каждого** затронутого среза создать **`reports/slice-acceptance-S<N>-YYYY-MM-DD.md`** (каноническое имя см. `.cursor/rules/vertical-slices.mdc`): краткий отчёт (факт принятия при архивации, дата, перечень `T<M>`, напоминание что прогон ИБ подтверждён пользователем).
+
+   8. После выполнения п.7 **повторить** парсинг п.1–2: все **`S<N>.T<M>`** должны быть **`[x]`**. Если после правок остался **`[ ]`** — **STOP**, сообщить о несоответствии `tasks.md` (ошибка парсера/формата). Иначе — перейти к шагу **3.6**.
+
+   Итог в summary после успешного прохода без force-legacy: `Slices: K/K приняты` (или с пометкой, что приёмка зафиксирована через **вариант A** при архивации).
 
    3.6. **Code-Truth Gate (HARD BLOCKER for completed scope)**
 
@@ -182,7 +210,7 @@ Archive a completed change in the experimental workflow.
    **If architecture reports found:**
    - For each `architecture-*.md`, read the report and identify key **decisions** (not analysis/validation).
    - A decision is ADR-worthy if: it affects future changes, involves trade-offs between alternatives, or establishes a contract/pattern/principle. See criteria in `.cursor/rules/adr-format.mdc`.
-   - Show a **brief informational** summary of candidate decisions (report file + one-line title each)—**no AskUserQuestion**
+   - Show a **brief informational** summary of candidate decisions (report file + one-line title each)—**no AskQuestion**
    - **Automatically extract all** ADR-worthy decisions (equivalent to former option «Да, извлечь все»):
      1. Determine next ADR number: Glob `openspec/adrs/ADR-*.md`, take max NNNN + 1 (or 0001 if empty)
      2. For each selected decision, create ADR file using format from `.cursor/rules/adr-format.mdc`:
@@ -260,7 +288,7 @@ Use this template; adapt lines to facts (omit `### Warnings` when there are none
 **Change:** <change-name>
 **Schema:** <schema-name>
 **Archived to:** openspec/changes/archive/YYYY-MM-DD-<name>/
-**Slices:** K/K приняты | N/A (legacy mode) | Force-legacy archive (нарушен контракт срезов)
+**Slices:** K/K приняты | N/A (legacy mode) | Принято при архивации (вариант A → `принят (archive)` в debug) | Force-legacy (контракт срезов нарушен)
 **Specs:** ✓ Synced to main specs (N requirements updated) | Already up to date | No delta specs
 **ADR:** ✓ Extracted N ADRs (ADR-NNNN, ...) | No architecture reports | No ADR-worthy decisions extracted
 **Knowledge:** ✓ Saved N (KB-NNNN, ...) | Deferred N — reuse value not justified | Declined by user | No candidates after filters | Skipped — no analytical reports | Blocked — taxonomy missing
@@ -273,7 +301,7 @@ Use this template; adapt lines to facts (omit `### Warnings` when there are none
 - Always prompt for change selection if not provided (step 1 only)
 - Use artifact graph (`openspec status --json`) for completion checking
 - **Don't block archive on warnings** — inform in the final summary (`### Warnings`) and proceed automatically
-- **EXCEPTION (slice mode, step 3.5):** **Hard block** archive when slice mode is detected and any `S<N>.T<M>` is `[ ]`. Override auto-yes for this case. Только пользователь может выбрать `--force-legacy` для продолжения, и это явно фиксируется в warnings.
+- **EXCEPTION (slice mode, step 3.5):** при любом `S<N>.T<M>` = `[ ]` — **pause** до **AskQuestion**: варианты **A** (отметить `[x]` и продолжить при готовых срезах), **B/C** (стоп), **D** / **`--force-legacy`** (продолжить без отметки, warnings). Флаг **`--force-legacy`** в команде обходит карточку.
 - **Recommended actions are automatic:** delta spec sync when merge is needed; ADR extraction for all ADR-worthy decisions from `reports/architecture-*.md`
 - Preserve `.openspec.yaml` when moving to archive (it moves with the directory)
 - Show clear summary of what happened

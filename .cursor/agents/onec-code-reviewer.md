@@ -192,9 +192,9 @@ Check:
       correct finding there is removal, not merging.
 
   Release hygiene (process metadata in comments only):
-    - Changelog markers in comments: author+date+ticket in comment lines
-      (// +++ Author, // ---, // НАЧАЛО/КОНЕЦ Изменения внес:,
-       // РГИТС ... +++/---, Заявка №, Подрядчик:, date-author stamps) — MEDIUM
+    - Whitelisted ЗНИ-пары // +++ / // --- (openspec/project.md) — не считать findings AP-040 (см. AP-040 whitelist в bsl-antipatterns.mdc).
+    - Устаревшие / вне-whitelist маркеры: // НАЧАЛО/КОНЕЦ Изменения, // РГИТС ..., Заявка №, Подрядчик:, date-author без шаблона whitelist — MEDIUM
+    - JSDoc над Процедура/Функция: сноски (см. <kebab-change> ...), пути reports/openspec/temp/reports, упоминание *.md как доказательства решения — MEDIUM (AP-040)
     - Commented-out old code with replacement markers
       ("Оригинальный код:", "Новый код:", "Старый вариант:") — MEDIUM
     - Work instructions in code

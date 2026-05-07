@@ -67,16 +67,19 @@ alwaysApply: true
 - По явному запросу пользователя («используй gemini», «используй opus»).
 - При документированном fallback (см. пункт «Fallback-перехват» ниже).
 
-Никогда не передавать `model="fast"` для 1С-агентов: для `onec-code-architect` это понижает Opus до fast; для `onec-code-explorer` / `onec-code-reviewer` — переопределяет оптимальную модель из фронтматтера. См. `.cursor/rules/model-selection.mdc`.
+**После сбоя вызова 1С-агента** (недоступность модели API, таймаут, лимиты): см. **FALLBACK STRATEGY** в `.cursor/rules/model-selection.mdc` — типично повтор с тем же `subagent_type` и **`model="inherit"`**; для `onec-code-architect` сначала **`onec-code-architect-2nd`**, затем при необходимости `model="inherit"`.
+
+Никогда не передавать `model="fast"` для 1С-агентов: для `onec-code-architect` это понижает Opus до fast; для `onec-code-explorer` / `onec-code-reviewer` — переопределяет оптимальную модель из фронтматтера. **Не использовать `model="fast"` как универсальный retry после сбоев API.**
 
 ## При ошибке `Invalid enum value`
 
 1. Проверить имя инструмента — должен быть **Task** (в других средах или в памяти иногда фигурируют иные имена — здесь корректно только Task).
 2. Проверить `subagent_type` по списку выше; для 1С-задач — только 1С-агенты.
 3. Не переключаться на `generalPurpose` / `explore` как на «запасной вариант» — это маскирует причину.
-4. **Fallback-перехват:** Если вызов `onec-code-architect` падает с ошибкой недоступности модели или таймаутом, не останавливаться, а выполнить повторный вызов с `subagent_type="onec-code-architect-2nd"`.
-5. Если retry не помог — СТОП, сообщить пользователю.
-6. **Схема `Task` без `onec-*` (ожидаются только `generalPurpose` / `explore` / `shell` / …):** кастомные субагенты из `.cursor/agents/*.md` не подхватились. Проверить по [документации Cursor (subagents)](https://cursor.com/docs/subagents.md): в YAML frontmatter поле **`model`** допустимо только `inherit`, `fast` или **идентификатор модели** — значение `default` и прочие нестандартные строки могут приводить к тому, что файл агента не регистрируется. Исправить frontmatter, **Developer: Reload Window**, убедиться что корень рабочей области — репозиторий с каталогом `.cursor/agents/`. Если после этого `onec-code-explorer` по-прежнему не в enum — обновить Cursor и проверить ограничения плана / Team admin на субагенты.
+4. **Fallback-перехват (архитектор):** недоступность модели или таймаут — `Task(subagent_type="onec-code-architect-2nd")`; далее по **FALLBACK STRATEGY** в `model-selection.mdc` (`model="inherit"`).
+5. **Fallback (остальные 1С-агенты):** тот же класс ошибок — повтор `Task` с **`model="inherit"`**, тот же `subagent_type`.
+6. Если retry-цепочка из `model-selection.mdc` не помогла — СТОП, сообщить пользователю.
+7. **Схема `Task` без `onec-*` (ожидаются только `generalPurpose` / `explore` / `shell` / …):** кастомные субагенты из `.cursor/agents/*.md` не подхватились. Проверить по [документации Cursor (subagents)](https://cursor.com/docs/subagents.md): в YAML frontmatter поле **`model`** допустимо только `inherit`, `fast` или **идентификатор модели** — значение `default` и прочие нестандартные строки могут приводить к тому, что файл агента не регистрируется. Исправить frontmatter, **Developer: Reload Window**, убедиться что корень рабочей области — репозиторий с каталогом `.cursor/agents/`. Если после этого `onec-code-explorer` по-прежнему не в enum — обновить Cursor и проверить ограничения плана / Team admin на субагенты.
 
 ---
 
