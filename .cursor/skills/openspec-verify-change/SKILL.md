@@ -49,15 +49,17 @@ flowchart TD
   V --> W[18 Save report]
 ```
 
-**Контракт режима/tier:** первые **три строки** ответа verify пользователю — фиксированная шапка, например:
+**Контракт режима/tier:** первые **три строки** ответа verify пользователю — фиксированная шапка в пользовательском языке (технический код режима — в backticks для автоматизации). Пример:
 
 ```
-Режим: slice-pre (ЗНИ подготовлена; срезов принятых: 0/3)
-Tier: Standard (12 задач, 3 среза)
-Этап: Pre-apply проверки формата/качества/когерентности → Architect readiness → ТЗ
+Режим: проверка до реализации среза (`slice-pre`) — принятых срезов: 0/3
+**Объём:** Полная (12 задач, 3 среза)
+**Что проверим:** формат, согласованность срезов, готовность к реализации
 ```
 
 Без этого блока ответ считается неполным.
+
+Соответствие технических кодов и пользовательских формулировок «Этап» — в шаге 16 (таблица в Executive Summary). Слова `Tier` / `Standard` / `Lite` / `Full` и калька «когерентность» в чате не цитируются (см. §3.1 `opsx-output-style.md`).
 
 **Input**: Optionally specify a change name. If omitted, check if it can be inferred from conversation context. If vague or ambiguous you MUST prompt for available changes.
 
@@ -167,7 +169,7 @@ Tier: Standard (12 задач, 3 среза)
    - QC (шаг 7.6) и Architect (шаг 7.7) вызываются всегда.
    - ТЗ (шаг 7.8) генерируется в зависимости от параметра `generate_tz`.
 
-   Объявить пользователю: "Tier: Standard (<N> задач, <M> срезов)".
+   Объявить пользователю в формате шапки шага 1: `**Объём:** Полная (<N> задач, <M> срезов)`. Слово `Tier` и метки `Standard` / `Lite` / `Full` в пользовательском выводе не цитируются (см. §3.1 `opsx-output-style.md`); технические метки остаются в YAML отчёта `verification-*.md`.
 
 5. **Initialize report structure**
 
@@ -175,7 +177,7 @@ Tier: Standard (12 задач, 3 среза)
    - **Artifact Format** (slice-pre / slice-post / legacy: pre-apply, mixed)
    - **Task Quality** (same modes)
    - **Manual Configuration Sufficiency** (same modes) — structured checklist with proof
-   - **Slice Coherence (Quality Controller)** (slice mode pre/post; legacy → `no-slices` SUGGESTION) — scenario coverage, slice independence, completeness, dependency graph, slice gate integrity, rework risk
+   - **Согласованность срезов (Quality Controller)** (slice mode pre/post; legacy → `no-slices` SUGGESTION) — scenario coverage, slice independence, completeness, dependency graph, slice gate integrity, rework risk
    - **Task Readiness (Architect)** — mandatory architect holistic assessment of realizability
    - **TZ (Functional Requirements)** — generated TZ document, gap analysis
    - **Gates**: Architect Gate, **Precedent Regression** (шаг 9b), Design Review, TZ Review, Project Constraints
@@ -394,7 +396,7 @@ Tier: Standard (12 задач, 3 среза)
 
    **After receiving the controller's report:**
    1. Save full report to `reports/quality-control-YYYY-MM-DD.md`.
-   2. Include verdict and slice summary + scenario coverage matrix in the verification report (section "Когерентность срезов (Quality Controller)").
+   2. Include verdict and slice summary + scenario coverage matrix in the verification report (section "Согласованность срезов (Quality Controller)").
    3. Map each alert to verification issues (затем **Actionability Gate**):
       - `scenario-uncovered` → WARNING (actionable: добавить срез или задачу в существующий).
       - `dependency-cycle`, `coupling-violation`, `missing-slice-test`, `backward-reference`, `fix-slice-on-unaccepted` → CRITICAL.
@@ -463,7 +465,7 @@ Tier: Standard (12 задач, 3 среза)
    - specs: <путь>
    - Чеклист ручной конфигурации (verify, шаг 7.5): <чеклист-таблица или «маркеров не найдено»>
    - Замечания механических проверок (verify, шаги 7A-7C): <список или «замечаний нет»>
-   - Когерентность срезов (verify, шаг 7.6 Quality Controller): <slice summary + scenario coverage matrix + alerts или «замечаний нет»>
+   - Согласованность срезов (verify, шаг 7.6 Quality Controller): <slice summary + scenario coverage matrix + alerts или «замечаний нет»>
 
    ## Критерии оценки
 
@@ -575,7 +577,7 @@ Tier: Standard (12 задач, 3 среза)
 
    ## Критерии оценки
 
-   1. **Когерентность срезов.** Если в tasks.md есть `# Срез` — оцени корректность срезов (независимость, полнота, наличие S<N>.T<M>). Если срезов нет — отметь legacy-режим и проверь, нет ли false start (код есть, задача [ ]) или rework risk.
+   1. **Согласованность срезов.** Если в tasks.md есть `# Срез` — оцени корректность срезов (независимость, полнота, наличие S<N>.T<M>). Если срезов нет — отметь legacy-режим и проверь, нет ли false start (код есть, задача [ ]) или rework risk.
    2. **Реализуемость кодовых задач.** Понятно ли ЧТО и ГДЕ делать? **Task Readability (1.b):** задачи (кроме `T<M>`) содержат файл/процедуру и бизнес-результат в первых 12 словах? Формулировки вида «Реализовать инвариант D<N>», «Обеспечить D<N>» → GAP `task-opaque-title`, предоставь сниппет-переформулировку. См. `.cursor/rules/task-readability.mdc`.
    3. **Разрешённость решений.** Все ли альтернативы разрешены?
    4. **Согласованность.** Нет ли противоречий между tasks, design и spec?
@@ -596,7 +598,7 @@ Tier: Standard (12 задач, 3 среза)
    ### Оценка по критериям
    | # | Критерий | Вердикт | Обоснование |
    |---|----------|---------|-------------|
-   | 1 | Когерентность срезов / legacy | OK/GAP | ... |
+   | 1 | Согласованность срезов / legacy | OK/GAP | ... |
    | 2 | Реализуемость кодовых задач | OK/GAP | ... |
    | 3 | Разрешённость решений | OK/GAP | ... |
    | 4 | Согласованность | OK/GAP | ... |
@@ -1031,24 +1033,46 @@ Tier: Standard (12 задач, 3 среза)
 
     ### Качество задач
     - [CRITICAL] N.M — нет пути к файлу, нет критериев приёмки
-    - [WARNING] N.M — размытость: «или аналог ...»
-    - [WARNING] N.M — «создать X», но X уже существует (repo consistency)
-    - [SUGGESTION] N.M — рекомендуется разбить на 2 задачи
+      Источник: `task-no-path-or-acceptance` (verify 7A)
+    - [WARNING] N.M — формулировка размытая: «или аналог», непонятно что именно делать
+      Источник: `task-ambiguous` (QC Task Readability)
+    - [WARNING] N.M — «создать X», но X уже существует в репозитории — переформулировать как «доработать X»
+      Источник: `repo-consistency` (verify 7C); файл: `<path>`
+    - [SUGGESTION] N.M — рекомендуется разбить на 2 задачи (3+ глаголов действия)
+      Источник: `task-not-atomic` (verify 7B)
     ...
 
+    Правила оформления пунктов (обязательно):
+    - В тексте пункта — формулировка проблемы для человека, без процитированных кодов категорий и без HTML-фрагментов разметки (`<!-- … -->`, `**Связь со spec:**` в кавычках и т. п.).
+    - В конце пункта — отдельная строка `Источник: <код-алерта>` (опционально с указанием файла/среза); туда же выносятся имена агентов и шагов verify.
+    - Имена движка (`Architect Gate`, `Precedent Regression Gate`, `Code-Truth Gate`, `Implementation Impact Gate`, `Promotion Test`) в текст пункта не попадают — только в строку «Источник:» или в файл отчёта (см. §3.1 `opsx-output-style.md`).
+
     ### Выполнимость и порядок задач (verify 7F, QC 5d)
-    - [INFO] порядок N.M → M.K обеспечен явными **Зависимостями:** в tasks (не требует действий пользователя до apply)
+    - [INFO] порядок N.M → M.K обеспечен явными зависимостями в tasks (не требует действий пользователя до apply)
+      Источник: `executability-explicit-deps` (verify 7F.1)
     - [WARNING] N.M — нет явной зависимости от M.K при выявленной потребности — дополнить tasks.md
+      Источник: `executability-implicit-dep` (verify 7F.1)
     - [SUGGESTION] N.M — расположен до зависимости M.K в файле (при этом граф может быть OK)
-    - [WARNING] Slice Gate: задача N.M [ ] помечена как зависимость S<N>.T<M>, но среза S<N>.T<M> нет
+      Источник: `executability-line-order` (verify 7F.1)
+    - [WARNING] задача N.M `[ ]` помечена как зависимость приёмочного теста среза S<N>: «<название>», но самого теста S<N>.T<M> нет
+      Источник: `slice-gate-missing-test` (verify 7F.3)
     - [SUGGESTION] «Порядок выполнения» не покрывает задачи: [list]
+      Источник: `execution-order-incomplete` (verify 7F.2)
     (или: замечаний выполнимости нет)
 
     ### Контекст (INFO)
 
-    Список всех INFO-строк (после Actionability Gate). Без развёрнутых абзацев. Пример:
-    - [INFO] K задач с `[ ]` ожидают реализации (mixed)
-    - [INFO] Цепочка 4.1→4.2 объявлена в tasks; apply соблюдает порядок
+    Список всех INFO-строк (после Actionability Gate). Без развёрнутых абзацев и без процитированных кодов категорий в тексте пункта. Каждая строка — одна формулировка в бизнес-языке для пользователя 1С. Если нужен технический контекст (имя агента / гейта / код алерта / путь файла) — отдельной строкой `Подробности — в reports/<file>.md` (или встроенной ссылкой на отчёт).
+
+    Запрещено в тексте пункта: имена агентов (`onec-code-architect`, `onec-code-architect-2nd`, `openspec-quality-controller` и пр.), имена гейтов (`Architect Gate`, `Precedent Regression Gate`, `Code-Truth Gate`, `Implementation Impact Gate`), коды алертов (`precedent-regression`, `slice-gate-misplaced`, `phantom-symbol` и пр.), идентификаторы движка (`capability`, `spec-delta`). Их место — в файле отчёта `reports/verification-*.md` или в строке «Подробности».
+
+    Примеры (бизнес-формулировка):
+
+    - [INFO] 6 задач ещё не реализованы — для продолжения: `/opsx:apply <name>`.
+    - [INFO] Цепочка зависимостей задач 4.1 → 4.2 объявлена в плане; реализация уважает порядок.
+    - [INFO] Сравнили эту ЗНИ с ранее зафиксированными требованиями той же области — конфликтов нет. Подробности — в `reports/verification-<mode>-YYYY-MM-DD.md`.
+    - [INFO] Архитектурное ревью готовности задач закрыто. Подробности — в `reports/task-readiness-review-YYYY-MM-DD.md`.
+    - [INFO] Основной архитектурный агент в этой сессии был недоступен; ревью выполнено резервным агентом, итог — «готово с пометкой о низкой уверенности». Подробности — в `reports/task-readiness-review-YYYY-MM-DD.md`.
 
     ### Полнота ручной конфигурации (чеклист шага 7.5)
 
@@ -1072,7 +1096,7 @@ Tier: Standard (12 задач, 3 среза)
 
     (повторить для каждого маркера; при отсутствии маркеров — «маркеров не найдено»)
 
-    ### Когерентность срезов (Quality Controller)
+    ### Согласованность срезов (Quality Controller)
 
     **Вердикт:** OK / WARNING / CRITICAL
     **Полный отчёт:** reports/quality-control-YYYY-MM-DD.md
