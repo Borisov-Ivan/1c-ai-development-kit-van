@@ -18,10 +18,14 @@ alwaysApply: false
 ```markdown
 # ADR-NNNN: Краткое название решения
 
-**Статус:** Proposed | Accepted | Superseded by ADR-NNNN | Deprecated | Rejected
+**Статус:** Proposed | Accepted | Load-Bearing | Superseded by ADR-NNNN | Deprecated | Rejected
 **Дата:** YYYY-MM-DD
 **Область:** <домен/подсистема>
 **Источник:** openspec/changes/archive/<date>-<name>/reports/<report>.md
+**Load-bearing:** no | yes           # по умолчанию no; yes — контракт ограничивает будущие ЗНИ в этой области
+**Protects-invariants:**              # опционально; список коротких строк — какие инварианты закрепляет ADR
+  - "<краткая формулировка инварианта 1>"
+  - "<краткая формулировка инварианта 2>"
 
 ## Контекст
 
@@ -50,6 +54,10 @@ alwaysApply: false
 - **Changes:** archive/<date>-<name>/
 - **Supersedes:** ADR-NNNN (если заменяет)
 - **Связанные ADR:** ADR-NNNN
+
+## Blast Radius
+
+Обязательно **только** если новый ADR заменяет (**Supersedes**) ADR со статусом **Load-Bearing** или с **Load-bearing: yes**: описать бизнес-последствия отмены прежнего контракта (что перестаёт выполняться для пользователя 1С), альтернативы без отмены и обоснование выбора. Без этой секции закрытие Precedent Regression Gate недопустимо (см. `.cursor/rules/precedent-regression-gate.mdc`).
 ```
 
 ## СТАТУСЫ
@@ -58,9 +66,12 @@ alwaysApply: false
 |--------|----------|
 | **Proposed** | Архитектор предлагает, пользователь ещё не подтвердил |
 | **Accepted** | Решение принято и действует |
+| **Load-Bearing** | Решение принято и действует как «несущий» контракт; последующие ЗНИ не должны молча его отменять — требуется Blast Radius при замене |
 | **Superseded by ADR-NNNN** | Заменено новым решением (ссылка) |
 | **Deprecated** | Устарело, но не заменено |
 | **Rejected** | Рассматривалось, отклонено (ценно для контекста) |
+
+**Поле `Load-bearing: yes`** в шапке — синоним статуса Load-Bearing для машиночитаемости при том же семантическом смысле; при статусе **Accepted** поле по умолчанию **no**.
 
 ## КРИТЕРИИ СОЗДАНИЯ ADR
 
@@ -77,11 +88,16 @@ alwaysApply: false
 - Валидация подхода (подтверждение, что точка расширения работает)
 - Решение очевидно и не имеет альтернатив
 
+## Замена Load-Bearing ADR (Supersedes)
+
+Если в новом ADR указано **Supersedes: ADR-NNNN**, а заменяемый ADR имеет статус **Load-Bearing** или **Load-bearing: yes** — в новом ADR **обязательна** секция `## Blast Radius` (см. шаблон выше). Иначе `/opsx:verify` и Precedent Regression Gate выдают CRITICAL `load-bearing-adr-bypass`.
+
 ## КОГДА СОЗДАВАТЬ
 
 | Точка workflow | Действие |
 |----------------|----------|
 | **archive** (шаг 4.5) | Основная точка. Если `reports/architecture-*.md` есть — предложить извлечь ADR |
+| **archive** (шаг 5.5.b invariant extraction) | Для контрактов из `## Goals` / `## Decisions`, влияющих на будущие ЗНИ — кандидат в ADR со статусом **Load-Bearing** или **Load-bearing: yes** и заполненным **Protects-invariants** |
 | **explore** (Structured Investigation) | При обнаружении архитектурного решения — предложить создать ADR |
 | **ff / new** (Design Gate) | Перед design — поиск существующих ADR по области (ADR Discovery) |
 | **Architect Gate** | При срабатывании — поиск ADR по области, передача как контекст архитектору |

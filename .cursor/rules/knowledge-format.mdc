@@ -94,6 +94,9 @@ metrics:
   used-count: 0
   last-used-at: null
   drift-detected-count: 0
+invariant: false                   # true — контракт нельзя молча отменять без Blast Radius / precedent audit
+breaks-on-removal: ""              # одно предложение: бизнес-последствия, если инвариант перестаёт выполняться
+protected-by-changes: []           # openspec/changes/archive/... имена change, установивших контракт
 ---
 
 ## Факт
@@ -105,6 +108,13 @@ metrics:
 
 1-2 предложения: нет trade-off (иначе ADR), не требование (иначе spec), описывает «как есть».
 ```
+
+### Инвариантные KB (`invariant: true`)
+
+- Ставится только если факт фиксирует контракт поведения, отмена которого меняет бизнес-смысл для пользователя 1С (например «после автоподстановки задача сохраняет связь с ролью»).
+- Обязательны поля `breaks-on-removal` и при возможности `protected-by-changes`.
+- В Discovery передаются в промпт **всегда** при совпадении `anchor-paths`, помечаются строкой `ИНВАРИАНТ` (см. §DISCOVERY); не подлежат вытеснению из бюджета Top-10 обычными фактами — см. §БЮДЖЕТ VERIFY.
+- **Behavioral-drift** на якоре с `invariant: true` → классификация **только** `review-required`; auto-repair и read-repair без явного решения пользователя **запрещены**.
 
 ## ТИПЫ ANCHOR'ОВ
 
@@ -237,7 +247,8 @@ CASE anchor.type:
 | Verify-результат | Автоматическое изменение status |
 |------------------|--------------------------------|
 | `verified` (на HEAD через >7 дней после verified-at) | auto-refresh `verified-at` (mechanical) |
-| `signature-drift`, `behavioral-drift`, `anchor-missing`, `count-drift` + `auto-repairable` | read-repair: обновить KB, оставить/вернуть `active`, refresh `verified-at` |
+| `behavioral-drift` на факте с `invariant: true` | **всегда** `review-required`; auto-repair **запрещён**; отчёт verify может поднять CRITICAL `invariant-drift` |
+| `signature-drift`, `behavioral-drift`, `anchor-missing`, `count-drift` + `auto-repairable` (и **не** invariant behavioral-drift) | read-repair: обновить KB, оставить/вернуть `active`, refresh `verified-at` |
 | `signature-drift`, `behavioral-drift`, `anchor-missing`, `count-drift` + `review-required` | `active` → `stale`, отчёт содержит карточку решения |
 | `signature-drift`, `behavioral-drift`, `anchor-missing`, `count-drift` + `deprecate-candidate` | статус не удалять автоматически; отчёт содержит карточку `deprecate` / `merge` / `delete --force-delete` / `keep with justification` |
 | `verify-failed` (retry не помог) | `stale` + `verify-error` в metadata |
@@ -255,9 +266,10 @@ CASE anchor.type:
 Read-repair для `procedure` anchor:
 
 1. Если `declaration` совпал, процедура найдена, а `body-head` изменился, audit извлекает актуальные первые 5 непустых не-комментарий строк.
-2. Audit сравнивает текст факта с изменением: если достаточно синхронизировать отпечаток и 1–2 предложения без изменения смысла, это `auto-repairable`.
-3. При `auto-repairable` audit обновляет `fingerprint.body-head`, при необходимости минимально правит `## Факт`, выставляет `status: active`, обновляет `verified-at`, `verified-by: audit`, `_index.yaml` и фиксирует действие в отчёте `Read-repair выполнен`.
-4. Если факт требует нового решения или пересмотра связанного поведения, audit ставит `stale` только после классификации `review-required` и указывает конкретные варианты действий.
+2. Если у KB `invariant: true` и классификация drift = `behavioral-drift` → **не** классифицировать как `auto-repairable`; только `review-required` и карточка решения пользователю.
+3. Audit сравнивает текст факта с изменением: если достаточно синхронизировать отпечаток и 1–2 предложения без изменения смысла, это `auto-repairable` (**кроме** п.2).
+4. При `auto-repairable` audit обновляет `fingerprint.body-head`, при необходимости минимально правит `## Факт`, выставляет `status: active`, обновляет `verified-at`, `verified-by: audit`, `_index.yaml` и фиксирует действие в отчёте `Read-repair выполнен`.
+5. Если факт требует нового решения или пересмотра связанного поведения, audit ставит `stale` только после классификации `review-required` и указывает конкретные варианты действий.
 
 ## FAILURE MODES
 
@@ -277,6 +289,7 @@ Read-repair для `procedure` anchor:
 ## БЮДЖЕТ VERIFY
 
 - **explore / Architect Gate:** не более 10 KB за Discovery, сортировка по релевантности.
+- **Инвариантные факты (`invariant: true`):** при совпадении `anchor-paths` со scope — включать в промпт **в первую очередь** (до 5 фактов), независимо от Top-10; после них добирать обычные факты до общего лимита 10 или расширять бюджет на ≤30% базового промпта архитектора при наличии invariant-хитов (см. `.cursor/rules/precedent-regression-gate.mdc`).
 - **archive шаг 2b:** только KB, чьи `anchor.path` ∈ git-diff текущей ЗНИ.
 - **audit без флагов:** full-revisit всех KB: verify anchors + Reuse Value Test по каждому факту. Если в KB > 50 фактов суммарно и не задан `--domain`, audit сначала задаёт AskQuestion: `full` / `overdue-only` / `by-domain`.
 - **audit `--overdue`:** только `stale` + TTL-просроченные.
@@ -340,6 +353,7 @@ facts:
       - src/ЕРПУХ/cfe/.../Module.bsl
     related-adr: [ADR-NNNN]
     title: "Краткий заголовок"
+    invariant: false              # опционально в индексе; источник истины — front-matter KB-файла
 ```
 
 - Запись атомарная: сначала `.md`, затем полная перезапись `_index.yaml` из состояния каталога.
@@ -349,14 +363,17 @@ facts:
 
 Универсальный алгоритм для explore / Architect Gate / archive шаг 2b:
 
-1. Read `openspec/knowledge/_index.yaml`.
+1. Read `openspec/knowledge/_index.yaml` и при необходимости front-matter `.md` для поля `invariant`.
 2. Исключить `deprecated` / `superseded`.
-3. Primary-фильтр (`anchor-paths`): точное совпадение `anchor-paths` ∈ {scope files}. Это главный детерминированный сигнал Discovery.
-4. Secondary-фильтр (`domain`): выполнять только если primary пусто И в scope есть путь под зарегистрированным `domain.source` из `_taxonomy.yaml`. Выбрать факты этого domain, затем ранжировать по совпадению токенов из `scope-files` / user query с `title` и `anchor-paths` (например имя подсистемы/модуля), затем по `used-count`. Взять Top-5.
-5. Объединить результаты primary/secondary (обычно используется один слой), затем Sort: `active` перед `stale`, затем по lexical relevance, затем по `used-count` (популярные выше).
-6. Top-10 по релевантности.
-7. Read выбранные `.md`-файлы.
-8. Для каждого прочитанного KB инкремент `used-count` и обновление `last-used-at` (через audit-протокол — запись только в writer-stages; read-stages добавляют в `metrics-queue` для следующего audit).
+3. **Invariant-first:** все факты с `invariant: true` (в индексе или в `.md`), у которых `anchor-paths` пересекается с {scope files}, собрать в список **ИНВАРИАНТ** (макс. 5).
+4. Primary-фильтр (`anchor-paths`): точное совпадение `anchor-paths` ∈ {scope files}. Это главный детерминированный сигнал Discovery.
+5. Secondary-фильтр (`domain`): выполнять только если primary пусто И в scope есть путь под зарегистрированным `domain.source` из `_taxonomy.yaml`. Выбрать факты этого domain, затем ранжировать по совпадению токенов из `scope-files` / user query с `title` и `anchor-paths` (например имя подсистемы/модуля), затем по `used-count`. Взять Top-5.
+6. Объединить: сначала список из п.3, затем результаты primary/secondary без дубликатов ID, затем Sort: `active` перед `stale`, затем по lexical relevance, затем по `used-count` (популярные выше).
+7. Top-10 по релевантности (инварианты из п.3 не вытесняются).
+8. Read выбранные `.md`-файлы.
+9. Для каждого прочитанного KB инкремент `used-count` и обновление `last-used-at` (через audit-протокол — запись только в writer-stages; read-stages добавляют в `metrics-queue` для следующего audit).
+
+Формат строки в блоке `## Existing Knowledge` для инварианта: префикс `ИНВАРИАНТ` перед `KB-NNNN`.
 
 ## GOVERNANCE
 

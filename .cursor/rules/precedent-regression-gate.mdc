@@ -1,0 +1,73 @@
+---
+description: "Precedent Regression Gate — защита от молчаливой отмены контрактов предыдущих ЗНИ / load-bearing ADR / invariant KB"
+alwaysApply: true
+priority: 240
+---
+
+# Precedent Regression Gate
+
+Единый источник истины для обнаружения **регрессии прецедента**: когда текущий change, дельта spec, дизайн или код отменяют цель, поведение или требование, ранее зафиксированные в **архивном** change, **Load-Bearing ADR** или **invariant KB**, без явного `## Blast Radius` в `design.md` (в бизнес-терминах).
+
+Ссылаются: `architect-gate.mdc`, `verified-cause-gate.mdc`, `openspec-verify-change/SKILL.md` (шаг 9b), `1c-agent-delegation.mdc` (KB CONTEXT), `knowledge-format.mdc` (invariant), `adr-format.mdc` (Load-Bearing / Blast Radius).
+
+## ПОНЯТИЯ
+
+- **Precedent** — контракт, установленный в `openspec/changes/archive/**` (в `## Goals`, `## Behavior Contract`, `## Decisions` или в дельте `specs/**` со статусом `ADDED`), с которым **пересекается** scope или capability текущей работы.
+- **Blast Radius** — секция в `design.md` (и при Supersedes — в новом ADR) с полями: что отменяется, архивный источник, **бизнес-эффект** для конечного пользователя 1С, альтернативы без отмены, обоснование. Технические имена реквизитов/процедур **не** заменяют поле «бизнес-эффект».
+
+## ТРИГГЕРЫ (любой сработал → Gate активен)
+
+### Дельта spec (текущий change)
+
+- В `openspec/changes/<name>/specs/<capability>/spec.md` есть `MODIFIED` или `REMOVED` для требования/сценария, для которого в **каком-либо** `openspec/changes/archive/**/specs/<capability>/spec.md` ранее был статус `ADDED` с тем же или семантически эквивалентным заголовком (плюс сравнение `WHEN`/`THEN` для отсечения ложных срабатываний при переименовании без смысла).
+
+### Design / proposal
+
+- В `design.md` или `proposal.md` есть формулировки отмены ранее принятой семантики: «не сохранять», «снять инвариант», «вернуть», «изменить требование так, чтобы не требовало», «убрал», «отменить контракт», «переписать поведение», явное противоречие пунктам `## Goals` архивного change при цитировании того же capability.
+
+### Код и KB
+
+- Инверсия семантики строки в `.bsl` относительно архивного описания (например закомментирована строка, ранее считавшаяся контрактной для пользователя).
+- Behavioral drift по якорю KB с `invariant: true` (`knowledge-format.mdc`).
+- Новый ADR с **Supersedes:** на ADR со статусом **Load-Bearing** или **Load-bearing: yes** без секции `## Blast Radius` в новом ADR (`adr-format.mdc`).
+
+### Отличие от Extend Scope Coherence Audit
+
+- **Scope coherence** (`openspec-extend-change`) — соответствие расширения scope исходному **Why** активного change и счётчик debug.md.
+- **Precedent Regression** — соответствие текущих решений **архивным** контрактам и ADR/KB. Разные источники истины; оба могут сработать независимо.
+
+### Отличие от Substituted Authority
+
+- **Substituted Authority** (`existing-mechanism-priority.mdc`) — подмена владельца поведения типовой платформы/BСП.
+- **Precedent Regression** — отмена **собственного** ранее принятого контракта проекта (архив, ADR, invariant KB).
+
+## ДЕЙСТВИЯ ПО КОНТЕКСТУ
+
+| Контекст | Действие |
+|----------|----------|
+| **explore / Structured Investigation** | В бриф и последующий промпт включить `## Cross-Archive Context` (до 3 архивных changes по совпадению capability + scope.files). Если триггер сработал — при продолжении в `/opsx:ff` или `/opsx:extend` потребовать `## Blast Radius` в design до закрытия Gate. |
+| **ff / new (Design Gate)** | Blocking: без заполненной секции `## Blast Radius` при активном триггере Design Gate не считается пройденным для области precedent (override только через явную документацию Blast Radius + пользователь). |
+| **extend** | Если бриф содержит «Отменяет архивный инвариант: yes» без Blast Radius в предлагаемых правках — `Drift-check: scope-violation` (`openspec-extend-change/SKILL.md`). |
+| **verify** | Шаг 9b Cross-Archive Regression Audit; CRITICAL/WARNING по матрице severity в скилле verify. |
+| **apply** | Pre-flight: если активный change имеет CRITICAL `precedent-regression` или `invariant-drift` не устранённые в артефактах — STOP до решения пользователя или `/opsx:extend`. |
+
+## ЗАКРЫТИЕ GATE
+
+Gate считается удовлетворённым для затронутого прецедента, если выполняется **любое**:
+
+1. В `design.md` есть секция `## Blast Radius` с заполненными полями (контракт, источник archive/ADR/KB, бизнес-эффект, альтернативы, обоснование), и текущая дельта spec/design явно фиксирует осознанную отмену или замену прецедента **или** архитектор в режиме `precedent-coherence-audit` заключил `extends` без отмены (см. verify 9b — понижение до INFO).
+2. Пользователь в Phase B verify выбрал вариант с явным принятием риска (карточка «Принятые риски») после блока Blast Radius.
+3. Триггеры не сработали (нет пересечения с архивным `ADDED`, нет MODIFIED/REMOVED против него, нет противоречия invariant KB / Load-Bearing ADR).
+
+**Design Rationale без Blast Radius не закрывает Gate** при сработавшем триггере.
+
+## БЮДЖЕТ И ПРОИЗВОДИТЕЛЬНОСТЬ (verify 9b)
+
+- Сканировать только архивы, чья `<capability>` входит в множество capability из дельт текущего change.
+- Не более **10** архивных каталогов changes за один прогон verify; при превышении — INFO «часть архивов не проверена» и опция `--full-precedent-audit` в сообщении пользователю (не блокирует без явной политики проекта).
+- `## Cross-Archive Context` для архитектора — не более **3** архивных changes (ранжирование: совпадение capability + пересечение путей из tasks/design).
+
+## ССЫЛКИ
+
+- Шаблон Blast Radius в design: `.cursor/skills/openspec-ff-change/SKILL.md`, `.cursor/skills/openspec-extend-change/SKILL.md`.
+- Алгоритм verify 9b: `.cursor/skills/openspec-verify-change/SKILL.md`.

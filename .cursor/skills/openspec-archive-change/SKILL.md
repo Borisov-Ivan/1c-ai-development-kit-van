@@ -250,6 +250,18 @@ Archive a completed change in the experimental workflow.
    | Reports не найдены вовсе | `Skipped — no analytical reports` |
    | Reports есть, taxonomy отсутствует | `Blocked — taxonomy missing` |
 
+5.5.b **Invariant extraction (optional, поведенческие ЗНИ)**
+
+   Выполнять, если change содержит принятые срезы и меняет **поведение пользователя** (есть `## Behavior Contract` в design или UX-сценарии в spec). Цель — зафиксировать устойчивые контракты для будущих verify 9b / precedent-regression-gate.
+
+   **Эвристика кандидатов (до 5 на change):** прочитать `design.md` и архивный `proposal.md` до переноса; выделить строки в `## Goals`, `## Decisions`, `## Behavior Contract`, содержащие маркеры вроде «сохраняется», «не очищается», «инвариант», «обязательно», «не снимать». Исключить чисто технические ограничения без UX-эффекта.
+
+   **Делегирование:** вызвать `onec-code-architect` с `mode=invariant-extraction`. Архитектор классифицирует каждый кандидат: **Load-bearing ADR** (создать/обновить `openspec/adrs/ADR-NNNN.md` по `.cursor/rules/adr-format.mdc` с `Load-bearing: yes` и `Protects-invariants:`), **invariant KB** (факт в `openspec/knowledge/` с `invariant: true`, якорями и `protected-by-changes:`), или **отклонить** (не несущий контракт). Применить **Reuse Value Test** из `openspec-knowledge-add` перед записью KB.
+
+   **Запись:** новые ADR — по формату adr-format; KB — атомарное обновление `_index.yaml` + файл факта. Если пользователь отклонил сохранение — зафиксировать в Warnings; archive не блокировать.
+
+   **Порядок:** шаг 5.5.b выполнять **после** 5.5 (facts extraction), **до** шага 6 (perform the archive), чтобы пути Source указывали на планируемый архивный каталог.
+
 6. **Perform the archive**
 
    Create the archive directory if it doesn't exist:

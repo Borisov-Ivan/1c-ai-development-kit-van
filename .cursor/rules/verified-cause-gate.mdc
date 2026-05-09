@@ -44,6 +44,18 @@ priority: 250
 4. **UX-значимый и системный → обязательно onec-code-architect** до реализации
 5. Триггеры системного масштаба включают объективные маркеры из `architect-gate.mdc` (наличие trace-analysis/exploration в reports/, перехват базовой процедуры, bug fix). При срабатывании — проверить наличие `architecture-*.md`; если отсутствует — architect обязателен
 
+## HALT 4: Precedent Awareness
+
+Перед реализацией фикса или изменения поведения в области, где уже есть **архивный** change или invariant KB по тем же `scope.files` / capability:
+
+1. **Glob** `openspec/changes/archive/**/specs/**/spec.md` и **прочитать** `proposal.md` архивных changes, чьи capabilities или пути пересекаются с текущим `tasks.md` / `design.md` (по подстрокам путей `src/`).
+2. Если пересечение найдено **и** текущий `design.md` потенциально **отменяет** цель или требование архива (см. триггеры в `.cursor/rules/precedent-regression-gate.mdc`) — **СТОП** до одного из:
+   - заполненной секции `## Blast Radius` в `design.md` (контракт / источник / бизнес-эффект для пользователя 1С / альтернативы / обоснование), **или**
+   - делегирования `onec-code-architect` с `mode=precedent-coherence-audit` и сохранения отчёта `reports/architecture-precedent-coherence-YYYY-MM-DD.md`, классифицирующего изменение как `extends` vs `revokes`.
+3. Если пересечений нет или отмены контракта нет — продолжить (HALT не применяется).
+
+Источник: защита от молчаливой отмены контрактов между ЗНИ (verify шаг 9b, extend drift-check).
+
 ## Анти-паттерны (заплатки)
 
 Примеры анти-паттернов: см. `.cursor/docs/1c-coding-standards.md` и доменные файлы `.cursor/docs/standard/std-*.md` (defensive checks, Попытка Justification, fail-fast). Также `.cursor/docs/antipatterns/bsl-antipatterns.md`. Дополнительно: флаг/параметр для обхода проблемного пути; дублирование логики вместо исправления оригинала; assumption-driven design (логика без верификации контрактов и паттернов); **фикс симптома** (улучшение поведения неправильного сценария вместо устранения неправильного сценария).

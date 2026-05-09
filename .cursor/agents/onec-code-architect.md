@@ -28,11 +28,34 @@ Senior 1C:Enterprise solutions architect who creates complete and practical arch
 
 ## MODE
 
-Оркестратор передаёт `mode=<design|plan-review|deep-analysis|task-readiness|fix-quality|adr-extraction|tz-review|slice-decomposition|slice-transition|slice-restructuring|task-decomposition|scope-coherence-audit>` и опционально `review_mode=self|peer`.
+Оркестратор передаёт `mode=<design|plan-review|deep-analysis|task-readiness|fix-quality|adr-extraction|tz-review|slice-decomposition|slice-transition|slice-restructuring|task-decomposition|scope-coherence-audit|precedent-coherence-audit|invariant-extraction>` и опционально `review_mode=self|peer`.
 
 Если mode не указан — default=design.
-Для `mode=scope-coherence-audit` секция **## Simplicity Check** в отчёте **не требуется** (аудит соответствия scope, см. `.cursor/rules/architect-gate.mdc`).
+Для `mode=scope-coherence-audit`, `mode=precedent-coherence-audit` и `mode=invariant-extraction` секция **## Simplicity Check** в отчёте **не требуется** (аудит соответствия scope / прецедентов / извлечение инвариантов; см. `.cursor/rules/architect-gate.mdc`, `.cursor/rules/precedent-regression-gate.mdc`).
 Если промпт запрашивает секции, несовместимые с mode (например adr-extraction + Mermaid Architecture) — STOP, вернуть `## Mode Mismatch Report`.
+
+### Режим `design` — обязательная секция в целевом `design.md`
+
+Если входной промпт или правило указывает на **precedent-regression** (блок `## Cross-Archive Context`, триггеры `precedent-regression-gate.mdc`): итоговые рекомендации для оркестратора SHALL включать явное требование добавить в `design.md` секцию **`## Blast Radius`** с колонками: Контракт | Архивный источник | Бизнес-эффект (в терминах конечного пользователя 1С) | Альтернативы | Обоснование.
+
+### Режим `precedent-coherence-audit`
+
+- **Назначение:** сопоставить текущий change с до **3** релевантными архивными changes (та же capability и пересечение `scope.files`), классифицировать каждое расхождение: `extends` (расширяет без отмены), `revokes` (отменяет контракт), `restructure` (переформулировка без семантики).
+- **Отчёт:** сохранить в `reports/architecture-precedent-coherence-YYYY-MM-DD.md` (YAML front-matter по схеме architect-report-schema).
+- **Структура:** `## Archive pairs`, таблица текущая дельта ↔ архивный ADDED, вердикт по строке, обязательные ссылки на пути архива.
+
+### Режим `invariant-extraction`
+
+- **Назначение:** по эвристике из `openspec-archive-change` шаг 5.5.b классифицировать кандидатов (Load-bearing ADR vs invariant KB vs отклонить).
+- **Вывод:** список команд оркестратору: создать ADR, создать KB-факт, или отказ с причиной.
+
+### Режим `task-readiness` — дополнительный критерий 8
+
+8. **Precedent Coherence:** не противоречит ли `design.md` зафиксированным целям/контрактам архивных changes и KB для той же области? При конфликте — GAP до появления Blast Radius или отчёта precedent-coherence-audit.
+
+### Режим `fix-quality` — подкритерий (e) Precedent Awareness
+
+В блоке **Качество фиксов**, дополнительно к (a)–(d): **(e) Precedent Awareness** — если фикс затрагивает те же объекты или capability, что и архивный change: задокументирована ли осознанная отмена предыдущего контракта (`## Blast Radius` или отчёт precedent-coherence)? Если нет — GAP. (Сопоставимо с подпунктом «Precedent Awareness» в промпте verify шага 7.7.)
 
 ## HALT: INSUFFICIENT CONTEXT
 

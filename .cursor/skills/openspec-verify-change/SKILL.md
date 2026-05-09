@@ -178,7 +178,7 @@ Tier: Standard (12 задач, 3 среза)
    - **Slice Coherence (Quality Controller)** (slice mode pre/post; legacy → `no-slices` SUGGESTION) — scenario coverage, slice independence, completeness, dependency graph, slice gate integrity, rework risk
    - **Task Readiness (Architect)** — mandatory architect holistic assessment of realizability
    - **TZ (Functional Requirements)** — generated TZ document, gap analysis
-   - **Gates**: Architect Gate, Design Review, TZ Review, Project Constraints
+   - **Gates**: Architect Gate, **Precedent Regression** (шаг 9b), Design Review, TZ Review, Project Constraints
    - **Slice Acceptance Status** (slice-post / slice-transition / migrate-to-slices) — таблица S<N> → принят/в работе/ожидает
    - **Completeness** (slice-post, slice-post final, legacy mixed/post-apply) — для принятых срезов / выполненных задач
    - **Correctness** (same)
@@ -509,11 +509,21 @@ Tier: Standard (12 задач, 3 среза)
       (c) Нет ли признаков заплатки (обход, дублирование, assumption-driven)? (d) Учтён ли UX-сценарий
       (что видит/делает пользователь после фикса)?
 
+      **(e) Precedent Awareness.** Если задача — исправление или затрагивает те же объекты,
+      что архивный change на ту же capability: есть ли в `design.md` секция `## Blast Radius`
+      или отчёт `reports/architecture-precedent-coherence-*.md`, объясняющая осознанную отмену
+      предыдущего контракта в терминах пользователя 1С?
+
    7. **Архитектурная эстетика (Design Smells).** Нет ли в проекте
       архитектурных запахов?
       - Over-engineering: переусложнение (например, новый регистр там, где хватит реквизита).
       - Invasiveness: высокая инвазивность (необоснованный &ИзменениеИКонтроль вместо &После или подписок).
       - Reinventing the wheel: игнорирование существующих механизмов или БСП.
+
+   8. **Согласованность с прецедентами (Precedent Coherence).** Не противоречит ли текущий
+      `design.md` целям и контрактам архивных changes по той же capability и пересекающимся
+      файлам (см. также замечания verify 9b)? Если расширение без отмены — классифицировать как
+      `extends`, не как `revokes`.
 
    ## Формат ответа
 
@@ -532,6 +542,7 @@ Tier: Standard (12 задач, 3 среза)
    | 5 | Согласованность | OK/GAP | ... |
    | 6 | Качество фиксов (Fix Quality) | OK/GAP | ... |
    | 7 | Архитектурная эстетика (Design Smells) | OK/SUBOPTIMAL | ... |
+   | 8 | Согласованность с прецедентами (Precedent Coherence) | OK/GAP | ... |
 
    ### Пробелы (только при GAP или SUBOPTIMAL)
 
@@ -546,7 +557,7 @@ Tier: Standard (12 задач, 3 среза)
    ```
 
    **Architect prompt (Lite tier compact review)**:
-   Используй сокращённый промпт (без критериев 2 и 4, с добавлением оценки срезов / legacy-кохерентности):
+   Используй сокращённый промпт (см. критерии ниже; ориентир — срезы/legacy + реализуемость + precedent при наличии):
 
    ```
    ## Задача
@@ -560,6 +571,7 @@ Tier: Standard (12 задач, 3 среза)
    - specs: <путь>
    - Замечания механических проверок (verify, шаги 7A-7C): <список или «замечаний нет»>
    - Проблемы выполнимости (verify, шаг 7F): <список или «замечаний нет»>
+   - Precedent issues (verify 9b): <список или «нет / N/A»>
 
    ## Критерии оценки
 
@@ -569,6 +581,7 @@ Tier: Standard (12 задач, 3 среза)
    4. **Согласованность.** Нет ли противоречий между tasks, design и spec?
    5. **Качество фиксов.** Направлен ли фикс на корневую причину?
    6. **Архитектурная эстетика (Design Smells).** Нет ли переусложнения, высокой инвазивности или изобретения велосипеда?
+   7. **Precedent / Blast Radius.** Если verify уже сообщил «Precedent issues (verify 9b)» или есть конфликт с архивным change — есть ли в `design.md` секция `## Blast Radius` с бизнес-эффектом для пользователя?
 
    ## Формат ответа
 
@@ -583,11 +596,13 @@ Tier: Standard (12 задач, 3 среза)
    ### Оценка по критериям
    | # | Критерий | Вердикт | Обоснование |
    |---|----------|---------|-------------|
-   | 1 | Реализуемость кодовых задач | OK/GAP | ... |
-   | 2 | Разрешённость решений | OK/GAP | ... |
-   | 3 | Согласованность | OK/GAP | ... |
-   | 4 | Качество фиксов | OK/GAP | ... |
-   | 5 | Архитектурная эстетика | OK/SUBOPTIMAL | ... |
+   | 1 | Когерентность срезов / legacy | OK/GAP | ... |
+   | 2 | Реализуемость кодовых задач | OK/GAP | ... |
+   | 3 | Разрешённость решений | OK/GAP | ... |
+   | 4 | Согласованность | OK/GAP | ... |
+   | 5 | Качество фиксов | OK/GAP | ... |
+   | 6 | Архитектурная эстетика | OK/SUBOPTIMAL | ... |
+   | 7 | Precedent / Blast Radius | OK/GAP | ... |
 
    ### Пробелы (только при GAP или SUBOPTIMAL)
    (Задача, что отсутствует, рекомендация. Если пропущен путь/подсистема/задача из design — дай сниппет для авто-вставки).
@@ -682,6 +697,49 @@ Tier: Standard (12 задач, 3 среза)
      - Если прошло > 7 дней → CRITICAL: "Отсрочка Architect Gate истекла. Архитектурный анализ не найден. Рекомендация: запустить `/opsx:verify` с опцией устранения или onec-code-architect вручную."
    - Triggers fired AND NO `architecture-*.md` AND NO `.gate-override.yaml` → CRITICAL: "Сработали маркеры Architect Gate: [list]. Архитектурный анализ не найден. Рекомендация: запустить `/opsx:verify` с опцией устранения или onec-code-architect вручную."
    - Debug fix markers in tasks AND NO `architecture-*.md` → CRITICAL (см. Debug fix check выше)
+
+9b. **Cross-Archive Regression Audit (Precedent Regression)**
+
+   Выполняется в режимах **slice-pre**, **slice-post** (для непринятых срезов / незакрытых задач), **slice-scoped**, **legacy pre-apply**, **legacy mixed**. В **slice-post (final)** и **legacy post-apply** — **пропустить** (инвариант: постфактум приёмка не пересматривает регрессию дельты против архива; при необходимости — отдельный прогон с непринятыми задачами). Источник правил: `.cursor/rules/precedent-regression-gate.mdc`.
+
+   **Цель:** обнаружить молчаливую отмену контракта, ранее зафиксированного в архивном change (`ADDED` в дельте spec) или в invariant KB / Load-Bearing ADR, без секции `## Blast Radius` в текущем `design.md`.
+
+   **Алгоритм:**
+
+   1. Если в change нет каталога `specs/` — перейти к подпункту **4 (file overlap)** и KB; если и там пусто — секция отчёта `### Регрессия предыдущих контрактов`: status `N/A (нет specs)`.
+   2. Из всех `openspec/changes/<name>/specs/**/*.md` извлечь требования и сценарии с маркерами **MODIFIED** или **REMOVED** (дельта OpenSpec). Собрать множество имён capability из путей каталогов.
+   3. Для каждого `<capability>` выполнить `Glob openspec/changes/archive/**/specs/<capability>/spec.md`. **Бюджет:** не более **10** уникальных каталогов архивных changes за прогон; при превышении — добавить INFO `precedent-audit-budget-exceeded` с рекомендацией повторить с узким scope или задокументировать ручной аудит.
+   4. Для каждого найденного архивного `spec.md` извлечь требования/сценарии со статусом **ADDED**. Сопоставить с текущими MODIFIED/REMOVED по нормализованному заголовку **и** по тексту `WHEN`/`THEN` (если заголовок совпадает посимвольно, но тело сценария идентично — классифицировать как `precedent-restructure`, severity **INFO**, не CRITICAL).
+   5. Для каждой пары «архивный ADDED ↔ текущий MODIFIED/REMOVED», где есть семантическое ослабление или отмена требования: прочитать `openspec/changes/archive/<dated-name>/proposal.md` и `design.md` (секции `## Goals`, `## Behavior Contract`, `## Decisions`) — зафиксировать «контракт прецедента» одной цитатой.
+   6. Проверить наличие в текущем `design.md` секции `## Blast Radius` с заполненными строками: контракт / источник (путь archive или ADR-NNNN) / бизнес-эффект / альтернативы / обоснование. Поле бизнес-эффекта не должно состоять только из имён процедур и реквизитов.
+   7. **Пересечение по файлам:** из `tasks.md` и `design.md` извлечь пути `src/...`; `Grep` по `openspec/changes/archive/**/proposal.md` на эти подстроки; взять до **3** наиболее релевантных архивных change для сравнения целей с текущим `design.md` при отсутствии specs-дельты.
+   8. **Invariant KB:** Read `openspec/knowledge/_index.yaml`; для фактов с `invariant: true` (или из front-matter `.md`), чьи `anchor-paths` пересекаются с путями из текущего change, проверить: не противоречит ли текущий `design.md` тексту факта в `openspec/knowledge/**/KB-*.md`. При противоречии — CRITICAL `invariant-drift`.
+   9. **Load-Bearing ADR:** Glob `openspec/adrs/ADR-*.md`; если в текущем change/design/spec упоминается **Supersedes** или замена ADR, у которого в файле **Load-bearing: yes** или статус **Load-Bearing**, проверить наличие `## Blast Radius` в новом ADR или в `design.md`. Иначе — CRITICAL `load-bearing-adr-bypass`.
+
+   **Матрица severity:**
+
+   | Условие | Severity | Код |
+   |---------|----------|-----|
+   | Пара ADDED→MODIFIED/REMOVED с отменой семантики, нет `## Blast Radius` | CRITICAL | `precedent-regression` |
+   | Есть `## Blast Radius`, но не заполнено поле бизнес-эффекта или источник | WARNING | `blast-radius-incomplete` |
+   | Прецедент явно закрыт Blast Radius или архивный контракт сохранён | INFO | `precedent-documented` |
+   | Только переименование / структура spec без изменения WHEN/THEN | INFO | `precedent-restructure` |
+   | Противоречие invariant KB | CRITICAL | `invariant-drift` |
+   | Supersedes Load-Bearing ADR без Blast Radius в новом ADR/design | CRITICAL | `load-bearing-adr-bypass` |
+
+   **Классификация для Issue Classification (шаг после Promotion Test):** замечания `precedent-regression`, `blast-radius-incomplete`, `invariant-drift`, `load-bearing-adr-bypass` → класс **`decision`** по умолчанию (не понижать в `artifact-hygiene`).
+
+   **Секция отчёта verify:**
+
+   ```
+   ### Регрессия предыдущих контрактов (verify 9b)
+
+   | Текущая дельта | Архивный источник | Контракт (цитата) | Blast Radius в design.md | Severity |
+   |---|---|---|---|---|
+   | ... | ... | ... | OK / ОТСУТСТВУЕТ / неполно | CRITICAL / WARNING / INFO |
+   ```
+
+   Передать краткий список находок в промпт архитектора шага **7.7** при повторном запуске (если выполняется remediation): строка «Precedent issues (verify 9b): …».
 
 11. **TZ Review Check**
 
@@ -898,7 +956,11 @@ Tier: Standard (12 задач, 3 среза)
 | TZ review remarks (11) | INFO | Не влияет на реализацию |
 | Incomplete tasks / срезы «ожидает» (slice-post / legacy 13) | INFO | Рекомендация `/opsx:apply` |
 | Spec/design divergence (post-apply, 15) | INFO | Информационное расхождение |
-| `hypothesis-dep` — гипотеза в Open Questions, fallback безопасен (design) | INFO | Информация о риске, не требует правки артефакта |
+    | `hypothesis-dep` — гипотеза в Open Questions, fallback безопасен (design) | INFO | Информация о риске, не требует правки артефакта |
+    | `precedent-regression` (verify 9b) | **decision** | Отмена архивного контракта без объяснения в бизнес-терминах; всегда карточка с блоком Blast Radius |
+    | `blast-radius-incomplete` (verify 9b) | **decision** | Частично заполненная секция `## Blast Radius`; не понижать в hygiene |
+    | `invariant-drift` (verify 9b / KB) | **decision** | Противоречие invariant KB текущему design/spec |
+    | `load-bearing-adr-bypass` (verify 9b / ADR) | **decision** | Замена Load-Bearing ADR без Blast Radius |
 
 **Повышение в decision (через Implementation Impact Gate 16b):** `artifact-hygiene` повышается в `decision`, если хотя бы один вариант **меняет** код / поведение / приёмку. Пример: `scenario-uncovered` → `artifact-hygiene` по умолчанию (правка только текста `**Связь со spec:**`), но → `decision`, если расширение scope подразумевает новые задачи реализации `S<N>.<M>` или новый `S<N>.T<M>`.
 
@@ -1037,6 +1099,7 @@ Tier: Standard (12 задач, 3 среза)
     | 5 | Согласованность | OK / GAP |
     | 6 | Качество фиксов | OK / GAP |
     | 7 | Архитектурная эстетика | OK / SUBOPTIMAL |
+    | 8 | Согласованность с прецедентами | OK / GAP |
 
     Пробелы:
     - [CRITICAL/WARNING] ...
@@ -1059,6 +1122,7 @@ Tier: Standard (12 задач, 3 среза)
     | Gate | Статус | Детали |
     |---|---|---|
     | Architect Gate | OK / CRITICAL | триггеры: [...] |
+    | Precedent Regression (verify 9b) | OK / WARNING / CRITICAL / N/A | архивные отмены контрактов / invariant KB / Load-Bearing ADR |
     | Design Review | OK / WARNING | триггеры: [...] |
     | ТЗ Review | OK / N/A / WARNING | |
     | Project Constraints | OK / CRITICAL | |
@@ -1215,6 +1279,13 @@ Tier: Standard (12 задач, 3 среза)
     - <N>b — Если выбрать <альтернатива> → код: <…>; приёмка: <…>; риск: <…>
     - <N>c — Принять как есть → код: <…>; риск: <…>
 
+    **Blast Radius (обязательно для verify 9b: `precedent-regression` / `invariant-drift` / `load-bearing-adr-bypass`):**
+    - **Контракт (что обещали ранее):** <кратко, с ссылкой на archive change / ADR>
+    - **Источник:** <путь к `spec.md` / `proposal.md` / `ADR-NNNN`>
+    - **Бизнес-эффект:** <что увидит конечный пользователь 1С: удобство, данные, сроки; не только имена процедур>
+    - **Альтернативы:** <как иначе удовлетворить оба мира / отложить>
+    - **Обоснование:** <почему отмена приемлема>
+
     Источники: <QC <код-алерта> / Architect <критерий> / verify <шаг>>
     ```
 
@@ -1258,6 +1329,8 @@ Tier: Standard (12 задач, 3 среза)
     | Slice transition issues (7.6b) | Код: upcoming срезы могут потребовать переразрезания. | a) Архитектор реструктурирует upcoming срезы. b) Обновить design.md `## Slices`. c) Принять → продолжить с риском. |
     | Project constraints violation (12) | Код: целевые каталоги вне зоны разрешённых правок (`project.md`). | a) `/opsx:extend <name> --from-verify <verification-report>` → задачи переписаны на разрешённые каталоги. b) Обосновать исключение → задокументировать override. |
     | Suboptimal architecture / Design Smell (7.7) | Код: реализуем неоптимальный подход; Поведение: возможно совпадает с целевым; Процесс: возможна переделка через `/opsx:debug`. | a) `/opsx:extend <name> --from-verify <verification-report>` → пересмотреть design/tasks через бриф и architect gate. b) Принять как есть → код согласно текущему design. |
+    | `precedent-regression` / `invariant-drift` / `load-bearing-adr-bypass` (verify 9b) | Поведение: пользователь теряет свойство, которое система ранее гарантировала (или не получает ожидаемое восстановление данных). Код: может быть минимальным, но контракт изменился. | a) Добавить заполненную секцию `## Blast Radius` в `design.md` с бизнес-эффектом и альтернативами → явное решение заказчика. b) Запустить `onec-code-architect mode=precedent-coherence-audit` → отчёт с классификацией `extends` vs `revokes`. c) Принять осознанную отмену инварианта → зафиксировать в proposal/decisions. |
+    | `blast-radius-incomplete` (verify 9b) | Документ есть, но решение неясно для не-разработчика. | a) Дополнить Blast Radius (бизнес-эффект в терминах пользователя). b) Принять риск неоднозначного трактования приёмки. |
 
     **Artifact-hygiene (Блок 2b — однострочный пункт, не карточка):**
 
@@ -1308,6 +1381,7 @@ Tier: Standard (12 задач, 3 среза)
     5. В вердикте «Решений от вас» — суммарное количество (Блок 2 + Блок 2b). Если 0 — «Решений от вас не требуется».
     6. Нумерация решений сквозная по обоим блокам; нет двух пунктов «1.» в одном выводе.
     7. Присутствует блок «Как ответить» с шаблоном строки и поведением при пустом ответе.
+    8. Для каждого замечания с кодами `precedent-regression`, `invariant-drift`, `load-bearing-adr-bypass`, `blast-radius-incomplete` карточка содержит блок **Blast Radius** с четырьмя заполненными строками (Контракт / Источник / Бизнес-эффект / Альтернативы); бизнес-эффект сформулирован для конечного пользователя 1С.
 
     **Примеры:**
 
