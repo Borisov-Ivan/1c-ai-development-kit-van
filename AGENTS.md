@@ -6,11 +6,11 @@
 `.cursor/rules/sdd-workflow.mdc` — explore → new/ff → verify → apply → verify → archive.
 Команды: `/opsx:intake`, `/opsx:explore`, `/opsx:new`, `/opsx:ff`, `/opsx:apply`, `/opsx:verify`, `/opsx:archive`, `/opsx:debug`, `/opsx:estimate`, `/prerelease-review`, `/review`, `/opsx:status`, `/opsx:extend`, `/opsx:migrate-slices`, `/opsx:knowledge-add`.
 `/review` — ревью по контексту запроса (модуль/файлы/расширение/ЗНИ) с опцией устранения замечаний; скилл `.cursor/skills/review/SKILL.md`. **Review Focus Boundaries:** без аргументов — scope по изменённым `.bsl` в git (`diff-focused`, границы по процедурам из diff); явный файл/каталог/расширение — полное ревью (`full`); ЗНИ — `diff-focused` по `tasks.md` `[x]` + git diff и маппинг на процедуры; в промпт ревьювера передаётся `## Review Boundaries` (протокол в `.cursor/agents/onec-code-reviewer.md`).
-Дополнительные: `/opsx:continue`, `/opsx:sync`, `/opsx:bulk-archive`, `/opsx:onboard`, `/init-project`.
+Дополнительные: `/opsx:continue`, `/opsx:sync`, `/opsx:bulk-archive`, `/init-project`.
 Паттерны агентов: `.cursor/skills/1c-agent-patterns/SKILL.md`.
 Документы: `/opsx:doc-tz <name>` (ТЗ по ЗНИ с архитектурным ревью и контролем качества артефактов) — `.cursor/skills/openspec-docs/SKILL.md`. Шаблон: `.cursor/skills/openspec-docs/prompts/change-tz.md`.
 
-**Output style (единый стиль выводов opsx):** `.cursor/docs/opsx-output-style.md` — 3 слоя (UX / код / процесс), типография, запрет внутренних ID (`S<N>.T<M>`, `D<N>`, `R<N>`, номера задач) в пользовательских полях, 5 общих шаблонов: **T-BRIEF** (debug, explore), **T-HANDOFF** (apply), **T-REPORT** (verify, estimate, doc-tz, onboard), **T-STATUS** (status), **T-CONFIRM** (archive, bulk-archive, sync, migrate-slices, continue, ff). Перед каждым пользовательским выводом opsx-скилл обязан проходить self-check-5 (§7 гайда), включая обязательный **пункт 6 «канонический переход»**: последний абзац вывода предлагает конкретную команду `/opsx:*`, правку существующего файла или явное END — не промежуточный артефакт («могу выписать», «черновик в чате», «сам запустите команду с этим контекстом»).
+**Output style (единый стиль выводов opsx):** `.cursor/docs/opsx-output-style.md` — 3 слоя (UX / код / процесс), типография, запрет внутренних ID (`S<N>.T<M>`, `D<N>`, `R<N>`, номера задач) в пользовательских полях, запрет жаргона движка (`Blast Radius`, `precedent-regression`, `Phase A/B`, `verdict:`, `verify_mode:` — см. §3.1), запрет голого `S<N>` без названия среза (правило §10 «Срез всегда с названием»), дисциплина правок ЗНИ (§8: decision → `/opsx:extend`, hygiene → ручная правка с обязательным повторным verify), 5 внутренних макетов сообщений (имена для авторов скиллов; в сообщения пользователю не цитируются — см. §5 и §9). Перед каждым пользовательским выводом opsx-скилл обязан проходить self-check (§7 гайда, 10 пунктов), включая «канонический переход» (п.6), «срез всегда с названием» (п.9) и «жаргон движка не цитируется» (п.10).
 
 ### Decision tree команд
 
@@ -72,7 +72,7 @@
 `.cursor/rules/1c-error-analysis.mdc` — trace-analyst → explorer/architect.
 
 ## Architect Gate
-`.cursor/rules/architect-gate.mdc` — единые триггеры архитектурного ревью (объективные маркеры, семантические, структурные). **UX-значимый фикс** (меняет что видит/делает пользователь) — семантический триггер; локальная реализация поведения, владельцем которого является база/БСП/платформа/общий модуль, вместо делегирования владельцу — семантический триггер Substituted Authority. **Simplicity Check:** каждый architecture-отчёт фиксирует простейший viable design, альтернативы и complexity budget; отсутствие секции ловит verify. **debug:** при срабатывании триггеров architect обязателен до шага 7 (не AskQuestion), шаблон «Architect — fix quality review» в `1c-agent-patterns/SKILL.md`. Проверяется в explore (шаг Decide, Fix Quality check при bug fix), verify (pre-apply, шаг 9 + Debug fix check), apply (soft redirect на verify).
+`.cursor/rules/architect-gate.mdc` — единые триггеры архитектурного ревью (объективные маркеры, семантические, структурные). **UX-значимый фикс** (меняет что видит/делает пользователь) — семантический триггер; локальная реализация поведения, владельцем которого является база/БСП/платформа/общий модуль, вместо делегирования владельцу — семантический триггер Substituted Authority. **Simplicity Check:** каждый architecture-отчёт фиксирует простейший viable design, альтернативы и complexity budget; отсутствие секции ловит verify. **debug:** при срабатывании триггеров architect обязателен до шага 7 (не AskQuestion), шаблон «Architect — fix quality review» в `1c-agent-patterns/architect.md`. Проверяется в explore (шаг Decide, Fix Quality check при bug fix), verify (pre-apply, шаг 9 + Debug fix check), apply (soft redirect на verify).
 
 ## Verify (универсальный quality gate)
 `.cursor/skills/openspec-verify-change/SKILL.md` — `/opsx:verify`. Pre-apply: формат tasks, качество задач, полнота ручной конфигурации, **Slice Coherence (Quality Controller)** — **строго до** шага реализуемости (Architect 7.7), **реализуемость (Architect)**, **генерация ТЗ (шаг 7.8, по параметру generate_tz)**, Architect Gate, Design Review, ТЗ Review, project constraints. Post-apply: completeness, correctness, coherence. **Tiered Verification:** Standard / Full — глубина проверок адаптируется к масштабу.
@@ -95,7 +95,7 @@
 
 **Executability Analysis (тройная проверка):** verify шаг 7D (механическая), QC (семантическая, в рамках Slice Coherence), Architect (холистическая). Покрывает все задачи: функциональные зависимости из описаний, порядок в tasks.md vs граф зависимостей срезов, итерационный дрифт (задачи из debug не ломают порядок принятых срезов), валидация приёмочных тестов `S<N>.T<M>` и маркеров `<!-- slice-gate -->`.
 
-Quality Controller (шаг 7.6): **Slice Coherence** (6 критериев из `vertical-slices.mdc`): Scenario Coverage, Slice Independence, Slice Completeness, Slice Dependency Graph, Slice Gate Integrity, Rework Risk. Шаблон промпта: `1c-agent-patterns/SKILL.md` (секция «Quality Controller — slice coherence review»). ТЗ (шаг 7.8): генерация по `openspec-docs/prompts/change-tz.md` при `generate_tz: auto` и пороге 6+ задач или явном запросе; иначе пропуск с сохранением существующего `ТЗ.md`.
+Quality Controller (шаг 7.6): **Slice Coherence** (6 критериев из `vertical-slices.mdc`): Scenario Coverage, Slice Independence, Slice Completeness, Slice Dependency Graph, Slice Gate Integrity, Rework Risk. Шаблон промпта: `1c-agent-patterns/quality-controller.md` (секция «Quality Controller — slice coherence review»). ТЗ (шаг 7.8): генерация по `openspec-docs/prompts/change-tz.md` при `generate_tz: auto` и пороге 6+ задач или явном запросе; иначе пропуск с сохранением существующего `ТЗ.md`.
 
 Коммуникация с пользователем: `.cursor/rules/verify-user-communication.mdc` — Executive Summary, **Actionability Principle** (каждое замечание — INFO до доказательства обратного через **Promotion Test**), **двухфазный формат:** Phase A Before/After таблица (авто), Phase B карточки решений (Проблема / Влияние / Варианты), секция «К сведению» (INFO), вердикт. Голые счётчики без карточек / таблиц запрещены. Подробности: **Issue Classification** и **Promotion Test** в `openspec-verify-change/SKILL.md`.
 
@@ -111,9 +111,6 @@ Quality Controller (шаг 7.6): **Slice Coherence** (6 критериев из 
 
 ## Quality Controller (OpenSpec)
 `.cursor/agents/openspec-quality-controller.md` — домен-агностичный readonly-агент для Slice Coherence. Активная модель задаётся frontmatter агента. Критерии — в `vertical-slices.mdc`; вызывается из `/opsx:verify` шаг 7.6.
-
-## Phase Gates (DEPRECATED — см. Vertical Slices)
-Фазовая модель (`# Фаза N`, `<!-- phase-gate -->`, P0–P4) **устарела**. Актуальная декомпозиция — вертикальные срезы: `.cursor/rules/vertical-slices.mdc`. `.cursor/rules/phase-gates.mdc` сохранён только как legacy-reference без `alwaysApply`; новые ЗНИ используют `/opsx:migrate-slices` для перехода на срезы.
 
 ## Session Handoff и Step-by-step mode
 `.cursor/skills/openspec-apply-change/SKILL.md` (шаги 5.6, 6, 7) — Session Handoff Summary (три секции: код / действия пользователя / следующие задачи), Step-by-step mode (пауза после каждой задачи с подтверждением, обработка ручных тестов с ожиданием результата). Триггеры step-by-step: явный запрос; debug-сессия (`debug.md` изменялся сегодня); slice-mode с ожидающим приёмочным тестом (`S<N>.T<M>`) в текущей пачке; fix-срез (`S<N>.fix`); размер среза ≥ 5 задач.
@@ -143,7 +140,7 @@ Quality Controller (шаг 7.6): **Slice Coherence** (6 критериев из 
 `openspec/adrs/` — постоянное хранилище архитектурных решений проекта.
 `.cursor/rules/adr-format.mdc` — формат, именование, критерии, жизненный цикл.
 Индекс: `openspec/adrs/README.md`. Создаются при archive (шаг 5), обнаруживаются при explore/ff/new (ADR Discovery).
-Интеграция: `architect-gate.mdc` (ADR Discovery при срабатывании), `1c-agent-patterns/SKILL.md` (шаблон extraction).
+Интеграция: `architect-gate.mdc` (ADR Discovery при срабатывании), `1c-agent-patterns/architect.md` (шаблон extraction).
 
 ## Knowledge Base
 `openspec/knowledge/` — структурированная база знаний с механизмом read-repair.
@@ -168,7 +165,7 @@ Quality Controller (шаг 7.6): **Slice Coherence** (6 критериев из 
 Ревьювер читает индекс динамически (Phase 2, step 16 в `onec-code-reviewer.md`). Новые AP подхватываются автоматически без правки агентских промптов. AP-047 — обобщённая карточка Substituted Authority: локальная реализация поведения, у которого есть владелец (база/БСП/платформа/общий модуль), вместо делегирования владельцу.
 
 ## Словарь лексики ТЗ
-`.cursor/docs/tz-lexicon-dictionary.md` — запрещённые слова (англицизмы, жаргон, опечатки) с заменами и Grep-паттернами. Единый источник для генерации (`change-tz.md`, п.2 и п.11), ревью архитектора (`1c-agent-patterns/SKILL.md`, пункт 6), механической проверки (`verify`, шаги 7.8 и 11). Пополняется из `/opsx:doc-tz` (ревью архитектора → предложение → подтверждение пользователя).
+`.cursor/docs/tz-lexicon-dictionary.md` — запрещённые слова (англицизмы, жаргон, опечатки) с заменами и Grep-паттернами. Единый источник для генерации (`change-tz.md`, п.2 и п.11), ревью архитектора (`1c-agent-patterns/architect.md`, секция «Architect — ТЗ quality review», пункт 6), механической проверки (`verify`, шаги 7.8 и 11). Пополняется из `/opsx:doc-tz` (ревью архитектора → предложение → подтверждение пользователя).
 
 ## Выбор модели
 `.cursor/rules/model-selection.mdc` — Opus для критичных задач, Sonnet/fast для остального.
@@ -187,7 +184,6 @@ Quality Controller (шаг 7.6): **Slice Coherence** (6 критериев из 
 - **1c-mxl** — `.cursor/skills/1c-mxl/SKILL.md` (и подскиллы compile, decompile, info, validate): табличные макеты (MXL) — компиляция, декомпиляция, анализ.
 - **1c-roles** — `.cursor/skills/1c-roles/SKILL.md` (и подскиллы compile, info): роли и права доступа — создание из JSON, анализ Rights.xml.
 - **1c-query-optimization** — `.cursor/skills/1c-query-optimization/SKILL.md`: продвинутые паттерны запросов (временные таблицы, DCS).
-- **1c-help-mcp**, **mcp-tools** — `.cursor/skills/1c-help-mcp/SKILL.md`, `.cursor/skills/mcp-tools/SKILL.md`: справка и MCP-инструменты.
 
 ## Справочная документация
 `.cursor/docs/` — справочники для агентов и генерации документов.
@@ -195,5 +191,5 @@ Quality Controller (шаг 7.6): **Slice Coherence** (6 критериев из 
 - **standard/** — `.cursor/docs/standard/1c-standards-navigator.md`, `std-01-metadata.md` … `std-11-general.md`: вендорские стандарты 1С. Ссылается `1c-vendor-standards/SKILL.md`.
 
 ## Системные промпты агентов
-`.cursor/agents/*.md` — промпты для onec-code-writer, onec-code-reviewer, onec-code-architect, onec-code-explorer, onec-trace-analyst, onec-code-simplifier, onec-admin, mcp-deploy, openspec-quality-controller, openspec-doc-writer.
+`.cursor/agents/*.md` — промпты для onec-code-writer, onec-code-reviewer, onec-code-architect, onec-code-explorer, onec-trace-analyst, onec-code-simplifier, openspec-quality-controller, openspec-doc-writer.
 Changelog: `.cursor/agents/CHANGELOG.md`.

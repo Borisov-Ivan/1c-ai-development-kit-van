@@ -257,7 +257,7 @@ Baseline: <из п.1.5.1>
 
 > Task Pre-call Checklist — `.cursor/rules/tool-name-guard.mdc` (subagent_type из списка, `model` не передавать).
 
-Вызвать **Task**(`subagent_type="onec-code-reviewer"`) с промптом по шаблону «Reviewer (ревью кода)» из `.cursor/skills/1c-agent-patterns/SKILL.md`:
+Вызвать **Task**(`subagent_type="onec-code-reviewer"`) с промптом по шаблону «Reviewer (ревью кода)» из `.cursor/skills/1c-agent-patterns/reviewer.md`:
 
 - Файлы: список из шага 1 (для батча — подмножество).
 - `expected_reviewer_prompt_contract_version`: 3.
@@ -379,7 +379,7 @@ Baseline: <из п.1.5.1>
 ### 6.4 Для каждого затронутого файла
 
 1. **MUST_FIX:** Task `onec-code-writer` по шаблону «Writer — review fix». В промпте findings отсортированы по `risk_score` desc.
-2. **REFACTOR:** Task `onec-code-simplifier`.
+2. **REFACTOR:** Task `onec-code-simplifier` (шаблон: `.cursor/skills/1c-agent-patterns/simplifier.md`).
 3. **LINT GATE:** ReadLints → исправить ошибки.
 4. **API EXISTENCE CHECK (smart default S12):**
    - По правилам из `1c-agent-delegation.mdc` проверить новые вызовы `МодульИмя.МетодИмя(` в diff.

@@ -246,11 +246,11 @@ Implement tasks from an OpenSpec change.
    - Запрещено писать в `debug.md` имена процедур/хелперов, которых нет в `created_or_modified_symbols` или spot-check.
 
    **Investigation Loop при apply.** Если reviewer в отчёте включил секцию `## Investigation Request`:
-   1. Вызвать explorer (contract resolution deep) по таблице из Investigation Request. Шаблон: «Explorer — contract resolution (deep)» из `1c-agent-patterns/SKILL.md`.
+   1. Вызвать explorer (contract resolution deep) по таблице из Investigation Request. Шаблон: «Explorer — contract resolution (deep)» из `1c-agent-patterns/explorer.md`.
    2. Сохранить вывод в `reports/resolved-contract-<slug>-YYYY-MM-DD.md` (артифакт ЗНИ).
    3. Повторно вызвать reviewer с Resolved Contracts в промпте.
    4. При последующем устранении замечаний — передать Resolved Contracts в промпт writer.
-   Протокол: см. `1c-agent-delegation.mdc`, секция CONTRACT RESOLUTION; шаблоны: `1c-agent-patterns/SKILL.md`.
+   Протокол: см. `1c-agent-delegation.mdc`, секция CONTRACT RESOLUTION; шаблоны: `1c-agent-patterns/explorer.md` (Explorer — contract resolution), `1c-agent-patterns/writer.md` (Writer — review fix), `1c-agent-patterns/reviewer.md` (Reviewer — ревью кода).
 
    **Task loop:**
 

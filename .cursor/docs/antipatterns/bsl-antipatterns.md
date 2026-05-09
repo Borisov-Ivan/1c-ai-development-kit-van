@@ -449,7 +449,7 @@ Callee возвращает структуру «Успех/Данные» вм�
 ### Ссылки
 
 - .cursor/docs/1c-coding-standards.md, rule 14 (антипаттерн «Defensive cake»)
-- 1c-agent-patterns/SKILL.md, INTEGRATION_CONTRACT_GATE (cross-boundary)
+- 1c-agent-patterns/SKILL.md (навигатор, секция SHARED INSTRUCTION BLOCKS), INTEGRATION_CONTRACT_GATE (cross-boundary)
 
 ---
 

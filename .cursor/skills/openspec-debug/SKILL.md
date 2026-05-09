@@ -131,7 +131,7 @@ If step 3 loaded a trace (PFF/TRACE file) or an error stack with 3+ call lines:
 2. If the trace-analyst report contains "Insufficient data" or "Request TRACE_FULL", ask the user for the full trace and do not continue the chain until it is provided. Otherwise proceed.
 
 3. **Verification queries** — check if the trace-analyst report contains a `## Verification queries for explorer` section with VQ-items:
-   - **If VQ-items exist**: run **onec-code-explorer** with the targeted verification prompt (template «Explorer — верификация гипотез trace-analyst» from `1c-agent-patterns/SKILL.md`). Pass: path to the trace-analyst report, the VQ list, and modules_hint from the report. Explorer returns a confirms/refutes/inconclusive answer for each VQ with code citations.
+   - **If VQ-items exist**: run **onec-code-explorer** with the targeted verification prompt (template «Explorer — верификация гипотез trace-analyst» from `1c-agent-patterns/explorer.md`). Pass: path to the trace-analyst report, the VQ list, and modules_hint from the report. Explorer returns a confirms/refutes/inconclusive answer for each VQ with code citations.
    - **If no VQ-items**: skip to step 4.
 
 4. **Merge VQ answers into RCA** (only if step 3 ran explorer):
@@ -235,7 +235,7 @@ Keep the RCA compact; the split ensures apply/debug can later enforce the verifi
 
 Перед переходом к плану фикса проверить триггеры из `.cursor/rules/architect-gate.mdc` (объективные маркеры, семантические, структурные). В контексте debug автоматически срабатывают: **bug fix** (объективный маркер); наличие отчётов trace-analyst или explorer в сессии (объективный маркер «вызывался trace-analyst/explorer»). Дополнительно проверить остальные триггеры (перехват базовой процедуры, новый объект в design, несколько точек реализации, фикс меняет UX-сценарий и т.д.).
 
-- **При срабатывании любого триггера:** вызвать **onec-code-architect** с брифом (RCA, корневая причина, предложенный подход, Fix Quality чеклист). Использовать шаблон «Architect — fix quality review» из `1c-agent-patterns/SKILL.md`. Результат сохранить в `reports/architecture-debug-YYYY-MM-DD.md` по `preserve-subagent-reports.mdc`. Учесть рекомендации в плане фикса (шаг 7). **К шагу 7 переходить ТОЛЬКО после получения отчёта архитектора.**
+- **При срабатывании любого триггера:** вызвать **onec-code-architect** с брифом (RCA, корневая причина, предложенный подход, Fix Quality чеклист). Использовать шаблон «Architect — fix quality review» из `1c-agent-patterns/architect.md`. Результат сохранить в `reports/architecture-debug-YYYY-MM-DD.md` по `preserve-subagent-reports.mdc`. Учесть рекомендации в плане фикса (шаг 7). **К шагу 7 переходить ТОЛЬКО после получения отчёта архитектора.**
 - **Исключение:** пользователь явно пишет «пропустить архитектора» → в debug.md секция «Architect Gate» с записью «Пользователь отклонил. Причина: …» → затем шаг 7. Оркестратор **НЕ** принимает решение «пропустить» самостоятельно (не допускается обоснование «фикс точечный»).
 - **Триггеры не сработали** — перейти к шагу 7 без вызова архитектора.
 

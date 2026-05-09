@@ -155,7 +155,7 @@ After completing the steps, summarize:
 - **Slice Generation Gate (MANDATORY)**: после создания `design.md` и до генерации `tasks.md` (или любых артефактов, зависящих от tasks):
   1. Определить объём ЗНИ. Если ≥ 6 задач — декомпозиция на срезы **обязательна**; если ≤ 5 — опциональна (один срез-контейнер).
   2. Проверить, содержит ли `design.md` секцию `## Slices`.
-  3. Если нет (и tier ≥ Standard) — делегировать **onec-code-architect** шаблоном «Architect — slice decomposition» (`1c-agent-patterns/SKILL.md`).
+  3. Если нет (и tier ≥ Standard) — делегировать **onec-code-architect** шаблоном «Architect — slice decomposition» (`1c-agent-patterns/architect.md`).
   4. Результат (таблица срезов + сценарии + граф зависимостей + покрытие Scenarios) вставить в `design.md`.
   5. Показать пользователю компактное резюме декомпозиции и AskQuestion: `[Принять] / [Скорректировать] / [Пересобрать]`.
   6. Генерация `tasks.md` (через «Architect — slice-aware task decomposition») запрещена, пока `## Slices` не принята.

@@ -183,7 +183,7 @@ Self-check перед выводом: слои разделены; в UX-пол�
 
 #### 5a. Scope Coherence Audit (режим `scope-coherence-audit`)
 
-Цель — обнаружить расползание ЗНИ (scope drift) до дорогого `/opsx:verify`. Отчёт: `reports/architecture-extend-coherence-YYYY-MM-DD.md`. Шаблон промпта: `.cursor/skills/1c-agent-patterns/SKILL.md`, секция **Architect — scope coherence audit (extend)**.
+Цель — обнаружить расползание ЗНИ (scope drift) до дорогого `/opsx:verify`. Отчёт: `reports/architecture-extend-coherence-YYYY-MM-DD.md`. Шаблон промпта: `.cursor/skills/1c-agent-patterns/architect.md`, секция **Architect — scope coherence audit (extend)**.
 
 **Триггер 1 (семантический, из брифа):** в блоке «Соответствие исходному scope» зафиксирован `Drift-check: drift-warning` или `Drift-check: scope-violation`.
 
@@ -210,7 +210,7 @@ Self-check перед выводом: слои разделены; в UX-пол�
 **Если грейс не применим:**
 
 1. Выполнить ADR Discovery и KB Discovery (как ниже для обычного architect).
-2. Вызвать `Task(subagent_type="onec-code-architect")` с `mode=scope-coherence-audit` и шаблоном из `1c-agent-patterns/SKILL.md`. Оркестратор передаёт блок «Соответствие исходному scope» из брифа, полные тексты артефактов, при наличии — фрагмент исходного `proposal.md` из git (`git show <hash>:openspec/changes/<name>/proposal.md`, где `<hash>` — коммит создания change или первый коммит с каталогом change; если недоступно — явно указать в промпте «исторический proposal недоступен»).
+2. Вызвать `Task(subagent_type="onec-code-architect")` с `mode=scope-coherence-audit` и шаблоном из `1c-agent-patterns/architect.md`. Оркестратор передаёт блок «Соответствие исходному scope» из брифа, полные тексты артефактов, при наличии — фрагмент исходного `proposal.md` из git (`git show <hash>:openspec/changes/<name>/proposal.md`, где `<hash>` — коммит создания change или первый коммит с каталогом change; если недоступно — явно указать в промпте «исторический proposal недоступен»).
 3. Сохранить полный отчёт в `openspec/changes/<name>/reports/architecture-extend-coherence-YYYY-MM-DD.md`.
 4. Добавить в `debug.md` запись:
    ```markdown

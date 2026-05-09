@@ -15,7 +15,7 @@ description: Миграция legacy/фазового tasks.md в вертика
 - `<change-name>` — обязательно. Если не указано — AskUserQuestion по списку активных changes.
 
 **Поведение:**
-1. Архитектор (`Task(subagent_type="onec-code-architect")`) получает proposal.md / design.md / spec и плоский tasks.md, использует шаблон «Architect — slice restructuring» из `1c-agent-patterns/SKILL.md`.
+1. Архитектор (`Task(subagent_type="onec-code-architect")`) получает proposal.md / design.md / spec и плоский tasks.md, использует шаблон «Architect — slice restructuring» из `1c-agent-patterns/architect.md`.
 2. Результат — предложенная структура срезов: таблица «старая задача → новый срез», список `S<N>.T<M>` приёмочных тестов, предупреждения о задачах, которые не удалось отнести к сценарию.
 3. Пользователь подтверждает diff (или отклоняет / просит пересборку).
 4. После подтверждения — `StrReplace`/`Write` для `tasks.md` и секции `## Slices` в `design.md`.

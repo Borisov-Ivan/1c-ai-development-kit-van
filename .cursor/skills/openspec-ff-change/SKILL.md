@@ -142,13 +142,13 @@ Fast-forward through artifact creation - generate everything needed to start imp
       - **Special case: `tasks` artifact (slice-aware task decomposition)**:
         Before delegating tasks, the **Slice Generation Gate** must have been passed (see step 5e.1 below) and design.md MUST contain a `## Slices` section.
 
-        Delegate to **onec-code-architect** with the "Architect — slice-aware task decomposition" template (`1c-agent-patterns/SKILL.md`).
+        Delegate to **onec-code-architect** with the "Architect — slice-aware task decomposition" template (`1c-agent-patterns/architect.md`).
         Pass: paths to proposal.md, design.md (with approved `## Slices` section, включая `### Матрица приёмки` если есть), specs/, and the `template` from instructions.
 
         **Acceptance Scope Tightness context (правило среза 6):** в промпт архитектору явно передать:
         - Извлечённый список Scenarios per slice из design.md `## Slices` (столбец «Scenarios из spec» и/или матрица приёмки).
         - Требование: каждый `S<N>.T<M>` SHALL иметь хвостовую ссылку `(Scenario: «<имя>»)` на Scenario из `**Связь со spec:**` **этого же** среза; количество `T<M>` ≤ 2 × количество Scenarios; инварианты/NFR/перф-проверки — НЕ в приёмку среза, а в `design.md#Assumptions` / обычную задачу / `## Follow-up`.
-        - Ссылки: `.cursor/rules/vertical-slices.mdc` (правило среза 6), `.cursor/rules/task-readability.mdc` (Исключение 1 для `T<M>`), `.cursor/skills/1c-agent-patterns/SKILL.md` (шаблон slice-aware task decomposition, правило 10.1).
+        - Ссылки: `.cursor/rules/vertical-slices.mdc` (правило среза 6), `.cursor/rules/task-readability.mdc` (Исключение 1 для `T<M>`), `.cursor/skills/1c-agent-patterns/architect.md` (шаблон slice-aware task decomposition, правило 10.1).
 
         The architect produces tasks.md with:
         - H1 headers `# Срез S<N>: <имя>` (one per slice from design)
@@ -245,7 +245,7 @@ Fast-forward through artifact creation - generate everything needed to start imp
          - If estimated ≥ 6 tasks — slice decomposition is **MANDATORY**.
       3. Grep `design.md` for existing `## Slices` section.
       4. **If `## Slices` section is absent (or empty) AND tier ≥ Standard:**
-         - Delegate to **onec-code-architect** with the "Architect — slice decomposition" template (`1c-agent-patterns/SKILL.md`).
+         - Delegate to **onec-code-architect** with the "Architect — slice decomposition" template (`1c-agent-patterns/architect.md`).
          - Pass: paths to proposal.md, design.md (without Slices), specs/.
          - The architect returns the `## Slices` block (table of slices + scenarios + files + acceptance + dependency graph + coverage matrix).
          - Insert the returned block into `design.md` (append after existing sections, before "Risks" if present).

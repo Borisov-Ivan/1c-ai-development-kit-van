@@ -79,13 +79,13 @@ priority: 140
 
 1. **Quality Controller** — критерий 7 Task Readability: alerts `task-opaque-title` (WARNING), `task-too-short` (SUGGESTION), `task-opaque-acceptance` (WARNING — только для `S<N>.T<M>` без Scenario-ссылки). См. `.cursor/agents/openspec-quality-controller.md`.
 2. **Architect readiness review** в verify — подкритерий 1.b Readability. См. `.cursor/skills/openspec-verify-change/SKILL.md`.
-3. **Архитектор при генерации tasks.md** — slice-aware task decomposition, правило 15 + 10.1 (маппинг T<M> ↔ Scenario). См. `.cursor/skills/1c-agent-patterns/SKILL.md`.
+3. **Архитектор при генерации tasks.md** — slice-aware task decomposition, правило 15 + 10.1 (маппинг T<M> ↔ Scenario). См. `.cursor/skills/1c-agent-patterns/architect.md`.
 
 ## ССЫЛКИ
 
 - Формат срезов: `.cursor/rules/vertical-slices.mdc`
 - Воркфлоу: `.cursor/rules/sdd-workflow.mdc`
-- Шаблоны промптов: `.cursor/skills/1c-agent-patterns/SKILL.md`
+- Шаблоны промптов: `.cursor/skills/1c-agent-patterns/SKILL.md` (навигатор) + ролевые файлы (`architect.md`, `writer.md`, ...)
 
 ---
 

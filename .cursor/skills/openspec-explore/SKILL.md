@@ -277,7 +277,7 @@ Depending on what the user brings, you might:
 После получения отчёта от аналитического агента (explorer, trace-analyst):
 
 Если сложность >= Сложная (5+ файлов, несколько подсистем, интеграции) ИЛИ bug fix с hypothesis в отчёте:
-1. Запустить **onec-code-architect** в режиме "глубокий анализ" (шаблон в `1c-agent-patterns/SKILL.md`)
+1. Запустить **onec-code-architect** в режиме "глубокий анализ" (шаблон в `1c-agent-patterns/architect.md`)
 2. Передать: путь к `exploration-*.md` (или `trace-analysis-*.md`) + контекст задачи из брифа
 3. Результат сохранить по правилу `preserve-subagent-reports.mdc`: `openspec/changes/<name>/reports/deep-analysis-YYYY-MM-DD.md` при активном change или `temp/reports/deep-analysis-YYYY-MM-DD.md` вне change
 4. Использовать в шаге 2 (Decide) для обоснования решений

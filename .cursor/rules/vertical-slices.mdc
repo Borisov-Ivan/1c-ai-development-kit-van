@@ -1,5 +1,5 @@
 ---
-description: "Vertical Slices — вертикальные срезы как единица декомпозиции ЗНИ: формат, поведение apply/verify/continue, slice-gate маркеры, миграция с phase-gates"
+description: "Vertical Slices — вертикальные срезы как единица декомпозиции ЗНИ: формат, поведение apply/verify/continue, slice-gate маркеры, миграция с устаревшей фазовой модели"
 alwaysApply: false
 priority: 150
 ---
@@ -91,7 +91,7 @@ priority: 150
 
 ## ДЕКОМПОЗИЦИЯ (кто и когда)
 
-- **При создании ЗНИ** (`/opsx:ff`, `/opsx:new`) — архитектор формирует секцию `## Slices` в `design.md` **до** генерации `tasks.md`. Затем `tasks.md` генерируется с `# Срез S<N>` по этой секции. См. шаблоны «Architect — slice decomposition» и «Architect — slice-aware task decomposition» в `1c-agent-patterns/SKILL.md`.
+- **При создании ЗНИ** (`/opsx:ff`, `/opsx:new`) — архитектор формирует секцию `## Slices` в `design.md` **до** генерации `tasks.md`. Затем `tasks.md` генерируется с `# Срез S<N>` по этой секции. См. шаблоны «Architect — slice decomposition» и «Architect — slice-aware task decomposition» в `1c-agent-patterns/architect.md`.
 - **При добавлении задач к существующему change** (`/opsx:continue`, `/opsx:debug`, `/opsx:explore`) — placement задач фикса **строго** по разделу **«ИНВАРИАНТ: Defect placement»** ниже (по умолчанию — inside-slice; новый срез `S<N+1>` только при выполнении условий инварианта).
 - **При пересмотре на границе среза** (`/opsx:apply` → slice-gate → опция «пересмотр») — архитектор через «Architect — slice transition review» оценивает актуальность следующего среза.
 - **При миграции легаси-ЗНИ** (tasks.md без `# Срез`) — через `/opsx:verify <name> --migrate-to-slices`, шаблон «Architect — slice restructuring».

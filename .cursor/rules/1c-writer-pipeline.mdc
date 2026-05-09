@@ -97,7 +97,7 @@ AskQuestion:
 
 ### Резолв контракта (только explorer)
 
-Оркестратор **не** резолвит контракты сам. Для всех точек из таблицы Investigation Request — один вызов **onec-code-explorer** по глубокому шаблону «Explorer — contract resolution (deep)» из `1c-agent-patterns/SKILL.md`.
+Оркестратор **не** резолвит контракты сам. Для всех точек из таблицы Investigation Request — один вызов **onec-code-explorer** по глубокому шаблону «Explorer — contract resolution (deep)» из `1c-agent-patterns/explorer.md`.
 
 ### Передача результата
 
@@ -122,7 +122,7 @@ writer'а (HALT с MISSING_INPUT при получении).
 
 При делегировании writer для файла в cfe/ (расширение):
 1. Grep файл на наличие &ИзменениеИКонтроль.
-2. Если найдено — в промпт writer ОБЯЗАТЕЛЬНО включить блок EXTENSION_GUARD из `1c-agent-patterns/SKILL.md` (секция Shared instruction blocks).
+2. Если найдено — в промпт writer ОБЯЗАТЕЛЬНО включить блок EXTENSION_GUARD из `1c-agent-patterns/SKILL.md` (навигатор, секция SHARED INSTRUCTION BLOCKS).
 3. В промпт reviewer ОБЯЗАТЕЛЬНО включить: путь к base-файлу в cf/ для верификации (заменить cfe/<ExtName>/ на cf/ в пути к файлу).
 
 ### EXTENSION VERIFICATION (после writer, до reviewer)
