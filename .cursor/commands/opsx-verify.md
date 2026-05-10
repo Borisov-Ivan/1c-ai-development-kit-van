@@ -27,6 +27,7 @@ Phase A: silent auto-fix mechanical issues. Phase B: judgment decision cards.
 - `--since-slice S<N>` — verify-pre для среза S<N> и всех последующих (полезно после правок design.md `## Slices`).
 - `--migrate-to-slices` — режим миграции legacy/фазового tasks.md в срезы. Architect перестраивает, пользователь подтверждает diff, скилл применяет StrReplace.
 - `--full` / `--standard` — повысить tier (по умолчанию определяется автоматически: Lite ≤5 задач/1 срез, Standard 6–15 задач/2+ срезов, Full ≥16 задач/3+ срезов или slice-transition).
+- `--verbose` — развёрнутый вывод проверки **в чат** (шапка, таблицы, карточки); без флага — краткая сводка + путь к `reports/verification-*.md` (см. `chat-output-budget.mdc`).
 
 **Примеры:**
 
@@ -35,3 +36,4 @@ Phase A: silent auto-fix mechanical issues. Phase B: judgment decision cards.
 - `/opsx:verify add-auth --since-slice S3` — verify-pre для S3 и далее (после правок design.md §Slices).
 - `/opsx:verify add-auth --migrate-to-slices` — реструктуризация плоского tasks.md в срезы.
 - `/opsx:verify add-auth --full` — форсировать полный tier.
+- `/opsx:verify add-auth --verbose` — полный отчёт продублировать в чате.

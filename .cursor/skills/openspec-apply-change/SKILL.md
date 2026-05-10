@@ -274,7 +274,13 @@ Implement tasks from an OpenSpec change.
    - **Slice Gate (после последней non-test задачи среза):**
      Детектор: все задачи S<N>.<M> = [x], S<N>.T<M> = [ ].
 
-     Действие — сгенерировать T-HANDOFF вариант `acceptance` (формат — `.cursor/docs/opsx-output-style.md` §5.2; НЕ вызывать AskQuestion):
+     **Внутренний verify (обязательно до приёмочного handoff):**
+     1. Оркестратор выполняет проверки по скиллу `openspec-verify-change/SKILL.md` для **текущего среза** в post-apply контексте: режим **slice-scoped** (`--slice S<N>` / автоэквивалент), **без** длинного вывода в чат.
+     2. Сохранить полный отчёт в `openspec/changes/<name>/reports/` с именем по шагу 18 verify (например `verification-slice-S<N>-YYYY-MM-DD.md`).
+     3. **Чат:** если вердикт внутреннего прогона требует решений пользователя (карточки Блок 2/2b) или итог «не готово» — вывести **кратко** по `.cursor/rules/chat-output-budget.mdc` + ссылка на файл отчёта; **не** переходить к шагу приёмочного handoff, пока пользователь не обработает блокеры (как при обычном `/opsx:verify`).
+     4. Если прогон **чистый** — **не упоминать** verify в сообщении пользователю.
+
+     Действие — сгенерировать T-HANDOFF вариант `acceptance` (формат — `.cursor/docs/opsx-output-style.md` §5.2; НЕ вызывать AskQuestion), **только после** успешного внутреннего verify по п.1–4:
 
      ```
      ## Срез S<N> — передача на приёмку: <change-name>
@@ -284,7 +290,7 @@ Implement tasks from an OpenSpec change.
      ### 1. Что реализовано
      1. [x] S<N>.<M> — <одно предложение>
         - Файл: `<path>`, строки X-Y
-        - Авто-проверка: OK | линтер чист | reviewer PASS | <замечания одной строкой>
+        - [только при проблеме] Замечание: <spot-check / линтер / ревью — одна строка>
 
      ### 2. Что проверить СЕЙЧАС
      Сценарий `S<N>.T<M>` в императиве (переписать критерии приёмки по пунктам; внутренние ID регрессий — в скобках в конце пункта):
@@ -293,7 +299,7 @@ Implement tasks from an OpenSpec change.
      3. Убедиться <ожидаемый результат> (регрессия R<N>, если применима)
 
      ### 3. Как вернуться
-     `/opsx:apply <change-name>` — новая сессия начнётся с запроса вердикта (принят / не принят / дефект в предыдущем срезе). Если при проверке выяснится, что нужно изменить scope/design/tasks, используйте `/opsx:extend <change-name>`; команда покажет бриф и вернёт в `/opsx:verify`. Пока вы проверяете — оркестратор ничего не делает.
+     `/opsx:apply <change-name>` — новая сессия начнётся с запроса вердикта (принят / не принят / дефект в предыдущем срезе). Если нужно изменить scope/design/tasks — `/opsx:extend <change-name>`; затем снова `/opsx:apply <change-name>`. Пока вы проверяете в 1С — оркестратор ничего не делает.
 
      ### 4. Short-cut
      Если уже проверено и принято — напишите `принято S<N>` / `accept S<N>`, отмечу без полного handoff.
@@ -316,7 +322,10 @@ Implement tasks from an OpenSpec change.
      1. Не генерировать Acceptance Handoff Card.
      2. Отметить S<N>.T<M> = [x].
      3. Append в debug.md "решение: принят (manual shortcut)".
-     4. Continue к S<N+1>.
+     4. Определить, **последний ли** срез S<N> в `tasks.md`: нет следующего заголовка вида `# Срез S<K>:` с K > N.
+     5. **Если срез не последний** — продолжить к следующему срезу / задачам (как раньше).
+     6. **Если срез последний** — в **чат** (тонко, `chat-output-budget.mdc`): подтвердить приёмку среза с названием (§10 стайл-гайда); спросить: «Архивировать ЗНИ? Напишите `архив` для подтверждения или `стоп` чтобы остановиться.» Завершить ход **без** автозапуска archive до ответа.
+     7. **Авто-archive:** если на шаге 6 пользователь ответил **`архив`** (или явная эквивалентная фраза) — в **этой же сессии** выполнить шаги скилла `openspec-archive-change/SKILL.md` для `<change-name>` целиком (как при `/opsx:archive <name>`), с **тонким** итогом в чат (T-CONFIRM §5.5); при блокере архива — карточка по правилам archive, не молчать. Ответ **`стоп`** — завершить сессию apply без archive.
 
    - **Ранний выход ("стоп" в любой момент):**
      Пользователь явно: "стоп" / "stop" / "прекрати" / "прерви" / "пока хватит".
@@ -338,7 +347,7 @@ Implement tasks from an OpenSpec change.
    - **Classify** (Task Dispatch table above) — announce type and executor
    - **Delegate** to the designated executor (agent or skill)
    - Orchestrator role: prepare prompt with context, delegate, spot-check result
-   - **Spot-check (post-verification):** After the agent reports completion, verify the change: Grep for a pattern that confirms the fix (e.g. after "replace ТекущаяДата with ТекущаяДатаСеанса" → Grep for `ТекущаяДата()` in that file must return 0 matches). For batch tasks (5+ files), spot-check at least 3 files (first, middle, last in the list). If the result does not match expectations → STOP, report to user, do NOT mark task complete.
+   - **Spot-check (post-verification):** After the agent reports completion, verify the change: Grep for a pattern that confirms the fix (e.g. after "replace ТекущаяДата with ТекущаяДатаСеанса" → Grep for `ТекущаяДата()` in that file must return 0 matches). For batch tasks (5+ files), spot-check at least 3 files (first, middle, last in the list). If the result does not match expectations → STOP, report to user, do NOT mark task complete. **Чат (non-events, §3a `chat-output-budget.mdc`):** при успешном writer + spot-check + линтер без ошибок + reviewer без блокеров — **не** выводить строки «Авто-проверка: OK», «Линтер чист», «reviewer PASS», «Spot-check: OK»; между задачами (без пошагового режима) достаточно одной строки «Задача `S<N>.<M>` («…») реализована.».
    - Mark task complete in the tasks file: `- [ ]` → `- [x]`
    - **Пошаговая пауза (если активен пошаговый режим):** После отметки задачи выполненной, ОБЯЗАТЕЛЬНАЯ ПАУЗА. Заголовки и формулировки — в пользовательском языке (англицизмы `Step-by-step`, `checkpoint` в чат не цитируются; см. §3.1 `opsx-output-style.md`).
 
@@ -390,7 +399,7 @@ Implement tasks from an OpenSpec change.
    - **Slice Gate reached** (все non-test задачи среза `[x]`, остался только `S<N>.T<M>` или первый task следующего среза) — ОБЯЗАТЕЛЬНАЯ карточка приёмки (см. Slice Gate check выше)
    - **Пошаговый режим:** после завершения каждой задачи (пошаговая пауза выше)
    - Task is unclear → ask for clarification
-   - Implementation reveals a design/scope issue → stop implementation and suggest `/opsx:extend <change-name>` (or `/opsx:extend <change-name> --from-review <report-path>` if the issue came from review), then `/opsx:verify <change-name>`
+   - Implementation reveals a design/scope issue → stop implementation and suggest `/opsx:extend <change-name>` (or `/opsx:extend <change-name> --from-review <report-path>` if the issue came from review), затем снова `/opsx:apply <change-name>` после обновления постановки
    - Error or blocker encountered → report and wait for guidance
    - User interrupts
    - **Verification/decision task completed** → пауза условной задачи (см. выше «Conditional Task Detection»)
@@ -404,7 +413,7 @@ Implement tasks from an OpenSpec change.
 
    **Имена секций одинаковы во всех трёх вариантах** (см. раздел «Output — T-HANDOFF» ниже):
 
-   - `### 1. Что реализовано` — за каждую задачу этого сеанса: `[x] N.M — описание`, файл `path` со строками, «что изменено» одним предложением, авто-проверка (spot-check) OK/расхождение.
+   - `### 1. Что реализовано` — за каждую задачу этого сеанса: `[x] N.M — описание`, файл `path` со строками, «что изменено» одним предложением; строка про автопроверку — **только** при расхождении или замечании ревью (без «OK» в успешном пути — §3a `chat-output-budget.mdc`).
    - `### 2. Что проверить СЕЙЧАС` — для каждой закрытой задачи с критериями приёмки (маркеры `убедиться`, `проверить`, `критерий приёмки`, `Критерий приёмки`): переписать критерии в императиве нумерованным списком (1. Открыть… 2. Выполнить… 3. Убедиться…). Для задач типа «Ручной тест» — полный сценарий с ожидаемыми результатами. Если ничего не требуется от пользователя — одна строка «Ручная проверка не требуется для задач этого сеанса».
    - `### 3. Следующие задачи` — таблица `Задача | Действие | Тип | Исполнитель | Зависит от | Статус`; 3–5 следующих. Для каждой:
      - **Задача** — ID `S<N>.<M>` / `S<N>.T<M>` в backticks.
@@ -413,7 +422,7 @@ Implement tasks from an OpenSpec change.
      - **Исполнитель** — русские роли: `агент`, `агент + ревью`, `пользователь`, `оркестратор`. Имена `onec-code-writer` / `onec-code-reviewer` / `onec-code-explorer` / `onec-code-architect` в чат не выводятся (см. §3.1 `opsx-output-style.md`).
      - **Зависит от** — ID задач в backticks; если зависимость `[ ]` — пометить «невыполнима до `<id>`».
      - **Статус** — `[x]` / `[ ]`.
-   - `### 4. Как вернуться` — `/opsx:apply <change-name>`, одна строка. Если выявлен scope/design mismatch, добавить вторую строку: `Обновить scope: /opsx:extend <change-name>` (после extend — `/opsx:verify <change-name>`).
+   - `### 4. Как вернуться` — `/opsx:apply <change-name>`, одна строка. Если выявлен scope/design mismatch, добавить вторую строку: `Обновить scope: /opsx:extend <change-name>` (затем снова `/opsx:apply <change-name>`).
    - `### 5. Blockers` — нумерованный список задач, которые не могут продолжаться, и почему.
    - `### 6. Issue` — **только в варианте `pause`**: описание проблемы 1 абзац + нумерованные **Options** из 2–3 вариантов решения.
    - `### 7. Short-cut` — **только в варианте `acceptance`**: строка про `принято S<N>` / `accept S<N>`.
@@ -424,16 +433,10 @@ Implement tasks from an OpenSpec change.
 
 **Output During Implementation**
 
+Между задачами в **чат** — минимум строк (§3a `chat-output-budget.mdc`): без заголовка `## Implementing`, без `Schema:`, без «✓ Task complete» при успехе. Достаточно: «Задача `S<N>.<M>` («…») реализована.» При ошибке/blocker — кратко что не так.
+
 ```
-## Implementing: <change-name> (schema: <schema-name>)
-
-Working on task 3/7: <task description>
-[...implementation happening...]
-✓ Task complete
-
-Working on task 4/7: <task description>
-[...implementation happening...]
-✓ Task complete
+Задача `S2.3` («…») реализована.
 ```
 
 **Output — T-HANDOFF (единый шаблон, см. `.cursor/docs/opsx-output-style.md` §5.2)**
@@ -459,7 +462,7 @@ Working on task 4/7: <task description>
 1. [x] <id задачи> — <одно предложение>
    - Файл: `<path>`, строки X-Y
    - Что изменено: <одно предложение>
-   - Авто-проверка: OK | расхождение <описание>
+   - [только при проблеме] Замечание: <spot-check / линтер / ревью — кратко>
 
 ### 2. Что проверить СЕЙЧАС
 1. <шаг 1 в императиве> → <ожидаемый результат> (регрессия R<N>, если применима)

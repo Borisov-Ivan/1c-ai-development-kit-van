@@ -17,7 +17,7 @@ Universal quality gate for OpenSpec changes. Mode is determined automatically fr
 - **Migrate** (`--migrate-to-slices`): реструктуризация плоского/фазового tasks.md в вертикальные срезы через architect «Architect — slice restructuring» (подробности — `.cursor/skills/openspec-migrate-slices/SKILL.md`, команда `/opsx:migrate-slices`)
 - **Legacy**: tasks.md без `# Срез` — режим совместимости: mechanical checks работают, QC — в legacy-режиме (предупреждение `no-slices`)
 
-**Output style:** отчёт верификации выводится по шаблону **T-REPORT** из `.cursor/docs/opsx-output-style.md` §5.3 (Summary → группы Severity → Action items → ссылки). Перед отправкой — self-check-5 (§7 стайл-гайда). Подробности маппинга — в секции «Report and remediation».
+**Output style:** полный отчёт — в файле `reports/verification-*.md` по **T-REPORT** §5.3 `.cursor/docs/opsx-output-style.md`. **Чат** по умолчанию — тонкий (сводка + путь к файлу + при необходимости одна команда); полный дубль в чат — только с флагом **`--verbose`** или при необходимости показать компактные карточки при блокерах (бюджет — `.cursor/rules/chat-output-budget.mdc`). Перед отправкой в чат — self-check §7 стайл-гайда + HALT из `chat-output-budget.mdc`. Подробности — `.cursor/rules/verify-user-communication.mdc`, секция «Report and remediation» ниже.
 
 ## Порядок шагов (обзор)
 
@@ -49,19 +49,11 @@ flowchart TD
   V --> W[18 Save report]
 ```
 
-**Контракт режима/tier:** первые **три строки** ответа verify пользователю — фиксированная шапка в пользовательском языке (технический код режима — в backticks для автоматизации). Пример:
-
-```
-Режим: проверка до реализации среза (`slice-pre`) — принятых срезов: 0/3
-**Объём:** Полная (12 задач, 3 среза)
-**Что проверим:** формат, согласованность срезов, готовность к реализации
-```
-
-Без этого блока ответ считается неполным.
+**Контракт шапки режима:** фиксированные строки «Этап / Объём / Что проверим» (пользовательский язык + технический код в backticks) — обязательны в **файле** отчёта (после `## Executive Summary`, см. шаг 16 и правило 11 `verify-user-communication.mdc`). В **чат** они копируются **только** если пользователь передал **`--verbose`**; иначе достаточно 1–2 предложений сути + путь к файлу отчёта.
 
 Соответствие технических кодов и пользовательских формулировок «Этап» — в шаге 16 (таблица в Executive Summary). Слова `Tier` / `Standard` / `Lite` / `Full` и калька «когерентность» в чате не цитируются (см. §3.1 `opsx-output-style.md`).
 
-**Input**: Optionally specify a change name. If omitted, check if it can be inferred from conversation context. If vague or ambiguous you MUST prompt for available changes.
+**Input**: Optionally specify a change name. Optional flag **`--verbose`**: развёрнутый вывод в чат (шапка, таблицы, карточки по шагу 17); без флага — тонкий чат по умолчанию. If change name omitted, check if it can be inferred from conversation context. If vague or ambiguous you MUST prompt for available changes.
 
 **Steps**
 
@@ -185,7 +177,7 @@ flowchart TD
    - **Completeness** (slice-post, slice-post final, legacy mixed/post-apply) — для принятых срезов / выполненных задач
    - **Correctness** (same)
    - **Coherence** (same)
-   - **Развёрнутые объяснения замечаний** (если есть любые CRITICAL/WARNING/SUGGESTION) — обязательная секция в **файле** отчёта и в сообщении пользователю; см. шаг 16
+   - **Развёрнутые объяснения замечаний** (если есть любые CRITICAL/WARNING/SUGGESTION) — обязательная секция в **файле** отчёта; в чат дублируются полностью только при `--verbose`, иначе — компактно по шагу 17; см. шаг 16
 
    Each section can have CRITICAL, WARNING, or SUGGESTION issues.
 
@@ -972,7 +964,7 @@ flowchart TD
 
 ## Report and remediation
 
-**Output style:** отчёт верификации строится по шаблону **T-REPORT** из `.cursor/docs/opsx-output-style.md` §5.3 — «Summary → группы по уровню (CRITICAL/WARNING/SUGGESTION/INFO) → Action items → ссылки на отчёты». Executive Summary ниже — слот «Summary»; Summary Scorecard и разделы по категориям — слот «группы по уровню». Пользовательские формулировки замечаний — в начале пункта, идентификаторы категорий (вида `N.M`, `R<N>`, `SC<N>`) — в скобках в конце пункта; не перемешивать их в одном предложении. Перед выводом — self-check-5 (§7 стайл-гайда).
+**Output style (файл отчёта):** полное тело по **T-REPORT** §5.3 — Executive Summary, Scorecard, группы замечаний, Action items, ссылки. Пользовательские формулировки замечаний — в начале пункта; технические коды — в скобках или в «Источники». **Чат** — по умолчанию тонкий + `--verbose` (см. шаг 17). Перед выводом в чат — §7 стайл-гайда и `chat-output-budget.mdc`.
 
 16. **Generate Verification Report**
 
@@ -1290,6 +1282,12 @@ flowchart TD
     Зафиксировать в отчёте: секция `### Card consolidation` — список свёрнутых пар «исходные алерты → итоговая карточка/строка» (или «дубликатов не обнаружено»).
 
 17. **Phase B — Show results + Judgment decision cards + Artifact hygiene**
+
+    **Маршрутизация чата (до сборки блоков)** — см. **§3a** [`.cursor/rules/chat-output-budget.mdc`](../../rules/chat-output-budget.mdc) (non-events: «Phase A ничего не нашла», «INFO нет», «гейты закрыты» и т. п. **не** писать в чат).
+    - Если **`--verbose` нет** и **пусты** Блок 2 и 2b и вердикт **«Готово к реализации»** (нет открытых решений от пользователя в финальном блоке) — в **чат ровно одна строка**: «Проверка пройдена. Подробности: `reports/verification-<mode>-YYYY-MM-DD.md`. Дальше: `/opsx:apply <name>`» (или `/opsx:archive` в post-apply final — подставить по режиму).
+    - Если **`--verbose` нет** и **пусты** Блок 2 и 2b, но вердикт **«Готово с оговорками»** / есть **неблокирующий** контекст в файле без карточек — в **чат** не более **3 строк**: итог простыми словами + путь к отчёту + одна команда. Таблица «Авто-исправлено», «К сведению», Executive Summary **не** дублируются в чат без `--verbose`.
+    - Если Блок 2 и/или 2b **не пусты** — в чат **компактные** карточки по шаблону ниже, в пределах [`.cursor/rules/chat-output-budget.mdc`](../../rules/chat-output-budget.mdc); полный текст — в файле.
+    - С **`--verbose`** — в чат допускается полный набор блоков шага 17 (как в примерах ниже), без нарушения HALT для пользовательского текста чата.
 
     **INFO** не участвуют в remediation и не показываются как карточки.
     **Footnote**-замечания (см. Issue Classification) показываются в секции «К сведению» — одна строка каждое.

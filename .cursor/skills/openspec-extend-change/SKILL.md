@@ -295,24 +295,18 @@ Architect обязателен, если:
 - если specs менялись — пройти Delta Specs Gate;
 - если добавлены задачи фикса — проверить defect placement invariant из `vertical-slices.mdc`;
 - если запуск был `--code-sync` — выполнить Code-Truth Gate из `.cursor/rules/code-truth-gate.mdc`; `phantom-symbol` после синхронизации = BLOCKER до повторной правки артефактов;
-- вернуть пользователю handoff на `/opsx:verify <name>`.
+- следующий шаг для пользователя: `/opsx:verify <name>` (не дублировать в чат длинный handoff — см. п. 8).
 
 ### 8. Handoff
 
-Финальный вывод — T-CONFIRM:
+Финальный вывод в **чат** — **§3a** [`.cursor/rules/chat-output-budget.mdc`](../../rules/chat-output-budget.mdc):
 
-```markdown
-**Действие:** Scope change `<name>` обновлён по <source>.
+- Если после подтверждения брифа **нет** изменений ни в одном артефакте (`proposal` / `design` / `specs` / `tasks` / `debug`) — **одна строка:** «Артефакты ЗНИ соответствуют запросу, правок не потребовалось.» Без `Drift-check: OK`, без перечня проверенных файлов.
+- Если артефакты **изменены** — **одна строка:** «Обновлено: `<path1>`[, `<path2>`…]. Дальше: `/opsx:verify <name>`.»
 
-**Изменённые файлы**
-1. `openspec/changes/<name>/proposal.md`
-2. `openspec/changes/<name>/design.md`
-3. `openspec/changes/<name>/tasks.md`
+Полный перечень правок, цитаты и заметки — в `debug.md` (`## Extend — YYYY-MM-DD`) и при необходимости `reports/extend-summary-<name>-YYYY-MM-DD.md`, **не** в чат.
 
-**Следующий шаг:** `/opsx:verify <name>` — проверить согласованность обновлённого scope; затем `/opsx:apply <name>` для реализации.
-```
-
-Если изменения не внесены из-за неоднозначности — T-CONFIRM с результатом «требуется решение пользователя» и 2–3 вариантами.
+Если изменения не внесены из-за неоднозначности — краткая карточка с 2–3 вариантами (развилка — исключение из однострочного режима).
 
 ---
 

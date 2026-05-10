@@ -13,7 +13,7 @@ Sync delta specs from a change to main specs.
 
 This is an **agent-driven** operation - you will read delta specs and directly edit main specs to apply the changes. This allows intelligent merging (e.g., adding a scenario without copying the entire requirement).
 
-**Output style:** сообщение пользователю о результате синхронизации — шаблон **T-CONFIRM** из `.cursor/docs/opsx-output-style.md` §5.5: действие (какие requirements/scenarios добавлены/заменены/удалены) → изменённые файлы (пути к `openspec/specs/**/spec.md`) → следующий шаг (`/opsx:verify <name>` или `/opsx:archive <name>`). Перед выводом — self-check-5 (§7).
+**Output style:** **§3a** [`.cursor/rules/chat-output-budget.mdc`](../../rules/chat-output-budget.mdc) — в **чат** только материальный итог: одна строка «спеки уже совпадают с дельтой» **или** «спеки обновлены: `<paths>`» + одна команда «Дальше». Перечень requirements/scenarios и diff — **только** в `reports/spec-sync-<name>-YYYY-MM-DD.md`, не в чат. Шаблон **T-CONFIRM** §5.5 — укороченно. Перед выводом — self-check §7 + §3a.
 
 **Input**: Optionally specify a change name. If omitted, check if it can be inferred from conversation context. If vague or ambiguous you MUST prompt for available changes.
 
@@ -38,7 +38,7 @@ This is an **agent-driven** operation - you will read delta specs and directly e
    - `## REMOVED Requirements` - Requirements to remove
    - `## RENAMED Requirements` - Requirements to rename (FROM:/TO: format)
 
-   If no delta specs found, inform user and stop.
+   If no delta specs found: в **чат** одна строка: «Дельта-spec не найдена. Дальше: `/opsx:archive <name>` или продолжите постановку.» — stop.
 
 3. **For each delta spec, apply changes to main specs**
 
@@ -73,19 +73,15 @@ This is an **agent-driven** operation - you will read delta specs and directly e
       - Add Purpose section (can be brief, mark as TBD)
       - Add Requirements section with the ADDED requirements
 
-4. **Show summary**
+4. **Summary (файл + тонкий чат)**
 
-   After applying all changes, summarize:
-   - Which capabilities were updated
-   - What changes were made (requirements added/modified/removed/renamed)
+   После применения изменений:
+   - Сформировать `openspec/changes/<name>/reports/spec-sync-<name>-YYYY-MM-DD.md`: какие capability затронуты, какие требования добавлены/изменены/удалены (кратко).
+   - **Чат:** если **ни один** файл `openspec/specs/**/spec.md` не изменился (дельта уже отражена в main) — одна строка: «Спеки уже синхронизированы с дельтой. Дальше: `/opsx:archive <name>`.» (или `/opsx:verify <name>` по ситуации). Если были **фактические** правки файлов — одна строка: «Спеки обновлены: `<path1>`[, `<path2>`…]. Дальше: `/opsx:verify <name>`.» Без списка requirements в чате.
 
-5. **Post-verification**
+5. **Post-verification (без diff в чате)**
 
-   After applying all changes:
-   - For each updated main spec: show a brief diff (which sections changed, what was added/removed).
-   - Ask the user: "Changes look correct? [Confirm / Show full spec]"
-   - If "Show full spec": read and display the full main spec file.
-   - If the user spots an issue: fix it before proceeding.
+   После записи main spec: точечно `Read`/сверка с дельтой; несоответствия — STOP с коротким сообщением. **Не** выводить diff и **не** спрашивать «Changes look correct?» в чате (non-event); полнота — в файле шага 4.
 
 **Delta Spec Format Reference**
 
@@ -123,27 +119,19 @@ Unlike programmatic merging, you can apply **partial updates**:
 - The delta represents *intent*, not a wholesale replacement
 - Use your judgment to merge changes sensibly
 
-**Output On Success**
+**Output On Success (чат)**
 
 ```
-## Specs Synced: <change-name>
-
-Updated main specs:
-
-**<capability-1>**:
-- Added requirement: "New Feature"
-- Modified requirement: "Existing Feature" (added 1 scenario)
-
-**<capability-2>**:
-- Created new spec file
-- Added requirement: "Another Feature"
-
-Main specs are now updated. The change remains active - archive when implementation is complete.
+Спеки обновлены: openspec/specs/<capability>/spec.md[, …]. Дальше: `/opsx:verify <change-name>`.
+```
+или
+```
+Спеки уже синхронизированы с дельтой. Дальше: `/opsx:archive <change-name>`.
 ```
 
 **Guardrails**
 - Read both delta and main specs before making changes
 - Preserve existing content not mentioned in delta
 - If something is unclear, ask for clarification
-- Show what you're changing as you go
+- Детали изменений — в `reports/spec-sync-*.md`, не потоком в чат
 - The operation should be idempotent - running twice should give same result
