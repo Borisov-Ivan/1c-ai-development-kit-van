@@ -114,13 +114,10 @@ Fast-forward through artifact creation - generate everything needed to start imp
    Use the **TodoWrite tool** to track progress through the artifacts.
 
    **Error handling (MANDATORY for all Task delegations in ff):**
-   If a Task call returns an error (Error, Aborted, timeout):
-   1. **Retry once** with the same prompt.
-   2. If retry also fails — create the artifact yourself using the `template`
-      and dependency artifacts (proposal, design, specs). Log a warning to the user:
-      "Делегирование агенту не удалось; артефакт создан оркестратором."
-   3. **NEVER silently skip** an artifact. Every `applyRequires` artifact
-      MUST be written to disk before the ff session ends.
+   Strictly follow the Subagent result protocol from `.cursor/rules/chat-output-budget.mdc` §5:
+   - For `interrupted-by-user`: PAUSE and ask the user how to proceed.
+   - For `failed`: Retry once. If retry fails, inform the user "Агент недоступен, делаю упрощённый вариант сам / откладываю" and wait for decision or create minimal scaffold.
+   - **NEVER silently skip** an artifact and **NEVER invent error causes** (like "timeout") without evidence. Every `applyRequires` artifact MUST be written to disk before the ff session ends.
 
    Loop through artifacts in dependency order (artifacts with no pending dependencies first):
 
@@ -286,6 +283,7 @@ After completing all artifacts, summarize:
 - Change name and location
 - List of artifacts created with brief descriptions
 - Architect Gate status: `not-required` / `passed: <path>` / `declined: <reason>` / `skipped via .gate-override.yaml` / `self-review fallback`
+- **Risk Surfacing (ОБЯЗАТЕЛЬНО):** Проактивно выделите 1-3 границы изменений на UX-языке. Укажите: «Что меняется для пользователя: ...» и «Что НЕ меняется: ...» (одной строкой из секции Non-Goals). Без этого блока handoff считается провальным.
 - What's ready: "All artifacts created! Ready for implementation."
 - Prompt: "Рекомендуется: `/opsx:verify <name>` для проверки качества артефактов (фазовая когерентность, ТЗ, реализуемость, gates). Или сразу `/opsx:apply <name>` для начала реализации."
 

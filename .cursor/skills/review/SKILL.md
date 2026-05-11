@@ -25,6 +25,9 @@ metadata:
 
 ### 1.1 Smart defaults (S12)
 
+**Acknowledgement first:** При получении запроса на ревью (любой вариант из таблицы 1.2) **первой строкой** ответа, до вызова любых инструментов (Glob, Shell, Read), вывести:
+> «Понял: запускаю ревью по <scope: диффу .bsl / файлу / расширению> в <change / ветке>, файлов: N. Если scope другой — скажите.» (подставить актуальный scope).
+
 Вместо AskQuestion при неоднозначности — применить следующие правила:
 
 1. **Активный change + непустой git diff `.bsl`:**
@@ -117,32 +120,21 @@ metadata:
 ```markdown
 ## Review Boundaries
 
-### Файл: <путь>
-Focus: full | diff-focused
-Baseline: <из п.1.5.1>
+Focus: diff-focused
+Baseline: <baseline-description>
 
-#### Изменённые процедуры/функции (только при diff-focused)
-- Процедура Имя (строки N–M)
-- Функция Имя2 (строки N–M)
-- [module-level] (строки N–M) — кратко
+File: <path>
+Target Procedures:
+- <name> (lines <start>-<end>)
+- [module-level] (lines <start>-<end>)
 
-#### Unified diff (контекст; усечь)
-\`\`\`diff
-<фрагмент>
-\`\`\`
-
-### ИНСТРУКЦИИ
-1. Читай файл целиком для контекста.
-2. Замечания (все категории) — только в границах.
-3. Без полировки вне границ.
-4. Нарушение контракта за границы — `[BOUNDARY_EXCEPTION]` с обоснованием.
+File: <path2>
+Focus: full (new file)
 ```
-
-Для батча mixed-файлов повторять `### Файл:` для каждого. Если все файлы `full` — секцию не добавлять.
 
 ---
 
-## Шаг 1.6. Whitelist и обязательный контроль (ТОЛЬКО чтение project.md)
+## Шаг 1.6. Project constraints (evidence)
 
 **Только чтение `openspec/project.md`** для передачи ревьюверу как evidence. Механические grep-проходы (прошлые 1.6.2/1.6.3/1.6.5/1.6.6) перенесены в агент (AP-040..AP-045 каталога, Phase 2 «Release-hygiene pass»).
 
@@ -275,6 +267,7 @@ Baseline: <из п.1.5.1>
 ### 3.1 Version contract check
 
 После ответа агента: если в самом ответе ревьювер явно сообщил `prompt_contract_version mismatch` или ревьювер пометил, что не поддерживает переданные блоки — записать warning в Summary отчёта, продолжить работу (не падать).
+**Honest Subagent Handling:** Если Task завершился ошибкой (`failed`) или был прерван пользователем (`interrupted-by-user`) — следовать протоколу `chat-output-budget.mdc` §5: явно назвать состояние, не придумывать диагноз, предложить retry/fallback.
 
 ---
 
@@ -293,6 +286,7 @@ Baseline: <из п.1.5.1>
 6. **Termination:** если после `max_iterations` остались нерезолвленные контракты:
    - В итоговом отчёте — секция `## Remaining Unresolved Contracts` (таблица из последнего Investigation Request).
    - Writer получает эти точки как риски с понижением `confidence` (эвристика: confidence ≤ 0.5, blast_radius проекция зависит от операций).
+**Honest Subagent Handling:** Любые сбои explorer в цикле обрабатываются по §5 (failed/interrupted-by-user).
 
 ### Сохранение промежуточных отчётов
 
@@ -330,14 +324,16 @@ Baseline: <из п.1.5.1>
 - В Summary main report — ссылка на appendix.
 - Если выполнялся Investigation Loop — путь к `resolved-contract-*.md` в Summary.
 
-### 4.4 Сводка пользователю
+### 4.4 Сводка пользователю (4-слотная карточка)
 
-- Кол-во findings по severity (CRITICAL, HIGH, MEDIUM, LOW).
-- Топ-3 по `risk_score`.
-- Разделение CODE / ARCHITECTURE.
-- Пути: main report, reasoning appendix, resolved-contract (если есть).
-- **Disposition recommendation:** если есть `ARCHITECTURE` findings, findings с `Action=MUST_FIX`, которые противоречат `design.md`/ADR/метаданным, или findings класса «постановочный дефект» — добавить строку:
-  `Обновить ЗНИ по отчёту: /opsx:extend <change-name> --from-review <main-report-path>` (затем `/opsx:verify <change-name>`).
+Вместо техничной сводки вывести в чат компактную карточку (см. `chat-output-budget.mdc` §5):
+
+1. **Что отрецензировано** — UX-формулировка scope (модуль / файлы / расширение / ЗНИ).
+2. **Итог** — топ-3 находки в пользовательском языке + общее число (без severity-меток в заголовках).
+3. **Что важно** (Risk Surfacing) — «не покрыто этим ревью»: при `diff-focused` — неизменённый код, при `light review` — Phase 0 / AP-пасс, при mismatch контракта ревьювера — затронутые findings.
+4. **Куда дальше** — одна команда (устранение / extend / archive).
+
+Полный отчёт (счётчики CRITICAL/HIGH/MEDIUM/LOW, разделение CODE/ARCHITECTURE) остаётся в `reports/review-<scope-slug>-YYYY-MM-DD.md` и appendix.
 
 ---
 
@@ -464,3 +460,15 @@ Baseline: <из п.1.5.1>
 - **Light review triggered (S15):** линтер + whitelist only; если найдены проблемы — эскалировать.
 - **Prompt contract version mismatch:** warning в Summary; продолжить (fail-open).
 - **Investigation loop превышен (S11):** `## Remaining Unresolved Contracts` в отчёт; writer работает с пониженным confidence.
+
+---
+
+## Self-check (Conversational Discipline)
+
+Перед выводом финального сообщения пользователю проверить:
+1. **Acknowledgement:** первая строка ответа была «Понял: запускаю ревью...» (шаг 1.1).
+2. **Карточка 4 слота:** сводка выведена строго в 4 слота (Что отрецензировано / Итог / Что важно / Куда дальше).
+3. **Risk Surfacing:** слот «Что важно» заполнен (неизменённый код, AP-пасс, unresolved contracts).
+4. **Honest Subagent:** сбои агентов названы честно (`failed` / `interrupted-by-user`), без выдуманных причин.
+5. **HALT-жаргон:** в чате нет CRITICAL/HIGH/MEDIUM/LOW, нет внутренних ID.
+6. **Полный отчёт:** счётчики и технические детали сохранены в файл `reports/review-*.md`.

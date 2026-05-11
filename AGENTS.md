@@ -38,6 +38,9 @@
 | «Архивировать завершённый change» | `/opsx:archive <name>` | В slice mode при `[ ]` на `S<N>.T<M>` — AskQuestion: подтвердить приёмку и отметить `[x]` (если все рабочие задачи среза закрыты), отложить, или **`--force-legacy`** |
 | «Зафиксировать verified-факты из отчёта/файлов вне ЗНИ» | `/opsx:knowledge-add <path>` | Не требует ЗНИ; bundle source + KB-карточка |
 
+## Conversational Discipline
+`.cursor/rules/conversational-discipline.mdc` — 5 принципов осознанного диалога: Acknowledgement Layer, Compact Brief (4 слота), Risk Surfacing, Honest Subagent Handling, Progress Marker. Приоритет над длинными отчётами скиллов. Карта SSOT (лимиты, шаблоны, запреты) — в `.cursor/rules/chat-output-budget.mdc` §1a. Шаблоны вывода — в `.cursor/docs/opsx-output-style.md` и `templates/` соответствующих скиллов.
+
 ## Глоссарий
 `openspec/glossary.md` — единый словарь ключевых терминов (ЗНИ, срез, slice-gate, tier, режимы verify, acceptance handoff и др.). Использовать для сверки терминологии в артефактах, отчётах и сообщениях пользователю.
 
@@ -75,7 +78,7 @@
 `.cursor/rules/architect-gate.mdc` — единые триггеры архитектурного ревью (объективные маркеры, семантические, структурные). **UX-значимый фикс** (меняет что видит/делает пользователь) — семантический триггер; локальная реализация поведения, владельцем которого является база/БСП/платформа/общий модуль, вместо делегирования владельцу — семантический триггер Substituted Authority. **Simplicity Check:** каждый architecture-отчёт фиксирует простейший viable design, альтернативы и complexity budget; отсутствие секции ловит verify. **debug:** при срабатывании триггеров architect обязателен до шага 7 (не AskQuestion), шаблон «Architect — fix quality review» в `1c-agent-patterns/architect.md`. Проверяется в explore (шаг Decide, Fix Quality check при bug fix), verify (pre-apply, шаг 9 + Debug fix check), apply (soft redirect на verify).
 
 ## Verify (универсальный quality gate)
-`.cursor/skills/openspec-verify-change/SKILL.md` — `/opsx:verify`. Pre-apply: формат tasks, качество задач, полнота ручной конфигурации, **Slice Coherence (Quality Controller)** — **строго до** шага реализуемости (Architect 7.7), **реализуемость (Architect)**, **генерация ТЗ (шаг 7.8, по параметру generate_tz)**, Architect Gate, Design Review, ТЗ Review, project constraints. Post-apply: completeness, correctness, coherence. **Tiered Verification:** Standard / Full — глубина проверок адаптируется к масштабу.
+`.cursor/skills/openspec-verify-change/SKILL.md` — `/opsx:verify`. Pre-apply: формат tasks, качество задач, полнота ручной конфигурации, **Slice Coherence (Quality Controller)** — **строго до** шага реализуемости (Architect 7.7), **реализуемость (Architect)**, **генерация ТЗ (шаг 7.8, по параметру generate_tz)**, Architect Gate, Design Review, ТЗ Review, project constraints. Post-apply: completeness, correctness, coherence. **Tiered Verification:** Standard / Full — глубина проверок адаптируется к масштабу. Шаблоны отчётов вынесены в `openspec-verify-change/templates/`. Карта SSOT — в `.cursor/rules/chat-output-budget.mdc` §1a.
 
 **Issue Classification (4 класса).** Каждое замечание попадает в один из четырёх классов:
 - **mechanical** — Phase A авто-фикс (шаг 16a) без вопросов;
