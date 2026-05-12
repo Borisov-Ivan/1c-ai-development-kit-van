@@ -2,7 +2,7 @@
 
 Шаблоны для делегирования `Task(subagent_type="onec-code-writer")`. Общие правила, выбор модели, обработка ошибок, Shared instruction blocks (DATA_CONTRACT_GATE, INTEGRATION_CONTRACT_GATE, EXISTING_MECHANISM_GATE, EXTENSION_GUARD, CONTEXT_SAFETY, CONDITIONAL_ACTION_GATE, ORCHESTRATOR_IMPLEMENTATION_GATE) — `SKILL.md` (навигатор), секция «Shared instruction blocks».
 
-**Частный случай writer:** во всех режимах (Light Mode, Mechanical Mode, Extension Guard, bug fix с root cause, средняя+ сложность) — `model` **не передавать**. Writer наследует модель `claude-4.6-sonnet-medium-thinking` из фронтматтера `.cursor/agents/onec-code-writer.md`.
+**Частный случай writer:** во всех режимах передавать **`Task(..., model=...)`** по таблице в `.cursor/rules/model-selection.mdc` для `onec-code-writer` (Primary и fallback); во frontmatter агента — `model: inherit`. Детали — `tool-name-guard.mdc`.
 
 ---
 

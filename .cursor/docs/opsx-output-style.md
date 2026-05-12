@@ -73,7 +73,7 @@
 | `capability` (как термин движка) | «область поведения», «возможность» |
 | `checkpoint` (как термин паузы apply) | «проверочная пауза», «пауза» |
 | `step-by-step`, `степ-бай-степ` | «пошагово», «пошаговый режим» |
-| Имена агентов (`onec-code-writer`, `onec-code-reviewer`, `onec-code-architect`, `onec-code-architect-2nd`, `onec-code-explorer`, `onec-trace-analyst`, `onec-code-simplifier`, `openspec-quality-controller`, `openspec-doc-writer`) | «агент», «агент + ревью», «архитектор», «ревьюер», «исследователь», «оркестратор» (без префикса `onec-` / `openspec-`) |
+| Имена агентов (`onec-code-writer`, `onec-code-reviewer`, `onec-code-architect`, `onec-code-explorer`, `onec-trace-analyst`, `onec-code-simplifier`, `openspec-quality-controller`, `openspec-doc-writer`) | «агент», «агент + ревью», «архитектор», «ревьюер», «исследователь», «оркестратор» (без префикса `onec-` / `openspec-`) |
 | Имена гейтов (`Architect Gate`, `Precedent Regression Gate`, `Code-Truth Gate`, `Implementation Impact Gate`, `Slice Gate`) | Описание результата: «архитектурное ревью закрыто», «сверка с прежними требованиями выполнена», «проверка фактов в коде пройдена», «приёмка среза» |
 
 **Правило применения:** категории ID кодов движка (`precedent-regression`, `dependency-cycle`, `task-opaque-acceptance`, `acceptance-without-scenario` и пр.) допустимы **только** в строке «Источники: …» в самом конце карточки. В заголовках карточек, полях «Что не так», «Что меняется для пользователя», описаниях вариантов и Executive Summary — заменить на пользовательский язык по таблице выше или на конкретное описание дефекта.

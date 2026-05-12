@@ -365,7 +365,7 @@ src/
 
 **Шаг 1 — Бриф для исследования.** Сформировать структурированный бриф из заполненного project.md (расширения, назначение, ключевые возможности, принципы) и данных Phase 1 (обнаруженные модули, бизнес-процессы, HTTP-сервисы).
 
-> Перед вызовом Task в шагах 2–3 — **Task Pre-call Checklist** из `.cursor/rules/tool-name-guard.mdc` (subagent_type из списка 1С-агентов; `model` не передавать).
+> Перед вызовом Task в шагах 2–3 — **Task Pre-call Checklist** из `.cursor/rules/tool-name-guard.mdc` (subagent_type из списка 1С-агентов; `model` — по `.cursor/rules/model-selection.mdc`).
 
 **Шаг 2 — Делегирование onec-code-explorer.** Task tool, `subagent_type="onec-code-explorer"`. Задача: по каждому расширению и ключевым модулям базы — определить entry points, цепочки вызовов, зависимости между расширениями, ключевые общие модули. Передать бриф и пути к расширениям.
 

@@ -15,7 +15,7 @@ description: Reference guide for 1C agent delegation patterns - complexity asses
 
 | Агент | Файл | Шаблоны |
 |---|---|---|
-| `onec-code-architect` (fallback `onec-code-architect-2nd`) | [architect.md](architect.md) | проектирование, ревью плана, глубокий анализ, scope-coherence audit, task readiness review (verify 7.7), slice transition review (7.6b), slice restructuring (migrate-to-slices), slice decomposition, slice-aware task decomposition, fix quality review (debug 5.5), ADR extraction, multisampling arbiter, ТЗ quality review |
+| `onec-code-architect` | [architect.md](architect.md) | проектирование, ревью плана, глубокий анализ, scope-coherence audit, task readiness review (verify 7.7), slice transition review (7.6b), slice restructuring (migrate-to-slices), slice decomposition, slice-aware task decomposition, fix quality review (debug 5.5), ADR extraction, multisampling arbiter, ТЗ quality review |
 | `onec-code-writer` | [writer.md](writer.md) | реализация задачи, bug fix, review fix |
 | `onec-code-reviewer` | [reviewer.md](reviewer.md) | ревью кода, ревью bug fix |
 | `onec-code-explorer` | [explorer.md](explorer.md) | исследование кода, верификация гипотез trace-analyst, contract resolution (deep) |
@@ -87,36 +87,19 @@ description: Reference guide for 1C agent delegation patterns - complexity asses
 
 Вызов субагентов — через инструмент **Task** (формат, допустимые `subagent_type`, поведение при `Invalid enum value` — `.cursor/rules/tool-name-guard.mdc`). Подробностей здесь не дублируем.
 
-**Fallback для архитектора:** в шаблонах архитектора с `subagent_type="onec-code-architect"` оркестратор использует `subagent_type="onec-code-architect-2nd"`, если основной вызов завершился ошибкой недоступности модели, таймаутом или пользователь явно попросил Gemini.
+**Fallback для архитектора (модель):** один агент `onec-code-architect`; цепочка `Task.model` и финальный вызов без `model=` — в `.cursor/rules/model-selection.mdc` (раздел «Цепочка для архитектора»).
 
 ---
 
 ## ВЫБОР МОДЕЛИ (все 1С-агенты)
 
-**Общее правило: параметр `model` в `Task(...)` по умолчанию не передавать.** Модель каждого агента задана фронтматтером `.cursor/agents/<agent>.md` (поле `model:`) и наследуется автоматически:
+**Единый SSOT:** [`.cursor/rules/model-selection.mdc`](../../rules/model-selection.mdc) — таблица ролей, `Task.model` для Primary и Fallback, ограничение enum, запрет `Task(model="inherit")`.
 
-| Агент | Модель из фронтматтера |
-|---|---|
-| `onec-code-architect` | `claude-opus-4-7-thinking-high` |
-| `onec-code-architect-2nd` (fallback) | `gemini-3.1-pro` |
-| `onec-code-explorer` | `gpt-5.4-medium` |
-| `onec-code-reviewer` | `gemini-3.1-pro` |
-| `onec-code-writer` | `claude-4.6-sonnet-medium-thinking` |
-| `onec-code-simplifier` | `gemini-3.1-pro` |
-| `onec-trace-analyst` | `default` (наследует parent) |
+**Кратко:** во frontmatter всех кастомных агентов **`model: inherit`**. Оркестратор **передаёт** `model=<slug>` из таблицы при каждом вызове (кроме `onec-trace-analyst`, `openspec-quality-controller` и финального шага fallback — без `model=`). Переопределение вне таблицы — только по явному запросу пользователя.
 
-**Когда передавать `model=...` всё-таки нужно:**
+**Не дублировать** полную таблицу здесь без пометки «синхронизировать с `model-selection.mdc`».
 
-- Явный запрос пользователя («используй gemini», «используй opus»).
-- Документированный fallback (`onec-code-architect` недоступен → вызов `onec-code-architect-2nd`).
-- Second-level fallback: если `onec-code-architect-2nd` (Gemini) тоже недоступен → вызов `onec-code-architect-2nd` с `model="default"`.
-
-**Чего нельзя:**
-
-- `model="fast"` для `onec-code-architect` — роняет Opus и теряет глубину архитектурного анализа.
-- Любая передача `model=...` для остальных агентов без явного запроса пользователя — переопределяет фронтматтер на один вызов.
-
-Детали — в `.cursor/rules/model-selection.mdc` (секция «Как применяется модель») и `.cursor/rules/tool-name-guard.mdc` (секция «Параметр `model` в `Task(...)`»).
+Детали вызова `Task` — `.cursor/rules/tool-name-guard.mdc`.
 
 ---
 

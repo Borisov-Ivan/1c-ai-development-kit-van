@@ -247,7 +247,7 @@ Focus: full (new file)
 
 ## Шаг 3. Делегирование ревью
 
-> Task Pre-call Checklist — `.cursor/rules/tool-name-guard.mdc` (subagent_type из списка, `model` не передавать).
+> Task Pre-call Checklist — `.cursor/rules/tool-name-guard.mdc` (subagent_type из списка; `model` — по `.cursor/rules/model-selection.mdc`).
 
 Вызвать **Task**(`subagent_type="onec-code-reviewer"`) с промптом по шаблону «Reviewer (ревью кода)» из `.cursor/skills/1c-agent-patterns/reviewer.md`:
 

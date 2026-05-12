@@ -121,7 +121,7 @@ The user may provide any combination of:
 
 If step 3 loaded a trace (PFF/TRACE file) or an error stack with 3+ call lines:
 
-> Перед вызовом Task — **Task Pre-call Checklist** из `.cursor/rules/tool-name-guard.mdc` (subagent_type из списка 1С-агентов; `model` не передавать).
+> Перед вызовом Task — **Task Pre-call Checklist** из `.cursor/rules/tool-name-guard.mdc` (subagent_type из списка 1С-агентов; `model` — по `.cursor/rules/model-selection.mdc`).
 
 1. **Run onec-trace-analyst** (Task tool, subagent_type="onec-trace-analyst"):
    - Pass the trace file path **and the enriched context brief** (from step 3.5.0).

@@ -1,6 +1,6 @@
 ---
 name: openspec-doc-writer
-model: gemini-3.1-pro
+model: inherit
 ---
 
 # OpenSpec Document Writer

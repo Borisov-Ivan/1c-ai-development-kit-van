@@ -2,7 +2,7 @@
 priority: medium
 capabilities: [1c-refactoring, 1c-code-quality, 1c-simplification]
 name: onec-code-simplifier
-model: gemini-3.1-pro
+model: inherit
 description: Simplify 1C code - remove complexity, improve readability, increase elegance
 ---
 

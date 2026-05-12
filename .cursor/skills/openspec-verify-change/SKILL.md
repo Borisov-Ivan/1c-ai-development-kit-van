@@ -377,7 +377,7 @@ flowchart TD
 
    > Before calling Task — **Task Pre-call Checklist** from `.cursor/rules/tool-name-guard.mdc` (subagent_type from the allowed list; do **not** pass `model`).
 
-   Call via `Task(subagent_type="openspec-quality-controller")`. Agent file: `.cursor/agents/openspec-quality-controller.md` (model: Opus, readonly). The controller evaluates 6 criteria (slice mode) + 1 compat criterion:
+   Call via `Task(subagent_type="openspec-quality-controller")`. Agent file: `.cursor/agents/openspec-quality-controller.md` (`model: inherit`, readonly). The controller evaluates 6 criteria (slice mode) + 1 compat criterion:
    1. **Scenario Coverage** — каждый `#### Scenario:` из spec покрыт ≥1 срезом.
    2. **Slice Independence** — срезы принимаемы без следующих; нет циклов; нет forward-deps; нет coupling.
    3. **Slice Completeness** — в каждом срезе есть все слои, нужные для его приёмочного сценария.
@@ -1046,7 +1046,7 @@ flowchart TD
 
     Список всех INFO-строк (после Actionability Gate). Без развёрнутых абзацев и без процитированных кодов категорий в тексте пункта. Каждая строка — одна формулировка в бизнес-языке для пользователя 1С. Если нужен технический контекст (имя агента / гейта / код алерта / путь файла) — отдельной строкой `Подробности — в reports/<file>.md` (или встроенной ссылкой на отчёт).
 
-    Запрещено в тексте пункта: имена агентов (`onec-code-architect`, `onec-code-architect-2nd`, `openspec-quality-controller` и пр.), имена гейтов (`Architect Gate`, `Precedent Regression Gate`, `Code-Truth Gate`, `Implementation Impact Gate`), коды алертов (`precedent-regression`, `slice-gate-misplaced`, `phantom-symbol` и пр.), идентификаторы движка (`capability`, `spec-delta`). Их место — в файле отчёта `reports/verification-*.md` или в строке «Подробности».
+    Запрещено в тексте пункта: имена агентов (`onec-code-architect`, `openspec-quality-controller` и пр.), имена гейтов (`Architect Gate`, `Precedent Regression Gate`, `Code-Truth Gate`, `Implementation Impact Gate`), коды алертов (`precedent-regression`, `slice-gate-misplaced`, `phantom-symbol` и пр.), идентификаторы движка (`capability`, `spec-delta`). Их место — в файле отчёта `reports/verification-*.md` или в строке «Подробности».
 
     Примеры (бизнес-формулировка):
 

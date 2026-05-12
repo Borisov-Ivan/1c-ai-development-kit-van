@@ -4,13 +4,13 @@ Single source of truth для YAML front-matter отчётов архитект�
 
 ## YAML Front-matter (в каждом отчёте)
 
-Каждый отчёт, генерируемый `onec-code-architect` или `onec-code-architect-2nd`, обязан начинаться с YAML-блока:
+Каждый отчёт, генерируемый `onec-code-architect`, обязан начинаться с YAML-блока:
 
 ```yaml
 ---
 report_type: architecture | deep-analysis | task-readiness | fix-quality | slice-transition | tz-review | adr-extraction | plan-review
 generated_at: YYYY-MM-DD
-agent: onec-code-architect | onec-code-architect-2nd
+agent: onec-code-architect
 mode: <из MODE списка>
 scope:
   change: <change-name или null>

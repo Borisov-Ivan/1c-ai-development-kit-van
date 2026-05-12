@@ -2,7 +2,7 @@
 priority: high
 capabilities: [1c-code-quality, 1c-bsp, 1c-performance, 1c-security, 1c-extensions, 1c-module-structure]
 name: onec-code-reviewer
-model: gemini-3.1-pro
+model: inherit
 description: Comprehensive 1C code review with BSL standards, performance, security, extension annotations, module structure and documentation analysis
 ---
 

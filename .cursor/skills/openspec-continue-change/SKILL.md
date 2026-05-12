@@ -106,7 +106,7 @@ Common artifact patterns:
 **Slice Generation Gate (МАНДАТОРНО, между design и tasks):**
 Если создаётся `tasks.md` и в `design.md` нет секции `## Slices`, а у ЗНИ ожидается ≥6 задач — **СТОП**. Сначала вызвать `Task(subagent_type="onec-code-architect")` с шаблоном «Architect — slice decomposition» из `.cursor/skills/1c-agent-patterns/architect.md`, получить `## Slices`, добавить в design.md (StrReplace), показать пользователю, дождаться подтверждения.
 
-> Перед вызовом Task — **Task Pre-call Checklist** из `.cursor/rules/tool-name-guard.mdc` (subagent_type из списка 1С-агентов; `model` не передавать). Только после этого переходить к генерации tasks через шаблон «Architect — slice-aware task decomposition». Подробнее — `.cursor/skills/openspec-ff-change/SKILL.md` (шаг 5e.1) и `.cursor/skills/openspec-new-change/SKILL.md` (Guardrails).
+> Перед вызовом Task — **Task Pre-call Checklist** из `.cursor/rules/tool-name-guard.mdc` (subagent_type из списка 1С-агентов; `model` — по `.cursor/rules/model-selection.mdc`). Только после этого переходить к генерации tasks через шаблон «Architect — slice-aware task decomposition». Подробнее — `.cursor/skills/openspec-ff-change/SKILL.md` (шаг 5e.1) и `.cursor/skills/openspec-new-change/SKILL.md` (Guardrails).
 
 **Дополнение задач после старта реализации:**
 Если пользователь просит «добавить задачу X» в уже стартовавшую ЗНИ:

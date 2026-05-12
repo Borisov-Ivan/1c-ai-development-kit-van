@@ -113,7 +113,7 @@ Quality Controller (шаг 7.6): **Slice Coherence** (6 критериев из 
 `.cursor/rules/existing-mechanism-priority.mdc` — Preference Hierarchy, Mandatory Discovery, anti-patterns. Срабатывает при создании нового объекта или интеграции с базой. Обязательная секция Existing Mechanisms в design.md / architecture-отчёте. Substituted Authority — локальная подмена владельца поведения вместо делегирования (второй источник истины) — запрещена без обоснования уровня 4.
 
 ## Quality Controller (OpenSpec)
-`.cursor/agents/openspec-quality-controller.md` — домен-агностичный readonly-агент для Slice Coherence. Активная модель задаётся frontmatter агента. Критерии — в `vertical-slices.mdc`; вызывается из `/opsx:verify` шаг 7.6.
+`.cursor/agents/openspec-quality-controller.md` — домен-агностичный readonly-агент для Slice Coherence. Вызов `Task` **без** `model=` (наследование чата; см. `.cursor/rules/model-selection.mdc`). Критерии — в `vertical-slices.mdc`; вызывается из `/opsx:verify` шаг 7.6.
 
 ## Session Handoff и Step-by-step mode
 `.cursor/skills/openspec-apply-change/SKILL.md` (шаги 5.6, 6, 7) — Session Handoff Summary (три секции: код / действия пользователя / следующие задачи), Step-by-step mode (пауза после каждой задачи с подтверждением, обработка ручных тестов с ожиданием результата). Триггеры step-by-step: явный запрос; debug-сессия (`debug.md` изменялся сегодня); slice-mode с ожидающим приёмочным тестом (`S<N>.T<M>`) в текущей пачке; fix-срез (`S<N>.fix`); размер среза ≥ 5 задач.
@@ -171,7 +171,7 @@ Quality Controller (шаг 7.6): **Slice Coherence** (6 критериев из 
 `.cursor/docs/tz-lexicon-dictionary.md` — запрещённые слова (англицизмы, жаргон, опечатки) с заменами и Grep-паттернами. Единый источник для генерации (`change-tz.md`, п.2 и п.11), ревью архитектора (`1c-agent-patterns/architect.md`, секция «Architect — ТЗ quality review», пункт 6), механической проверки (`verify`, шаги 7.8 и 11). Пополняется из `/opsx:doc-tz` (ревью архитектора → предложение → подтверждение пользователя).
 
 ## Выбор модели
-`.cursor/rules/model-selection.mdc` — Opus для критичных задач, Sonnet/fast для остального.
+`.cursor/rules/model-selection.mdc` — SSOT: таблица `Task.model` по ролям; во frontmatter агентов `inherit`; детали и fallback — в правиле и в `tool-name-guard.mdc`.
 
 ## Запрет ROI-оценок
 `.cursor/rules/no-roi-estimates.mdc` — запрет на расчёт ROI и временных оценок (кроме `/opsx:estimate`).

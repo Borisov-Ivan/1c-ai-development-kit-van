@@ -1,106 +1,90 @@
 ---
-description: "Выбор модели: Opus для критичных задач, Sonnet/fast для остального"
+description: "SSOT: все субагенты во frontmatter с model: inherit; оркестратор передаёт Task(model=<slug>) по таблице ниже. Fallback и ограничение enum Task.model."
 alwaysApply: false
 priority: 200
 ---
 
-# Model Selection Strategy
+# Model Selection Strategy (SSOT)
 
-## ПРИНЦИП
+## Принцип
 
-Sonnet (fast) по умолчанию. Opus — только для критичных задач.
+1. Во **всех** файлах `.cursor/agents/*.md` поле **`model: inherit`** — субагент по умолчанию использует модель **родительского чата** (см. [Cursor subagents — Model configuration](https://cursor.com/docs/subagents.md)).
+2. **Источник истины по выбору модели для работы** — таблица **«Роли и Task.model»** ниже. Оркестратор при вызове `Task(subagent_type="...", prompt="...")` **передаёт** `model=<slug>` из колонки Primary, если для роли не указано иное (trace/QC — без `model=`).
+3. **Режим «модель чата»** (наследование без override): вызов `Task` **без** параметра `model` — подхватывается `inherit` из frontmatter (= модель чата).
 
-*Примечание: В будущем планируется переход от брендов моделей (Opus/Sonnet/Gemini) к ролям (high-reasoning / fast / fallback) с централизованным конфигом slugs, чтобы смена поставщика моделей не ломала промпты.*
+## Роли и `Task.model`
 
-## DECISION FLOWCHART
+| `subagent_type` | Primary `Task.model` | Fallback 1 | Fallback 2 (последний: без `model=`, inherit) |
+|-----------------|----------------------|------------|------------------------------------------------|
+| `onec-code-architect` | `claude-opus-4-7-thinking-high` | `gemini-3.1-pro` | опустить `model` |
+| `onec-code-writer` | `default` | — | опустить `model` |
+| `onec-code-explorer` | `default` | — | опустить `model` |
+| `onec-code-reviewer` | `gemini-3.1-pro` | — | опустить `model` |
+| `onec-code-simplifier` | `gemini-3.1-pro` | — | опустить `model` |
+| `openspec-doc-writer` | `gemini-3.1-pro` | — | опустить `model` |
+| `onec-trace-analyst` | *(без `model`)* | — | — |
+| `openspec-quality-controller` | *(без `model`)* | — | — |
 
-```
-1. Архитектурное решение? → Opus
-2. Security/data integrity? → Opus  
-3. Несколько trade-offs, глубокий анализ? → Opus
-4. Всё остальное → Sonnet (fast)
-```
+Колонки Fallback относятся к **ошибке вызова** `Task` (недоступность модели, таймаут, лимиты, **`Invalid model selection`**) и **не** к содержательному отказу агента.
 
-## AGENT CONFIGURATION
+## Ограничение enum параметра `Task.model`
 
-| Агент | Роль (семантика) | Причина |
-|-------|------------------|---------|
-| **onec-code-architect** | **high-reasoning** | Архитектурные решения, глубокий анализ |
-| onec-code-writer | adaptive (writer default) | Генерация кода. Light Mode / простые задачи — fast-равное качество; средняя+ сложность — мощнее |
-| onec-code-reviewer | fast | Ревью по стандартам |
-| onec-code-explorer | fast | Навигация по коду |
-| onec-trace-analyst | fast | Парсинг трасс |
-| Утилитарные и инфраструктурные | fast | По умолчанию. См. `1c-utility-agents.mdc` |
+В ряде сборок Cursor параметр `Task(..., model=...)` принимает **только** перечисленные slug'и, например:
 
-Фактические слаги моделей для каждого агента зафиксированы **во фронтматтере** `.cursor/agents/<agent>.md` (поле `model:`). Текущая раскладка — в `.cursor/skills/1c-agent-patterns/SKILL.md` (секция «Выбор модели (все 1С-агенты)»).
+`claude-4.6-sonnet-medium-thinking`, `claude-opus-4-7-thinking-xhigh`, `composer-2-fast`, `gemini-3.1-pro`, `gpt-5.3-codex`, `gpt-5.5-medium`.
 
-## Как применяется модель
+Значения из таблицы **`claude-opus-4-7-thinking-high`** и **`default`** могут **отсутствовать** в enum → первый вызов с Primary даст **`Invalid model selection`**.
 
-**Единственный штатный способ** — фронтматтер агентного файла. `Task(subagent_type="<agent>")` подхватывает `model:` из `.cursor/agents/<agent>.md` автоматически.
+**Поведение оркестратора:** при `Invalid model selection` или ином сбое на шаге Primary — сразу перейти к Fallback 1 (если есть); если снова сбой или для роли нет Fallback 1 — вызвать тот же `subagent_type` **без** `model=` (inherit / модель чата). **Одной строкой** в чате предупредить пользователя (без жаргона движка из `chat-output-budget.mdc`).
 
-**Передача `model=...` в `Task(...)` — override.** Она заменяет фронтматтер на один конкретный вызов и имеет смысл только в трёх случаях:
+**Устранение лишних сбоев Primary (опционально):** подменить в этой таблице Primary на slug из enum (например `claude-opus-4-7-thinking-xhigh` для архитектора, `composer-2-fast` или `gpt-5.3-codex` для writer/explorer) — правка только `model-selection.mdc`, frontmatter агентов не трогать.
 
-1. **Явный запрос пользователя:** «используй gemini», «используй opus», «используй fast».
-2. **Документированный fallback:** `onec-code-architect` недоступен / таймаут → повтор с `subagent_type="onec-code-architect-2nd"` (см. «FALLBACK STRATEGY» ниже).
-3. **Диагностика по прямому указанию пользователя:** «воспроизведи проблему на другой модели».
+## Цепочка для архитектора
 
-**Никогда:**
+Один агент `onec-code-architect` (отдельного `*_2nd` нет):
 
-- Не передавать `model="fast"` в `Task(...)` для `onec-code-architect` — понижает Opus и теряет ценность архитектурного ревью.
-- Не копировать `model=...` из шаблонов «по инерции» — это скрытый override фронтматтера.
-- Не передавать `model=...` для 1С-агентов без причины из списка выше.
+1. `Task(subagent_type="onec-code-architect", model="claude-opus-4-7-thinking-high", ...)` (или сразу Fallback 1, если Primary невалиден в enum).
+2. При сбое — `Task(subagent_type="onec-code-architect", model="gemini-3.1-pro", ...)`.
+3. При сбое — `Task(subagent_type="onec-code-architect", ...)` **без** `model=`.
 
-Если в шаблоне промпта (в т.ч. в `1c-agent-patterns/SKILL.md` или в cursor-commands) встречается `model="fast"` рядом с `subagent_type="onec-*"` — это **устаревшее наследие**. Игнорировать и вызывать без параметра `model`.
+Два повтора с одним и тем же Primary без смены модели не требуются; при сбое переходить к следующему шагу цепочки.
 
-### Override на high-reasoning (Opus-подобные модели)
+## Цепочка для writer / explorer
 
-Только при: явном запросе пользователя, обнаруженной security-уязвимости, data corruption, breaking change.
+1. `Task(..., model="default", ...)`.
+2. При `Invalid model selection` или сбое — `Task(...)` **без** `model=`.
 
-## FALLBACK STRATEGY
+## Цепочка для reviewer / simplifier / openspec-doc-writer
 
-Встроенные субагенты Cursor не поддерживают автоматический fallback моделей внутри одного файла. Поэтому маршрутизация выполняется оркестратором.
+1. `Task(..., model="gemini-3.1-pro", ...)`.
+2. При сбое — `Task(...)` **без** `model=`.
 
-**«АВТО» пользователя:** в frontmatter подагента нет значения «auto». Для повтор после сбоя использовать **`model="inherit"`** — наследование модели **текущего чата** (у пользователя в UI это обычно **Auto**).
+## Запреты в параметре `Task`
 
-### Все агенты из группы 1С (см. `tool-name-guard.mdc`)
+- **`model="inherit"`** — в enum параметра обычно **нет**; inherit достигается **отсутствием** `model=`.
+- **`model="default"`**, **`model="auto"`** — не полагаться как на стабильный enum; для writer/explorer при невалидности Primary сразу вызов без `model=`.
+- Слепой **`model=`** без таблицы и без запроса пользователя — анти-паттерн.
 
-При **сбое API, таймауте или ошибке лимитов** после первичного вызова `Task(subagent_type="<1c-agent>", ...)` **без** параметра `model`:
+## Override по запросу пользователя
 
-1. Перехватить ошибку и выполнить **второй** вызов с тем же `subagent_type` и **`model="inherit"`** (тот же промпт).
+`Task(..., model="<slug>")` **вне** таблицы — только по **явному запросу пользователя** или диагностике по его указанию; slug должен быть из допустимых для инструмента `Task` в текущей сборке.
 
-### Особый порядок для `onec-code-architect`
+## Что считать сбоем
 
-1. Первый вызов — `Task(subagent_type="onec-code-architect")` без `model`.
-2. Если п.1 упал тем же классом ошибок — **`Task(subagent_type="onec-code-architect-2nd")`** без `model` (альтернативный файл агента).
-3. Если п.2 снова упал — **`Task(subagent_type="onec-code-architect-2nd", model="inherit")`** (или с тем типом, что только что упал, и **`model="inherit"`**).
-4. При явном запросе пользователя («используй gemini») можно сразу вызвать `onec-code-architect-2nd`.
-
-### Что считать сбоем для retry
-
-Неуспешный ответ инструмента `Task`: недоступность модели, таймаут, лимиты/credits, иные ошибки API. Не использовать retry из-за содержательного отказа агента (нет данных в выгрузке и т.п.) — это не ошибка платформы.
-
-## OPTIMIZATION
-
-1. **Agent isolation**: параллельные задачи через агентов (отдельный контекст)
-2. **Batch operations**: группировать связанные вопросы
-3. **Incremental context**: читать сигнатуры, расширять по необходимости
-4. **Skill creation**: для повторяющихся задач создать скилл
-5. **New chat at 500k tokens**
+Неуспешный ответ `Task`: недоступность модели, таймаут, лимиты/credits, `Invalid model selection`, иные ошибки API. **Не** retry из-за содержательного отказа агента.
 
 ## ANTI-PATTERNS
 
-- Opus для простых вопросов или генерации кода
-- Чтение целого модуля когда нужна одна функция
-- Последовательные агенты вместо параллельных
-- Чат свыше 500k токенов
-- Использовать **`model="fast"`** как «запасной» retry после сбоя — это **переопределение** модели, а не режим Auto; после сбоев для 1С-агентов — только **`model="inherit"`** по правилам FALLBACK выше (кроме целенаправленного выбора пользователя или фронтматтера без override)
+- Вызывать субагента с устаревшим именем удалённого агента.
+- Подставлять `model="fast"` (или иной slug) без запроса пользователя.
+- Дублировать таблицу ролей в других файлах без пометки «синхронизировать с `model-selection.mdc`».
 
 ## INTEGRATION
 
-- `1c-agent-delegation.mdc`: agent model defaults, HALT conditions + delegation triggers
-- `tool-name-guard.mdc`: правило «параметр `model` в `Task(...)` по умолчанию не передавать»
-- `1c-agent-patterns/SKILL.md` (секция «Выбор модели (все 1С-агенты)»): таблица фактических моделей из фронтматтера
-- `sdd-workflow.mdc`: OpenSpec flow
+- `tool-name-guard.mdc` — чеклист `Task` и параметр `model`
+- `architect-gate.mdc` — качество отчёта архитектора при деградации модели
+- `1c-agent-delegation.mdc` — делегирование 1С-агентов
+- `1c-agent-patterns/SKILL.md` — ссылка на этот файл как SSOT
+- `openspec/project.md`, `AGENTS.md` — краткая отсылка сюда
 
 ---
-

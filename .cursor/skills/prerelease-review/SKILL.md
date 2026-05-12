@@ -268,7 +268,7 @@ openspec list --json
 
 ### 2.1 Code Review (Tier 1, батчи)
 
-> Перед вызовом Task — **Task Pre-call Checklist** из `.cursor/rules/tool-name-guard.mdc` (subagent_type из списка 1С-агентов; `model` не передавать).
+> Перед вызовом Task — **Task Pre-call Checklist** из `.cursor/rules/tool-name-guard.mdc` (subagent_type из списка 1С-агентов; `model` — по `.cursor/rules/model-selection.mdc`).
 
 Вызвать **Task** с `subagent_type: onec-code-reviewer` для каждого батча. Шаблон промпта — «Reviewer (ревью кода)» из `.cursor/skills/1c-agent-patterns/reviewer.md`.
 
@@ -295,7 +295,7 @@ openspec list --json
 
 ### 2.5 Архитектурный анализ (Tier 2, параллельно с шагом 2.1)
 
-> Перед вызовом Task — **Task Pre-call Checklist** из `.cursor/rules/tool-name-guard.mdc` (subagent_type из списка 1С-агентов; `model` не передавать).
+> Перед вызовом Task — **Task Pre-call Checklist** из `.cursor/rules/tool-name-guard.mdc` (subagent_type из списка 1С-агентов; `model` — по `.cursor/rules/model-selection.mdc`).
 
 Запустить **Task** с `subagent_type: onec-code-explorer` **параллельно** с батчами reviewer (шаг 2.1). Explorer читает ВСЕ .bsl файлы расширения разом (не батчами) и выполняет кросс-модульные проверки, недоступные пофайловому reviewer.
 

@@ -1,6 +1,6 @@
 # Architect — шаблоны промптов
 
-Шаблоны для делегирования `Task(subagent_type="onec-code-architect")` (fallback `onec-code-architect-2nd`). Общие правила, оценка сложности, выбор модели, обработка ошибок — `SKILL.md` (навигатор).
+Шаблоны для делегирования `Task(subagent_type="onec-code-architect", model=...)` (модель — по `.cursor/rules/model-selection.mdc`). Общие правила, оценка сложности, выбор модели, обработка ошибок — `SKILL.md` (навигатор).
 
 ---
 
@@ -29,7 +29,8 @@ Task(
          Создай план с этапами реализации (атомарные, с критериями приемки).
          Используй Mermaid диаграммы.
          Обязательно добавь YAML front-matter, Evidence для каждого паттерна и Test Scenarios.",
-  subagent_type="onec-code-architect" // или "onec-code-architect-2nd" при fallback
+  subagent_type="onec-code-architect",
+  model="<slug из .cursor/rules/model-selection.mdc>"
 )
 ```
 

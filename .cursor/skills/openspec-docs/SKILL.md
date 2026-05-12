@@ -41,7 +41,7 @@ description: "Генерация проектных документов на о
 
 4. **Прочитать промпт** `prompts/change-tz.md`.
 
-> Перед вызовом Task в шагах 5–6 — **Task Pre-call Checklist** из `.cursor/rules/tool-name-guard.mdc` (subagent_type из списка; `model` не передавать).
+> Перед вызовом Task в шагах 5–6 — **Task Pre-call Checklist** из `.cursor/rules/tool-name-guard.mdc` (subagent_type из списка; `model` — по `.cursor/rules/model-selection.mdc`).
 
 5. **Генерация ТЗ (субагент).** Делегировать генерацию документа субагенту через `Task(subagent_type="openspec-doc-writer")`. Передать в промпт субагента содержимое `prompts/change-tz.md` и тексты всех собранных артефактов. Попросить субагента выступить в роли технического писателя и вернуть готовый текст ТЗ. Промпт включает секцию «Верификация артефактов» — субагент должен выполнить проверку и вывести замечания к артефактам после текста ТЗ.
 
