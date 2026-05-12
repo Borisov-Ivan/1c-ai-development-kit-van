@@ -171,7 +171,7 @@ Quality Controller (шаг 7.6): **Slice Coherence** (6 критериев из 
 `.cursor/docs/tz-lexicon-dictionary.md` — запрещённые слова (англицизмы, жаргон, опечатки) с заменами и Grep-паттернами. Единый источник для генерации (`change-tz.md`, п.2 и п.11), ревью архитектора (`1c-agent-patterns/architect.md`, секция «Architect — ТЗ quality review», пункт 6), механической проверки (`verify`, шаги 7.8 и 11). Пополняется из `/opsx:doc-tz` (ревью архитектора → предложение → подтверждение пользователя).
 
 ## Выбор модели
-`.cursor/rules/model-selection.mdc` — SSOT: таблица `Task.model` по ролям; во frontmatter агентов `inherit`; детали и fallback — в правиле и в `tool-name-guard.mdc`.
+`.cursor/rules/model-selection.mdc` — SSOT: таблица `Task.model` по ролям; во frontmatter агентов `inherit`; детали и fallback — в правиле и в `tool-name-guard.mdc`. Полная цепочка fallback (включая финальный вызов `Task` без `model=`) и запрет подмены аналитического отчёта текстом оркестратора — раздел **«Целостность цепочки Task»** в том же файле; протокол сбоя субагента в чате — `chat-output-budget.mdc` §5.
 
 ## Запрет ROI-оценок
 `.cursor/rules/no-roi-estimates.mdc` — запрет на расчёт ROI и временных оценок (кроме `/opsx:estimate`).
