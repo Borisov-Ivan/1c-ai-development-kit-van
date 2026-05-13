@@ -15,6 +15,7 @@ Fast-forward through artifact creation - generate everything needed to start imp
 
 **Output style:**
 - Сводка в чате («что создано», ссылки на артефакты, следующий шаг) — шаблон **T-CONFIRM** из `.cursor/docs/opsx-output-style.md` §5.5.
+- **Подтверждение постановки перед scaffold:** если пользователю нужно сверить понимание задачи — вывести адаптивный **T-BRIEF** в чате (§5.1): обязательны Контекст, Что я понял, **KB в scope** (Read `openspec/knowledge/_index.yaml` и при необходимости выбранные KB `.md` по путям из запроса / Explore Summary; иначе «нет совпадений…»), План, Подтвердить. Файлы `temp/briefs/*.md` **не создаются**.
 - **Генерируемые артефакты** `proposal.md`, `design.md`, `tasks.md`, spec deltas — подчиняются §1 «Три слоя» и §3 «Запрет внутренних ID в пользовательских полях»: секции для заказчика/приёмки (`Why`, `What Changes`, `Scope`, `Scenarios`, `Requirements`) — UX-слой; внутренние ID (`S<N>.T<M>`, `D<N>`, `R<N>`, `I<N>`, номера задач `12.9`) — только в `## Slices`, `## Decisions`, `## Tasks`, `## Risks`. Перечисления — нумерованные списки. Перед записью — self-check-5 (§7).
 
 **Steps**
@@ -24,12 +25,12 @@ Fast-forward through artifact creation - generate everything needed to start imp
    a. **If argument provided** — use it as change name (kebab-case). Proceed to step 2.
 
    b. **If no argument — auto-detect from context:**
-      0. Glob `temp/intake-brief-*.md` (exclude `temp/intake-brief-example-*.md`). If found, read the most recent one (by date in filename).
+      0. Glob `temp/briefs/intake-*.md` и `temp/intake-brief-*.md` (exclude `*example*`). If found, read the most recent one (by date in filename).
          Extract change name from `### Рекомендованный следующий шаг` if it contains `/opsx:ff <name>` or derive kebab-case from `**Тема:**` / `### Нормализованная цель`.
          Extract brief from `### Нормализованная цель`, `### Scope`, and `### План исследования`.
          AskQuestion: «Из Intake Brief: `<name>`. Использовать?
          [Да / Другое имя / Сначала explore]».
-         If the user chooses `Сначала explore`, stop and recommend `/opsx:explore @temp/intake-brief-...md`.
+         If the user chooses `Сначала explore`, stop and recommend `/opsx:explore` с передачей контекста из чата или пути к прочитанному файлу intake, если он есть.
       1. Glob `temp/explore-summary-*.md`. If found, read the most recent one (by date in filename).
          Extract change name from line matching `Готово к созданию ЗНИ <name>`
          or derive kebab-case from `**Тема:**`.

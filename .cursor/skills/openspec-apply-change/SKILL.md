@@ -424,7 +424,7 @@ Implement tasks from an OpenSpec change.
      - **Статус** — `[x]` / `[ ]`.
    - `### 4. Как вернуться` — `/opsx:apply <change-name>`, одна строка. Если выявлен scope/design mismatch, добавить вторую строку: `Обновить scope: /opsx:extend <change-name>` (затем снова `/opsx:apply <change-name>`).
    - `### 5. Blockers` — нумерованный список задач, которые не могут продолжаться, и почему.
-   - `### 6. Issue` — **только в варианте `pause`**: описание проблемы 1 абзац + нумерованные **Options** из 2–3 вариантов решения.
+   - `### 6. Issue` — **только в варианте `pause`**: описание проблемы 1 абзац + нумерованные **Options** из 2–3 вариантов решения. **Тонкий чат:** при сообщении пользователю дублировать развилку блоками **«Решение N — …»** с метками `<N>a` / `<N>b` / `<N>c` по образцу `.cursor/skills/openspec-verify-change/templates/chat-summary.md` (полное Issue и таблицы — в файле `reports/handoff-*.md`, см. §5.2 выше).
    - `### 7. Short-cut` — **только в варианте `acceptance`**: строка про `принято S<N>` / `accept S<N>`.
 
    Если все срезы приняты (`final`) — добавить строку «All tasks complete. Ready to archive: `/opsx:archive <change-name>`». Если `pause` из-за design/scope mismatch — предложить `Follow-up: /opsx:extend <change-name>` рядом с вариантами решения. Если `pause` — ждать ответа пользователя. Если `acceptance` — end turn.

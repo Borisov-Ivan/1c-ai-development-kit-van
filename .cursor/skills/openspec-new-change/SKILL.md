@@ -14,7 +14,7 @@ Start a new change using the experimental artifact-driven approach.
 **Input**: The user's request may include a change name (kebab-case), a description of what they want to build, or nothing (auto-detect from context).
 
 **Output style:**
-- Пользовательские сообщения в чате (AskQuestion-блоки, сводка после генерации артефактов) — шаблон **T-BRIEF** / **T-CONFIRM** по контексту, см. `.cursor/docs/opsx-output-style.md`.
+- Пользовательские сообщения в чате (AskQuestion-блоки, сводка после генерации артефактов) — шаблон **T-BRIEF** (§5.1, адаптивный, только чат) / **T-CONFIRM** по контексту, см. `.cursor/docs/opsx-output-style.md`. Файлы `temp/briefs/*.md` не создаются. Для **T-BRIEF** на старте: **KB в scope** обязателен (Read `openspec/knowledge/_index.yaml` и при необходимости KB `.md` или явное «нет совпадений…»).
 - **Генерируемые артефакты** `proposal.md`, `design.md`, `tasks.md`, spec deltas — подчиняются §1 «Три слоя» и §3 «Запрет внутренних ID в пользовательских полях»: поля `Why`, `What Changes`, `Scope`, `Scenarios`, `Requirements` — UX-слой без утечки `S<N>.T<M>`, `D<N>`, `R<N>`, номеров задач `12.9`; внутренние ID допустимы только в `## Slices`, `## Decisions`, `## Tasks`, `## Risks`. Любое перечисление ≥2 пунктов — нумерованный список. Перед записью артефакта — self-check-5 (§7).
 
 **Steps**
@@ -24,7 +24,7 @@ Start a new change using the experimental artifact-driven approach.
    a. **If argument provided** — use it as change name (kebab-case). Proceed to step 2.
 
    b. **If no argument — auto-detect from context:**
-      0. Glob `temp/intake-brief-*.md` (exclude `temp/intake-brief-example-*.md`). If found, read the most recent one (by date in filename).
+      0. Glob `temp/briefs/intake-*.md` и `temp/intake-brief-*.md` (exclude `*example*`). If found, read the most recent one (by date in filename).
          Extract change name from `### Рекомендованный следующий шаг` if it contains `/opsx:new <name>` or `/opsx:ff <name>`, or derive kebab-case from `**Тема:**` / `### Нормализованная цель`.
          Extract brief from `### Нормализованная цель`, `### Scope`, and `### План исследования`.
          AskQuestion:
@@ -38,7 +38,7 @@ Start a new change using the experimental artifact-driven approach.
          2. Изменить имя
          3. Сначала explore
          ```
-         If the user chooses `Сначала explore`, stop and recommend `/opsx:explore @temp/intake-brief-...md`.
+         If the user chooses `Сначала explore`, stop and recommend `/opsx:explore` с передачей контекста из чата или пути к прочитанному файлу intake, если он есть.
       1. Glob `temp/explore-summary-*.md`. If found, read the most recent one (by date in filename).
          Extract change name from line matching `Готово к созданию ЗНИ <name>`
          or derive kebab-case from `**Тема:**`.
