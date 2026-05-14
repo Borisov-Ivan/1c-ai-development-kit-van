@@ -26,6 +26,7 @@ Fast-forward through artifact creation - generate everything needed to start imp
 
    b. **If no argument — auto-detect from context:**
       0. Glob `temp/briefs/intake-*.md` и `temp/intake-brief-*.md` (exclude `*example*`). If found, read the most recent one (by date in filename).
+         **Примечание:** скилл `/opsx:intake` этот файл **не создаёт**; при отсутствии совпадения Glob используйте текст брифа из чата сессии или попросите пользователя сохранить бриф в `temp/intake-brief-*.md` вручную.
          Extract change name from `### Рекомендованный следующий шаг` if it contains `/opsx:ff <name>` or derive kebab-case from `**Тема:**` / `### Нормализованная цель`.
          Extract brief from `### Нормализованная цель`, `### Scope`, and `### План исследования`.
          AskQuestion: «Из Intake Brief: `<name>`. Использовать?
@@ -271,7 +272,7 @@ Fast-forward through artifact creation - generate everything needed to start imp
          - Эти проверки — «hint» для следующего шага `slice-aware task decomposition`: архитектор должен соблюдать Acceptance Scope Tightness при генерации `tasks.md`.
       7. **Guardrail:** do NOT invoke the tasks architect template until `design.md` contains the `## Slices` section (or Lite tier was explicitly chosen).
 
-      **Error handling:** if architect Task fails (error / timeout after retry), create a minimal single-slice draft yourself (1 container slice covering all tasks) and log a warning to the user. The user may run `/opsx:verify --migrate-to-slices` later to decompose.
+      **Error handling:** if architect Task fails (error / timeout after retry), create a minimal single-slice draft yourself (1 container slice covering all tasks) and log a warning to the user. The user may run `/opsx:migrate-slices <name>` later to decompose.
 
 6. **Show final status**
    ```bash

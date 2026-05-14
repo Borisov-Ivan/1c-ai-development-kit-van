@@ -25,6 +25,7 @@ Start a new change using the experimental artifact-driven approach.
 
    b. **If no argument — auto-detect from context:**
       0. Glob `temp/briefs/intake-*.md` и `temp/intake-brief-*.md` (exclude `*example*`). If found, read the most recent one (by date in filename).
+         **Примечание:** скилл `/opsx:intake` этот файл **не создаёт**; при отсутствии совпадения Glob используйте текст брифа из чата сессии или попросите пользователя сохранить бриф в `temp/intake-brief-*.md` вручную.
          Extract change name from `### Рекомендованный следующий шаг` if it contains `/opsx:new <name>` or `/opsx:ff <name>`, or derive kebab-case from `**Тема:**` / `### Нормализованная цель`.
          Extract brief from `### Нормализованная цель`, `### Scope`, and `### План исследования`.
          AskQuestion:

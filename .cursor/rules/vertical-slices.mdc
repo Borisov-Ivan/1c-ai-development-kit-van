@@ -94,7 +94,7 @@ priority: 150
 - **При создании ЗНИ** (`/opsx:ff`, `/opsx:new`) — архитектор формирует секцию `## Slices` в `design.md` **до** генерации `tasks.md`. Затем `tasks.md` генерируется с `# Срез S<N>` по этой секции. См. шаблоны «Architect — slice decomposition» и «Architect — slice-aware task decomposition» в `1c-agent-patterns/architect.md`.
 - **При добавлении задач к существующему change** (`/opsx:continue`, `/opsx:debug`, `/opsx:explore`) — placement задач фикса **строго** по разделу **«ИНВАРИАНТ: Defect placement»** ниже (по умолчанию — inside-slice; новый срез `S<N+1>` только при выполнении условий инварианта).
 - **При пересмотре на границе среза** (`/opsx:apply` → slice-gate → опция «пересмотр») — архитектор через «Architect — slice transition review» оценивает актуальность следующего среза.
-- **При миграции легаси-ЗНИ** (tasks.md без `# Срез`) — через `/opsx:verify <name> --migrate-to-slices`, шаблон «Architect — slice restructuring».
+- **При миграции легаси-ЗНИ** (tasks.md без `# Срез`) — через `/opsx:migrate-slices <name>`, шаблон «Architect — slice restructuring».
 
 ## ПОВЕДЕНИЕ APPLY
 
@@ -116,8 +116,8 @@ priority: 150
 
 - **Режим `slice-pre`** (до старта apply на ЗНИ с срезами): автодетект по наличию `# Срез` в tasks.md; проверки QC Slice Coherence (критерии 1–6 ниже), Architect readiness per-slice.
 - **Режим `slice-post`** (после завершения хотя бы одного среза): автодетект по наличию `[x]` у любого `S<N>.T<M>`; постпроверки для принятых срезов, pre-проверки для непринятых.
-- **Режим `slice` (флаг `--slice S<N>`)** — verify одного среза: артефакты ограничены метаданными среза, Requirement/Scenario из `Связь со spec`, файлы из выполненных задач среза. Отчёт — `reports/verification-slice-S<N>-YYYY-MM-DD.md`.
-- **Режим `migrate-to-slices`** (флаг `--migrate-to-slices`) — чтение плоского `tasks.md` без `# Срез` или с `<!-- phase-gate -->`, делегирование architect через шаблон «Architect — slice restructuring». Результат — предложенная структура срезов в отчёте, пользовательское подтверждение, применение StrReplace к `tasks.md`.
+- **`slice-scoped`** (узкий verify одного среза): включается по контексту — явное имя среза в запросе, свежий `reports/slice-acceptance-*`, блок `debug.md` о приёмке/ожидании. Артефакты ограничены метаданными среза, Requirement/Scenario из `Связь со spec`, файлы из выполненных задач среза. Отчёт мог именоваться `reports/verification-slice-S<N>-YYYY-MM-DD.md` исторически; новые сохранения — `reports/verification-YYYY-MM-DD.md`.
+- **Предложение миграции в срезы** (нет `# Срез` или есть `<!-- phase-gate -->`): `/opsx:verify` **рекомендует словами** `/opsx:migrate-slices <name>`; не блокирует весь прогон; фактическая миграция — только по команде migrate.
 
 ## QUALITY CONTROLLER — SLICE COHERENCE
 
@@ -159,14 +159,14 @@ Replace старого Phase Classification. Новые критерии QC:
 
 ## ПОВЕДЕНИЕ ARCHIVE
 
-- Пока в `tasks.md` есть **`S<N>.T<M>`** с **`[ ]`**, см. `.cursor/skills/openspec-archive-change/SKILL.md` шаг **3.5**: краткая карточка и **AskQuestion** (подтверждение как на slice gate в apply): **A** — пользователь подтверждает приёмку на ИБ → оркестратор ставит **`[x]`**, **обязательно** append в `debug.md` с **`Решение: принят (archive)`**, файл **`reports/slice-acceptance-S<N>-YYYY-MM-DD.md`**; **D** или флаг **`--force-legacy`** — архив без отметки и с warnings. Альтернативно перед архивом: `/opsx:verify --slice S<N>`.
+- Пока в `tasks.md` есть **`S<N>.T<M>`** с **`[ ]`**, см. `.cursor/skills/openspec-archive-change/SKILL.md` шаг **3.5**: краткая карточка и **AskQuestion** (подтверждение как на slice gate в apply): **A** — пользователь подтверждает приёмку на ИБ → оркестратор ставит **`[x]`**, **обязательно** append в `debug.md` с **`Решение: принят (archive)`**, файл **`reports/slice-acceptance-S<N>-YYYY-MM-DD.md`**; **D** или флаг **`--force-legacy`** — архив без отметки и с warnings. Альтернативно перед архивом: `/opsx:verify <name>` с упором на проблемный срез в запросе.
 - Архивный change после перемещения в `openspec/changes/archive/` — read-only для workflow; структура среза сохраняется.
 
 ## ОБРАТНАЯ СОВМЕСТИМОСТЬ
 
 - **Архивные ЗНИ** (`openspec/changes/archive/`) с Phase Gates — read-only, не мигрируем.
-- **Активные ЗНИ без срезов**: apply работает в legacy-режиме (без остановок на slice-gate), но выдаёт WARNING: «Change без срезов. Рекомендуется `/opsx:verify <name> --migrate-to-slices`».
-- **Маркеры `<!-- phase-gate -->`**: читаются apply/verify, помечаются DEPRECATED, при автодетекте в verify включается режим `migrate-to-slices` с предложением реструктуризации.
+- **Активные ЗНИ без срезов**: apply работает в legacy-режиме (без остановок на slice-gate), но выдаёт WARNING: «Change без срезов. Рекомендуется `/opsx:migrate-slices <name>`».
+- **Маркеры `<!-- phase-gate -->`**: читаются apply/verify, помечаются DEPRECATED; verify предлагает `/opsx:migrate-slices <name>`.
 - **Заголовки `# Фаза N`**: обрабатываются как обычный markdown, но не триггерят слоевой порядок P0→P4; верификатор предупреждает о устаревшей структуре.
 
 ## ФИКСАЦИЯ РЕШЕНИЙ И ОТЧЁТОВ

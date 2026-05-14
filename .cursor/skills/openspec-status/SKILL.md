@@ -80,7 +80,7 @@ Read-only skill. Не вызывает субагентов, не правит �
    ### Рекомендация
    Следующая команда: `/opsx:apply <change-name>` — есть awaiting-acceptance в debug.md, войдёт в resume-with-pending-verdict.
    
-   Альтернативы: `/opsx:verify --slice S2 <change-name>` (проверить, что мешает приёмке), `/opsx:debug <change-name>` (если возник дефект при прогоне S2.T1).
+   Альтернативы: `/opsx:verify <change-name>` (в запросе указать проблемный срез S2 или причину приёмки), `/opsx:debug <change-name>` (если возник дефект при прогоне S2.T1).
    ```
 
    **Формат `--short`:** одна строка

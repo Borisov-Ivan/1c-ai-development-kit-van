@@ -369,9 +369,9 @@ Task(
 
 ---
 
-## Architect — slice restructuring (verify remediation / migrate-to-slices)
+## Architect — slice restructuring (ремедиэйшн после verify / явная `/opsx:migrate-slices`)
 
-Used by `/opsx:verify` in mode `migrate-to-slices` (автодетект по отсутствию `# Срез` в tasks.md или по наличию deprecated `<!-- phase-gate -->`). Restructures an existing flat or phase-based tasks.md into vertical slices. Preserves existing tasks, their numbering, and `[x]`/`[ ]` statuses; re-IDs задач с префиксом среза ТОЛЬКО если явно указано.
+Вызывается при **перестройке** `tasks.md` в вертикальные срезы: когда verify обнаружил несовместимый с срезами формат (**нет** заголовков `# Срез` при slice-ориентированной ЗНИ) или маркеры `<!-- phase-gate -->`, и после этого пользователь подтвердил запуск **`/opsx:migrate-slices <name>`** (или аналогичный явный триггер). Restructures an existing flat or phase-based tasks.md into vertical slices. Preserves existing tasks, their numbering, and `[x]`/`[ ]` statuses; re-IDs задач с префиксом среза ТОЛЬКО если явно указано.
 
 ```
 Task(

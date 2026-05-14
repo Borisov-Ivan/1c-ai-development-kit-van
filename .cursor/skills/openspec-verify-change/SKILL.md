@@ -1,6 +1,6 @@
 ---
 name: openspec-verify-change
-description: Universal quality gate for OpenSpec changes. Pre-apply — artifact quality, task specificity, slice coherence (QC before Architect), conditional TZ generation, gates, scope gate. Post-apply — implementation completeness, correctness, coherence. Slice-pre/slice-post — per-slice verify via --slice. Migrate — restructure legacy tasks.md to vertical slices.
+description: Universal quality gate for OpenSpec changes. Pre-apply — artifact quality, task specificity, slice coherence (QC before Architect when needed), conditional TZ generation, gates, scope gate. Post-apply — implementation completeness, correctness, coherence. Режим и «узкий прогон» определяются по контексту и шагу 4c (Novelty Check); флагов командной строки нет.
 license: MIT
 compatibility: Requires openspec CLI.
 metadata:
@@ -12,12 +12,12 @@ metadata:
 Universal quality gate for OpenSpec changes. Mode is determined automatically from tasks.md structure and completion status:
 - **Pre-apply** (slice mode: `slice-pre`): artifact format, task quality, manual config checklist, **slice coherence (Quality Controller)** — **строго до** architect readiness review (шаг 7.7), **mandatory architect readiness review**, **TZ generation** (при пороге задач или явном запросе, шаг 7.8), Architect Gate, Design Review, TZ Review, project constraints
 - **Post-apply** (slice mode: `slice-post`): implementation completeness per accepted slice, correctness, coherence; remaining slices получают pre-checks
-- **Slice-scoped** (`--slice S<N>`): verify для одного среза — артефакты, связанные Requirements/Scenarios, файлы реализованных задач среза
-- **Slice-transition** (`--after-slice S<N>`, явный флаг или вызов из apply): проверка актуальности задач `S<N+1>+` после принятия среза S<N>
-- **Migrate** (`--migrate-to-slices`): реструктуризация плоского/фазового tasks.md в вертикальные срезы через architect «Architect — slice restructuring» (подробности — `.cursor/skills/openspec-migrate-slices/SKILL.md`, команда `/opsx:migrate-slices`)
+- **Slice-scoped** (узкий охват одного среза): если в тексте запроса явно указан срез `S<N>` или есть свежий `reports/slice-acceptance-S<N>-*.md` / запись приёмки в `debug.md` и пользователь явно просит перепроверить этот срез после приёмки
+- **Slice-transition**: только если текст запроса просит «проверить после принятого среза S<N>», «переход между срезами», или сообщение передано из `/opsx:apply` с пометкой `Mode: slice-transition` и `Accepted slice: S<N>`
+- **Migrate**: только предложить `/opsx:migrate-slices <name>` (отдельная команда) при legacy с `<!-- phase-gate -->` или при запросе миграции в свободной форме; verify сам не режет задачи в срезы
 - **Legacy**: tasks.md без `# Срез` — режим совместимости: mechanical checks работают, QC — в legacy-режиме (предупреждение `no-slices`)
 
-**Output style:** полный отчёт — в файле `reports/verification-*.md` по **T-REPORT** §5.3 `.cursor/docs/opsx-output-style.md`. **Чат** по умолчанию — тонкий (сводка + путь к файлу + при необходимости одна команда); полный дубль в чат — только с флагом **`--verbose`** или при необходимости показать компактные карточки при блокерах (бюджет — `.cursor/rules/chat-output-budget.mdc`). Перед отправкой в чат — self-check §7 стайл-гайда + HALT из `chat-output-budget.mdc`. Подробности — `.cursor/rules/verify-user-communication.mdc`, секция «Report and remediation» ниже.
+**Output style:** полный артефакт — в файле `reports/verification-YYYY-MM-DD.md` **только если** шаги 16–18 зафиксировали содержание (найденные нестыдовки, авто-правки или разговорное обсуждение развилок). Если шаг **4c** дал раннее завершение `silent_ok` — **новый файл не создавать**. **Чат** всегда тонкий: шаблон `templates/chat-summary.md` (вариант «тихий» или «информативный»); развилки без кодов вида `<N>a` — параграфы по `templates/card-decision.md`. Бюджет — `.cursor/rules/chat-output-budget.mdc`. Перед отправкой — self-check `verify-user-communication.mdc`.
 
 ## Порядок шагов (обзор)
 
@@ -27,7 +27,9 @@ flowchart TD
   B --> C[2-3 Load artifacts]
   C --> D[4 Determine mode]
   D --> E[4b Determine tier]
-  E --> F[5 Init report]
+  E --> Ec[4c Novelty Check]
+  Ec -->|silent_ok STOP| ChatQuiet[Thin chat quiet]
+  Ec --> F[5 Init conditional report outline]
   F --> G[6 Artifact format]
   G --> H[7 Task quality]
   H --> I[7.5 Manual config]
@@ -43,17 +45,15 @@ flowchart TD
   R --> S[16a Phase A mechanical autofix]
   S --> S1[16b Implementation Impact Gate]
   S1 --> S2[16c Card consolidation]
-  S2 --> T[17 Phase B decision cards + hygiene]
-  T --> U[17a Re-verify after judgment]
+  S2 --> T[17 Phase B conversational + hygiene]
+  T --> U[17a Re-verify after user reply]
   U --> V[17b Final verdict]
-  V --> W[18 Save report]
+  V --> W[18 Save report if warranted]
 ```
 
-**Контракт шапки режима:** фиксированные строки «Этап / Объём / Что проверим» (пользовательский язык + технический код в backticks) — обязательны в **файле** отчёта (после `## Executive Summary`, см. шаг 16 и правило 11 `verify-user-communication.mdc`). В **чат** они копируются **только** если пользователь передал **`--verbose`**; иначе достаточно 1–2 предложений сути + путь к файлу отчёта.
+**Технические коды режима** (`slice-pre`, и т. п.) допустимы **только** в YAML frontmatter файла отчёта (см. `templates/report-header.md`) и строке «Источники» при необходимости — **не** в абзаце «Суть» и не как обязательная шапка в чате. Слова `Tier`, `Lite`, калька «когерентность» в сообщении пользователю не использовать (см. §3.1 `opsx-output-style.md`).
 
-Соответствие технических кодов и пользовательских формулировок «Этап» — в шаге 16 (таблица в Executive Summary). Слова `Tier` / `Standard` / `Lite` / `Full` и калька «когерентность» в чате не цитируются (см. §3.1 `opsx-output-style.md`).
-
-**Input**: Optionally specify a change name. Optional flag **`--verbose`**: развёрнутый вывод в чат (шапка, таблицы, карточки по шагу 17); без флага — тонкий чат по умолчанию. If change name omitted, check if it can be inferred from conversation context. If vague or ambiguous you MUST prompt for available changes.
+**Input:** необязательно имя ЗНИ в сообщении командой `/opsx:verify [<name>]`. Допустим один аргумент — имя каталога change. Намёки на режим («проверь S2 после приёмки») извлекаются из того же сообщения текста без специальных ключей. Если имя ЗНИ не ясно — `openspec list --json` и выбор пользователем.
 
 **Steps**
 
@@ -108,13 +108,15 @@ flowchart TD
 
 4. **Determine verification mode**
 
-   **Flag handling (before structural analysis):**
-   - `--migrate-to-slices` — явный запрос миграции: set mode = **migrate-to-slices**, skip обычные проверки, перейти к шагу 7.M (миграция). Автодетект также может включить этот режим — см. ниже.
-   - `--slice S<N>` — verify одного среза: set mode = **slice-scoped** для указанного S<N>, сузить область проверок (артефакты, связанные Requirements, файлы реализованных задач среза).
+   **Контекст пользователя (без флагов):** до структурного анализа прочитать свободный текст запроса рядом с `/opsx:verify`:
+   - Фразы вида «мигрируй в срезы», «нужна миграция задач» → зафиксировать намерение **migrate** → в конце сообщения порекомендовать `/opsx:migrate-slices <name>` (шаг 7.M); основной прогон verify не отменять автоматически.
+   - Явное «срез S2», «после приёмки S3», «только S1» или «проверь один срез» → **slice-scoped** для указанного `S<N>` при условии совпадения с заголовком `# Срез S<N>` в `tasks.md`; иначе уточняющий вопрос пользователю.
+   - «После правок в Slices / нарезке / графе срезов», «обновили мы план срезов» — при намерении не сужать до одного среза оставить режим по таблице ниже; шаг 7.6/7.7 всё равно зависят от **4c**.
+   - Специальные строки CLI (`--slice`, `--verbose`, и т. п.) **игнорировать** как устаревшие; не требовать их от пользователя.
 
    **Структурный анализ tasks.md:**
    - Grep `tasks.md` на `^# Срез S\d+` — если найдено хотя бы одно вхождение → ЗНИ в **slice mode**. Иначе → **legacy mode**.
-   - Grep `tasks.md` на `<!-- phase-gate -->` — если найдено в legacy mode → emit SUGGESTION `deprecated-phase-gate` и предложить `--migrate-to-slices`.
+   - Grep `tasks.md` на `<!-- phase-gate -->` — если найдено в legacy mode → emit SUGGESTION `deprecated-phase-gate` и предложить `/opsx:migrate-slices <name>` (см. 7.M).
    - Count lines matching `- [ ]` (incomplete checkboxes)
    - Count lines matching `- [x]` (complete checkboxes)
    - Count lines matching `S<N>.T<M>` acceptance tests (total / `[x]` — принятые срезы / `[ ]` — ожидающие приёмки).
@@ -139,47 +141,47 @@ flowchart TD
    **Slice-transition mode (explicit only):**
 
    Slice-transition activates **only** in these cases:
-   1. User or apply explicitly requested slice-transition review (e.g. "verify after slice S2", "slice-transition review", `/opsx:verify <name> --after-slice S<N>`).
-   2. The prompt indicates this run was triggered from apply at a slice gate (apply передаёт `Mode: slice-transition` и `Accepted slice: S<N>`).
+   1. Пользователь в свободном тексте запросил переход между срезами / проверку после принятого `S<N>` (например «проверь актуальность S2 после приёмки S1»).
+   2. Сообщение передано из `/opsx:apply` на slice-gate с пометками `Mode: slice-transition` и `Accepted slice: S<N>`.
 
-   **Auto-detect отключён** (ранее case 3 — «пересечённая граница среза» — давал ложные срабатывания, когда пользователь отметил `[x]` вручную). Если в tasks.md виден принятый срез без явного флага — верифицировать в режиме `slice-post`, не в `slice-transition`. Для тяжёлой проверки актуальности следующего среза — пользователь явно вызывает `/opsx:verify <name> --after-slice S<N>`.
+   **Auto-detect отключён:** без явного текста из п.1 или п.2 использовать `slice-post`, а не `slice-transition`.
 
-   Announce mode to user:
-   ```
-   Режим: slice-pre (ЗНИ подготовлена / в работе, ни один срез не принят)
-   Режим: slice-post (принятых срезов: K/M — pre-проверки для непринятых, post-проверки для принятых)
-   Режим: slice-post (final) — все срезы приняты
-   Режим: slice-transition — проверка актуальности следующего среза после принятого
-   Режим: slice-scoped --slice S<N>
-   Режим: migrate-to-slices — реструктуризация в срезы
-   Режим: pre-apply (legacy) / mixed (legacy) / post-apply (legacy) — tasks.md без срезов
-   ```
+   Сообщить режим **только в YAML** файла отчёта или в секции процесса внутри файла; в консультативный чат **не дублировать** техническое объявление «Режим: …».
 
-4b. **Determine verification tier**
+4b. **Determine verification tier (внутренний расчёт)**
 
-   Все ЗНИ верифицируются по единому стандарту (Standard/Full).
-   - QC (шаг 7.6) и Architect (шаг 7.7) вызываются всегда.
-   - ТЗ (шаг 7.8) генерируется в зависимости от параметра `generate_tz`.
+   Подсчитать задачи по чекбоксам в `tasks.md` и число срезов; выставить технический tier: Lite (≤5 задач), Standard (6–15), Full (≥16 задач или slice-transition). Поле `tier:` в YAML отчёта; **не** выводить в чат имена объёма.
 
-   Объявить пользователю в формате шапки шага 1: `**Объём:** Полная (<N> задач, <M> срезов)`. Слово `Tier` и метки `Standard` / `Lite` / `Full` в пользовательском выводе не цитируются (см. §3.1 `opsx-output-style.md`); технические метки остаются в YAML отчёта `verification-*.md`.
+   **Вызываемость тяжёлых подшагов:** шаги **7.6** (QC) и **7.7** (архитектор) выполняются **только если** шаг **4c** установил флаг `run_heavy_review = true` (см. ниже). В Lite-tier при `run_heavy_review = true`: 7.6 пропускается, архитектор выполняется в compact (как уже описано ниже для Lite).
 
-5. **Initialize report structure**
+   ТЗ (шаг 7.8) генерируется только при соблюдении порога и `generate_tz` — без изменений логики порога.
 
-   Create a report structure with sections:
-   - **Artifact Format** (slice-pre / slice-post / legacy: pre-apply, mixed)
-   - **Task Quality** (same modes)
-   - **Manual Configuration Sufficiency** (same modes) — structured checklist with proof
-   - **Согласованность срезов (Quality Controller)** (slice mode pre/post; legacy → `no-slices` SUGGESTION) — scenario coverage, slice independence, completeness, dependency graph, slice gate integrity, rework risk
-   - **Task Readiness (Architect)** — mandatory architect holistic assessment of realizability
-   - **TZ (Functional Requirements)** — generated TZ document, gap analysis
-   - **Gates**: Architect Gate, **Precedent Regression** (шаг 9b), Design Review, TZ Review, Project Constraints
-   - **Slice Acceptance Status** (slice-post / slice-transition / migrate-to-slices) — таблица S<N> → принят/в работе/ожидает
-   - **Completeness** (slice-post, slice-post final, legacy mixed/post-apply) — для принятых срезов / выполненных задач
-   - **Correctness** (same)
-   - **Coherence** (same)
-   - **Развёрнутые объяснения замечаний** (если есть любые CRITICAL/WARNING/SUGGESTION) — обязательная секция в **файле** отчёта; в чат дублируются полностью только при `--verbose`, иначе — компактно по шагу 17; см. шаг 16
+4c. **Novelty Check и ранний выход**
 
-   Each section can have CRITICAL, WARNING, or SUGGESTION issues.
+   Цель: не расходовать субагентов и не плодить пустые отчёты, если с прошлой проверки **ничего существенного не изменилось**.
+
+   1. В каталоге `openspec/changes/<name>/reports/` найти файл, имя совпадает с `verification-*.md`, с **наибольшей** датой в имени (или по mtime — при равенстве брать более новый). Если нет ни одного — установить `novelty_signal = full_run`; `run_heavy_review = true`; перейти к шагу 5.
+   2. Прочитать верхнюю секцию YAML (frontmatter) последнего отчёта. Извлечь блок **`snapshot`** с полями:
+      - `accepted_tasks`: список идентификаторов выполненных задач (формат строки задачи после чекбокса, например `S2.1`, `S1.T1`, без пробелов).
+      - `artifacts_mtime`: словарь путь → ISO-метка времени модификации на момент прошлого прогона (строками; сравнение строковое с тем, что считывается заново через файловые метаданные ОС после загрузки артефакта — достаточно единого формата RFC3339 или «как сохранено»).
+      - При отсутствии `snapshot` в старых отчётах — трактовать как `full_run` + `run_heavy_review = true`.
+   3. Снять **текущее** состояние:
+      - множество `accepted_tasks_now` из всех строк `tasks.md` с `- [x]` и маркерами `S<number>.`, `S<number>.T<number>`, или `F<number>` для follow-up;
+      - текущие mtime ключевых файлов `proposal.md`, `design.md`, `tasks.md` и каждого `specs/**/*.md`.
+   4. **Правило `silent_ok`:** множества `accepted_tasks` и `accepted_tasks_now` равны **и** для каждого ключа из union snapshot/current mtime файл не стал новее сохранённого значения (`>=` недопустимо для «изменился» — строго **равно** числу/строкой как записано в snapshot): → вывести **тихий ответ** строго по `templates/chat-summary.md` («Тихий вариант»), указать путь к последнему отчёту; **не вызывать** шаги 6–18; **остановиться**.
+   5. **Правило `progress_only`:** множества `accepted_tasks` и `accepted_tasks_now` **не** равны, только расширение (добавились выполненные задачи или приёмки), при этом текущее mtime каждого ключевого артефакта **совпадает** с snapshot **или** в snapshot этого ключа не было и текст файлов не считался изменённым вручную — установить `run_heavy_review = false`. В этом прогоне **пропустить** шаги **7.6** и **7.7**. Остальные шаги выполняются (включая post-apply / code-truth по новым `[x]`).
+   6. Иначе: `novelty_signal = full_delta`; `run_heavy_review = true`. Если в текущих правках затронуты только разделы `design.md`: `## Slices`, `## Behavior Contract`, `## Decisions`, `## Goals / Non-Goals` — уже достаточно для `run_heavy_review = true` (Architect нужен для смысловых решений).
+
+   После выполнения 4c записать переменную `novelty_signal` во внутренний контекст прогона для шага 18 (snapshot обновить).
+
+5. **Initialize report structure (условно)**
+
+   План отчёта — **черновой**: фактическая структура файла формируется на шаге 16; **включать только непустые разделы**. Пустые блоки («маркеров не найдено», N/A для режима) не писать. Минимально обязательное:
+   - YAML frontmatter по `templates/report-header.md` (`verify_mode`, `verdict`, блок `snapshot` после прогона шага 18).
+   - `## Executive Summary` по `templates/executive-summary.md`.
+   - Далее — по наличию результатов: Формат артефактов, Качество задач, Ручная конфигурация (7.5), QC (только если выполнялся 7.6), Архитектор (только если выполнялся 7.7), ТЗ, Gates, Post-apply, Авто-исправлено (16a), Conversational / hygiene (17), Развёрнутые пояснения (если есть CRITICAL/WARNING/SUGGESTION).
+
+   Если шаг 18 решает **не создавать** файл (`report_warranted = false` — нет находок, Phase A пуста, нет открытых развилок после Promotion Test) — структура остаётся только в черновике; пользователю достаточно тихого сообщения (см. шаг 17).
 
 ---
 
@@ -294,7 +296,7 @@ flowchart TD
    5. Если кандидат помечен `**Причина fix-среза:** cross-slice`, но зависимости не покрывают ≥2 среза по сценарию — **WARNING** `fix-slice-cross-slice-unsubstantiated`.
 
    **7F.5 Deprecated phase-gate detection:**
-   Grep tasks.md for `<!-- phase-gate` markers. If found → SUGGESTION `deprecated-phase-gate`: "устаревший маркер фазового gate — рекомендуется `/opsx:verify --migrate-to-slices`".
+   Grep tasks.md for `<!-- phase-gate` markers. If found → SUGGESTION `deprecated-phase-gate`: "устаревший маркер фазового gate — рекомендуется `/opsx:migrate-slices <name>`".
 
    Pass all 7D results to Quality Controller (step 7.6) and Architect (step 7.7): "Executability issues (verify 7D): <list or 'замечаний нет'>".
 
@@ -356,6 +358,8 @@ flowchart TD
 
 7.6. **Quality Controller — Slice Coherence Review (Standard/Full tiers ONLY)**
 
+   **Предусловие:** шаг **4c** установил `run_heavy_review = true` **и** tier не Lite. Если `run_heavy_review = false` — шаг **полностью пропустить**; в отчёте при необходимости одна строка `- [INFO] Контроль срезов пропущен: прогресс без изменения постановки (novelty progress_only).`
+
    **This step executes in Standard and Full tiers (skipped in Lite).** Domain-agnostic assessment of slice coherence, scenario coverage, slice independence, dependencies and rework risk. Complements the architect's realizability review (step 7.7).
 
    **Prepare repository state** (before calling the controller):
@@ -394,7 +398,7 @@ flowchart TD
       - `dependency-cycle`, `coupling-violation`, `missing-slice-test`, `backward-reference`, `fix-slice-on-unaccepted` → CRITICAL.
       - `stale-slice-dep`, `forward-slice-dep`, `undeclared-slice-dep`, `slice-incomplete`, `rework-risk-on-unaccepted`, `fix-slice-cross-slice-unsubstantiated` → WARNING.
       - `missing-slice-gate-marker`, `vague-slice-test`, `unaccepted-slice-in-progress`, `slice-overlap`, `hypothesis-dep` → SUGGESTION.
-      - `no-slices`, `deprecated-phase-gate` → SUGGESTION с рекомендацией `/opsx:verify --migrate-to-slices`.
+      - `no-slices`, `deprecated-phase-gate` → SUGGESTION с рекомендацией запустить `/opsx:migrate-slices <name>`.
 
 7.6b. **Slice Transition Review (slice-transition mode ONLY)**
 
@@ -422,12 +426,15 @@ flowchart TD
    Focus: остаются ли upcoming срезы валидными в свете результатов S<N>? Есть ли design drift? Нужно ли пере-разрезать (rebrick) S<N+1>+?
    Save architect result to `reports/slice-transition-YYYY-MM-DD.md`.
 
-7.7. **Task Readiness Architect Review (MANDATORY)**
+7.7. **Task Readiness Architect Review (условно)**
 
-   **Порядок выполнения (Standard/Full):** шаг **7.6** (Quality Controller) MUST завершиться **до** запуска шага **7.7** (Architect). Архитектор получает результат QC (slice summary, scenario coverage, alerts из 7.6) как входной параметр. **Параллельный** запуск QC (7.6) и Architect (7.7) **запрещён**.
-   **В Lite tier:** шаг 7.6 пропускается, архитектор выполняет compact-ревью (совмещает оценку срезов и реализуемость).
+   **Предусловие:** шаг **4c** установил `run_heavy_review = true`. Если `false` — шаг **полностью пропустить** (кроме Lite: см. ниже); в отчёте при необходимости INFO-строка с причиной.
 
-   **This step executes ALWAYS in pre-apply and mixed modes.** It is not remediation — it is part of the verification pipeline. The architect provides the expert holistic assessment that mechanical checks cannot.
+   **Порядок выполнения (Standard/Full):** если 7.6 выполнялся — он MUST завершиться **до** 7.7. Архитектор получает результат QC как вход; **параллельный** запуск QC и Architect **запрещён**. Если 7.6 пропущен — в промпт передать «Quality Controller пропущен (novelty / Lite)».
+
+   **В Lite tier:** при `run_heavy_review = true` шаг 7.6 не вызывается, архитектор выполняет compact-ревью. При `run_heavy_review = false` — архитектор также **не** вызывается.
+
+   **This step is not remediation** — часть конвейера при полном охвате. При раннем `silent_ok` (4c) сюда не попадают.
 
    **Scope coherence — закрытие через extend audit.** Перед формированием промпта архитектора проверить наличие `reports/architecture-extend-coherence-*.md` в каталоге change. Если файл есть и его время модификации **новее** времени модификации `proposal.md` и `design.md` (или совпадает с последней правкой scope — оркестратор сравнивает mtime файлов), **и** в отчёте в секции `### Verdict` указано `coherent` или `drift-warning` (не `scope-violation`) — в промпт архитектора добавить явную инструкцию: «Раздел целостности scope закрыт audit-отчётом `<path>` из `/opsx:extend`; не дублировать полный scope-drift анализ — сфокусироваться на реализуемости по критериям task-readiness (п. 1, 1b, 2–7 ниже)». Если coherence-отчёта нет, coherence устарел (артефакты новее отчёта) или Verdict = `scope-violation` — полный объём task-readiness без сокращения scope-части.
 
@@ -615,7 +622,7 @@ flowchart TD
    Миграция legacy/фазового `tasks.md` в вертикальные срезы **вынесена в отдельную команду** и скилл `.cursor/skills/openspec-migrate-slices/SKILL.md`. Verify не перестраивает артефакты самостоятельно.
 
    **Поведение verify:**
-   - Если пользователь передал `--migrate-to-slices` → предложить `/opsx:migrate-slices <name>` в карточке решения и завершить текущий verify-прогон без прогона проверок.
+   - Если пользователь явно попросил миграцию в свободной форме (см. шаг 4) → сообщить порекомендовать **`/opsx:migrate-slices <name>`** в разделе conversational / «Что обсудим» и **продолжить** текущие проверки (не обнулять прогон без отдельной команды пользователя).
    - Если найдены `<!-- phase-gate -->` маркеры в legacy ЗНИ → SUGGESTION `deprecated-phase-gate` с рекомендацией `/opsx:migrate-slices <name>`. Verify продолжается в legacy-режиме.
    - Если QC выдал alert `no-slices` → в карточке решения (шаг 17) опция «Мигрировать в срезы» — команда предлагается к ручному запуску; verify не вызывает её автоматически.
 
@@ -964,44 +971,19 @@ flowchart TD
 
 ## Report and remediation
 
-**Output style (файл отчёта):** полное тело по **T-REPORT** §5.3 — Executive Summary, Scorecard, группы замечаний, Action items, ссылки. Пользовательские формулировки замечаний — в начале пункта; технические коды — в скобках или в «Источники». **Чат** — по умолчанию тонкий + `--verbose` (см. шаг 17). Перед выводом в чат — §7 стайл-гайда и `chat-output-budget.mdc`.
+**Output style:** **файл** — только непустые разделы (см. шаг 5); полный технический текст, таблицы, ссылки на вложенные отчёты. **Чат** — строго `templates/chat-summary.md` («тихий» или «информативный»); без кодов выбора, без блока «Как ответить». Перед чатом — §7 стайл-гайда и `chat-output-budget.mdc`.
 
 16. **Generate Verification Report**
 
-    **Executive Summary (обязательная первая секция отчёта):**
+    **Executive Summary (`## Executive Summary`):** только шаблон `templates/executive-summary.md` — абзац **«Суть»** и опционально **«Что в работе»**. Строк вида «Этап / Объём / Готовность / Подробности» в тексте секции **не** использовать (вердикты и режим — в YAML frontmatter, см. шаг 18).
 
-    Структура **внутри** `## Executive Summary` (порядок фиксирован) — см. шаблон `templates/executive-summary.md`.
-    Шапка отчёта (строки метаданных) — см. шаблон `templates/report-header.md`.
+    YAML frontmatter — `templates/report-header.md` (`verify_mode`, `verdict`, `tier`, при необходимости счётчики; блок `snapshot` добавляется на шаге 18).
 
-    Пример **хорошего** первого абзаца «Суть»: «Проверена готовность доработки формы „Повтор согласования“: в постановке теперь явно описано, как при выключенной галке короткого списка пользователь снова видит строки последующих шагов маршрута (раньше в согласованной версии они скрывались). Противоречий с уже зафиксированными в проекте договорённостями нет — можно переходить к реализации.»
+    Примеры и запрет жаргона для «Сути» — в `verify-user-communication.mdc` и §3.1 `opsx-output-style.md`.
 
-    Пример **плохого** первого абзаца (запрещённый стиль): «PASS. В `design.md` добавлена `## Blast Radius` после записи в `debug.md`; снято замечание по precedent-regression 9b.»
+    **Slice Acceptance:** в тексте использовать формулировки вида «Срез S<N>: «<название из H1 tasks.md>»», не голый `S1`.
 
-    Правила заполнения:
-
-    - **Этап** — человеческое описание + технический код в backticks (для автоматизации). Соответствие:
-      - `slice-pre` → «Проверка до реализации среза»
-      - `slice-post` → «Проверка после реализации среза»
-      - `slice-post (final)` → «Финальная проверка после реализации всех срезов»
-      - `slice-scoped (S<N>)` → «Проверка одного среза»
-      - `slice-transition (после S<N>)` → «Переход между срезами»
-      - `migrate-to-slices` → «Миграция в срезы»
-      - `legacy pre-apply` → «Проверка до реализации (без срезов)»
-      - `legacy mixed` → «Промежуточная проверка (без срезов)»
-      - `legacy post-apply` → «Проверка после реализации (без срезов)»
-    - **Объём** — соответствие:
-      - `Lite` → «Краткая» (≤5 задач)
-      - `Standard` → «Полная» (6–15 задач)
-      - `Full` → «Расширенная» (≥16 задач или slice-transition)
-    - **Готовность** — формулировка зависит от счётчиков (Блокеры > 0 → «Не готово»; иначе если есть Замечания → «Готово с оговорками»; иначе «Готово к реализации»).
-    - **Подробности** — счётчики используют русские термины («Блокер», «Замечание», «Предложение») вместо `CRITICAL`/`WARNING`/`SUGGESTION` в пользовательском выводе. **INFO не входят** в счётчики; при наличии — отдельная строка «К сведению: R пунктов».
-    - **Решений от вас** — конкретные решения, которые не может принять машина (выбор подхода, отложить/реализовать задачу, принять риск). Если таких нет — «0». INFO **не** считаются запросом решения.
-
-    **Запрещённый жаргон в Executive Summary (включая абзац «Суть» и строки метаданных):** слова **PASS** / **FAIL** как вердикт; `verdict:`, `verify_mode:`, `Phase A/B`, `9b`, имя секции «Blast Radius», `precedent-regression`, `Implementation Impact Gate`, `Promotion Test`, `Determinism Test` — в текст, который читает человек, не попадают (см. §3.1 `opsx-output-style.md`). Технические коды этапа (`slice-pre`, `Standard`) — **только** в backticks в строке **Этап** / **Объём**. YAML front-matter файла отчёта может содержать `verdict` / `verify_mode` для автоматизации — **не копировать** эти поля в формулировки «Суть» и не дублировать их в чате как заголовок вердикта.
-
-    **Таблица «Slice Acceptance Status»:** в колонке среза — всегда `Срез S<N>: «<название из H1 tasks.md>»`, не голый `S1`.
-
-    **Summary Scorecard (после Executive Summary):**
+    **Условный scorecard** (после Executive Summary, только где есть содержание):
     ```
     ## Verification Report: <change-name>
     ### Режим: slice-pre | slice-post | slice-post (final) | slice-transition | slice-scoped (S<N>) | migrate-to-slices | legacy pre-apply | legacy mixed | legacy post-apply
@@ -1199,14 +1181,11 @@ flowchart TD
 
     Формат (нумерация сквозная по всем severity, сначала CRITICAL, затем WARNING, затем SUGGESTION): заголовки уровня 4 `#### CRITICAL N — …`, `#### WARNING N — …`, `#### SUGGESTION N — …`; под каждым — абзац (для CRITICAL/WARNING 3–5 предложений; для SUGGESTION 1–2 предложения).
 
-    **Связь с сообщением пользователю:** файл отчёта содержит развёрнутые абзацы (полная запись); сообщение пользователю использует формат **карточек решений** для judgment-замечаний (см. шаг 17). Это разные форматы — файл как долгосрочная память, карточки как инструмент принятия решений.
-
-    См. `.cursor/rules/verify-user-communication.mdc` — правила 2, 3, 7, 8.
     ```
 
-    **Сообщение пользователю** формируется на шаге 17 после Phase A (авто-исправление механических замечаний). Формат карточек решений — см. шаг 17.
+    **Связь с сообщением пользователю:** файл отчёта — развёрнутые абзацы (полная запись); сообщение пользователю после шага **16a** формируется по шагу **17** через `templates/chat-summary.md`: «Что нашли», «Что обсудим» (блок по `templates/card-decision.md` на развилку), без кодов выбора.
 
-    Коммуникация с пользователем: `.cursor/rules/verify-user-communication.mdc`
+    См. `.cursor/rules/verify-user-communication.mdc`.
 
 16a. **Phase A — Mechanical auto-fix (silent)**
 
@@ -1266,197 +1245,84 @@ flowchart TD
 
     Зафиксировать в отчёте: секция `### Card consolidation` — список свёрнутых пар «исходные алерты → итоговая карточка/строка» (или «дубликатов не обнаружено»).
 
-17. **Phase B — Show results + Judgment decision cards + Artifact hygiene**
+17. **Phase B — Сообщение пользователю (conversational)**
 
-    **Маршрутизация чата (до сборки блоков)** — см. **§3a** [`.cursor/rules/chat-output-budget.mdc`](../../rules/chat-output-budget.mdc) (non-events: «Phase A ничего не нашла», «INFO нет», «гейты закрыты» и т. п. **не** писать в чат).
-    1. Без `--verbose`, любой исход (готово / с оговорками / не готово) — в чат идёт **строго по шаблону `templates/chat-summary.md`**: нумерованные **«Что не так»**, при наличии развилок — блок **«Решения»** (**«Решение N»** с `<N>a`/`Nb`/`Nc` для каждой decision-карточки и каждого пункта гигиены из файла отчёта), **«От вас нужно»**, **«Как ответить»**, **«Подробности»**, без произвольных секций («Режим», «Объём» и т. п.). Полные карточки `card-decision.md` / `card-hygiene.md` — **только** в файле отчёта; контракт переноса — правило 7 `.cursor/rules/verify-user-communication.mdc` и §1b `.cursor/rules/chat-output-budget.mdc`.
-    2. С `--verbose` — в чат допускается полный набор блоков (как сейчас), **без снятия** обязательности блоков **«Решение N»** из п.1 при открытых развилках.
-    3. Запрет: шапка «Этап / Объём / Готовность / Подробности», executive-summary как абзац, полные карточки «Что меняется для пользователя» — в чате без `--verbose` запрещены; отсылка «выберите в файле отчёта» **вместо** перечня `Na`/`Nb`/`Nc` — запрещена.
+    Перед сборкой сообщения — **§3a** `.cursor/rules/chat-output-budget.mdc` (non-events в чат не выводятся).
 
-    **INFO** не участвуют в remediation и не показываются как карточки.
-    **Footnote**-замечания (см. Issue Classification) показываются в секции «К сведению» — одна строка каждое.
-    **`artifact-hygiene`** замечания (после Gate 16b) — в **файле** отдельный блок (Блок 2b) по `card-hygiene.md`; в **чате** — отдельный блок **«Решение N»** по `chat-summary.md` с вариантами `Na`/`Nb`/`Nc`, не одна строка без буквенных меток.
+    **Где был тихий выход.** Если шаг **4c** вернул `silent_ok`, шаг **17 не выполняется** (ответ уже отправлен там).
 
-    **Формат сообщения пользователю (обязательный):**
+    **Информативный выход.** Чат следует **`templates/chat-summary.md` (вариант «Информативный»).** По смыслу:
+    - **Что нашли** — каждая строка новая находка после фильтра плана (см. self-check ниже и шаг **4c**); не повторять из прошлого `snapshot.open_known_questions`, если они помечены `planned_in` и задача всё ещё в очереди.
+    - **Сама поправила** — краткий перечень результата **16a**, со ссылками на файлы (`templates/phase-a-table.md` в теле отчёта — полнее).
+    - **Что обсудим** — по **развёрнутым** блокам **`templates/card-decision.md`** (один блок на каждое judgment-замечание после **16c**). В чате — **пересказ** шаблоном (параграфы, альтернативы строками-буллетами без буквенных суффиксов). Hygiene после **16b** — в файл по **`templates/card-hygiene.md`**; если нужно согласие пользователя по тексту — мягкая формулировка здесь («можем поправить вручную сейчас / отложить»).
+    - **По плану** — строки вида «открытый вопрос X — закроется в `S<M>.`…», если в постановке есть owner-задача; это **не** развилка.
+    - **Подробности** — путь к файлу только если файл создан на шаге **18**; иначе ссылаться на последний существующий `reports/verification-*.md`, как в шаблоне тихого варианта (если применимо к сценарию).
 
-    **Блок 1 — Авто-исправлено (Phase A):**
-    Если Phase A (шаг 16a) выполнила хотя бы одно исправление:
-    См. шаблон `templates/phase-a-table.md`.
-    Если Phase A не нашла mechanical-замечаний — блок опустить.
+    **Запреты для чата:** заголовков «Решение N», «Как ответить», любых кодов выбора; шапки «Этап / Объём / Готовность / Подробности» как пользовательское сообщение; отсылка «ответьте в файле» вместо краткой развилки в чате.
 
-    **Блок 2 — Решения (decision-замечания, прошедшие Implementation Impact Gate):**
-    Только замечания с классом `decision` (хотя бы один «да» по Gate 16b). Для каждого — карточка строго по шаблону `templates/card-decision.md`.
+    **`INFO` / footnote** — блок «К сведению» в конце сообщения только при содержании: одна строка на пункт.
 
-    **Обязательные поля карточки** (отсутствие любого = провал self-check шага 17):
+    **Развёрнутые развилки для исполнения:** любое изменение `tasks/design/spec/proposal`, меняющее код или приёмку, оформляется как предложение `/opsx:extend <name> --from-verify <путь-к-этому-отчёту>` (прямые правки оркестратором только для класса hygiene по §8 `opsx-output-style.md`). В чате объяснять эффект бизнес-языком; технические коды — в строке источников **внутри файла**.
 
-    - **Что не так** — конкретный дефект (1 предложение, без общих слов, без жаргона движка из §3.1 `opsx-output-style.md`).
-    - **Что меняется для пользователя** — список из 1–3 пунктов в пользовательском языке. Запрещены процессные термины (`Phase A/B`, `verdict`, `verify_mode`, `precedent-regression`, `Blast Radius`, `slice-pre/post`, `Implementation Impact Gate`); запрещены имена секций движка (`Behavior Contract`, `Implementation Options`, `Simplicity Check`) — описывается **эффект**, а не имя секции, в которой он зафиксирован.
-    - **Варианты** — 2–3 действия. Для decision-замечаний действие, меняющее код / поведение / приёмку, **обязано** идти через `/opsx:extend <name> --from-verify <verification-report>` (прямая правка артефактов оркестратором запрещена — см. §8 `opsx-output-style.md`). Всегда есть «Принять как есть» с описанием конкретного риска.
-    - **Источники** — обязательная строка после свёртки 16c. Только здесь допустимы технические коды и имена движка (`precedent-regression-9b`, `dependency-cycle`, `Blast Radius`, имена шагов verify).
-    - **Severity** — НЕ помещается в заголовок карточки. Передаётся через позицию в группе (Блокеры → Замечания → Предложения) в Executive Summary и через счётчик «N Блокеров, M Замечаний, K Предложений» в вердикте.
+    **Справа решения после Implementation Impact Gate (16b) — памятка содержания (не формат меню):** для типов замечаний из таблицы Issue Classification сохранять **смысл**: что за риск, что изменится для пользователя 1С, предпочитаемый путь через `/opsx:extend ... --from-verify`, опция принять текущее состояние с явным риском — без буквенных меток во встроенном чат-примере оставить указание «таблица Issue Classification».
 
-    **Блок 2b — Уточнения текста (`artifact-hygiene` замечания):**
-    Замечания, которые не прошли Implementation Impact Gate (все три «нет»), но требуют выбора пользователя «применять или нет». Формат — компактный список, **не** полная карточка:
-    См. шаблон `templates/card-hygiene.md`.
+    **Self-check перед отправкой (чат):**
+    - Нет подстрок `Решение N`, паттернов «`<N>a`», «ответьте 1a».
+    - Каждый пункт «Что нашли» — новый относительно прошлого отчёта **или** явное противоречие актуальных артефактов **или** пользователь в запросе попросил перепроверить тему (см. план фильтра 4c-дополнение).
+    - Для блоков прецедентов отмены: в тексте пользователю — бизнес-эффект, источник обещания, альтернативы; коды только в файл.
+    - **Срезы с названием** — см. §10 `opsx-output-style.md`.
 
-    Для hygiene-замечаний прямая правка текста артефакта оркестратором **разрешена** (см. §8 `opsx-output-style.md` — дисциплина правок ЗНИ, hygiene = ручная правка). После применения — обязательный повторный `/opsx:verify`.
+    **17a. Re-verify после свободного ответа пользователя**
 
-    Если hygiene-замечаний нет — блок опустить.
+    Пользователь отвечает **простым текстом** («первый вариант», «отложим», «сделай extend и …»). Оркестратор **интерпретирует намерение** без парсинга буквенных кодов. После любых действий по развилкам или ручной правке артефакта оркестратором при hygiene:
 
-    **Действия по вариантам.** Замечания распределяются по Блоку 2 (decision, прошли Gate 16b) или Блоку 2b (artifact-hygiene, не прошли Gate). Маппинг по умолчанию ниже; финальная категория — после Gate 16b и Card consolidation 16c.
+    1. Перезапустить **только затронутые** механические проверки (**6–7F**) по изменённым файлам.
+    2. Если меняли `tasks.md` и в исходном прогоне выполняли **7.6** — повторить **7.6** с тем же режимом и новым `tasks.md`; новые алерты включить в обновление отчёта.
+    3. **7.7** — повторять только если менялись состав задач, их зависимости или содержание, влияющее на realizability Architect (как в старой логике 17a).
+    4. Дополнить файл отчёта секцией `### Re-verification after remediation`.
 
-    **Decision (Блок 2 — карточка с блоком «Что меняется для пользователя»):**
+    Mechanical **16a** отдельно **17a** не раскручивает (достаточно встроенной ре-проверки 16a).
 
-    Все decision-варианты, меняющие код / поведение / приёмку, оформляются как `/opsx:extend <name> --from-verify <verification-report>` с конкретным сценарием правки. Прямая правка `proposal.md` / `design.md` / `specs/**/spec.md` / `tasks.md` оркестратором — запрещена для decision-замечаний (см. §8 `opsx-output-style.md`).
+    **17b. Финал после remediation**
 
-    | Замечание | «Что меняется для пользователя» (примеры) | Варианты (через `/opsx:extend` или принять) |
-    |---|---|---|
-    | Task quality (7B / 7C) | Реализация задачи неоднозначна — пользователь увидит ту или иную интерпретацию. | a) `/opsx:extend ... --from-verify` уточнить формулировку и приёмку → один сценарий, фиксированная приёмка. b) Принять как есть → выбор реализации остаётся за writer, ревью пост-фактум. |
-    | Architect Gate not closed (9) | Подход к реализации не валидирован, риск переделки и нерабочего сценария. | a) `/opsx:extend ... --from-verify` с пометкой «архитектурный аудит» → запуск architect, отчёт `reports/architecture-verify-YYYY-MM-DD.md`. b) Принять → реализация без архитектурного ревью, риск переделки. |
-    | `dependency-cycle` / `forward-slice-dep` / `coupling-violation` (QC) | Срезы нельзя принять в объявленном порядке — пользователю придётся проверять связку из нескольких срезов. | a) `/opsx:extend ... --from-verify` с архитектором (slice restructuring) → новые границы срезов. b) `/opsx:extend ... --from-verify` с переупорядочиванием задач без рестрктуризации. c) Принять → начать с риском блокировки приёмки. |
-    | `slice-incomplete` / `missing-slice-test` (QC) | Срез нечем подтвердить — пользователь не сможет принять функцию. | a) `/opsx:extend ... --from-verify` → добавить недостающую задачу или приёмочный тест. b) Принять → срез не приёмопригоден, archive невозможен. |
-    | `task-opaque-acceptance` (QC 7) | Приёмочный тест не описывает наблюдаемое поведение — приёмка субъективна. | a) `/opsx:extend ... --from-verify` → переформулировать тест по шаблону «действие — результат». b) `/opsx:extend ... --from-verify` → перенести проверку из non-scenario в обычную задачу. c) Принять → ручная приёмка остаётся субъективной. |
-    | `rework-risk-on-unaccepted` / `unaccepted-slice-in-progress` (QC) | Срез строится на ещё не принятом фундаменте — возможна переделка после приёмки. | a) Дождаться приёмки зависимости → стабильный фундамент. b) Принять → начать сейчас, риск переделки. |
-    | Executability issues (7F) | Writer не сможет реализовать задачу без зависимости — apply встанет. | a) `/opsx:extend ... --from-verify` → добавить зависимости в задачи или переупорядочить. b) Принять → apply поднимет блокер. |
-    | Slice transition issues (7.6b) | Следующие срезы могут потребовать переразрезания — пользователь увидит изменение нарезки в середине ЗНИ. | a) `/opsx:extend ... --from-verify` → architect реструктурирует upcoming срезы. b) Принять → продолжить с риском. |
-    | Project constraints violation (12) | Целевые каталоги — вне зоны разрешённых правок проекта; задача в текущем виде нарушает границы. | a) `/opsx:extend ... --from-verify` → переписать задачи на разрешённые каталоги. b) `/opsx:extend ... --from-verify` → задокументировать обоснованное исключение. |
-    | Suboptimal architecture / Design Smell (7.7) | Реализуется неоптимальный подход — возможна переделка после первого пользователя. | a) `/opsx:extend ... --from-verify` → пересмотреть design/tasks через бриф и architect gate. b) Принять как есть → код согласно текущему design. |
-    | `precedent-regression` / `invariant-drift` / `load-bearing-adr-bypass` (verify 9b) — отмена ранее принятого решения | Пользователь теряет свойство, которое система ранее гарантировала, или не получает ожидаемое восстановление данных. Источник прежнего обещания: archive change / ADR — со ссылкой в человеческом описании. Альтернативы: соблюсти оба контракта, отложить, или явно отменить с обоснованием. | a) `/opsx:extend ... --from-verify` → дополнить design «Что меняется для пользователя» (пользовательский эффект, источник, альтернативы, обоснование) — явное решение заказчика. b) `/opsx:extend ... --from-verify` → architect-аудит соответствия архивных контрактов (отчёт `architecture-precedent-coherence-*.md`). c) Принять осознанную отмену → зафиксировать в proposal/decisions. |
-    | `blast-radius-incomplete` (verify 9b) — обоснование отмены неполное | В design зафиксирован эффект отмены, но решение неясно для не-разработчика. | a) `/opsx:extend ... --from-verify` → дополнить пользовательский эффект и альтернативы. b) Принять риск неоднозначной приёмки. |
+    Краткое сообщение в чат простым языком: что изменилось, готовность, одна следующая команда (`/opsx:apply`, `/opsx:extend`, `/opsx:verify` или ожидание). Табличный «принятие рисков» **не обязательно**; при осознанном «оставляем как есть» достаточно 1–2 предложений с названием темы и риском — без вторичной процедурной сетки в чате.
 
-    **Artifact-hygiene (Блок 2b — однострочный пункт, не карточка):**
-
-    Эти замечания по умолчанию попадают в hygiene, поскольку правка касается только текста артефактов (Связь со spec, заголовки сценариев, мелкая согласованность, стиль формулировки) и не приводит к разному коду / поведению / приёмке. Если по Gate 16b хоть один ответ «да» — повышаются в decision (Блок 2).
-
-    Для hygiene-замечаний разрешена прямая ручная правка артефакта оркестратором (StrReplace). После любой принятой правки — обязательный повторный `/opsx:verify <name>` (см. §8 `opsx-output-style.md`).
-
-    | Замечание | Hygiene-формулировка по умолчанию |
-    |---|---|
-    | `scenario-uncovered` (QC 7.6) | Согласовать scope: `<N>a` — Применить правку (сузить дельту spec, убрать сценарии вне фактического scope) / `<N>b` — Расширить срез через `/opsx:extend --from-verify` (если сценарий действительно входит в scope ЗНИ) / `<N>c` — Отложить. |
-    | `acceptance-scenario-duplication` (QC 5b) | Унифицировать привязку приёмочного теста к Scenario: `<N>a` — Применить правку (оставить связь в текущем срезе, удалить из источника) / `<N>b` — Применить правку (оставить только в источнике) / `<N>c` — Отложить. |
-    | `acceptance-without-scenario` (QC 5b) | Перенести non-scenario проверку: `<N>a` — Применить правку (вынести в `design.md#Assumptions`) / `<N>b` — Применить правку (превратить в обычную задачу `S<N>.<M>`) / `<N>c` — Применить правку (вынести в `## Follow-up`) / `<N>d` — `/opsx:extend --from-verify` (добавить Scenario в spec и привязать тест) / `<N>e` — Отложить. |
-    | `scenario-uncovered-by-acceptance` (QC 5b) | Согласовать `**Связь со spec:**`: `<N>a` — Применить правку (снять Scenario из связи, если не закрывается здесь) / `<N>b` — `/opsx:extend --from-verify` (добавить приёмочный тест для Scenario) / `<N>c` — Отложить. |
-    | `recipe-leaked-into-contract` (verify 7A.1) | Очистить контракт поведения от конкретных имён процедур: `<N>a` — Применить правку (пометить как «например») / `<N>b` — Применить правку (перенести в раздел вариантов реализации) / `<N>c` — Отложить. |
-    | `slice-numbering-inconsistent` (verify 6B) | Привести к единой нумерации в срезе: `<N>a` — Применить правку (`S<N>.<M>` через всё tasks.md) / `<N>b` — Оставить как есть / `<N>c` — Отложить. |
-    | `no-slices` (QC, legacy ЗНИ) | Миграция в срезы: `<N>a` — `/opsx:migrate-slices <name>` / `<N>b` — Остаться в legacy. |
-
-    Если decision-замечаний нет — Блок 2 опустить. Если hygiene-замечаний нет — Блок 2b опустить.
-
-    **Блок 3 — К сведению (footnote + INFO):**
-    ```
-    ## К сведению
-    - ТЗ без ревью архитектора — при необходимости `/opsx:doc-tz <name>`
-    - 6 задач ожидают реализации (mixed mode)
-    ```
-    Footnote-замечания и INFO — по одной строке. Если ни footnote, ни INFO нет — блок опустить.
-
-    **Блок 4 — Вердикт:**
-    ```
-    ## Как ответить
-    - Формат: `<номер><буква>` через запятую. Пример: `1a, 2c`.
-    - Свободный текст принимается, если ни один вариант не подходит.
-    - Пустой ответ — статус сохраняется; артефакты не меняются, отчёт остаётся в `reports/`.
-
-    ## Готовность: <Готово к реализации | Готово с оговорками | Не готово>
-    Решений от вас: N.
-    Следующий шаг: `/opsx:extend <name> --from-verify <verification-report>` при изменении scope/design/tasks (decision-замечания); правка hygiene-замечаний — вручную с обязательным повторным `/opsx:verify <name>`; иначе `/opsx:apply <name>` или `/opsx:archive <name>`.
-    ```
-
-    Если decision- и hygiene-замечаний нет → «Решений от вас не требуется».
-
-    **Голые счётчики** («0 CRITICAL, 2 WARNING, 1 SUGGESTION») без карточек / таблиц / hygiene-блока — **запрещены**.
-
-    **Self-check шага 17 (перед выводом сообщения):**
-
-    1. Каждая карточка из Блока 2 содержит блок **«Что меняется для пользователя»** в пользовательском языке (бизнес-эффект, без жаргона движка из §3.1 `opsx-output-style.md`). Если для замечания эффект для пользователя — «ничего не меняется», оно **не должно** быть в Блоке 2; перенести в Блок 2b (уточнение текста) или в «К сведению» (Предложение/INFO).
-    2. Каждый вариант в карточке указывает **конкретное** последствие в коде / приёмке / риске (не «возможна доработка», не «решение архитектора», не «исправить»). Decision-варианты, меняющие код / поведение / приёмку, оформлены как `/opsx:extend <name> --from-verify <verification-report>` с описанием правки.
-    3. **Заголовки карточек не содержат severity-метку** (`(CRITICAL)`, `(WARNING)`). Severity передаётся через позицию в группе и счётчик «Подробности» в Executive Summary.
-    4. Каждая карточка / hygiene-строка имеет строку «Источники: …» (после Card consolidation 16c). Технические коды и имена движка (`precedent-regression`, `Blast Radius`, `dependency-cycle`, `slice-incomplete`, имена шагов verify) допустимы **только** в этой строке.
-    5. В вердикте «Решений от вас» — суммарное количество (Блок 2 + Блок 2b). Если 0 — «Решений от вас не требуется».
-    6. Нумерация решений сквозная по обоим блокам; нет двух пунктов «1.» в одном выводе.
-    7. Присутствует блок «Как ответить» с шаблоном строки и поведением при пустом ответе.
-    8. **Для замечаний об отмене ранее принятого решения** (`precedent-regression`, `invariant-drift`, `load-bearing-adr-bypass`, `blast-radius-incomplete`): блок «Что меняется для пользователя» обязательно содержит (a) бизнес-эффект для конечного пользователя 1С, (b) источник прежнего обещания (archive change / ADR / KB) с человеческим описанием контракта, (c) альтернативы и обоснование. Технические коды (`precedent-regression-9b` и т. д.) — только в строке «Источники».
-    9. **Срез всегда с названием.** Каждое упоминание `S<N>` в карточках / Block 2b / Executive Summary идёт в формате `Срез S<N>: «<название>»`. Голый `S1`, `S2` — провал self-check (исключения: внутри ID задачи `S<N>.<M>` и в строке «Источники»). Эталон — §10 `opsx-output-style.md`.
-    10. **Жаргон движка в пользовательском выводе.** Ни один термин из §3.1 `opsx-output-style.md` (`Blast Radius`, `precedent-regression`, `9b`, `Phase A/B`, `verdict:`, `verify_mode:`, `Promotion Test`, `Determinism Test`, `Implementation Impact Gate`, `Card consolidation`, `decision`/`artifact-hygiene` как метки) не появляется в заголовках карточек, полях «Что не так», «Что меняется для пользователя», вариантах, Executive Summary. Допустимо только в строке «Источники: …».
-
-    **Примеры:**
-
-    Хорошо (нет решений):
-    ```
-    ## Авто-исправлено
-    См. шаблон `templates/phase-a-table.md`.
-
-    ## К сведению
-    - ТЗ сгенерировано без ревью — при необходимости `/opsx:doc-tz`
-
-    ## Готовность: Готово к реализации
-    Решений от вас не требуется. Следующий шаг: `/opsx:apply <name>`.
-    ```
-
-    Хорошо (decision-карточка в пользовательском языке):
-    ```
-    ## Авто-исправлено
-    См. шаблон `templates/phase-a-table.md`.
-
-    ## Решения (1)
-    См. шаблон `templates/card-decision.md`.
-
-    ## Уточнения текста (1)
-    См. шаблон `templates/card-hygiene.md`.
-
-    ## К сведению
-    См. шаблон `templates/info-section.md`.
-
-    ## Готовность: Готово с оговорками
-    Решений от вас: 2.
-    Следующий шаг по Решению 1 — `/opsx:extend <name> --from-verify <verification-report>` (decision); по Уточнению 2 — выбранная ручная правка с обязательным повторным `/opsx:verify <name>`.
-    ```
-
-    **17a. Mandatory re-verification after judgment remediation**
-
-    После выполнения действий по выбранным вариантам judgment-карточек, если затронуто **содержимое** артефакта (`tasks.md`, `design.md`, `spec`, `proposal`):
-
-    1. Перезапустить **только затронутые** механические проверки (шаги 6–7F) на изменённых артефактах.
-    2. Если remediation затронула `tasks.md` и в этом прогоне уже выполнялся QC (шаг 7.6):
-       - **Перезапустить QC** с обновлённым `tasks.md` (те же входы + пометка «re-run after remediation»).
-       - Новые алерты QC → добавить в отчёт verify.
-    3. Перезапуск Architect (шаг 7.7) **не обязателен**, если remediation **не** добавляла новые задачи и **не** меняла явные зависимости между задачами в `tasks.md`. Если добавлялись задачи или менялись зависимости — **перезапустить** шаг 7.7 с обновлёнными артефактами и свежим результатом QC (п.2).
-    4. Обновить файл отчёта: секция `### Re-verification after remediation` — что перепроверено, новые алерты или «новых алертов нет».
-
-    Без перезапуска затронутых проверок по п.1–2 (и п.3 при необходимости) remediation **не считается завершённой**.
-
-    Phase A mechanical fixes **не** триггерят 17a (их ре-верификация выполнена в шаге 16a).
-
-    **17b. Final verdict after judgment remediation**
-
-    После выполнения judgment-действий и ре-верификации (17a) — финальное сообщение:
-
-    ```
-    ## Результат устранения
-
-    | # | Замечание | Было | Стало | Что сделано |
-    |---|-----------|------|-------|-------------|
-    | 1 | <описание в пользовательском языке> | Замечание | Закрыто | <действие> |
-
-    ## Готовность: Готово к реализации
-    Решений от вас не требуется. Следующий шаг: `/opsx:apply <name>`.
-    ```
-
-    Если пользователь выбрал «Принять как есть» по некоторым карточкам:
-    ```
-    ## Принятые риски
-
-    | # | Замечание | Риск |
-    |---|-----------|------|
-    | 1 | <описание> | <одно предложение — чем рискуем> |
-    ```
-
-    Коммуникация с пользователем: `.cursor/rules/verify-user-communication.mdc`
+    Коммуникация и жаргон: `.cursor/rules/verify-user-communication.mdc`
 
 18. **Save verification report**
 
-    Save the report to `reports/verification-<mode>-YYYY-MM-DD.md` in the change directory,
-    where `<mode>` is one of: `slice-pre`, `slice-post`, `slice-post-final`, `slice-S<N>` (slice-scoped), `slice-trans-S<N>` (slice-transition после среза S<N>), `migrate-to-slices`, `legacy-pre`, `legacy-mixed`, `legacy-post`.
+    **Имя файла:** только `reports/verification-YYYY-MM-DD.md`. Поле режима **`verify_mode`** хранится **внутри YAML** (значение как раньше: `slice-pre`, `slice-post`, `legacy-pre`, …). При коллизии имён за тот же день — добавить суффикс `-2`, `-3` и т. д.
+
+    **Когда записывать:** `report_warranted = true`, если хотя бы одно:
+    - после **4c** выполнялись проверки **6–17** и есть **ненулевые** находки после Actionability Gate (CRITICAL/WARNING/SUGGESTION), **или**
+    - сработали **решения пользователя / hygiene** после **17**, **или**
+    - **Phase A** (16a) изменила файл(ы).
+
+    Если **нет** material для отличия от тихого сценария — **новый файл не создавать** (уже покрывает **4c** `silent_ok`).
+
+    **`snapshot` в YAML (обязателен в каждом новом сохранении):**
+
+    ```yaml
+    snapshot:
+      accepted_tasks:
+        - S2.1
+        - "S3.T1"
+      open_known_questions:
+        - id: <латиница-kebab-case>
+          where: "design.md — кратко где описан вопрос"
+          planned_in: "tasks.md — S<N>.<M>"   # только если есть owner; иначе поле omit или null
+      artifacts_mtime:
+        proposal.md: "2026-05-14T10:15:30"
+        design.md: "2026-05-14T09:05:12"
+        tasks.md: "2026-05-14T08:58:01"
+        specs/<capability-имя-каталога>/spec.md: "2026-05-13T12:00:00"
+    ```
+
+    Правила:
+    - `accepted_tasks` — полный упорядоченный список идентификаторов строк `tasks.md` с `- [x]` (форматы `S<N>.<M>`, `S<N>.T<M>`, `F<k>`).
+    - `artifacts_mtime` — ISO-8601 строка **до секунды** для `proposal.md`, `design.md`, `tasks.md` и **каждого** файла под `openspec/changes/<name>/specs/**/*.md`; при отсутствии файла ключ не включать или значение указать явно как отсутствующее только если так задумано процессом.
+    - `open_known_questions` — только элементы без удовлетворительного closure **и** которые verify **упоминает** как активные; записи помеченные как «решится в задаче …» включаются **только** для стабильного diff (опционально) или omit — см. фильтр в шаг **17**.
+    После сохранения `snapshot` используется **4c** следующего запуска.
 
 ---
 
@@ -1468,8 +1334,8 @@ flowchart TD
 - **Coherence**: look for glaring inconsistencies, don't nitpick style
 - **False Positives**: when uncertain, prefer SUGGESTION over WARNING, WARNING over CRITICAL
 - **Actionability**: every **CRITICAL / WARNING / SUGGESTION** must answer: «что пользователь меняет в артефактах или решает до apply?» Иначе → **INFO** (см. Actionability Gate). INFO допускаются без «рекомендации устранить» в стиле remediation
-- **Two-phase remediation**: mechanical (детерминировано) → silent auto-fix Phase A (шаг 16a); artifact-hygiene (правка артефакта без runtime-эффекта) → однострочный hygiene-блок Phase B (шаг 17 Блок 2b); decision (разный код / поведение / приёмка) → карточка с блоком «Влияние» Phase B (шаг 17 Блок 2). Между 16a и 17 — Implementation Impact Gate (16b) и Card consolidation (16c). См. Issue Classification.
-- **INFO**: контекст режима и автоматики; не дублировать как WARNING только потому что задачи ещё `[ ]` или зависимости корректно объявлены
+- **Remediation pipeline**: mechanical исправление → автоматический **Phase A** (16a); далее фильтры **Implementation Impact** (16b) и consolidation (16c); в чате — разговорные блоки (**17**) без кодов меню; в файле полные блоки **`card-decision` / `card-hygiene`**. См. Issue Classification.
+- **INFO**: контекст режима и автоматики; не дублировать как WARNING только потому что задачи ещё `[ ]` или зависимости корректно объявлены.
 
 **Graceful Degradation**
 
@@ -1482,11 +1348,11 @@ flowchart TD
 **Output Format**
 
 Use clear markdown with:
+
 - Tables for summary scorecards
 - Grouped lists for issues (CRITICAL/WARNING/SUGGESTION); отдельный блок bullets для **INFO**
-- Carded format only for `decision` (Блок 2 шага 17); `artifact-hygiene` — однострочные пункты (Блок 2b)
+- Полные блоки **`card-decision` / `card-hygiene` в файле** отчёта; чат без «menu-меток»
 - Code references in format: `file.bsl:123`
-- Specific, actionable recommendations
-- No vague suggestions like "consider reviewing"
+- Конкретные рекомендации
 
-Коммуникация с пользователем: `.cursor/rules/verify-user-communication.mdc` — обязательные требования к Executive Summary, двухфазному remediation (Phase A mechanical auto-fix + Phase B judgment decision cards), карточкам решений, и явному указанию решений от пользователя.
+Коммуникация с пользователем: `.cursor/rules/verify-user-communication.mdc` — Executive Summary, conversational развилки, запрет машиночитаемых кодов ответа в чате.

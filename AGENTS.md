@@ -18,7 +18,7 @@
 
 | Задача пользователя | Команда | Чем отличается от соседних |
 |---------------------|---------|----------------------------|
-| «Распаковать сырую постановку заказчика» | `/opsx:intake` | Отделяет факты от шума, подготавливает бриф и сразу запускает исследование |
+| «Распаковать сырую постановку заказчика» | `/opsx:intake` | Бриф в чате; при однозначном маршруте в explore/debug — дополнение к брифу без полного дубля (см. `.cursor/docs/opsx-output-style.md` §5.1); для ff/new — рекомендация команды отдельным шагом |
 | «Обсудить идею, пока change нет» | `/opsx:explore` | Без активного change; не вызывает writer/reviewer; **Output Discipline** — каждый выход в одном из 5 канонических (диалог / capture / Explore Summary / KB / отчёт субагента); запрещено предлагать «черновик tasks/spec/design в чате» |
 | «Создать новый change пошагово» | `/opsx:new <name>` | Пошаговая последовательность артефактов |
 | «Создать change целиком разом» | `/opsx:ff <name>` | Все артефакты сразу, для уже понятной задачи |
@@ -78,29 +78,25 @@
 `.cursor/rules/architect-gate.mdc` — единые триггеры архитектурного ревью (объективные маркеры, семантические, структурные). **UX-значимый фикс** (меняет что видит/делает пользователь) — семантический триггер; локальная реализация поведения, владельцем которого является база/БСП/платформа/общий модуль, вместо делегирования владельцу — семантический триггер Substituted Authority. **Simplicity Check:** каждый architecture-отчёт фиксирует простейший viable design, альтернативы и complexity budget; отсутствие секции ловит verify. **debug:** при срабатывании триггеров architect обязателен до шага 7 (не AskQuestion), шаблон «Architect — fix quality review» в `1c-agent-patterns/architect.md`. Проверяется в explore (шаг Decide, Fix Quality check при bug fix), verify (pre-apply, шаг 9 + Debug fix check), apply (soft redirect на verify).
 
 ## Verify (универсальный quality gate)
-`.cursor/skills/openspec-verify-change/SKILL.md` — `/opsx:verify`. Pre-apply: формат tasks, качество задач, полнота ручной конфигурации, **Slice Coherence (Quality Controller)** — **строго до** шага реализуемости (Architect 7.7), **реализуемость (Architect)**, **генерация ТЗ (шаг 7.8, по параметру generate_tz)**, Architect Gate, Design Review, ТЗ Review, project constraints. Post-apply: completeness, correctness, coherence. **Tiered Verification:** Standard / Full — глубина проверок адаптируется к масштабу. Шаблоны отчётов вынесены в `openspec-verify-change/templates/`. Карта SSOT — в `.cursor/rules/chat-output-budget.mdc` §1a.
+`.cursor/skills/openspec-verify-change/SKILL.md` — `/opsx:verify [<name>]`. Контракт с пользователем: аргументы командной строки только имя ЗНИ (или одна активная ЗНИ); **режим** (срез, legacy, post-apply и т. д.) определяется по контексту артефактов, дат изменения (`snapshot`) и по свободной форме запроса — без флагов CLI. QC (7.6) и архитектор (7.7) вызываются при **novelty**/внутреннем tier-охвате, см. шаг **4c**. Pre-apply: формат tasks, качество задач, ручная конфигурация, согласованность срезов (QC) до архитектурной проверки готовности задач (Architect), генерация ТЗ (7.8), гейты, ограничения проекта; post-apply: completeness / correctness / coherence. Шаблоны — `openspec-verify-change/templates/`. Карта лимитов чата — `.cursor/rules/chat-output-budget.mdc` §1.
 
-**Issue Classification (4 класса).** Каждое замечание попадает в один из четырёх классов:
-- **mechanical** — Phase A авто-фикс (шаг 16a) без вопросов;
-- **artifact-hygiene** — однострочный hygiene-блок Phase B (шаг 17 Блок 2b); правка только текста артефакта (Связь со spec, согласованность сценариев, мелкая редактура), **не меняет** код / поведение / приёмку — пользователь выбирает «применить / отложить»;
-- **decision** — карточка Phase B (шаг 17 Блок 2) с обязательным блоком «Влияние»: Код / Поведение / Приёмка / Процесс. Хотя бы один вариант приводит к **разному** коду / поведению / приёмке;
-- **INFO** — секция «К сведению», не блокирует, не требует решения.
+**Вывод пользователю:** либо **тихий** ответ («ничего по снимку не изменилось» + ссылка на последний отчёт — **новый файл не пишется**), либо **информативный** по `templates/chat-summary.md` («Что нашли», автоправки, «Что обсудим» **прозой** без кодов ответа, «По плану» для вопросов с owner-задачей).
 
-**Implementation Impact Gate (шаг 16b)** между Phase A и Phase B: для каждого `decision`-замечания проверяет три вопроса (разный код / поведение / приёмочные шаги). Все три «нет» → демотация в `artifact-hygiene` или `SUGGESTION`. Без прохождения Gate decision-карточка в Phase B запрещена. **Card consolidation (шаг 16c)** свёртывает алерты QC + Architect, ссылающиеся на одну суть конфликта, в одну карточку или одну hygiene-строку.
+**Issue Classification и внутренние фильтры** (Promotion Test, Implementation Impact, determinism/consolidation) — как в SKILL; они **не** выводятся в чат буквальными именами.
 
-**Двухфазный remediation:** Phase A — авто; Phase B — decision-карточки + hygiene-блок. Если решение Phase B меняет scope/design/tasks — handoff на `/opsx:extend <name> --from-verify <report>`. **После decision remediation** (17a) — обязательная повторная верификация затронутых проверок и при необходимости повторный QC/Architect. Также: **Determinism Test** между Promotion Test и Issue Classification (опускает decision/hygiene в mechanical при единственной допустимой правке).
+**Remediation:** после **Phase A** (авто) и фильтров 16b/16c сообщение пользователю формируется в **конверсационном** виде (шаг 17). Смена смысла артефактов — через `/opsx:extend <name> --from-verify <report>` где применимо. Повторный прогон (17a) трактует **обычный текст** ответа пользователя.
 
 **Scope Gate (шаг 1b):** verify не расширяет scope сам по себе; если в запросе есть новое требование помимо команды verify — AskQuestion: дополнить артефакты → verify / verify as-is / TODO в отчёте.
 
 **Порядок субагентов:** QC (7.6) и Architect task readiness (7.7) **не** запускать параллельно — Architect получает результат QC.
 
-**Отчёт:** `reports/verification-<mode>-YYYY-MM-DD.md` — полный артефакт, включая секцию **«Развёрнутые объяснения замечаний»** (дублируется в сообщении пользователю). См. шаг 16 скилла.
+**Отчёт:** при необходимости `reports/verification-YYYY-MM-DD.md` или с суффиксом `-2`; в YAML блок **`snapshot`** (`accepted_tasks`, `open_known_questions`, `artifacts_mtime`) для шага **4c** следующего запуска. Полное тело — по шагам 16–18 SKILL.
 
 **Executability Analysis (тройная проверка):** verify шаг 7D (механическая), QC (семантическая, в рамках Slice Coherence), Architect (холистическая). Покрывает все задачи: функциональные зависимости из описаний, порядок в tasks.md vs граф зависимостей срезов, итерационный дрифт (задачи из debug не ломают порядок принятых срезов), валидация приёмочных тестов `S<N>.T<M>` и маркеров `<!-- slice-gate -->`.
 
 Quality Controller (шаг 7.6): **Slice Coherence** (6 критериев из `vertical-slices.mdc`): Scenario Coverage, Slice Independence, Slice Completeness, Slice Dependency Graph, Slice Gate Integrity, Rework Risk. Шаблон промпта: `1c-agent-patterns/quality-controller.md` (секция «Quality Controller — slice coherence review»). ТЗ (шаг 7.8): генерация по `openspec-docs/prompts/change-tz.md` при `generate_tz: auto` и пороге 6+ задач или явном запросе; иначе пропуск с сохранением существующего `ТЗ.md`.
 
-Коммуникация с пользователем: `.cursor/rules/verify-user-communication.mdc` — Executive Summary, **Actionability Principle** (каждое замечание — INFO до доказательства обратного через **Promotion Test**), **двухфазный формат:** Phase A Before/After таблица (авто), Phase B карточки решений (Проблема / Влияние / Варианты), секция «К сведению» (INFO), вердикт. Голые счётчики без карточек / таблиц запрещены. Подробности: **Issue Classification** и **Promotion Test** в `openspec-verify-change/SKILL.md`.
+Коммуникация с пользователем: `.cursor/rules/verify-user-communication.mdc` — Executive Summary («Суть» + опционально «Что в работе», без режимной шапки markdown), conversational развилки и **snapshot**/`silent`-логика. Подробности классификации и внутренних тестов — в `openspec-verify-change/SKILL.md`.
 
 ## Behavior vs Implementation и Code-Truth
 `design.md` для UX/UI/интеграций разделяет **Behavior Contract** (наблюдаемое поведение и инварианты) и **Implementation Options** (варианты реализации и выбранный простейший viable design). `tasks.md` формулируется через результат; конкретные новые имена процедур — только verified, публичный контракт или явно «например».

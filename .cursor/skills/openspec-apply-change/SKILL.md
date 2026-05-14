@@ -169,10 +169,10 @@ Implement tasks from an OpenSpec change.
    Ref: `.cursor/rules/vertical-slices.mdc`.
 
    **Legacy mode (no slices in tasks.md):**
-   - Warn: "ЗНИ без срезов. Рекомендуется `/opsx:verify <name> --migrate-to-slices` перед продолжением."
+   - Warn: "ЗНИ без срезов. Рекомендуется `/opsx:migrate-slices <name>` перед продолжением."
    - AskQuestion: `[Продолжить без срезов] / [Мигрировать на срезы (verify)] / [Стоп]`.
    - `Продолжить` → fall back to file-only parallelization (tasks touching different files = independent; same file = sequential). Нет slice-gate пауз.
-   - `Мигрировать` → STOP apply, предложить запустить `/opsx:verify <name> --migrate-to-slices`.
+   - `Мигрировать` → STOP apply, предложить запустить `/opsx:migrate-slices <name>`.
    - `Стоп` → завершить apply.
 
    **5.6 Determine execution mode**
@@ -275,7 +275,7 @@ Implement tasks from an OpenSpec change.
      Детектор: все задачи S<N>.<M> = [x], S<N>.T<M> = [ ].
 
      **Внутренний verify (обязательно до приёмочного handoff):**
-     1. Оркестратор выполняет проверки по скиллу `openspec-verify-change/SKILL.md` для **текущего среза** в post-apply контексте: режим **slice-scoped** (`--slice S<N>` / автоэквивалент), **без** длинного вывода в чат.
+     1. Оркестратор выполняет проверки по скиллу `openspec-verify-change/SKILL.md` для **текущего среза** в post-apply контексте (режим **slice-scoped** определяется контекстом приёмки артефактов, см. шаг 4 verify), **без** длинного вывода в чат.
      2. Сохранить полный отчёт в `openspec/changes/<name>/reports/` с именем по шагу 18 verify (например `verification-slice-S<N>-YYYY-MM-DD.md`).
      3. **Чат:** если вердикт внутреннего прогона требует решений пользователя (карточки Блок 2/2b) или итог «не готово» — вывести **кратко** по `.cursor/rules/chat-output-budget.mdc` + ссылка на файл отчёта; **не** переходить к шагу приёмочного handoff, пока пользователь не обработает блокеры (как при обычном `/opsx:verify`).
      4. Если прогон **чистый** — **не упоминать** verify в сообщении пользователю.

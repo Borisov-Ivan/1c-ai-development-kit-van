@@ -17,7 +17,7 @@ review/debug/verify/apply/explore → extend → verify → apply
 |------|---------|----------------|--------|
 | **Исследование** | `/opsx:explore` | Понять задачу, исследовать код, принять решения, сформировать slice hints в Explore Summary. **Knowledge Discovery** (read-repair). | onec-code-explorer, onec-code-architect |
 | **Создание change** | `/opsx:new` или `/opsx:ff` | proposal → design (вкл. `## Slices`) → specs → tasks (с `# Срез S<N>`). **Knowledge Discovery** (в Architect Gate). | onec-code-architect (slice decomposition + slice-aware task decomposition) |
-| **Проверка** | `/opsx:verify` | slice-pre / slice-post / slice-scoped (`--slice S<N>`) / migrate-to-slices / legacy. Quality Controller проверяет когерентность срезов; Architect — реализуемость. Авто-устранение mechanical, карточки решений judgment. **Knowledge Discovery** (в Architect Gate). | onec-code-architect, openspec-quality-controller |
+| **Проверка** | `/opsx:verify` | Режим (pre/post/scoped/migrate-предложение/legacy) и глубину проверок определяет скилл verify по контексту артефактов и **`snapshot`**; без CLI-флагов. Авто-исправление mechanical и разговорные развилки в чате. **Knowledge Discovery** (в Architect Gate). | onec-code-architect, openspec-quality-controller |
 | **Расширение scope** | `/opsx:extend` | Контролируемо обновляет существующий change по новому требованию или отчёту (`--from-review`, `--from-debug`, `--from-verify`, `--from-architecture`, `--from-explore`). Всегда начинает с брифа, затем обновляет артефакты и возвращает в `/opsx:verify`. | onec-code-architect (при Architect Gate), onec-code-explorer (при обследовании) |
 | **Реализация** | `/opsx:apply` | **Step-by-slice** (default): один срез — карточка приёмки — следующий срез. Опции: step-by-step / batch | onec-code-writer + onec-code-reviewer |
 | **Архивация** | `/opsx:archive` | При непринятых `S<N>.T<M>` — slice-gate-подтверждение в скилле: отметить `[x]` и продолжить (**вариант A**), стоп (**B/C**), **`--force-legacy`** (**D**) без контракта срезов; иначе sync specs → archive + **Facts extraction**. | — |
@@ -51,7 +51,7 @@ review/debug/verify/apply/explore → extend → verify → apply
 | Slice mode, дефект в **принятом** срезе S<K> | Создать **fix-срез** `S<N+1>: Исправление дефекта S<K>` (зависит от S<K>) |
 | Slice mode, новая функциональность | Новый срез `S<N+1>` или расширение существующего непринятого |
 | Новое требование / отчёт ревью / архитектурное замечание в существующем change | `/opsx:extend <name> [--from-review <path>|--from-architecture <path>|--from-verify <path>]` → бриф → правка артефактов → `/opsx:verify` |
-| Legacy mode (`# Срез` нет) | Вставить в подходящую секцию или «7. Рефакторинг и качество». При накоплении исправлений — рекомендовать `/opsx:verify --migrate-to-slices` |
+| Legacy mode (`# Срез` нет) | Вставить в подходящую секцию или «7. Рефакторинг и качество». При накоплении исправлений — рекомендовать `/opsx:migrate-slices <name>` |
 
 `/opsx:ff` создаёт **новый** change — не используется для добавления задач к существующему. Подробности — `.cursor/skills/openspec-continue-change/SKILL.md` и `.cursor/skills/openspec-debug/SKILL.md`.
 
@@ -61,7 +61,7 @@ review/debug/verify/apply/explore → extend → verify → apply
 |--------------------------|----------------------|
 | **≤ 5 задач** | **Lite verify**: пропускается Quality Controller, компактный вызов архитектора. Срезов может быть 1 (или legacy без срезов). |
 | **≥ 6 задач** | **Генерация ТЗ**: авто при ≥6 задач, если `generate_tz: auto` или поле отсутствует; иначе — по выбору пользователя (шаг 7.8 в verify). |
-| **≥ 6 задач** | **Slice Generation Gate**: design.md обязан содержать `## Slices`. ff/new не разрешают переход к tasks без срезов. Если ЗНИ legacy — `/opsx:verify --migrate-to-slices`. |
+| **≥ 6 задач** | **Slice Generation Gate**: design.md обязан содержать `## Slices`. ff/new не разрешают переход к tasks без срезов. Если ЗНИ legacy — пользователь выполняет `/opsx:migrate-slices <name>`. |
 
 ## ПРИНЦИПЫ
 

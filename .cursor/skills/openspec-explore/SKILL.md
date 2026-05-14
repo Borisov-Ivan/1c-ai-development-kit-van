@@ -5,7 +5,7 @@ license: MIT
 compatibility: Requires openspec CLI.
 metadata:
   author: openspec
-  version: "1.1"
+  version: "1.2"
   generatedBy: "1.1.1"
 ---
 
@@ -19,7 +19,7 @@ Enter explore mode. Think deeply. Visualize freely. Follow the conversation wher
 
 При входе в explore **ПЕРВЫЙ шаг** — классификация входа и подготовка брифа. Не начинать исследование до завершения этого протокола.
 
-**STOP-GATE (БЕЗУСЛОВНЫЙ):** Вход содержит **любой** HALT-триггер (трасса, стек, баг, ссылки на код/модули/функции, архитектурный вопрос, исследование, ревизия change) — ваш ПЕРВЫЙ видимый вывод ОБЯЗАН быть блоком брифа (шаг 2). До вывода брифа ЗАПРЕЩЕНО: Read (артефактов, модулей, трасс, design.md/reports), Grep, SemanticSearch, Task. Единственные допустимые действия до брифа — Read SKILL.md (command-skill-gate), Read `openspec/project.md` (ограничения проекта), Read `openspec/knowledge/_index.yaml` / `_taxonomy.yaml` и выбранных KB `.md` по шагу 1.5, Shell `openspec list --json` (шаг 0). После брифа — END TURN. Нарушение = провал протокола.
+**STOP-GATE (БЕЗУСЛОВНЫЙ):** Вход содержит **любой** HALT-триггер (трасса, стек, баг, ссылки на код/модули/функции, архитектурный вопрос, исследование, ревизия change) — ваш ПЕРВЫЙ видимый вывод ОБЯЗАН быть блоком брифа (шаг 2). **Исключение:** при вызове explore из `/opsx:intake` п.7a **А** в том же ответе ассистента выше уже выведен intake-бриф; ваш текстовый вклад — только `### Дополнение: /opsx:explore` (шаг 2, continuation-from-intake). До вывода брифа ЗАПРЕЩЕНО: Read (артефактов, модулей, трасс, design.md/reports), Grep, SemanticSearch, Task. Единственные допустимые действия до брифа — Read SKILL.md (command-skill-gate), Read `openspec/project.md` (ограничения проекта), Read `openspec/knowledge/_index.yaml` / `_taxonomy.yaml` и выбранных KB `.md` по шагу 1.5, Shell `openspec list --json` (шаг 0). После брифа — END TURN. Нарушение = провал протокола.
 
 **Пакетная дисциплина:** Батч после `openspec list --json` — ТОЛЬКО Knowledge Discovery из шага 1.5 (при необходимости Read `_taxonomy.yaml` и выбранных KB `.md`) и затем текстовый вывод (классификация + бриф при HALT, или начало свободного режима при отсутствии триггеров). Допустимый tool call помимо KB Discovery — только AskQuestion (уточняющие вопросы). Read артефактов change, модулей, трасс, Grep, Shell, SemanticSearch, Task — ЗАПРЕЩЕНЫ до завершения Entry Protocol (подтверждение брифа пользователем на шаге 3).
 
@@ -77,7 +77,9 @@ Enter explore mode. Think deeply. Visualize freely. Follow the conversation wher
 
 ### 2. Сформировать и ПОКАЗАТЬ бриф (STOP — END TURN)
 
-Сформировать бриф из ТОЛЬКО:
+**Continuation-from-intake (тот же ответ ассистента, что и `/opsx:intake` п.7a А):** если **выше в этом же сообщении** уже выведен полный блок `## Бриф: /opsx:intake | …`, **не** выводить второй полный entry-бриф с заголовком `## Бриф: /opsx:explore | …`. Вывести **только** `### Дополнение: /opsx:explore` по SSOT `.cursor/docs/opsx-output-style.md` §5.1 подраздел «Составной бриф». **Запрещено** повторять во вложении: Контекст, Что я понял, Сценарий, Факты, Гипотезы, Технический контекст, Артефакты, Границы, Открытые вопросы — если они уже есть в intake-блоке. **Обязательно во вложении:** **KB в scope**, **План** (вкл. шаг 1 → агент), **Шаг 1 — детали для агента**, **Подтвердить?** (одна строка — запуск исследования). Допускается **Технический контекст (дополнение)** при новых якорях из Knowledge Discovery. Связка «Перехожу к …» обычно уже в intake; повторять не обязательно. Далее — END TURN как ниже.
+
+Сформировать **обычный** (не intake) бриф из ТОЛЬКО:
 1. Пользовательского ввода (текст, вложения, скриншоты)
 2. Уже загруженного контекста (recently viewed files, git status)
 3. Результата `openspec list` из шага 0
@@ -119,7 +121,10 @@ Enter explore mode. Think deeply. Visualize freely. Follow the conversation wher
 
 Файлы `temp/briefs/*.md` **не создаются**.
 
-**Self-check перед выводом** (см. `.cursor/docs/opsx-output-style.md` §7): (1) в полях «Контекст / Сценарий / Симптом» нет внутренних ID OpenSpec (`D<N>/S<N>.T<M>/R<N>/I<N>/SC<N>`, номера задач `12.9`); (2) UX-надписи — в «ёлочках», идентификаторы кода — в backticks, без цепочки 3+ разнотипных терминов подряд; (3) перечисления ≥2 пунктов — нумерованный список, не поток через `;`; (4) «Симптом» — только факты; (5) каждое поле ≤3 строк или ≤7 пунктов; (6) секция **KB в scope** в **чате** присутствует и заполнена: либо список фактов с выжимкой, либо явное «нет совпадений по anchor-paths и домену».
+**Self-check перед выводом** (см. `.cursor/docs/opsx-output-style.md` §7):
+
+- **Режим continuation-from-intake:** оценивать **всё сообщение целиком**. Пункты (1)–(5) для полей «Контекст / Что я понял / Сценарий / Симптом» считаются выполненными, если соответствующий контент есть **в intake-блоке выше** (дублировать в `### Дополнение` не нужно). Пункт (6): **KB в scope** обязательно присутствует **в блоке `### Дополнение`** с выжимкой или «нет совпадений…». **План**, **Шаг 1 — детали для агента** и **Подтвердить?** — только в `### Дополнение`.
+- **Обычный режим** (без intake-блока в том же сообщении): (1) в полях «Контекст / Сценарий / Симптом» нет внутренних ID OpenSpec (`D<N>/S<N>.T<M>/R<N>/I<N>/SC<N>`, номера задач `12.9`); (2) UX-надписи — в «ёлочках», идентификаторы кода — в backticks, без цепочки 3+ разнотипных терминов подряд; (3) перечисления ≥2 пунктов — нумерованный список, не поток через `;`; (4) «Симптом» — только факты; (5) каждое поле ≤3 строк или ≤7 пунктов; (6) секция **KB в scope** в **чате** присутствует и заполнена: либо список фактов с выжимкой, либо явное «нет совпадений по anchor-paths и домену».
 
 Если данных недостаточно для полного брифа — задать уточняющие вопросы пользователю (AskQuestion).
 
@@ -649,7 +654,7 @@ Explore Summary — входной артефакт для ff/new. Design Gate �
 
 ## Guardrails
 
-- **Output style:** все брифы, карточки делегирования и Explore Summary выводятся по шаблону **T-BRIEF** из `.cursor/docs/opsx-output-style.md`; перед отправкой — self-check-5 (§7).
+- **Output style:** все брифы, карточки делегирования и Explore Summary выводятся по шаблону **T-BRIEF** из `.cursor/docs/opsx-output-style.md`; перед отправкой — self-check §7; при **continuation-from-intake** (шаг 2 Entry Protocol) применять ослабленный self-check из того же шага.
 - **Don't bypass Entry Protocol** - Never Read code, artifacts, traces, or modules before showing the brief. The only tool calls before brief output are: Read SKILL.md (command-skill-gate batch), Shell `openspec list --json`, Read `openspec/project.md`, Read `openspec/knowledge/_index.yaml`, and Read `_taxonomy.yaml` / selected KB `.md` only by Entry Protocol step 1.5. Everything else — after brief confirmation on step 3. Reading change artifacts (proposal.md, design.md, tasks.md) is also forbidden before brief.
 - **Don't skip Knowledge Discovery** - Read `_index.yaml` is mandatory in Entry Protocol step 0. The brief MUST contain `KB в scope`: either `KB-NNNN: <title> — <one-line summary>` entries or explicit «нет совпадений». Omitting the field is a failed self-check.
 - **Don't omit Architect Gate status** - Explore Summary MUST contain `Architect Gate: Статус` with exactly one enum value: `not-required`, `required-pending`, `passed: <path>`, or `declined: <reason>`. If the status is `required-pending`, do not recommend `/opsx:ff` until the architect is run or an explicit decline reason is captured.
