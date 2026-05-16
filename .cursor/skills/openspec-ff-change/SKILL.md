@@ -288,6 +288,10 @@ After completing all artifacts, summarize:
 - **Risk Surfacing (ОБЯЗАТЕЛЬНО):** Проактивно выделите 1-3 границы изменений на UX-языке. Укажите: «Что меняется для пользователя: ...» и «Что НЕ меняется: ...» (одной строкой из секции Non-Goals). Без этого блока handoff считается провальным.
 - What's ready: "All artifacts created! Ready for implementation."
 - Prompt: "Рекомендуется: `/opsx:verify <name>` для проверки качества артефактов (фазовая когерентность, ТЗ, реализуемость, gates). Или сразу `/opsx:apply <name>` для начала реализации."
+- **Безопасные границы хода (по `chat-output-budget.mdc` §10/§11):**
+  - «Код не менял. Артефакты в `openspec/changes/<name>/`».
+  - Дальше: `/opsx:verify <name>` или `/opsx:apply <name>`.
+  - Прямая правка `src/**` после `ff` запрещена (`1c-agent-delegation.mdc` §APPLY GATE, `chat-output-budget.mdc` §11).
 
 **Artifact Creation Guidelines**
 
@@ -313,3 +317,4 @@ After completing all artifacts, summarize:
 - If a change with that name already exists, suggest continuing that change instead
 - Verify each artifact file exists after writing before proceeding to next
 - **Completion checkpoint (MANDATORY on every turn):** Before processing a user follow-up message during ff, run `openspec status --change "<name>" --json`. If any `applyRequires` artifact has status != `"done"`: (1) Notify the user: «Артефакт `<id>` не создан. Продолжить создание?» (2) Complete the missing artifact BEFORE handling the follow-up request. Rationale: user follow-ups in ff are still part of the ff session (`command-session-persistence`). Missing artifacts must not be silently dropped.
+- **APPLY GATE дубль:** в сессии `/opsx:ff` правка `src/**` запрещена; правки только через `/opsx:apply <name>`.

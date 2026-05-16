@@ -22,7 +22,7 @@ alwaysApply: true
 2. **`model` в вызове?** **Штатно передавать** `model=<slug>` по таблице в `.cursor/rules/model-selection.mdc` для данного `subagent_type` (Primary). **Без** `model=` — только для `onec-trace-analyst`, `openspec-quality-controller` и **последний шаг** цепочки fallback (модель чата / inherit). Исключения: явный запрос пользователя или диагностика — см. секцию «Параметр `model` в `Task(...)`».
 3. **Source-of-truth для выбора модели** — таблица в `.cursor/rules/model-selection.mdc`. Во frontmatter всех кастомных агентов в этом репозитории задано **`model: inherit`**; конкретная модель вызова задаётся параметром `Task.model`, а не YAML агента.
 
-**Симптомы провала чеклиста:** желание указать `model="composer-2"` / `"fast"` / «как в шаблоне»; выбор `subagent_type="explore"` потому что «быстрее»; игнорирование бриф-карточки с agent name. В любом из случаев — СТОП, перечитать чеклист.
+**Симптомы провала чеклиста:** желание указать `model="composer-2"` / `"fast"` / «как в шаблоне»; для `onec-code-writer` / `onec-code-explorer` — `model="gpt-5.3-codex"` или иной slug вне цепочки `model-selection.mdc` без запроса пользователя; выбор `subagent_type="explore"` потому что «быстрее»; игнорирование бриф-карточки с agent name. В любом из случаев — СТОП, перечитать чеклист.
 
 ## Допустимые `subagent_type`
 

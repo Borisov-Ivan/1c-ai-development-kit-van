@@ -293,6 +293,7 @@ Keep the RCA compact; the split ensures apply/debug can later enforce the verifi
 - **1c-error-analysis.mdc:** не читать трассу вручную; делегировать onec-trace-analyst с путём и брифом. TRACE_FULL по запросу агента — запросить у пользователя.
 - **verified-cause-gate.mdc:** перед фиксом — разделение Verified facts / Hypotheses, цепочка «Почему», корневая причина; hypothesis-based fix только с задачей верификации или follow-up.
 - **vertical-slices.mdc:** placement fix-задач в `tasks.md` — только по **ИНВАРИАНТ: Defect placement** и mechanical gate шага 7a (не плодить `# Срез` до подписанной приёмки без cross-slice / frozen-slice).
+- **Гейт `src/**`:** правка `src/**` в сессии `/opsx:debug` запрещена — см. `chat-output-budget.mdc` §11.
 
 ---
 

@@ -674,6 +674,7 @@ Explore Summary — входной артефакт для ff/new. Design Gate �
 - **Do visualize** - A good diagram is worth many paragraphs
 - **Do explore the codebase** - Ground discussions in reality
 - **Do question assumptions** - Including the user's and your own
+- **Гейт `src/**`:** правка `src/**` в сессии `/opsx:explore` запрещена — см. `chat-output-budget.mdc` §11.
 
 ---
 
