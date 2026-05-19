@@ -1,0 +1,48 @@
+---
+description: Сессии исследования /opsx:explore — каталог openspec/sessions/, дисциплина путей
+alwaysApply: true
+---
+
+# OpenSpec Sessions
+
+## Назначение
+
+Сессия `/opsx:explore` — изолированный каталог с утверждённым брифом, промежуточными шагами и финальным `analysis.md`. Не путать с `openspec/changes/<name>/` (ЗНИ).
+
+## Структура каталога
+
+```text
+openspec/sessions/<session-slug>/
+  brief.md              # утверждённый бриф (YAML + markdown)
+  analysis.md           # финальный отчёт (после композиции)
+  brief.closed.md       # при закрытии висячей сессии (опционально)
+  temp/
+    step-<step-id>-<slug>.md
+    step-*.stub.md
+    step-*.prev-*.md
+    trace-analysis.md
+    verify-*.md
+    draft-report.md
+    composer-result-pass*.md
+    accumulated-objects.md
+```
+
+`<session-slug>` = `<ГГГГ-ММ-ДД>-<slug>` — только `[a-z0-9-]`, без кириллицы.
+
+## Дисциплина путей
+
+1. **Запись и промпты** — только относительные пути от корня репозитория: `openspec/sessions/<session-slug>/...`.
+2. **`<SESSION_DIR>`** — префикс из результата `Glob`/`Read` после `Write brief.md`, не из памяти чата.
+3. **Запрещено** в промптах субагентам: абсолютные пути (`C:\...`, `/home/...`).
+4. После `Write brief.md` — обязательны `Glob` → `Read` по найденному пути.
+
+## Висячая сессия
+
+Сессия «висячая», если есть `brief.md` и **нет** `analysis.md` (исключая только `brief.closed.md`).
+
+При bootstrap explore: `Glob openspec/sessions/*/brief.md` — предложить продолжить / оставить / закрыть.
+
+## Связь с ЗНИ
+
+- `analysis.md` — вход для `/opsx:ff`, `/opsx:new` (short-circuit брифа), `/opsx:extend <change> --from-report <path>`.
+- Отчёты в `openspec/changes/<name>/reports/` — артефакты ЗНИ после apply/verify; в sessions не дублировать без явной необходимости.

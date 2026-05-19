@@ -17,10 +17,11 @@ description: Контролируемое расширение scope сущес�
 - Опционально — ссылка на файл/отчёт, который нужно проанализировать как основание для правки ЗНИ:
   - `@path/to/file.md`
   - `--from-review <path>` — отчёт `/review`
-  - `--from-debug <path>` — `debug.md` / RCA-отчёт
+  - `--from-report <path>` — `openspec/sessions/<slug>/analysis.md` (итог `/opsx:explore`; основной путь capture fix)
+  - `--from-debug <path>` — устаревший alias: `debug.md` или RCA в change (предпочтительно `--from-report`)
   - `--from-verify <path>` — отчёт `/opsx:verify`
   - `--from-architecture <path>` — отчёт архитектора
-  - `--from-explore <path>` — Explore Summary
+  - `--from-explore <path>` — legacy Explore Summary (`temp/explore-summary-*.md`)
 
 **Примеры:**
 

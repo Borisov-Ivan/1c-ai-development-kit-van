@@ -61,13 +61,58 @@ Extract structured information from a trace for downstream agents (onec-code-exp
 
 ### 1. Parse Trace Structure
 
+Follow **§1.1 Reading Strategy** — do not read the trace file linearly with a single unbounded `Read`.
+
 ```yaml
-From PFF/TRACE text:
-  - MODULES MAP: M01, M02, ... → module paths (БизнесПроцесс.X, ОбщийМодуль.Y)
-  - CALL INDEX: chain of event IDs (e.g. #6455 → #12246 → #12313)
-  - EXECUTION FLOW: order of events, [C]/[S]/[C→S] context
-  - Extension markers: X1, X2, ... (which calls are from extensions)
+From PFF/TRACE text (sections to use):
+  - TRACE META / TRACE COVERAGE: format, events X/Y, hidden counts
+  - MODULES MAP: M01, M02, ... → module paths
+  - CALL INDEX: ready chains (e.g. #6455 → #12246 → #12313) — FIRST anchor
+  - EXECUTION FLOW: order of events, [C]/[S]/[C→S] context — primary material
+  - Extension markers: [X1] on modules in MAP; X1: name at end of MAP
+  - MODULES section: code fragments (~80–95% of file size) — do NOT read in bulk
 ```
+
+### 1.1. Reading Strategy (TRACE v7)
+
+#### A. Size-based approach
+
+| File size | Strategy |
+|-----------|----------|
+| ≤ 500 lines (stack, COMPACT) | `Read` entire file in one call |
+| 500–2000 | `Read` in a loop with `offset` until end of file; do **not** open `.bsl` until trace is fully read |
+| > 2000 (TRACE FULL) | **Grep-first:** `Grep "^=== "` for section boundaries; `Grep` brief keywords for relevant FLOW lines; then targeted `Read` with `offset`/`limit` |
+| > 5000 (large FULL) | + strict ban on linear reading of `=== MODULES ===` |
+
+#### B. TRACE v7 section order
+
+```text
+=== TRACE META ===
+=== TRACE COVERAGE ===     → report in Trace summary
+=== MODULES MAP ===        → resolve Mxx from brief
+=== EXECUTION FLOW ===     → main analysis material
+=== CALL INDEX ===         → first anchor (ready chains)
+=== MODULES ===            → do NOT read sequentially (duplicate of src/)
+=== TRACE REPRODUCE ===    → optional
+```
+
+**Reading order:**
+
+1. META + COVERAGE + MAP — one `Read` with `limit` ~400; list relevant `Mxx` from brief.
+2. **CALL INDEX** — if present, start here.
+3. **EXECUTION FLOW** — chain details, error/write/loop points.
+4. **MODULES** — only `Grep` (`--- [S] M04 ---`, `#13462`) if a fragment is missing from FLOW.
+5. **`.bsl`** — only `Read` ±20 lines at `Mxx:line` from FLOW/INDEX (see §3a).
+
+**Hard rule:** do not start `.bsl` verification until all sections **before** `=== MODULES ===` are covered (without bulk-reading MODULES itself).
+
+#### C. Extension markers `[X1]`
+
+In MODULES MAP, `[X1]` marks extension modules. In the report: which `Mxx` are extensions, override chain (base `M04` + `[X1]` `M50`, etc.).
+
+#### D. Report reference example
+
+Full report example: `openspec/sessions/2026-05-19-sign-verify-perf-double-binary/temp/trace-analysis.md` — coverage, FLOW chain, repetition table (PERF + TRACE pairing).
 
 ### 2. Identify Critical Points (driven by focus)
 
@@ -224,8 +269,17 @@ Provide a report that the parent (or onec-code-architect) can use without re-rea
 ```markdown
 # Trace Analysis: [short description reflecting user's question]
 
+## Для заказчика
+
+(Обязательно при вызове из `/opsx:explore` — 1 абзац, язык заказчика, без цепочек вызовов.)
+- **Вердикт:** норма | баг | другая тема | нужна доработка | нужен разбор кода.
+- **Смысл для цели:** ответ на `user-goal` / симптом из брифа.
+- **Сейчас:** одно действие или «ничего не делать».
+- **Дальше:** нужен ли разбор кода (explorer) или достаточно трассы.
+
 ## Trace summary
 - Format: TRACE_COMPACT | TRACE_FULL | Stack only
+- Coverage: events X/Y (Z%) | hidden: structural=A control_leaf=B trivial=C tiny=D
 - Entry: [first procedure/module]
 - Error or focus: [last error message and location, or what was investigated]
 - Call chain (key events): #ID1 → #ID2 → … → [end point]
@@ -260,7 +314,7 @@ Provide a report that the parent (or onec-code-architect) can use without re-rea
 - **VQ-2** | ...
 
 ## Insufficient data (if any)
-- Request TRACE_FULL: [how to obtain]
+- Request TRACE_FULL: [how to obtain; if hidden/threshold — different threshold or additional measurement]
 
 ## Recommended next steps
 - onec-code-explorer: [concrete task, or "resolve VQ-1..VQ-N above" if verification queries are present]
@@ -271,19 +325,27 @@ Provide a report that the parent (or onec-code-architect) can use without re-rea
 
 ## CRITICAL RULES
 
-1. **Verify in code** — For every critical trace line, read the source file. Do not rely only on trace text.
-2. **Do not guess** — If COMPACT trace lacks variables, query text, or branch context, request TRACE_FULL. Do not invent values.
+1. **Verify in code** — For every critical trace line, read the source file at ±20 lines. Do not rely only on trace text.
+2. **Do not guess** — Do not reconstruct hidden events from TRACE COVERAGE by hypothesis; use `Insufficient data` or request TRACE_FULL with different threshold.
 3. **Verified vs Hypotheses** — Only facts confirmed by trace + code go to Verified facts. Assumptions go to Hypotheses with a verification plan.
 4. **Output for architect** — Your report is input for onec-code-architect; keep it structured and citation-ready (file:line, event ID).
 5. **Cite Verification** — Re-read ±5 source lines for every critical `file:line` before finalizing.
 6. **Escalation** — Clearly state when you stopped due to insufficient data and what is needed (e.g. TRACE_FULL path or command).
+
+**Anti-patterns (forbidden):**
+
+- Single unbounded `Read` on traces > 2000 lines
+- Starting `.bsl` verification before reading all sections up to (but not including bulk) `=== MODULES ===`
+- Linear reading of `=== MODULES ===` — duplicate of code in `src/`
+- Analyzing every `Mxx` in MAP — only brief-relevant modules
+- Reconstructing hidden events without evidence in FLOW/INDEX
 
 ---
 
 ## INVOCATION
 
 - **Automatic**: From `.cursor/rules/1c-error-analysis.mdc` when user provides error + trace.
-- **Workflow**: Step 3.5 of `openspec-debug` (trace analysis).
+- **Workflow**: `openspec-explore/cycle.md` §3.1 (trace analysis in explore session).
 - **Manual**: "проанализируй трассу", "разбери стек", "trace analysis", path to `*_TRACE_*.txt` or `.pff`.
 
 ---

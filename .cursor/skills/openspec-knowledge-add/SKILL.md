@@ -122,7 +122,7 @@ status: in_progress
 | Markdown вне канонических масок | Пригоден только если содержит verified facts + anchors; добавить warning «вне канонических масок reports» |
 | Markdown из корневого `reports/` | Пригоден только при явном пути; добавить warning «non-canonical source location, recommend `temp/reports/`» |
 | `openspec/knowledge/**/KB-*.md` | `Skipped — already a KB` |
-| `.bsl`, `.xml`, `.mxl`, `.json`, `.txt`, трассы `.pff` / `*_TRACE_*.txt` | `Skipped — not a knowledge source`; подсказка: сначала `/opsx:explore` или `/opsx:debug`, затем `/opsx:knowledge-add <report>` |
+| `.bsl`, `.xml`, `.mxl`, `.json`, `.txt`, трассы `.pff` / `*_TRACE_*.txt` | `Skipped — not a knowledge source`; подсказка: сначала `/opsx:explore`, затем `/opsx:knowledge-add <report>` |
 | Каталог | `Skipped — directory input is not supported`; пользователь должен передать конкретные files |
 
 Команда **не запускает** `onec-code-explorer` сама. Она работает с уже подготовленными источниками знаний, а не проводит обследование.
@@ -162,7 +162,7 @@ status: in_progress
 - `core` — центральный факт source-отчёта: совпадает с заголовком, первым разделом «Определение»/«Факт», основной причиной запуска исследования или главным вопросом пользователя.
 - `peripheral` — смежный факт, который помогает контексту, но не отвечает на главный вопрос отчёта.
 
-Если все `core` кандидаты заблокированы (`taxonomy mismatch`, `unverified content`, `signature-drift`, `behavioral-drift`, `anchor-missing`) или отложены Reuse Value Test, команда **не подменяет** их `peripheral` кандидатами. Итог: `Saved 0 — Blocked: core facts unsaveable`; в Warnings перечислить причины по каждому core-кандидату и предложить следующий шаг (`/opsx:knowledge-init` для taxonomy mismatch, `/opsx:explore` или `/opsx:debug` для re-verify).
+Если все `core` кандидаты заблокированы (`taxonomy mismatch`, `unverified content`, `signature-drift`, `behavioral-drift`, `anchor-missing`) или отложены Reuse Value Test, команда **не подменяет** их `peripheral` кандидатами. Итог: `Saved 0 — Blocked: core facts unsaveable`; в Warnings перечислить причины по каждому core-кандидату и предложить следующий шаг (`/opsx:knowledge-init` для taxonomy mismatch, `/opsx:explore` для re-verify).
 
 `peripheral` кандидаты можно показывать в preview только если хотя бы один `core` кандидат прошёл validation и попал в saveable-набор. Это защищает KB от шума: вторичный факт не должен становиться единственным результатом команды, если главное знание сохранить нельзя.
 

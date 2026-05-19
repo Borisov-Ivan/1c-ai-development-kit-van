@@ -24,23 +24,10 @@ Start a new change using the experimental artifact-driven approach.
    a. **If argument provided** — use it as change name (kebab-case). Proceed to step 2.
 
    b. **If no argument — auto-detect from context:**
-      0. Glob `temp/briefs/intake-*.md` и `temp/intake-brief-*.md` (exclude `*example*`). If found, read the most recent one (by date in filename).
-         **Примечание:** скилл `/opsx:intake` этот файл **не создаёт**; при отсутствии совпадения Glob используйте текст брифа из чата сессии или попросите пользователя сохранить бриф в `temp/intake-brief-*.md` вручную.
-         Extract change name from `### Рекомендованный следующий шаг` if it contains `/opsx:new <name>` or `/opsx:ff <name>`, or derive kebab-case from `**Тема:**` / `### Нормализованная цель`.
-         Extract brief from `### Нормализованная цель`, `### Scope`, and `### План исследования`.
-         AskQuestion:
-         ```
-         Из Intake Brief:
-         - **Имя ЗНИ:** `<kebab-name>`
-         - **Бриф:** <2-3 sentences from normalized goal/scope>
-         - **Источник:** intake-brief-YYYY-MM-DD.md
-
-         1. Подтвердить
-         2. Изменить имя
-         3. Сначала explore
-         ```
-         If the user chooses `Сначала explore`, stop and recommend `/opsx:explore` с передачей контекста из чата или пути к прочитанному файлу intake, если он есть.
-      1. Glob `temp/explore-summary-*.md`. If found, read the most recent one (by date in filename).
+      0. **Session report short-circuit:** Glob `openspec/sessions/*/analysis.md`. If found, read the most recent if ≤48h and тема совпадает с запросом.
+         Entry-бриф **опускается** — «Создаю ЗНИ по утверждённому отчёту `<path>`» + AskQuestion `[Подтвердить / Изменить имя / Сначала explore]`.
+         Extract change name from `## Следующий шаг` (`/opsx:new <name>` or `/opsx:ff <name>`) or kebab-case from темы в `analysis.md`.
+      1. Glob `temp/explore-summary-*.md` (legacy). If found, read the most recent one (by date in filename).
          Extract change name from line matching `Готово к созданию ЗНИ <name>`
          or derive kebab-case from `**Тема:**`.
          Extract brief from `**Ключевые решения:**` section (2-3 sentences).

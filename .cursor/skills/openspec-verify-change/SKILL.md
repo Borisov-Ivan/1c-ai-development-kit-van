@@ -687,7 +687,7 @@ flowchart TD
    **Debug fix check (дополнительно):**
    - Grep tasks.md на маркеры: `(исправление)`, `RCA:`, `корневая причина`, `reports/trace-analysis`, `reports/exploration`
    - Если маркеры найдены И нет ни одного `reports/architecture-*.md` в change dir (в т.ч. `architecture-debug-*.md`):
-     → CRITICAL: "В tasks.md есть задачи-исправления из debug без архитектурного ревью. Рекомендация: запустить onec-code-architect или /opsx:debug с прохождением Architect Gate (шаг 5.5)."
+     → CRITICAL: "В tasks.md есть задачи-исправления из explore/extend без архитектурного ревью. Рекомендация: запустить onec-code-architect или /opsx:explore (профиль bug) с Architect Gate."
 
    **Result:**
    - No triggers fired AND (no debug fix markers OR architecture-*.md exists) → `OK`

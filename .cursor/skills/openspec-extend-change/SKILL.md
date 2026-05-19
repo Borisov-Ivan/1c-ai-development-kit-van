@@ -27,7 +27,8 @@ metadata:
   - `--from-debug <path>` — `debug.md` или RCA-отчёт
   - `--from-verify <path>` — отчёт `/opsx:verify`
   - `--from-architecture <path>` — отчёт архитектора
-  - `--from-explore <path>` — Explore Summary
+  - `--from-report <path>` — `openspec/sessions/<slug>/analysis.md` (итог `/opsx:explore`; RCA, рецепт, fix-задачи)
+  - `--from-explore <path>` — legacy Explore Summary (`temp/explore-summary-*.md`)
   - `--code-sync` — штатная синхронизация OpenSpec-артефактов с фактическим кодом после ручного упрощения, writer/apply или Code-Truth Gate (`phantom-symbol`, устаревшие имена процедур, drift design/tasks/debug).
 
 Если текст требования отсутствует, но указан файл — извлечь намерение из файла и показать в брифе. Если намерение неоднозначно — спросить пользователя после брифа, до правок.
@@ -44,7 +45,7 @@ metadata:
    - иначе выполнить `openspec list --json` и выбрать активный / спросить пользователя.
 3. Выполнить `openspec instructions apply --change "<name>" --json`.
 4. Прочитать `openspec/project.md` и артефакты change из `contextFiles`: `proposal.md`, `design.md`, `tasks.md`, `specs/**` при наличии; для расширения scope также прочитать `debug.md` (если есть) — нужен для счётчика Scope Coherence Audit и записей `## Extend`.
-5. Прочитать только явно переданные source-файлы (`--from-*`, `@path`, пути в запросе). Это не трассы; трассы остаются за `/opsx:debug`. Если указан `--code-sync`, source = артефакты change + `debug.md` + отчёты `reports/**` + результаты Code-Truth Gate; чтение BSL/XML до брифа всё равно запрещено.
+5. Прочитать только явно переданные source-файлы (`--from-*`, `@path`, пути в запросе). Трассы — через `/opsx:explore` (профиль bug). `--from-report` принимает `openspec/sessions/<slug>/analysis.md` (замена capture из удалённого `/opsx:debug`). Если указан `--code-sync`, source = артефакты change + `debug.md` + отчёты `reports/**` + результаты Code-Truth Gate; чтение BSL/XML до брифа всё равно запрещено.
 5a. Для секции **KB в scope** брифа: прочитать `openspec/knowledge/_index.yaml` и при необходимости `_taxonomy.yaml` и выбранные KB `.md` — по алгоритму Entry Protocol шаг 1.5 `.cursor/skills/openspec-explore/SKILL.md` (anchor-paths из путей в уже прочитанных артефактах и source-файлах; бюджет Top-10; при отсутствии совпадений — «нет совпадений по anchor-paths и домену» или «Discovery не требовался» при явном отсутствии релевантных путей).
 6. Сформировать и показать **бриф extend** по шаблону ниже.
 7. **END TURN.** До подтверждения пользователя запрещены: запись артефактов, вызовы writer/reviewer, вызовы architect/explorer, чтение BSL/XML для анализа логики.
@@ -106,7 +107,7 @@ Self-check перед выводом: слои разделены; в UX-пол�
 2. Сформировать бриф и делегировать:
    - `onec-code-explorer` — для обследования кода;
    - `onec-code-architect` — для выбора/пересмотра подхода;
-   - `onec-trace-analyst` не используется в extend; трассы перенаправлять в `/opsx:debug`.
+   - `onec-trace-analyst` не используется в extend; трассы перенаправлять в `/opsx:explore` (профиль bug).
 3. До делегирования допустимо читать только OpenSpec-артефакты и явно переданные отчёты.
 
 ---
@@ -122,6 +123,7 @@ Self-check перед выводом: слои разделены; в UX-пол�
 | `verify` | `verification-*.md`, `Phase B`, `Decision`, `CRITICAL/WARNING/SUGGESTION` | decision cards, scope/design/task issues, recommended remediation |
 | `architecture` | `architecture-*.md`, `architecture-review-*` | рекомендуемые изменения design/spec/tasks/ADR, alternatives |
 | `explore` | `explore-summary-*`, `Explore Summary`, `Decisions`, `Open questions` | сформулированные требования, slice hints, unresolved questions |
+| `report` | `openspec/sessions/*/analysis.md`, секции RCA / Verified facts / Рекомендации / Fix tasks | root cause, verified facts, рецепт, задачи для `debug.md` и `tasks.md`, slice placement |
 | `code-sync` | флаг `--code-sync`, `phantom-symbol`, расхождения `design/tasks/debug` с фактическим кодом | фактические символы, устаревшие рецепты, какие артефакты догнать до кода |
 | `other` | markdown/text без явных маркеров | факты и open questions; если непонятно — AskQuestion |
 
@@ -320,7 +322,7 @@ Architect обязателен, если:
 Команды семейства `/opsx:*` должны ссылаться на extend, когда вывод показывает необходимость изменить scope:
 
 - `/review`: `Architecture findings` или findings, противоречащие `design.md` → `/opsx:extend <name> --from-review <report-path>`.
-- `/opsx:debug`: RCA показывает постановочный дефект → `/opsx:extend <name> --from-debug <debug-path>`.
+- `/opsx:explore` + `analysis.md`: RCA и рецепт → `/opsx:extend <name> --from-report openspec/sessions/<slug>/analysis.md`.
 - `/opsx:verify`: Phase B требует решения по scope/design/tasks → `/opsx:extend <name> --from-verify <report-path>`.
 - `/opsx:apply`: реализация выявила scope mismatch → `/opsx:extend <name>`.
 - `/opsx:explore`: есть активный change и обсуждение даёт новое требование → `/opsx:extend <name>`.

@@ -23,7 +23,7 @@ priority: 250
 2. **Или** пометить фикс как «hypothesis-based fix» с **обязательной задачей follow-up верификации** после фикса.
 3. Фикс без верификации и без follow-up — **СТОП**.
 
-Источник: openspec-debug/SKILL.md шаг 7 (перенесено в always-apply).
+Источник: openspec-explore (профиль bug) + extend (перенесено в always-apply).
 
 ## HALT 2: Root Cause Depth
 

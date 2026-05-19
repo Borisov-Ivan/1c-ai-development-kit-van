@@ -6,7 +6,7 @@ priority: 150
 
 # Vertical Slices — вертикальные пользовательские срезы
 
-Единственный источник истины для декомпозиции ЗНИ OpenSpec. Ссылаются: `openspec-new-change`, `openspec-ff-change`, `openspec-continue-change`, `openspec-apply-change`, `openspec-verify-change`, `openspec-debug`, `openspec-explore`, `openspec-archive-change`, `sdd-workflow.mdc`, `1c-agent-patterns`, `openspec-quality-controller`.
+Единственный источник истины для декомпозиции ЗНИ OpenSpec. Ссылаются: `openspec-new-change`, `openspec-ff-change`, `openspec-continue-change`, `openspec-apply-change`, `openspec-verify-change`, `openspec-explore`, `openspec-archive-change`, `sdd-workflow.mdc`, `1c-agent-patterns`, `openspec-quality-controller`.
 
 ## ПРОБЛЕМА
 
@@ -92,7 +92,7 @@ priority: 150
 ## ДЕКОМПОЗИЦИЯ (кто и когда)
 
 - **При создании ЗНИ** (`/opsx:ff`, `/opsx:new`) — архитектор формирует секцию `## Slices` в `design.md` **до** генерации `tasks.md`. Затем `tasks.md` генерируется с `# Срез S<N>` по этой секции. См. шаблоны «Architect — slice decomposition» и «Architect — slice-aware task decomposition» в `1c-agent-patterns/architect.md`.
-- **При добавлении задач к существующему change** (`/opsx:continue`, `/opsx:debug`, `/opsx:explore`) — placement задач фикса **строго** по разделу **«ИНВАРИАНТ: Defect placement»** ниже (по умолчанию — inside-slice; новый срез `S<N+1>` только при выполнении условий инварианта).
+- **При добавлении задач к существующему change** (`/opsx:continue`, `/opsx:extend`, `/opsx:explore` → extend) — placement задач фикса **строго** по разделу **«ИНВАРИАНТ: Defect placement»** ниже (по умолчанию — inside-slice; новый срез `S<N+1>` только при выполнении условий инварианта).
 - **При пересмотре на границе среза** (`/opsx:apply` → slice-gate → опция «пересмотр») — архитектор через «Architect — slice transition review» оценивает актуальность следующего среза.
 - **При миграции легаси-ЗНИ** (tasks.md без `# Срез`) — через `/opsx:migrate-slices <name>`, шаблон «Architect — slice restructuring».
 

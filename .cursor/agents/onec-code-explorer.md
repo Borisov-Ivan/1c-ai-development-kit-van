@@ -413,6 +413,20 @@ Before reading any code:
 
 Provide analysis that helps developers understand the feature for modification or extension. Format depends on task type (see TASK CLASSIFICATION).
 
+### Explore step-result (`/opsx:explore`)
+
+Если в промпте указаны `SAVE_PATH`, `target-section`, `user-goal`, `success-criteria` (контракт из `openspec-explore/cycle.md` §3.2) — в **конце** отчёта (после технического content, перед `### Объекты` или сразу после него) обязательна подсекция:
+
+```markdown
+### Для заказчика
+
+- **Вердикт шага:** … (норма / баг / уточнение / готово к решению)
+- **Влияние на цель:** … (как шаг приближает к `success-criteria`)
+- **Сейчас:** одно действие или «ждём следующий шаг»
+```
+
+2–4 строки, без таблиц и длинных цепочек — оркестратор берёт текст для **T-EXPLORE-SVOD** в чате.
+
 Если входной промпт содержит `## Existing Knowledge`, любой формат отчёта MUST включать секцию `## KB references`:
 
 ```markdown

@@ -21,7 +21,7 @@ description: Reference guide for 1C agent delegation patterns - complexity asses
 | `onec-code-explorer` | [explorer.md](explorer.md) | исследование кода, верификация гипотез trace-analyst, contract resolution (deep) |
 | `openspec-quality-controller` | [quality-controller.md](quality-controller.md) | slice coherence review (verify 7.6) |
 | `onec-code-simplifier` | [simplifier.md](simplifier.md) | рефакторинг (REFACTOR-замечания) |
-| `onec-trace-analyst` | (нет шаблона; контракт в `.cursor/agents/onec-trace-analyst.md`) | бриф готовится скиллом-вызывающим: `openspec-debug/SKILL.md` шаг 3.5 (debug/apply), `openspec-explore/SKILL.md` шаг 2 (explore) |
+| `onec-trace-analyst` | (нет шаблона; контракт в `.cursor/agents/onec-trace-analyst.md`) | бриф готовится `openspec-explore/cycle.md` §3.1 (разбор трассы в сессии explore) |
 
 ---
 
@@ -69,7 +69,7 @@ description: Reference guide for 1C agent delegation patterns - complexity asses
 ### onec-trace-analyst
 - Файл трассы (PFF/TRACE) или стек ошибки 3+ строк
 - Перед вызовом: подготовить бриф.
-  В debug/apply — обогащённый бриф из артефактов change (`openspec-debug/SKILL.md` шаг 3.5).
+  В explore (профиль bug) / extend — обогащённый бриф из `analysis.md` или артефактов change.
   В explore — бриф из пользовательского ввода (STOP-gate, `openspec-explore/SKILL.md` шаг 2).
 
 ### openspec-quality-controller

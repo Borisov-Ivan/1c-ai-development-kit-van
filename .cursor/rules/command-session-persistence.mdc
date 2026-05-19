@@ -37,6 +37,7 @@ priority: 996
    | explore | «измени design» | Молча StrReplace в design.md | Проверить gates (Architect, Verified Cause, auto-capture). Предложить правку, не делать |
    | explore | «обследуй» / «проверь в коде» / «найди где вызывается» | Grep/Glob/Read по .bsl самостоятельно | Бриф → делегировать explorer. Контекст оркестратора — не для обследования |
    | explore | «создай ЗНИ» / «заведи ЗНИ» | Создать артефакты вручную (Write proposal, design, tasks) | СТОП (Change Creation Gate). Explore Summary + redirect на `/opsx:ff <name>` |
+   | explore | Старт темы / утверждение плана | Только `AskQuestion` без полного брифа в чате | Entry Protocol §3: бриф 14–22 строк в сообщении; Подтвердить? текстом; END TURN |
    | apply | «а может лучше по-другому?» | Начать explore-стиль обсуждение | Предложить вернуться в explore для перепроектирования |
    | ff/new | Пропустить Design Gate после design.md | Продолжить без проверки | СТОП, выполнить Design Gate по протоколу скилла |
    | ff | Есть свежий `temp/explore-summary-*.md` | Использовать только имя change | Прочитать как source context: `Architect Gate`, ключевые решения, knowledge findings; передать в Design Gate и шаблоны артефактов |

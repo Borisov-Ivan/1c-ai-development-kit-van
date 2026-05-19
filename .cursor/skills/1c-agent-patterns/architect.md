@@ -711,7 +711,7 @@ Task(
 
 ## Architect — fix quality review (debug шаг 5.5)
 
-Used by `/opsx:debug` step 5.5 when Architect Gate triggers fire. The architect evaluates the proposed fix against root cause, UX scenario, alternatives, and band-aid signs. Orchestrator passes RCA (from debug.md or reports), proposed fix plan, and paths to trace/exploration reports.
+Used by `/opsx:explore` (профиль bug) or `/opsx:extend --from-report` when Architect Gate triggers fire. The architect evaluates the proposed fix against root cause, UX scenario, alternatives, and band-aid signs. Orchestrator passes RCA (from debug.md or reports), proposed fix plan, and paths to trace/exploration reports.
 
 ```
 Task(

@@ -4,13 +4,13 @@
 
 ## OpenSpec Workflow
 `.cursor/rules/sdd-workflow.mdc` — explore → new/ff → verify → apply → verify → archive.
-Команды: `/opsx:intake`, `/opsx:explore`, `/opsx:new`, `/opsx:ff`, `/opsx:apply`, `/opsx:verify`, `/opsx:archive`, `/opsx:debug`, `/opsx:estimate`, `/prerelease-review`, `/review`, `/opsx:status`, `/opsx:extend`, `/opsx:migrate-slices`, `/opsx:knowledge-add`.
+Команды: `/opsx:explore` (точка входа по умолчанию; свободный текст = explore), `/opsx:new`, `/opsx:ff`, `/opsx:apply`, `/opsx:verify`, `/opsx:archive`, `/opsx:estimate`, `/prerelease-review`, `/review`, `/opsx:status`, `/opsx:extend`, `/opsx:migrate-slices`, `/opsx:knowledge-add`.
 `/review` — ревью по контексту запроса (модуль/файлы/расширение/ЗНИ) с опцией устранения замечаний; скилл `.cursor/skills/review/SKILL.md`. **Review Focus Boundaries:** без аргументов — scope по изменённым `.bsl` в git (`diff-focused`, границы по процедурам из diff); явный файл/каталог/расширение — полное ревью (`full`); ЗНИ — `diff-focused` по `tasks.md` `[x]` + git diff и маппинг на процедуры; в промпт ревьювера передаётся `## Review Boundaries` (протокол в `.cursor/agents/onec-code-reviewer.md`).
 Дополнительные: `/opsx:continue`, `/opsx:sync`, `/opsx:bulk-archive`, `/init-project`.
 Паттерны агентов: `.cursor/skills/1c-agent-patterns/SKILL.md`.
 Документы: `/opsx:doc-tz <name>` (ТЗ по ЗНИ с архитектурным ревью и контролем качества артефактов) — `.cursor/skills/openspec-docs/SKILL.md`. Шаблон: `.cursor/skills/openspec-docs/prompts/change-tz.md`.
 
-**Output style (единый стиль выводов opsx):** `.cursor/docs/opsx-output-style.md` — 3 слоя (UX / код / процесс), типография, запрет внутренних ID (`S<N>.T<M>`, `D<N>`, `R<N>`, номера задач) в пользовательских полях, запрет жаргона движка (`Blast Radius`, `precedent-regression`, `Phase A/B`, `verdict:`, `verify_mode:`, `Tier`, `Standard / Lite / Full`, `когерентность`, `low-confidence`, `capability`, `checkpoint`, `step-by-step` — см. §3.1; вместо `Tier` — «Объём», вместо «когерентность» — «согласованность»), запрет имён агентов (`onec-code-*`, `openspec-*`) и гейтов (`Architect Gate`, `Slice Gate`, `Implementation Impact Gate`, `Code-Truth Gate`, `Precedent Regression Gate`) в чате — заменяются на «агент / архитектор / ревьюер / оркестратор» и описание результата проверки соответственно, полные имена остаются только в строке «Источники: …» и в файлах отчётов `reports/`. **Non-events в чат не выводятся** — см. `.cursor/rules/chat-output-budget.mdc` §3a. Запрет голого `S<N>` без названия среза (правило §10 «Срез всегда с названием»); первое упоминание задачи `S<N>.<M>` / `S<N>.T<M>` в заголовке — с коротким описанием в «ёлочках» (§10.1). T-HANDOFF «Следующие задачи» — обязательная колонка «Действие»; «Тип» / «Исполнитель» — только из русских наборов (§5.2). Дисциплина правок ЗНИ (§8: decision → `/opsx:extend`, hygiene → ручная правка с обязательным повторным verify), 5 внутренних макетов сообщений (имена для авторов скиллов; в сообщения пользователю не цитируются — см. §5 и §9). Перед каждым пользовательским выводом opsx-скилл обязан проходить self-check (§7 гайда), включая «канонический переход» (п.6), «срез всегда с названием» (п.9), HALT жаргона и **бюджет чата** (п.10–13, плюс always-apply `.cursor/rules/chat-output-budget.mdc`), для verify — «Суть» в **файле** отчёта и тонкий чат по умолчанию (п.11, флаг `--verbose`). Роль оркестратора — навигатор: `.cursor/rules/orchestrator-as-navigator.mdc`.
+**Output style (единый стиль выводов opsx):** `.cursor/docs/opsx-output-style.md` — 3 слоя (UX / код / процесс), типография, запрет внутренних ID (`S<N>.T<M>`, `D<N>`, `R<N>`, номера задач) в пользовательских полях, запрет жаргона движка (`Blast Radius`, `precedent-regression`, `Phase A/B`, `verdict:`, `verify_mode:`, `Tier`, `Standard / Lite / Full`, `когерентность`, `low-confidence`, `capability`, `checkpoint`, `step-by-step` — см. §3.1; вместо `Tier` — «Объём», вместо «когерентность» — «согласованность»), запрет имён агентов (`onec-code-*`, `openspec-*`) и гейтов (`Architect Gate`, `Slice Gate`, `Implementation Impact Gate`, `Code-Truth Gate`, `Precedent Regression Gate`) в чате — заменяются на «агент / архитектор / ревьюер / оркестратор» и описание результата проверки соответственно, полные имена остаются только в строке «Источники: …» и в файлах отчётов `reports/`. **Non-events в чат не выводятся** — §3a `.cursor/rules/chat-output-budget.mdc`. Запрет голого `S<N>` без названия среза (правило §10 «Срез всегда с названием»); первое упоминание задачи `S<N>.<M>` / `S<N>.T<M>` в заголовке — с коротким описанием в «ёлочках» (§10.1). T-HANDOFF «Следующие задачи» — обязательная колонка «Действие»; «Тип» / «Исполнитель» — только из русских наборов (§5.2). Дисциплина правок ЗНИ (§8: decision → `/opsx:extend`, hygiene → ручная правка с обязательным повторным verify), 5 внутренних макетов сообщений (имена для авторов скиллов; в сообщения пользователю не цитируются — см. §5 и §9). Перед каждым пользовательским выводом opsx-скилл обязан проходить self-check (§7 гайда), включая «канонический переход» (п.6), «срез всегда с названием» (п.9), HALT жаргона и **бюджет чата** (п.10–13, плюс always-apply `.cursor/rules/chat-output-budget.mdc`), для verify — «Суть» в **файле** отчёта и тонкий чат по умолчанию (п.11, флаг `--verbose`). Роль оркестратора — навигатор: `.cursor/rules/orchestrator-as-navigator.mdc`.
 
 ### Decision tree команд
 
@@ -18,8 +18,8 @@
 
 | Задача пользователя | Команда | Чем отличается от соседних |
 |---------------------|---------|----------------------------|
-| «Распаковать сырую постановку заказчика» | `/opsx:intake` | Бриф в чате; при однозначном маршруте в explore/debug — дополнение к брифу без полного дубля (см. `.cursor/docs/opsx-output-style.md` §5.1); для ff/new — рекомендация команды отдельным шагом |
-| «Обсудить идею, пока change нет» | `/opsx:explore` | Без активного change; не вызывает writer/reviewer; **Output Discipline** — каждый выход в одном из 5 канонических (диалог / capture / Explore Summary / KB / отчёт субагента); запрещено предлагать «черновик tasks/spec/design в чате» |
+| Любой вопрос, дефект, постановка (в т.ч. свободный текст) | `/opsx:explore` | Единая точка входа; компактный бриф 14–22 строки; итог — `openspec/sessions/<slug>/analysis.md`; профиль bug обогащает бриф трассой/PERF |
+| «Обсудить идею, пока change нет» | `/opsx:explore` | Сессия в `openspec/sessions/`; не writer/reviewer; capture → `/opsx:ff` или `/opsx:extend --from-report` |
 | «Создать новый change пошагово» | `/opsx:new <name>` | Пошаговая последовательность артефактов |
 | «Создать change целиком разом» | `/opsx:ff <name>` | Все артефакты сразу, для уже понятной задачи |
 | «Быстро понять, где я в этом change» | `/opsx:status <name>` | Read-only снимок, без верификаций и субагентов |
@@ -30,7 +30,7 @@
 | «Добавить одну задачу / создать следующий артефакт» | `/opsx:continue <name>` | Пошаговое продолжение, без большого расширения scope |
 | «Мигрировать старый tasks.md (plain/phase) в срезы» | `/opsx:migrate-slices <name>` | Architect restructuring + подтверждение diff |
 | «Реализовать задачи» | `/opsx:apply <name>` | Делегирует writer/reviewer; slice-gate paused |
-| «Разобрать дефект, обновить план» | `/opsx:debug <name>` | RCA + генерация fix-задач |
+| «Разобрать дефект, обновить план» | `/opsx:explore` → `/opsx:extend <name> --from-report` | Исследование (профиль bug) → `analysis.md` → capture fix-задач в change |
 | «Сгенерировать ТЗ по ЗНИ» | `/opsx:doc-tz <name>` | ТЗ отдельно от verify (verify генерирует как часть gate при пороге) |
 | «Финальная проверка перед релизом» | `/prerelease-review` | Tier 1 + Tier 2 расширения или change scope |
 | «Ревью кода» | `/review` | Без change — по git diff; с аргументом — по файлу/модулю/расширению/ЗНИ |
@@ -39,7 +39,7 @@
 | «Зафиксировать verified-факты из отчёта/файлов вне ЗНИ» | `/opsx:knowledge-add <path>` | Не требует ЗНИ; bundle source + KB-карточка |
 
 ## Conversational Discipline
-`.cursor/rules/conversational-discipline.mdc` — 5 принципов осознанного диалога: Acknowledgement Layer, Adaptive Brief, Risk Surfacing, Honest Subagent Handling, Progress Marker. Приоритет над длинными отчётами скиллов. Карта SSOT (лимиты, шаблоны, запреты, 5 принципов) — в `.cursor/rules/chat-output-budget.mdc` §1a, §4–6, §10. Шаблоны вывода — в `.cursor/docs/opsx-output-style.md` и `templates/` соответствующих скиллов.
+`.cursor/rules/conversational-discipline.mdc` — 5 принципов осознанного диалога: Acknowledgement Layer, Adaptive Brief (entry-бриф в чат по §5.1 `opsx-output-style.md`), Risk Surfacing, Honest Subagent Handling, Progress Marker. Приоритет над длинными отчётами скиллов. Карта SSOT (лимиты, шаблоны, запреты) — в `.cursor/rules/chat-output-budget.mdc` §1a. Шаблоны вывода — в `.cursor/docs/opsx-output-style.md` и `templates/` соответствующих скиллов.
 
 ## Глоссарий
 `openspec/glossary.md` — единый словарь ключевых терминов (ЗНИ, срез, slice-gate, tier, режимы verify, acceptance handoff и др.). Использовать для сверки терминологии в артефактах, отчётах и сообщениях пользователю.
@@ -51,7 +51,7 @@
 Секция в `openspec/project.md`; метаданные — в `proposal.md` (Metadata); размещение — `onec-code-writer.md`; проверка пар — reviewer/prerelease/archive, scope = diff по zni_id.
 
 ## BSL write guard
-`.cursor/rules/bsl-write-guard.mdc` — глобальный инвариант: правка .bsl только через onec-code-writer + обязательный onec-code-reviewer (любой диалог). `.cursor/rules/1c-agent-delegation.mdc` — детальная диспетчеризация: APPLY GATE, DELEGATION GATE, LINT GATE, API CHECK, EXTENSION GATE. Гейт `src/**` вне сессий apply/review — см. `.cursor/rules/chat-output-budget.mdc` §11.
+`.cursor/rules/bsl-write-guard.mdc` — глобальный инвариант: правка .bsl только через onec-code-writer + обязательный onec-code-reviewer (любой диалог). `.cursor/rules/1c-agent-delegation.mdc` — детальная диспетчеризация: APPLY GATE, DELEGATION GATE, LINT GATE, API CHECK, EXTENSION GATE.
 
 ## Пути к выгрузке
 Базовая конфигурация и расширения заданы в `openspec/project.md` (секция «Структура репозитория»). При поиске кода в src/ и проверке выгрузки использовать эти пути; не предполагать `src/cf/` и `src/cfe/`. См. `.cursor/rules/project-paths.mdc`.
@@ -75,7 +75,7 @@
 `.cursor/rules/1c-error-analysis.mdc` — trace-analyst → explorer/architect.
 
 ## Architect Gate
-`.cursor/rules/architect-gate.mdc` — единые триггеры архитектурного ревью (объективные маркеры, семантические, структурные). **UX-значимый фикс** (меняет что видит/делает пользователь) — семантический триггер; локальная реализация поведения, владельцем которого является база/БСП/платформа/общий модуль, вместо делегирования владельцу — семантический триггер Substituted Authority. **Simplicity Check:** каждый architecture-отчёт фиксирует простейший viable design, альтернативы и complexity budget; отсутствие секции ловит verify. **debug:** при срабатывании триггеров architect обязателен до шага 7 (не AskQuestion), шаблон «Architect — fix quality review» в `1c-agent-patterns/architect.md`. Проверяется в explore (шаг Decide, Fix Quality check при bug fix), verify (pre-apply, шаг 9 + Debug fix check), apply (soft redirect на verify).
+`.cursor/rules/architect-gate.mdc` — единые триггеры архитектурного ревью (объективные маркеры, семантические, структурные). **UX-значимый фикс** (меняет что видит/делает пользователь) — семантический триггер; локальная реализация поведения, владельцем которого является база/БСП/платформа/общий модуль, вместо делегирования владельцу — семантический триггер Substituted Authority. **Simplicity Check:** каждый architecture-отчёт фиксирует простейший viable design, альтернативы и complexity budget; отсутствие секции ловит verify. **Explore (профиль bug):** при срабатывании триггеров architect обязателен в маршруте (не AskQuestion с пропуском), шаблон «Architect — fix quality review» в `1c-agent-patterns/architect.md`. Проверяется в explore, verify (pre-apply, шаг 9 + fix check по задачам из debug.md), apply (soft redirect на verify).
 
 ## Verify (универсальный quality gate)
 `.cursor/skills/openspec-verify-change/SKILL.md` — `/opsx:verify [<name>]`. Контракт с пользователем: аргументы командной строки только имя ЗНИ (или одна активная ЗНИ); **режим** (срез, legacy, post-apply и т. д.) определяется по контексту артефактов, дат изменения (`snapshot`) и по свободной форме запроса — без флагов CLI. QC (7.6) и архитектор (7.7) вызываются при **novelty**/внутреннем tier-охвате, см. шаг **4c**. Pre-apply: формат tasks, качество задач, ручная конфигурация, согласованность срезов (QC) до архитектурной проверки готовности задач (Architect), генерация ТЗ (7.8), гейты, ограничения проекта; post-apply: completeness / correctness / coherence. Шаблоны — `openspec-verify-change/templates/`. Карта лимитов чата — `.cursor/rules/chat-output-budget.mdc` §1.
@@ -160,7 +160,7 @@ Quality Controller (шаг 7.6): **Slice Coherence** (6 критериев из 
 ## Реестр антипаттернов BSL
 `.cursor/rules/bsl-antipatterns.mdc` — краткий индекс (AP-NNN ID, detection rule, severity). **Reviewer-only** (`alwaysApply: false`, без `globs`), не загружается для writer. Writer не должен видеть антипаттерны — они могут быть неверно интерпретированы как паттерны.
 `.cursor/docs/antipatterns/bsl-antipatterns.md` — полные карточки с примерами BAD/GOOD, ссылками на стандарты.
-Пополняется из `/opsx:debug` (шаг 7.5 — Anti-pattern detection) по подтверждению пользователя.
+Пополняется из `/opsx:explore` (профиль bug, секция отчёта) по подтверждению пользователя.
 Ревьювер читает индекс динамически (Phase 2, step 16 в `onec-code-reviewer.md`). Новые AP подхватываются автоматически без правки агентских промптов. AP-047 — обобщённая карточка Substituted Authority: локальная реализация поведения, у которого есть владелец (база/БСП/платформа/общий модуль), вместо делегирования владельцу.
 
 ## Словарь лексики ТЗ
