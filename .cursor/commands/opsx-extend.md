@@ -17,7 +17,7 @@ description: Контролируемое расширение scope сущес�
 - Опционально — ссылка на файл/отчёт, который нужно проанализировать как основание для правки ЗНИ:
   - `@path/to/file.md`
   - `--from-review <path>` — отчёт `/review`
-  - `--from-report <path>` — `openspec/sessions/<slug>/analysis.md` (итог `/opsx:explore`; основной путь capture fix)
+  - `--from-report <path>` — итог `/opsx:explore`: `temp/reports/<тип>-YYYY-MM-DD-<slug>.md` (полный отчёт `Task`: trace-analysis, exploration, architecture), `temp/explore-handoff-*.md` (опциональный handoff с блоком `## Для /opsx:ff`), или legacy `openspec/sessions/<slug>/analysis.md`. Основной путь capture fix.
   - `--from-debug <path>` — устаревший alias: `debug.md` или RCA в change (предпочтительно `--from-report`)
   - `--from-verify <path>` — отчёт `/opsx:verify`
   - `--from-architecture <path>` — отчёт архитектора
@@ -26,7 +26,8 @@ description: Контролируемое расширение scope сущес�
 **Примеры:**
 
 - `/opsx:extend do2-roli-avtopodstanovka-gate --from-review openspec/changes/do2-roli-avtopodstanovka-gate/reports/review-do2-roli-avtopodstanovka-gate-2026-04-29-subagent-raw.md "Пересмотреть решение по представлению роли"`
-- `/opsx:extend add-auth @temp/explore-summary-2026-04-29.md "Добавить требование по ротации токенов"`
+- `/opsx:extend add-auth --from-report temp/reports/trace-analysis-2026-04-29-token-rotation.md "Добавить требование по ротации токенов"`
+- `/opsx:extend add-auth @temp/explore-handoff-2026-04-29-token-rotation.md "Учесть найденный риск"`
 
 **Поведение (кратко):**
 1. Прочитать `openspec/changes/<name>/` (proposal, design, specs, tasks).

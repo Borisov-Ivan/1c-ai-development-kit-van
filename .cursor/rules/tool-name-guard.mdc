@@ -40,7 +40,7 @@ alwaysApply: true
 **Generic / OpenSpec (для задач вне 1С-контента):**
 
 - `generalPurpose`, `explore`, `shell` — общие задачи, инфраструктура, неспецифичный поиск
-- `openspec-quality-controller`, `openspec-doc-writer`, `openspec-composer` — OpenSpec-артефакты (не BSL); composer — сборка `analysis.md` из step-файлов сессии explore
+- `openspec-quality-controller`, `openspec-doc-writer` — OpenSpec-артефакты (не BSL)
 
 ## NEGATIVE GUARD (обязательно)
 

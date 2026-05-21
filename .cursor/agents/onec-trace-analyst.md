@@ -32,6 +32,18 @@ Extract structured information from a trace for downstream agents (onec-code-exp
   - Релевантные модули и процедуры (relevant modules and procedures)
   - Что искать в трассе (what to look for in the trace — e.g. task creation call, register write, posting handler)
 - **Fallback**: if no brief is provided — text of the error or a short problem description (agent will derive focus from it; result may be less precise).
+- **`open_hypotheses_from_archive[]`** (optional, from orchestrator §«Архивный контекст» in `openspec-explore/SKILL.md`):
+
+```yaml
+open_hypotheses_from_archive:
+  - id: <H-sign-task | label from debug>
+    source: <path to exploration/debug in archive or active change>
+    hypothesis: <text>
+    status: inconclusive | not_verified
+    archive_relation: directly-related | adjacent | unrelated
+```
+
+Treat archive entries as **candidates to verify**, not as confirmed root cause. User-supplied archive reference does **not** auto-confirm a hypothesis.
 
 ---
 
@@ -112,7 +124,7 @@ In MODULES MAP, `[X1]` marks extension modules. In the report: which `Mxx` are e
 
 #### D. Report reference example
 
-Full report example: `openspec/sessions/2026-05-19-sign-verify-perf-double-binary/temp/trace-analysis.md` — coverage, FLOW chain, repetition table (PERF + TRACE pairing).
+Full report example: `temp/reports/trace-analysis-2026-05-19-sign-verify-perf-double-binary.md` — coverage, FLOW chain, repetition table (PERF + TRACE pairing).
 
 ### 2. Identify Critical Points (driven by focus)
 
@@ -271,11 +283,16 @@ Provide a report that the parent (or onec-code-architect) can use without re-rea
 
 ## Для заказчика
 
-(Обязательно при вызове из `/opsx:explore` — 1 абзац, язык заказчика, без цепочек вызовов.)
-- **Вердикт:** норма | баг | другая тема | нужна доработка | нужен разбор кода.
-- **Смысл для цели:** ответ на `user-goal` / симптом из брифа.
-- **Сейчас:** одно действие или «ничего не делать».
-- **Дальше:** нужен ли разбор кода (explorer) или достаточно трассы.
+(Обязательно при вызове из `/opsx:explore` profile `explore-bug` — **4 строки** по `profiles/bug.md`; язык заказчика, без цепочек вызовов.)
+
+1. **Что наблюдаешь у себя** — дословно `user-goal` из брифа (симптом пользователя, не симптом трассы).
+2. **Почему так устроено** — one-liner про механизм находки.
+3. **Связано ли это с симптомом** — `объясняет полностью` | `объясняет частично, есть ещё причина` | `не объясняет, симптом из другой ветки`.
+4. **Что чинить и где** — модуль/расширение + поле/процедура; маркер `[verified]` или `[hypothesis: <план>]`. Если п.3 = «не объясняет» — **другая** причина, не «допустимое поведение».
+
+**Архивные гипотезы** (если передан `open_hypotheses_from_archive[]`): для каждой — одна строка: «Гипотеза `<id>` из `<source>` — подтверждается | опровергается | остаётся открытой | неприменима к этому симптому».
+
+Для прочих вызовов (не explore-bug) допустим краткий абзац с вердиктом и «нужен ли разбор кода».
 
 ## Trace summary
 - Format: TRACE_COMPACT | TRACE_FULL | Stack only
@@ -345,7 +362,7 @@ Provide a report that the parent (or onec-code-architect) can use without re-rea
 ## INVOCATION
 
 - **Automatic**: From `.cursor/rules/1c-error-analysis.mdc` when user provides error + trace.
-- **Workflow**: `openspec-explore/cycle.md` §3.1 (trace analysis in explore session).
+- **Workflow**: `openspec-explore/SKILL.md` (Ultra-Lite explore — trace step in chat-first dialog; full report to `temp/reports/trace-analysis-*.md`).
 - **Manual**: "проанализируй трассу", "разбери стек", "trace analysis", path to `*_TRACE_*.txt` or `.pff`.
 
 ---

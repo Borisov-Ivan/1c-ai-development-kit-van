@@ -18,8 +18,8 @@
 
 | Задача пользователя | Команда | Чем отличается от соседних |
 |---------------------|---------|----------------------------|
-| Любой вопрос, дефект, постановка (в т.ч. свободный текст) | `/opsx:explore` | Единая точка входа; компактный бриф 14–22 строки; итог — `openspec/sessions/<slug>/analysis.md`; профиль bug обогащает бриф трассой/PERF |
-| «Обсудить идею, пока change нет» | `/opsx:explore` | Сессия в `openspec/sessions/`; не writer/reviewer; capture → `/opsx:ff` или `/opsx:extend --from-report` |
+| Любой вопрос, дефект, постановка (в т.ч. свободный текст) | `/opsx:explore` | Единая точка входа; компактный бриф 8–12 строк; итог — блок `## Для /opsx:ff` **в чате**; опциональный handoff `temp/explore-handoff-*.md` по словесной просьбе; профиль bug обогащает бриф трассой/PERF |
+| «Обсудить идею, пока change нет» | `/opsx:explore` | Диалог в чате без `openspec/sessions/`; полные отчёты `Task` — `temp/reports/`; не writer/reviewer; capture → `/opsx:ff` (берёт блок из чата) или `/opsx:extend --from-report <temp/reports/...>` |
 | «Создать новый change пошагово» | `/opsx:new <name>` | Пошаговая последовательность артефактов |
 | «Создать change целиком разом» | `/opsx:ff <name>` | Все артефакты сразу, для уже понятной задачи |
 | «Быстро понять, где я в этом change» | `/opsx:status <name>` | Read-only снимок, без верификаций и субагентов |
@@ -30,7 +30,7 @@
 | «Добавить одну задачу / создать следующий артефакт» | `/opsx:continue <name>` | Пошаговое продолжение, без большого расширения scope |
 | «Мигрировать старый tasks.md (plain/phase) в срезы» | `/opsx:migrate-slices <name>` | Architect restructuring + подтверждение diff |
 | «Реализовать задачи» | `/opsx:apply <name>` | Делегирует writer/reviewer; slice-gate paused |
-| «Разобрать дефект, обновить план» | `/opsx:explore` → `/opsx:extend <name> --from-report` | Исследование (профиль bug) → `analysis.md` → capture fix-задач в change |
+| «Разобрать дефект, обновить план» | `/opsx:explore` → `/opsx:extend <name> --from-report` | Исследование (профиль bug) → блок `## Для /opsx:ff` в чате / `temp/reports/*.md` / `temp/explore-handoff-*.md` → capture fix-задач в change |
 | «Сгенерировать ТЗ по ЗНИ» | `/opsx:doc-tz <name>` | ТЗ отдельно от verify (verify генерирует как часть gate при пороге) |
 | «Финальная проверка перед релизом» | `/prerelease-review` | Tier 1 + Tier 2 расширения или change scope |
 | «Ревью кода» | `/review` | Без change — по git diff; с аргументом — по файлу/модулю/расширению/ЗНИ |

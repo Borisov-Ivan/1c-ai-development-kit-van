@@ -21,7 +21,7 @@ description: Reference guide for 1C agent delegation patterns - complexity asses
 | `onec-code-explorer` | [explorer.md](explorer.md) | исследование кода, верификация гипотез trace-analyst, contract resolution (deep) |
 | `openspec-quality-controller` | [quality-controller.md](quality-controller.md) | slice coherence review (verify 7.6) |
 | `onec-code-simplifier` | [simplifier.md](simplifier.md) | рефакторинг (REFACTOR-замечания) |
-| `onec-trace-analyst` | (нет шаблона; контракт в `.cursor/agents/onec-trace-analyst.md`) | бриф готовится `openspec-explore/cycle.md` §3.1 (разбор трассы в сессии explore) |
+| `onec-trace-analyst` | (нет шаблона; контракт в `.cursor/agents/onec-trace-analyst.md`) | бриф готовится в чате (Ultra-Lite explore — см. `openspec-explore/SKILL.md`, шаг «Маршрут шагов»); полный отчёт → `temp/reports/trace-analysis-*.md` |
 
 ---
 
@@ -69,8 +69,8 @@ description: Reference guide for 1C agent delegation patterns - complexity asses
 ### onec-trace-analyst
 - Файл трассы (PFF/TRACE) или стек ошибки 3+ строк
 - Перед вызовом: подготовить бриф.
-  В explore (профиль bug) / extend — обогащённый бриф из `analysis.md` или артефактов change.
-  В explore — бриф из пользовательского ввода (STOP-gate, `openspec-explore/SKILL.md` шаг 2).
+  В extend — обогащённый бриф из артефактов change (`design.md`, `debug.md`) или из `temp/reports/<тип>-*.md` / `temp/explore-handoff-*.md`.
+  В explore — бриф из пользовательского ввода и блока «Хочу понять» в чате (Entry Protocol; `openspec-explore/SKILL.md`).
 
 ### openspec-quality-controller
 - Domain-agnostic readonly Slice Coherence review

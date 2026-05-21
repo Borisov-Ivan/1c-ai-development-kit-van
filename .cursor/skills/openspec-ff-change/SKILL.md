@@ -24,35 +24,39 @@ Fast-forward through artifact creation - generate everything needed to start imp
 
    a. **If argument provided** — use it as change name (kebab-case). Proceed to step 2.
 
-   b. **If no argument — auto-detect from context:**
-      0. **Session report short-circuit:** Glob `openspec/sessions/*/analysis.md`. If found, read the most recent (by date in session slug or file mtime) if ≤48h and тема совпадает с запросом пользователя.
-         Entry-бриф **опускается** — одна строка «Создаю ЗНИ по утверждённому отчёту `<path>`» + AskQuestion `[Да / Другое имя / Сначала explore]`.
-         Extract change name from `## Следующий шаг` (`/opsx:ff <name>`) or derive kebab-case from заголовка/темы в `analysis.md`.
-         Load full `analysis.md` as `exploreContext` (аналог Explore Summary).
-      1. Glob `temp/explore-summary-*.md` (legacy). If found, read the most recent one (by date in filename).
-         Extract change name from line matching `Готово к созданию ЗНИ <name>`
-         or derive kebab-case from `**Тема:**`.
-         Extract `Architect Gate`, `Ключевые решения`, `Knowledge findings`, and `Рекомендации по срезам` into `exploreContext`. This context is authoritative input for `proposal`, `design`, `specs`, `tasks`, and Design Gate; do not use Explore Summary only for change-name detection.
-         AskQuestion: «Из Explore Summary: `<name>`. Использовать?
-         [Да / Другое имя]».
-      2. If no Explore Summary — run `openspec list --json`.
-         If exactly 1 active change with incomplete artifacts — AskQuestion:
-         «Найден активный change `<name>` (N/M задач). Продолжить?
-         [Да / Новый change]».
-      3. If nothing found — AskQuestion (open-ended):
-         «What change do you want to work on? Describe what you want to build or fix.»
-         Derive kebab-case name from description.
+   b. **If no argument — auto-detect from context (приоритет источников: чат → handoff → legacy → запрос):**
+      0. **Chat short-circuit (приоритет 1):** Прочитать **последние 30–50 сообщений текущего чата сверху-вниз** и найти **самый свежий** блок `## Для /opsx:ff` (формат — см. `openspec-explore/SKILL.md`, секция «Финал bug-профиля»). Если найден и тема совпадает с запросом пользователя:
+         - Entry-бриф **опускается** — одна строка «Создаю ЗНИ по утверждённому отчёту в чате» + `AskQuestion [Да / Другое имя / Сначала explore]`.
+         - Имя change: первый kebab-case-токен из «Что менять» / «Файлы», иначе derive из заголовка темы.
+         - `exploreContext` = разобранные поля блока (Симптом, Корневая причина, Что менять, Файлы, Приёмка, Связь с архивом, Architect/verify). Это **primary source** для `proposal`, `design`, `tasks`; не пересобирать вручную.
+      1. **Handoff-файл (приоритет 2):** `Glob temp/explore-handoff-*.md` за последние **48 часов**. Если найден свежий файл, тема совпадает:
+         - Read; извлечь блок `## Для /opsx:ff` (тот же формат) → `exploreContext`.
+         - AskQuestion: «Из handoff `<path>`: `<name>`. Использовать? [Да / Другое имя]».
+      2. **Legacy session (приоритет 3, только если шаги 0–1 пусты):** `Glob openspec/sessions/*/analysis.md` за последние 48 ч. Если найден и тема совпадает:
+         - Read; в `## Готовый материал для ЗНИ` (legacy формат) — те же поля → `exploreContext`.
+         - AskQuestion: «Из legacy-сессии `<path>`: `<name>`. Использовать? [Да / Другое имя]».
+      3. **Legacy explore-summary (приоритет 4):** `Glob temp/explore-summary-*.md` за последние 48 ч (старый формат). Если найден:
+         - Имя из строки `Готово к созданию ЗНИ <name>` или derive из `**Тема:**`.
+         - Извлечь `Architect Gate`, `Ключевые решения`, `Knowledge findings`, `Рекомендации по срезам` в `exploreContext`.
+         - AskQuestion: «Из Explore Summary: `<name>`. Использовать? [Да / Другое имя]».
+      4. **`openspec list --json`:** если ровно 1 активный change с незакрытыми артефактами — AskQuestion: «Найден активный change `<name>` (N/M задач). Продолжить? [Да / Новый change]».
+      5. **Запрос пользователю (последний шаг):** «Не нашёл готового блока `## Для /opsx:ff` в чате или handoff. Опишите change или повторите ключевые поля (Симптом, Корневая причина, Файлы) — оформлю по шаблону.»
+
+      Derive kebab-case name из описания пользователя в шаге 5.
 
    **IMPORTANT**: Do NOT proceed without a confirmed change name.
 
 1.25. **Explore / Session Context Gate**
 
-   После подтверждения имени change определить `exploreContext`:
-   - Если на шаге 1b.0 уже прочитан `openspec/sessions/*/analysis.md` — использовать его.
-   - Если на шаге 1b.1 уже прочитан `temp/explore-summary-*.md` — использовать его.
-   - Если имя передано аргументом и `exploreContext` ещё не задан — Glob `openspec/sessions/*/analysis.md` (≤48h, тема совпадает), иначе `temp/explore-summary-*.md` за последние 48 часов.
-   - Извлечь из Summary как минимум: `Architect Gate` (`not-required` / `required-pending` / `passed: <path>` / `declined: <reason>`), `Ключевые решения`, `Knowledge findings`, `Рекомендации по срезам`.
-   - Если Summary старше 48 часов или не относится к change — считать, что `exploreContext` отсутствует.
+   После подтверждения имени change определить `exploreContext` (тот же приоритет источников, что в шаге 1b):
+   - Если на шаге 1b.0 уже найден блок `## Для /opsx:ff` в чате — использовать его (primary).
+   - Если на шаге 1b.1 уже прочитан `temp/explore-handoff-*.md` — использовать его.
+   - Если на шаге 1b.2 уже прочитан `openspec/sessions/*/analysis.md` (legacy) — использовать его.
+   - Если на шаге 1b.3 уже прочитан `temp/explore-summary-*.md` (legacy) — использовать его.
+   - Если имя передано аргументом и `exploreContext` ещё не задан — сначала просмотреть последние сообщения чата на блок `## Для /opsx:ff`, затем `Glob temp/explore-handoff-*.md` (≤48ч), затем `openspec/sessions/*/analysis.md` (≤48ч, legacy), затем `temp/explore-summary-*.md` (legacy).
+   - Извлечь как минимум: Симптом / Why, Корневая причина (с маркером `[verified]` / `[hypothesis: план]`), Что менять (scope), Файлы (модули/расширение), Приёмка (acceptance), Связь с архивом (extends `<change>` / новый / unrelated), Architect / verify (yes/no). Для legacy-источников — `Architect Gate`, `Ключевые решения`, `Knowledge findings`, `Рекомендации по срезам`.
+   - Если найден блок `## Для /opsx:ff` (в чате или handoff) — это **primary source** для `proposal`, `design`, `specs`, `tasks`; не пересобирать вручную.
+   - Если источник старше 48 часов или не относится к change — считать, что `exploreContext` отсутствует.
    - Если `exploreContext` отсутствует, это не блокирует простой ff. Design Gate ниже выполнит hard-gate только при структурных триггерах.
 
 1.5. **Metadata Gate (MANDATORY)**
@@ -134,8 +138,8 @@ Fast-forward through artifact creation - generate everything needed to start imp
         - `outputPath`: Where to write the artifact
         - `dependencies`: Completed artifacts to read for context
       - Read any completed dependency files for context
-      - If the change name/brief was derived from `openspec/sessions/*/analysis.md`, use it as `exploreContext` for `proposal`, `design`, `specs`, and `tasks` (verified sections only; hypotheses — с пометкой).
-      - If `exploreContext` exists, use it as source context for `proposal`, `design`, `specs`, and `tasks`: carry `Ключевые решения` into scope/design rationale, `Knowledge findings` into context/assumptions, `Рекомендации по срезам` into `## Slices`, and `Architect Gate` into Design Gate. Treat `exploreContext` as verified investigation context only to the extent its reports are referenced; do not invent code facts from prose.
+      - If the change name/brief was derived from a `## Для /opsx:ff` block (chat or `temp/explore-handoff-*.md`) or legacy `openspec/sessions/*/analysis.md`, use it as `exploreContext` for `proposal`, `design`, `specs`, and `tasks` (verified sections only; hypotheses — с пометкой `[hypothesis: план]`).
+      - If `exploreContext` exists, use it as source context for `proposal`, `design`, `specs`, and `tasks`: для нового формата (`## Для /opsx:ff`) — Симптом → `## Why`, Корневая причина / Что менять → `## What Changes` / scope, Файлы → `## Scope`, Приёмка → `## Acceptance Criteria` / scenarios, Связь с архивом → `## Decisions` (extends/precedent), Architect/verify → Design Gate. Для legacy — `Ключевые решения` → scope/design rationale, `Knowledge findings` → context/assumptions, `Рекомендации по срезам` → `## Slices`, `Architect Gate` → Design Gate. Treat `exploreContext` as verified investigation context only to the extent its reports are referenced; do not invent code facts from prose.
       - **Special case: `tasks` artifact (slice-aware task decomposition)**:
         Before delegating tasks, the **Slice Generation Gate** must have been passed (see step 5e.1 below) and design.md MUST contain a `## Slices` section.
 
@@ -304,7 +308,7 @@ After completing all artifacts, summarize:
 
 **Guardrails**
 - **Metadata Gate MUST NOT be silently skipped**: Do not run `openspec new change` without getting an answer to the developer/zni_id prompt. Before showing the final summary, verify `proposal.md` for placeholders like "Уточнить до", `<developer>`, `<zni_id>`. If found and the user did NOT choose "Пропустить", add a WARNING to the summary.
-- **Explore Summary MUST NOT be used only for naming**: If a recent relevant `temp/explore-summary-*.md` exists, read it as source context and carry `Architect Gate`, key decisions, knowledge findings, and slice recommendations into artifact creation and Design Gate.
+- **Explore context MUST NOT be used only for naming**: Если в последних сообщениях чата найден свежий блок `## Для /opsx:ff` или относится свежий `temp/explore-handoff-*.md` (или legacy `temp/explore-summary-*.md`), прочитать как source context и перенести все поля (Симптом, Корневая причина с маркером, Что менять, Файлы, Приёмка, Связь с архивом, Architect/verify) в `proposal`, `design`, `specs`, `tasks` и Design Gate. Для legacy — те же поля + `Architect Gate`, key decisions, knowledge findings, slice recommendations.
 - Create ALL artifacts needed for implementation (as defined by schema's `apply.requires`)
 - Always read dependency artifacts before creating a new one
 - If context is critically unclear, ask the user - but prefer making reasonable decisions to keep momentum

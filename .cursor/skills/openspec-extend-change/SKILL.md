@@ -27,7 +27,7 @@ metadata:
   - `--from-debug <path>` — `debug.md` или RCA-отчёт
   - `--from-verify <path>` — отчёт `/opsx:verify`
   - `--from-architecture <path>` — отчёт архитектора
-  - `--from-report <path>` — `openspec/sessions/<slug>/analysis.md` (итог `/opsx:explore`; RCA, рецепт, fix-задачи)
+  - `--from-report <path>` — итог `/opsx:explore`: `temp/reports/<тип>-YYYY-MM-DD-<slug>.md` (полный отчёт trace-analyst / explorer / architect), `temp/explore-handoff-*.md` (опциональный handoff с блоком `## Для /opsx:ff`), или legacy `openspec/sessions/<slug>/analysis.md` (RCA, рецепт, fix-задачи)
   - `--from-explore <path>` — legacy Explore Summary (`temp/explore-summary-*.md`)
   - `--code-sync` — штатная синхронизация OpenSpec-артефактов с фактическим кодом после ручного упрощения, writer/apply или Code-Truth Gate (`phantom-symbol`, устаревшие имена процедур, drift design/tasks/debug).
 
@@ -45,7 +45,7 @@ metadata:
    - иначе выполнить `openspec list --json` и выбрать активный / спросить пользователя.
 3. Выполнить `openspec instructions apply --change "<name>" --json`.
 4. Прочитать `openspec/project.md` и артефакты change из `contextFiles`: `proposal.md`, `design.md`, `tasks.md`, `specs/**` при наличии; для расширения scope также прочитать `debug.md` (если есть) — нужен для счётчика Scope Coherence Audit и записей `## Extend`.
-5. Прочитать только явно переданные source-файлы (`--from-*`, `@path`, пути в запросе). Трассы — через `/opsx:explore` (профиль bug). `--from-report` принимает `openspec/sessions/<slug>/analysis.md` (замена capture из удалённого `/opsx:debug`). Если указан `--code-sync`, source = артефакты change + `debug.md` + отчёты `reports/**` + результаты Code-Truth Gate; чтение BSL/XML до брифа всё равно запрещено.
+5. Прочитать только явно переданные source-файлы (`--from-*`, `@path`, пути в запросе). Трассы — через `/opsx:explore` (профиль bug). `--from-report` принимает (приоритет): `temp/reports/<тип>-YYYY-MM-DD-<slug>.md` (отчёт `Task` из Ultra-Lite explore), `temp/explore-handoff-*.md` (handoff с блоком `## Для /opsx:ff`), legacy `openspec/sessions/<slug>/analysis.md`. Если указан `--code-sync`, source = артефакты change + `debug.md` + отчёты `reports/**` + результаты Code-Truth Gate; чтение BSL/XML до брифа всё равно запрещено.
 5a. Для секции **KB в scope** брифа: прочитать `openspec/knowledge/_index.yaml` и при необходимости `_taxonomy.yaml` и выбранные KB `.md` — по алгоритму Entry Protocol шаг 1.5 `.cursor/skills/openspec-explore/SKILL.md` (anchor-paths из путей в уже прочитанных артефактах и source-файлах; бюджет Top-10; при отсутствии совпадений — «нет совпадений по anchor-paths и домену» или «Discovery не требовался» при явном отсутствии релевантных путей).
 6. Сформировать и показать **бриф extend** по шаблону ниже.
 7. **END TURN.** До подтверждения пользователя запрещены: запись артефактов, вызовы writer/reviewer, вызовы architect/explorer, чтение BSL/XML для анализа логики.
@@ -54,11 +54,9 @@ metadata:
 
 ### Шаблон брифа (T-BRIEF)
 
-Единый каркас — `.cursor/docs/opsx-output-style.md` §5.1 в **чате**. Заголовок: `## Бриф: /opsx:extend | change: <name>`. Файлы `temp/briefs/*.md` не создаются.
+Единый каркас — `.cursor/docs/opsx-output-style.md` §5.1 в **чате** (5 секций: Что вижу, Хочу понять, Как буду искать, Что получите, Подтвердить?). Заголовок: `Бриф для исследования: /opsx:extend | change: <name>`. Файлы `temp/briefs/*.md` не создаются.
 
-**Обязательные секции §5.1:** Контекст; Что я понял; **KB в scope** (Discovery по anchor-paths из артефактов change и source-файлов или явное «нет совпадений / Discovery не требовался»); **План**; **Подтвердить?**
-
-**Дополнительно для extend (всегда в том же сообщении, после опциональных секций §5.1):**
+**Дополнительно для extend (всегда в том же сообщении, после секции «Что получите»):**
 
 ```markdown
 **Предлагаемое изменение артефактов**
@@ -76,9 +74,9 @@ metadata:
 - Drift-check: pass / drift-warning / scope-violation
 ```
 
-Секция **План** того же сообщения (после блоков выше или до них — на усмотрение, но один раз): 1) уточнить неоднозначности через AskQuestion при необходимости; 2) проверить гейты архитектуры и факты в коде; 3) при `--code-sync` — после подтверждения делегировать исследователя кода и сохранить `reports/exploration-code-sync-YYYY-MM-DD.md`; 4) обновить артефакты change; 5) передать на `/opsx:verify <name>`. Завершить **Подтвердить?** по §5.1.
+Секция **Как буду искать** того же сообщения: 1) уточнить неоднозначности через AskQuestion при необходимости; 2) проверить гейты архитектуры и факты в коде; 3) при `--code-sync` — после подтверждения делегировать исследователя кода и сохранить `reports/exploration-code-sync-YYYY-MM-DD.md`; 4) обновить артефакты change; 5) передать на `/opsx:verify <name>`. Завершить **Подтвердить?** по §5.1.
 
-Self-check перед выводом: слои разделены; в UX-полях §5.1 нет `S<N>.T<M>` / `D<N>` / номеров задач; списки нумерованы; поле **Вход** / **Факты** — только факты; каждое поле ≤3 строк или ≤7 пунктов; **KB в scope** присутствует; блок **«Соответствие исходному scope»** заполнен всеми **пятью** строками (Why, Non-Goals, Behavior Contract, Отменяет архивный инвариант, Drift-check).
+Self-check перед выводом: слои разделены; в UX-полях §5.1 нет `S<N>.T<M>` / `D<N>` / номеров задач; списки нумерованы; поле **Вход** / **Факты** — только факты; каждое поле ≤3 строк или ≤7 пунктов; блок **«Соответствие исходному scope»** заполнен всеми **пятью** строками (Why, Non-Goals, Behavior Contract, Отменяет архивный инвариант, Drift-check).
 
 **Развилки в чате после брифа:** любые варианты выбора до или после подтверждения (AskQuestion, неоднозначный `Drift-check` и т.п.) выводить блоками **«Решение N — …»** с метками `<N>a` / `<N>b` / `<N>c` по образцу `.cursor/skills/openspec-verify-change/templates/chat-summary.md`, чтобы пользователь мог ответить одной строкой; варианты **в чате**, не только в длинном теле брифа.
 
@@ -122,8 +120,8 @@ Self-check перед выводом: слои разделены; в UX-пол�
 | `debug` | `debug.md`, `trace-analysis-*`, RCA, `Verified facts`, `Hypotheses`, `Root cause` | verified facts, hypotheses, root cause, target slice |
 | `verify` | `verification-*.md`, `Phase B`, `Decision`, `CRITICAL/WARNING/SUGGESTION` | decision cards, scope/design/task issues, recommended remediation |
 | `architecture` | `architecture-*.md`, `architecture-review-*` | рекомендуемые изменения design/spec/tasks/ADR, alternatives |
-| `explore` | `explore-summary-*`, `Explore Summary`, `Decisions`, `Open questions` | сформулированные требования, slice hints, unresolved questions |
-| `report` | `openspec/sessions/*/analysis.md`, секции RCA / Verified facts / Рекомендации / Fix tasks | root cause, verified facts, рецепт, задачи для `debug.md` и `tasks.md`, slice placement |
+| `explore` | `explore-summary-*` (legacy), `Explore Summary`, `Decisions`, `Open questions` | сформулированные требования, slice hints, unresolved questions |
+| `report` | `temp/reports/<тип>-*.md` (новый формат: trace-analyst / explorer / architect), `temp/explore-handoff-*.md` (блок `## Для /opsx:ff`), legacy `openspec/sessions/*/analysis.md` (секции RCA / Verified facts / Рекомендации / Fix tasks) | root cause, verified facts, рецепт, задачи для `debug.md` и `tasks.md`, slice placement |
 | `code-sync` | флаг `--code-sync`, `phantom-symbol`, расхождения `design/tasks/debug` с фактическим кодом | фактические символы, устаревшие рецепты, какие артефакты догнать до кода |
 | `other` | markdown/text без явных маркеров | факты и open questions; если непонятно — AskQuestion |
 
@@ -322,7 +320,7 @@ Architect обязателен, если:
 Команды семейства `/opsx:*` должны ссылаться на extend, когда вывод показывает необходимость изменить scope:
 
 - `/review`: `Architecture findings` или findings, противоречащие `design.md` → `/opsx:extend <name> --from-review <report-path>`.
-- `/opsx:explore` + `analysis.md`: RCA и рецепт → `/opsx:extend <name> --from-report openspec/sessions/<slug>/analysis.md`.
+- `/opsx:explore` (Ultra-Lite): RCA и рецепт → `/opsx:extend <name> --from-report temp/reports/<тип>-YYYY-MM-DD-<slug>.md` (отчёт `Task`) или `temp/explore-handoff-*.md` (если был handoff); legacy: `--from-report openspec/sessions/<slug>/analysis.md`.
 - `/opsx:verify`: Phase B требует решения по scope/design/tasks → `/opsx:extend <name> --from-verify <report-path>`.
 - `/opsx:apply`: реализация выявила scope mismatch → `/opsx:extend <name>`.
 - `/opsx:explore`: есть активный change и обсуждение даёт новое требование → `/opsx:extend <name>`.

@@ -23,15 +23,18 @@ Start a new change using the experimental artifact-driven approach.
 
    a. **If argument provided** — use it as change name (kebab-case). Proceed to step 2.
 
-   b. **If no argument — auto-detect from context:**
-      0. **Session report short-circuit:** Glob `openspec/sessions/*/analysis.md`. If found, read the most recent if ≤48h and тема совпадает с запросом.
-         Entry-бриф **опускается** — «Создаю ЗНИ по утверждённому отчёту `<path>`» + AskQuestion `[Подтвердить / Изменить имя / Сначала explore]`.
-         Extract change name from `## Следующий шаг` (`/opsx:new <name>` or `/opsx:ff <name>`) or kebab-case from темы в `analysis.md`.
-      1. Glob `temp/explore-summary-*.md` (legacy). If found, read the most recent one (by date in filename).
-         Extract change name from line matching `Готово к созданию ЗНИ <name>`
-         or derive kebab-case from `**Тема:**`.
-         Extract brief from `**Ключевые решения:**` section (2-3 sentences).
-         AskQuestion:
+   b. **If no argument — auto-detect from context (приоритет источников: чат → handoff → temp/reports → legacy → запрос):**
+      0. **Chat short-circuit (приоритет 1):** Прочитать **последние 30–50 сообщений текущего чата** и найти **самый свежий** блок `## Для /opsx:ff` (формат — см. `openspec-explore/SKILL.md`, секция «Финал bug-профиля»). Если найден и тема совпадает с запросом:
+         - Entry-бриф **опускается** — «Создаю ЗНИ по утверждённому отчёту в чате» + AskQuestion `[Подтвердить / Изменить имя / Сначала explore]`.
+         - Имя change: kebab-case-токен из «Что менять» / «Файлы» / темы; derive из заголовка темы при необходимости.
+         - `exploreContext` = разобранные поля блока (Симптом, Корневая причина, Что менять, Файлы, Приёмка, Связь с архивом, Architect/verify). Это **primary source** для всех артефактов.
+      1. **Handoff-файл (приоритет 2):** `Glob temp/explore-handoff-*.md` за последние **48 часов**. Если найден свежий, тема совпадает — Read; извлечь блок `## Для /opsx:ff` → `exploreContext`; AskQuestion как выше.
+      2. **Полные отчёты `Task` (приоритет 3):** `Glob temp/reports/{trace-analysis,exploration,correlation,architecture}-*.md` за 48 ч. Если найден свежий по теме — Read; derive topic и brief из секций `## Для заказчика` / `## Свод`. AskQuestion с предложенным именем (источник = имя файла).
+      3. **Legacy session (приоритет 4):** `Glob openspec/sessions/*/analysis.md` за 48 ч. Если найден и тема совпадает — Read; в `## Готовый материал для ЗНИ` поля → `exploreContext`; AskQuestion `[Подтвердить / Изменить имя / Сначала explore]`.
+      4. **Legacy explore-summary (приоритет 5):** `Glob temp/explore-summary-*.md` за 48 ч. Если найден:
+         - Имя из строки `Готово к созданию ЗНИ <name>` или derive из `**Тема:**`.
+         - Brief из `**Ключевые решения:**` (2–3 предложения).
+         - AskQuestion:
          ```
          Из контекста обсуждения:
          - **Имя ЗНИ:** `<kebab-name>`
@@ -42,16 +45,8 @@ Start a new change using the experimental artifact-driven approach.
          2. Изменить имя
          3. Уточнить бриф
          ```
-      2. If no Explore Summary — Glob `temp/reports/{trace-analysis,exploration,correlation}-*.md`.
-         If found, read the most recent report, derive topic and brief from its content.
-         AskQuestion with proposed name and brief (same format as above, source = report filename).
-      3. If no reports — run `openspec list --json`.
-         If exactly 1 active change with incomplete artifacts — AskQuestion:
-         «Найден активный change `<name>` (N/M артефактов). Продолжить?
-         [Да / Новый change]».
-      4. If nothing found — AskQuestion (open-ended, no preset options):
-         «Что хотите реализовать? Опишите задачу.»
-         From the answer, derive a kebab-case name and brief.
+      5. **`openspec list --json`:** если ровно 1 активный change с незакрытыми артефактами — AskQuestion: «Найден активный change `<name>` (N/M артефактов). Продолжить? [Да / Новый change]».
+      6. **Запрос пользователю (последний шаг):** AskQuestion (open-ended): «Не нашёл готового блока `## Для /opsx:ff` в чате или handoff. Что хотите реализовать? Опишите задачу.» Derive a kebab-case name и brief из ответа.
 
    **IMPORTANT**: Do NOT proceed without a confirmed change name.
 
