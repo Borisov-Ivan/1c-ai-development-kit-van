@@ -92,7 +92,8 @@ Grep `tasks.md` на `^- \[[ ]\]` — если найдено хотя бы од
 3. Если **все три** флага `same/actual` **И** в текущем запросе пользователя нет содержательных вопросов (был только триггер `/opsx:verify <name>`) — путь **`silent_ok`**:
    - **Не запускать слои 1–5.**
    - **Не создавать новый файл отчёта.**
-   - В чат — «тихий» вариант шаблона `templates/chat-summary.md`. Закончить шаг.
+   - Прочитать тело последнего `reports/verification-*.md` (не только YAML).
+   - В чат — «тихий» вариант шаблона `templates/chat-summary.md`: **1a**, если прошлый вердикт «можно apply»; **1b**, если прошлый вердикт «до apply нужно решение». Для **1b** обязательно извлечь развилки из секции `## Решения до apply` прошлого отчёта и вывести их в чат в формате Варианта 3 (5 блоков на развилку, строка `Цель ЗНИ:` обязательна). Закончить шаг.
 4. Если хотя бы один флаг разошёлся — продолжить со слоя 1.
 
 ### Layer 1 — Гигиена артефактов (тихая, авто-исправление)
@@ -119,6 +120,8 @@ Layer 1 **никогда** не блокирует — только правит
 **Цель:** артефакты не противоречат друг другу.
 
 **2.1. Slice Coherence (Quality Controller)** — делегировать **`openspec-quality-controller`** (Task **без** `model=`, по `model-selection.mdc`). Промпт: см. `1c-agent-patterns/quality-controller.md`. Получить `reports/quality-control-YYYY-MM-DD.md`.
+
+**Режим запуска:** `run_in_background: false` (sync, последовательно). Карточка Task не показывается в чате как отдельное сообщение — `tool_result` идёт во внутренний контекст оркестратора. В промпт обязательно включить блок **Final message constraint** из секции «Запуск агентов verify» ниже.
 
 QC оценивает критерии 1–6 из `vertical-slices.mdc` (Scenario Coverage, Slice Independence, Slice Completeness, Slice Dependency Graph, Slice Gate Integrity, Acceptance Checklist Coverage 5b, Rework Risk).
 
@@ -167,11 +170,12 @@ QC оценивает критерии 1–6 из `vertical-slices.mdc` (Scenari
 **Запуск:**
 
 1. Делегировать `onec-code-architect` с `mode=design-challenge` по таблице моделей (`model-selection.mdc`, цепочка для архитектора).
-2. Промпт включает:
+2. **Режим запуска:** `run_in_background: true` (параллельно с sync-агентами Layer 2/5). Самый длинный шаг verify; параллелизм нужен, иначе verify становится в 2.5x длиннее. В чате остаётся **одна короткая карточка** (одна строка пути к файлу) — это допустимо как фоновый прогресс-маркер и не нагружает внимание. В промпт обязательно включить блок **Final message constraint** (секция «Запуск агентов verify» ниже).
+3. Промпт включает:
    - `proposal.md`, `design.md`, `specs/**/spec.md` — как первичные источники.
    - **Запрет** опираться на `reports/architecture-*.md` собственного авторства как на источник истины.
    - Инструкции по адверсариальной установке, Three-Question Challenge и формату отчёта (см. `.cursor/agents/onec-code-architect.md` секция «Режим `design-challenge`»).
-3. Результат — `reports/design-challenge-YYYY-MM-DD.md` с YAML `verdict: APPROVE | CHALLENGE | REJECT`.
+4. Результат — `reports/design-challenge-YYYY-MM-DD.md` с YAML `verdict: APPROVE | CHALLENGE | REJECT`.
 
 **Маппинг вердикта на статус слоя:**
 
@@ -185,7 +189,7 @@ QC оценивает критерии 1–6 из `vertical-slices.mdc` (Scenari
 
 **Цель:** задачи реально можно реализовать as-is. Это **не** пересмотр архитектурного подхода (это сделал Layer 4) — узкий фокус на исполнимости.
 
-Делегировать `onec-code-architect` с `mode=task-readiness` (промпт см. `1c-agent-patterns/architect.md`). Архитектор оценивает:
+Делегировать `onec-code-architect` с `mode=task-readiness` (промпт см. `1c-agent-patterns/architect.md`). **Режим запуска:** `run_in_background: false` (sync). Карточка Task не отображается в чате. В промпт обязательно включить блок **Final message constraint** (секция «Запуск агентов verify» ниже). Архитектор оценивает:
 
 1. Каждая задача `S<N>.<M>` имеет конкретные файл/процедуру/объект (по правилу `task-readability.mdc`)?
 2. Контракты данных (`Свойство()`/`ТипЗнч()`/защитные проверки) — оправданы (Data Contract Gate)?
@@ -219,22 +223,36 @@ Layer 4 `CHALLENGE` или `REJECT` → NO-GO.
 
 ### Save report
 
-Если хоть один слой не `PASS` либо были автоправки — сохранить `reports/verification-YYYY-MM-DD.md`:
+Если хоть один слой не `PASS` либо были автоправки — сохранить `reports/verification-YYYY-MM-DD.md` строго в следующем порядке (полный шаблон — `templates/executive-summary.md` и `templates/report-header.md`):
 
-- YAML front-matter — `templates/report-header.md`.
-- `## Executive Summary` — `templates/executive-summary.md` (бинарный вердикт + статусы 5 слоёв).
-- `### Авто-исправлено (Layer 1)` — `templates/phase-a-table.md`.
-- `### К сведению` (info из любого слоя) — `templates/info-section.md`.
-- `### Что обсудим` — один или несколько разговорных блоков `templates/card-decision.md`. Только при NO-GO.
-- В конце файла — раздел «Источники», в который попадают технические коды алертов и пути дочерних отчётов (`quality-control-*.md`, `design-challenge-*.md`, `architecture-task-readiness-*.md`).
+1. **YAML front-matter** — `templates/report-header.md`. Внутреннее состояние (verdict, layer_status, snapshot) для движка и фильтра новизны.
+2. **`## Резюме для разработчика`** — первый видимый раздел. Зеркало финального сообщения чата + 1–2 абзаца контекста (модули, процедуры, директивы). На языке кода 1С, без жаргона движка.
+3. **`## Решения до apply`** — только при NO-GO. Развёрнутые развилки прозой; каждая `###` с конкретными именами `Функция/Процедура/Модуль/Реквизит`. Внутренние коды развилок (`templates/card-decision.md`) — НЕ здесь.
+4. **`## Что меняется в постановке`** — карточка изменений для разработчика: путь в `src/`, точки изменения, что НЕ меняется, связанные ADR/KB/архив.
+5. **`### Подправил в постановке`** — авто-правки гигиены простыми словами (если были); техническая таблица `templates/phase-a-table.md` уходит в `## Технический аудит`.
+6. **`### К сведению`** — мелочи, не блокирующие apply (`templates/info-section.md`).
+7. **`## Технический аудит (для движка OpenSpec)`** — статусы пяти слоёв, развёрнутые карточки `templates/card-decision.md`, технический формат `templates/phase-a-table.md`. **Только здесь** допустимы имена `Layer 1..5`, `PASS/FAIL`, `CHALLENGE/APPROVE/REJECT`, `design-challenge`, `task-readiness`, `phantom-symbol`, `slice coherence`.
+8. **`## Источники`** — пути к дочерним отчётам (`quality-control-*.md`, `design-challenge-*.md`, `architecture-task-readiness-*.md`), технические коды алертов.
 
 Если verify повторный в один день — суффикс `-2`, `-3` и т. д.
 
-При `silent_ok` (шаг 4) — **новый файл не создаётся**, ссылка в чате идёт на последний `reports/verification-*.md`.
+При `silent_ok` (шаг 4) — **новый файл не создаётся**. Если прошлый вердикт «до apply нужно решение» — в чат выводятся развилки из последнего отчёта (Вариант 1b); иначе — тихий вариант 1a. Ссылка в конце — на последний `reports/verification-*.md`.
 
 ### Output to chat
 
-Использовать `templates/chat-summary.md` и `templates/verdict-card.md`. Бинарный вердикт — первой строкой. Один разговорный блок (`templates/card-decision.md`) на каждое содержательное обсуждение (Layer 3 FAIL, Layer 4 CHALLENGE/REJECT, Layer 2/5 FAIL). Без кодов выбора, без счётчиков severity, без имён слоёв в стиле «Layer 4». Pre-send self-check — `chat-output-budget.mdc` §1b и `verify-user-communication.mdc`.
+Использовать `templates/chat-summary.md` и `templates/verdict-card.md`. Первая строка — вердикт в формулировке «Можно запускать apply» / «До apply нужно решение: <одна техническая фраза сути>». Без кодов выбора, без счётчиков severity, без имён слоёв.
+
+**Тон сообщения — «архитектор — разработчику».** Читатель — коллега-разработчик 1С, который **не открывал** артефакты OpenSpec и **не знает** про слои verify. Резюме и развилки формулируются на языке кода 1С: имена общих модулей, процедур, объектов метаданных, директив расширения, реквизитов — в backticks.
+
+#### Pre-send self-check (обязательно перед отправкой)
+
+1. **Знает ли OpenSpec?** Если читатель сообщения никогда не открывал артефакты `openspec/changes/`, понимает ли он смысл? Если нет — переписать.
+2. **Конкретика 1С.** Развилки и резюме содержат имена общих модулей, процедур, объектов метаданных, директив расширения (`&Вместо`, `&После`, `&ИзменениеИКонтроль`), реквизитов? Если только «согласованность плана» / «реализуемость» — переписать на язык кода.
+3. **Запрещённые подстроки.** Прогнать сообщение по §7 `chat-output-budget.mdc` (расширенный список: `Layer 1..5`, `GAP`, `PASS`, `FAIL`, `slice coherence`, `code-truth`, `phantom-symbol`, `task-readiness`, `design-challenge`, `snapshot`, `novelty`, «согласованность плана», «реализуемость задач», «когерентность»).
+4. **Один путь к одному отчёту.** В конце сообщения — ровно одна ссылка на `reports/verification-YYYY-MM-DD.md`. Нет других путей и других отчётов в чате.
+5. **Промежуточные карточки.** Сообщение не упоминает и не цитирует карточки Task (QC / design-challenge / task-readiness), даже если они отобразились в чате во время прогона.
+6. **Развилки — 5 блоков, цель ЗНИ обязательна.** Каждая развилка в чате имеет ровно 5 коротких блоков (заголовок-проблема → контекст → bullet-варианты → `Влияет на:` → `Цель ЗНИ:` → ссылка). Строка `Цель ЗНИ:` с маппингом «обе ветки закрывают / только X закрывает» — обязательна. Без неё сообщение не отправляется. Список вариантов содержит только **реальные** альтернативы (вариант, отличающийся от другого только правкой `design.md`/`tasks.md` без изменения кода, — слить или удалить). В развилке нет таблиц, отдельных строк «Цена/Плюс/Минус», псевдокода цепочек вызовов, листингов кода — это всё в файле отчёта.
+7. **Без мета-абзацев.** В финальном сообщении нет абзацев про устройство скилла («формат вывода», «режим verify», «шаблон сообщения», «вариант обсуждения, не суть», «Ask/Agent mode», описание следующих шагов extend). Сообщение заканчивается на «Полный отчёт: …» либо — после решения пользователя — на одной строке следующей команды.
 
 ### Update snapshot
 
@@ -245,13 +263,48 @@ Layer 4 `CHALLENGE` или `REJECT` → NO-GO.
 - `last_challenge_at` — обновить **только** если Layer 4 был запущен и вернул `APPROVE` или `CHALLENGE`. При `REJECT` или пропуске не трогать.
 - `open_known_questions` — список тем `## Для /opsx:ff` / TODO из info-секции.
 
-## Делегирование агентам
+## Запуск агентов verify (гибридный режим)
 
-| Layer | Агент | Mode | Когда |
-|---|---|---|---|
-| 2 | `openspec-quality-controller` | — (без `model=`) | Всегда |
-| 4 | `onec-code-architect` | `design-challenge` | По триггеру (см. Layer 4) |
-| 5 | `onec-code-architect` | `task-readiness` | Всегда |
+### Таблица
+
+| Layer | Агент | Mode | `run_in_background` | Когда |
+|---|---|---|---|---|
+| 2 | `openspec-quality-controller` | — (без `model=`) | **false** (sync) | Всегда |
+| 4 | `onec-code-architect` | `design-challenge` | **true** (background) | По триггеру (см. Layer 4) |
+| 5 | `onec-code-architect` | `task-readiness` | **false** (sync) | Всегда |
+
+### Порядок (минимум видимых карточек, без удвоения времени)
+
+1. **Запустить design-challenge в background** (если триггер Layer 4 сработал) — `run_in_background: true`. Карточка Task в чате будет, но свёрнутая до одной строки благодаря Final message constraint.
+2. **Запустить QC sync** — `run_in_background: false`. Дождаться результата. Карточки в чате нет.
+3. **Запустить task-readiness sync** — `run_in_background: false`. Дождаться результата. Карточки в чате нет.
+4. **Дождаться завершения design-challenge** (если ещё не завершён).
+5. **Синтез** — оркестратор пишет **одно** финальное сообщение пользователю по `templates/chat-summary.md`. Промежуточные карточки Task **не цитируются** и **не упоминаются**.
+
+### Final message constraint (HARD — обязательно в каждом промпте)
+
+В **каждый** промпт Task (QC, design-challenge, task-readiness) включить блок дословно:
+
+```
+## Final message to chat (HARD CONSTRAINT)
+
+Your final assistant message in this turn is a single line:
+"Отчёт сохранён: <full path to file>".
+
+Do NOT include verdict, severity, slice coherence summary, layer name,
+simplicity check, three-question challenge, recommendations, or any other
+analysis в финальном сообщении. Full analysis goes ONLY to the saved
+markdown file.
+
+Reason: the user does NOT read your final message. The orchestrator reads
+the file and synthesizes a single message for the user. Anything you put
+в финальный assistant message becomes user-visible chat noise.
+```
+
+Без этого блока промпт verify считается некорректным — карточка Task
+протекает в чат с внутренним языком модели.
+
+### Сбой субагента
 
 При сбое субагента — следовать **«Целостность цепочки Task»** в `.cursor/rules/model-selection.mdc`. Не подменять отчёт собственным текстом до исчерпания цепочки. Layer 4 при полностью исчерпанной цепочке без согласия пользователя на обход — **NO-GO** с пометкой «Не удалось выполнить независимый аудит — повторите позже либо явно обойдите через `.gate-override.yaml`».
 

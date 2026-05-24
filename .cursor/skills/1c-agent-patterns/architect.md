@@ -176,6 +176,73 @@ Task(
 
 ---
 
+## Architect — design challenge (verify Layer 4)
+
+Used by `/opsx:verify` Layer 4 — независимый адверсариальный аудит, что `design.md` действительно решает проблему из `proposal.md` оптимальным способом. **Не** дублирует Architect Gate из `/opsx:ff` (там — auctorial design); здесь — adversarial challenge.
+
+Подробный протокол (адверсариальная установка, Three-Question Challenge, формат отчёта, маппинг вердикта) — см. `.cursor/agents/onec-code-architect.md` секция «Режим `design-challenge`».
+
+**Модель.** По цепочке для архитектора из `.cursor/rules/model-selection.mdc`. **Режим запуска: `run_in_background=true`** (см. SKILL.md verify, секция «Запуск агентов verify»).
+
+```
+Task(
+  description="Design Challenge [change-name]",
+  prompt="mode=design-challenge
+
+         ## Задача
+
+         Независимый адверсариальный аудит `design.md` ЗНИ `<change-name>`.
+         Атаковать решение по Three-Question Challenge (Q1 Problem-Solution
+         Fit, Q2 Optimality vs ≥2 неупомянутых альтернатив, Q3 Fresh-Eye
+         Approval). Полный протокол режима — см. .cursor/agents/onec-code-architect.md
+         секция «Режим design-challenge».
+
+         ## Артефакты (первичные источники истины)
+
+         - proposal: openspec/changes/<change-name>/proposal.md
+         - design: openspec/changes/<change-name>/design.md
+         - specs: openspec/changes/<change-name>/specs/**/spec.md
+
+         ## Запреты
+
+         - Не опираться на собственные прошлые отчёты `reports/architecture-*.md`
+           как на источник истины — каждый аргумент должен ссылаться на
+           proposal.md / design.md / specs / файлы кода / вендорские стандарты.
+         - Не повторять секции «Simplicity Check», «Found Patterns»,
+           «Architecture» из режима design — это не дизайн-сессия.
+         - Не молчать. Если не нашёл что атаковать — показать ≥3 альтернативы
+           и обосновать, почему ни одна не лучше.
+
+         ## Результат
+
+         Сохранить отчёт в:
+         openspec/changes/<change-name>/reports/design-challenge-YYYY-MM-DD.md
+
+         YAML: verdict ∈ {APPROVE | CHALLENGE | REJECT}, confidence,
+         scope.design_mtime.
+
+         ## Final message to chat (HARD CONSTRAINT)
+
+         Your final assistant message in this turn is a single line:
+         \"Отчёт сохранён: openspec/changes/<change-name>/reports/design-challenge-YYYY-MM-DD.md\".
+
+         Do NOT include verdict, severity, three-question challenge summary,
+         layer name, alternative names, recommendations, или any other
+         analysis в финальном сообщении. Full analysis goes ONLY to the
+         saved markdown file.
+
+         Reason: the user does NOT read your final message. The orchestrator
+         reads the file and synthesizes a single message for the user.
+         Anything you put в финальный assistant message becomes user-visible
+         chat noise.",
+  subagent_type="onec-code-architect",
+  model="<по цепочке для архитектора из model-selection.mdc>",
+  run_in_background=true
+)
+```
+
+---
+
 ## Architect — task readiness review (verify шаг 7.7)
 
 Used by `/opsx:verify` step 7.7 — MANDATORY in every pre-apply verification. The architect evaluates holistic readiness: can the ЗНИ be implemented as-is by agents and users without returning for clarification?
@@ -286,8 +353,23 @@ Task(
          Только: можно ли реализовать as-is.
 
          Результат: сохранить в
-         openspec/changes/<change-name>/reports/task-readiness-review-YYYY-MM-DD.md.",
-  subagent_type="onec-code-architect"
+         openspec/changes/<change-name>/reports/task-readiness-review-YYYY-MM-DD.md.
+
+         ## Final message to chat (HARD CONSTRAINT)
+
+         Your final assistant message in this turn is a single line:
+         \"Отчёт сохранён: openspec/changes/<change-name>/reports/task-readiness-review-YYYY-MM-DD.md\".
+
+         Do NOT include verdict, severity, gap summary, layer name,
+         simplicity check, recommendations, или any other analysis в финальном
+         сообщении. Full analysis goes ONLY to the saved markdown file.
+
+         Reason: the user does NOT read your final message. The orchestrator
+         reads the file and synthesizes a single message for the user.
+         Anything you put в финальный assistant message becomes user-visible
+         chat noise.",
+  subagent_type="onec-code-architect",
+  run_in_background=false
 )
 ```
 

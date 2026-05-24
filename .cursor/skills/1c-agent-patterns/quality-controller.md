@@ -31,8 +31,23 @@ Task(
            mentioned in tasks, with empty/non-empty status>
 
          Save result to:
-         openspec/changes/<change-name>/reports/quality-control-YYYY-MM-DD.md.",
-  subagent_type="openspec-quality-controller"
+         openspec/changes/<change-name>/reports/quality-control-YYYY-MM-DD.md.
+
+         ## Final message to chat (HARD CONSTRAINT)
+
+         Your final assistant message in this turn is a single line:
+         \"Отчёт сохранён: openspec/changes/<change-name>/reports/quality-control-YYYY-MM-DD.md\".
+
+         Do NOT include verdict, severity, slice coherence summary, layer
+         name, recommendations, or any other analysis в финальном сообщении.
+         Full analysis goes ONLY to the saved markdown file.
+
+         Reason: the user does NOT read your final message. The orchestrator
+         reads the file and synthesizes a single message for the user.
+         Anything you put в финальный assistant message becomes user-visible
+         chat noise.",
+  subagent_type="openspec-quality-controller",
+  run_in_background=false
 )
 ```
 

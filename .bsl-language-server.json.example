@@ -1,0 +1,46 @@
+{
+    "$schema": "https://1c-syntax.github.io/bsl-language-server/configuration/schema.json",
+    "language": "ru",
+
+    // -------------------------------------------------------------------------
+    // Профиль configurationRoot — выберите ОДИН (остальные закомментируйте).
+    // После смены: Developer: Reload Window + синхронизируйте rootPath в .vscode/settings.json
+    // -------------------------------------------------------------------------
+
+    // ДО2 — cf + все cfe этой линии (активный профиль PavDO по умолчанию)
+    "configurationRoot": "src/ДО2",
+
+    // ДО3 — cf + cfe линии 3.0
+    // "configurationRoot": "src/ДО3",
+
+    // ДО2 Подрядчик — отдельная выгрузка подрядчика
+    // "configurationRoot": "src/ДО2 Подрядчик",
+
+    // -------------------------------------------------------------------------
+    // Узкий профиль — одно расширение (быстрее, если работаете только в нём)
+    // -------------------------------------------------------------------------
+    // "configurationRoot": "src/ДО2/cfe/ДО21_Павлик",
+    // "configurationRoot": "src/ДО2/cfe/ДО2_КнопкаHelp",
+    // "configurationRoot": "src/ДО3/cfe/АдаптацияДО3_Павлик",
+
+    "diagnostics": {
+        "computeTrigger": "onSave",
+        "skipSupport": "withSupportLocked",
+        "analyzeOnStart": false,
+        "mode": "ON",
+        "minimumLSPDiagnosticLevel": "Warning"
+    },
+    "codeLens": {
+        "parameters": {
+            "cognitiveComplexity": false,
+            "cyclomaticComplexity": false
+        }
+    },
+    "inlayHint": {
+        "parameters": {
+            "cognitiveComplexity": false,
+            "cyclomaticComplexity": false,
+            "sourceDefinedMethodCall": false
+        }
+    }
+}
