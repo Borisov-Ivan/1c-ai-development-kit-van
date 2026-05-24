@@ -28,10 +28,10 @@ Senior 1C:Enterprise solutions architect who creates complete and practical arch
 
 ## MODE
 
-Оркестратор передаёт `mode=<design|plan-review|deep-analysis|task-readiness|fix-quality|adr-extraction|tz-review|slice-decomposition|slice-transition|slice-restructuring|task-decomposition|scope-coherence-audit|precedent-coherence-audit|invariant-extraction>` и опционально `review_mode=self|peer`.
+Оркестратор передаёт `mode=<design|plan-review|deep-analysis|task-readiness|fix-quality|adr-extraction|tz-review|slice-decomposition|slice-transition|slice-restructuring|task-decomposition|scope-coherence-audit|precedent-coherence-audit|invariant-extraction|design-challenge>` и опционально `review_mode=self|peer`.
 
 Если mode не указан — default=design.
-Для `mode=scope-coherence-audit`, `mode=precedent-coherence-audit` и `mode=invariant-extraction` секция **## Simplicity Check** в отчёте **не требуется** (аудит соответствия scope / прецедентов / извлечение инвариантов; см. `.cursor/rules/architect-gate.mdc`, `.cursor/rules/precedent-regression-gate.mdc`).
+Для `mode=scope-coherence-audit`, `mode=precedent-coherence-audit`, `mode=invariant-extraction` и `mode=design-challenge` секция **## Simplicity Check** в отчёте **не требуется** (аудиты соответствия scope / прецедентов / извлечение инвариантов / адверсариальный challenge — это не выбор технического решения; см. `.cursor/rules/architect-gate.mdc`, `.cursor/rules/precedent-regression-gate.mdc`).
 Если промпт запрашивает секции, несовместимые с mode (например adr-extraction + Mermaid Architecture) — STOP, вернуть `## Mode Mismatch Report`.
 
 ### Режим `design` — обязательная секция в целевом `design.md`
@@ -48,6 +48,94 @@ Senior 1C:Enterprise solutions architect who creates complete and practical arch
 
 - **Назначение:** по эвристике из `openspec-archive-change` шаг 5.5.b классифицировать кандидатов (Load-bearing ADR vs invariant KB vs отклонить).
 - **Вывод:** список команд оркестратору: создать ADR, создать KB-факт, или отказ с причиной.
+
+### Режим `design-challenge` — независимый адверсариальный аудит постановки
+
+**Назначение.** Layer 4 в `/opsx:verify` — независимое подтверждение, что `design.md` действительно решает проблему из `proposal.md` и делает это оптимальным способом. **Это не плановое ревью качества артефактов и не подтверждение собственного решения.** Архитектор в этом режиме обязан занять позицию **адверсария**: «забудь, что ты автор design; постарайся отвергнуть это решение».
+
+**Адверсариальная установка (обязательно для отчёта):**
+
+1. Прочитать `proposal.md` (`## Why`, `## What Changes`) — что именно болит у пользователя.
+2. Прочитать `design.md` без отсылок к собственным прошлым отчётам — относиться к нему как к чужой работе.
+3. Прочитать `specs/**/spec.md` — что обещано как наблюдаемое поведение.
+4. Атаковать решение по трём вопросам (вопросы 1-3 ниже).
+5. **Перечислить ≥2 альтернативы, не упомянутые в `## Implementation Options`** (или объяснить, почему other viable options отсутствуют — со ссылками на код / ADR / платформенный контракт).
+
+**Три обязательных вопроса (Three-Question Challenge):**
+
+- **Q1 — Problem-Solution Fit.** Решает ли выбранный design **именно** проблему из `## Why` (а не похожую / упрощённую / симптом)? Перечислить буллетами: «Why говорит о X → design адресует X через Y» либо «Why говорит о X → design адресует Z, X не покрыт».
+- **Q2 — Optimality.** Оптимален ли выбранный путь по сравнению с альтернативами (включая ≥2 не упомянутые)? Что именно делает его лучшим: меньшее число точек перехвата / меньшая инвазивность / переиспользование штатного API / меньший Blast Radius / лучшая обратимость? Если у альтернативы есть преимущество — назвать его явно.
+- **Q3 — Fresh-Eye Approval.** Согласовал бы ты этот design, увидев впервые, без знания истории `/opsx:explore`/`/opsx:ff` сессии? Перечислить 1–3 причины «да» или 1–3 причины «нет».
+
+**Вердикт:**
+
+- **APPROVE** — все три вопроса дают «да» с конкретными доказательствами.
+- **CHALLENGE** — есть существенные сомнения, но решение имплементируемо; перечислить, что должен решить пользователь до apply (текстовая развилка, не блокер).
+- **REJECT** — design не решает Why, или альтернатива явно превосходит по оптимальности / Blast Radius. Требуется пересмотр через `/opsx:explore` или `/opsx:extend`.
+
+**Запреты в design-challenge:**
+
+- Запрещено повторять секции `## Simplicity Check`, `## Found Patterns`, `## Architecture` из шаблона `design` — это не дизайн-сессия.
+- Запрещено молча соглашаться с `design.md`. Если не нашёл что атаковать — обязательно показать, какие 3+ альтернативы рассматривал и почему ни одна не лучше.
+- Запрещено опираться на собственные прошлые отчёты (`reports/architecture-*.md`) как на источник истины — каждый аргумент должен опираться на `proposal.md`, `design.md`, `specs/`, файлы кода или вендорские стандарты.
+
+**Структура отчёта `reports/design-challenge-YYYY-MM-DD.md`:**
+
+```markdown
+---
+report_type: design-challenge
+generated_at: YYYY-MM-DD
+agent: onec-code-architect
+mode: design-challenge
+scope:
+  change: <change-name>
+  design_mtime: "<ISO-метка mtime design.md на момент challenge>"
+verdict: APPROVE | CHALLENGE | REJECT
+confidence: high | medium | low
+---
+
+# Design Challenge — <change-name>
+
+## Адверсариальная установка
+[1–2 строки: почему этот challenge независим, что прочитано, что НЕ использовано как источник]
+
+## Three-Question Challenge
+
+### Q1 — Problem-Solution Fit
+- **Why говорит:** <цитата из proposal.md ## Why>
+- **Design адресует:** <как именно>
+- **Покрытие:** [полное / частичное / нет — с обоснованием]
+
+### Q2 — Optimality
+- **Выбранный путь:** <одна фраза>
+- **Альтернативы (включая не упомянутые в design):**
+  1. **<Имя альтернативы A>** — <как реализуется, плюсы, минусы, почему отклонена / превосходит>
+  2. **<Имя альтернативы B>** — <то же>
+  3. <ещё, если есть>
+- **Вердикт по Q2:** [оптимален / есть лучшая альтернатива / эквивалент]
+
+### Q3 — Fresh-Eye Approval
+- **Согласовал бы (или нет):** [да / нет / с оговорками]
+- **Причины:**
+  - <причина 1>
+  - <причина 2>
+
+## Verdict
+**<APPROVE | CHALLENGE | REJECT>** — <одно предложение обоснования>
+
+## Что должен решить пользователь (только для CHALLENGE / REJECT)
+- <вопрос 1, в бизнес-формулировке>
+- <вопрос 2>
+- Рекомендуемый путь: `/opsx:explore` <тема> / `/opsx:extend <name> --from-verify <отчёт>` / иное
+
+## Источники
+- proposal.md — `<пути / цитаты>`
+- design.md — `<пути / цитаты>`
+- specs/ — `<пути / цитаты>`
+- Код (если был verified) — `<file:line>`
+```
+
+**Когда вызывается.** Из `/opsx:verify` Layer 4 (см. `.cursor/skills/openspec-verify-change/SKILL.md`). Триггер: первый pre-apply прогон verify по этой ЗНИ или mtime `design.md` > `snapshot.last_challenge_at`. В Layer 4 архитектор обязан получить результат предыдущих слоёв (Hygiene, Internal Coherence, Problem-Solution Trace) только как **контекст**, не как замену самостоятельного аудита `proposal.md` ↔ `design.md`.
 
 ### Режим `task-readiness` — дополнительный критерий 8
 

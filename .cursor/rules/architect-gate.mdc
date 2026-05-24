@@ -106,14 +106,15 @@ priority: 200
 |----------|----------|
 | **explore** (Structured Investigation, шаг Decide) | Архитектор **обязателен**. AskQuestion пользователю: «Сработали триггеры [...]. Запустить архитектора?» без равноправной опции пропуска. Отказ только через явный пользовательский ввод с причиной; фиксируется в Explore Summary как `declined: <reason>`. Если архитектор не запущен и отказ не зафиксирован — статус `required-pending`, `/opsx:ff` не рекомендовать |
 | **ff / new** (Design Gate) | Blocking. Без опции пропуска. Escape только через флаг `--skip-architect <причина>`, оставляющий явный аудит-след `.gate-override.yaml`. |
-| **verify** (pre-apply check, шаг 9) | CRITICAL в отчёте verify. Предложение запустить архитектора через авто-устранение (шаг 17). Основной рубеж проверки |
-| **apply** (pre-flight) | Soft redirect на `/opsx:verify`. Если в change dir не найден ни один из `reports/verification-slice-pre-*.md`, `reports/verification-legacy-pre-*.md`, `reports/verification-legacy-mixed-*.md` — предупреждение. Не дублирует проверку триггеров |
+| **verify** Layer 4 (Independent Challenge) | Архитектор в режиме `design-challenge` — **независимый адверсариальный аудит** `proposal.md` ↔ `design.md`. Триггер: первый pre-apply прогон verify по ЗНИ или mtime `design.md` > `snapshot.last_challenge_at`. Отчёт `reports/design-challenge-YYYY-MM-DD.md`. Это **не дублирует** Architect Gate из ff/explore: ff даёт согласие на подход (auctorial), challenge даёт независимое подтверждение (adversarial). См. `.cursor/skills/openspec-verify-change/SKILL.md` Layer 4. |
+| **verify** Layer 5 (Implementation Readiness) | Архитектор в режиме `task-readiness` — оценка реализуемости задач. CRITICAL в отчёте verify при GAP. Не пересматривает архитектурный подход (это сделал Layer 4). |
+| **apply** (pre-flight) | Soft redirect на `/opsx:verify`. Если в change dir не найден ни один из `reports/verification-*.md` — предупреждение. Не дублирует проверку триггеров |
 | **1c-agent-delegation** (правка .bsl вне OpenSpec) | При срабатывании → onec-code-architect до реализации |
 | **extend** (Scope Coherence Audit) | При срабатывании scope-drift триггеров (см. `openspec-extend-change/SKILL.md` п. 5a) → onec-code-architect в режиме `scope-coherence-audit`; отчёт `reports/architecture-extend-coherence-*.md` |
 
 ## SIMPLICITY CHECK (обязательный выход архитектора)
 
-Каждый отчёт `onec-code-architect` в режимах `design`, `plan-review`, `task-readiness`, `fix-quality`, `slice-decomposition`, `task-decomposition` обязан содержать секцию ниже. Режимы **`scope-coherence-audit`**, **`precedent-coherence-audit`**, **`invariant-extraction`** Simplicity Check **не требуют** — это аудиты соответствия, а не выбор технического решения в одном change.
+Каждый отчёт `onec-code-architect` в режимах `design`, `plan-review`, `task-readiness`, `fix-quality`, `slice-decomposition`, `task-decomposition` обязан содержать секцию ниже. Режимы **`scope-coherence-audit`**, **`precedent-coherence-audit`**, **`invariant-extraction`**, **`design-challenge`** Simplicity Check **не требуют** — это аудиты соответствия / адверсариальный challenge, а не выбор технического решения в одном change.
 
 ```markdown
 ## Simplicity Check
@@ -147,6 +148,21 @@ Gate считается пройденным, если выполняется **
 **Design Rationale ≠ закрытие Gate.** Самописный Rationale агента без внешней валидации не закрывает Gate. Закрывает только файл architecture-*.md с релевантным scope или осознанное решение пользователя.
 
 6. Для **precedent-regression** триггеров (`.cursor/rules/precedent-regression-gate.mdc`): помимо п.1–5, Gate считается закрытым по архитектурной части только если выполняется **любое**: (a) в `design.md` есть заполненная секция `## Blast Radius`; (b) существует `reports/architecture-precedent-coherence-*.md` с вердиктом «extends / без отмены архивного контракта» для всех затронутых прецедентов; (c) триггеры precedent не сработали. Обычный `architecture-*.md` без явного разбора Cross-Archive Context **не закрывает** precedent-regression.
+
+## INDEPENDENT CHALLENGE (verify Layer 4 vs ff Architect Gate)
+
+Architect Gate из ff/explore (`design`-режим) и Independent Challenge из verify (`design-challenge`-режим) — **разные роли**, не дублирующие друг друга.
+
+| Свойство | ff/explore Architect Gate | verify Layer 4 Independent Challenge |
+|----------|---------------------------|--------------------------------------|
+| Роль | автор design-решения | адверсарий, атакует чужой design |
+| Цель | предложить подход | подтвердить, что подход решает Why оптимально |
+| Промпт | `mode=design`, Simplicity Check + альтернативы | `mode=design-challenge`, три обязательных вопроса (Q1 fit, Q2 optimality, Q3 fresh-eye) |
+| Закрывает Architect Gate? | да (для триггеров) | **нет** — это Layer 4 verify, отдельный gate |
+| Тип отчёта | `reports/architecture-*.md` | `reports/design-challenge-*.md` |
+| Триггер запуска | триггеры выше при создании ЗНИ | первый pre-apply verify или mtime(design.md) > snapshot.last_challenge_at |
+
+**Запрет.** Architect Gate из ff/explore **не закрывается** файлом `design-challenge-*.md`, и наоборот — Layer 4 verify не считается выполненным по факту наличия `architecture-*.md`. Каждый gate ищет свой файл отчёта.
 
 ---
 

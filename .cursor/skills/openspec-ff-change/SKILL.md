@@ -16,7 +16,7 @@ Fast-forward through artifact creation - generate everything needed to start imp
 **Output style:**
 - Сводка в чате («что создано», ссылки на артефакты, следующий шаг) — шаблон **T-CONFIRM** из `.cursor/docs/opsx-output-style.md` §5.5.
 - **Подтверждение постановки перед scaffold:** если пользователю нужно сверить понимание задачи — вывести адаптивный **T-BRIEF** в чате (§5.1): обязательны Контекст, Что я понял, **KB в scope** (Read `openspec/knowledge/_index.yaml` и при необходимости выбранные KB `.md` по путям из запроса / Explore Summary; иначе «нет совпадений…»), План, Подтвердить. Файлы `temp/briefs/*.md` **не создаются**.
-- **Генерируемые артефакты** `proposal.md`, `design.md`, `tasks.md`, spec deltas — подчиняются §1 «Три слоя» и §3 «Запрет внутренних ID в пользовательских полях»: секции для заказчика/приёмки (`Why`, `What Changes`, `Scope`, `Scenarios`, `Requirements`) — UX-слой; внутренние ID (`S<N>.T<M>`, `D<N>`, `R<N>`, `I<N>`, номера задач `12.9`) — только в `## Slices`, `## Decisions`, `## Tasks`, `## Risks`. Перечисления — нумерованные списки. Перед записью — self-check-5 (§7).
+- **Генерируемые артефакты** `proposal.md`, `design.md`, `tasks.md`, spec deltas — подчиняются §1 «Три слоя» и §3 «Запрет внутренних ID в пользовательских полях»: секции для заказчика/приёмки (`Why`, `What Changes`, `Scope`, `Scenarios`, `Requirements`) — UX-слой; внутренние ID (`S<N>.<M>`, `S<N>.accept`, `D<N>`, `R<N>`, `I<N>`, номера задач `12.9`) — только в `## Slices`, `## Decisions`, `## Tasks`, `## Risks`. Перечисления — нумерованные списки. Перед записью — self-check-5 (§7).
 
 **Steps**
 
@@ -146,35 +146,45 @@ Fast-forward through artifact creation - generate everything needed to start imp
         Delegate to **onec-code-architect** with the "Architect — slice-aware task decomposition" template (`1c-agent-patterns/architect.md`).
         Pass: paths to proposal.md, design.md (with approved `## Slices` section, включая `### Матрица приёмки` если есть), specs/, and the `template` from instructions.
 
-        **Acceptance Scope Tightness context (правило среза 6):** в промпт архитектору явно передать:
+        **Acceptance Checklist Coverage context (правило среза 6):** в промпт архитектору явно передать:
         - Извлечённый список Scenarios per slice из design.md `## Slices` (столбец «Scenarios из spec» и/или матрица приёмки).
-        - Требование: каждый `S<N>.T<M>` SHALL иметь хвостовую ссылку `(Scenario: «<имя>»)` на Scenario из `**Связь со spec:**` **этого же** среза; количество `T<M>` ≤ 2 × количество Scenarios; инварианты/NFR/перф-проверки — НЕ в приёмку среза, а в `design.md#Assumptions` / обычную задачу / `## Follow-up`.
-        - Ссылки: `.cursor/rules/vertical-slices.mdc` (правило среза 6), `.cursor/rules/task-readability.mdc` (Исключение 1 для `T<M>`), `.cursor/skills/1c-agent-patterns/architect.md` (шаблон slice-aware task decomposition, правило 10.1).
+        - Требование: в каждом срезе **ровно одна** приёмочная задача `S<N>.accept` со следующей структурой:
+          ```
+          - [ ] S<N>.accept Принять срез S<N> «<имя>» — <бизнес-результат>:
+            - Scenario «<имя сценария 1 буквально из spec>»: <одна строка ручного шага или критерия pass/fail>
+            - Scenario «<имя сценария 2>»: <…>
+          ```
+          В теле — **по одной строке на каждый** Scenario из `**Связь со spec:**` этого среза (буквально, без перефразирования). Sub-bullets чеклиста **не** имеют отдельных чекбоксов — это пункты внутри одной задачи.
+        - Инварианты/NFR/перф-проверки — НЕ в чеклист `S<N>.accept`, а в `design.md#Assumptions` / обычную задачу `S<N>.<M>` / `## Follow-up`.
+        - Ссылки: `.cursor/rules/vertical-slices.mdc` (правило среза 6 + секция «ФОРМАТ S<N>.accept»), `.cursor/rules/task-readability.mdc` (Исключение 1), `.cursor/skills/1c-agent-patterns/architect.md` (шаблон slice-aware task decomposition).
 
         The architect produces tasks.md with:
         - H1 headers `# Срез S<N>: <имя>` (one per slice from design)
         - metadata blocks under each slice header (Сценарий, Приёмка, Связь со spec, Зависимости)
         - task IDs with slice prefix `S<N>.<M>`
-        - acceptance tasks `S<N>.T<M>` inside each slice, каждая с `(Scenario: «…»)` в хвосте
-        - slice-gate markers `<!-- slice-gate: <critérion> -->`
+        - **exactly one** acceptance task `S<N>.accept` per slice, with a bullet-checklist of scenarios in its body (one bullet per Scenario from `**Связь со spec:**`)
+        - slice-gate markers `<!-- slice-gate: <criterion> -->`
 
-        No classification P0–P4, no `# Фаза N`, no `<!-- phase-gate -->`. See `.cursor/rules/vertical-slices.mdc` (в т.ч. **ИНВАРИАНТ: Defect placement** — не плодить `# Срез S<N+1>` для дефекта непринятого среза без cross-slice / frozen-slice).
+        No classification P0–P4, no `# Фаза N`, no `<!-- phase-gate -->`, no multiple `S<N>.T<M>` per slice (legacy format — only for migrated changes). See `.cursor/rules/vertical-slices.mdc` (в т.ч. **ИНВАРИАНТ: Defect placement** — не плодить `# Срез S<N+1>` для дефекта непринятого среза без cross-slice / frozen-slice).
 
         Architect reads files independently and returns tasks.md content.
         Save the result to `outputPath`.
         If architect Task fails — apply error handling above (retry once, then create yourself).
 
-        **Post-tasks self-check (Acceptance Scope Tightness):**
+        **Post-tasks self-check (Acceptance Checklist Coverage):**
         После сохранения `tasks.md` — mechanical self-check:
-        1. Grep `tasks.md` на `^- \[[ x]\] S\d+\.T\d+` — собрать все acceptance tasks.
-        2. Для каждого `T<M>` проверить наличие хвостовой скобки `(Scenario: «…»)` или `(Scenarios: «…», …)`.
-        3. Сверить имя(имена) Scenario с `**Связь со spec:**` соответствующего среза.
+        1. Grep `tasks.md` на `^- \[[ x]\] S\d+\.accept\b` — собрать все приёмочные задачи; их должно быть ровно столько же, сколько срезов (`# Срез S\d+`).
+        2. Для каждого `S<N>.accept` извлечь буллет-чеклист в его теле (sub-bullets со словом `Scenario «…»`).
+        3. Сверить множество имён Scenario из чеклиста с множеством `Scenario` в `**Связь со spec:**` этого среза.
         4. Зафиксировать mismatches:
-           - `T<M>` без ссылки → **WARNING** в сводке ff.
-           - `T<M>` со Scenario не из `**Связь со spec:**` → **WARNING**.
-           - `|T<M>| > 2 × |Scenarios|` в срезе → **SUGGESTION**.
-        5. Если есть WARNING — в финальной сводке ff: «Обнаружены замечания Acceptance Scope Tightness. Рекомендую `/opsx:verify <name>` для полной проверки критерием 5b QC и получения карточек решений.»
-        6. Если mismatches нет — лог «Acceptance ↔ Scenario mapping OK».
+           - Срез без `S<N>.accept` → **CRITICAL** в сводке ff.
+           - Срез с двумя и более `S<N>.accept` → **CRITICAL**.
+           - `S<N>.accept` без буллет-чеклиста → **CRITICAL** (`accept-checklist-empty`).
+           - Scenario из `**Связь со spec:**` отсутствует в чеклисте → **WARNING** (`accept-bullets-missing-scenario`).
+           - Буллет ссылается на Scenario, заявленный в `**Связь со spec:**` другого среза → **WARNING** (`accept-bullet-foreign-scenario`).
+           - В срезе остался legacy-формат `S<N>.T<M>` (один или несколько) — **SUGGESTION** «Старая модель приёмки. Использовать `S<N>.accept` со чеклистом.»; ff не падает, но сводка показывает рекомендацию.
+        5. Если есть CRITICAL/WARNING — в финальной сводке ff: «Обнаружены замечания Acceptance Checklist Coverage. Рекомендую `/opsx:verify <name>` для полной проверки критерием 5b QC.»
+        6. Если mismatches нет — лог «Acceptance checklist OK».
       - **All other artifacts**: Create the artifact file using `template` as the structure
       - Apply `context` and `rules` as constraints - but do NOT copy them into the file
       - **Metadata block**: When creating `proposal.md`, ALWAYS add the `## Metadata (comment markers)` block (with developer, zni_id, zni_name, generate_tz) immediately after `## Why`.
@@ -266,12 +276,12 @@ Fast-forward through artifact creation - generate everything needed to start imp
          - Validate with Quality Controller (quick check — criteria 1, 3, 5 from QC), see `openspec-quality-controller.md`.
          - If critical issues — show the user and AskQuestion whether to regenerate.
          - Otherwise — proceed.
-      6. **Acceptance Scope Tightness pre-check (правило среза 6):**
+      6. **Acceptance Checklist Coverage pre-check (правило среза 6):**
          - Read the `## Slices` block from `design.md`. For each slice row, extract the Scenarios column (ссылки на `#### Scenario:` из spec).
          - Validate per slice:
            * Scenarios count SHALL be ≥1 and ≤3. Если >3 — предупредить архитектора и предложить раздробить срез. Если 0 — это не срез, а prereq-слой (см. правило декомпозиции 7).
-           * Если в таблице есть отдельная `### Матрица приёмки (Acceptance ↔ Scenario)` — проверить, что каждый `T<M>` привязан к Scenario из того же среза; отсутствие матрицы при Standard/Full tier — рекомендация архитектору дополнить.
-         - Эти проверки — «hint» для следующего шага `slice-aware task decomposition`: архитектор должен соблюдать Acceptance Scope Tightness при генерации `tasks.md`.
+           * Каждый срез будет иметь ровно одну `S<N>.accept` с буллет-чеклистом по этим Scenarios.
+         - Эти проверки — «hint» для следующего шага `slice-aware task decomposition`: архитектор должен соблюдать Acceptance Checklist Coverage при генерации `tasks.md`.
       7. **Guardrail:** do NOT invoke the tasks architect template until `design.md` contains the `## Slices` section (or Lite tier was explicitly chosen).
 
       **Error handling:** if architect Task fails (error / timeout after retry), create a minimal single-slice draft yourself (1 container slice covering all tasks) and log a warning to the user. The user may run `/opsx:migrate-slices <name>` later to decompose.

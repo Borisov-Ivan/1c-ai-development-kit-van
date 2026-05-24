@@ -42,15 +42,19 @@ Do not duplicate or invent phase-gate logic. Phase classification P0-P4 is depre
 
 ## EVALUATION CHECKLIST
 
-In slice mode, evaluate the criteria from `vertical-slices.mdc`:
+In slice mode, evaluate the criteria from `vertical-slices.mdc` (section «QUALITY CONTROLLER — SLICE COHERENCE»):
 
 1. Scenario Coverage
 2. Slice Independence
 3. Slice Completeness
 4. Slice Dependency Graph
-5. Slice Gate Integrity
-6. Acceptance to Scenario Mapping
-7. Rework Risk
+5. Slice Gate Integrity — exactly one `S<N>.accept` per slice plus the `<!-- slice-gate -->` marker. Missing or duplicated → `CRITICAL`. Legacy: if a slice has `S<N>.T<M>` (one or more) but no `S<N>.accept`, do not fail this criterion; emit `legacy-acceptance-format` (SUGGESTION) recommending `/opsx:migrate-acceptance <change-name>`.
+5b. Acceptance Checklist Coverage — the body of `S<N>.accept` SHALL contain one bullet per `#### Scenario:` listed in the slice's `**Связь со spec:**`. Alerts:
+   - `accept-checklist-empty` (CRITICAL) — `S<N>.accept` body has no scenario bullets.
+   - `accept-bullets-missing-scenario` (WARNING) — a Scenario from `**Связь со spec:**` is not present as a bullet in `S<N>.accept`.
+   - `accept-bullet-foreign-scenario` (WARNING) — a bullet in `S<N>.accept` references a Scenario declared in another slice's `**Связь со spec:**` (cross-slice acceptance duplication).
+   - Legacy mode (`S<N>.T<M>` without `S<N>.accept`): apply the legacy alert `acceptance-without-scenario` (WARNING) only — the new alert family is not used until migration.
+6. Rework Risk
 
 Then evaluate task readability using `task-readability.mdc`.
 
@@ -64,7 +68,9 @@ For each alert, include:
 - evidence from artifacts
 - concrete recommendation
 
-Use alert names from the canonical rules when they exist. Do not emit `missing-phase-gate`, `phase-violation`, or `phase-gate-blocked`.
+Use alert names from the canonical rules when they exist.
+
+**Removed alerts (do not emit):** `missing-phase-gate`, `phase-violation`, `phase-gate-blocked`, `acceptance-scenario-duplication` (replaced by `accept-bullet-foreign-scenario`), `acceptance-overload` (the single-`accept` model makes overload impossible by construction).
 
 ## OUTPUT FORMAT
 
@@ -76,6 +82,11 @@ Use alert names from the canonical rules when they exist. Do not emit `missing-p
 
 | Slice | Scenario | Tasks | Acceptance | Dependencies | Gate |
 |---|---|---|---|---|---|
+
+Column conventions:
+
+- **Acceptance:** `S<N>.accept` (preferred) or legacy `S<N>.T<M>...T<M>` listing. For `S<N>.accept`, also note bullets count vs declared scenarios (e.g. `S1.accept (3/3)`).
+- **Gate:** presence of `<!-- slice-gate -->` marker.
 
 ### Scenario Coverage
 

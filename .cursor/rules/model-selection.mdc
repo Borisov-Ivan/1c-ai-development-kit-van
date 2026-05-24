@@ -41,7 +41,7 @@ priority: 200
 
 ## Цепочка для архитектора
 
-Один агент `onec-code-architect` (отдельного `*_2nd` нет):
+Один агент `onec-code-architect` (отдельного `*_2nd` нет). Все режимы (`design`, `task-readiness`, `design-challenge`, `slice-decomposition` и пр., см. `.cursor/agents/onec-code-architect.md` секцию MODE) используют **одну и ту же** цепочку моделей:
 
 1. `Task(subagent_type="onec-code-architect", model="claude-opus-4-7-thinking-high", ...)` (или сразу Fallback 1, если Primary невалиден в enum).
 2. При сбое — `Task(subagent_type="onec-code-architect", model="gemini-3.1-pro", ...)`.
