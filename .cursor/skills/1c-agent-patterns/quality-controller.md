@@ -45,7 +45,17 @@ Task(
          Reason: the user does NOT read your final message. The orchestrator
          reads the file and synthesizes a single message for the user.
          Anything you put в финальный assistant message becomes user-visible
-         chat noise.",
+         chat noise.
+
+         Cursor will auto-generate a user_visible_high_level_summary card from
+         your reasoning. To keep that card readable by the orchestrator (not by
+         the user as raw text), AVOID in your reasoning steps:
+         - artifact IDs without unfolding: S1.0, S1.T5, Option A, F1
+         - engine layer names: Layer N, design-challenge, task-readiness, QC,
+           PASS/FAIL/CHALLENGE/APPROVE/REJECT, slice coherence, snapshot
+         - internal section names: Three-Question Challenge, Simplicity Check
+         Use plain language: «первый ручной шаг», «приёмочный тест единственного
+         шаблона», «выбранный вариант реализации».",
   subagent_type="openspec-quality-controller",
   run_in_background=false
 )
