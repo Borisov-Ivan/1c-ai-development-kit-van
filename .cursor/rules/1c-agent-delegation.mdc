@@ -168,11 +168,12 @@ Workflow: прямая правка (StrReplace) + Grep-верификация +
 **После каждой правки .bsl** (writer, Mechanical Mode, прямая правка) — **до вызова reviewer**:
 
 1. Вызвать `ReadLints` на изменённых `.bsl` файлах.
-2. Если есть ошибки уровня error («Переменная не определена», «Метод не найден», несоответствие контекста) — **исправить до вызова reviewer** (writer повторно; в apply/review — только writer, без прямой правки).
-3. Вывод линтера (или «линтер не выявил ошибок») передать в промпт reviewer как параметр «Диагностики линтера».
-4. Если линтер недоступен или не возвращает диагностик для .bsl — пропустить шаг, не блокировать.
+2. Если есть ошибки уровня **error** («Переменная не определена», «Метод не найден», несоответствие контекста) — **исправить до вызова reviewer** (writer повторно; в apply/review — только writer, без прямой правки).
+3. Сформировать блок **`## Linter Signals (evidence)`** для reviewer (формат — `.cursor/skills/review/SKILL.md` шаг 1.8): передать **все** диагностики, включая **warning**; не фильтровать «только error».
+4. **Reviewer (Phase 1b):** in-scope warning/error из блока → по умолчанию **MUST_FIX**; отложить на prerelease **запрещено** (см. `.cursor/agents/onec-code-reviewer.md` Phase 1b).
+5. Если линтер недоступен — блок с `Linter unavailable: <reason>`; reviewer проверяет документацию новых/изменённых процедур вручную.
 
-Поток: `writer → ReadLints → [fix if errors] → API EXISTENCE CHECK → [AskQuestion if WARNING] → reviewer (+ lint output + API check results)`
+Поток: `writer → ReadLints → [fix if errors] → API EXISTENCE CHECK → reviewer (+ Linter Signals + API check results)`
 
 ## WRITER PIPELINE (детали)
 
@@ -182,8 +183,8 @@ API EXISTENCE CHECK, EXTENSION GATE + VERIFICATION, CONTRACT RESOLUTION (фор�
 
 ```
 writer → ReadLints → [fix if errors] → API EXISTENCE CHECK →
-  [AskQuestion if WARNING] → EXTENSION VERIFICATION (если &ИзменениеИКонтроль) →
-  reviewer (+ lint output + API check results + base path + verification result)
+  EXTENSION VERIFICATION (если &ИзменениеИКонтроль) →
+  reviewer (+ Linter Signals evidence + API check results + base path + verification result)
 ```
 
 Investigation loop (резолв контрактов) запускается **только** по запросу ревьювера (секция `## Investigation Request` в его отчёте) — см. детали в `1c-writer-pipeline.mdc` и `review/SKILL.md` шаг 3.5.

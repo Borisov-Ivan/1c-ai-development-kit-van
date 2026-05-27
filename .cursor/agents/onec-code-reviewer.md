@@ -455,6 +455,49 @@ Completeness gate: 7 строк в таблице. Меньше — Phase 0 не
    Else: proceed with MCP-only; manual structure analysis from Read(file)
 ```
 
+### Phase 1b: BSL Linter Signals Gate (ОБЯЗАТЕЛЬНО при наличии блока `## Linter Signals (evidence)`)
+
+**Политика:** предупреждения bsl-language-server / `ReadLints` на **in-scope** строках **не откладываются** на предрелизное ревью. Погашение документационного и структурного техдолга позже повышает риск регресса (правки шапок/JSDoc/аннотаций на уже принятом коде).
+
+**In-scope** (любое из):
+- строка попадает в `## Review Boundaries` (diff-focused);
+- строка в теле/шапке процедуры или функции, созданной или изменённой в текущей задаче writer;
+- `[module-level]` в границах ревью.
+
+**Алгоритм (для каждой строки таблицы Linter Signals с severity `warning` или `error`):**
+
+| Шаг | Действие |
+|-----|----------|
+| 1 | **confirm → MUST_FIX** (default для in-scope warning/error). Severity finding: **MEDIUM** для документации (`MissingReturnedValueDescription`, `MissingParameterDescription`, `MissingDescription`, …); **HIGH** если warning указывает на риск поведения/контракта. |
+| 2 | **dismiss** — только с явной причиной в отчёте: `out-of-scope` (вне Review Boundaries), `false-positive` (обоснование + строка кода), `pre-existing-unchanged` (full-ревью: процедура не менялась в текущем diff). |
+| 3 | **reclassify** — если warning дублирует Phase 0 / AP finding, объединить; не создавать второй MUST_FIX на то же место. |
+
+**Запрещённые основания для dismiss:** «не блокирует apply», «отложим на prerelease», «стиль», «линтер слишком строгий» без `false-positive`.
+
+**Документация (JSDoc / шапка метода):**
+- Экспортные и перехватывающие (`&Вместо`, `&После`, `&Перед`) процедуры/функции in-scope **без** блоков «Параметры:» / «Возвращаемое значение:» (если применимо) → **MUST_FIX**.
+- JSDoc размещать **выше** аннотаций расширения (`&Вместо`, …), не между аннотацией и объявлением (std-06 / vendor doc comments).
+- Тип коллекции: `Массив из Тип1, Тип2 — …`, не «Массив ссылок» без уточнения элементов.
+
+**Completeness gate Phase 1b:** если в промпте есть `## Linter Signals (evidence)` с ≥1 in-scope warning и ни одного finding с Action MUST_FIX или явного dismiss в отчёте — Phase 1b **не завершена**; Status ≠ PASS.
+
+**Если блок отсутствует или `Linter unavailable`:** зафиксировать в Summary `Linter Signals: unavailable`; для **новых** in-scope `Функция`/`Процедура` без шапки — вручную проверить документацию (Phase 2 п.3) и выдать MUST_FIX при отсутствии.
+
+**Формат finding (Linter):**
+```yaml
+[MEDIUM] Line N: MissingReturnedValueDescription (bsl-language-server)
+  Procedure: <имя>
+  Anchor: <строка объявления>
+  Action: MUST_FIX
+  Issue: Linter warning on in-scope line; not deferred to prerelease
+  Fix: <конкретная шапка / перенос JSDoc>
+  kind: linter-signal
+  LinterRule: MissingReturnedValueDescription
+  LinterVerdict: confirm
+```
+
+**Status PASS:** только если нет unresolved MUST_FIX из Phase 0, Phase 1b, Phase 2–2.5 и Standards.
+
 ### Phase 2: Deep Analysis
 ```yaml
 1. Performance check:
@@ -754,8 +797,10 @@ D. Investigation Request (резолв контрактов по запросу 
 3. Summary:
    - Status: PASS | FAIL | NEEDS_WORK
    - Phase 0: N findings (по severity)
+   - Linter Signals (Phase 1b): K confirmed MUST_FIX, D dismissed, U unavailable
    - Standards: M findings (по severity)
    - Overall: итоговая формулировка
+   - PASS запрещён при unresolved MUST_FIX из Phase 1b (in-scope linter warnings без fix/dismiss)
 ```
 
 Required Improvements (вместо секции "Рекомендации"):
@@ -1046,10 +1091,21 @@ Best practices:
 File: src/.../Module.bsl
 Status: [PASS | FAIL | NEEDS_WORK]
 Phase 0: N findings (X HIGH, Y MEDIUM)   # если Phase 0 выполнялась
+Linter Signals (Phase 1b): K confirmed, D dismissed, U unavailable
 Попытка Audit: P blocks checked, Q findings   # Phase 2.5
 Standards: M findings (Critical: ..., High: ..., Medium: ..., Low: ...)
 Overall: Исправить все замечания (...)
 ```
+
+### Linter Signals Audit (Phase 1b)
+
+Если во входном промпте был блок `## Linter Signals (evidence)` — включить таблицу:
+
+| # | File:Line | Rule | In-scope | Verdict | Action | Linked finding |
+|---|-----------|------|----------|---------|--------|----------------|
+| 1 | X.bsl:3 | MissingReturnedValueDescription | yes | confirm | MUST_FIX | [MEDIUM] … |
+
+Verdict: `confirm` | `dismiss` | `reclassify`. При `dismiss` — колонка Reason (кратко).
 
 ### Reasoning Analysis (Phase 0)
 

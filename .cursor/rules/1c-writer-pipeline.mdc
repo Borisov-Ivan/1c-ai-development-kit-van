@@ -13,8 +13,8 @@ priority: 800
 
 ```
 writer → ReadLints → [fix if errors] → API EXISTENCE CHECK →
-  [AskQuestion if WARNING] → EXTENSION VERIFICATION (если &ИзменениеИКонтроль) →
-  reviewer (+ lint output + API check results + base path + verification result)
+  [AskQuestion if WARNING on API only] → EXTENSION VERIFICATION (если &ИзменениеИКонтроль) →
+  reviewer (+ Linter Signals evidence incl. warnings; Phase 1b MUST_FIX in-scope + base path + verification result)
 ```
 
 ## API EXISTENCE CHECK

@@ -20,7 +20,7 @@ Task(
          Base-файл (для &ИзменениеИКонтроль): [путь к base в cf/ или 'не применимо']
 
          ## Linter Signals (evidence)
-         [Блок из шага 1.8 review/SKILL.md — таблица диагностик от bsl_lsp_diagnostics / syntax-checker / code-checker; либо 'Linter unavailable: <reason>'. Reviewer обязан дать confirm/dismiss/reclassify для каждой строки.]
+         [Блок из шага 1.8 review/SKILL.md — таблица ReadLints/bsl-language-server (все severity, включая warning); либо 'Linter unavailable: <reason>'. Reviewer Phase 1b: in-scope warning → MUST_FIX по умолчанию; отложить на prerelease запрещено.]
 
          ## Whitelist & Mandatory Controls (from project.md)
          [Блок из шага 1.6.1 — две таблицы (Whitelist предрелиза, Обязательный контроль) для release-hygiene rules AP-040..AP-043.]
@@ -164,7 +164,7 @@ Task(
 
          Файлы: [список изменённых .bsl]
          Стандарты: .cursor/docs/1c-coding-standards.md
-         Диагностики линтера: [вывод ReadLints или 'линтер не выявил ошибок']
+         Диагностики линтера: блок ## Linter Signals (evidence) — таблица ReadLints/bsl-language-server (включая warning); reviewer Phase 1b → in-scope MUST_FIX, без отложения на prerelease
          Base-файл (для &ИзменениеИКонтроль): [путь к base в cf/ или 'не применимо']
 
          [Если оркестратор собрал diff-focused scope — вставить блок ## Review Boundaries (как в шаблоне «Reviewer (ревью кода)»). При focus=full для всех файлов — секцию не вставлять.]

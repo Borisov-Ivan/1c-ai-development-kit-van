@@ -188,9 +188,9 @@ Focus: full (new file)
 | 1 | syntax-checker | X.bsl:45 | error | Unclosed НачатьТранзакцию | AP-015 |
 ```
 
-- Блок передаётся ревьюверу. Ревьювер в Phase 1 применяет confirm/dismiss/reclassify: диагностики → findings (с AP-ID, severity из каталога, risk axes).
+- Блок передаётся ревьюверу. Ревьювер в **Phase 1b** (`.cursor/agents/onec-code-reviewer.md`) обязан обработать каждую in-scope диагностику: по умолчанию **confirm → MUST_FIX**; dismiss только с явной причиной (`out-of-scope`, `false-positive`, `pre-existing-unchanged`). **Запрещено** откладывать in-scope warning на prerelease («погасим техдолг позже»).
 
-**Важно:** оркестратор НЕ переводит сигналы в findings. Это работа ревьювера (единый источник вердиктов — S3 принцип).
+**Важно:** оркестратор НЕ переводит сигналы в findings и не выставляет Action — это работа ревьювера (единый источник вердиктов — S3 принцип). Оркестратор **обязан** передать warnings в блоке evidence, не отфильтровывая их.
 
 ---
 
@@ -253,7 +253,7 @@ Focus: full (new file)
 
 - Файлы: список из шага 1 (для батча — подмножество).
 - `expected_reviewer_prompt_contract_version`: 3.
-- Диагностики линтера: блок `## Linter Signals (evidence)` из шага 1.8.
+- Диагностики линтера: блок **`## Linter Signals (evidence)`** из шага 1.8 (все severity, включая warning; не сокращать до «линтер чист»).
 - Whitelist / Mandatory: блоки из шага 1.6.
 - Prior Findings History: блок из шага 2.1 (если есть).
 - Architectural Context: из шага 2.2 (если есть).
