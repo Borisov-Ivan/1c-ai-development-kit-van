@@ -49,7 +49,7 @@ In slice mode, evaluate the criteria from `vertical-slices.mdc` (section «QUALI
 3. Slice Completeness
 4. Slice Dependency Graph
 5. Slice Gate Integrity — exactly one `S<N>.accept` per slice plus the `<!-- slice-gate -->` marker. Missing or duplicated → `CRITICAL`. Legacy: if a slice has `S<N>.T<M>` (one or more) but no `S<N>.accept`, do not fail this criterion; emit `legacy-acceptance-format` (SUGGESTION) recommending `/opsx:migrate-acceptance <change-name>`.
-5b. Acceptance Checklist Coverage — the body of `S<N>.accept` SHALL contain one bullet per `#### Scenario:` listed in the slice's `**Связь со spec:**`. Alerts:
+5b. Acceptance Checklist Coverage — structural coverage only. The body of `S<N>.accept` SHALL contain one bullet per `#### Scenario:` listed in the slice's `**Связь со spec:**`. Alerts:
    - `accept-checklist-empty` (CRITICAL) — `S<N>.accept` body has no scenario bullets.
    - `accept-bullets-missing-scenario` (WARNING) — a Scenario from `**Связь со spec:**` is not present as a bullet in `S<N>.accept`.
    - `accept-bullet-foreign-scenario` (WARNING) — a bullet in `S<N>.accept` references a Scenario declared in another slice's `**Связь со spec:**` (cross-slice acceptance duplication).
@@ -57,6 +57,14 @@ In slice mode, evaluate the criteria from `vertical-slices.mdc` (section «QUALI
 6. Rework Risk
 
 Then evaluate task readability using `task-readability.mdc`.
+
+## OUT OF SCOPE
+
+Do NOT evaluate:
+- Whether the acceptance checklist steps are executable by the user right now.
+- Whether test data, test documents, or baseline DB snapshots are specified.
+- Smoke testing scenarios.
+These are concerns for apply/archive. Do NOT emit alerts or recommendations asking for test data or baseline snapshots.
 
 ## ALERT RULES
 

@@ -26,12 +26,15 @@ metadata:
   - `--from-review <path>` — отчёт `/review`
   - `--from-debug <path>` — `debug.md` или RCA-отчёт
   - `--from-verify <path>` — отчёт `/opsx:verify`
-  - `--from-architecture <path>` — отчёт архитектора
+   - `--from-architecture <path>` — отчёт архитектора
   - `--from-report <path>` — итог `/opsx:explore`: `temp/reports/<тип>-YYYY-MM-DD-<slug>.md` (полный отчёт trace-analyst / explorer / architect), `temp/explore-handoff-*.md` (опциональный handoff с блоком `## Для /opsx:ff`), или legacy `openspec/sessions/<slug>/analysis.md` (RCA, рецепт, fix-задачи)
   - `--from-explore <path>` — legacy Explore Summary (`temp/explore-summary-*.md`)
   - `--code-sync` — штатная синхронизация OpenSpec-артефактов с фактическим кодом после ручного упрощения, writer/apply или Code-Truth Gate (`phantom-symbol`, устаревшие имена процедур, drift design/tasks/debug).
 
 Если текст требования отсутствует, но указан файл — извлечь намерение из файла и показать в брифе. Если намерение неоднозначно — спросить пользователя после брифа, до правок.
+
+**Output style:**
+Стиль вывода в чат (брифы, сводки, развилки) — см. `.cursor/docs/opsx-output-style.md` §2.5 «Человеческий слой».
 
 ---
 

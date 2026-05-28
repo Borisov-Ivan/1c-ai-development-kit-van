@@ -163,6 +163,13 @@ Replace старого Phase Classification. Новые критерии QC:
    - Legacy (`S<N>.T<M>` без `S<N>.accept`): применять старые алерты `acceptance-without-scenario` (WARNING) до миграции; новые алерты к legacy-формату не применяются.
 6. **Rework Risk** — срез опирается на непринятый предыдущий без явной зависимости, или сценарий среза повторяет сценарий другого среза. → WARNING / SUGGESTION в зависимости от остроты.
 
+**Out of scope для QC:**
+- Выполнимость пунктов приёмочного чеклиста пользователем.
+- Наличие тестовых данных.
+- Наличие эталона ИБ.
+- Smoke-сценарии.
+Это apply/archive. QC проверяет только структурное покрытие.
+
 **Удалены:** Phase Classification P0–P4, alert `missing-phase-gate`, alert `phase-violation`, implicit `P2→P0` dependency logic, alert `acceptance-scenario-duplication` (заменён `accept-bullet-foreign-scenario`), alert `acceptance-overload` (модель один-`accept` его делает невозможным).
 
 ## ПОВЕДЕНИЕ CONTINUE

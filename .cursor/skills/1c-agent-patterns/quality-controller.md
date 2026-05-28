@@ -30,6 +30,11 @@ Task(
          - Repository state: <list of existing objects/files
            mentioned in tasks, with empty/non-empty status>
 
+         ## Out of scope
+
+         Не оценивай: качество формулировки приёмочных шагов, выполним ли
+         тест сейчас на ИБ, нужны ли тестовые данные. Это apply/archive.
+
          Save result to:
          openspec/changes/<change-name>/reports/quality-control-YYYY-MM-DD.md.
 
