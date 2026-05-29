@@ -41,6 +41,9 @@
 ## Conversational Discipline
 `.cursor/rules/conversational-discipline.mdc` — 5 принципов осознанного диалога: Acknowledgement Layer, Adaptive Brief (entry-бриф в чат по §5.1 `opsx-output-style.md`), Risk Surfacing, Honest Subagent Handling, Progress Marker. Приоритет над длинными отчётами скиллов. Карта SSOT (лимиты, шаблоны, запреты) — в `.cursor/rules/chat-output-budget.mdc` §1a. Шаблоны вывода — в `.cursor/docs/opsx-output-style.md` и `templates/` соответствующих скиллов.
 
+## Анти-слоп
+`.cursor/rules/anti-slop.mdc` — always-apply чеклист AI-tells в чате (RU): без вводных, контрастов «не X, а Y», пустых усилителей, обезлички. Навык `.cursor/skills/stop-slop/SKILL.md` + `references/ai-tells-ru.md` — полный каталог с примерами до/после. Развилки verify: обязательная триада «В чём проблема / На что влияет / Если A·B» в `openspec-verify-change/templates/card-decision.md`. Pre-send — `chat-output-budget.mdc` §1b п.4. Не дублирует §7 chat-output-budget (жаргон движка) и `tz-lexicon-dictionary.md` (англицизмы в ТЗ).
+
 ## Глоссарий
 `openspec/glossary.md` — единый словарь ключевых терминов (ЗНИ, срез, slice-gate, tier, режимы verify, acceptance handoff и др.). Использовать для сверки терминологии в артефактах, отчётах и сообщениях пользователю.
 

@@ -20,6 +20,7 @@ You are domain-agnostic. Do not review code quality, architecture, implementatio
 - dependency graph
 - slice-gate integrity
 - rework risk
+- slice verticality / acceptance observability
 - task readability as formulation quality
 
 ## SOURCES OF TRUTH
@@ -55,16 +56,19 @@ In slice mode, evaluate the criteria from `vertical-slices.mdc` (section «QUALI
    - `accept-bullet-foreign-scenario` (WARNING) — a bullet in `S<N>.accept` references a Scenario declared in another slice's `**Связь со spec:**` (cross-slice acceptance duplication).
    - Legacy mode (`S<N>.T<M>` without `S<N>.accept`): apply the legacy alert `acceptance-without-scenario` (WARNING) only — the new alert family is not used until migration.
 6. Rework Risk
+8. Slice Verticality / Acceptance Observability — per `vertical-slices.mdc` criterion 8. Apply to **both** `S<N>.accept` bullets and legacy `S<N>.T<M>` lines. Alert: `slice-not-vertical` when all acceptance items are code-review-only with no observability markers.
 
 Then evaluate task readability using `task-readability.mdc`.
 
 ## OUT OF SCOPE
 
 Do NOT evaluate:
-- Whether the acceptance checklist steps are executable by the user right now.
+- Whether acceptance steps are **executable right now** (code not wired, extension not loaded in IB).
 - Whether test data, test documents, or baseline DB snapshots are specified.
-- Smoke testing scenarios.
-These are concerns for apply/archive. Do NOT emit alerts or recommendations asking for test data or baseline snapshots.
+- Smoke testing scenarios outside tasks.
+These are concerns for apply/archive. Do NOT emit alerts asking for test data or baseline snapshots.
+
+**In scope (criterion 8):** whether slice acceptance describes **observable product behavior** vs code-review-only acceptance (`slice-not-vertical`).
 
 ## ALERT RULES
 

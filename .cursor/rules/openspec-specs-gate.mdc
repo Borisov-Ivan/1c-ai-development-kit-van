@@ -44,6 +44,30 @@ Glob по `openspec/changes/<name>/specs/**/*.md`. Если 0 файлов и а
 
 Источники: proposal.md (секция Capabilities / What Changes), design.md. Формат: `openspec/changes/<name>/specs/<capability>/spec.md` с секциями ADDED/MODIFIED + сценарии WHEN/THEN. Если capability не определена — использовать имя change как capability.
 
+## НАБЛЮДАЕМОСТЬ СЦЕНАРИЕВ (Scenario Observability)
+
+**Триггер:** verify Layer 3, ff/new при генерации specs, QC при cross-check spec ↔ tasks.
+
+**Правило:** клаузы `THEN` (и при необходимости `WHEN`) в `#### Scenario:` SHALL описывать **наблюдаемое** поведение для пользователя/приёмки в ИБ, а не детали реализации.
+
+**Алгоритм (Grep по `openspec/changes/<name>/specs/**/spec.md`):**
+
+Для каждого `#### Scenario:` проверить строки `- **THEN**` на **маркеры implementation-leak** (регистронезависимо, подстрока):
+
+- `функция возвращает`, `метод возвращает`, `процедура возвращает`
+- `метод вызывает`, `процедура добавляет`, `модуль экспортирует`
+- `возвращает структуру`, `вставляет ключ`, `добавляет экспортную`
+- `shall определять` + имя процедуры/функции в backticks как единственный результат
+
+**Алерт:** `scenario-implementation-leak` — **WARNING** (verify Layer 3; не блокирует archive).
+
+**Ремедиация:**
+
+1. Переписать `THEN` как наблюдаемый результат («проверка УНЭП проходит без ложного „недействительно“», «одно чтение вложения на трассировке»).
+2. Детали реализации (имена функций, ключи структур) — в `design.md` (`## Behavior Contract`, `## Implementation Options`), не в spec Scenario.
+
+**Связь с vertical slices:** implementation-level Scenario часто порождает non-vertical срез с код-ревью приёмкой (QC `slice-not-vertical`).
+
 ## ИСКЛЮЧЕНИЯ
 
 - Пользователь явно сказал «без спеки» / «skip specs».

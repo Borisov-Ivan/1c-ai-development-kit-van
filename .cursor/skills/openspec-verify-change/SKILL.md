@@ -151,6 +151,7 @@ QC оценивает критерии 1–6 из `vertical-slices.mdc` (Scenari
 3. **Scenarios → Slices.** Каждый `#### Scenario:` упомянут в `## Slices` design.md? Иначе → `scenario-orphan-slice` (WARNING — может быть подобрано в Layer 2; FAIL только если несовпадение системное).
 4. **Slices → Acceptance.** Каждый Scenario, заявленный в `**Связь со spec:**` среза, есть буллетом в чеклисте `S<N>.accept` этого среза? Иначе — алерт `accept-bullets-missing-scenario` (WARNING) от Layer 2 (5b QC); Layer 3 не дублирует.
 5. **Slices → Tasks.** Для каждого среза есть рабочие задачи (`S<N>.<M>`) И ровно одна `S<N>.accept`. Срез без рабочих задач — алерт `slice-empty` (FAIL).
+6. **Scenario observability (`scenario-implementation-leak`).** Grep `specs/**/spec.md`: для каждого `#### Scenario:` проверить `- **THEN**` на маркеры implementation-leak (см. `.cursor/rules/openspec-specs-gate.mdc` секция «НАБЛЮДАЕМОСТЬ СЦЕНАРИЕВ»). При совпадении — **WARNING** `scenario-implementation-leak`; рекомендация: переписать THEN наблюдаемо, детали — в design.md. Не эскалирует в FAIL Layer 3, но включается в отчёт verify.
 
 `FAIL` в Layer 3 — **NO-GO**.
 
