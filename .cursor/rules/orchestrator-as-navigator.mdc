@@ -1,9 +1,0 @@
----
-description: "Orchestrator as Navigator: redirect to chat-output-budget.mdc"
-alwaysApply: true
----
-
-# Orchestrator as Navigator (Redirect)
-
-См. SSOT: `.cursor/rules/chat-output-budget.mdc`.
-Оркестратор — навигатор. Пользователю не нужны детали внутреннего движка OpenSpec, ему нужны только значимые изменения и блокеры.

@@ -439,9 +439,8 @@ Focus: full (new file)
 
 ## Интеграция
 
-- **command-skill-gate.mdc:** первый инструмент в первом батче — Read этого скилла.
-- **command-session-persistence.mdc:** протокол действует весь `/review`.
-- **bsl-write-guard / 1c-agent-delegation:** правки `.bsl` только через writer/simplifier; после правок — обязательный reviewer; LINT GATE и API EXISTENCE CHECK; EXTENSION GATE и EXTENSION VERIFICATION при `&ИзменениеИКонтроль`. **Investigation Loop** (шаг 3.5) — multi-iteration (max 3). Формат — секция CONTRACT RESOLUTION в `1c-agent-delegation.mdc`.
+- **session-discipline.mdc:** первый инструмент в первом батче — Read этого скилла; протокол действует весь `/review`.
+- **1c-agent-delegation:** правки `.bsl` только через writer/simplifier; после правок — обязательный reviewer; LINT GATE и API EXISTENCE CHECK; EXTENSION GATE и EXTENSION VERIFICATION при `&ИзменениеИКонтроль`. **Investigation Loop** (шаг 3.5) — multi-iteration (max 3). Формат — секция CONTRACT RESOLUTION в `1c-agent-delegation.mdc`.
 - **Review Focus Boundaries:** при `diff-focused` оркестратор формирует `## Review Boundaries`; reviewer следует Review Boundaries Protocol.
 - **Evidence separation:** все механические проверки (linter, whitelist, mandatory controls, prior history) — **evidence**; вердикты (severity/kind/action/risk) — **reviewer**.
 - **Release-hygiene:** AP-040..AP-045 каталога (не grep оркестратора); reviewer использует Intent Map / Contract Map.

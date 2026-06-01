@@ -141,7 +141,7 @@ Note: global processors do not have the `TargetObjects` parameter.
 1. Find `ObjectModule.bsl` via Glob: `src/{{ProcessorName}}/Ext/ObjectModule.bsl`
 2. Read the file
 3. If `ExternalDataProcessorInfo` already exists — inform user, do not duplicate
-4. If file not found — suggest creating the EPF structure in **Configurator** and exporting to `src/` (см. `1c-xml-write-guard.mdc`; scaffold/generators форм в репозитории не используются)
+4. If file not found — suggest creating the EPF structure in **Configurator** and exporting to `src/` (см. `1c-agent-delegation.mdc` § XML WRITE GUARD; scaffold/generators форм в репозитории не используются)
 5. Find the region `#Region PublicInterface` ... `#EndRegion`
 6. Insert `ExternalDataProcessorInfo()` function inside this region
 7. If kind requires server handler — insert it too, after the function

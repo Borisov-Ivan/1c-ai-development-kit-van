@@ -1,9 +1,0 @@
----
-description: "Command Skill Gate: redirect to session-discipline.mdc"
-alwaysApply: true
----
-
-# Command Skill Gate (Redirect)
-
-См. SSOT: `.cursor/rules/session-discipline.mdc`.
-При старте команды — первый tool call только Read SKILL.md.

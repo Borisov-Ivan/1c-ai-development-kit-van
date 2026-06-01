@@ -104,7 +104,7 @@ priority: 150
 
 ### Legacy-compat
 
-Активные ЗНИ, созданные до введения `S<N>.accept`, могут содержать множественные `S<N>.T<M>` (по одному на Scenario) — apply, verify и archive обязаны их понимать (см. ниже секции по командам). QC при их обнаружении выдаёт SUGGESTION «Старая модель приёмки. Запустить `/opsx:migrate-acceptance <name>` (или сделать вручную: объединить `T<M>` в один `S<N>.accept` с чеклистом сценариев)». Алерт не блокирует прогон.
+Активные ЗНИ, созданные до введения `S<N>.accept`, могут содержать множественные `S<N>.T<M>` (по одному на Scenario) — apply, verify и archive обязаны их понимать (см. ниже секции по командам). QC при их обнаружении выдаёт SUGGESTION «Старая модель приёмки. Объединить `T<M>` в один `S<N>.accept` с чеклистом сценариев (вручную)». Алерт не блокирует прогон.
 
 ## ТРИГГЕРЫ И ПОРОГИ
 
@@ -151,7 +151,7 @@ priority: 150
 - **Layer 2 Internal Coherence** прогоняет QC Slice Coherence (критерии 1–6, 8–9 ниже).
 - **Layer 5 Implementation Readiness** прогоняет Architect readiness per-slice.
 - **Предложение миграции в срезы** (нет `# Срез` или есть `<!-- phase-gate -->`): `/opsx:verify` **рекомендует словами** `/opsx:migrate-slices <name>`; не блокирует весь прогон; фактическая миграция — только по команде migrate.
-- **Предложение миграции приёмки** (есть `S<N>.T<M>` в активной ЗНИ — legacy acceptance): QC выдаёт SUGGESTION «Старая модель приёмки. `/opsx:migrate-acceptance <name>` (или вручную: объединить `T<M>` в один `S<N>.accept`)». Не блокирует прогон; legacy-формат остаётся работоспособным во всех командах.
+- **Предложение миграции приёмки** (есть `S<N>.T<M>` в активной ЗНИ — legacy acceptance): QC выдаёт SUGGESTION «Старая модель приёмки. Вручную: объединить `T<M>` в один `S<N>.accept`». Не блокирует прогон; legacy-формат остаётся работоспособным во всех командах.
 
 ## QUALITY CONTROLLER — SLICE COHERENCE
 
@@ -164,7 +164,7 @@ Replace старого Phase Classification. Новые критерии QC:
 2. **Slice Independence** — каждый срез принимаем без следующих (зависимости только «назад»). Циклы → CRITICAL.
 3. **Slice Completeness** — в срезе есть все слои (метаданные, форма, BSL, тест), необходимые для его приёмочного сценария. Пропуски → WARNING: «S<N> не содержит задачи слоя <X>, требуемого для приёмки».
 4. **Slice Dependency Graph** — зависимости между срезами объявлены в метаданных (`Зависимости:`); объявленные деды существуют; нет циклов. Несоответствие → WARNING.
-5. **Slice Gate Integrity** — в каждом срезе есть **ровно один** `S<N>.accept` и маркер `<!-- slice-gate -->`. Отсутствие или дубль → CRITICAL. Legacy: если в срезе есть `S<N>.T<M>` (один или несколько), но нет `S<N>.accept` — критерий не падает; QC параллельно эмитирует SUGGESTION `legacy-acceptance-format` с предложением `/opsx:migrate-acceptance <name>`.
+5. **Slice Gate Integrity** — в каждом срезе есть **ровно один** `S<N>.accept` и маркер `<!-- slice-gate -->`. Отсутствие или дубль → CRITICAL. Legacy: если в срезе есть `S<N>.T<M>` (один или несколько), но нет `S<N>.accept` — критерий не падает; QC параллельно эмитирует SUGGESTION `legacy-acceptance-format` с предложением объединить `T<M>` в один `S<N>.accept` вручную.
 5b. **Acceptance Checklist Coverage** (правило среза 6, Acceptance Checklist Coverage). Алгоритм: (a) собрать Scenarios из `**Связь со spec:**` среза; (b) извлечь имена Scenario из тела `S<N>.accept` (буллеты вида `Scenario «…»` или хвостовые скобки `(Scenario: «…»)`); (c) сравнить множества; (d) эмитировать алерты:
    - `accept-bullets-missing-scenario` — **WARNING**: в чеклисте `S<N>.accept` не упомянут Scenario, заявленный в `**Связь со spec:**` среза.
    - `accept-checklist-empty` — **CRITICAL**: тело `S<N>.accept` не содержит ни одного буллета чеклиста (одна строка приёмки без сценариев — не приёмка).
@@ -236,7 +236,7 @@ Replace старого Phase Classification. Новые критерии QC:
 
 - **`debug.md#Slice Gate Decisions`** — append при каждом slice-gate (см. формат выше). Поле `Решение` принимает значения: `awaiting-acceptance` (handoff на приёмку), `принят`, `принят (manual shortcut)`, **`принят (archive)`** (приёмка зафиксирована при `/opsx:archive`, см. SKILL archive шаг 3.5), `не принят`, `inside-slice rework` (дефект до подписанной приёмки `S<K>.T<M>`; fix-задачи добавлены в `S<K>` перед `S<K>.T<M>`), `fix предыдущего S<K>`, `стоп`.
 - **`reports/slice-acceptance-S<N>-YYYY-MM-DD.md`** — отчёт приёмки среза: изменения, тест, результат.
-- **`reports/verification-slice-S<N>-YYYY-MM-DD.md`** — per-slice verify.
+- **`reports/verification-YYYY-MM-DD.md`** — отчёт verify (единое имя; если прогон scoped на срез — срез/фаза указываются в YAML `snapshot`, не в имени файла).
 - **`reports/quality-control-YYYY-MM-DD.md`** — содержимое перестроено под Slice Coherence (имя файла то же).
 
 ## ИНВАРИАНТ: Defect placement (fix-срез vs inside-slice)

@@ -8,7 +8,7 @@ priority: 240
 
 Единый источник истины для обнаружения **регрессии прецедента**: когда текущий change, дельта spec, дизайн или код отменяют цель, поведение или требование, ранее зафиксированные в **архивном** change, **Load-Bearing ADR** или **invariant KB**, без явного `## Blast Radius` в `design.md` (в бизнес-терминах).
 
-Ссылаются: `architect-gate.mdc`, `verified-cause-gate.mdc`, `openspec-verify-change/SKILL.md` (шаг 9b), `1c-agent-delegation.mdc` (KB CONTEXT), `knowledge-format.mdc` (invariant), `adr-format.mdc` (Load-Bearing / Blast Radius).
+Ссылаются: `architect-gate.mdc`, `verified-cause-gate.mdc`, `openspec-verify-change/SKILL.md` (Layer 2, шаг 2.4 Cross-Archive Regression Audit), `1c-agent-delegation.mdc` (KB CONTEXT), `knowledge-format.mdc` (invariant), `adr-format.mdc` (Load-Bearing / Blast Radius).
 
 ## ПОНЯТИЯ
 
@@ -48,26 +48,26 @@ priority: 240
 | **explore / Structured Investigation** | В бриф и последующий промпт включить `## Cross-Archive Context` (до 3 архивных changes по совпадению capability + scope.files). Если триггер сработал — при продолжении в `/opsx:ff` или `/opsx:extend` потребовать `## Blast Radius` в design до закрытия Gate. |
 | **ff / new (Design Gate)** | Blocking: без заполненной секции `## Blast Radius` при активном триггере Design Gate не считается пройденным для области precedent (override только через явную документацию Blast Radius + пользователь). |
 | **extend** | Если бриф содержит «Отменяет архивный инвариант: yes» без Blast Radius в предлагаемых правках — `Drift-check: scope-violation` (`openspec-extend-change/SKILL.md`). |
-| **verify** | Шаг 9b Cross-Archive Regression Audit; CRITICAL/WARNING по матрице severity в скилле verify. |
+| **verify** | Layer 2, шаг 2.4 Cross-Archive Regression Audit; CRITICAL/INFO по матрице severity в скилле verify. |
 | **apply** | Pre-flight: если активный change имеет CRITICAL `precedent-regression` или `invariant-drift` не устранённые в артефактах — STOP до решения пользователя или `/opsx:extend`. |
 
 ## ЗАКРЫТИЕ GATE
 
 Gate считается удовлетворённым для затронутого прецедента, если выполняется **любое**:
 
-1. В `design.md` есть секция `## Blast Radius` с заполненными полями (контракт, источник archive/ADR/KB, бизнес-эффект, альтернативы, обоснование), и текущая дельта spec/design явно фиксирует осознанную отмену или замену прецедента **или** архитектор в режиме `precedent-coherence-audit` заключил `extends` без отмены (см. verify 9b — понижение до INFO).
+1. В `design.md` есть секция `## Blast Radius` с заполненными полями (контракт, источник archive/ADR/KB, бизнес-эффект, альтернативы, обоснование), и текущая дельта spec/design явно фиксирует осознанную отмену или замену прецедента **или** архитектор в режиме `precedent-coherence-audit` заключил `extends` без отмены (см. verify Layer 2.4 — понижение до INFO).
 2. Пользователь в Phase B verify выбрал вариант с явным принятием риска (карточка «Принятые риски») после блока Blast Radius.
 3. Триггеры не сработали (нет пересечения с архивным `ADDED`, нет MODIFIED/REMOVED против него, нет противоречия invariant KB / Load-Bearing ADR).
 
 **Design Rationale без Blast Radius не закрывает Gate** при сработавшем триггере.
 
-## БЮДЖЕТ И ПРОИЗВОДИТЕЛЬНОСТЬ (verify 9b)
+## БЮДЖЕТ И ПРОИЗВОДИТЕЛЬНОСТЬ (verify Layer 2.4)
 
 - Сканировать только архивы, чья `<capability>` входит в множество capability из дельт текущего change.
-- Не более **10** архивных каталогов changes за один прогон verify; при превышении — INFO «часть архивов не проверена» и опция `--full-precedent-audit` в сообщении пользователю (не блокирует без явной политики проекта).
+- Не более **10** архивных каталогов changes за один прогон verify; при превышении — INFO `precedent-audit-budget-exceeded` (повторить с узким scope или задокументировать ручной аудит); не блокирует без явной политики проекта.
 - `## Cross-Archive Context` для архитектора — не более **3** архивных changes (ранжирование: совпадение capability + пересечение путей из tasks/design).
 
 ## ССЫЛКИ
 
 - Шаблон Blast Radius в design: `.cursor/skills/openspec-ff-change/SKILL.md`, `.cursor/skills/openspec-extend-change/SKILL.md`.
-- Алгоритм verify 9b: `.cursor/skills/openspec-verify-change/SKILL.md`.
+- Алгоритм verify Layer 2.4: `.cursor/skills/openspec-verify-change/SKILL.md`.

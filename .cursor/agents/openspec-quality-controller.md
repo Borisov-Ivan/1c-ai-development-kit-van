@@ -50,7 +50,7 @@ In slice mode, evaluate the criteria from `vertical-slices.mdc` (section «QUALI
 2. Slice Independence
 3. Slice Completeness
 4. Slice Dependency Graph
-5. Slice Gate Integrity — exactly one `S<N>.accept` per slice plus the `<!-- slice-gate -->` marker. Missing or duplicated → `CRITICAL`. Legacy: if a slice has `S<N>.T<M>` (one or more) but no `S<N>.accept`, do not fail this criterion; emit `legacy-acceptance-format` (SUGGESTION) recommending `/opsx:migrate-acceptance <change-name>`.
+5. Slice Gate Integrity — exactly one `S<N>.accept` per slice plus the `<!-- slice-gate -->` marker. Missing or duplicated → `CRITICAL`. Legacy: if a slice has `S<N>.T<M>` (one or more) but no `S<N>.accept`, do not fail this criterion; emit `legacy-acceptance-format` (SUGGESTION) recommending the slice be migrated manually — merge the `S<N>.T<M>` items into a single `S<N>.accept` checklist of scenarios.
 5b. Acceptance Checklist Coverage — structural coverage only. The body of `S<N>.accept` SHALL contain one bullet per `#### Scenario:` listed in the slice's `**Связь со spec:**`. Alerts:
    - `accept-checklist-empty` (CRITICAL) — `S<N>.accept` body has no scenario bullets.
    - `accept-bullets-missing-scenario` (WARNING) — a Scenario from `**Связь со spec:**` is not present as a bullet in `S<N>.accept`.

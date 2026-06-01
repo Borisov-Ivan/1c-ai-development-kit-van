@@ -1,9 +1,0 @@
----
-description: "XML Write Guard: redirect to 1c-agent-delegation.mdc"
-alwaysApply: true
----
-
-# XML Write Guard (Redirect)
-
-См. SSOT: `.cursor/rules/1c-agent-delegation.mdc`.
-Запрет прямой записи/генерации XML в src/ (Form.xml, Template.xml и др.). Формы — через Конфигуратор или программное создание в BSL.

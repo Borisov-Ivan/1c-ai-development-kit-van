@@ -68,10 +68,7 @@ Implement tasks from an OpenSpec change.
 
    **Pre-flight: verify check & Metadata**
 
-   Glob в change dir (любой из):
-   - `reports/verification-slice-pre-*.md`
-   - `reports/verification-legacy-pre-*.md`
-   - `reports/verification-legacy-mixed-*.md`
+   Glob в change dir: `reports/verification-*.md`. Взять последний по дате в имени, прочитать YAML `verify_mode` (`pre-apply` / `post-apply`) — фаза в снапшоте, не в имени файла.
 
    - **If found** → show summary line from report (first CRITICAL/WARNING counts). Continue.
    - **If NOT found** → soft warning:
@@ -240,12 +237,12 @@ Implement tasks from an OpenSpec change.
    |---|---|---|
    | BSL-код (новая логика, правка процедур) | «реализовать», «добавить», «доработать» + путь к .bsl | **onec-code-writer** + **onec-code-reviewer** после |
    | Модуль формы (BSL) | путь `Forms/.../Ext/Form/Module.bsl`, «программно создать элемент», «Элементы.Добавить», «видимость элементов» без правки `Form.xml` | **onec-code-writer** + **onec-code-reviewer** после |
-   | Форма / Form.xml / Конфигуратор | «Form.xml», «реквизиты формы», «добавить форму», «колонки в Конфигураторе», создание/изменение XML формы | **СТОП.** Инструкция ручного конфигурирования (1c-xml-write-guard.mdc). WAIT — не продолжать до выгрузки |
+   | Форма / Form.xml / Конфигуратор | «Form.xml», «реквизиты формы», «добавить форму», «колонки в Конфигураторе», создание/изменение XML формы | **СТОП.** Инструкция ручного конфигурирования (`1c-agent-delegation.mdc` § XML WRITE GUARD). WAIT — не продолжать до выгрузки |
    | Верификация метаданных | «проверить соответствие», «проверить наличие» | Оркестратор (Glob/Grep/Read — только проверка, не реализация) |
    | Приёмочная задача (`S<N>.accept` или legacy `S<N>.T<M>`) | «ручной тест», «убедиться», `S<N>.accept`, `S<N>.T<M>` | **Режимы по срезам / пошаговый** (внутренние коды `step-by-slice` / `step-by-step`): trigger Slice Gate (см. шаг 6). **Legacy batch:** пропустить с предупреждением; включить в Session Summary секцию «Отложенные ручные тесты» |
    | Создание метаданных | «создать регистр», «создать справочник», «создать форму» | **СТОП** — блокер пользователю (`1c-no-metadata-creation.mdc`) |
 
-   **HALT:** Оркестратор НЕ реализует задачи типов BSL-код и модули формы самостоятельно. Оркестратор готовит промпт и делегирует. Прямое использование Write/StrReplace для .bsl и **любая правка Form.xml** (включая скрипты/JSON-конвейеры) — запрещены. Для `Form.xml`/Конфигуратора: СТОП — инструкция ручного конфигурирования и WAIT до выгрузки/приёмки пользователя. Для программного создания элементов в `Form/Module.bsl`: обычный BSL pipeline (`onec-code-writer` → `ReadLints` → `onec-code-reviewer`). Ref: `1c-agent-delegation.mdc`, `1c-utility-agents.mdc`, `1c-xml-write-guard.mdc`.
+   **HALT:** Оркестратор НЕ реализует задачи типов BSL-код и модули формы самостоятельно. Оркестратор готовит промпт и делегирует. Прямое использование Write/StrReplace для .bsl и **любая правка Form.xml** (включая скрипты/JSON-конвейеры) — запрещены. Для `Form.xml`/Конфигуратора: СТОП — инструкция ручного конфигурирования и WAIT до выгрузки/приёмки пользователя. Для программного создания элементов в `Form/Module.bsl`: обычный BSL pipeline (`onec-code-writer` → `ReadLints` → `onec-code-reviewer`). Ref: `1c-agent-delegation.mdc` (§ XML WRITE GUARD), `1c-utility-agents.mdc`.
 
    **Code-Truth Journal (mandatory after writer/reviewer success):**
    - После каждой BSL/form-module задачи извлечь из ответа `onec-code-writer` блок `created_or_modified_symbols`.
@@ -523,7 +520,7 @@ Implement tasks from an OpenSpec change.
 - Pause on errors, blockers, or unclear requirements - don't guess
 - Use contextFiles from CLI output, don't assume specific file names
 - **Task Dispatch:** classify each task before implementation; delegate to the correct executor per dispatch table. Orchestrator MUST NOT implement BSL or form-module tasks directly — only prepare context and delegate.
-- **Form XML / Configurator tasks:** STOP — produce manual configuration instructions (`1c-xml-write-guard.mdc`); do not edit `Form.xml` or continue until the user has performed configuration and re-exported.
+- **Form XML / Configurator tasks:** STOP — produce manual configuration instructions (`1c-agent-delegation.mdc` § XML WRITE GUARD); do not edit `Form.xml` or continue until the user has performed configuration and re-exported.
 - **Form module BSL tasks:** if the task changes `Forms/.../Ext/Form/Module.bsl` only (for example `Элементы.Добавить`, visibility, event handlers), run the standard BSL writer/reviewer pipeline; this is not a `Form.xml` task.
 - Reference: `1c-agent-delegation.mdc` (BSL gate), `1c-utility-agents.mdc` (forms, queries, tests).
 - **vertical-slices.mdc:** вердикт Slice Gate **[3]** и любое добавление `# Срез` — только по **ИНВАРИАНТ: Defect placement** (не создавать fix-срез при приёмочной задаче среза `S<K>.accept` (или legacy `S<K>.T<M>`) = `[ ]` без cross-slice).

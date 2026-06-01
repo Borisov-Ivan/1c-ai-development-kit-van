@@ -56,6 +56,6 @@ metadata:
 
 ## Связь
 
-- Always-apply чеклист: `.cursor/rules/anti-slop.mdc`
-- Pre-send: `.cursor/rules/chat-output-budget.mdc` §1b п.4
+- Always-apply pre-send чеклист: `.cursor/rules/chat-output-budget.mdc` §1b п.4
+- Словарь запретов (SSOT): `.cursor/docs/chat-lexicon.md`
 - Развилки verify (триада): `.cursor/skills/openspec-verify-change/templates/executive-summary.md`

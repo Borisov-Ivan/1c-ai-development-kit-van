@@ -44,7 +44,7 @@ Continue working on a change by creating the next artifact.
    **If all artifacts are complete (`isComplete: true`)**:
    - Congratulate the user
    - Show final status including the schema used
-   - Suggest: "All artifacts created! You can now implement this change or archive it."
+   - Рекомендовать следующий шаг: **`Следующий шаг: /opsx:verify <name>`** — проверить артефакты перед реализацией (можно ли безопасно запускать apply). После чистого verify — `/opsx:apply <name>`.
    - STOP
 
    ---
@@ -101,7 +101,7 @@ Common artifact patterns:
   - The Capabilities section is critical - each capability listed will need a spec file.
 - **specs/<capability>/spec.md**: Create one spec per capability listed in the proposal's Capabilities section (use the capability name, not the change name).
 - **design.md**: Document technical decisions, architecture, and implementation approach. **Включает обязательную секцию `## Slices`** (для ЗНИ ≥6 задач) с описанием вертикальных срезов — см. `.cursor/rules/vertical-slices.mdc`.
-- **tasks.md**: Break down implementation into checkboxed tasks **по срезам**: H1-заголовки `# Срез S<N>: ...`, метаданные среза (`**Сценарий:**`, `**Приёмка:**`, `**Связь со spec:**`, `**Зависимости:**`), задачи `S<N>.<M>`, обязательный приёмочный тест `S<N>.T<M>` и маркер `<!-- slice-gate: ... -->`.
+- **tasks.md**: Break down implementation into checkboxed tasks **по срезам**: H1-заголовки `# Срез S<N>: ...`, метаданные среза (`**Сценарий:**`, `**Приёмка:**`, `**Связь со spec:**`, `**Зависимости:**`), задачи `S<N>.<M>`, **ровно одна** приёмочная задача `S<N>.accept` с буллет-чеклистом сценариев в теле и маркер `<!-- slice-gate: ... -->`. Формат — `.cursor/rules/vertical-slices.mdc` (секция «ФОРМАТ S<N>.accept»). Legacy `S<N>.T<M>` — только для ранее мигрированных ЗНИ, в новой генерации не использовать.
 
 **Slice Generation Gate (МАНДАТОРНО, между design и tasks):**
 Если создаётся `tasks.md` и в `design.md` нет секции `## Slices`, а у ЗНИ ожидается ≥6 задач — **СТОП**. Сначала вызвать `Task(subagent_type="onec-code-architect")` с шаблоном «Architect — slice decomposition» из `.cursor/skills/1c-agent-patterns/architect.md`, получить `## Slices`, добавить в design.md (StrReplace), показать пользователю, дождаться подтверждения.
@@ -110,10 +110,10 @@ Common artifact patterns:
 
 **Дополнение задач после старта реализации:**
 Если пользователь просит «добавить задачу X» в уже стартовавшую ЗНИ:
-0. **Mechanical check:** для целевого среза `S<K>` — Grep в `tasks.md` строку `S<K>.T<M>`; чекбокс **`[x]`** или **`[ ]`**?
+0. **Mechanical check:** для целевого среза `S<K>` — Grep в `tasks.md` приёмочную задачу `S<K>.accept` (или legacy `S<K>.T<M>`); чекбокс **`[x]`** или **`[ ]`**?
 1. Спросить (или вывести из контекста): к какому срезу относится X?
-2. **По умолчанию** (приёмка `S<K>.T<M>` = `[ ]`) — вставить задачу с ID `S<K>.<M+1>` **внутрь** `S<K>` **перед** `S<K>.T<M>` (inside-slice). **Запрещено** создавать `# Срез S<N+1>` для дефекта одного среза без cross-slice — см. `.cursor/rules/vertical-slices.mdc` (**ИНВАРИАНТ: Defect placement**, decision tree).
-3. Если `S<K>.T<M>` = **`[x]`** (срез принят, frozen) и X — дефект/фикс — создать **fix-срез** `# Срез S<N+1>: …` с отдельным `S<N+1>.T<M>` по инварианту; **не** добавлять «тихо» в принятый срез без осознанного решения и записи в `debug.md`.
+2. **По умолчанию** (приёмка `S<K>.accept` = `[ ]`) — вставить задачу с ID `S<K>.<M+1>` **внутрь** `S<K>` **перед** `S<K>.accept` (inside-slice). **Запрещено** создавать `# Срез S<N+1>` для дефекта одного среза без cross-slice — см. `.cursor/rules/vertical-slices.mdc` (**ИНВАРИАНТ: Defect placement**, decision tree).
+3. Если `S<K>.accept` = **`[x]`** (срез принят, frozen) и X — дефект/фикс — создать **fix-срез** `# Срез S<N+1>: …` с отдельным `S<N+1>.accept` по инварианту; **не** добавлять «тихо» в принятый срез без осознанного решения и записи в `debug.md`.
 
 For other schemas, follow the `instruction` field from the CLI output.
 

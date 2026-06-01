@@ -1,9 +1,0 @@
----
-description: "Command Session Persistence: redirect to session-discipline.mdc"
-alwaysApply: true
----
-
-# Command Session Persistence (Redirect)
-
-См. SSOT: `.cursor/rules/session-discipline.mdc`.
-Протокол команды действует на каждом ходе сессии.

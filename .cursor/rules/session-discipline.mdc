@@ -6,7 +6,7 @@ priority: 180
 
 # Session Discipline
 
-Объединяет: command-skill-gate, command-session-persistence, context-strategy-gate.
+Объединяет три аспекта дисциплины сессии: Command → Skill (вход), Persistence (каждый ход), Context Strategy (массовое чтение).
 
 ## Command → Skill (вход)
 
@@ -34,5 +34,3 @@ priority: 180
 | explore | «обследуй» → Grep .bsl сам | бриф → Task explorer |
 | explore | «создай ЗНИ» | блок `## Для /opsx:ff` → `/opsx:ff` |
 | apply | «а может лучше?» | предложить explore |
-
-Полные таблицы — в legacy-файлах (redirect): `command-session-persistence.mdc`, `command-skill-gate.mdc`, `context-strategy-gate.mdc`.

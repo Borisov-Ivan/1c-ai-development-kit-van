@@ -12,10 +12,12 @@ priority: 800
 Сквозной поток (подробности — ниже):
 
 ```
-writer → ReadLints → [fix if errors] → API EXISTENCE CHECK →
-  [AskQuestion if WARNING on API only] → EXTENSION VERIFICATION (если &ИзменениеИКонтроль) →
+writer → ReadLints → [fix if errors] → API EXISTENCE CHECK + METADATA CHECK →
+  [AskQuestion if WARNING on API/metadata] → EXTENSION VERIFICATION (если &ИзменениеИКонтроль) →
   reviewer (+ Linter Signals evidence incl. warnings; Phase 1b MUST_FIX in-scope + base path + verification result)
 ```
+
+**Метаданные:** имена объектов, типов и значений перечислений (`Перечисления.X.Y`, `Тип("СправочникСсылка.X")`, `Метаданные.<Kind>.<Name>`) проверяются по выгрузке `src/` тем же принципом — детали в `.cursor/rules/1c-metadata-validation.mdc` (globs `**/*.bsl`). Несуществующее имя → STOP (нет в выгрузке = либо опечатка, либо создание метаданных по `1c-no-metadata-creation.mdc`).
 
 ## API EXISTENCE CHECK
 

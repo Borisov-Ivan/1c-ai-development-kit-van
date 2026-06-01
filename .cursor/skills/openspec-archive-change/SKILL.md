@@ -43,15 +43,13 @@ Archive a completed change in the experimental workflow.
 
 2a. **Verify freshness (внутренний прогон, без «лишнего» шага для пользователя)**
 
-   Grep в `openspec/changes/<name>/reports/` по маскам:
-   - `verification-slice-post-final-*.md` (slice mode)
-   - `verification-legacy-post-*.md` (legacy mode)
+   Glob в `openspec/changes/<name>/reports/verification-*.md`. Взять последний по дате, прочитать YAML `snapshot` / `verify_mode`. Свежий финальный отчёт — это прогон с `verify_mode: post-apply` после последней правки `tasks.md`.
 
    **Если свежий финальный отчёт verify найден** — **silent** в чат (non-event); отчёт остаётся в `reports/` архивируемой ЗНИ.
 
    **Если свежий финальный отчёт не найден:**
-   1. Выполнить **молча** (без рекомендации отдельной команды verify) полный прогон по скиллу `openspec-verify-change/SKILL.md` в режиме финальной post-apply проверки (`slice-post (final)` для slice-ЗНИ или `legacy-post` для legacy — по структуре `tasks.md`).
-   2. Сохранить отчёт в `reports/` (имя по шагу 18 verify).
+   1. Выполнить **молча** (без рекомендации отдельной команды verify) полный прогон по скиллу `openspec-verify-change/SKILL.md` в режиме финальной проверки (`verify_mode: post-apply`).
+   2. Сохранить отчёт в `reports/verification-YYYY-MM-DD.md` (имя по шагу 18 verify; суффикс `-2`/`-3` при повторе за день).
    3. **Чат:** не упоминать факт прогона, если итог чистый и архив не заблокирован.
    4. Если прогон выявил **блокеры** или обязательные решения пользователя — **СТОП** до шага 4 (не переносить change в archive): краткая карточка на языке заказчика + путь к `reports/verification-*.md` (бюджет `.cursor/rules/chat-output-budget.mdc`). Пользователь устраняет замечания и снова вызывает `/opsx:archive <name>`.
 
@@ -256,7 +254,7 @@ Archive a completed change in the experimental workflow.
 
 5.5.b **Invariant extraction (optional, поведенческие ЗНИ)**
 
-   Выполнять, если change содержит принятые срезы и меняет **поведение пользователя** (есть `## Behavior Contract` в design или UX-сценарии в spec). Цель — зафиксировать устойчивые контракты для будущих verify 9b / precedent-regression-gate.
+   Выполнять, если change содержит принятые срезы и меняет **поведение пользователя** (есть `## Behavior Contract` в design или UX-сценарии в spec). Цель — зафиксировать устойчивые контракты для будущих verify Layer 2.4 / precedent-regression-gate.
 
    **Эвристика кандидатов (до 5 на change):** прочитать `design.md` и архивный `proposal.md` до переноса; выделить строки в `## Goals`, `## Decisions`, `## Behavior Contract`, содержащие маркеры вроде «сохраняется», «не очищается», «инвариант», «обязательно», «не снимать». Исключить чисто технические ограничения без UX-эффекта.
 

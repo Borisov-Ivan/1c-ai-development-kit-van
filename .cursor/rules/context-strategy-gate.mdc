@@ -1,9 +1,0 @@
----
-description: "Context Strategy Gate: redirect to session-discipline.mdc"
-alwaysApply: true
----
-
-# Context Strategy Gate (Redirect)
-
-См. SSOT: `.cursor/rules/session-discipline.mdc`.
-При анализе 3+ файлов или больших файлов — использовать context-strategy/SKILL.md.

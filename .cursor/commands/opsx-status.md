@@ -18,5 +18,5 @@ description: Снимок текущего состояния OpenSpec change �
 - `<change-name>` — опционально. Если не указано — AskUserQuestion по списку активных changes (`openspec list --json`).
 
 **Флаги:**
-- `--short` — только заголовок: имя, режим (slice-pre / slice-post / legacy), прогресс по срезам одной строкой, рекомендация.
+- `--short` — только заголовок: имя, фаза (pre-apply / post-apply), структура (срезы / legacy), прогресс по срезам одной строкой, рекомендация.
 - `--reports` — таблица последних отчётов в `reports/` (тип, дата, размер, first-line summary).

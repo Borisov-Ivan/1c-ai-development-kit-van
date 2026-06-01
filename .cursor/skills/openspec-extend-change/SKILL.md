@@ -57,7 +57,7 @@ Chat Surface Contract — §2.6 `opsx-output-style.md`.
 
 Первый шаг команды **user-extend**:
 
-1. Прочитать этот `SKILL.md` (обеспечивает command-skill-gate).
+1. Прочитать этот `SKILL.md` (Command → Skill, `session-discipline.mdc`).
 2. Определить change:
    - если `<change-name>` указан — использовать его;
    - иначе выполнить `openspec list --json` и выбрать активный / спросить пользователя.
@@ -74,40 +74,28 @@ Chat Surface Contract — §2.6 `opsx-output-style.md`.
 
 Единый каркас — `.cursor/docs/opsx-output-style.md` §5.1 в **чате** (5 секций: Что вижу, Хочу понять, Как буду искать, Что получите, Подтвердить?). Заголовок: `Бриф для исследования: /opsx:extend | change: <name>`. Файлы `temp/briefs/*.md` не создаются.
 
-**Дополнительно для extend (всегда в том же сообщении, после секции «Что получите»):**
+**Чат-бриф extend = только 5 слотов §5.1.** Поле **На выходе** = 2–3 предложения на языке эффекта (что именно допишется в план). Служебные блоки **в чат не выводятся**.
 
-Если extend вызван **не** из verify (обычный режим):
+**Внутренние блоки (считаются перед брифом, в чат НЕ попадают — пишутся в `debug.md` / файл отчёта или применяются после подтверждения):**
 
 ```markdown
-**Предлагаемое изменение артефактов**
-1. `proposal.md`: …
-2. `design.md`: …
-3. `specs/**`: …
-4. `tasks.md`: …
-5. `debug.md`: …
-
-**Соответствие исходному scope**
+# (internal, не в чат)
+Предлагаемое изменение артефактов: proposal.md / design.md / specs/** / tasks.md / debug.md — что и где.
+Соответствие исходному scope:
 - Усиливает пункт Why: …
-- Затрагивает Non-Goals: yes / no — …
-- Меняет Behavior Contract: yes / no — …
-- Отменяет архивный инвариант: yes / no — …
+- Затрагивает Non-Goals: yes / no
+- Меняет Behavior Contract: yes / no
+- Отменяет архивный инвариант: yes / no
 - Drift-check: pass / drift-warning / scope-violation
 ```
 
 Если extend вызван **internal repair-from-verify** — **бриф не показывается**, правки сразу по §6.
 
-Если extend вызван **user-extend с `--from-verify` после decision** — **lite-бриф**:
-
-```markdown
-**Суть изменений (по отчёту verify):**
-<2–3 предложения на языке эффекта: что именно будет дописано в план. Без голых S<N>.x и без упоминания Drift-check / Behavior Contract в чате.>
-
-(Детали Drift-check и соответствия scope будут сохранены в файл).
-```
+Если extend вызван **user-extend с `--from-verify` после decision** — чат-бриф ужимается до поля **На выходе** (2–3 предложения сути); внутренние блоки — как выше, в файл.
 
 Секция **Как буду искать** того же сообщения: 1) уточнить неоднозначности через AskQuestion при необходимости; 2) проверить гейты архитектуры и факты в коде; 3) при `--code-sync` — после подтверждения делегировать исследователя кода и сохранить `reports/exploration-code-sync-YYYY-MM-DD.md`; 4) обновить артефакты change; 5) передать на `/opsx:verify <name>`. Завершить **Подтвердить?** по §5.1.
 
-Self-check перед выводом: слои разделены; в UX-полях §5.1 нет `S<N>.T<M>` / `D<N>` / номеров задач; списки нумерованы; поле **Вход** / **Факты** — только факты; каждое поле ≤3 строк или ≤7 пунктов; блок **«Соответствие исходному scope»** заполнен всеми **пятью** строками (в памяти оркестратора для файла, а в чате только если это не `--from-verify`).
+Self-check перед выводом: чат-бриф = 5 слотов §5.1, 8–12 строк; в UX-полях нет `S<N>.T<M>` / `D<N>` / номеров задач; списки нумерованы; блок **«Соответствие исходному scope»** заполнен всеми **пятью** строками **внутренне (для файла/применения), в чат не выводится**.
 
 **Развилки в чате после брифа:** любые варианты выбора до или после подтверждения (AskQuestion, неоднозначный `Drift-check` и т.п.) выводить блоками **«Решение N — …»** с развилками прозой (как в verify 3a, `verify-user-communication.mdc:43`), чтобы пользователь мог ответить одной строкой. Коды `<N>a` / `<N>b` / `<N>c` в чате запрещены. Варианты **в чате**, не только в длинном теле брифа.
 
@@ -336,10 +324,8 @@ Architect обязателен, если:
 
 ## Integration
 
-- `command-skill-gate.mdc`: первым tool call при `/opsx:extend` должен быть Read этого скилла.
-- `command-session-persistence.mdc`: протокол extend действует на каждом follow-up ходе.
-- `bsl-write-guard.mdc` / `1c-agent-delegation.mdc`: extend не реализует BSL и не вызывает writer/reviewer.
-- `1c-xml-write-guard.mdc`: extend не правит XML метаданных.
+- `session-discipline.mdc`: первым tool call при `/opsx:extend` — Read этого скилла; протокол extend действует на каждом follow-up ходе.
+- `1c-agent-delegation.mdc`: extend не реализует BSL/XML и не вызывает writer/reviewer (BSL и XML write guard — там).
 - `openspec-specs-gate.mdc`: при изменении specs соблюдать delta-формат.
 - `vertical-slices.mdc`: все изменения `tasks.md` slice-aware.
 - `code-truth-gate.mdc`: `--code-sync` — штатный remediation path для `phantom-symbol` и drift code↔artifacts.

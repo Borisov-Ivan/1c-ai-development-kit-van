@@ -14,7 +14,7 @@ Start a new change using the experimental artifact-driven approach.
 **Input**: The user's request may include a change name (kebab-case), a description of what they want to build, or nothing (auto-detect from context).
 
 **Output style:**
-- Пользовательские сообщения в чате (AskQuestion-блоки, сводка после генерации артефактов) — шаблон **T-BRIEF** (§5.1, адаптивный, только чат) / **T-CONFIRM** по контексту, см. `.cursor/docs/opsx-output-style.md`. Стиль вывода — см. `.cursor/docs/opsx-output-style.md` §2.5 «Человеческий слой». Файлы `temp/briefs/*.md` не создаются. Для **T-BRIEF** на старте: **KB в scope** обязателен (Read `openspec/knowledge/_index.yaml` и при необходимости KB `.md` или явное «нет совпадений…»).
+- Пользовательские сообщения в чате (AskQuestion-блоки, сводка после генерации артефактов) — шаблон **T-BRIEF** (единый каркас §5.1: **От вас / Цель / План / На выходе / Ок?**, 8–12 строк) / **T-CONFIRM** по контексту, см. `.cursor/docs/opsx-output-style.md`. Стиль вывода — §2.5 «Человеческий слой». Файлы `temp/briefs/*.md` не создаются. KB-discovery (Read `openspec/knowledge/_index.yaml` и при необходимости KB `.md`) — **внутренний шаг перед брифом**, в чат не выводится.
 - **Генерируемые артефакты** `proposal.md`, `design.md`, `tasks.md`, spec deltas — подчиняются §1 «Три слоя» и §3 «Запрет внутренних ID в пользовательских полях»: поля `Why`, `What Changes`, `Scope`, `Scenarios`, `Requirements` — UX-слой без утечки `S<N>.T<M>`, `D<N>`, `R<N>`, номеров задач `12.9`; внутренние ID допустимы только в `## Slices`, `## Decisions`, `## Tasks`, `## Risks`. Любое перечисление ≥2 пунктов — нумерованный список. Перед записью артефакта — self-check-5 (§7).
 
 **Steps**

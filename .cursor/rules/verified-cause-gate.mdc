@@ -54,7 +54,7 @@ priority: 250
    - делегирования `onec-code-architect` с `mode=precedent-coherence-audit` и сохранения отчёта `reports/architecture-precedent-coherence-YYYY-MM-DD.md`, классифицирующего изменение как `extends` vs `revokes`.
 3. Если пересечений нет или отмены контракта нет — продолжить (HALT не применяется).
 
-Источник: защита от молчаливой отмены контрактов между ЗНИ (verify шаг 9b, extend drift-check).
+Источник: защита от молчаливой отмены контрактов между ЗНИ (verify Layer 2.4, extend drift-check).
 
 ## Анти-паттерны (заплатки)
 

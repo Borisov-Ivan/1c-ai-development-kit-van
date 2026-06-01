@@ -60,7 +60,7 @@ flowchart TD
 
 Verify не правит scope артефактов. Если в запросе пользователя помимо команды verify есть **новое требование** или содержательная правка постановки (новые сценарии, изменения design):
 
-- AskQuestion: **«Хотите дополнить артефакты этим требованием перед verify? `/opsx:extend <name> --from-verify-prompt` / Запустить verify по текущим артефактам / Зафиксировать в TODO отчёта»**.
+- AskQuestion: **«Хотите дополнить артефакты этим требованием перед verify? `/opsx:extend <name>` (передать текст требования) / Запустить verify по текущим артефактам / Зафиксировать в TODO отчёта»**.
 - При выборе extend — verify останавливается, оркестратор передаёт текст в `/opsx:extend`.
 - При выборе «по текущим» — текст пользователя не учитывается в проверках, фиксируется в YAML отчёта `scope_gate_decision: ignore-extra` для аудита.
 - При выборе «TODO» — записывается в info-секцию отчёта, на вердикт не влияет.
@@ -133,11 +133,34 @@ QC оценивает критерии 1–6 из `vertical-slices.mdc` (Scenari
 
 **2.3. Spec ↔ Tasks ↔ Design coverage** — каждый `#### Scenario:` из `specs/**/spec.md` должен встречаться в `## Slices` design (строка «Scenarios из spec») И в чеклисте какого-то `S<N>.accept`. Иначе — алерт `scenario-orphan-design` или `scenario-orphan-accept`.
 
+**2.4. Cross-Archive Regression Audit (precedent regression)** — защита от молчаливой отмены ранее принятого контракта. Источник правил: `.cursor/rules/precedent-regression-gate.mdc`. Выполняется в `pre-apply`; в `post-apply` для непринятых задач/срезов; пропускается, когда все задачи `[x]` (постфактум приёмка не пересматривает регрессию дельты).
+
+Алгоритм (механический, бюджет ≤ 10 архивных каталогов за прогон):
+
+1. Собрать множество `<capability>` из дельт `specs/**` текущего change, имеющих статус `MODIFIED`/`REMOVED`.
+2. Для каждого — `Glob openspec/changes/archive/**/specs/<capability>/spec.md`; извлечь требования/сценарии со статусом `ADDED`.
+3. Сопоставить с текущими `MODIFIED`/`REMOVED` по нормализованному заголовку **и** тексту `WHEN`/`THEN`.
+4. **Invariant KB:** `Read openspec/knowledge/_index.yaml`; для фактов с `invariant: true`, чьи anchor-paths пересекаются с путями текущего change, проверить противоречие тексту факта.
+5. **Load-Bearing ADR:** `Glob openspec/adrs/ADR-*.md`; если текущий change/design упоминает `Supersedes` ADR со статусом Load-Bearing — проверить наличие `## Blast Radius`.
+
+Матрица severity:
+
+| Условие | Severity | Алерт |
+|---|---|---|
+| Пара `ADDED → MODIFIED/REMOVED` с отменой семантики, нет `## Blast Radius` в design | CRITICAL | `precedent-regression` |
+| Прецедент закрыт `## Blast Radius` или архивный контракт сохранён | INFO | `precedent-documented` |
+| Только переименование/структура spec без изменения `WHEN`/`THEN` | INFO | `precedent-restructure` |
+| Противоречие invariant KB | CRITICAL | `invariant-drift` |
+| Supersedes Load-Bearing ADR без `## Blast Radius` в новом ADR/design | CRITICAL | `load-bearing-adr-bypass` |
+| Превышен бюджет архивов (> 10) | INFO | `precedent-audit-budget-exceeded` (рекомендация: повторить с узким scope) |
+
+CRITICAL `precedent-regression` / `invariant-drift` / `load-bearing-adr-bypass` → класс **decision** в Repair Loop (не понижать в repair-гигиену): развилка человеку с блоком Blast Radius, **NO-GO**.
+
 **Итоговый статус слоя:**
 
 - `PASS` — все критерии OK / только INFO.
 - `WARNING` — есть несущественные несостыковки (один scenario без покрытия в матрице, лишний legacy-маркер). На вердикт идёт как «не блокирует apply».
-- `FAIL` — циклы зависимостей срезов, `accept-checklist-empty`, дублирование `S<N>.accept` в одном срезе, или CRITICAL `phantom-symbol` в post-apply.
+- `FAIL` — циклы зависимостей срезов, `accept-checklist-empty`, дублирование `S<N>.accept` в одном срезе, CRITICAL `phantom-symbol` в post-apply, или CRITICAL precedent-regression (`precedent-regression` / `invariant-drift` / `load-bearing-adr-bypass`).
 
 `FAIL` в Layer 2 — это **NO-GO**.
 
@@ -168,7 +191,9 @@ QC оценивает критерии 1–6 из `vertical-slices.mdc` (Scenari
 **Когда Layer 4 пропускается:**
 
 - Триггеры не сработали (`mtime(design.md) ≤ last_challenge_at`) → `layer_status.layer_4_independent_challenge: SKIPPED-novelty`. Вердикт от прошлого challenge остаётся в силе.
-- В корне change есть `.gate-override.yaml` с `gate: design-challenge` — пропуск с предупреждением в чат («Независимый аудит постановки пропущен по override от <дата>; повторите без override, если хотите проверить заново»). YAML: `layer_status.layer_4_independent_challenge: SKIPPED-override`.
+- В корне change есть `.gate-override.yaml` с `gate: design-challenge` — прочитать поле `timestamp`:
+  - **≤ 7 дней** — пропуск с предупреждением в чат («Независимый аудит постановки отложен по вашему решению от <дата> (причина: <reason>); отсрочка истекает через <N> дней»). YAML: `layer_status.layer_4_independent_challenge: SKIPPED-override`.
+  - **> 7 дней** — отсрочка истекла: **override игнорируется**, Layer 4 запускается как обычно. В info-секцию отчёта — `gate-override-expired`. Не давать молчаливый бессрочный обход.
 
 **Запуск:**
 
@@ -200,13 +225,15 @@ QC оценивает критерии 1–6 из `vertical-slices.mdc` (Scenari
 3. Есть ли в плане «фикс симптома» вместо корня (для bug-fix change — критерий из `verified-cause-gate.mdc` HALT 1/2)?
 4. Порядок задач не создаёт «петлю» — нет ли задачи, которая ссылается на ещё не созданный объект?
 
+**5.1. Manual Configuration Sufficiency (механический, до архитектора).** Grep `tasks.md` (case-insensitive) на маркеры ручной конфигурации: «вручную», «в Конфигураторе», «создать реквизит», «добавить измерение», «настроить роль», «элемент формы», «реквизит формы». Если маркеры найдены — в `design.md` должна быть **дословная таблица-доказательство**: конкретные имена объектов/реквизитов, типы, элементы формы, которые пользователь создаёт руками. Нет полной таблицы (есть требование ручной настройки, но в design только общая фраза без имён/типов) → `manual-config-incomplete` (CRITICAL) → **NO-GO**. Это страховка: без точных имён разработчик не выполнит ручную часть, и apply встанет. Если маркеров нет — записать «маркеров ручной конфигурации не найдено» в info, без правок.
+
 Архитектор сохраняет `reports/architecture-task-readiness-YYYY-MM-DD.md`.
 
 **Маппинг:**
 
 - Нет GAP / минорные → `PASS`.
 - WARNING-уровень GAP (нечёткие формулировки, недостающие ссылки) → `WARNING` (не блокирует).
-- CRITICAL GAP (нереализуемая as-is задача) → `FAIL` → **NO-GO**.
+- CRITICAL GAP (нереализуемая as-is задача) **или** `manual-config-incomplete` (5.1) → `FAIL` → **NO-GO**.
 
 ### Финальный вердикт
 
@@ -328,7 +355,7 @@ the file and synthesizes a single message for the user. Anything you put
 
 - **Не правит scope** (proposal/design/tasks/specs) через user-facing extend — только Layer 1 авто-гигиена и **internal Repair Loop** для repair-класса.
 - **Не генерирует** ТЗ — это путь `/opsx:doc-tz <name>` (`openspec-docs/SKILL.md`). Если в ЗНИ есть `proposal.md` метаданное `generate_tz: auto` и порог числа задач — verify в info-секцию отчёта добавляет рекомендацию запустить `/opsx:doc-tz`, не более.
-- **Не мигрирует** в срезы и не объединяет `S<N>.T<M>` в `S<N>.accept` — это отдельные команды (`/opsx:migrate-slices`, `/opsx:migrate-acceptance` — последняя в плане).
+- **Не мигрирует** в срезы (`/opsx:migrate-slices`) и не объединяет `S<N>.T<M>` в `S<N>.accept` (ручная правка артефакта).
 - **Не выполняет** apply, не отмечает задачи `[x]`.
 - **Не оценивает** выполнимость приёмочных тестов пользователем.
 - **Не требует** тестовые данные или эталоны ИБ (это зона ответственности apply/archive).
@@ -337,12 +364,12 @@ the file and synthesizes a single message for the user. Anything you put
 
 Активные ЗНИ, созданные до введения `S<N>.accept`, могут содержать множественные `S<N>.T<M>` per slice. Verify работает с ними без падений:
 
-- Layer 2 (QC критерий 5) использует legacy-ветку (см. `vertical-slices.mdc`): один или несколько `S<N>.T<M>` без `S<N>.accept` не падают на CRITICAL `Slice Gate Integrity`; QC выдаёт `legacy-acceptance-format` (SUGGESTION) с предложением `/opsx:migrate-acceptance <name>`.
+- Layer 2 (QC критерий 5) использует legacy-ветку (см. `vertical-slices.mdc`): один или несколько `S<N>.T<M>` без `S<N>.accept` не падают на CRITICAL `Slice Gate Integrity`; QC выдаёт `legacy-acceptance-format` (SUGGESTION) с предложением объединить `T<M>` в один `S<N>.accept` вручную.
 - Layer 2 5b — legacy-алерт `acceptance-without-scenario` (WARNING).
 - Layer 3 — Scenario `**Связь со spec:**` matched либо в чеклист `S<N>.accept`, либо в legacy `S<N>.T<M>` (по хвостовой скобке `(Scenario: «…»)`).
 - Layer 5 — архитектор оценивает выполнимость и старого, и нового формата.
 
-В отчёте verify в info-секции — одна строка «Старая модель приёмки. Можно объединить в один `S<N>.accept` командой `/opsx:migrate-acceptance <name>` (если эта команда уже доступна).»
+В отчёте verify в info-секции — одна строка «Старая модель приёмки. Можно вручную объединить `S<N>.T<M>` в один `S<N>.accept` с чеклистом сценариев.»
 
 ## Ссылки
 

@@ -10,7 +10,7 @@ alwaysApply: false
 Проверять при любом переходе:
 
 - `/opsx:apply` → handoff / slice gate / final;
-- `/opsx:verify` в post-apply, mixed, slice-post, slice-transition;
+- `/opsx:verify` в режиме `post-apply`;
 - `/opsx:archive`;
 - `/opsx:extend <name> --code-sync`;
 - ручное упрощение/переписывание кода после уже созданных `design.md`, `tasks.md`, `debug.md`.

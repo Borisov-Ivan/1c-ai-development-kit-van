@@ -1,9 +1,0 @@
----
-description: "Conversational Discipline: redirect to chat-output-budget.mdc"
-alwaysApply: true
----
-
-# Conversational Discipline (Redirect)
-
-См. SSOT: `.cursor/rules/chat-output-budget.mdc`.
-5 принципов осознанного диалога: No Acknowledgement, Adaptive Brief, Risk Surfacing, Honest Subagent Handling, Progress Marker.

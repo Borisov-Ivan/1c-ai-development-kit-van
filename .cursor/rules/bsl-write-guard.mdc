@@ -1,9 +1,0 @@
----
-description: "BSL Write Guard: redirect to 1c-agent-delegation.mdc"
-alwaysApply: true
----
-
-# BSL Write Guard (Redirect)
-
-См. SSOT: `.cursor/rules/1c-agent-delegation.mdc`.
-Правка .bsl файлов напрямую запрещена (кроме исключений) — делегировать `onec-code-writer` + `onec-code-reviewer`.

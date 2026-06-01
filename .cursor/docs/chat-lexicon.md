@@ -1,78 +1,66 @@
 # Словарь чата (SSOT: жаргон → человеческая замена)
 
-Единый источник для HALT-проверки сообщений оркестратора пользователю. Три слоя; полный grep-паттерн — в конце.
+Единый источник для HALT-проверки сообщений оркестратора пользователю.
 
-**Критерий:** поймёт ли заказчик-делопроизводитель, не знающий ни 1С-разработки, ни OpenSpec.
+## Две аудитории (важно)
 
-Ссылаются: `chat-output-budget.mdc` §7, `opsx-output-style.md` §3.1, `anti-slop.mdc`, `verify-user-communication.mdc`, `tz-lexicon-dictionary.md` (слой «лексика ТЗ»).
+- **Workflow-чат** (explore / verify / apply / extend и т. п.) адресован **разработчику 1С**. Профессиональные слова — «срез», «постановка», «приёмка», «область задачи», имена процедур, «что сломается» — **разрешены**. Не переводить их в канцелярит.
+- **Пользовательские итоги и ТЗ** (документы для заказчика без 1С) — полная расшифровка терминов. Лексика ТЗ — `.cursor/docs/tz-lexicon-dictionary.md`.
+
+**Что действительно запрещено в любом чате — коды и имена внутреннего движка** (Слой 1). Они ничего не говорят человеку и создают шум.
+
+Ссылаются: `chat-output-budget.mdc` §7 и §1b.4, `opsx-output-style.md` §3.1, `stop-slop/SKILL.md`, `verify-user-communication.mdc`.
 
 ---
 
-## Слой 1 — движок OpenSpec
+## Слой 1 — коды и имена движка (ЖЁСТКИЙ БАН в чате)
 
 Запрещены в чате (регистронезависимо, вне `` `имя-файла` `` и вне строки «Источники: …»):
 
-`CRITICAL`, `WARNING`, `SUGGESTION`, `Severity`, `Slice Gate`, `Promotion Test`, `Determinism Test`, `Implementation Impact`, `Card consolidation`, `Code-Truth`, `Architect Gate`, `Precedent Regression`, `Phase A`, `Phase B`, `verify_mode`, `verdict:`, `slice-pre`, `slice-post`, `slice-transition`, `Tier`, `Standard` (как метка объёма), `Lite`, `Full`, `low-confidence`, `capability` (как термин движка), `step-by-step`, `checkpoint`, `artifact-hygiene`, `precedent-regression`, `invariant-drift`, `phantom-symbol`, фраза «По документам ЗНИ».
+`CRITICAL`, `WARNING`, `SUGGESTION`, `Severity`, `GO`, `NO-GO`, `PASS`, `FAIL`, `GAP`, `APPROVE`, `CHALLENGE`, `REJECT`, `Layer 1`…`Layer 5`, `verify_mode`, `verdict:`, `snapshot`, `last_challenge_at`, `novelty`, `SKIPPED-novelty`, `phantom-symbol`, `design-challenge`, `task-readiness`, `quality-controller`, `slice coherence`, `code-truth`, `Promotion Test`, `Determinism Test`, `Three-Question Challenge`, `Simplicity Check`, `Acceptance Checklist Coverage`, `Problem-Solution Trace`, `Independent Challenge`, `Implementation Readiness`, `Blast Radius`, `precedent-regression`, `invariant-drift`, `artifact-hygiene`, `slice-pre`, `slice-post`, `slice-transition`, `Tier`, `low-confidence`, `checkpoint`, имена агентов `onec-code-*` / `openspec-*`, имена гейтов (`Architect Gate`, `Code-Truth Gate`, `Slice Gate`, `Precedent Regression Gate`).
 
-**Дополнительно для `/opsx:verify`:** `Layer 1`…`Layer 5`, `GAP`, `PASS`, `FAIL`, `APPROVE`, `CHALLENGE`, `REJECT`, `GO`, `NO-GO`, `slice coherence`, `code-truth`, `task-readiness`, `design-challenge`, `quality-controller`, `snapshot`, `last_challenge_at`, `novelty`, `SKIPPED-novelty`, `SKIPPED-override`, `Three-Question Challenge`, `Simplicity Check`, `Acceptance Checklist Coverage`, `Internal Coherence`, `Problem-Solution Trace`, `Independent Challenge`, `Implementation Readiness`, «независимый аудит постановки», «согласованность плана», «реализуемость задач», «когерентность», «слой проверки», «слои verify», «гигиена артефактов» (как имя слоя), `тестовая ИБ`, `эталон до перехвата`, `smoke`, `прогнать ручной тест`, `S<N>.T<M>` без расшифровки, `operational этalон`, `baseline ИБ`.
-
-| Термин | Замена в чате |
-|--------|----------------|
-| Layer N / слой проверки | «проверка постановки» / «проверка задач» (по смыслу) |
+| Код движка | Замена в чате |
+|------------|----------------|
 | GO / NO-GO | «можно запускать apply» / «apply пока нельзя» |
+| Layer N / слой проверки | «проверка постановки» / «проверка задач» (по смыслу) |
 | design-challenge | «независимая проверка плана» (или не называть) |
 | phantom-symbol | «в постановке указано имя, которого нет в коде» |
+| CRITICAL / WARNING | «блокер» / «замечание» |
+
+**Имя агента в чате** — «агент», «архитектор», «ревьюер»; полное имя — только в строке «Источники: …».
 
 ---
 
-## Слой 2 — workflow OpenSpec
+## Слой 2 — workflow-слова (РАЗРЕШЕНЫ разработчику, расшифровка — для заказчика)
 
-| Запрещено | Замена |
-|-----------|--------|
-| срез (как единица плана) | этап работ / часть задачи + расшифровка («этап с формой шаблонов») |
-| постановка (без контекста) | «план в tasks.md и design.md» / «описание доработки» |
-| pivot | «пересмотрели подход» / «сменили направление этапа» |
-| scope | «область задачи» / «что входит в доработку» |
-| продуктовый выбор | «нужно ваше решение по поведению для пользователя» |
-| as-is | «как сейчас работает» |
-| extend (как глагол в чате без команды) | «допишу план» + `/opsx:extend …` |
-| голый `S<N>`, `S<N>.T<M>` | «этап «…»» из tasks.md или «задача «…»» |
-| Option A/B/C/D | «вариант A (…кратко…)» |
-| F<N> (Follow-up) | «дополнительная задача «…»» |
+Эти слова **корректны в workflow-чате**. Расшифровывать их нужно только в документах для заказчика без 1С.
 
-Workflow-подстроки verify (запрещены): `apply сейчас`, `apply на свой риск`, `defer apply`, `workaround сейчас`.
+- **«срез»** (vertical slice) — корректный методологический термин (UI + код + тест = одна готовая возможность). При первом упоминании — с названием: `Срез S<N>: «название»` (§10 opsx-output-style). Не переименовывать в «этап».
+- **«постановка»**, **«приёмка»**, **«область задачи» / scope**, **«план в tasks.md/design.md»** — допустимы как есть.
+- Голый идентификатор `S<N>` без названия среза — провал self-check (название обязательно). `S<N>.accept`, номера задач `12.9`, `D<N>`, `R<N>` — только в полях «План» / «Ссылки», не в прозе для заказчика.
+
+Workflow-подстроки verify, которые **запрещены** (вводят в заблуждение про безопасность): `apply сейчас`, `apply на свой риск`, `defer apply`, `workaround сейчас` — формулировать через последствия выбора.
 
 ---
 
-## Слой 3 — лексика (англицизмы и кальки)
+## Слой 3 — лексика (англицизмы) — мягкое предпочтение
 
-Полная таблица для ТЗ — `.cursor/docs/tz-lexicon-dictionary.md`. В чате оркестратора те же замены:
+Полная таблица для ТЗ — `.cursor/docs/tz-lexicon-dictionary.md`. В workflow-чате с разработчиком общеупотребимые термины (UI, handler, deploy) допустимы; в документах заказчику — заменять.
 
-| Запрещено | Замена |
-|-----------|--------|
-| checkbox / чекбокс | флажок |
-| scope / скоуп | область задачи |
-| feature / фича | функциональность, доработка |
-| flow / флоу | порядок действий, процесс |
-| impact | последствия, область влияния |
-| handler / хэндлер | обработчик |
-| callback / коллбэк | обратный вызов |
-| deploy / деплой | развёртывание, обновление |
-| UI | интерфейс |
-| когерентность | согласованность |
+| Предпочесть | Вместо |
+|-------------|--------|
+| флажок | checkbox / чекбокс |
+| последствия, область влияния | impact |
+| согласованность | когерентность |
+| порядок действий, процесс | flow / флоу |
 
 ---
 
 ## Разрешено в чате
 
-- Одна строка **`Источники: …`** с техническими кодами.
+- Одна строка **`Источники: …`** с техническими кодами и именами агентов/гейтов.
 - Имена команд `/opsx:*` и путей `reports/…`.
-- Backticks для **имени файла** или **команды**, не для severity.
+- Профессиональная лексика 1С-разработки (см. Слой 2).
+- Право назвать конкретную процедуру и сказать «что сломается».
 
----
-
-## Grep-паттерн (pre-send, выборочно)
-
-Оркестратор прогоняет сообщение по слоям 1–2; слой 3 — по `tz-lexicon-dictionary.md` Grep-паттерну при verify/doc-tz.
-
-**Last updated:** 2026-05-30
+**Last updated:** 2026-06-01

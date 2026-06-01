@@ -1,6 +1,6 @@
 # Пример тонкого чата verify (эталон)
 
-ЗНИ: `hash-duplicate-check-before-kontur-api`. Полный отчёт и блоки решений — в `openspec/changes/hash-duplicate-check-before-kontur-api/reports/verification-legacy-mixed-2026-05-13.md`. Ниже — **как выглядит чат** по `templates/chat-summary.md`: информативный вариант, без кодов ответа.
+ЗНИ: `hash-duplicate-check-before-kontur-api`. Полный отчёт и блоки решений — в `openspec/changes/hash-duplicate-check-before-kontur-api/reports/verification-2026-05-13.md`. Ниже — **как выглядит чат** по `templates/chat-summary.md`: информативный вариант, без кодов ответа.
 
 ---
 
@@ -14,7 +14,7 @@
 
 ### Честная картина прогресса в задачах и спецификации
 
-Мы видим расхождение между отметками в задачах и текстом новой спецификации — это может привести к преждевременной приёмке. **Логичный путь по артефактам:** выполнить `/opsx:extend hash-duplicate-check-before-kontur-api --from-verify …/verification-legacy-mixed-2026-05-13.md` и привести задачи и спецификацию к одной «честной» линии, без изменения кода до согласования.
+Мы видим расхождение между отметками в задачах и текстом новой спецификации — это может привести к преждевременной приёмке. **Логичный путь по артефактам:** выполнить `/opsx:extend hash-duplicate-check-before-kontur-api --from-verify …/verification-2026-05-13.md` и привести задачи и спецификацию к одной «честной» линии, без изменения кода до согласования.
 
 **Если у вас другой план** — напишите. Альтернативы одной строкой:
 
@@ -41,7 +41,7 @@
 
 **По плану:** если что-то из перечисленного сознательно откладывается — можно написать «отложим N», оркестратор зафиксирует в артефактах после `/opsx:extend` при необходимости.
 
-**Подробности:** `openspec/changes/hash-duplicate-check-before-kontur-api/reports/verification-legacy-mixed-2026-05-13.md`.
+**Подробности:** `openspec/changes/hash-duplicate-check-before-kontur-api/reports/verification-2026-05-13.md`.
 
 ---
 

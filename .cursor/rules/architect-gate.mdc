@@ -83,7 +83,7 @@ priority: 200
 Дополнительно к ADR Discovery и KB Discovery — контекст **архивных** changes той же capability и пересекающихся файлов:
 
 1. Из текущего change извлечь множество `<capability>` из путей `openspec/changes/<name>/specs/*/spec.md` (если есть).
-2. Для каждого capability: `Glob openspec/changes/archive/**/specs/<capability>/spec.md`. Если файлов >10 — остановиться на 10 по новизме даты в пути archive (пользовательское правило бюджета verify 9b).
+2. Для каждого capability: `Glob openspec/changes/archive/**/specs/<capability>/spec.md`. Если файлов >10 — остановиться на 10 по новизме даты в пути archive (правило бюджета verify Layer 2.4).
 3. Для каждого найденного архивного change прочитать только `proposal.md` (секции `## Why`, `## What Changes`), первые абзацы `design.md` (`## Goals / Non-Goals`, `## Behavior Contract`, `## Decisions`).
 4. Пересечение по файлам: `Grep` по `openspec/changes/archive/**/proposal.md` на пути из `tasks.md` / `design.md` текущего change (`src/...`) — до **3** наиболее релевантных архивных каталогов (совпадение capability + пересечение путей).
 5. Сформировать блок промпта **`## Cross-Archive Context`** (не более 3 changes): для каждого — имя каталога archive, цитата цели из `## Goals`, ссылка на capability.

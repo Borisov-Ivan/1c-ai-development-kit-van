@@ -1,9 +1,0 @@
----
-description: "Anti-slop: redirect to chat-lexicon.md"
-alwaysApply: true
----
-
-# Anti-slop (Redirect)
-
-См. SSOT: `.cursor/docs/chat-lexicon.md`.
-Запрет AI-tells (вводных слов, пустых усилителей) в чате. Развилки — триада (Проблема / На что влияет / Если A/B).
