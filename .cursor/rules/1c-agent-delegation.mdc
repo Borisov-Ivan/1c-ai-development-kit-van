@@ -23,12 +23,13 @@ priority: 999
 | Исследование кода из 3+ модулей | Делегировать **onec-code-explorer** (не читать модули вручную) | см. DELEGATION GATE ниже |
 | Исправление ошибки (bug fix). Маркеры: «исправь», «не работает», «падает», «ошибка», «баг», «fix», «crash», «добавь проверку», «Неопределено», «NPE», «null», «не заполнено», «пустое значение», «не находит», «вылетает», «сломалось», «регресс», «дефект», «поведение неверное» | СТОП. Проверить root cause + impact assessment по `verified-cause-gate.mdc` (HALT 1, 1b, 2, 3). При системном масштабе — **onec-code-architect**. При Light Mode bug fix — обязательный root cause блок в промпте writer (см. LIGHT MODE ниже) | `.cursor/rules/verified-cause-gate.mdc` |
 
-## ПРИНЦИП
+**ПРИНЦИП**
 
-   Инварианты загружены соседними always-apply правилами:
-- BSL write guard → `bsl-write-guard.mdc`
-- Tool name (использовать **Task**) → `tool-name-guard.mdc`
-- Project paths (cf/cfe) → `project-paths.mdc`
+Инварианты делегирования и путей подгружаются через always-apply диспетчер:
+- BSL write guard → `bsl-write-guard.mdc` (редирект на этот файл)
+- Диспетчер гейтов → `.cursor/rules/gate-dispatcher.mdc` (здесь и в on-demand гейтах)
+- Tool name (Task) → `.cursor/rules/tool-name-guard.mdc` (on-demand)
+- Project paths → `.cursor/rules/project-paths.mdc` (on-demand)
 
 **Explore-mode guard:** В режиме `/opsx:explore` без активного change — onec-code-writer и onec-code-reviewer НЕ вызываются. Сначала ЗНИ (`/opsx:new` или `/opsx:ff`).
 

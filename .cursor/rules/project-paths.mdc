@@ -1,6 +1,6 @@
 ---
 description: "Пути к базовой конфигурации и расширениям — единственный источник: openspec/project.md"
-alwaysApply: true
+alwaysApply: false
 priority: 900
 ---
 

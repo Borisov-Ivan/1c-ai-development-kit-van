@@ -1,6 +1,6 @@
 ---
 description: "Code-Truth Gate — проверка, что OpenSpec-артефакты после apply ссылаются на реальные символы кода"
-alwaysApply: true
+alwaysApply: false
 ---
 
 # Code-Truth Gate

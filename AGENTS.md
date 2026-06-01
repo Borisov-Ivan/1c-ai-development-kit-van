@@ -1,6 +1,7 @@
 # AGENTS.md — BSL Code Gate (навигационный индекс)
 
 **Главный диспетчер:** `.cursor/rules/1c-agent-delegation.mdc` — HALT-условия + делегирование агентам.
+**Диспетчер on-demand гейтов:** `.cursor/rules/gate-dispatcher.mdc` — загружает архитектурные и верификационные гейты (включая `.cursor/rules/precedent-regression-gate.mdc`).
 
 ## OpenSpec Workflow
 `.cursor/rules/sdd-workflow.mdc` — explore → new/ff → verify → apply → verify → archive.
@@ -10,7 +11,7 @@
 Паттерны агентов: `.cursor/skills/1c-agent-patterns/SKILL.md`.
 Документы: `/opsx:doc-tz <name>` (ТЗ по ЗНИ с архитектурным ревью и контролем качества артефактов) — `.cursor/skills/openspec-docs/SKILL.md`. Шаблон: `.cursor/skills/openspec-docs/prompts/change-tz.md`.
 
-**Output style (единый стиль выводов opsx):** `.cursor/docs/opsx-output-style.md` — 3 слоя (UX / код / процесс), типография, запрет внутренних ID (`S<N>.T<M>`, `D<N>`, `R<N>`, номера задач) в пользовательских полях, запрет жаргона движка (`Blast Radius`, `precedent-regression`, `Phase A/B`, `verdict:`, `verify_mode:`, `Tier`, `Standard / Lite / Full`, `когерентность`, `low-confidence`, `capability`, `checkpoint`, `step-by-step` — см. §3.1; вместо `Tier` — «Объём», вместо «когерентность» — «согласованность»), запрет имён агентов (`onec-code-*`, `openspec-*`) и гейтов (`Architect Gate`, `Slice Gate`, `Implementation Impact Gate`, `Code-Truth Gate`, `Precedent Regression Gate`) в чате — заменяются на «агент / архитектор / ревьюер / оркестратор» и описание результата проверки соответственно, полные имена остаются только в строке «Источники: …» и в файлах отчётов `reports/`. **Non-events в чат не выводятся** — §3a `.cursor/rules/chat-output-budget.mdc`. Запрет голого `S<N>` без названия среза (правило §10 «Срез всегда с названием»); первое упоминание задачи `S<N>.<M>` / `S<N>.T<M>` в заголовке — с коротким описанием в «ёлочках» (§10.1). T-HANDOFF «Следующие задачи» — обязательная колонка «Действие»; «Тип» / «Исполнитель» — только из русских наборов (§5.2). Дисциплина правок ЗНИ (§8: decision → `/opsx:extend`, hygiene → ручная правка с обязательным повторным verify), 5 внутренних макетов сообщений (имена для авторов скиллов; в сообщения пользователю не цитируются — см. §5 и §9). Перед каждым пользовательским выводом opsx-скилл обязан проходить self-check (§7 гайда), включая «канонический переход» (п.6), «срез всегда с названием» (п.9), HALT жаргона и **бюджет чата** (п.10–13, плюс always-apply `.cursor/rules/chat-output-budget.mdc`), для verify — «Суть» в **файле** отчёта и тонкий чат по умолчанию (п.11, флаг `--verbose`). Роль оркестратора — навигатор: `.cursor/rules/orchestrator-as-navigator.mdc`.
+**Output style (единый стиль выводов opsx):** `.cursor/docs/opsx-output-style.md` — **Chat Surface Contract** §2.6 (сквозной UX чата), 3 слоя (UX / код / процесс), типография, запрет внутренних ID (`S<N>.T<M>`, `D<N>`, `R<N>`, номера задач) в пользовательских полях, запрет жаргона движка (`Blast Radius`, `precedent-regression`, `Phase A/B`, `verdict:`, `verify_mode:`, `Tier`, `Standard / Lite / Full`, `когерентность`, `low-confidence`, `capability`, `checkpoint`, `step-by-step` — см. §3.1; вместо `Tier` — «Объём», вместо «когерентность» — «согласованность»), запрет имён агентов (`onec-code-*`, `openspec-*`) и гейтов (`Architect Gate`, `Slice Gate`, `Implementation Impact Gate`, `Code-Truth Gate`, `Precedent Regression Gate`) в чате — заменяются на «агент / архитектор / ревьюер / оркестратор» и описание результата проверки соответственно, полные имена остаются только в строке «Источники: …» и в файлах отчётов `reports/`. **Non-events в чат не выводятся** — §3a `.cursor/rules/chat-output-budget.mdc`. Запрет голого `S<N>` без названия среза (правило §10 «Срез всегда с названием»); первое упоминание задачи `S<N>.<M>` / `S<N>.T<M>` в заголовке — с коротким описанием в «ёлочках» (§10.1). T-HANDOFF «Следующие задачи» — обязательная колонка «Действие»; «Тип» / «Исполнитель» — только из русских наборов (§5.2). Дисциплина правок ЗНИ (§8: decision → `/opsx:extend`, hygiene → ручная правка с обязательным повторным verify), 5 внутренних макетов сообщений (имена для авторов скиллов; в сообщения пользователю не цитируются — см. §5 и §9). Перед каждым пользовательским выводом opsx-скилл обязан проходить self-check (§7 гайда), включая «канонический переход» (п.6), «срез всегда с названием» (п.9), HALT жаргона и **бюджет чата** (п.10–13, плюс always-apply `.cursor/rules/chat-output-budget.mdc`), для verify — «Суть» в **файле** отчёта и тонкий чат по умолчанию (п.11, флаг `--verbose`). Роль оркестратора — навигатор: `.cursor/rules/orchestrator-as-navigator.mdc`.
 
 ### Decision tree команд
 
@@ -23,8 +24,8 @@
 | «Создать новый change пошагово» | `/opsx:new <name>` | Пошаговая последовательность артефактов |
 | «Создать change целиком разом» | `/opsx:ff <name>` | Все артефакты сразу, для уже понятной задачи |
 | «Быстро понять, где я в этом change» | `/opsx:status <name>` | Read-only снимок, без верификаций и субагентов |
-| «Проверить артефакты до реализации, могу ли запустить apply» | `/opsx:verify <name>` | Бинарный вердикт GO/NO-GO в первой строке; пять слоёв (гигиена, согласованность, Why→Solution, независимый аудит, реализуемость); не модифицирует артефакты |
-| «Добавить новое требование в существующий change» | `/opsx:extend <name>` | Контролируемо обновляет proposal/specs/tasks; начинает с брифа и verify-handoff |
+| «Проверить артефакты до реализации, могу ли запустить apply» | `/opsx:verify <name>` | Pre-flight + self-repair (Repair Loop); одно финальное сообщение; бинарный вердикт в первой строке |
+| «Добавить новое требование в существующий change» | `/opsx:extend <name>` | user-extend: бриф → правки → hint verify. repair-from-verify — только internal из verify |
 | «Учесть отчёт ревью / архитектора в существующем change» | `/opsx:extend <name> --from-review <path>` / `--from-architecture <path>` | Анализирует файл-источник, классифицирует findings, при необходимости запускает Architect Gate и обновляет артефакты ЗНИ |
 | «Код упростили вручную, артефакты отстали от факта» | `/opsx:extend <name> --code-sync` | Code-Truth sync: explorer читает фактический код, затем design/tasks/spec/debug догоняют выгрузку |
 | «Добавить одну задачу / создать следующий артефакт» | `/opsx:continue <name>` | Пошаговое продолжение, без большого расширения scope |
@@ -39,10 +40,10 @@
 | «Зафиксировать verified-факты из отчёта/файлов вне ЗНИ» | `/opsx:knowledge-add <path>` | Не требует ЗНИ; bundle source + KB-карточка |
 
 ## Conversational Discipline
-`.cursor/rules/conversational-discipline.mdc` — 5 принципов осознанного диалога: Acknowledgement Layer, Adaptive Brief (entry-бриф в чат по §5.1 `opsx-output-style.md`), Risk Surfacing, Honest Subagent Handling, Progress Marker. Приоритет над длинными отчётами скиллов. Карта SSOT (лимиты, шаблоны, запреты) — в `.cursor/rules/chat-output-budget.mdc` §1a. Шаблоны вывода — в `.cursor/docs/opsx-output-style.md` и `templates/` соответствующих скиллов.
+`.cursor/rules/chat-output-budget.mdc` — SSOT чата: лимиты, шаблоны, запреты, а также 5 принципов осознанного диалога (Acknowledgement Layer, Adaptive Brief, Risk Surfacing, Honest Subagent Handling, Progress Marker). Шаблоны вывода — в `.cursor/docs/opsx-output-style.md` и `templates/` соответствующих скиллов.
 
 ## Анти-слоп
-`.cursor/rules/anti-slop.mdc` — always-apply чеклист AI-tells в чате (RU): без вводных, контрастов «не X, а Y», пустых усилителей, обезлички. Навык `.cursor/skills/stop-slop/SKILL.md` + `references/ai-tells-ru.md` — полный каталог с примерами до/после. Развилки verify: обязательная триада «В чём проблема / На что влияет / Если A·B» в `openspec-verify-change/templates/card-decision.md`. Pre-send — `chat-output-budget.mdc` §1b п.4. Не дублирует §7 chat-output-budget (жаргон движка) и `tz-lexicon-dictionary.md` (англицизмы в ТЗ).
+`.cursor/docs/chat-lexicon.md` — единый словарь (движок, workflow, лексика). `.cursor/skills/stop-slop/SKILL.md` + `references/ai-tells-ru.md` — полный каталог с примерами до/после. Развилки verify: обязательная триада «В чём проблема / На что влияет / Если A·B» (шаблон встроен в `chat-summary.md`). Pre-send — `chat-output-budget.mdc` §1b п.4. Не дублирует §7 chat-output-budget (жаргон движка) и `tz-lexicon-dictionary.md` (англицизмы в ТЗ).
 
 ## Глоссарий
 `openspec/glossary.md` — единый словарь ключевых терминов (ЗНИ, срез, slice-gate, tier, режимы verify, acceptance handoff и др.). Использовать для сверки терминологии в артефактах, отчётах и сообщениях пользователю.
@@ -54,10 +55,10 @@
 Секция в `openspec/project.md`; метаданные — в `proposal.md` (Metadata); размещение — `onec-code-writer.md`; проверка пар — reviewer/prerelease/archive, scope = diff по zni_id.
 
 ## BSL write guard
-`.cursor/rules/bsl-write-guard.mdc` — глобальный инвариант: правка .bsl только через onec-code-writer + обязательный onec-code-reviewer (любой диалог). `.cursor/rules/1c-agent-delegation.mdc` — детальная диспетчеризация: APPLY GATE, DELEGATION GATE, LINT GATE, API CHECK, EXTENSION GATE.
+`.cursor/rules/1c-agent-delegation.mdc` — глобальный инвариант: правка .bsl только через onec-code-writer + обязательный onec-code-reviewer (любой диалог), а также детальная диспетчеризация: APPLY GATE, DELEGATION GATE, LINT GATE, API CHECK, EXTENSION GATE.
 
 ## Пути к выгрузке
-Базовая конфигурация и расширения заданы в `openspec/project.md` (секция «Структура репозитория»). При поиске кода в src/ и проверке выгрузки использовать эти пути; не предполагать `src/cf/` и `src/cfe/`. См. `.cursor/rules/project-paths.mdc`.
+Базовая конфигурация и расширения заданы в `openspec/project.md` (секция «Структура репозитория»). При поиске кода в src/ и проверке выгрузки использовать эти пути; не предполагать `src/cf/` и `src/cfe/`. См. `.cursor/rules/project-paths.mdc` (on-demand).
 
 ## Code reviewer (onec-code-reviewer)
 `.cursor/agents/onec-code-reviewer.md` — ревью кода BSL. **Приоритет рассуждения над каталогом:** сначала Phase 0 (Intent & Reasoning Analysis) — артефакты Intent Map, Contract Map, Knowledge Assessment; замечания по логике (DISPROPORTIONATE_COMPLEXITY, CONTRACT_INCONSISTENCY, CONTRACT_INFERENCE, KNOWLEDGE_DEFICIT, CLARITY_DEFICIT, AUTHORITY_MISPLACEMENT). **Phase 1b (Linter Signals):** in-scope warning/error из `ReadLints`/bsl-language-server → по умолчанию MUST_FIX; откладывать на prerelease запрещено (техдолг гасится в момент правки). Каталог антипаттернов (AP-NNN) — вспомогательный шаг. **AP-040 (release-hygiene):** kebab-case имена change и пути к артефактам OpenSpec (`reports/…`, `openspec/…`, сноски `(см. …)` с `.md`) в комментариях и **JSDoc** над процедурами — MUST_FIX; пары `// +++`/`// ---` из whitelist `openspec/project.md` не флагать как AP-040. Мета-имена (постановка вместо домена): AP-031. Локальная подмена владельца поведения вместо делегирования: AUTHORITY_MISPLACEMENT + AP-047. Отчёт: секция Reasoning Analysis (Phase 0), затем Standards & Patterns. **Формат замечаний:** каждое замечание содержит стабильные якоря (Procedure, Anchor — для поиска после правок) и поле Action (MUST_FIX / VERIFIED_OK / OPTIONAL); при устранении через /review writer получает только MUST_FIX. **Investigation Request:** ревьювер может запросить резолв контрактов через секцию `## Investigation Request` в отчёте (Phase 2.5 шаг D); оркестратор делегирует explorer и перезапускает ревью с Resolved Contracts (шаг 3.5 review/SKILL.md). **Resolved Contracts (артифакт ЗНИ):** результат investigation loop сохраняется в `reports/resolved-contract-<scope-slug>-YYYY-MM-DD.md`. Содержит верифицированные контракты (тип, ключи, fixed/dynamic, Evidence). Передаётся writer при review-fix и reviewer при повторном ревью. Writer и reviewer знают формат и правила использования (см. агентские промпты). При отсутствии блока в промпте reviewer проверяет `reports/resolved-contract-*.md` по change (fallback). **Принцип «Уточни, не защищайся»:** Свойство()/ТипЗнч() при невыясненном контракте без попытки резолва = AP-004 (компенсация незнания). Writer обязан сначала установить контракт; reviewer проверяет наличие обоснования. См. `.cursor/docs/1c-coding-standards.md` и раздел AP-004 в `.cursor/docs/antipatterns/bsl-antipatterns.md`. **Unverified API:** информационная секция в отчёте — вызовы, определение которых не найдено в src/.
@@ -66,7 +67,7 @@
 `.cursor/rules/1c-agent-delegation.mdc` (секция API EXISTENCE CHECK) — проверка существования вызываемых методов общих модулей в src/ (cf + cfe) после writer, до reviewer. AskQuestion при ненайденном методе.
 
 ## XML write guard
-`.cursor/rules/1c-xml-write-guard.mdc` — запрет прямой записи/генерации Form.xml, Template.xml, Rights.xml и прочих XML в src/. Form.xml → инструкция ручного конфигурирования или программное создание элементов в BSL модуля формы; read-only навыки `1c-forms/info` и `1c-forms/validate` допустимы для анализа выгрузки. Template.xml, Rights.xml — через скиллы 1c-mxl, 1c-roles.
+Запрет прямой записи/генерации Form.xml, Template.xml, Rights.xml и прочих XML в src/. Form.xml → инструкция ручного конфигурирования или программное создание элементов в BSL модуля формы; read-only навыки `1c-forms/info` и `1c-forms/validate` допустимы для анализа выгрузки. Template.xml, Rights.xml — через скиллы 1c-mxl, 1c-roles. Детали в `.cursor/rules/1c-agent-delegation.mdc`.
 
 ## Tool Name Guard
 `.cursor/rules/tool-name-guard.mdc` — для вызова субагентов использовать инструмент **Task**. При `Invalid enum value` проверить имя инструмента (должен быть Task) и subagent_type; не переключаться на generalPurpose.
@@ -80,8 +81,13 @@
 ## Architect Gate
 `.cursor/rules/architect-gate.mdc` — единые триггеры архитектурного ревью (объективные маркеры, семантические, структурные). **UX-значимый фикс** (меняет что видит/делает пользователь) — семантический триггер; локальная реализация поведения, владельцем которого является база/БСП/платформа/общий модуль, вместо делегирования владельцу — семантический триггер Substituted Authority. **Simplicity Check:** каждый architecture-отчёт фиксирует простейший viable design, альтернативы и complexity budget; отсутствие секции ловит verify. **Explore (профиль bug):** при срабатывании триггеров architect обязателен в маршруте (не AskQuestion с пропуском), шаблон «Architect — fix quality review» в `1c-agent-patterns/architect.md`. Проверяется в explore, verify (pre-apply, шаг 9 + fix check по задачам из debug.md), apply (soft redirect на verify).
 
-## Verify (независимое согласование перед apply)
-`.cursor/skills/openspec-verify-change/SKILL.md` — `/opsx:verify [<name>]`. Главный вопрос пользователя: «**могу ли я безопасно запустить apply?**» Ответ — **бинарный** (`GO` / `NO-GO`) в первой строке чата (`templates/verdict-card.md`). Аргумент команды — только имя ЗНИ (или одна активная); режим (`pre-apply` / `post-apply`) и узкий охват выводятся из артефактов, дат изменения и свободной формы запроса — без флагов CLI.
+## Verify (pre-flight + self-repair перед apply)
+
+`.cursor/skills/openspec-verify-change/SKILL.md` — `/opsx:verify [<name>]`. **Pre-flight:** одна команда → **одно** финальное сообщение в чат. **Internal Repair Loop** (max 2 attempts) чинит repair-класс без user-facing extend и без «Подтвердить?». **Decision** — один вопрос A/B, END TURN.
+
+**Chat Surface Contract:** §2.6 `.cursor/docs/opsx-output-style.md` — сквозной UX всех `/opsx:*`.
+
+Главный вопрос: «**могу ли я безопасно запустить apply?**» Ответ в первой строке чата (`templates/verdict-card.md`): «можно apply» | «нужен выбор» | «не удалось дочинить за 2 итерации».
 
 **Пять слоёв проверки** (порядок строгий):
 1. **Гигиена артефактов** — авто-исправление мелких дефектов формы, без вопросов пользователю.
@@ -94,11 +100,11 @@
 - `GO` — все слои в `PASS / WARNING / AUTOFIXED / APPROVE / SKIPPED-novelty`.
 - `NO-GO` — любой `FAIL` в Layer 2/3/5 либо `CHALLENGE` / `REJECT` в Layer 4.
 
-**Вывод пользователю:** первая строка — вердикт по `templates/verdict-card.md`. Далее — `templates/chat-summary.md`: «тихий» вариант для `silent_ok` (нет новизны после фильтра — новый файл отчёта не создаётся) или «информативный» с блоками «Что нашли», «Сама поправила», «Что обсудим» (только при NO-GO, разговорный блок прозой), «По плану». Запрещены имена слоёв, `verdict:`, `PASS/FAIL`, коды выбора `<N>a` (см. `chat-output-budget.mdc` §7).
+**Вывод пользователю:** `templates/chat-summary.md` + Repair Loop (0 промежуточных сообщений). `silent_ok` — только YAML `snapshot` + mtime, **не** история чата.
 
-**Snapshot и фильтр новизны:** YAML отчёта содержит `accepted_tasks`, `artifacts_mtime` каждого артефакта, `last_challenge_at`. Если все три не изменились с прошлого запуска — путь `silent_ok` без слоёв и без нового файла.
+**Repair vs decision:** карта в §2.6 `opsx-output-style.md`. Repair — internal extend (repair-from-verify). Decision — STOP, вопрос человеку.
 
-**Что verify НЕ делает:** не правит артефакты (только Layer 1 — авто-гигиена); не генерирует ТЗ (это `/opsx:doc-tz`); не мигрирует приёмку из `S<N>.T<M>` в `S<N>.accept` (отдельная команда `/opsx:migrate-acceptance` — в плане); не выполняет apply.
+**Что verify НЕ делает:** не меняет scope через user-facing extend (только Layer 1 + internal Repair Loop); не генерирует ТЗ; не выполняет apply.
 
 **Scope Gate:** verify не расширяет scope сам. Если в запросе помимо команды есть новое требование — AskQuestion: дополнить артефакты через `/opsx:extend --from-verify-prompt`, запустить as-is, или зафиксировать TODO в отчёте.
 
@@ -140,10 +146,10 @@
 `.cursor/rules/openspec-specs-gate.mdc` — полнота артефакта specs.
 
 ## Command → Skill Read Gate
-`.cursor/rules/command-skill-gate.mdc` — сначала Read скилла, потом файлы.
+`.cursor/rules/session-discipline.mdc` — сначала Read скилла, потом файлы.
 
 ## Command Session Persistence
-`.cursor/rules/command-session-persistence.mdc` — протокол команды действует на каждом ходе сессии, не только на первом.
+`.cursor/rules/session-discipline.mdc` — протокол команды действует на каждом ходе сессии, не только на первом.
 
 ## Architecture Decision Records (ADR)
 `openspec/adrs/` — постоянное хранилище архитектурных решений проекта.
@@ -162,7 +168,7 @@
 
 ## Стратегия анализа файлов
 `.cursor/skills/context-strategy/SKILL.md` — планирование: прямое чтение vs субагенты.
-`.cursor/rules/context-strategy-gate.mdc` — триггер при 3+ файлах, данных, крупных модулях.
+`.cursor/rules/session-discipline.mdc` — триггер при 3+ файлах, данных, крупных модулях.
 
 ## Стандарты BSL
 `.cursor/docs/1c-coding-standards.md` — стандарты кода 1С/BSL. `.cursor/rules/1c-coding-standards.mdc` — только thin loader по `**/*.bsl`, без полного тела стандартов.

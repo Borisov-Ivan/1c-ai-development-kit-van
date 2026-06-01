@@ -1,6 +1,11 @@
-# Цикл /opsx:explore (после утверждения брифа)
+---
+description: "(DEPRECATED) Цикл /opsx:explore (legacy). Не используется."
+alwaysApply: false
+---
 
-Выполняется **только** после ответа пользователя «да» (или эквивалента) **текстом в чате** на бриф Entry Protocol §3 — не через `AskQuestion` для утверждения плана.
+# (DEPRECATED) Цикл /opsx:explore (после утверждения брифа)
+
+**Внимание:** Этот протокол устарел. Актуальный режим исследования (Ultra-Lite) не использует `temp/step-*.md` и `todo` в таком виде. См. `.cursor/skills/openspec-explore/SKILL.md`.
 
 ## 3.0. Каталог сессии и TodoWrite
 

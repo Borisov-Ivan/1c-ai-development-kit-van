@@ -59,14 +59,16 @@ Glob по `openspec/changes/<name>/specs/**/*.md`. Если 0 файлов и а
 - `возвращает структуру`, `вставляет ключ`, `добавляет экспортную`
 - `shall определять` + имя процедуры/функции в backticks как единственный результат
 
-**Алерт:** `scenario-implementation-leak` — **WARNING** (verify Layer 3; не блокирует archive).
+**Алерт:** `scenario-implementation-leak` — **WARNING** (verify Layer 3; не блокирует archive). На этапе **ff/new Slice Generation Gate** — **WARNING с обязательной remediation** (блокирует «Принять» предложенные срезы до исправления spec или явного override пользователя).
+
+**Requirement только с implementation-leak:** если все Scenario Requirement описывают контракт API/кода (implementation-leak), **не создавать отдельный Requirement** в spec. Перенести детали в `design.md` → `## Behavior Contract`; в spec оставить UX-Requirement с наблюдаемыми Scenario. Implementation Scenario покрываются verification-задачей `S<N>.<M>` или буллетом primary `S<N>.accept`, **не** отдельным срезом с gate.
 
 **Ремедиация:**
 
 1. Переписать `THEN` как наблюдаемый результат («проверка УНЭП проходит без ложного „недействительно“», «одно чтение вложения на трассировке»).
 2. Детали реализации (имена функций, ключи структур) — в `design.md` (`## Behavior Contract`, `## Implementation Options`), не в spec Scenario.
 
-**Связь с vertical slices:** implementation-level Scenario часто порождает non-vertical срез с код-ревью приёмкой (QC `slice-not-vertical`).
+**Связь с vertical slices:** implementation-level Requirement/Scenario часто порождает foundation-slice с gate (QC `slice-not-vertical`, `slice-foundation-with-gate`). Не маппить 1:1 Requirement → Slice.
 
 ## ИСКЛЮЧЕНИЯ
 

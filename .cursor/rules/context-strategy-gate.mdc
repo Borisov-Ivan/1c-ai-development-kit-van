@@ -1,28 +1,9 @@
 ---
-description: "Загрузить скилл context-strategy при анализе файлов — планирование: прямое чтение vs субагенты"
+description: "Context Strategy Gate: redirect to session-discipline.mdc"
 alwaysApply: true
 ---
-# Context Strategy Gate
 
-## TRIGGER
+# Context Strategy Gate (Redirect)
 
-Задача включает анализ файлов И хотя бы одно из условий:
-- 3+ файлов для анализа (включая @-ссылки, вложения, пути в тексте)
-- Файл данных (XML, HTML, CSV, JSON) любого размера
-- Файл кода 500+ строк с вопросом о конкретном аспекте
-- Пользователь просит «береги контекст» / «разными субагентами» / «не забивай контекст»
-
-## ACTION
-
-СТОП. Загрузить `.cursor/skills/context-strategy/SKILL.md`.
-Следовать Entry Protocol **до** чтения файлов из задачи.
-
-## BYPASS
-
-- 1–2 файла < 150 строк каждый
-- Точечный вопрос о конкретной строке/фрагменте
-- Файл уже загружен в контекст (recently viewed, < 200 строк)
-- Однострочная правка, переименование, опечатка
-
----
-
+См. SSOT: `.cursor/rules/session-discipline.mdc`.
+При анализе 3+ файлов или больших файлов — использовать context-strategy/SKILL.md.

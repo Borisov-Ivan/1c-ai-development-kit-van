@@ -511,7 +511,7 @@ Implement tasks from an OpenSpec change.
 8. **Англицизмы** (`Step-by-step`, `checkpoint`, `Tier`, `Standard/Lite/Full` как метки) и имена движка (`Architect Gate`, `Slice Gate`, `Implementation Impact Gate`) — в пользовательский вывод не попадают; внутренние ID триггеров (`slice-size-threshold`, `awaiting-acceptance`) — только в `debug.md` / в скрытом контексте модели.
 
 **Guardrails**
-- **Output style:** все пользовательские сообщения (Acceptance Handoff, pause, final, Implementation summary) выводятся по единому шаблону **T-HANDOFF** из `.cursor/docs/opsx-output-style.md` §5.2; имена секций одинаковы во всех вариантах; перед отправкой — self-check-5 (§7).
+- **Output style:** T-HANDOFF §5.2 + **Chat Surface Contract** §2.6 `opsx-output-style.md`: handoff среза на языке эффекта; next step — только user-action команды (`/opsx:verify`, `/opsx:apply`, `/opsx:archive`); без internal-команд и перечней файлов. Self-check §2.6 перед отправкой.
 - Keep going through tasks until done or blocked
 - Always read context files before starting (from the apply instructions output)
 - **Spot-check after each task:** Grep (or Read) to confirm the change; for 5+ files, check at least 3. Do not mark task complete if verification fails.

@@ -1,6 +1,6 @@
 ---
 description: Сессии исследования /opsx:explore — каталог openspec/sessions/, дисциплина путей
-alwaysApply: true
+alwaysApply: false
 ---
 
 # OpenSpec Sessions

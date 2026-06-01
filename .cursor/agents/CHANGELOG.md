@@ -4,13 +4,13 @@
 
 ### Changed (unified model policy: inherit in YAML + `Task.model` SSOT)
 - Все кастомные агенты в `.cursor/agents/*.md`: во frontmatter **`model: inherit`**. Конкретная модель вызова — параметр **`Task(..., model=<slug>)`** по таблице в [`.cursor/rules/model-selection.mdc`](../rules/model-selection.mdc); для `onec-trace-analyst` и `openspec-quality-controller` и финальный шаг fallback — вызов **без** `model=`.
-- Удалён файл **`onec-code-architect-2nd.md`**. Цепочка fallback архитектора: один `onec-code-architect`, последовательность `Task.model` (Opus primary → Gemini → без `model=`) — в `model-selection.mdc`.
+- **`onec-code-architect-2nd`** (файл-заглушка): агент удалён из активной ротации, цепочка fallback архитектора использует один `onec-code-architect`. Последовательность `Task.model` (Opus primary → Gemini → без `model=`) — в `model-selection.mdc`.
 - Обновлены [`.cursor/rules/tool-name-guard.mdc`](../rules/tool-name-guard.mdc), [`.cursor/rules/architect-gate.mdc`](../rules/architect-gate.mdc), [`.cursor/rules/1c-agent-delegation.mdc`](../rules/1c-agent-delegation.mdc), [`.cursor/skills/1c-agent-patterns/SKILL.md`](../skills/1c-agent-patterns/SKILL.md), смежные скиллы/доки с упоминанием `model` / `_2nd`.
 
 ## [4.4] - 2026-05-12
 
 ### Changed (model policy: pinned first, inherit only for architect fallback)
-- Во frontmatter восстановлены **закреплённые** модели: `onec-code-architect` — `claude-opus-4-7-thinking-high`; writer/explorer — `default`; reviewer/simplifier/openspec-doc-writer — `gemini-3.1-pro`; trace-analyst и openspec-quality-controller — `inherit` (без изменения).
+- Во frontmatter восстановлены **закреплённые** модели: `onec-code-architect` — `claude-opus-4-8-thinking-high`; writer/explorer — `default`; reviewer/simplifier/openspec-doc-writer — `gemini-3.1-pro`; trace-analyst и openspec-quality-controller — `inherit` (без изменения).
 - **`onec-code-architect-2nd`:** только **`model: inherit`** (= модель чата) и только **после двух сбоев** основного архитектора; не первый вызов. Правило: [`.cursor/rules/model-selection.mdc`](../rules/model-selection.mdc) (FALLBACK STRATEGY).
 - Синхронизированы [`.cursor/rules/architect-gate.mdc`](../rules/architect-gate.mdc), [`.cursor/skills/1c-agent-patterns/SKILL.md`](../skills/1c-agent-patterns/SKILL.md), [`openspec/project.md`](../../openspec/project.md), [`AGENTS.md`](../../AGENTS.md).
 

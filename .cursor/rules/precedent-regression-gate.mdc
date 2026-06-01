@@ -1,6 +1,6 @@
 ---
 description: "Precedent Regression Gate — защита от молчаливой отмены контрактов предыдущих ЗНИ / load-bearing ADR / invariant KB"
-alwaysApply: true
+alwaysApply: false
 priority: 240
 ---
 

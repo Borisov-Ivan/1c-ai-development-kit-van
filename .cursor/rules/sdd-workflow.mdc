@@ -9,16 +9,19 @@ alwaysApply: false
 
 ```
 explore → new/ff → verify → apply (по срезам) → verify → archive
-                 ↘ extend ↗
-review/verify/apply/explore → extend → verify → apply
+                 ↘ extend (user-path) ↗
+verify: internal Repair Loop (repair-класс) — без user-facing extend
+review/explore → extend (user) → verify → apply
 ```
+
+**Chat Surface Contract** — §2.6 `.cursor/docs/opsx-output-style.md` (сквозной UX всех `/opsx:*`).
 
 | Этап | Команда | Что происходит | Агенты |
 |------|---------|----------------|--------|
 | **Исследование** | `/opsx:explore` | Компактный бриф 8–12 строк → ≤3 `Task` (trace + explorer) → превью + **Итог / Вердикт / Дальше** в чате → финал bug: блок `## Для /opsx:ff` **в чате**. Полные отчёты — `temp/reports/`. Опциональный handoff — `temp/explore-handoff-*.md` по словесной просьбе. Профили bug/question. **Knowledge Discovery**. | onec-code-explorer, onec-trace-analyst, onec-code-architect |
 | **Создание change** | `/opsx:new` или `/opsx:ff` | proposal → design (вкл. `## Slices`) → specs → tasks (с `# Срез S<N>`). **Knowledge Discovery** (в Architect Gate). | onec-code-architect (slice decomposition + slice-aware task decomposition) |
-| **Проверка** | `/opsx:verify` | Режим (pre/post/scoped/migrate-предложение/legacy) и глубину проверок определяет скилл verify по контексту артефактов и **`snapshot`**; без CLI-флагов. Авто-исправление mechanical и разговорные развилки в чате. **Knowledge Discovery** (в Architect Gate). | onec-code-architect, openspec-quality-controller |
-| **Расширение scope** | `/opsx:extend` | Обновляет change по требованию или отчёту (`--from-review`, `--from-report`, `--from-verify`, `--from-architecture`, `--from-explore`). `--from-report` принимает `temp/reports/<тип>-*.md`, `temp/explore-handoff-*.md` (для новых исследований) и `openspec/sessions/*/analysis.md` (legacy). | onec-code-architect, onec-code-explorer |
+| **Проверка** | `/opsx:verify` | Pre-flight + **internal Repair Loop** (max 2) для repair-класса без чата. Decision → один вопрос A/B, END TURN. Одна команда → **одно** финальное сообщение. `snapshot` без опоры на историю чата. | onec-code-architect, openspec-quality-controller |
+| **Расширение scope** | `/opsx:extend` | **user-extend:** бриф → правки → hint verify. **repair-from-verify:** internal из verify, **без** сообщений в чат. | onec-code-architect, onec-code-explorer |
 | **Реализация** | `/opsx:apply` | **Step-by-slice** (default): один срез — карточка приёмки — следующий срез. Опции: step-by-step / batch | onec-code-writer + onec-code-reviewer |
 | **Архивация** | `/opsx:archive` | При непринятых `S<N>.T<M>` — slice-gate-подтверждение в скилле: отметить `[x]` и продолжить (**вариант A**), стоп (**B/C**), **`--force-legacy`** (**D**) без контракта срезов; иначе sync specs → archive + **Facts extraction**. | — |
 | **Предрелизное ревью** | `/prerelease-review` | Батчевый ревью расширения | onec-code-reviewer |
@@ -49,7 +52,7 @@ review/verify/apply/explore → extend → verify → apply
 | Slice mode, дефект в **непринятом** срезе S<N> | Вставить новую задачу `S<N>.<M+1>` **перед** `S<N>.T<M>` |
 | Slice mode, дефект в **принятом** срезе S<K> | Создать **fix-срез** `S<N+1>: Исправление дефекта S<K>` (зависит от S<K>) |
 | Slice mode, новая функциональность | Новый срез `S<N+1>` или расширение существующего непринятого |
-| Новое требование / отчёт ревью / архитектурное замечание в существующем change | `/opsx:extend <name> [--from-review <path>|--from-architecture <path>|--from-verify <path>]` → бриф → правка артефактов → `/opsx:verify` |
+| Новое требование / отчёт ревью / архитектурное замечание в существующем change | `/opsx:extend <name> [--from-review …]` → user-extend (бриф) → hint `/opsx:verify` |
 | Legacy mode (`# Срез` нет) | Вставить в подходящую секцию или «7. Рефакторинг и качество». При накоплении исправлений — рекомендовать `/opsx:migrate-slices <name>` |
 
 `/opsx:ff` создаёт **новый** change — не используется для добавления задач к существующему. Подробности — `.cursor/skills/openspec-continue-change/SKILL.md` и `.cursor/skills/openspec-extend-change/SKILL.md` (`--from-report`).

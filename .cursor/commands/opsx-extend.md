@@ -7,7 +7,11 @@ description: Контролируемое расширение scope сущес�
 
 Контролируемо расширить scope активного change: пользователь описывает **новое требование**, команда обновляет `proposal.md` / `design.md` / `specs/` / `tasks.md` (при необходимости — с привязкой к существующим или новому срезу), фиксирует в `debug.md` секцию расширения и возвращает управление в `/opsx:verify` для валидации изменённого scope.
 
-Отделена от `/opsx:verify` — verify не редактирует артефакты (read-only gate). Extend отвечает за изменение артефактов.
+Отделена от `/opsx:verify` — verify read-only для user-path; **repair-from-verify** — internal only (verify Repair Loop, без чата).
+
+**Режимы:**
+- **user-extend** — бриф + confirm → handoff на языке эффекта → hint `/opsx:verify <name>` (не auto-chain).
+- **repair-from-verify** — internal из verify; **без** сообщений в чат; вызывается только из Repair Loop verify SKILL.
 
 **Первое действие:** прочитать `.cursor/skills/openspec-extend-change/SKILL.md` и далее идти по его шагам. До прочтения скилла — никаких других чтений артефактов, отчётов, трасс или модулей.
 
@@ -39,8 +43,8 @@ description: Контролируемое расширение scope сущес�
    - specs/*/spec.md — добавить Requirement/Scenario (через openspec delta-формат, см. `openspec-specs-gate.mdc`).
    - design.md — дополнить `## Slices` (новый срез `S<N+1>`, если новое требование не укладывается в существующие).
    - tasks.md — добавить задачи по правилам vertical-slices.mdc «Поведение continue» (вставка в существующий срез или новый срез).
-6. Зафиксировать в `debug.md` секцию `## Extend — YYYY-MM-DD`: источник (`--from-review`/`--from-debug`/...), что добавлено, в какой срез, disposition по findings.
-7. Предложить пользователю запустить `/opsx:verify <name>` для валидации изменённого scope.
+6. Зафиксировать в `debug.md` секцию `## Extend — YYYY-MM-DD`: источник, что добавлено, disposition.
+7. **user-extend:** hint `/opsx:verify <name>` одной строкой (язык эффекта, без перечня файлов). **repair-from-verify:** шаг 7 **не** выводится в чат.
 
 **Ограничения:**
 - Не вызывает writer/reviewer — реализация остаётся за `/opsx:apply`.

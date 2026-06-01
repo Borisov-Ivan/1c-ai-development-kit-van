@@ -11,7 +11,7 @@ metadata:
 
 Archive a completed change in the experimental workflow.
 
-**Output style:** итог в чат — **skip-on-empty** и **non-events** (см. [`.cursor/rules/chat-output-budget.mdc`](../../rules/chat-output-budget.mdc) §3a): только путь архива, фактически изменённые main-specs, новые/обновлённые `ADR-*`, сохранённые `KB-*` при `Saved`, actionable `Blocked — taxonomy missing`. Без `Schema:`, без «Slices: K/K» в штатном случае, без перечисления того, чего не делали. Шаблон — **T-CONFIRM** §5.5 `opsx-output-style.md`. Стиль вывода — см. `.cursor/docs/opsx-output-style.md` §2.5 «Человеческий слой». Раздел **`### Warnings`** — только при остаточных пунктах после фильтра §3a (часто пусто). Перед выводом — self-check §7 + §3a.
+**Output style:** итог в чат — **одна строка эффекта** («заархивировано») + опц. actionable KB/ADR; **Chat Surface Contract** §2.6: без internal-команд, без перечня non-events. T-CONFIRM §5.5. Self-check §2.6 + §3a `chat-output-budget.mdc`.
 
 **Auto-yes policy:** Invoking archive means the user accepts the recommended path: proceed despite incomplete artifacts/tasks, **sync delta specs to main** when a delta exists, and **extract all ADR-worthy decisions** from architecture reports. Do **not** use **AskQuestion** for ADR/sync. **Не** выводить в чат предупреждения о: незакрытых follow-up в `tasks.md`, пустом диффе маркеров `0/0`, отсутствии analytical reports / KB-кандидатов / отложенном KB (см. шаги 2–3, 5.5). **Исключения (AskQuestion разрешён):** шаг 1 — выбор change при неоднозначности; шаг 3.5 — непринятые приёмочные задачи в slice mode (`S<N>.accept` или legacy `S<N>.T<M>`); шаг 5.5 — сохранение KB-фактов (когда кандидаты есть).
 

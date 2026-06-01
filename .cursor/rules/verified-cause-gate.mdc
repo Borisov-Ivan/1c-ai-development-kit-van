@@ -1,6 +1,6 @@
 ---
 description: "HALT: перед любым фиксом — root cause (verified, не hypothesis) + impact assessment"
-alwaysApply: true
+alwaysApply: false
 priority: 250
 ---
 

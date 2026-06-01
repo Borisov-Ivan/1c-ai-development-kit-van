@@ -1,6 +1,6 @@
 ---
 description: "GUARD: для вызова субагентов использовать инструмент Task"
-alwaysApply: true
+alwaysApply: false
 ---
 
 # Tool Name Guard

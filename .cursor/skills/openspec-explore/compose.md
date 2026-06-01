@@ -1,6 +1,11 @@
-# Сборка отчёта /opsx:explore
+---
+description: "(DEPRECATED) Сборка отчёта /opsx:explore (legacy). Не используется."
+alwaysApply: false
+---
 
-Когда все пункты TodoWrite, кроме «Собрать и проверить отчёт», — `completed`.
+# (DEPRECATED) Сборка отчёта /opsx:explore
+
+**Внимание:** Этот протокол устарел. Актуальный режим исследования (Ultra-Lite) не использует `openspec-composer` и `analysis.md`. См. `.cursor/skills/openspec-explore/SKILL.md`.
 
 ## Preflight
 

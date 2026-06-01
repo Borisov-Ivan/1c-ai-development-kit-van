@@ -14,7 +14,7 @@ Fast-forward through artifact creation - generate everything needed to start imp
 **Input**: The user's request may include a change name (kebab-case), a description of what they want to build, or nothing (auto-detect from context).
 
 **Output style:**
-- Сводка в чате («что создано», ссылки на артефакты, следующий шаг) — шаблон **T-CONFIRM** из `.cursor/docs/opsx-output-style.md` §5.5. Стиль вывода — см. `.cursor/docs/opsx-output-style.md` §2.5 «Человеческий слой».
+- Сводка в чате («что создано», следующий шаг) — шаблон **T-CONFIRM** §5.5 + **Chat Surface Contract** §2.6: handoff на языке эффекта, **без** перечня файлов; **один** next step — `/opsx:verify <name>` (не «verify или apply», без auto-chain).
 - **Подтверждение постановки перед scaffold:** если пользователю нужно сверить понимание задачи — вывести адаптивный **T-BRIEF** в чате (§5.1): обязательны Контекст, Что я понял, **KB в scope** (Read `openspec/knowledge/_index.yaml` и при необходимости выбранные KB `.md` по путям из запроса / Explore Summary; иначе «нет совпадений…»), План, Подтвердить. Файлы `temp/briefs/*.md` **не создаются**.
 - **Генерируемые артефакты** `proposal.md`, `design.md`, `tasks.md`, spec deltas — подчиняются §1 «Три слоя» и §3 «Запрет внутренних ID в пользовательских полях»: секции для заказчика/приёмки (`Why`, `What Changes`, `Scope`, `Scenarios`, `Requirements`) — UX-слой; внутренние ID (`S<N>.<M>`, `S<N>.accept`, `D<N>`, `R<N>`, `I<N>`, номера задач `12.9`) — только в `## Slices`, `## Decisions`, `## Tasks`, `## Risks`. Перечисления — нумерованные списки. Перед записью — self-check-5 (§7).
 
@@ -273,10 +273,14 @@ Fast-forward through artifact creation - generate everything needed to start imp
            - `Скорректировать` → принять пользовательский комментарий, повторно делегировать architect с этим комментарием, обновить `design.md`.
            - `Пересобрать срезы` → повторить делегирование со сменой модели или указанием «другое группирование».
       5. **If `## Slices` section is present:**
-         - Validate with Quality Controller (quick check — criteria 1, 3, 5 from QC), see `openspec-quality-controller.md`.
+         - Delegate to **openspec-quality-controller** (quick check — criteria 1, 3, 5, 8, 9 from QC), see `openspec-quality-controller.md`. **Do NOT** grep keyword lists for criterion 8 — QC semantic judgment only.
          - If critical issues — show the user and AskQuestion whether to regenerate.
          - Otherwise — proceed.
-      6. **Acceptance Checklist Coverage pre-check (правило среза 6):**
+      6. **Foundation Slice Guard** (before AskQuestion «Принять» on proposed slices):
+         1. Grep `specs/**/spec.md` for `scenario-implementation-leak` per `.cursor/rules/openspec-specs-gate.mdc` (implementation-leak markers in `- **THEN**` only — structural check).
+         2. If QC (or architect output) indicates `slice-foundation-with-gate` / `slice-not-vertical` on a proposed decomposition — **do not offer «Принять»**; only «Скорректировать» / «Пересобрать» with explanation (merge foundation into primary slice).
+         3. If `scenario-implementation-leak` found on a Requirement that would become its own slice — remediation: move to `design.md` Behavior Contract before accepting slices (or user override explicitly).
+      7. **Acceptance Checklist Coverage pre-check (правило среза 6):**
          - Read the `## Slices` block from `design.md`. For each slice row, extract the Scenarios column (ссылки на `#### Scenario:` из spec).
          - Validate per slice:
            * Scenarios count SHALL be ≥1 and ≤3. Если >3 — предупредить архитектора и предложить раздробить срез. Если 0 — это не срез, а prereq-слой (см. правило декомпозиции 7).
@@ -293,13 +297,12 @@ Fast-forward through artifact creation - generate everything needed to start imp
 
 **Output**
 
-After completing all artifacts, summarize:
-- Change name and location
-- List of artifacts created with brief descriptions
-- Architect Gate status: `not-required` / `passed: <path>` / `declined: <reason>` / `skipped via .gate-override.yaml` / `self-review fallback`
-- **Risk Surfacing (ОБЯЗАТЕЛЬНО):** Проактивно выделите 1-3 границы изменений на UX-языке. Укажите: «Что меняется для пользователя: ...» и «Что НЕ меняется: ...» (одной строкой из секции Non-Goals). Без этого блока handoff считается провальным.
-- What's ready: "All artifacts created! Ready for implementation."
-- Prompt: "Рекомендуется: `/opsx:verify <name>` для проверки качества артефактов (фазовая когерентность, ТЗ, реализуемость, gates). Или сразу `/opsx:apply <name>` для начала реализации."
+After completing all artifacts, summarize in chat (T-CONFIRM, Chat Surface Contract §2.6):
+- Change name (one line, language of effect — «ЗНИ создано»)
+- **Risk Surfacing (ОБЯЗАТЕЛЬНО):** 1–3 границы на UX-языке («Что меняется / что НЕ меняется»)
+- Architect Gate status: one line if actionable for user; details in `reports/`
+- **One next step only:** `/opsx:verify <name>` — без auto-chain, без «или apply»
+- **Do NOT** list created artifact paths in chat (non-events / file list handoff — fail)
 
 **Artifact Creation Guidelines**
 

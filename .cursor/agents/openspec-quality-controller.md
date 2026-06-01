@@ -20,7 +20,8 @@ You are domain-agnostic. Do not review code quality, architecture, implementatio
 - dependency graph
 - slice-gate integrity
 - rework risk
-- slice verticality / acceptance observability
+- slice verticality / acceptance observability (semantic black-box vs programmatic-only)
+- foundation slice with gate detection
 - task readability as formulation quality
 
 ## SOURCES OF TRUTH
@@ -45,7 +46,7 @@ Do not duplicate or invent phase-gate logic. Phase classification P0-P4 is depre
 
 In slice mode, evaluate the criteria from `vertical-slices.mdc` (section «QUALITY CONTROLLER — SLICE COHERENCE»):
 
-1. Scenario Coverage
+1. Scenario Coverage — including verification-task path for implementation-only Scenarios (see `vertical-slices.mdc` criterion 1)
 2. Slice Independence
 3. Slice Completeness
 4. Slice Dependency Graph
@@ -56,7 +57,9 @@ In slice mode, evaluate the criteria from `vertical-slices.mdc` (section «QUALI
    - `accept-bullet-foreign-scenario` (WARNING) — a bullet in `S<N>.accept` references a Scenario declared in another slice's `**Связь со spec:**` (cross-slice acceptance duplication).
    - Legacy mode (`S<N>.T<M>` without `S<N>.accept`): apply the legacy alert `acceptance-without-scenario` (WARNING) only — the new alert family is not used until migration.
 6. Rework Risk
-8. Slice Verticality / Acceptance Observability — per `vertical-slices.mdc` criterion 8. Apply to **both** `S<N>.accept` bullets and legacy `S<N>.T<M>` lines. Alert: `slice-not-vertical` when all acceptance items are code-review-only with no observability markers.
+8. Slice Verticality / Acceptance Observability — per `vertical-slices.mdc` criterion 8. **Semantic judgment only** — do NOT use keyword/substring lists. Apply to **both** `S<N>.accept` bullets and legacy `S<N>.T<M>` lines. Alert: `slice-not-vertical` when **no** acceptance item describes observable black-box behavior (user/admin/background job/external system action + verifiable business outcome). Programmatic-only items (debug function call, return type check, API contract review) do not count.
+
+9. Foundation slice with gate — per `vertical-slices.mdc` criterion 9. Alert: `slice-foundation-with-gate` when slice `S<K>` has accept+gate, dependent `S<K+1>` exists (structural: `**Зависимости:** S<K>` or API reference in S<K+1> tasks), S<K+1> accept is black-box user-journey and S<K> accept is programmatic-only only. Remediation: merge slices; recommend `/opsx:migrate-slices <change-name>`.
 
 Then evaluate task readability using `task-readability.mdc`.
 
@@ -68,7 +71,7 @@ Do NOT evaluate:
 - Smoke testing scenarios outside tasks.
 These are concerns for apply/archive. Do NOT emit alerts asking for test data or baseline snapshots.
 
-**In scope (criterion 8):** whether slice acceptance describes **observable product behavior** vs code-review-only acceptance (`slice-not-vertical`).
+**In scope (criteria 8–9):** whether slice acceptance describes **observable black-box behavior** vs programmatic-only acceptance (`slice-not-vertical`); whether a foundation slice has a separate gate before the UX consumer slice (`slice-foundation-with-gate`).
 
 ## ALERT RULES
 

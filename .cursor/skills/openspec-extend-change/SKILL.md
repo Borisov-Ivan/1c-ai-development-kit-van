@@ -1,6 +1,6 @@
 ---
 name: openspec-extend-change
-description: Controlled scope extension for an existing OpenSpec change. Reads user text and optional source reports/files, shows a mandatory brief, updates change artifacts only after confirmation, then hands off to verify/apply.
+description: Controlled scope extension for an existing OpenSpec change. user-extend (brief + confirm) or repair-from-verify (internal, silent).
 license: MIT
 compatibility: Does not call writer/reviewer and never edits BSL/XML metadata. May delegate read-only analysis to onec-code-architect / onec-code-explorer when gates require it.
 metadata:
@@ -11,6 +11,19 @@ metadata:
 Контролируемо расширить или пересмотреть scope существующего OpenSpec change по новому требованию, отчёту ревью, debug/RCA, verify-отчёту, архитектурному отчёту или Explore Summary.
 
 **Extend правит только артефакты change**: `proposal.md`, `design.md`, `specs/**`, `tasks.md`, `debug.md`, `reports/**`. Код BSL, XML метаданных и реализация остаются за `/opsx:apply`.
+
+## Режимы (user-extend vs repair-from-verify)
+
+| Режим | Триггер | Бриф | Сообщение в чат |
+|-------|---------|------|-----------------|
+| **user-extend** | `/opsx:extend` от пользователя; `--from-verify` **после** decision 3a | T-BRIEF + «Подтвердить?» | Handoff на языке эффекта + hint `/opsx:verify <name>` |
+| **repair-from-verify** | internal из verify Repair Loop (`apply_repairs_from_report`) | **SKIP** | **нет** — вызывающий verify продолжает loop |
+
+**repair-from-verify:** без Entry Protocol, без lite-брифа, без «Подтвердить?»; сразу §6 Artifact update rules по remediation из отчёта verify; запись в `debug.md`; **0** строк в чат.
+
+**user-extend с `--from-verify` после decision:** lite-бриф (2–3 предложения) + «Подтвердить?» → после правок handoff на языке эффекта.
+
+Chat Surface Contract — §2.6 `opsx-output-style.md`.
 
 ---
 
@@ -38,9 +51,11 @@ metadata:
 
 ---
 
-## Entry Protocol (MANDATORY)
+## Entry Protocol (MANDATORY для user-extend)
 
-Первый шаг команды:
+**repair-from-verify:** Entry Protocol **пропускается** — сразу §6 Artifact update rules.
+
+Первый шаг команды **user-extend**:
 
 1. Прочитать этот `SKILL.md` (обеспечивает command-skill-gate).
 2. Определить change:
@@ -61,6 +76,8 @@ metadata:
 
 **Дополнительно для extend (всегда в том же сообщении, после секции «Что получите»):**
 
+Если extend вызван **не** из verify (обычный режим):
+
 ```markdown
 **Предлагаемое изменение артефактов**
 1. `proposal.md`: …
@@ -77,11 +94,22 @@ metadata:
 - Drift-check: pass / drift-warning / scope-violation
 ```
 
+Если extend вызван **internal repair-from-verify** — **бриф не показывается**, правки сразу по §6.
+
+Если extend вызван **user-extend с `--from-verify` после decision** — **lite-бриф**:
+
+```markdown
+**Суть изменений (по отчёту verify):**
+<2–3 предложения на языке эффекта: что именно будет дописано в план. Без голых S<N>.x и без упоминания Drift-check / Behavior Contract в чате.>
+
+(Детали Drift-check и соответствия scope будут сохранены в файл).
+```
+
 Секция **Как буду искать** того же сообщения: 1) уточнить неоднозначности через AskQuestion при необходимости; 2) проверить гейты архитектуры и факты в коде; 3) при `--code-sync` — после подтверждения делегировать исследователя кода и сохранить `reports/exploration-code-sync-YYYY-MM-DD.md`; 4) обновить артефакты change; 5) передать на `/opsx:verify <name>`. Завершить **Подтвердить?** по §5.1.
 
-Self-check перед выводом: слои разделены; в UX-полях §5.1 нет `S<N>.T<M>` / `D<N>` / номеров задач; списки нумерованы; поле **Вход** / **Факты** — только факты; каждое поле ≤3 строк или ≤7 пунктов; блок **«Соответствие исходному scope»** заполнен всеми **пятью** строками (Why, Non-Goals, Behavior Contract, Отменяет архивный инвариант, Drift-check).
+Self-check перед выводом: слои разделены; в UX-полях §5.1 нет `S<N>.T<M>` / `D<N>` / номеров задач; списки нумерованы; поле **Вход** / **Факты** — только факты; каждое поле ≤3 строк или ≤7 пунктов; блок **«Соответствие исходному scope»** заполнен всеми **пятью** строками (в памяти оркестратора для файла, а в чате только если это не `--from-verify`).
 
-**Развилки в чате после брифа:** любые варианты выбора до или после подтверждения (AskQuestion, неоднозначный `Drift-check` и т.п.) выводить блоками **«Решение N — …»** с метками `<N>a` / `<N>b` / `<N>c` по образцу `.cursor/skills/openspec-verify-change/templates/chat-summary.md`, чтобы пользователь мог ответить одной строкой; варианты **в чате**, не только в длинном теле брифа.
+**Развилки в чате после брифа:** любые варианты выбора до или после подтверждения (AskQuestion, неоднозначный `Drift-check` и т.п.) выводить блоками **«Решение N — …»** с развилками прозой (как в verify 3a, `verify-user-communication.mdc:43`), чтобы пользователь мог ответить одной строкой. Коды `<N>a` / `<N>b` / `<N>c` в чате запрещены. Варианты **в чате**, не только в длинном теле брифа.
 
 ### Соответствие исходному scope — критерии заполнения (оркестратор)
 
@@ -292,14 +320,17 @@ Architect обязателен, если:
 
 ### 8. Handoff
 
-Финальный вывод в **чат** — **§3a** [`.cursor/rules/chat-output-budget.mdc`](../../rules/chat-output-budget.mdc):
+Финальный вывод в **чат** — Chat Surface Contract §2.6 + §3a `chat-output-budget.mdc`:
 
-- Если после подтверждения брифа **нет** изменений ни в одном артефакте (`proposal` / `design` / `specs` / `tasks` / `debug`) — **одна строка:** «Артефакты ЗНИ соответствуют запросу, правок не потребовалось.» Без `Drift-check: OK`, без перечня проверенных файлов.
-- Если артефакты **изменены** — **одна строка:** «Обновлено: `<path1>`[, `<path2>`…]. Дальше: `/opsx:verify <name>`.»
+- **repair-from-verify (internal):** **нет** сообщения в чат.
+- **user-extend, правок не было:** одна строка на языке эффекта: «Артефакты соответствуют запросу, правок не потребовалось.»
+- **user-extend, артефакты изменены:** «Постановка дополнена, можно проверять. Следующий шаг: `/opsx:verify <name>`.» — **без** перечня файлов, **без** internal-команд с флагами.
 
-Полный перечень правок, цитаты и заметки — в `debug.md` (`## Extend — YYYY-MM-DD`) и при необходимости `reports/extend-summary-<name>-YYYY-MM-DD.md`, **не** в чат.
+Полный перечень правок — в `debug.md` (`## Extend — YYYY-MM-DD`) и при необходимости `reports/extend-summary-*.md`, **не** в чат.
 
-Если изменения не внесены из-за неоднозначности — краткая карточка с 2–3 вариантами (развилка — исключение из однострочного режима).
+**Запрещено:** «Обновлено: `tasks.md`, `design.md`, … Дальше: `/opsx:extend --from-verify …`».
+
+Если изменения не внесены из-за неоднозначности — компактная развилка (исключение из однострочного режима).
 
 ---
 
