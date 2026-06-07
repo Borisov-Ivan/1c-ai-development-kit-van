@@ -59,45 +59,65 @@ Fast-forward through artifact creation - generate everything needed to start imp
    - Если источник старше 48 часов или не относится к change — считать, что `exploreContext` отсутствует.
    - Если `exploreContext` отсутствует, это не блокирует простой ff. Design Gate ниже выполнит hard-gate только при структурных триггерах.
 
-1.5. **Metadata Gate (MANDATORY)**
+1.5. **Metadata Gate (MANDATORY для нового change)**
 
-   После подтверждения имени ЗНИ запросить данные для маркеров разработчика и генерации ТЗ.
-   **Это обязательный шаг перед scaffold.**
-   
-   1. Выведите текстовый запрос в чат (без `AskQuestion` и без других инструментов):
-      ```
-      Для оформления комментариев в коде (// +++ ... [ID#...]) укажите:
-      1. Разработчик (ФИО, например «Борисов И.Г.»):
-      2. Идентификатор ЗНИ (например «ID#79714»):
-      3. Название ЗНИ для комментария (короткое):
-      
-      Генерация ТЗ.md (документ для согласования с заказчиком):
-      4. Нужно ли генерировать ТЗ.md: Да / Нет / Решить позже
-      ```
-   2. Не вызывайте `AskQuestion`: это свободный многострочный ввод, пользователь отвечает обычным текстом в чат.
-   3. Допустимые ответы:
-      - заполненные пункты 1–4 — использовать как Metadata Gate;
-      - `пропустить`, `плейсхолдеры`, `позже` — продолжить с плейсхолдерами;
-      - `отмена`, `cancel`, `стоп` — завершить ff без создания change.
-   
-   **STOP: дождаться ответа.**
-   
-   **Guardrail:** Выполнение шага 2 (`openspec new change`) до завершения Metadata Gate СТРОГО ЗАПРЕЩЕНО.
-   
-   - **Если пользователь прислал заполненные пункты:** Запомните введённые данные. На шаге 5 при генерации `proposal.md` заполните блок `## Metadata (comment markers)` реальными значениями (не используйте «Уточнить до»). Также добавьте поле `generate_tz: auto | no | deferred` в зависимости от ответа про ТЗ (`auto` = да/нужно при verify, `no` = нет/не нужно, `deferred` = решить позже).
-   - **Если пользователь попросил пропустить:** На шаге 5 при генерации `proposal.md` запишите нормализованные плейсхолдеры:
-     - `developer: <developer>`
-     - `zni_id: <zni_id>`
-     - `zni_name: <заполняется из темы>`
-     - `generate_tz: auto` (по умолчанию)
-     А также при генерации `tasks.md` добавьте в блок `## Follow-up` (или создайте его в конце файла) задачу:
-     `- [ ] F1 Заполнить Metadata (developer / zni_id) в proposal.md до первого кода`
+   Read `openspec/project.md` → секция **«Разработчик по умолчанию»** → `defaultDeveloper` (ФИО с пробелами, trim).
 
-2. **Create the change directory**
+   **Resume (каталог `openspec/changes/<name>/` уже существует):**
+   - Если `proposal.md` есть и `developer` заполнен (не `<ФИО>` / `<developer>`) — **не спрашивать** Metadata Gate; использовать metadata из proposal.
+   - Если в proposal плейсхолдеры — один вопрос как ниже (только comment_suffix, если ФИО есть в project.md).
+
+   **Новый change — один текстовый вопрос в чат** (без `AskQuestion`):
+
+   - **Если `defaultDeveloper` задан в project.md:**
+     ```
+     ФИО для маркеров: <из project.md>.
+     Укажите краткий комментарий к маркеру (необязательно).
+     Пустой ответ → // +++ <ФИО> <дата> без дополнительного текста.
+     ```
+   - **Если ФИО в project.md нет:**
+     ```
+     Укажите ФИО (формат «<Фамилия И.О.>» с пробелами) и при необходимости краткий комментарий к маркеру.
+     Примеры ответа: «<Фамилия И.О.>» или «<Фамилия И.О.> <текст задачи>».
+     Пустой комментарий → // +++ <ФИО> <дата> без текста.
+     ```
+
+   Парсинг ответа:
+   - Первая часть до «лишнего» хвоста → `developer` (нормализовать пробелы в инициалах).
+   - Остаток строки → `comment_suffix` (может быть пустым).
+   - Если ФИО только из project.md и ответ пустой → `comment_suffix` пустой.
+
+   Допустимо: `пропустить` / `позже` → `developer: <ФИО>`, follow-up F1; `отмена` / `стоп` → завершить ff.
+
+   **После первого указания ФИО** (когда в project.md не было значения) — предложить записать в «Разработчик по умолчанию» по `.cursor/rules/capture-to-project.mdc`.
+
+   **STOP:** дождаться ответа (кроме resume с валидным proposal metadata).
+
+   **Guardrail:** `openspec new change` до завершения Metadata Gate для **нового** change запрещён.
+
+   Запись в `proposal.md` (шаг 5):
+   ```markdown
+   ## Metadata (comment markers)
+
+   developer: <ФИО>
+   comment_suffix: <опционально; пусто = только ФИО и дата>
+   ```
+   Follow-up при плейсхолдере: `- [ ] F1 Заполнить developer в proposal.md (и при необходимости project.md) до первого кода`
+
+2. **Create or resume the change directory**
+
+   Проверить: существует ли `openspec/changes/<name>/`.
+
+   **Если каталог существует (resume):**
+   - **НЕ** вызывать `openspec new change`.
+   - Одна строка в чат: «Дозавершаю ЗНИ `<name>` (resume)».
+   - Перейти к шагу 3.
+
+   **Если каталога нет (новый change):**
    ```bash
    openspec new change "<name>"
    ```
-   This creates a scaffolded change at `openspec/changes/<name>/`.
+   Создаёт scaffold в `openspec/changes/<name>/`.
 
 3. **Read project context**
    Read `openspec/project.md` for project-level constraints (editing rules, allowed directories, conventions).
@@ -146,21 +166,21 @@ Fast-forward through artifact creation - generate everything needed to start imp
         Delegate to **onec-code-architect** with the "Architect — slice-aware task decomposition" template (`1c-agent-patterns/architect.md`).
         Pass: paths to proposal.md, design.md (with approved `## Slices` section, включая `### Матрица приёмки` если есть), specs/, and the `template` from instructions.
 
-        **Acceptance Checklist Coverage context (правило среза 6):** в промпт архитектору явно передать:
-        - Извлечённый список Scenarios per slice из design.md `## Slices` (столбец «Scenarios из spec» и/или матрица приёмки).
-        - Требование: в каждом срезе **ровно одна** приёмочная задача `S<N>.accept` со следующей структурой:
+        **Primary acceptance context (правило среза 6):** в промпт архитектору явно передать:
+        - Primary acceptance per slice из design.md `## Slices`.
+        - Требование: в каждом срезе **ровно одна** `S<N>.accept`:
           ```
           - [ ] S<N>.accept Принять срез S<N> «<имя>» — <бизнес-результат>:
-            - Scenario «<имя сценария 1 буквально из spec>»: <одна строка ручного шага или критерия pass/fail>
-            - Scenario «<имя сценария 2>»: <…>
+            - **Primary (обязательно):** <шаги из **Primary acceptance:**>
+            - Scenario «<имя>» (опционально): <…>
           ```
-          В теле — **по одной строке на каждый** Scenario из `**Связь со spec:**` этого среза (буквально, без перефразирования). Sub-bullets чеклиста **не** имеют отдельных чекбоксов — это пункты внутри одной задачи.
-        - Инварианты/NFR/перф-проверки — НЕ в чеклист `S<N>.accept`, а в `design.md#Assumptions` / обычную задачу `S<N>.<M>` / `## Follow-up`.
+          `[x]` = Primary пройден. Остальные Scenario — optional или `S<N>.<M>`.
+        - Metadata: `**Primary acceptance:**` обязателен при `# Срез S<N>`.
         - Ссылки: `.cursor/rules/vertical-slices.mdc` (правило среза 6 + секция «ФОРМАТ S<N>.accept»), `.cursor/rules/task-readability.mdc` (Исключение 1), `.cursor/skills/1c-agent-patterns/architect.md` (шаблон slice-aware task decomposition).
 
         The architect produces tasks.md with:
         - H1 headers `# Срез S<N>: <имя>` (one per slice from design)
-        - metadata blocks under each slice header (Сценарий, Приёмка, Связь со spec, Зависимости)
+        - metadata blocks under each slice header (Сценарий, **Primary acceptance**, Приёмка, Связь со spec, Зависимости; опц. **Режим apply:** mechanical)
         - task IDs with slice prefix `S<N>.<M>`
         - **exactly one** acceptance task `S<N>.accept` per slice, with a bullet-checklist of scenarios in its body (one bullet per Scenario from `**Связь со spec:**`)
         - slice-gate markers `<!-- slice-gate: <criterion> -->`
@@ -171,23 +191,18 @@ Fast-forward through artifact creation - generate everything needed to start imp
         Save the result to `outputPath`.
         If architect Task fails — apply error handling above (retry once, then create yourself).
 
-        **Post-tasks self-check (Acceptance Checklist Coverage):**
+        **Post-tasks self-check (Primary + Acceptance Coverage):**
         После сохранения `tasks.md` — mechanical self-check:
-        1. Grep `tasks.md` на `^- \[[ x]\] S\d+\.accept\b` — собрать все приёмочные задачи; их должно быть ровно столько же, сколько срезов (`# Срез S\d+`).
-        2. Для каждого `S<N>.accept` извлечь буллет-чеклист в его теле (sub-bullets со словом `Scenario «…»`).
-        3. Сверить множество имён Scenario из чеклиста с множеством `Scenario` в `**Связь со spec:**` этого среза.
-        4. Зафиксировать mismatches:
-           - Срез без `S<N>.accept` → **CRITICAL** в сводке ff.
-           - Срез с двумя и более `S<N>.accept` → **CRITICAL**.
-           - `S<N>.accept` без буллет-чеклиста → **CRITICAL** (`accept-checklist-empty`).
-           - Scenario из `**Связь со spec:**` отсутствует в чеклисте → **WARNING** (`accept-bullets-missing-scenario`).
-           - Буллет ссылается на Scenario, заявленный в `**Связь со spec:**` другого среза → **WARNING** (`accept-bullet-foreign-scenario`).
-           - В срезе остался legacy-формат `S<N>.T<M>` (один или несколько) — **SUGGESTION** «Старая модель приёмки. Использовать `S<N>.accept` со чеклистом.»; ff не падает, но сводка показывает рекомендацию.
-        5. Если есть CRITICAL/WARNING — в финальной сводке ff: «Обнаружены замечания Acceptance Checklist Coverage. Рекомендую `/opsx:verify <name>` для полной проверки критерием 5b QC.»
-        6. Если mismatches нет — лог «Acceptance checklist OK».
+        1. Grep `# Срез S\d+` — для каждого среза grep `**Primary acceptance:**` → CRITICAL если нет.
+        2. Grep `^- \[[ x]\] S\d+\.accept\b` — count = count срезов; иначе CRITICAL.
+        3. В каждом `S<N>.accept` — sub-bullet `**Primary (обязательно):**` → CRITICAL если нет.
+        4. >1 mandatory sub-bullet без «опционально» → WARNING (`acceptance-simplicity-overload`).
+        5. Scenario из spec не покрыт Primary/optional/`S<N>.<M>` → WARNING.
+        6. Legacy `S<N>.T<M>` → SUGGESTION.
+        7. CRITICAL/WARNING → «Рекомендую `/opsx:verify <name>`».
       - **All other artifacts**: Create the artifact file using `template` as the structure
       - Apply `context` and `rules` as constraints - but do NOT copy them into the file
-      - **Metadata block**: When creating `proposal.md`, ALWAYS add the `## Metadata (comment markers)` block (with developer, zni_id, zni_name, generate_tz) immediately after `## Why`.
+      - **Metadata block**: When creating `proposal.md`, ALWAYS add `## Metadata (comment markers)` (`developer`, `comment_suffix`) immediately after `## Why`.
       - Show brief progress: "✓ Created <artifact-id>"
 
    b. **Continue until all `applyRequires` artifacts are complete**
@@ -273,22 +288,19 @@ Fast-forward through artifact creation - generate everything needed to start imp
            - `Скорректировать` → принять пользовательский комментарий, повторно делегировать architect с этим комментарием, обновить `design.md`.
            - `Пересобрать срезы` → повторить делегирование со сменой модели или указанием «другое группирование».
       5. **If `## Slices` section is present:**
-         - Delegate to **openspec-quality-controller** (quick check — criteria 1, 3, 5, 8, 9 from QC), see `openspec-quality-controller.md`. **Do NOT** grep keyword lists for criterion 8 — QC semantic judgment only.
+         - Delegate to **openspec-quality-controller** (quick check — criteria 1, 3, 5, 5b, 8–10 from QC), see `openspec-quality-controller.md`. **Do NOT** grep keyword lists for criterion 8 — QC semantic judgment only.
          - If critical issues — show the user and AskQuestion whether to regenerate.
          - Otherwise — proceed.
       6. **Foundation Slice Guard** (before AskQuestion «Принять» on proposed slices):
          1. Grep `specs/**/spec.md` for `scenario-implementation-leak` per `.cursor/rules/openspec-specs-gate.mdc` (implementation-leak markers in `- **THEN**` only — structural check).
          2. If QC (or architect output) indicates `slice-foundation-with-gate` / `slice-not-vertical` on a proposed decomposition — **do not offer «Принять»**; only «Скорректировать» / «Пересобрать» with explanation (merge foundation into primary slice).
          3. If `scenario-implementation-leak` found on a Requirement that would become its own slice — remediation: move to `design.md` Behavior Contract before accepting slices (or user override explicitly).
-      7. **Acceptance Checklist Coverage pre-check (правило среза 6):**
-         - Read the `## Slices` block from `design.md`. For each slice row, extract the Scenarios column (ссылки на `#### Scenario:` из spec).
-         - Validate per slice:
-           * Scenarios count SHALL be ≥1 and ≤3. Если >3 — предупредить архитектора и предложить раздробить срез. Если 0 — это не срез, а prereq-слой (см. правило декомпозиции 7).
-           * Каждый срез будет иметь ровно одну `S<N>.accept` с буллет-чеклистом по этим Scenarios.
-         - Эти проверки — «hint» для следующего шага `slice-aware task decomposition`: архитектор должен соблюдать Acceptance Checklist Coverage при генерации `tasks.md`.
+      7. **Primary acceptance pre-check (правило среза 6):**
+         - For each slice in `## Slices`: Primary acceptance column filled; one blocking journey.
+         - Hint for task decomposition: mandatory Primary sub-bullet in `S<N>.accept`.
       7. **Guardrail:** do NOT invoke the tasks architect template until `design.md` contains the `## Slices` section (or Lite tier was explicitly chosen).
 
-      **Error handling:** if architect Task fails (error / timeout after retry), create a minimal single-slice draft yourself (1 container slice covering all tasks) and log a warning to the user. The user may run `/opsx:migrate-slices <name>` later to decompose.
+      **Error handling:** if architect Task fails (error / timeout after retry), create a minimal single-slice draft yourself (1 container slice covering all tasks) and log a warning to the user. Для перестройки legacy tasks — `/opsx:extend <name>` с architect slice decomposition или ручная правка по `vertical-slices.mdc`.
 
 6. **Show final status**
    ```bash
@@ -320,11 +332,11 @@ After completing all artifacts, summarize in chat (T-CONFIRM, Chat Surface Contr
 - **Implementation Options (for design artifact)**: для UI, интеграций, перехватов и переносов поведения добавить секцию `## Implementation Options`. Минимум: `Option A / Option B`, выбранный вариант, почему он проще/надёжнее, какие варианты отклонены. Конкретная реализация в `tasks.md` должна ссылаться на выбранный вариант, но задача формулируется через результат, а не через рецепт.
 
 **Guardrails**
-- **Metadata Gate MUST NOT be silently skipped**: Do not run `openspec new change` without getting an answer to the developer/zni_id prompt. Before showing the final summary, verify `proposal.md` for placeholders like "Уточнить до", `<developer>`, `<zni_id>`. If found and the user did NOT choose "Пропустить", add a WARNING to the summary.
+- **Metadata Gate MUST NOT be silently skipped** (новый change): не вызывать `openspec new change` без ответа на Metadata Gate. Перед финальной сводкой проверить `proposal.md` на `<ФИО>`, `<developer>`, «Уточнить до». Если плейсхолдеры и пользователь не выбирал «пропустить» — WARNING в сводке.
 - **Explore context MUST NOT be used only for naming**: Если в последних сообщениях чата найден свежий блок `## Для /opsx:ff` или относится свежий `temp/explore-handoff-*.md` (или legacy `temp/explore-summary-*.md`), прочитать как source context и перенести все поля (Симптом, Корневая причина с маркером, Что менять, Файлы, Приёмка, Связь с архивом, Architect/verify) в `proposal`, `design`, `specs`, `tasks` и Design Gate. Для legacy — те же поля + `Architect Gate`, key decisions, knowledge findings, slice recommendations.
 - Create ALL artifacts needed for implementation (as defined by schema's `apply.requires`)
 - Always read dependency artifacts before creating a new one
 - If context is critically unclear, ask the user - but prefer making reasonable decisions to keep momentum
-- If a change with that name already exists, suggest continuing that change instead
+- If a change with that name already exists, **resume** (шаг 2) — не предлагать отдельную команду continue
 - Verify each artifact file exists after writing before proceeding to next
 - **Completion checkpoint (MANDATORY on every turn):** Before processing a user follow-up message during ff, run `openspec status --change "<name>" --json`. If any `applyRequires` artifact has status != `"done"`: (1) Notify the user: «Артефакт `<id>` не создан. Продолжить создание?» (2) Complete the missing artifact BEFORE handling the follow-up request. Rationale: user follow-ups in ff are still part of the ff session (`session-discipline.mdc`, Persistence). Missing artifacts must not be silently dropped.

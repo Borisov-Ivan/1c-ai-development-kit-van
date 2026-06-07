@@ -26,7 +26,7 @@ Task(
          [Блок из шага 1.6.1 — две таблицы (Whitelist предрелиза, Обязательный контроль) для release-hygiene rules AP-040..AP-043.]
 
          ## Comment Markers Metadata (from proposal.md)
-         [Если review_mode = change-scoped: извлечь блок `## Metadata (comment markers)` из proposal.md (developer, zni_id, zni_name). Передать ревьюверу для проверки парности маркеров по BORDER-PAIR-001.]
+         [Если review_mode = change-scoped: извлечь `## Metadata (comment markers)` из proposal.md (developer, comment_suffix). BORDER-PAIR-001 по ФИО.]
 
          ## Mandatory Control Signals (evidence)
          [Опционально — из шага 1.6.2, если есть regex-нарушения. Таблица Rule ID / File:Line / Observed / Expected.]
@@ -70,7 +70,7 @@ Task(
          Category 9 Code Cleanliness включая log-literal artefacts: имя события ЖР и текст сообщения/СтрШаблон не должны содержать маркеры постановки (S<N>, D<N>, kebab-case change, Decision); отладочный ЗаписьЖурналаРегистрации (Информация/Предупреждение/Примечание) без требования в tasks.md/design.md — удалить или оформить требование. Action: MUST_FIX.
          Пустые процедуры/функции/обработчики (empty-unused / empty-body / empty-handler) в границах ревью — Action: MUST_FIX (обработчики без привязки к элементу — инструкция правки Form.xml вручную).
          Если в промпте есть блок ## Mechanical findings (orchestrator) — не дублировать эти строки в findings; при необходимости дополнить контекстом (процедура, вызов).
-         Если передан блок ## Comment Markers Metadata — проверить BORDER-PAIR-001: на каждый найденный в изменённом коде маркер `// +++ ... [{zni_id}]` должен быть парный `// --- ... [{zni_id}]` с тем же `zni_id`. Если пары нет — HIGH [release-hygiene]. Чужие маркеры (с другим zni_id) не проверять.
+         Если передан блок ## Comment Markers Metadata — BORDER-PAIR-001: на каждый `// +++` с `developer` из metadata — парный `// --- {developer}` (legacy с `[ID#…]`/`[б/н#…]` в open допустим). Нет пары — HIGH [release-hygiene]. Чужие ФИО не проверять.
 
          ## Проверка соблюдения gates (HALT-compliance)
          Проверить, что writer следовал gates из промпта.
@@ -149,6 +149,63 @@ Task(
          - Читаемость: [оценка 1-5] ([краткий комментарий])
          - Когнитивная нагрузка: [Низкая/Средняя/Высокая] ([краткий комментарий])
          - Вердикт: [краткий вывод о необходимости рефакторинга]",
+  subagent_type="onec-code-reviewer"
+)
+```
+
+---
+
+## Reviewer (предрелиз) — `/release-review`
+
+Использовать при `release_mode = true` (шаг 3 review/SKILL.md). Отличия от обычного ревью: **`mode=prerelease`**, Category 12, эскалация severity, release-hygiene.
+
+```
+Task(
+  description="Предрелизное ревью [extension/change]",
+  prompt="Проверь качество кода для предрелиза [feature/extension].
+
+         expected_reviewer_prompt_contract_version: 3
+         mode=prerelease
+
+         Файлы: [список .bsl батча]
+         Стандарты: .cursor/docs/1c-coding-standards.md
+         Category 12: .cursor/docs/standard/reviewer-checks.md §12 Release Readiness
+         Base-файл (для &ИзменениеИКонтроль): [путь к base в cf/ или 'не применимо']
+
+         ## Linter Signals (evidence)
+         [Блок из шага 1.8 review/SKILL.md]
+
+         ## Whitelist & Mandatory Controls (from project.md)
+         [Блок из шага 1.6.1]
+
+         ## Comment Markers Metadata (from proposal.md)
+         [При change-scoped: developer, comment_suffix; BORDER-PAIR-001]
+
+         ## Mandatory Control Signals (evidence)
+         [Опционально — шаг 1.6.2]
+
+         ## Prior Findings History
+         [Опционально — шаг 2.1]
+
+         ## Architectural Context
+         [Опционально — design.md / architecture-*.md]
+
+         ## Reference Files (read-only)
+         [При change-scoped: список reference_files — контекст только, findings запрещены]
+
+         [## Review Boundaries — при diff-focused, как в шаблоне «Reviewer (ревью кода)»]
+
+         РЕЖИМ: mode=prerelease. Применять Prerelease escalation из AP-каталога (HIGH→CRITICAL где указано).
+         Release-hygiene: AP-040..AP-045, BORDER-PAIR-001, AP-042/043 по evidence-блокам.
+         Category 12 Release Readiness — обязательно в prerelease.
+         Язык комментариев (не JSDoc/маркеры): русский; англ. кроме TODO/FIXME — MEDIUM [style].
+         AP-031 naming: доменный тест для идентификаторов; экспортные без домена — HIGH [style].
+
+         [Далее — Reasoning focus, Code Smells, gates HALT-compliance, формат замечаний — как в «Reviewer (ревью кода)»;
+          EXTENSION_GUARD: расхождение с base → CRITICAL (prerelease) / HIGH (normal) — здесь всегда prerelease → CRITICAL]
+
+         ### Оценка эстетики кода (Elegance Score)
+         [как в основном шаблоне]",
   subagent_type="onec-code-reviewer"
 )
 ```

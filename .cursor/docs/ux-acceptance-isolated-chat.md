@@ -22,8 +22,20 @@ SSOT контракта: `.cursor/docs/opsx-output-style.md` §2.6.
 | **B** | `/opsx:verify <name>` | ZNI с CHALLENGE / A-B | **1** блок вопроса (проблема→последствия→варианты); END TURN |
 | **C** | `/opsx:verify <name>` | post-GO, артефакты не менялись | 3–5 строк; «статус прежний: можно apply» |
 | **D** | `/opsx:ff <name>` | новый change | T-CONFIRM; **одна** команда next: verify; без перечня файлов |
-| **E** | `/opsx:apply <name>` | завершённый срез | handoff на языке эффекта; user-action next step |
+| **E** | `/opsx:apply <name>` | завершённый срез | handoff: **Primary acceptance** одной строкой; user-action next step; без meta pipeline |
+| **E2** | `/opsx:apply <name>` | кодовая задача без критерия приёмки (mechanical slice) | одна строка «реализована»; нет «пошаговая пауза»; нет diff-чеклиста; нет «автопроверки пройдены» |
+| **E3** | `/opsx:apply <name>` | slice-gate handoff | Primary acceptance; ≤7 строк в «Что проверить СЕЙЧАС»; T-HANDOFF §2 без перечня всех задач |
 | **F** | `/opsx:explore` | симптом | бриф по Правилу 4; финал — блок `## Для /opsx:ff` или один вопрос |
+
+## Сценарии G — verify anti-fatigue (multi-round)
+
+| ID | Шаг | Pass |
+|----|-----|------|
+| **G1** | Новый чат: `/opsx:verify diadok-mchd-before-pack` после backfill ledger | GO **или** одна развилка; **0** agent-keys; нет reopen mount/cleanup |
+| **G2** | Ответ на развилку → extend | Handoff на языке эффекта; ledger в debug.md |
+| **G3** | Повторный `/opsx:verify` в **той же** сессии | Блок «Уже зафиксировано»; **0** reopen закрытых решений |
+
+**Hard gate:** G1+G3 (или G1 GO без G2). Fixture: `diadok-mchd-before-pack` с `debug.md` § Verify decision ledger.
 
 ## Anti-patterns (fail)
 
@@ -33,6 +45,8 @@ SSOT контракта: `.cursor/docs/opsx-output-style.md` §2.6.
 - Explore-бриф на internal repair
 - «Ничего не требуется» + «Подтвердить?»
 - Перегруз bold/backticks; решение требует открыть файл
+- «пошаговая пауза» / «Ваш шаг (» в заголовках apply
+- Meta-статус pipeline: «автопроверки пройдены», «diff не обязателен», «reviewer PASS»
 
 ## Fixtures (рекомендуемые)
 
@@ -41,8 +55,10 @@ SSOT контракта: `.cursor/docs/opsx-output-style.md` §2.6.
 | A, C | `do2-pavlik-predzapolnenie-viz-shablony` — после repair или tag «до repair» |
 | B | тот же change с открытым CHALLENGE (контракт схемы КП) |
 | D | любой новый ff из explore-блока |
-| E | любой change с готовым срезом к приёмке |
+| E, E3 | любой change с готовым срезом к приёмке (Primary в metadata) |
+| E2 | mechanical slice (`**Режим apply:** mechanical`) или change без `**Приёмка:**` в рабочих задачах |
 | F | произвольный симптом ДО2 |
+| G1–G3 | `diadok-mchd-before-pack` — ledger backfill в debug.md |
 
 Опционально: `temp/ux-fixtures/README.md` с git tag на commit «до repair».
 
@@ -52,7 +68,8 @@ SSOT контракта: `.cursor/docs/opsx-output-style.md` §2.6.
 - [ ] B — decision verify в новом чате
 - [ ] C — silent_ok в новом чате
 - [ ] D — ff hint verify в новом чате
-- [ ] E — apply handoff
+- [ ] E — apply handoff (Primary)
+- [ ] E2 — apply mechanical task (тихий успех)
+- [ ] E3 — apply slice-gate handoff
 - [ ] F — explore бриф/финал
-
-Все six — **pass** перед merge изменений правил.
+- [ ] G1/G2/G3 — verify anti-fatigue на `diadok-mchd-before-pack`

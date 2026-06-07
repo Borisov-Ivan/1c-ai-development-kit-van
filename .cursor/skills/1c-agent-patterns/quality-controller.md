@@ -2,7 +2,7 @@
 
 Шаблоны для делегирования `Task(subagent_type="openspec-quality-controller")`. Domain-agnostic readonly-агент. Активная модель — фронтматтер `.cursor/agents/openspec-quality-controller.md`.
 
-Критерии оценки (Slice Coherence: Scenario Coverage, Slice Independence, Slice Completeness, Slice Dependency Graph, Slice Gate Integrity, Rework Risk) — `.cursor/rules/vertical-slices.mdc`.
+         Критерии оценки (Slice Coherence: Scenario Coverage, Slice Independence, Slice Completeness, Slice Dependency Graph, Slice Gate Integrity, Acceptance Checklist 5b, Rework Risk, criteria 8–10) — `.cursor/rules/vertical-slices.mdc`.
 
 Общие правила, обработка ошибок — `SKILL.md` (навигатор).
 

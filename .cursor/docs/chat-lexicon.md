@@ -5,7 +5,7 @@
 ## Две аудитории (важно)
 
 - **Workflow-чат** (explore / verify / apply / extend и т. п.) адресован **разработчику 1С**. Профессиональные слова — «срез», «постановка», «приёмка», «область задачи», имена процедур, «что сломается» — **разрешены**. Не переводить их в канцелярит.
-- **Пользовательские итоги и ТЗ** (документы для заказчика без 1С) — полная расшифровка терминов. Лексика ТЗ — `.cursor/docs/tz-lexicon-dictionary.md`.
+- **Пользовательские итоги и ТЗ** (документы для заказчика без 1С) — полная расшифровка терминов; избегать англицизмов и внутреннего жаргона 1С.
 
 **Что действительно запрещено в любом чате — коды и имена внутреннего движка** (Слой 1). Они ничего не говорят человеку и создают шум.
 
@@ -17,7 +17,7 @@
 
 Запрещены в чате (регистронезависимо, вне `` `имя-файла` `` и вне строки «Источники: …»):
 
-`CRITICAL`, `WARNING`, `SUGGESTION`, `Severity`, `GO`, `NO-GO`, `PASS`, `FAIL`, `GAP`, `APPROVE`, `CHALLENGE`, `REJECT`, `Layer 1`…`Layer 5`, `verify_mode`, `verdict:`, `snapshot`, `last_challenge_at`, `novelty`, `SKIPPED-novelty`, `phantom-symbol`, `design-challenge`, `task-readiness`, `quality-controller`, `slice coherence`, `code-truth`, `Promotion Test`, `Determinism Test`, `Three-Question Challenge`, `Simplicity Check`, `Acceptance Checklist Coverage`, `Problem-Solution Trace`, `Independent Challenge`, `Implementation Readiness`, `Blast Radius`, `precedent-regression`, `invariant-drift`, `artifact-hygiene`, `slice-pre`, `slice-post`, `slice-transition`, `Tier`, `low-confidence`, `checkpoint`, имена агентов `onec-code-*` / `openspec-*`, имена гейтов (`Architect Gate`, `Code-Truth Gate`, `Slice Gate`, `Precedent Regression Gate`).
+`CRITICAL`, `WARNING`, `SUGGESTION`, `Severity`, `GO`, `NO-GO`, `PASS`, `FAIL`, `GAP`, `APPROVE`, `CHALLENGE`, `REJECT`, `Layer 1`…`Layer 5`, `verify_mode`, `verdict:`, `snapshot`, `last_challenge_at`, `novelty`, `SKIPPED-novelty`, `SKIPPED-lite`, `CHALLENGE-saturated`, `phantom-symbol`, `design-challenge`, `task-readiness`, `quality-controller`, `slice coherence`, `code-truth`, `Promotion Test`, `Determinism Test`, `Three-Question Challenge`, `Simplicity Check`, `Acceptance Checklist Coverage`, `Problem-Solution Trace`, `Independent Challenge`, `Implementation Readiness`, `Blast Radius`, `precedent-regression`, `invariant-drift`, `artifact-hygiene`, `slice-pre`, `slice-post`, `slice-transition`, `Tier`, `low-confidence`, `checkpoint`, `closed_decisions`, `decision_round`, `decision_id`, `open_decision_id`, `verify_depth`, `incremental`, `GO-with-assumptions`, `reopen-blocked`, `supersedes`, `implementation_invariant`, `D0`, `D1`, `D2`, `D3`, `D4`, `D5`, `mount_context`, `context_cleanup`, имена агентов `onec-code-*` / `openspec-*`, имена гейтов (`Architect Gate`, `Code-Truth Gate`, `Slice Gate`, `Precedent Regression Gate`), **`пошаговая пауза`**, **`Ваш шаг (`**, **`автопроверки пройдены`**, **`diff не обязателен`**, **`reviewer PASS`**, **`линтер чист`**.
 
 | Код движка | Замена в чате |
 |------------|----------------|
@@ -26,6 +26,8 @@
 | design-challenge | «независимая проверка плана» (или не называть) |
 | phantom-symbol | «в постановке указано имя, которого нет в коде» |
 | CRITICAL / WARNING | «блокер» / «замечание» |
+| пошаговая пауза / Ваш шаг ( | «Задача выполнена» + шаги приёмки; slice-gate: `## Срез S<N>: «…» — проверка на ИБ` |
+| автопроверки пройдены / diff не обязателен / reviewer PASS / линтер чист | не выводить (non-event); только эффект для пользователя |
 
 **Имя агента в чате** — «агент», «архитектор», «ревьюер»; полное имя — только в строке «Источники: …».
 
@@ -45,7 +47,7 @@ Workflow-подстроки verify, которые **запрещены** (вв�
 
 ## Слой 3 — лексика (англицизмы) — мягкое предпочтение
 
-Полная таблица для ТЗ — `.cursor/docs/tz-lexicon-dictionary.md`. В workflow-чате с разработчиком общеупотребимые термины (UI, handler, deploy) допустимы; в документах заказчику — заменять.
+В workflow-чате с разработчиком общеупотребимые термины (UI, handler, deploy) допустимы; в документах заказчику — заменять на русские эквиваленты.
 
 | Предпочесть | Вместо |
 |-------------|--------|

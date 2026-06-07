@@ -1,48 +1,17 @@
 ---
-description: Сессии исследования /opsx:explore — каталог openspec/sessions/, дисциплина путей
+description: "(DEPRECATED) Legacy openspec/sessions/ — redirect to Ultra-Lite explore"
 alwaysApply: false
 ---
 
-# OpenSpec Sessions
+# (DEPRECATED) OpenSpec Sessions
 
-## Назначение
+**Не использовать для новых исследований.**
 
-Сессия `/opsx:explore` — изолированный каталог с утверждённым брифом, промежуточными шагами и финальным `analysis.md`. Не путать с `openspec/changes/<name>/` (ЗНИ).
+Актуально: [`.cursor/skills/openspec-explore/SKILL.md`](../skills/openspec-explore/SKILL.md) — Ultra-Lite, без создания `openspec/sessions/`. Отчёты — `temp/reports/`.
 
-## Структура каталога
+Legacy read-only (не удалять из ff/extend):
 
-```text
-openspec/sessions/<session-slug>/
-  brief.md              # утверждённый бриф (YAML + markdown)
-  analysis.md           # финальный отчёт (после композиции)
-  brief.closed.md       # при закрытии висячей сессии (опционально)
-  temp/
-    step-<step-id>-<slug>.md
-    step-*.stub.md
-    step-*.prev-*.md
-    trace-analysis.md
-    verify-*.md
-    draft-report.md
-    composer-result-pass*.md
-    accumulated-objects.md
-```
+- `openspec-ff-change` — fallback `Glob openspec/sessions/*/analysis.md` (≤48ч)
+- `openspec-extend-change` — `--from-report` для старых путей
 
-`<session-slug>` = `<ГГГГ-ММ-ДД>-<slug>` — только `[a-z0-9-]`, без кириллицы.
-
-## Дисциплина путей
-
-1. **Запись и промпты** — только относительные пути от корня репозитория: `openspec/sessions/<session-slug>/...`.
-2. **`<SESSION_DIR>`** — префикс из результата `Glob`/`Read` после `Write brief.md`, не из памяти чата.
-3. **Запрещено** в промптах субагентам: абсолютные пути (`C:\...`, `/home/...`).
-4. После `Write brief.md` — обязательны `Glob` → `Read` по найденному пути.
-
-## Висячая сессия
-
-Сессия «висячая», если есть `brief.md` и **нет** `analysis.md` (исключая только `brief.closed.md`).
-
-При bootstrap explore: `Glob openspec/sessions/*/brief.md` — предложить продолжить / оставить / закрыть.
-
-## Связь с ЗНИ
-
-- `analysis.md` — вход для `/opsx:ff`, `/opsx:new` (short-circuit брифа), `/opsx:extend <change> --from-report <path>`.
-- Отчёты в `openspec/changes/<name>/reports/` — артефакты ЗНИ после apply/verify; в sessions не дублировать без явной необходимости.
+Создание новых каталогов `openspec/sessions/` **запрещено**.

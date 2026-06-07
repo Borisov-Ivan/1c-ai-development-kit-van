@@ -63,6 +63,8 @@ alwaysApply: false
 5. HALT §7 пройден?
 6. Handoff на языке эффекта, не лог файлов?
 7. **Изолированный чат:** ответ не ссылается на «как в прошлой сессии» / «вы уже подтвердили»?
+8. **Agent-keys HALT:** нет `D0`–`Dn`, `closed_decisions`, `decision_round`, `decision_id`, `verify_depth`, `GO-with-assumptions`, `reopen-blocked`, `supersedes`, `CHALLENGE-saturated`, `SKIPPED-lite` в чате?
+9. **Decision context:** при `decision_round >= 1` есть блок «Уже зафиксировано» прозой (без ID)?
 
 ## После решения пользователя (decision)
 
@@ -70,12 +72,12 @@ alwaysApply: false
 
 2. **Две строки в чат** (без отдельного «Понял» — перефраз выбора и есть подтверждение, см. §4 `chat-output-budget.mdc`):
    ```
-   Выбор: <пересказ решения одним предложением>.
+   Выбор: <пересказ решения одним предложением на языке кода 1С, без D0/decision_id>.
    Зафиксирую в постановке. Следующий шаг: `/opsx:verify <name>`.
    ```
    **Без** `/opsx:extend --from-verify …` в чате.
 
-3. Internal: user-extend `--from-verify` (lite confirm допустим после decision).
+3. Internal: user-extend `--from-verify` → **сразу** обновить `debug.md` § Verify decision ledger + design § «Решения verify (зафиксировано)» + закрыть темы в `open_known_questions`; lite confirm допустим после decision.
 
 ## После remediation
 

@@ -15,7 +15,7 @@ metadata:
 
 1. **Пять слоёв, в строгом порядке.** Каждый слой имеет единственную цель; пропуск/слияние слоёв запрещены, кроме явного триггера Layer 4.
 2. **Бинарный вердикт.** Чат всегда даёт `GO` (можно apply) или `NO-GO` (на обсуждение). Не «WARNING/SUGGESTION», не «PASS/FAIL» в чат.
-3. **Без скидок по объёму.** Глубина проверки одинакова для маленьких и больших ЗНИ — одна сломанная задача может остановить пользователя так же, как 25.
+3. **Без скидок по объёму.** Глубина проверки одинакова для маленьких и больших ЗНИ — одна сломанная задача может остановить пользователя так же, как 25. **Исключение:** режимы `verify_depth` (`incremental`, `lite`) с guardrails — см. § «Verify depth» ниже; не ослабляют adversarial Layer 4 на первом прогоне.
 4. **Verify чинит repair-класс сам.** Содержательные правки scope — через user `/opsx:extend`. Детерминированные пробелы постановки (карта repair в §2.6 `opsx-output-style.md`) — **internal Repair Loop** внутри verify, без user-facing extend и без «Подтвердить?».
 5. **Один файл отчёта в день.** Полный отчёт `reports/verification-YYYY-MM-DD.md` создаётся, только если что-то найдено или исправлено; «тихий» прогон по фильтру новизны новый файл не пишет.
 6. **Verify оценивает постановку, не приёмку.** Приёмочные тесты, тестовые данные, эталоны ИБ, smoke-проверки — это apply/archive (срез либо принят, либо нет). Verify не задаёт вопросов про тесты и не блокирует apply из-за отсутствия тестовых данных.
@@ -67,6 +67,22 @@ Verify не правит scope артефактов. Если в запросе 
 
 Если запрос — только имя ЗНИ — Scope Gate проходит молча.
 
+### 1c. Verify depth и флаги запроса
+
+Разобрать запрос пользователя:
+
+| Флаг / условие | `verify_depth` | Слои |
+|----------------|----------------|------|
+| Первый verify или `decision_round=0`, без `--lite` | `full` | L1–L5 |
+| После **user-extend** по decision (`decision_round>0`) | `incremental` | L1 diff + L4 targeted + L5 если менялся tasks |
+| `/opsx:verify <name> --lite` **и** нет открытой развилки **и** `decision_round=0` | `lite` | L2 + L5; L4 `SKIPPED-lite` |
+
+**Guardrails `--lite`:** запрещён при `open_decision_id != null`, `decision_round > 0`, или открытой развилке в последнем отчёте. В чате: «проверена исполнимость без повторного независимого аудита постановки» (без слова lite в HALT).
+
+**Guardrails `incremental`:** только после user-extend по decision; **не** после internal Repair Loop (repair → `verify_depth: full` как сейчас).
+
+Записать выбранный `verify_depth` в snapshot отчёта.
+
 ### 2. Load artifacts
 
 Прочитать (с фиксацией mtime для snapshot):
@@ -75,9 +91,11 @@ Verify не правит scope артефактов. Если в запросе 
 - `openspec/changes/<name>/design.md` (mtime → `design_mtime` для решения по Layer 4)
 - `openspec/changes/<name>/tasks.md`
 - `openspec/changes/<name>/specs/**/*.md`
-- `openspec/changes/<name>/debug.md` (если есть)
+- `openspec/changes/<name>/debug.md` (если есть) — **обязательно** секция `## Verify decision ledger` (runtime SSOT closed decisions)
 - `openspec/changes/<name>/reports/_manifest.yaml` (если есть)
 - `openspec/project.md`
+
+**Decision ledger (agent-only):** если в `debug.md` есть `## Verify decision ledger`, прочитать YAML-блок (`closed_decisions`, `decision_round`, `open_decision_id`, `assumptions_accepted`). Если секции нет — инициализировать пустой ledger в памяти оркестратора; при Save report синхронизировать в snapshot. Также прочитать design § «Решения verify (зафиксировано)» — UX-mirror для промпта L4 и блока «Уже зафиксировано» в чате.
 
 ### 3. Determine mode
 
@@ -125,7 +143,7 @@ Layer 1 **никогда** не блокирует — только правит
 
 **Режим запуска:** `run_in_background: false` (sync, последовательно). Карточка Task не показывается в чате как отдельное сообщение — `tool_result` идёт во внутренний контекст оркестратора. В промпт обязательно включить блок **Final message constraint** из секции «Запуск агентов verify» ниже.
 
-QC оценивает критерии 1–6 из `vertical-slices.mdc` (Scenario Coverage, Slice Independence, Slice Completeness, Slice Dependency Graph, Slice Gate Integrity, Acceptance Checklist Coverage 5b, Rework Risk).
+QC оценивает критерии 1–6, 8–10 из `vertical-slices.mdc` (Scenario Coverage, Slice Independence, Slice Completeness, Slice Dependency Graph, Slice Gate Integrity, Acceptance Checklist Coverage 5b amended, Rework Risk, Slice Verticality, Foundation slice with gate, Acceptance Simplicity).
 
 **2.2. Code-Truth (механический)** — для каждого технического имени в backticks из `design.md`/`tasks.md`/`debug.md`/`specs/**` запустить `Grep` по путям из `openspec/project.md`. См. `.cursor/rules/code-truth-gate.mdc`.
 
@@ -160,7 +178,7 @@ CRITICAL `precedent-regression` / `invariant-drift` / `load-bearing-adr-bypass` 
 
 - `PASS` — все критерии OK / только INFO.
 - `WARNING` — есть несущественные несостыковки (один scenario без покрытия в матрице, лишний legacy-маркер). На вердикт идёт как «не блокирует apply».
-- `FAIL` — циклы зависимостей срезов, `accept-checklist-empty`, дублирование `S<N>.accept` в одном срезе, CRITICAL `phantom-symbol` в post-apply, или CRITICAL precedent-regression (`precedent-regression` / `invariant-drift` / `load-bearing-adr-bypass`).
+- `FAIL` — циклы зависимостей срезов, `accept-checklist-empty`, `primary-acceptance-missing`, `acceptance-simplicity-overload`, `slice-not-vertical`, `slice-foundation-with-gate`, дублирование `S<N>.accept` в одном срезе, CRITICAL `phantom-symbol` в post-apply, или CRITICAL precedent-regression (`precedent-regression` / `invariant-drift` / `load-bearing-adr-bypass`).
 
 `FAIL` в Layer 2 — это **NO-GO**.
 
@@ -187,10 +205,12 @@ CRITICAL `precedent-regression` / `invariant-drift` / `load-bearing-adr-bypass` 
 
 - Это **первый** `/opsx:verify` по этой ЗНИ (нет ни одного `reports/verification-*.md` или ни в одном snapshot нет `last_challenge_at`).
 - `mtime(design.md) > snapshot.last_challenge_at` (design менялся со времени последнего challenge — например, после `/opsx:extend`).
+- `verify_depth = incremental` — Layer 4 **targeted** (delta design + closed decisions), не полный adversarial re-run всех альтернатив.
 
 **Когда Layer 4 пропускается:**
 
-- Триггеры не сработали (`mtime(design.md) ≤ last_challenge_at`) → `layer_status.layer_4_independent_challenge: SKIPPED-novelty`. Вердикт от прошлого challenge остаётся в силе.
+- `verify_depth = lite` → `layer_status.layer_4_independent_challenge: SKIPPED-lite`.
+- Триггеры не сработали (`mtime(design.md) ≤ last_challenge_at`) **и** `verify_depth ≠ incremental` → `SKIPPED-novelty`.
 - В корне change есть `.gate-override.yaml` с `gate: design-challenge` — прочитать поле `timestamp`:
   - **≤ 7 дней** — пропуск с предупреждением в чат («Независимый аудит постановки отложен по вашему решению от <дата> (причина: <reason>); отсрочка истекает через <N> дней»). YAML: `layer_status.layer_4_independent_challenge: SKIPPED-override`.
   - **> 7 дней** — отсрочка истекла: **override игнорируется**, Layer 4 запускается как обычно. В info-секцию отчёта — `gate-override-expired`. Не давать молчаливый бессрочный обход.
@@ -201,16 +221,39 @@ CRITICAL `precedent-regression` / `invariant-drift` / `load-bearing-adr-bypass` 
 2. **Режим запуска:** `run_in_background: true` (параллельно с sync-агентами Layer 2/5). Самый длинный шаг verify; параллелизм нужен, иначе verify становится в 2.5x длиннее. В чате остаётся **одна короткая карточка** (одна строка пути к файлу) — это допустимо как фоновый прогресс-маркер и не нагружает внимание. В промпт обязательно включить блок **Final message constraint** (секция «Запуск агентов verify» ниже).
 3. Промпт включает:
    - `proposal.md`, `design.md`, `specs/**/spec.md` — как первичные источники.
+   - **Обязательный блок Closed decisions** (из `debug.md` § Verify decision ledger + design § «Решения verify (зафиксировано)»):
+     ```markdown
+     ## Closed decisions (mandatory context)
+     <paste closed_decisions summaries + design mirror prose>
+
+     You MAY challenge closed decisions in the report file with verified code facts.
+     Tag reopening alternatives: reopen-blocked: <decision_id>.
+     Prefer implementation_invariant gaps over architectural forks when closed axis holds.
+     ```
+   - При `verify_depth = incremental`: ограничить scope — «проверь только delta design с прошлого challenge и инварианты очистки/контекста; не переоткрывай closed decisions без verified new fact».
    - **Запрет** опираться на `reports/architecture-*.md` собственного авторства как на источник истины.
    - Инструкции по адверсариальной установке, Three-Question Challenge и формату отчёта (см. `.cursor/agents/onec-code-architect.md` секция «Режим `design-challenge`»).
 4. Результат — `reports/design-challenge-YYYY-MM-DD.md` с YAML `verdict: APPROVE | CHALLENGE | REJECT`.
 
+### Post-challenge classifier (оркестратор, после Layer 4, до синтеза чата)
+
+**Цель:** adversarial Layer 4 не ослабляется; фильтр и reclassify — на оркестраторе. Пользователь **не** видит agent-keys (`decision_id`, `reopen-blocked`).
+
+| Сигнал в design-challenge | Действие |
+|---------------------------|----------|
+| Gap закрывается правкой design/tasks **без** смены closed axis | **Repair Loop** (`implementation_invariant`) |
+| Alternative отменяет closed `decision_id` **без** verified new fact в отчёте | **Drop** — не в чат; log в info «reopen-closed-decision filtered» |
+| Alternative + **verified new fact** (код, единственный caller) | **`supersedes`**: одна прозаичная эскалация «подтверждаете X, несмотря на Y?» — не A/B с отменой closed |
+| `assumption_deferrable` / load-bearing без блокера | Кандидат **GO-saturated** (см. § GO-saturated) |
+| Layer 4 **REJECT** + gap корректности / security / resource-leak | **Всегда NO-GO** — cap не применяется |
+
 **Маппинг вердикта на статус слоя и чат:**
 
 - `APPROVE` → `layer_status.layer_4_independent_challenge: APPROVE` → не блокирует apply. Обновить `snapshot.last_challenge_at = mtime(design.md)`.
-- `CHALLENGE` → `layer_status.layer_4_independent_challenge: CHALLENGE` → **NO-GO** в финальном вердикте. В чат: блок `## Gaps for design.md` из отчёта маппится в список «Что доработать в постановке»; блок `## Architectural alternatives` (если есть) маппится в опциональную развилку (максимум одна). `last_challenge_at` обновляется.
-  - **Defensive filter:** если архитектор всё же вернул workflow-формулировку (содержит `apply сейчас`, `отложить apply`, `на свой риск`, `workaround сейчас` и т.п.) — оркестратор **молча игнорирует** этот пункт. В чат и файл отчёта он не выводится. В info-секцию файла добавляется лог: «architect вернул workflow-вариант — отфильтрован».
-- `REJECT` → `layer_status.layer_4_independent_challenge: REJECT` → **NO-GO**. `last_challenge_at` **не обновляется** — следующий verify запустит challenge заново.
+- `CHALLENGE` → после **Post-challenge classifier**: если только `implementation_invariant` → Repair Loop; если `drop reopen` → не NO-GO; если `supersedes` → одна эскалация в чат; иначе **NO-GO** с развилкой (максимум одна). `last_challenge_at` обновляется при CHALLENGE, прошедшем в чат или repair.
+  - **Defensive filter:** workflow-формулировки — как раньше.
+  - **Defensive filter reopen:** альтернатива с тегом `reopen-blocked: <id>`, противоречащая `closed_decisions` без verified new fact — **не** в чат.
+- `REJECT` → после classifier: если gap = `implementation_invariant` only → Repair; иначе **NO-GO**. `last_challenge_at` **не обновляется** при REJECT, блокирующем apply.
 
 **Важно:** Layer 4 нельзя «обойти» прогоном `--skip-architect`, переданным в ff. Этот флаг закрывает только Architect Gate из ff. Layer 4 verify имеет собственный override-механизм через `.gate-override.yaml gate: design-challenge`.
 
@@ -242,14 +285,29 @@ verdict = GO  if and only if
   layer_1_hygiene ∈ {PASS, AUTOFIXED}
   AND layer_2_internal_coherence ∈ {PASS, WARNING}
   AND layer_3_problem_solution ∈ {PASS, WARNING}
-  AND layer_4_independent_challenge ∈ {APPROVE, SKIPPED-novelty, SKIPPED-override}
+  AND layer_4_independent_challenge ∈ {APPROVE, SKIPPED-novelty, SKIPPED-override, SKIPPED-lite, CHALLENGE-saturated}
   AND layer_5_implementation_readiness ∈ {PASS, WARNING}
 
 verdict = NO-GO  otherwise
 ```
 
+### GO-saturated (decision fatigue cap)
+
+Применяется **только если** одновременно:
+
+- `decision_round >= decision_round_max` (default 2), **и**
+- L2/3/5 = PASS или WARNING без FAIL, **и**
+- остаток L4 после classifier = `assumption_deferrable` **или** duplicate challenge по тому же closed axis (de-dupe), **и**
+- Layer 4 **не** REJECT с gap корректности / security / resource-leak.
+
+Тогда: `verdict: GO`, `layer_4: CHALLENGE-saturated`. В чат (вариант 2): «можно apply; остаточный риск … проверяется в S1.accept» — **без** agent-keys.
+
+**REJECT с утечкой контекста / security → всегда NO-GO**, cap не спасает.
+
+Явный accept risk пользователя («принимаю риск», «apply без further verify») → `assumptions_accepted` в ledger + GO; одна строка прозой в design § Risks.
+
 Любой `FAIL` в Layer 2/3/5 → NO-GO.
-Layer 4 `CHALLENGE` или `REJECT` → NO-GO.
+Layer 4 `CHALLENGE` или `REJECT` → NO-GO **кроме** CHALLENGE-saturated и случаев, когда classifier перевёл всё в repair/drop.
 
 ### Save report
 
@@ -278,8 +336,8 @@ Layer 4 `CHALLENGE` или `REJECT` → NO-GO.
 
 После NO-GO классифицировать блокеры по карте repair/decision (§2.6 `opsx-output-style.md`, `layer_status` и коды алертов отчёта):
 
-1. **Decision blockers** (CHALLENGE/REJECT с A/B, `scope-violation`, FAIL с продуктовым выбором, Why ↔ plan) → chat **3a-decision**, **END TURN**. Repair не запускать без ответа пользователя.
-2. **Repair only** + `repair_attempt < 2`:
+1. **Decision blockers** (CHALLENGE/REJECT с A/B **после classifier**, `scope-violation`, FAIL с продуктовым выбором, Why ↔ plan, `supersedes`) → chat **3a-decision**, **END TURN**. Repair не запускать без ответа пользователя.
+2. **Repair only** (включая `implementation_invariant` от classifier) + `repair_attempt < 2`:
    - Вызвать `apply_repairs_from_report()` — internal `/opsx:extend <name> --from-verify <отчёт>` в режиме **repair-from-verify** (без брифа, без сообщений в чат; порядок правок — extend §6).
    - **Не END TURN** → полный re-verify (слои 1–5) с `repair_attempt + 1`.
    - **0 промежуточных сообщений** в чат; допустима одна строка progress marker (§6 `chat-output-budget.mdc`): «Дописываю постановку…».
@@ -293,12 +351,13 @@ Layer 4 `CHALLENGE` или `REJECT` → NO-GO.
 
 ### Update snapshot
 
-После сохранения отчёта обновить YAML `snapshot`:
+После сохранения отчёта обновить YAML `snapshot` **и** синхронизировать `debug.md` § Verify decision ledger:
 
 - `accepted_tasks` — текущий список `[x]`.
 - `artifacts_mtime` — текущие mtime каждого артефакта.
-- `last_challenge_at` — обновить **только** если Layer 4 был запущен и вернул `APPROVE` или `CHALLENGE`. При `REJECT` или пропуске не трогать.
-- `open_known_questions` — список тем `## Для /opsx:ff` / TODO из info-секции.
+- `closed_decisions`, `decision_round`, `open_decision_id`, `verify_depth`, `assumptions_accepted` — из runtime ledger.
+- `last_challenge_at` — обновить **только** если Layer 4 был запущен и вернул `APPROVE` или `CHALLENGE` (в т.ч. saturated). При `REJECT`, блокирующем apply — не трогать.
+- `open_known_questions` — список открытых тем; **удалить** темы, закрытые через `closed_decisions` (sync с ledger).
 
 ## Запуск агентов verify (гибридный режим)
 
@@ -354,8 +413,7 @@ the file and synthesizes a single message for the user. Anything you put
 ## Что НЕ делает verify
 
 - **Не правит scope** (proposal/design/tasks/specs) через user-facing extend — только Layer 1 авто-гигиена и **internal Repair Loop** для repair-класса.
-- **Не генерирует** ТЗ — это путь `/opsx:doc-tz <name>` (`openspec-docs/SKILL.md`). Если в ЗНИ есть `proposal.md` метаданное `generate_tz: auto` и порог числа задач — verify в info-секцию отчёта добавляет рекомендацию запустить `/opsx:doc-tz`, не более.
-- **Не мигрирует** в срезы (`/opsx:migrate-slices`) и не объединяет `S<N>.T<M>` в `S<N>.accept` (ручная правка артефакта).
+- **Не мигрирует** legacy tasks в срезы автоматически — рекомендует `/opsx:extend <name>` или ручную правку; не объединяет `S<N>.T<M>` в `S<N>.accept` без правки артефакта.
 - **Не выполняет** apply, не отмечает задачи `[x]`.
 - **Не оценивает** выполнимость приёмочных тестов пользователем.
 - **Не требует** тестовые данные или эталоны ИБ (это зона ответственности apply/archive).

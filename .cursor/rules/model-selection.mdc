@@ -17,11 +17,10 @@ priority: 200
 | `subagent_type` | Primary `Task.model` | Fallback 1 | Fallback 2 (последний: без `model=`, inherit) |
 |-----------------|----------------------|------------|------------------------------------------------|
 | `onec-code-architect` | `claude-opus-4-8-thinking-high` | `gemini-3.1-pro` | опустить `model` |
-| `onec-code-writer` | `default` | — | опустить `model` |
-| `onec-code-explorer` | `default` | — | опустить `model` |
+| `onec-code-writer` | *(без `model`)* | — | — |
+| `onec-code-explorer` | *(без `model`)* | — | — |
 | `onec-code-reviewer` | `gemini-3.1-pro` | — | опустить `model` |
 | `onec-code-simplifier` | `gemini-3.1-pro` | — | опустить `model` |
-| `openspec-doc-writer` | `gemini-3.1-pro` | — | опустить `model` |
 | `onec-trace-analyst` | *(без `model`)* | — | — |
 | `openspec-quality-controller` | *(без `model`)* | — | — |
 
@@ -31,19 +30,19 @@ priority: 200
 
 В ряде сборок Cursor параметр `Task(..., model=...)` принимает **только** перечисленные slug'и, например:
 
-`claude-4.6-sonnet-medium-thinking`, `claude-opus-4-7-thinking-xhigh`, `composer-2-fast`, `gemini-3.1-pro`, `gpt-5.3-codex`, `gpt-5.5-medium`.
+`claude-4.6-sonnet-medium-thinking`, `claude-opus-4-8-thinking-high`, `composer-2.5-fast`, `gemini-3.1-pro`, `gpt-5.3-codex`, `gpt-5.5-medium`.
 
-Значения из таблицы **`claude-opus-4-8-thinking-high`** и **`default`** могут **отсутствовать** в enum → первый вызов с Primary даст **`Invalid model selection`**.
+Primary в таблице — только slug'и из enum или «без model=». Устаревшие **`default`**, **`claude-opus-4-7-thinking-xhigh`**, **`composer-2-fast`** в Primary **не использовать**.
 
 **Поведение оркестратора:** при `Invalid model selection` или ином сбое на шаге Primary — сразу перейти к Fallback 1 (если есть). Фраза «если снова сбой» означает **сбой уже на шаге Fallback 1** (не повторный вызов того же Primary). Если для роли нет Fallback 1 — сразу переход к вызову **без** `model=`. После сбоя на последнем доступном шаге с `model=` — вызвать тот же `subagent_type` **без** `model=` (inherit / модель чата), если это предусмотрено цепочкой для роли. **Одной строкой** в чате предупредить пользователя (без жаргона движка из `chat-output-budget.mdc`). Полная последовательность шагов — в разделе **«Целостность цепочки Task»** ниже.
 
-**Устранение лишних сбоев Primary (опционально):** подменить в этой таблице Primary на slug из enum (например `claude-opus-4-8-thinking-high` для архитектора, `composer-2-fast` или `gpt-5.3-codex` для writer/explorer) — правка только `model-selection.mdc`, frontmatter агентов не трогать.
+**Устранение лишних сбоев Primary:** Primary уже подобран под enum; при смене enum в Cursor — обновить только эту таблицу.
 
 ## Цепочка для архитектора
 
 Один агент `onec-code-architect` (отдельного `*_2nd` нет). Все режимы (`design`, `task-readiness`, `design-challenge`, `slice-decomposition` и пр., см. `.cursor/agents/onec-code-architect.md` секцию MODE) используют **одну и ту же** цепочку моделей:
 
-1. `Task(subagent_type="onec-code-architect", model="claude-opus-4-8-thinking-high", ...)` (или сразу Fallback 1, если Primary невалиден в enum).
+1. `Task(subagent_type="onec-code-architect", model="claude-opus-4-8-thinking-high", ...)`.
 2. При сбое — `Task(subagent_type="onec-code-architect", model="gemini-3.1-pro", ...)`.
 3. При сбое — `Task(subagent_type="onec-code-architect", ...)` **без** `model=`.
 
@@ -51,10 +50,10 @@ priority: 200
 
 ## Цепочка для writer / explorer
 
-1. `Task(..., model="default", ...)`.
-2. При `Invalid model selection` или сбое — `Task(...)` **без** `model=`.
+1. `Task(...)` **без** `model=` (inherit / модель чата).
+2. При явном запросе пользователя — `model=` из enum по его указанию.
 
-## Цепочка для reviewer / simplifier / openspec-doc-writer
+## Цепочка для reviewer / simplifier
 
 1. `Task(..., model="gemini-3.1-pro", ...)`.
 2. При сбое — `Task(...)` **без** `model=`.

@@ -387,7 +387,7 @@ facts:
 **НЕ пишут** (только read + proposal):
 - `/opsx:explore` — drift копится в Explore Summary, обрабатывается через audit по запросу пользователя.
 - `Architect Gate` — факты передаются архитектору как контекст, drift в architecture-report.
-- `verify`, `apply`, `debug`, `new`, `ff`, `continue`, `sync`, `status`, `estimate`, `bulk-archive` — read-only.
+- `explore`, `ff`, `verify`, `apply`, `archive`, `extend`, `status`, `sync`, `bulk-archive`, `knowledge-add`, `review`, `init-project` — read-only (кроме явных write-режимов команды).
 
 ### Ретроактивная миграция НЕ делается
 

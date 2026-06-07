@@ -63,7 +63,7 @@ description: Reference guide for 1C agent delegation patterns - complexity asses
 
 ### onec-code-reviewer
 - Обязательно после каждого writer
-- mode=prerelease при предрелизной проверке
+- mode=prerelease при `/release-review`
 - Категории: performance, security, БСП, аннотации, структура модуля
 
 ### onec-trace-analyst

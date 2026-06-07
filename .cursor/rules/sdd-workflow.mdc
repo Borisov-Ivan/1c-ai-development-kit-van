@@ -8,7 +8,7 @@ alwaysApply: false
 ## FLOW
 
 ```
-explore → new/ff → verify → apply (по срезам) → verify → archive
+explore → ff → verify → apply (по срезам) → verify → archive
                  ↘ extend (user-path) ↗
 verify: internal Repair Loop (repair-класс) — без user-facing extend
 review/explore → extend (user) → verify → apply
@@ -19,15 +19,15 @@ review/explore → extend (user) → verify → apply
 | Этап | Команда | Что происходит | Агенты |
 |------|---------|----------------|--------|
 | **Исследование** | `/opsx:explore` | Компактный бриф 8–12 строк → ≤3 `Task` (trace + explorer) → превью + **Итог / Вердикт / Дальше** в чате → финал bug: блок `## Для /opsx:ff` **в чате**. Полные отчёты — `temp/reports/`. Опциональный handoff — `temp/explore-handoff-*.md` по словесной просьбе. Профили bug/question. **Knowledge Discovery**. | onec-code-explorer, onec-trace-analyst, onec-code-architect |
-| **Создание change** | `/opsx:new` или `/opsx:ff` | proposal → design (вкл. `## Slices`) → specs → tasks (с `# Срез S<N>`). **Knowledge Discovery** (в Architect Gate). | onec-code-architect (slice decomposition + slice-aware task decomposition) |
+| **Создание / resume change** | `/opsx:ff` | proposal → design (вкл. `## Slices`) → specs → tasks (с `# Срез S<N>`). Повторный вызов — дозавершение артефактов. | onec-code-architect (slice decomposition + slice-aware task decomposition) |
 | **Проверка** | `/opsx:verify` | Pre-flight + **internal Repair Loop** (max 2) для repair-класса без чата. Decision → один вопрос A/B, END TURN. Одна команда → **одно** финальное сообщение. `snapshot` без опоры на историю чата. | onec-code-architect, openspec-quality-controller |
 | **Расширение scope** | `/opsx:extend` | **user-extend:** бриф → правки → hint verify. **repair-from-verify:** internal из verify, **без** сообщений в чат. | onec-code-architect, onec-code-explorer |
 | **Реализация** | `/opsx:apply` | **Step-by-slice** (default): один срез — карточка приёмки — следующий срез. Опции: step-by-step / batch | onec-code-writer + onec-code-reviewer |
 | **Архивация** | `/opsx:archive` | При непринятых `S<N>.T<M>` — slice-gate-подтверждение в скилле: отметить `[x]` и продолжить (**вариант A**), стоп (**B/C**), **`--force-legacy`** (**D**) без контракта срезов; иначе sync specs → archive + **Facts extraction**. | — |
-| **Предрелизное ревью** | `/prerelease-review` | Батчевый ревью расширения | onec-code-reviewer |
-| **Ревью кода** | `/review` | Ревью по контексту запроса | onec-code-reviewer |
+| **Ревью кода** | `/review` | Ревью по контексту (файл, diff, change); light-review на тривиальном diff. Памятка: `.cursor/docs/review-guide.md` | onec-code-reviewer |
+| **Предрелиз** | `/release-review` | Предрелизный gate: Category 12, Tier 2 explorer, `mode=prerelease`. См. `review-guide.md` | onec-code-reviewer, onec-code-explorer |
 
-Дополнительные действия: `continue` (следующий артефакт), `extend` (расширить существующий change), `sync` (дельта-спеки → main), `bulk-archive` (пакетная архивация).
+Дополнительные действия: `extend` (расширить существующий change), `sync` (дельта-спеки → main), `bulk-archive` (пакетная архивация).
 
 ## АЛИАСЫ КОМАНД
 
@@ -53,17 +53,16 @@ review/explore → extend (user) → verify → apply
 | Slice mode, дефект в **принятом** срезе S<K> | Создать **fix-срез** `S<N+1>: Исправление дефекта S<K>` (зависит от S<K>) |
 | Slice mode, новая функциональность | Новый срез `S<N+1>` или расширение существующего непринятого |
 | Новое требование / отчёт ревью / архитектурное замечание в существующем change | `/opsx:extend <name> [--from-review …]` → user-extend (бриф) → hint `/opsx:verify` |
-| Legacy mode (`# Срез` нет) | Вставить в подходящую секцию или «7. Рефакторинг и качество». При накоплении исправлений — рекомендовать `/opsx:migrate-slices <name>` |
+| Legacy mode (`# Срез` нет) | Вставить в подходящую секцию. Перестройка в срезы — `/opsx:extend <name>` (architect) или ручная правка по этому файлу |
 
-`/opsx:ff` создаёт **новый** change — не используется для добавления задач к существующему. Подробности — `.cursor/skills/openspec-continue-change/SKILL.md` и `.cursor/skills/openspec-extend-change/SKILL.md` (`--from-report`).
+`/opsx:ff` — создание **или resume** (дозавершение артефактов). Добавление задач к существующему change — `.cursor/skills/openspec-extend-change/SKILL.md`.
 
 ## ПОРОГИ МАСШТАБА ЗНИ
 
 | Порог (задач в tasks.md) | Поведение в workflow |
 |--------------------------|----------------------|
 | **≤ 5 задач** | **Lite verify**: пропускается Quality Controller, компактный вызов архитектора. Срезов может быть 1 (или legacy без срезов). |
-| **≥ 6 задач** | **Генерация ТЗ**: авто при ≥6 задач, если `generate_tz: auto` или поле отсутствует; иначе — по выбору пользователя (шаг 7.8 в verify). |
-| **≥ 6 задач** | **Slice Generation Gate**: design.md обязан содержать `## Slices`. ff/new не разрешают переход к tasks без срезов. Если ЗНИ legacy — пользователь выполняет `/opsx:migrate-slices <name>`. |
+| **≥ 6 задач** | **Slice Generation Gate**: design.md обязан содержать `## Slices`. ff не разрешает переход к tasks без срезов. Legacy tasks — `/opsx:extend <name>` или ручная правка. |
 
 ## ПРИНЦИПЫ
 

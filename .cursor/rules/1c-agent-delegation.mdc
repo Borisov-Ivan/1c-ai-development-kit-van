@@ -6,33 +6,18 @@ priority: 999
 
 # 1C Code Gate — Dispatch & Delegation
 
-## HALT CONDITIONS (проверять ДО любого действия)
+## HALT CONDITIONS (компактно)
 
-Триггеры проверяются **сверху вниз**; более специфичный триггер (Light Mode, Mechanical Mode) имеет приоритет над общим («Правка .bsl файла»).
+При правке `.bsl` или делегировании — **Read** [`.cursor/rules/1c-halt-triggers.mdc`](1c-halt-triggers.mdc) (полная таблица, Light/Mechanical, исключения).
 
-| Триггер | Действие | Детали |
-|---------|----------|--------|
-| Реализация ЗНИ без /opsx:apply (change существует в `openspec/changes/`, но сессия не в режиме apply) | **СТОП.** Правка .bsl, вызов writer/reviewer запрещены. **Исключение:** Light Mode и Mechanical Mode — работают без /opsx:apply (см. секции ниже). Предложить: «Для начала реализации: /opsx:apply <name>» | см. APPLY GATE ниже |
-| Режим explore без активного change (сессия в `/opsx:explore`, в `openspec/changes/` нет каталога change кроме `_template` и `archive`) | **СТОП.** Реализация (writer, reviewer) запрещена. Предложить пользователю: «Для реализации создайте ЗНИ: `/opsx:new <name>` или `/opsx:ff <name>`» | `.cursor/skills/openspec-explore/SKILL.md` (Guardrails, Architect Gate) |
-| Задача требует нового объекта метаданных (форма, модуль, справочник, регистр, роль, XML) | **СТОП. Никогда не создавать.** Выдать блокер с описанием. WAIT | `.cursor/rules/1c-no-metadata-creation.mdc` |
-| Файл трассы (`.pff`, `*_TRACE_*.txt`) или стек ошибки 1С | СТОП. Подготовить бриф. Делегировать **onec-trace-analyst**. По результату — onec-code-explorer, onec-code-architect. **В explore:** бриф из пользовательского ввода (без чтения трасс/артефактов), вывести по шаблону openspec-explore/SKILL.md (шаг 2), END TURN; делегировать trace-analyst только после подтверждения пользователя | `.cursor/rules/1c-error-analysis.mdc` |
-| Вызов `Task(subagent_type="explore"\|"generalPurpose")` для 1С-контента (BSL, XML из `src/**`, трассы `.pff`/TRACE, расширения `cfe/*`, отладка/ревью/архитектура) | **СТОП.** Повторить с корректным 1С-агентом: обследование 3+ модулей → **onec-code-explorer**; трасса / стек → **onec-trace-analyst**; архитектура → **onec-code-architect**. Перед повторным вызовом — пройти **Task Pre-call Checklist** (`tool-name-guard.mdc` → `## Task Pre-call Checklist`): `subagent_type` из списка 1С-агентов; `model` — по таблице в `model-selection.mdc` (см. `tool-name-guard.mdc`) | `.cursor/rules/tool-name-guard.mdc` (Task Pre-call Checklist + NEGATIVE GUARD), `.cursor/rules/model-selection.mdc` |
-| Точечная правка (Light Mode): 2–10 строк, 1 файл, без архитектуры | Делегировать **onec-code-writer** с контекстом, затем **onec-code-reviewer**. Без артефактов OpenSpec | см. LIGHT MODE ниже |
-| Шаблонная правка (Mechanical Mode): find-replace, #Область, удаление комментариев | Прямая правка + Grep-верификация + **onec-code-reviewer** после. Без writer | см. MECHANICAL MODE ниже |
-| Правка `.bsl` файла | СТОП. Загрузить скилл. — Light Mode (1 файл, ≤10 строк, без архитектуры) → **onec-code-writer** + **onec-code-reviewer**, без артефактов. — Иначе → проверить триггеры `architect-gate.mdc`; при срабатывании — **onec-code-architect** до реализации, затем **onec-code-writer** + **onec-code-reviewer**. Обязательно **onec-code-reviewer** после | см. ТАБЛИЦА ДЕЛЕГИРОВАНИЯ ниже |
-| Исследование кода из 3+ модулей | Делегировать **onec-code-explorer** (не читать модули вручную) | см. DELEGATION GATE ниже |
-| Исправление ошибки (bug fix). Маркеры: «исправь», «не работает», «падает», «ошибка», «баг», «fix», «crash», «добавь проверку», «Неопределено», «NPE», «null», «не заполнено», «пустое значение», «не находит», «вылетает», «сломалось», «регресс», «дефект», «поведение неверное» | СТОП. Проверить root cause + impact assessment по `verified-cause-gate.mdc` (HALT 1, 1b, 2, 3). При системном масштабе — **onec-code-architect**. При Light Mode bug fix — обязательный root cause блок в промпте writer (см. LIGHT MODE ниже) | `.cursor/rules/verified-cause-gate.mdc` |
+| Триггер (кратко) | Действие |
+|---|---|
+| apply gate / explore без change / metadata / трасса | СТОП → halt-triggers |
+| Light / Mechanical / правка .bsl / 3+ модулей / bug fix | Делегирование → halt-triggers |
 
-**ПРИНЦИП**
+**ПРИНЦИП:** BSL write guard → halt-triggers (Light/Mechanical/исключения); XML → § XML WRITE GUARD; гейты → `gate-dispatcher.mdc`; Task → `tool-name-guard.mdc`; пути → `project-paths.mdc`.
 
-Инварианты делегирования и путей:
-- BSL write guard → этот файл (LIGHT MODE / MECHANICAL MODE / ИСКЛЮЧЕНИЯ ниже): правка `.bsl` напрямую запрещена, кроме явных исключений; после правок — обязательный `onec-code-reviewer`.
-- XML write guard → секция `## XML WRITE GUARD` ниже.
-- Диспетчер гейтов → `.cursor/rules/gate-dispatcher.mdc` (здесь и в on-demand гейтах)
-- Tool name (Task) → `.cursor/rules/tool-name-guard.mdc` (on-demand)
-- Project paths → `.cursor/rules/project-paths.mdc` (on-demand)
-
-**Explore-mode guard:** В режиме `/opsx:explore` без активного change — onec-code-writer и onec-code-reviewer НЕ вызываются. Сначала ЗНИ (`/opsx:new` или `/opsx:ff`).
+**Explore-mode guard:** `/opsx:explore` без active change — writer/reviewer запрещены → `/opsx:ff`.
 
 ## APPLY GATE
 
@@ -115,38 +100,6 @@ Architect может рекомендовать новые объекты в des
 
 `stale` факты передаются с пометкой `⚠ TTL истёк`. `deprecated` и `superseded` не передаются. Бюджет — до 10 KB-фактов на Discovery (см. `.cursor/rules/knowledge-format.mdc` §БЮДЖЕТ VERIFY).
 
-## LIGHT MODE (точечная правка)
-
-1 файл, 2–10 строк, без архитектуры → writer + reviewer. Без артефактов OpenSpec. За рамками → полный workflow (architect → writer → reviewer).
-
-**Bug fix в Light Mode** (задача = исправление ошибки, а не новая функциональность):
-
-1. Перед вызовом writer — проверить `verified-cause-gate.mdc` (HALT 1, 1b, 2).
-2. Промпт writer обязан содержать **root cause блок** (см. шаблон «Writer — bug fix» в `1c-agent-patterns/writer.md`):
-   - Симптом
-   - Корневая причина (verified или hypothesis + follow-up)
-   - Доказательство (ссылка на код/трассу/лог)
-   - Подход к фиксу (почему устраняет причину, а не симптом)
-3. Если root cause не установлен — **СТОП**, запросить у пользователя (описание ошибки, трассу, шаги воспроизведения).
-4. Reviewer получает root cause контекст для валидации (см. шаблон «Reviewer — bug fix»).
-5. После завершения (writer + reviewer): сохранить краткий **root cause brief** в `temp/reports/bugfix-lightmode-ГГГГ-ММ-ДД-<описание>.md`:
-   - Симптом
-   - Корневая причина
-   - Что исправлено (файл, строки)
-   - Verified / hypothesis
-   Цель: root cause не теряется между сессиями. Без OpenSpec-артефактов это единственная фиксация контекста исправления.
-
-## MECHANICAL MODE (шаблонная правка)
-
-Критерии (все должны выполняться):
-- Замена идентична во всех файлах (find-and-replace)
-- Не меняется логика (только разметка, переименование, удаление комментариев)
-- Паттерн проверяем через Grep до и после
-
-Примеры: добавление `#Область`, переименование процедуры через replace_all, удаление маркеров чейнджлога в комментариях (не директив #Вставка/#Удаление), удаление закомментированного кода.
-
-Workflow: прямая правка (StrReplace) + Grep-верификация + **onec-code-reviewer** после. Без writer.
-
 ## АВТО-ИСПРАВЛЕНИЕ РЕВЬЮ
 
 Все кодовые замечания (critical/high/medium/low) → автоматически writer с замечаниями → повторный reviewer. Макс. 2 итерации — согласовано с Phase 7 агента writer.
@@ -191,13 +144,9 @@ Workflow: прямая правка (StrReplace) + Grep-верификация +
 
 ## LINT GATE
 
-**После каждой правки .bsl** (writer, Mechanical Mode, прямая правка) — **до вызова reviewer**:
+После каждой правки `.bsl` — **до reviewer**: `ReadLints` → fix errors → блок `## Linter Signals (evidence)` для reviewer.
 
-1. Вызвать `ReadLints` на изменённых `.bsl` файлах.
-2. Если есть ошибки уровня **error** («Переменная не определена», «Метод не найден», несоответствие контекста) — **исправить до вызова reviewer** (writer повторно; в apply/review — только writer, без прямой правки).
-3. Сформировать блок **`## Linter Signals (evidence)`** для reviewer (формат — `.cursor/skills/review/SKILL.md` шаг 1.8): передать **все** диагностики, включая **warning**; не фильтровать «только error».
-4. **Reviewer (Phase 1b):** in-scope warning/error из блока → по умолчанию **MUST_FIX**; отложить на prerelease **запрещено** (см. `.cursor/agents/onec-code-reviewer.md` Phase 1b).
-5. Если линтер недоступен — блок с `Linter unavailable: <reason>`; reviewer проверяет документацию новых/изменённых процедур вручную.
+**SSOT:** [`.cursor/rules/1c-writer-pipeline.mdc`](1c-writer-pipeline.mdc) § LINT GATE; формат evidence — `review/SKILL.md` шаг 1.8.
 
 Поток: `writer → ReadLints → [fix if errors] → API EXISTENCE CHECK → reviewer (+ Linter Signals + API check results)`
 
@@ -213,16 +162,7 @@ writer → ReadLints → [fix if errors] → API EXISTENCE CHECK →
   reviewer (+ Linter Signals evidence + API check results + base path + verification result)
 ```
 
-Investigation loop (резолв контрактов) запускается **только** по запросу ревьювера (секция `## Investigation Request` в его отчёте) — см. детали в `1c-writer-pipeline.mdc` и `review/SKILL.md` шаг 3.5.
-
-## ИСКЛЮЧЕНИЯ
-
-- Однострочные правки (опечатка, переименование)
-- Только комментарии (**не** включает **JSDoc** / многострочную шапку перед `Процедура`/`Функция`: назначение, «Параметры:», «Возвращаемое значение:» — такие изменения только через **onec-code-writer**)
-- Пользователь явно: «без агентов» / «без ревью»
-- Mechanical Mode (шаблонная правка) — прямая правка StrReplace разрешена; см. секцию MECHANICAL MODE выше
-
-**Ограничение:** Исключения (однострочная правка, только комментарии) не действуют в контексте командных сессий /opsx:apply и /review. Mechanical Mode и «без агентов» в этих сессиях по-прежнему допускают прямую правку + reviewer.
+Investigation loop — по запросу ревьювера: `1c-writer-pipeline.mdc`, `review/SKILL.md` шаг 3.5.
 
 ---
 

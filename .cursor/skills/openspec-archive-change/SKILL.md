@@ -79,26 +79,15 @@ Archive a completed change in the experimental workflow.
    3.2. **Check developer comment markers balance (HARD BLOCKER)**
 
    Read `proposal.md` and check for the `## Metadata (comment markers)` block.
-   - If the block exists, extract `zni_id`.
+   - If the block exists, extract `developer` (ФИО).
    - Build a diff of all `*.bsl` files in the change relative to the baseline (merge-base with main/master).
-   - In the diff, count the number of added lines matching the open marker pattern containing `[{zni_id}]` (e.g., `// +++ ... [{zni_id}]`).
-   - Count the number of added lines matching the close marker pattern containing `[{zni_id}]` (e.g., `// --- ... [{zni_id}]`).
-   - **If the counts do not match:**
-     - This is a **hard blocker** (override auto-yes).
-     - Do not execute steps 4–7. Show the user:
-       ```
-       ## Архив заблокирован: дисбаланс маркеров комментариев
-       
-       Обнаружено несовпадение парных маркеров разработчика для ЗНИ {zni_id}:
-       - Открывающих маркеров (// +++): {count_open}
-       - Закрывающих маркеров (// ---): {count_close}
-       
-       Архив возможен только при строгом равенстве.
-       Пожалуйста, проверьте код и добавьте недостающие маркеры.
-       ```
-     - Stop execution (return).
-   - **If `count_open = 0` and `count_close = 0`** (в диффе нет добавленных маркеров с этим `zni_id`): **silent** — не добавлять предупреждений в чат; proceed to the next step.
-   - **If counts match and at least one marker present:** proceed to the next step.
+   - In the diff, count **added** lines that are open markers for this developer:
+     - **Canon:** `// +++ {developer}` (substring match on developer FIO)
+     - **Legacy:** `// +++ {developer} ... [` (contains `[ID#` or `[б/н#`)
+   - Count **added** close markers: `// --- {developer}` (optional trailing `[...]` for legacy).
+   - **If the counts do not match:** hard blocker — сообщить дисбаланс для `{developer}`, stop.
+   - **If `count_open = 0` and `count_close = 0`:** silent, proceed.
+   - **If counts match:** proceed.
 
    3.5. **Check slice acceptance status (slice mode only — HARD BLOCKER)**
 
@@ -121,20 +110,20 @@ Archive a completed change in the experimental workflow.
    3. **Если есть `[ ]` на любой приёмочной задаче (`S<N>.accept` или legacy `S<N>.T<M>`):** показать **краткую карточку** (не полный T-HANDOFF из `/opsx:apply`; итоговый вывод archive остаётся **T-CONFIRM**, §5.5):
 
       ```
-      ## Slice gate при архивации — непринятые приёмочные тесты
+      ## При архивации — непринятые срезы
 
-      | Срез | Тест | Готовность среза | Строка (фрагмент) |
-      |------|------|------------------|-------------------|
-      | …    | …    | да / нет (+ незакрытые задачи при «нет») | … |
+      | Срез | Primary acceptance (из metadata) | Готовность |
+      |------|-----------------------------------|------------|
+      | S1: «…» | <текст Primary или «не задан»> | да / нет |
       ```
 
-      Пояснение одной строкой: без **`[x]`** на приёмочной задаче среза (`S<N>.accept` или legacy `S<N>.T<M>`) контракт среза формально не закрыт; подтверждение ниже фиксирует действие.
+      Пояснение одной строкой: без **`[x]`** на accept контракт среза не закрыт. Опция **A** — подтверждение, что **Primary пройден на ИБ** (ответственность пользователя).
 
    4. **Условие опции A:** опция **A** в AskQuestion допустима **только если** каждый срез, в котором есть `[ ]` в acceptance set, уже **«готов»** (все рабочие задачи среза `[x]`). Если условие не выполнено — перед AskQuestion вывести строку «**Вариант A недоступен:** есть срезы с незакрытыми задачами реализации; завершите через `/opsx:apply <name>`.» и выдать **AskQuestion только с опциями B, C, D**.
 
    5. **AskQuestion** (исключение из auto-yes). Подписи опций должны явно содержать дисклеймер: подтверждение успешного прогона на ИБ — ответственность пользователя.
 
-      - **A.** *(если выполнено условие п.4)* Принято на ИБ — **отметить acceptance set каждого незакрытого среза** как `[x]` в `tasks.md` (для нового формата — `S<N>.accept`; для legacy — все `S<N>.T<M>` среза), **продолжить архив** (шаги 4–7 после повторной проверки п.8).
+      - **A.** *(если выполнено условие п.4)* Primary пройден на ИБ — отметить accept каждого незакрытого среза `[x]`, продолжить архив. **Дисклеймер:** подтверждаете успешный прогон Primary на ИБ.
       - **B.** Тесты не пройдены / нужна доработка → **STOP**; рекомендовать `/opsx:apply <name>` или `/opsx:verify <name>`.
       - **C.** Отложить архив → **STOP**.
       - **D.** Принудительное продолжение **без** отметки в `tasks.md` (семантика **`--force-legacy`**) → шаги 4–7; в warnings: `Archived with --force-legacy: …` (перечислить непринятые приёмочные задачи).
@@ -154,7 +143,7 @@ Archive a completed change in the experimental workflow.
         Изменения tasks: отмечены [x]: <S<N>.accept | S<N>.T<M>, …>
         Связанный отчёт: reports/slice-acceptance-S<N>-YYYY-MM-DD.md
         ```
-      - Для **каждого** затронутого среза создать **`reports/slice-acceptance-S<N>-YYYY-MM-DD.md`** (каноническое имя см. `.cursor/rules/vertical-slices.mdc`): краткий отчёт (факт принятия при архивации, дата, перечень принятых задач — `S<N>.accept` и/или `S<N>.T<M>`, напоминание что прогон ИБ подтверждён пользователем).
+      - Для **каждого** затронутого среза создать **`reports/slice-acceptance-S<N>-YYYY-MM-DD.md`**: дата, `Primary acceptance: pass | fail | skipped (причина)`, optional-сценарии, перечень accept-задач, напоминание что прогон подтверждён пользователем при archive.
 
    8. После выполнения п.7 **повторить** парсинг п.1–2: каждый acceptance set должен быть полностью `[x]`. Если после правок остался `[ ]` — **STOP**, сообщить о несоответствии `tasks.md` (ошибка парсера/формата). Иначе — перейти к шагу **3.6**.
 

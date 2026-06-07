@@ -6,7 +6,7 @@ priority: 150
 
 # Vertical Slices — вертикальные пользовательские срезы
 
-Единственный источник истины для декомпозиции ЗНИ OpenSpec. Ссылаются: `openspec-new-change`, `openspec-ff-change`, `openspec-continue-change`, `openspec-apply-change`, `openspec-verify-change`, `openspec-explore`, `openspec-archive-change`, `sdd-workflow.mdc`, `1c-agent-patterns`, `openspec-quality-controller`.
+Единственный источник истины для декомпозиции ЗНИ OpenSpec. Ссылаются: `openspec-ff-change`, `openspec-apply-change`, `openspec-verify-change`, `openspec-explore`, `openspec-archive-change`, `sdd-workflow.mdc`, `1c-agent-patterns`, `openspec-quality-controller`.
 
 ## ПРОБЛЕМА
 
@@ -20,12 +20,19 @@ priority: 150
 
 1. **Сценарно-ориентирован.** Один срез = 1–3 связанных пользовательских сценария. Каждый срез SHALL ссылаться на ≥1 `#### Scenario:` из `specs/**/spec.md`.
 2. **Полный стек.** Внутри среза — все слои (метаданные, форма, BSL, общий модуль, визы), необходимые для приёмки. Если слой недостаточен для приёмки — это не срез, а подготовка к срезу. Подготовительный код (новая функция, хелпер, рефактор без UX-эффекта) SHALL включаться в срез с primary-сценарием, где код **вызывается и даёт наблюдаемый результат** — не выделяться в отдельный срез с приёмкой «ревью контракта» / «код-ревью» / «ручная сверка». Код-ревью — внутренняя задача `S<N>.<M>`, не приёмка среза.
-3. **Финальная задача среза — `S<N>.accept`** с буллет-чеклистом сценариев в теле приёмки. Один чекбокс (parent) — принят / не принят весь срез. Sub-bullets — сценарии для проверки пользователем; они **не** являются отдельными чекбоксами в формате 1С-acceptance, а служат списком шагов в рамках одной приёмочной задачи. См. формат в секции «ФОРМАТ S<N>.accept» ниже.
+3. **Финальная задача среза — `S<N>.accept`** с буллет-чеклистом в теле приёмки. Один чекбокс (parent) — принят / не принят весь срез. **Blocking для `[x]`** — только **Primary acceptance** (поле metadata + первый mandatory sub-bullet). Остальные sub-bullets — optional или вынесены в `S<N>.<M>`. Sub-bullets **не** являются отдельными чекбоксами. См. «ФОРМАТ S<N>.accept» ниже.
 4. **Независим при приёмке.** Срез `S3` можно принять, даже если `S4+` не начаты. Допустимы зависимости между срезами (`S5` требует `S3` принятым), но принятие `S3` SHALL не требовать `S4+`.
 5. **Slice-gate между срезами.** После каждого среза — обязательная пауза apply: «принят / не принят / дефект в предыдущем / стоп». Решение фиксируется в `debug.md` секция `## Slice Gate Decisions`. Фиксация **«принят»** при **`/opsx:archive`** (вариант A, см. поведение ARCHIVE ниже) — допустима с пометкой **`принят (archive)`**.
-6. **Acceptance Checklist Coverage.** Чеклист `S<N>.accept` SHALL содержать **по одной строке на каждый** `#### Scenario:` из поля `**Связь со spec:**` этого же среза:
-   - Каждый заявленный в `**Связь со spec:**` Scenario SHALL присутствовать в чеклисте `S<N>.accept` (по имени Scenario в скобках или буквальной формулировке).
-   - Чеклист `S<N>.accept` **запрещено**: дублировать Scenario, заявленный в `**Связь со spec:**` другого среза (приёмка одного Scenario живёт в одном срезе); включать пункты, не сопоставимые ни с одним Scenario среза, кроме явно перечисленных в карте non-scenario проверок ниже.
+6. **Acceptance Checklist Coverage (Primary + spec coverage).**
+
+   | Что | Правило |
+   |-----|---------|
+   | **Blocking для `[x]`** | Только **Primary acceptance** (`**Primary acceptance:**` в metadata + первый mandatory sub-bullet в `S<N>.accept`) |
+   | **Остальные Scenario** | Sub-bullets с пометкой «опционально / при наличии данных» **или** задачи `S<N>.<M>` «верифицировать на ИБ / по коду» — **не** blocking для accept |
+   | **Coverage spec** | Каждый `#### Scenario:` из spec SHALL быть покрыт **хотя бы в одном месте**: Primary, optional sub-bullet accept, или задача `S<N>.<M>` |
+   | **Частичная приёмка** | `[x]` на accept = Primary пройден; optional-сценарии фиксируются в `debug.md` / повторной приёмке, не блокируют закрытие среза |
+
+   - Чеклист `S<N>.accept` **запрещено**: дублировать Scenario другого среза; включать programmatic-only пункты (diff, отладчик, вызов API) как mandatory без UX-proxy.
    - **Куда переносить non-scenario проверки** (обязательная карта мест):
 
      | Тип проверки | Место в ЗНИ | Пример |
@@ -42,11 +49,13 @@ priority: 150
 ## ФОРМАТ `tasks.md` СО СРЕЗАМИ
 
 - **`# Срез S<N>: <имя>`** — заголовок среза (H1). Обязателен при 6+ задачах.
-- **Блок метаданных** сразу под заголовком:
+- **Блок метаданных** сразу под заголовком (обязателен при наличии `# Срез S<N>`; для Lite ≤5 задач **без** `# Срез` — поле `**Primary acceptance:**` не требуется):
   - `**Сценарий:** <пользовательский сценарий, одно предложение>`
+  - `**Primary acceptance:** <один user-journey: Given → When → Then, выполнимый на типовой ИБ без отладчика>`
   - `**Приёмка:** <ручной тест / автоматизированный тест / проверка в ИБ>`
   - `**Связь со spec:** <Requirement «…», Scenario «…»>` (перечисление из `specs/**/spec.md`)
   - `**Зависимости:** <нет / S<K>, S<L>>`
+  - `**Режим apply:** mechanical` — опционально, для migration-only change (пауза apply только на slice-gate; см. `openspec-apply-change`)
 - **Группы внутри среза** — `## N. <Группа>` (H2). Опциональны; полезны для читаемости, когда в срезе 5+ задач разных слоёв.
 - **Задачи** — `- [ ] S<N>.<M> <описание>` (чекбокс + ID с префиксом среза). Опциональный префикс в ID — тип слоя: `S3.1`, `S3.2` и т.д.
 - **Приёмочная задача** — **ровно один** `- [ ] S<N>.accept <бизнес-результат>` на срез. В её теле — буллет-чеклист сценариев из `**Связь со spec:**`. Формат — секция «ФОРМАТ S<N>.accept» ниже.
@@ -60,18 +69,19 @@ priority: 150
 
 ```markdown
 - [ ] S<N>.accept Принять срез S<N> «<имя среза>» — <бизнес-результат>:
-  - Scenario «<имя сценария 1 из spec>»: <одна строка ручного шага или критерия pass/fail>
-  - Scenario «<имя сценария 2 из spec>»: <…>
-  - Scenario «<имя сценария 3 из spec>»: <…>
+  - **Primary (обязательно):** <шаги из **Primary acceptance:** metadata>
+  - Scenario «<имя>» (опционально): <одна строка, если не вынесено в S<N>.<M>>
 ```
 
 Правила формата:
 
-- Имя Scenario в скобках-ёлочках совпадает с заголовком `#### Scenario:` в `specs/**/spec.md` (буквально, без перефразирования).
-- Каждый Scenario из `**Связь со spec:**` среза присутствует в чеклисте ровно одной строкой.
+- Первый sub-bullet — **mandatory Primary** (текст из `**Primary acceptance:**`); без него accept invalid.
+- Имя Scenario в скобках-ёлочках совпадает с `#### Scenario:` в spec (буквально). Optional sub-bullets помечать «(опционально)».
+- Каждый Scenario из `**Связь со spec:**` покрыт Primary, optional sub-bullet **или** задачей `S<N>.<M>` (правило 6).
 - Сценарии других срезов в чеклист не включаются.
-- Один родительский чекбокс `- [ ] S<N>.accept …` ставится в `[x]` целиком — это сигнал «срез принят».
-- Если срез частично принят (пользователь подтвердил часть сценариев), это не «принят» — приёмка ставится только когда все Scenario из `**Связь со spec:**` отработали как ожидалось. Частичные результаты фиксируются в `debug.md` `## Slice Gate Decisions` со значением `Решение: не принят`.
+- `[x]` на `- [ ] S<N>.accept …` = Primary пройден (сигнал «срез принят»).
+- Optional не пройдены — фиксировать в `debug.md` `## Slice Gate Decisions`; не блокируют `[x]`, если Primary pass.
+- Primary не пройден — `Решение: не принят`.
 
 ### Пример
 
@@ -79,6 +89,7 @@ priority: 150
 # Срез S1: Флажок сохранения в шаблоне согласования
 
 **Сценарий:** администратор открывает шаблон, включает флаг «Сохранять участников при повторе», переоткрывает — флаг сохранён в БД.
+**Primary acceptance:** открыть шаблон → включить флаг → сохранить → переоткрыть → флаг на месте.
 **Приёмка:** ручной тест в ИБ с развёрнутым расширением.
 **Связь со spec:** Requirement «Режим сохранения участников при частичном повторе» — Scenario «Сохранение флага при ручной правке шаблона», Scenario «Установка флага по умолчанию для нового шаблона», Scenario «Сохранение флага через копирование шаблона».
 **Зависимости:** нет.
@@ -95,9 +106,9 @@ priority: 150
 ## 3. Приёмка
 
 - [ ] S1.accept Принять срез S1 — флаг доступен и сохраняется в шаблоне согласования:
-  - Scenario «Сохранение флага при ручной правке шаблона»: открыть шаблон → включить флаг → сохранить → переоткрыть → флаг на месте
-  - Scenario «Установка флага по умолчанию для нового шаблона»: создать новый шаблон → флаг = Истина по умолчанию
-  - Scenario «Сохранение флага через копирование шаблона»: открыть шаблон-копию → переключить флаг → сохранить → значение сохранилось
+  - **Primary (обязательно):** открыть шаблон → включить флаг → сохранить → переоткрыть → флаг на месте
+  - Scenario «Установка флага по умолчанию для нового шаблона» (опционально): создать новый шаблон → флаг = Истина по умолчанию
+  - Scenario «Сохранение флага через копирование шаблона» (опционально): открыть шаблон-копию → переключить флаг → сохранить → значение сохранилось
 
 <!-- slice-gate: в шаблоне согласования виден и сохраняется флаг `pav_СохранятьУчастниковПриПовторе` -->
 ```
@@ -122,10 +133,10 @@ priority: 150
 
 ## ДЕКОМПОЗИЦИЯ (кто и когда)
 
-- **При создании ЗНИ** (`/opsx:ff`, `/opsx:new`) — архитектор формирует секцию `## Slices` в `design.md` **до** генерации `tasks.md`. Затем `tasks.md` генерируется с `# Срез S<N>` по этой секции. См. шаблоны «Architect — slice decomposition» и «Architect — slice-aware task decomposition» в `1c-agent-patterns/architect.md`.
-- **При добавлении задач к существующему change** (`/opsx:continue`, `/opsx:extend`, `/opsx:explore` → extend) — placement задач фикса **строго** по разделу **«ИНВАРИАНТ: Defect placement»** ниже (по умолчанию — inside-slice; новый срез `S<N+1>` только при выполнении условий инварианта).
+- **При создании ЗНИ** (`/opsx:ff`) — архитектор формирует секцию `## Slices` в `design.md` **до** генерации `tasks.md`. Затем `tasks.md` генерируется с `# Срез S<N>` по этой секции. См. шаблоны «Architect — slice decomposition» и «Architect — slice-aware task decomposition» в `1c-agent-patterns/architect.md`.
+- **При добавлении задач к существующему change** (`/opsx:extend`, `/opsx:explore` → extend) — placement задач фикса **строго** по разделу **«ИНВАРИАНТ: Defect placement»** ниже (по умолчанию — inside-slice; новый срез `S<N+1>` только при выполнении условий инварианта).
 - **При пересмотре на границе среза** (`/opsx:apply` → slice-gate → опция «пересмотр») — архитектор через «Architect — slice transition review» оценивает актуальность следующего среза.
-- **При миграции легаси-ЗНИ** (tasks.md без `# Срез`) — через `/opsx:migrate-slices <name>`, шаблон «Architect — slice restructuring».
+- **При миграции легаси-ЗНИ** (tasks.md без `# Срез`) — через `/opsx:extend <name>` (architect slice restructuring) или ручная правка по этому файлу.
 
 ## ПОВЕДЕНИЕ APPLY
 
@@ -133,7 +144,7 @@ priority: 150
 - **Выполнение среза:** оркестратор запускает все задачи среза (параллелизация по файлам там, где возможно); финальной приёмочной задачей идёт `S<N>.accept` (или `S<N>.T<M>` в legacy-режиме).
 - **Slice-gate (передача на приёмку):** после последней non-acceptance задачи среза агент НЕ задаёт вопрос о вердикте в текущей сессии. Вместо этого:
   1. Append в `debug.md` `## Slice Gate Decisions` запись `Решение: awaiting-acceptance`.
-  2. Сгенерировать Acceptance Handoff Card — что сделано + чеклист сценариев из `S<N>.accept` в императиве (один сценарий — одна строка) + явная инструкция вернуться командой `/opsx:apply <name>`.
+  2. Сгенерировать Acceptance Handoff Card — что сделано + **Primary acceptance** из metadata + optional одной строкой + `/opsx:apply <name>`.
   3. Сгенерировать Session Handoff Summary с заголовком `## Paused for Acceptance — S<N>`.
   4. Завершить apply.
 
@@ -148,9 +159,9 @@ priority: 150
 
 `/opsx:verify` использует два режима — **`pre-apply`** и **`post-apply`** — выводимые из состояния `tasks.md` (наличие `[ ]` хотя бы на одной задаче, включая `S<N>.accept`, → `pre-apply`; все `[x]` → `post-apply`). Узкий охват одного среза, переход между срезами и смешанный случай — частные случаи `pre-apply`, выводимые из текста запроса пользователя и контекста (свежий `reports/slice-acceptance-*`, блок в `debug.md`). Отдельных значений `slice-pre`, `slice-post`, `slice-scoped`, `slice-transition`, `legacy-pre`, `legacy-mixed`, `legacy-post` **нет**.
 
-- **Layer 2 Internal Coherence** прогоняет QC Slice Coherence (критерии 1–6, 8–9 ниже).
+- **Layer 2 Internal Coherence** прогоняет QC Slice Coherence (критерии 1–6, 8–10 ниже).
 - **Layer 5 Implementation Readiness** прогоняет Architect readiness per-slice.
-- **Предложение миграции в срезы** (нет `# Срез` или есть `<!-- phase-gate -->`): `/opsx:verify` **рекомендует словами** `/opsx:migrate-slices <name>`; не блокирует весь прогон; фактическая миграция — только по команде migrate.
+- **Предложение миграции в срезы** (нет `# Срез` или есть `<!-- phase-gate -->`): `/opsx:verify` **рекомендует** `/opsx:extend <name>` (architect slice decomposition) или ручную правку; не блокирует прогон.
 - **Предложение миграции приёмки** (есть `S<N>.T<M>` в активной ЗНИ — legacy acceptance): QC выдаёт SUGGESTION «Старая модель приёмки. Вручную: объединить `T<M>` в один `S<N>.accept`». Не блокирует прогон; legacy-формат остаётся работоспособным во всех командах.
 
 ## QUALITY CONTROLLER — SLICE COHERENCE
@@ -165,11 +176,12 @@ Replace старого Phase Classification. Новые критерии QC:
 3. **Slice Completeness** — в срезе есть все слои (метаданные, форма, BSL, тест), необходимые для его приёмочного сценария. Пропуски → WARNING: «S<N> не содержит задачи слоя <X>, требуемого для приёмки».
 4. **Slice Dependency Graph** — зависимости между срезами объявлены в метаданных (`Зависимости:`); объявленные деды существуют; нет циклов. Несоответствие → WARNING.
 5. **Slice Gate Integrity** — в каждом срезе есть **ровно один** `S<N>.accept` и маркер `<!-- slice-gate -->`. Отсутствие или дубль → CRITICAL. Legacy: если в срезе есть `S<N>.T<M>` (один или несколько), но нет `S<N>.accept` — критерий не падает; QC параллельно эмитирует SUGGESTION `legacy-acceptance-format` с предложением объединить `T<M>` в один `S<N>.accept` вручную.
-5b. **Acceptance Checklist Coverage** (правило среза 6, Acceptance Checklist Coverage). Алгоритм: (a) собрать Scenarios из `**Связь со spec:**` среза; (b) извлечь имена Scenario из тела `S<N>.accept` (буллеты вида `Scenario «…»` или хвостовые скобки `(Scenario: «…»)`); (c) сравнить множества; (d) эмитировать алерты:
-   - `accept-bullets-missing-scenario` — **WARNING**: в чеклисте `S<N>.accept` не упомянут Scenario, заявленный в `**Связь со spec:**` среза.
-   - `accept-checklist-empty` — **CRITICAL**: тело `S<N>.accept` не содержит ни одного буллета чеклиста (одна строка приёмки без сценариев — не приёмка).
-   - `accept-bullet-foreign-scenario` — **WARNING**: в чеклисте `S<N>.accept` есть Scenario, заявленный в `**Связь со spec:**` другого среза (дублирование приёмки между срезами).
-   - Legacy (`S<N>.T<M>` без `S<N>.accept`): применять старые алерты `acceptance-without-scenario` (WARNING) до миграции; новые алерты к legacy-формату не применяются.
+5b. **Acceptance Checklist Coverage** (правило среза 6). Алгоритм: (a) собрать Scenarios из spec для change; (b) проверить покрытие каждого Scenario в Primary, optional accept, или `S<N>.<M>`; (c) проверить наличие `**Primary acceptance:**` и mandatory Primary sub-bullet; (d) эмитировать алерты:
+   - `primary-acceptance-missing` — **CRITICAL** (при `# Срез`): нет `**Primary acceptance:**` в metadata или нет mandatory Primary sub-bullet в `S<N>.accept`.
+   - `accept-bullets-missing-scenario` — **WARNING**: Scenario из spec **нигде** не покрыт (нет в accept optional, нет задачи `S<N>.<M>`). Покрытие только в `S<N>.<M>` — **OK**.
+   - `accept-checklist-empty` — **CRITICAL**: тело `S<N>.accept` без mandatory Primary sub-bullet.
+   - `accept-bullet-foreign-scenario` — **WARNING**: Scenario другого среза в accept.
+   - Legacy (`S<N>.T<M>` без `S<N>.accept`): алерты `acceptance-without-scenario` (WARNING); новые алерты к legacy не применяются.
 6. **Rework Risk** — срез опирается на непринятый предыдущий без явной зависимости, или сценарий среза повторяет сценарий другого среза. → WARNING / SUGGESTION в зависимости от остроты.
 8. **Slice Verticality / Acceptance Observability** — приёмка среза SHALL описывать **наблюдаемое** (black-box) поведение, а не заглядывание «внутрь» кода. **Оценка — семантическая (суждение QC-агента), не grep подстрок.** Оркестратор в ff/verify **не** применяет списки ключевых слов к критерию 8; вывод делегируется QC.
 
@@ -177,20 +189,23 @@ Replace старого Phase Classification. Новые критерии QC:
    - Собрать все приёмочные пункты: буллеты тела `S<N>.accept` **или** строки legacy `S<N>.T<M>` (если `S<N>.accept` отсутствует).
    - **User-journey (наблюдаемость):** пункт описывает взаимодействие с системой как с «чёрным ящиком» (действия пользователя, администратора, фонового задания или внешней системы) и проверяемый бизнес-результат (изменение в форме, проводка документа, запись в ЖР, поведение регламента/БП, отправка файла).
    - **Programmatic-only (implementation leak):** пункт требует заглянуть «внутрь» — вызвать конкретную функцию в отладчике, проверить возвращаемый тип/структуру, код-ревью контракта API.
-   - **Срабатывание `slice-not-vertical`:** **ни один** приёмочный пункт среза не описывает наблюдаемый (black-box) результат.
-   - Severity: **WARNING** (Standard/Lite, ≤15 задач); **CRITICAL** (Full tier, ≥16 задач).
-   - Рекомендация: свернуть код-only срез в primary-срез; programmatic проверки — задача `S<N>.<M>`, не `S<N>.accept` / `S<N>.T<M>`.
+   - **Срабатывание `slice-not-vertical`:** **ни один** mandatory приёмочный пункт (Primary) не описывает наблюдаемый (black-box) результат.
+   - Severity: **CRITICAL** для любого tier при наличии `# Срез S<N>` в tasks.md.
+   - Remediation: свернуть код-only срез в primary-срез; programmatic — задача `S<N>.<M>`, не accept.
 
 9. **Foundation slice with gate (`slice-foundation-with-gate`)** — ложная точка приёмки между foundation и consumer. Условия (все):
    - Срез `S<K>` имеет `S<K>.accept` и `<!-- slice-gate -->`.
    - Существует `S<K+1>` с `**Зависимости:** S<K>` (или явная ссылка на API/функцию из S<K> в задачах S<K+1>) — **структурный** признак; допустимо определить механически (grep зависимостей, ссылки на символы из задач S<K>).
    - `S<K+1>.accept` семантически описывает user-journey, а `S<K>.accept` — нет (только programmatic-only) — **семантика QC-агента**, не grep.
-   - Severity: **WARNING** (Standard/Lite); **CRITICAL** (Full).
-   - Remediation: свернуть S<K> в S<K+1>; `/opsx:migrate-slices <name>` (шаблон architect migrate p.11).
+   - Severity: **CRITICAL** для любого tier при `# Срез`.
+   - Remediation: свернуть S<K> в S<K+1>; `/opsx:extend <name>` (architect slice restructuring).
 
-**In scope для QC (критерии 8–9):**
-- Вертикальность среза: приёмка — наблюдаемый black-box сценарий, не programmatic-only accept на отдельном gate.
+10. **Acceptance Simplicity (`acceptance-simplicity-overload`)** — в теле `S<N>.accept` более одного **mandatory** (без пометки «опционально») black-box journey. Severity: **CRITICAL** при `# Срез`. Remediation: один mandatory Primary; остальное → optional или `S<N>.<M>`.
+
+**In scope для QC (критерии 8–10):**
+- Вертикальность среза: Primary — наблюдаемый black-box сценарий, не programmatic-only accept на отдельном gate.
 - Foundation + dependent UX-срез с двумя gate — structural + semantic проверка.
+- Acceptance Simplicity: один blocking journey на срез.
 
 **Out of scope для QC:**
 - Исполнимость шагов приёмки **прямо сейчас** (код ещё не подключён, нет выгрузки в ИБ).
@@ -228,14 +243,14 @@ Replace старого Phase Classification. Новые критерии QC:
 ## ОБРАТНАЯ СОВМЕСТИМОСТЬ
 
 - **Архивные ЗНИ** (`openspec/changes/archive/`) с Phase Gates — read-only, не мигрируем.
-- **Активные ЗНИ без срезов**: apply работает в legacy-режиме (без остановок на slice-gate), но выдаёт WARNING: «Change без срезов. Рекомендуется `/opsx:migrate-slices <name>`».
-- **Маркеры `<!-- phase-gate -->`**: читаются apply/verify, помечаются DEPRECATED; verify предлагает `/opsx:migrate-slices <name>`.
+- **Активные ЗНИ без срезов**: apply работает в legacy-режиме (без остановок на slice-gate), но выдаёт WARNING: перестройка через `/opsx:extend <name>` или ручная правка tasks.md.
+- **Маркеры `<!-- phase-gate -->`**: читаются apply/verify, помечаются DEPRECATED; verify предлагает `/opsx:extend <name>`.
 - **Заголовки `# Фаза N`**: обрабатываются как обычный markdown, но не триггерят слоевой порядок P0→P4; верификатор предупреждает о устаревшей структуре.
 
 ## ФИКСАЦИЯ РЕШЕНИЙ И ОТЧЁТОВ
 
 - **`debug.md#Slice Gate Decisions`** — append при каждом slice-gate (см. формат выше). Поле `Решение` принимает значения: `awaiting-acceptance` (handoff на приёмку), `принят`, `принят (manual shortcut)`, **`принят (archive)`** (приёмка зафиксирована при `/opsx:archive`, см. SKILL archive шаг 3.5), `не принят`, `inside-slice rework` (дефект до подписанной приёмки `S<K>.T<M>`; fix-задачи добавлены в `S<K>` перед `S<K>.T<M>`), `fix предыдущего S<K>`, `стоп`.
-- **`reports/slice-acceptance-S<N>-YYYY-MM-DD.md`** — отчёт приёмки среза: изменения, тест, результат.
+- **`reports/slice-acceptance-S<N>-YYYY-MM-DD.md`** — отчёт приёмки среза: изменения, **Primary acceptance: pass | fail | skipped**, optional-сценарии, результат.
 - **`reports/verification-YYYY-MM-DD.md`** — отчёт verify (единое имя; если прогон scoped на срез — срез/фаза указываются в YAML `snapshot`, не в имени файла).
 - **`reports/quality-control-YYYY-MM-DD.md`** — содержимое перестроено под Slice Coherence (имя файла то же).
 

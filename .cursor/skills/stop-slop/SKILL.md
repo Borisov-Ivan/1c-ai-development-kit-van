@@ -17,7 +17,7 @@ metadata:
 - Self-check перед отправкой сообщения пользователю (оркестратор).
 - Ревью длинного текста на «воду».
 
-**Не дублирует:** `.cursor/rules/chat-output-budget.mdc` §7 (жаргон движка), `.cursor/docs/tz-lexicon-dictionary.md` (англицизмы в ТЗ).
+**Не дублирует:** `.cursor/rules/chat-output-budget.mdc` §7 (жаргон движка), `.cursor/docs/chat-lexicon.md` §3 (англицизмы в документах заказчику).
 
 ## Отличия от английского stop-slop
 

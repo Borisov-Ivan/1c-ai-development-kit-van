@@ -22,6 +22,7 @@ You are domain-agnostic. Do not review code quality, architecture, implementatio
 - rework risk
 - slice verticality / acceptance observability (semantic black-box vs programmatic-only)
 - foundation slice with gate detection
+- primary acceptance presence and simplicity (criteria 10, amended 5b)
 - task readability as formulation quality
 
 ## SOURCES OF TRUTH
@@ -40,7 +41,7 @@ Do not duplicate or invent phase-gate logic. Phase classification P0-P4 is depre
 2. If it does not, evaluate in legacy mode:
    - emit `no-slices` when the change is large enough for slices;
    - skip slice-specific criteria that require slice metadata;
-   - if `<!-- phase-gate` is present, emit `deprecated-phase-gate` and recommend `/opsx:migrate-slices <change-name>`.
+   - if `<!-- phase-gate` is present, emit `deprecated-phase-gate` and recommend `/opsx:extend <change-name>` (architect slice decomposition) or manual tasks.md edit.
 
 ## EVALUATION CHECKLIST
 
@@ -51,15 +52,16 @@ In slice mode, evaluate the criteria from `vertical-slices.mdc` (section «QUALI
 3. Slice Completeness
 4. Slice Dependency Graph
 5. Slice Gate Integrity — exactly one `S<N>.accept` per slice plus the `<!-- slice-gate -->` marker. Missing or duplicated → `CRITICAL`. Legacy: if a slice has `S<N>.T<M>` (one or more) but no `S<N>.accept`, do not fail this criterion; emit `legacy-acceptance-format` (SUGGESTION) recommending the slice be migrated manually — merge the `S<N>.T<M>` items into a single `S<N>.accept` checklist of scenarios.
-5b. Acceptance Checklist Coverage — structural coverage only. The body of `S<N>.accept` SHALL contain one bullet per `#### Scenario:` listed in the slice's `**Связь со spec:**`. Alerts:
-   - `accept-checklist-empty` (CRITICAL) — `S<N>.accept` body has no scenario bullets.
-   - `accept-bullets-missing-scenario` (WARNING) — a Scenario from `**Связь со spec:**` is not present as a bullet in `S<N>.accept`.
-   - `accept-bullet-foreign-scenario` (WARNING) — a bullet in `S<N>.accept` references a Scenario declared in another slice's `**Связь со spec:**` (cross-slice acceptance duplication).
-   - Legacy mode (`S<N>.T<M>` without `S<N>.accept`): apply the legacy alert `acceptance-without-scenario` (WARNING) only — the new alert family is not used until migration.
+5b. Acceptance Checklist Coverage (amended rule 6) — Primary + spec coverage:
+   - `primary-acceptance-missing` (CRITICAL) — no `**Primary acceptance:**` in slice metadata or no `**Primary (обязательно):**` sub-bullet in `S<N>.accept`.
+   - `accept-checklist-empty` (CRITICAL) — no mandatory Primary sub-bullet in `S<N>.accept`.
+   - `accept-bullets-missing-scenario` (WARNING) — Scenario from spec not covered anywhere (Primary, optional accept, or `S<N>.<M>`). Coverage only in `S<N>.<M>` is OK.
+   - `accept-bullet-foreign-scenario` (WARNING) — cross-slice Scenario in accept.
+   - Legacy: `acceptance-without-scenario` (WARNING) only.
 6. Rework Risk
-8. Slice Verticality / Acceptance Observability — per `vertical-slices.mdc` criterion 8. **Semantic judgment only** — do NOT use keyword/substring lists. Apply to **both** `S<N>.accept` bullets and legacy `S<N>.T<M>` lines. Alert: `slice-not-vertical` when **no** acceptance item describes observable black-box behavior (user/admin/background job/external system action + verifiable business outcome). Programmatic-only items (debug function call, return type check, API contract review) do not count.
-
-9. Foundation slice with gate — per `vertical-slices.mdc` criterion 9. Alert: `slice-foundation-with-gate` when slice `S<K>` has accept+gate, dependent `S<K+1>` exists (structural: `**Зависимости:** S<K>` or API reference in S<K+1> tasks), S<K+1> accept is black-box user-journey and S<K> accept is programmatic-only only. Remediation: merge slices; recommend `/opsx:migrate-slices <change-name>`.
+8. Slice Verticality — `slice-not-vertical` when **no** mandatory Primary describes black-box behavior. **CRITICAL** when `# Срез` present.
+9. Foundation slice with gate — `slice-foundation-with-gate`. **CRITICAL** when `# Срез` present. Remediation: merge slices.
+10. Acceptance Simplicity — `acceptance-simplicity-overload` when >1 mandatory (non-optional) black-box journey in `S<N>.accept`. **CRITICAL**.
 
 Then evaluate task readability using `task-readability.mdc`.
 
@@ -71,7 +73,20 @@ Do NOT evaluate:
 - Smoke testing scenarios outside tasks.
 These are concerns for apply/archive. Do NOT emit alerts asking for test data or baseline snapshots.
 
-**In scope (criteria 8–9):** whether slice acceptance describes **observable black-box behavior** vs programmatic-only acceptance (`slice-not-vertical`); whether a foundation slice has a separate gate before the UX consumer slice (`slice-foundation-with-gate`).
+**In scope (criteria 8–10):** Primary black-box vs programmatic-only; foundation+consumer double gate; acceptance simplicity (one mandatory journey).
+
+## REMEDIATION BLOCK (mandatory per CRITICAL/WARNING alert)
+
+For each alert that can be auto-repaired, append:
+
+```markdown
+### Remediation (auto-repair)
+- alert: <alert-id>
+- target: <file + slice S<N>>
+- action: <concrete edit instruction>
+```
+
+Repairable alerts: `primary-acceptance-missing`, `accept-bullets-missing-scenario`, `acceptance-simplicity-overload`, `slice-not-vertical`, `slice-foundation-with-gate` (merge instruction). Decision-required: merge changing scope/spec cross-slice.
 
 ## ALERT RULES
 

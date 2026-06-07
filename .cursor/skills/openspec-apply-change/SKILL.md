@@ -33,10 +33,9 @@ Implement tasks from an OpenSpec change.
    - Which artifact contains the tasks (typically "tasks" for spec-driven, check status for others)
 
    **Metadata Prep (MANDATORY):** Before writing any code, check `proposal.md` for comment marker placeholders:
-   - Read or Grep `openspec/changes/<name>/proposal.md` for `<developer>`, `<zni_id>`, «Уточнить до `/opsx:apply`» or «Уточнить».
-   - If any placeholders are found, STOP and use **AskQuestion** to request the missing developer/zni_id.
-   - Replace the placeholders in `proposal.md` with the user's answers.
-   - If `tasks.md` has an `F1` Follow-up task for this, mark it as completed.
+   - Read or Grep `openspec/changes/<name>/proposal.md` for `<developer>`, `<ФИО>`, «Уточнить до `/opsx:apply`» or «Уточнить».
+   - If placeholders found, STOP — один вопрос в чат: ФИО (default из `project.md` § «Разработчик по умолчанию») и опциональный `comment_suffix`.
+   - Replace placeholders in `proposal.md`; mark F1 follow-up `[x]` if present.
 
 3. **Get apply instructions**
 
@@ -51,7 +50,7 @@ Implement tasks from an OpenSpec change.
    - Dynamic instruction based on current state
 
    **Handle states:**
-   - If `state: "blocked"` (missing artifacts): show message, suggest using openspec-continue-change
+   - If `state: "blocked"` (missing artifacts): show message, suggest `/opsx:ff <name>` (resume)
    - If `state: "all_done"`: congratulate, suggest archive
    - Otherwise: proceed to implementation
 
@@ -83,20 +82,15 @@ Implement tasks from an OpenSpec change.
    Verify check is advisory — does not block apply.
 
    **Metadata (comment markers) check:**
-   Прочитать `proposal.md`. Найти секцию `## Metadata (comment markers)`.
-   - Если секция есть — извлечь `developer`, `zni_id`, `zni_name`. Сформировать строки:
-     `open_marker` = `// +++ {developer} {date} {zni_name} [{zni_id}]` (где date — текущая дата `dd.MM.yyyy`)
-     `close_marker` = `// --- {developer} [{zni_id}]`
-   - Если секции нет — **AskQuestion**:
-     ```
-     В proposal.md отсутствует блок Metadata для маркеров комментариев.
-     Укажите:
-     1. Разработчик (ФИО):
-     2. Идентификатор ЗНИ (например ID#12345):
-     3. Название ЗНИ:
-     ```
-     Дописать блок `## Metadata (comment markers)` в `proposal.md` после `## Why`. Сформировать `open_marker` и `close_marker`.
-   Эти строки будут передаваться в промпт `onec-code-writer`.
+   Прочитать `proposal.md` и `openspec/project.md` (ФИО по умолчанию).
+   - Если секция `## Metadata (comment markers)` есть — извлечь `developer` (trim, с пробелами в инициалах), `comment_suffix` (может быть пустым).
+   - Если `developer` пустой/плейсхолдер — взять из project.md или один вопрос в чат.
+   - Сформировать (date = текущая `dd.MM.yyyy`):
+     - `open_marker` = `// +++ {developer} {date}` если `comment_suffix` пуст;
+     - иначе `// +++ {developer} {date} {comment_suffix}`
+     - `close_marker` = `// --- {developer}`
+   - Если секции нет — один вопрос (ФИО + опц. комментарий), дописать Metadata в proposal.md.
+   Передать `open_marker` и `close_marker` в промпт `onec-code-writer`.
 
 5. **Resume with pending verdict & Show current progress**
 
@@ -166,10 +160,10 @@ Implement tasks from an OpenSpec change.
    Ref: `.cursor/rules/vertical-slices.mdc`.
 
    **Legacy mode (no slices in tasks.md):**
-   - Warn: "ЗНИ без срезов. Рекомендуется `/opsx:migrate-slices <name>` перед продолжением."
+   - Warn: "ЗНИ без срезов. Перестройка: `/opsx:extend <name>` (architect slice decomposition) или ручная правка по vertical-slices.mdc."
    - AskQuestion: `[Продолжить без срезов] / [Мигрировать на срезы (verify)] / [Стоп]`.
    - `Продолжить` → fall back to file-only parallelization (tasks touching different files = independent; same file = sequential). Нет slice-gate пауз.
-   - `Мигрировать` → STOP apply, предложить запустить `/opsx:migrate-slices <name>`.
+   - `Мигрировать` → STOP apply, предложить `/opsx:extend <name>` или ручную правку tasks.md.
    - `Стоп` → завершить apply.
 
    **5.6 Determine execution mode**
@@ -179,20 +173,43 @@ Implement tasks from an OpenSpec change.
    - После последней non-acceptance задачи среза — ОБЯЗАТЕЛЬНАЯ ПАУЗА на slice-gate (карточка приёмки, см. шаг 6).
    - Не начинать следующий срез до принятия (или явного пропуска) текущего.
 
-   **Пошаговый режим** (внутренний код режима — `step-by-step`, в чат не цитируется) — более жёсткий режим, активируется когда выполнено **хотя бы одно** из условий (триггеры):
-   - `explicit-request` — пользователь прямо попросил: «по одной», «пошагово», «по шагам», «одну задачу».
-   - `debug-session` — `debug.md` существует AND был изменён сегодня (активная отладка).
-   - `fix-slice` — имя среза начинается с `Fix ` / `Фикс `, либо срез создан из `/opsx:extend --from-report` (секция «Fix-задачи» в debug.md).
-   - `slice-size-threshold` — в принимаемом срезе ≥5 задач (включая `S<N>.accept`).
+   **Пошаговый режим** (внутренний код `step-by-step`, в чат не цитируется) — пауза после **каждой** задачи только при срабатывании триггеров ниже.
 
-   В пошаговом режиме — пауза также после КАЖДОЙ завершённой задачи (не только на slice-gate).
+   **Приоритет правил** (сверху вниз):
 
-   **Batch mode** активируется ТОЛЬКО в legacy mode (без срезов) и по явному запросу пользователя — sequential execution с паузами только на ошибках/условных задачах.
+   1. **Slice-gate** — пауза всегда (шаблон B приёмки среза).
+   2. **Explicit-request** — пользователь попросил «пошагово» / «по одной».
+   3. **Pure mechanical slice** — **нет** auto `slice-size-threshold`; между задачами **тихий успех** (одна строка).
+   4. **Mixed slice** (код + UX в одном срезе) — auto step-by-step **не** включать; пауза только на slice-gate.
+   5. **`slice-size-threshold`** (≥5 задач в срезе) — только если есть **хотя бы одна** задача с явным ручным критерием (`убедиться`, `проверить`, `**Приёмка:** ручной тест`) **и** срез **не** mechanical/mixed.
 
-   **Announce mode (обязательно, с явной причиной в пользовательском языке):**
-   - "Режим: пауза на каждом slice-gate" — по умолчанию в slice mode без триггеров пошагового режима.
-   - "Режим: пошаговый (пауза после каждой задачи, так как <причина>)" — выбрать причину: «вы просили пошагово», «активная отладка», «срез содержит фиксы», «в срезе много шагов». Внутренние ID триггеров (`slice-size-threshold` и т.д.) в текст для пользователя **не выводить**.
-   - "Режим: пакетный (пауза только на ошибках)".
+   **Триггеры step-by-step:**
+   - `explicit-request`
+   - `debug-session` — `debug.md` изменён сегодня
+   - `fix-slice` — срез Fix/Фикс или fix-задачи в debug
+   - `slice-size-threshold` — см. приоритет 5 (не для mechanical/mixed)
+
+   **Детекция mechanical slice** (не grep как единственный SSOT):
+   - **Primary:** metadata `**Режим apply:** mechanical`
+   - **Fallback:** все рабочие задачи без `**Приёмка:** ручной тест` и без Primary, требующего ИБ; эвристика «миграц», «замен», «rename» только если нет UX-accept
+   - **Mixed побеждает mechanical** — одна задача «верифицировать по коду» в UX-срезе не делает срез mechanical
+
+   **Три режима вывода между задачами:**
+
+   | Режим | Когда | Чат |
+   |-------|-------|-----|
+   | **Тихий успех** (default) | Mechanical; mixed; обычный slice без step-by-step | Одна строка: «Задача `S<N>.<M>` («…») реализована.» |
+   | **Explicit step-by-step** | step-by-step + явный критерий в tasks | Шаблон A |
+   | **Slice-gate** | Все рабочие `[x]`, accept `[ ]` | Шаблон B |
+
+   **Запрет meta-статуса pipeline в чате:** не сообщать «автопроверки пройдены», «линтер чист», «reviewer PASS», «diff не обязателен» — non-events (§3a `chat-output-budget.mdc`).
+
+   **Batch mode** — только legacy без срезов + явный запрос пользователя.
+
+   **Announce mode** (один раз в начале сессии, не в каждой карточке):
+   - «Пауза на приёмку каждого среза» — default slice mode
+   - «Пошагово — по вашей просьбе / отладка / фиксы» — при step-by-step
+   - «Между задачами — без пауз» — mechanical / тихий успех
 
    **5.5b Слой чата при apply (анти-шум)** — относится ко **всем** промежуточным сообщениям в чате (старт сессии, между задачами, перед делегированием writer). Финальный **T-HANDOFF** (шаг 7) не отменяется.
 
@@ -204,7 +221,8 @@ Implement tasks from an OpenSpec change.
    | Режим **человеческим языком**: «пауза после каждой задачи — в срезе много шагов» / «вы просили пошагово» / «активная отладка по debug» | Обязательное цитирование внутренних id триггеров (`slice-size-threshold`, `step-by-step`, `awaiting-acceptance`); при необходимости id один раз в `debug.md` или в конце сообщения мелким блоком «Техническое» |
    | «Маркеры разработчика в proposal заполнены» | Полный текст строк `// +++` / `// ---` в чате |
    | Одна строка со ссылкой на отчёт verify при старте (если нужна): `reports/verification-*.md` | Дважды одно и то же PASS + длинный путь |
-   | Пошаговая пауза: что изменилось, что проверить руками, варианты ответа | Списки инструментов ради отчёта («ReadLints», «grep OK») — допустимо заменить на «автопроверки пройдены», если детали не важны для приёмки |
+   | Пошаговая пауза (шаблон A) — только явный критерий приёмки в tasks | Списки lint/reviewer/spot-check в чат |
+   | Pre-apply verify NO-GO — одна строка **только** при первом сообщении apply, если блокирует | NO-GO / OQ в каждой карточке паузы |
    | Роли исполнителей по-русски: «агент», «агент + ревью», «пользователь», «оркестратор» | Имена агентов (`onec-code-writer`, `onec-code-reviewer`, `onec-code-explorer`, `onec-code-architect`, `openspec-quality-controller`) — только во внутреннем контексте делегирования; в чат не цитируются |
    | Обозначение проверки на человеческом языке: «архитектурное ревью закрыто», «проверка прошла резервным агентом» | Имена гейтов (`Architect Gate`, `Slice Gate`, `Implementation Impact Gate`) и техкоды режимов (`Step-by-step`, `checkpoint`, `Tier`, `Standard/Lite/Full`) — только в `debug.md`, отчётах `reports/` и в скрытом контексте модели |
 
@@ -289,10 +307,7 @@ Implement tasks from an OpenSpec change.
      - [только при проблеме] Замечание: <spot-check / линтер / ревью — одна строка>
 
      ### 2. Что проверить СЕЙЧАС
-     Чеклист `S<N>.accept` в императиве (по одному пункту на каждый Scenario из чеклиста; внутренние ID регрессий — в скобках в конце пункта). При legacy-формате (`S<N>.T<M>`) — переписать сценарий каждой `T<M>` пунктом:
-     1. <Scenario «<имя>»>: открыть <что>, выполнить <действие>, убедиться <ожидаемый результат> (регрессия R<N>, если применима)
-     2. <Scenario «<имя>»>: …
-     3. …
+     **Primary acceptance** из metadata среза (императив, 1 нумерованный список). Optional-сценарии — одной строкой «остальные — см. tasks.md». Legacy `S<N>.T<M>` — Primary или первый UX-сценарий.
 
      ### 3. Как вернуться
      `/opsx:apply <change-name>` — новая сессия начнётся с запроса вердикта (принят / не принят / дефект в предыдущем срезе). Если нужно изменить scope/design/tasks — `/opsx:extend <change-name>`; затем снова `/opsx:apply <change-name>`. Пока вы проверяете в 1С — оркестратор ничего не делает.
@@ -307,7 +322,7 @@ Implement tasks from an OpenSpec change.
         ### Slice S<N> — <имя> (YYYY-MM-DD)
         Срез: S<N> — <имя>
         Решение: awaiting-acceptance
-        Обоснование: все рабочие задачи реализованы и прошли автопроверки; приёмочная задача S<N>.accept (или legacy S<N>.T<M>) передана пользователю на ручной прогон.
+        Обоснование: все рабочие задачи реализованы; приёмочная задача передана на ручной прогон Primary.
         Изменения tasks: нет (S<N>.accept остаётся [ ])
         Связанный отчёт: —
         ```
@@ -343,58 +358,41 @@ Implement tasks from an OpenSpec change.
    - **Classify** (Task Dispatch table above) — announce type and executor
    - **Delegate** to the designated executor (agent or skill)
    - Orchestrator role: prepare prompt with context, delegate, spot-check result
-   - **Spot-check (post-verification):** After the agent reports completion, verify the change: Grep for a pattern that confirms the fix (e.g. after "replace ТекущаяДата with ТекущаяДатаСеанса" → Grep for `ТекущаяДата()` in that file must return 0 matches). For batch tasks (5+ files), spot-check at least 3 files (first, middle, last in the list). If the result does not match expectations → STOP, report to user, do NOT mark task complete. **Linter:** перед reviewer — блок `## Linter Signals (evidence)` со всеми warning/error (`1c-agent-delegation.mdc` LINT GATE); reviewer Phase 1b — in-scope warning → MUST_FIX, не откладывать на prerelease. **Чат (non-events, §3a `chat-output-budget.mdc`):** при успешном writer + spot-check + reviewer PASS без MUST_FIX — **не** выводить строки «Авто-проверка: OK», «Линтер чист», «reviewer PASS», «Spot-check: OK»; между задачами (без пошагового режима) достаточно одной строки «Задача `S<N>.<M>` («…») реализована.».
+   - **Spot-check (post-verification):** After the agent reports completion, verify the change: Grep for a pattern that confirms the fix (e.g. after "replace ТекущаяДата with ТекущаяДатаСеанса" → Grep for `ТекущаяДата()` in that file must return 0 matches). For batch tasks (5+ files), spot-check at least 3 files (first, middle, last in the list). If the result does not match expectations → STOP, report to user, do NOT mark task complete. **LINT GATE** — см. [`.cursor/rules/1c-agent-delegation.mdc`](../../rules/1c-agent-delegation.mdc) § LINT GATE + [`.cursor/rules/1c-writer-pipeline.mdc`](../../rules/1c-writer-pipeline.mdc). **Чат (non-events, §3a `chat-output-budget.mdc`):** при успешном writer + spot-check + reviewer PASS без MUST_FIX — **не** выводить строки «Авто-проверка: OK», «Линтер чист», «reviewer PASS», «Spot-check: OK»; между задачами (без пошагового режима) достаточно одной строки «Задача `S<N>.<M>` («…») реализована.».
    - Mark task complete in the tasks file: `- [ ]` → `- [x]`
-   - **Пошаговая пауза (если активен пошаговый режим):** После отметки задачи выполненной, ОБЯЗАТЕЛЬНАЯ ПАУЗА. Заголовки и формулировки — в пользовательском языке (англицизмы `Step-by-step`, `checkpoint` в чат не цитируются; см. §3.1 `opsx-output-style.md`).
+   - **Вывод после задачи** — по режиму из §5.6 (тихий успех / шаблон A / slice-gate B):
 
-     **Шаблон для задач кода/форм** (выполненных агентом):
+     **Тихий успех (default):** одна строка «Задача `S<N>.<M>` («…») реализована.» — без паузы, без кнопок.
 
-     ```
-     ## Ваш шаг (пошаговая пауза)
-
-     **Задача `S<N>.<M>` («<краткое описание из tasks.md в «ёлочках»>») реализована.**
-
-     ### Что изменено
-     - Файл: `<path>`, строки X-Y
-     - <одно предложение по сути правки>
-
-     ### Что проверить у себя — задача `S<N>.<M>` («<описание>»)
-     1. <шаг 1 в императиве>
-     2. <шаг 2>
-     ...
-
-     **Варианты:** [Подтвердить / Проблема / Пропустить]
-     ```
-
-     - **Подтвердить** → продолжить.
-     - **Проблема** → пользователь описывает проблему, создать задачу follow-up в том же срезе (до `S<N>.accept` или legacy `S<N>.T<M>`), НЕ продолжать до решения или «Пропустить».
-     - **Пропустить** → продолжить, добавить пометку «(не проверено пользователем)», включить в Session Summary как непроверенное.
-
-     **Шаблон для приёмочной задачи** (`S<N>.accept` или legacy `S<N>.T<M>`):
+     **Шаблон A — explicit step-by-step** (только при step-by-step **и** явном критерии в tasks: `убедиться`, `проверить`, `**Приёмка:** ручной тест`):
 
      ```
-     ## Ваш шаг (приёмка среза) — `S<N>.accept` («<бизнес-результат среза>»)
-
-     ### Чеклист сценариев
-     1. <Scenario «<имя 1>»>: <шаг ручной проверки>
-     2. <Scenario «<имя 2>»>: <шаг>
-     ...
-
-     ### Зависимости
-     - `S<N>.<M>` [x] — <описание>
-
-     **Варианты:** [Все пункты пройдены → срез принят / Какой-то пункт не прошёл / Отложить]
+     Задача `S<N>.<M>` («<описание>») выполнена — <одно предложение эффекта, без путей>.
+     1. <шаги из критерия приёмки tasks>
+     Ответ: Проблема | Пропустить
+     Дальше: `S<N>.<M+1>` («…»). `/opsx:apply <name>`
      ```
 
-     Это эквивалент Slice Gate; шаги описаны выше.
+     Без «Подтвердить», если нет шагов для ИБ. Diff — только по запросу пользователя.
 
-     **Правило «первое упоминание ID — с описанием».** Каждое первое упоминание `S<N>.<M>` или `S<N>.accept` в заголовке секции / карточки / handoff-сообщения сопровождается коротким описанием задачи в «ёлочках». Голый `S<N>.<M>` без описания (например «Что имеет смысл проверить у себя (к `S1.2`)» или «`S1.2` закрыта с моей стороны») в заголовках чата запрещён. Повторное упоминание в той же секции — уже без описания. Срез — по правилу §10 `opsx-output-style.md` (`Срез S<N>: «<название>»`).
+     **Шаблон B — приёмка среза** (`S<N>.accept` / slice-gate):
+
+     ```
+     ## Срез S<N>: «<название>» — проверка на ИБ
+
+     **Primary acceptance:** <из metadata>
+     1. <шаги только primary>
+     Опционально: …
+     Ответ: Принято | Не принято | Отложить
+     ```
+
+     **Правило «первое упоминание ID — с описанием».** §10 / §10.1 `opsx-output-style.md`.
    - **If this was a verification/decision task** (identified in Conditional Task Detection) → trigger ОБЯЗАТЕЛЬНАЯ ПАУЗА above before proceeding
    - Continue to next task
 
    **Pause if:**
-   - **Slice Gate reached** (все рабочие задачи среза `[x]`, остался только `S<N>.accept` (или legacy `S<N>.T<M>`) или первый task следующего среза) — ОБЯЗАТЕЛЬНАЯ карточка приёмки (см. Slice Gate check выше)
-   - **Пошаговый режим:** после завершения каждой задачи (пошаговая пауза выше)
+   - **Slice Gate reached** — шаблон B (§6)
+   - **Explicit step-by-step** — шаблон A только при явном критерии в tasks
    - Task is unclear → ask for clarification
    - Implementation reveals a design/scope issue → stop implementation and suggest `/opsx:extend <change-name>` (or `/opsx:extend <change-name> --from-review <report-path>` if the issue came from review), затем снова `/opsx:apply <change-name>` после обновления постановки
    - Error or blocker encountered → report and wait for guidance
@@ -411,7 +409,11 @@ Implement tasks from an OpenSpec change.
    **Имена секций одинаковы во всех трёх вариантах** (см. раздел «Output — T-HANDOFF» ниже):
 
    - `### 1. Что реализовано` — за каждую задачу этого сеанса: `[x] N.M — описание`, файл `path` со строками, «что изменено» одним предложением; строка про автопроверку — **только** при расхождении или замечании ревью (без «OK» в успешном пути — §3a `chat-output-budget.mdc`). Для нетривиальных срезов в чате допускается **2–3 предложения прозой** (что именно сделано в коде, какие файлы затронуты) вместо списка-телеграммы.
-   - `### 2. Что проверить СЕЙЧАС` — для каждой закрытой задачи с критериями приёмки (маркеры `убедиться`, `проверить`, `критерий приёмки`, `Критерий приёмки`): переписать критерии в императиве нумерованным списком (1. Открыть… 2. Выполнить… 3. Убедиться…). Для задач типа «Ручной тест» — полный сценарий с ожидаемыми результатами. Если ничего не требуется от пользователя — одна строка «Ручная проверка не требуется для задач этого сеанса».
+   - `### 2. Что проверить СЕЙЧАС` — **три режима** (согласовано с §5.6):
+     - **Slice-gate / acceptance handoff:** только **Primary acceptance** из metadata + optional одной строкой.
+     - **Тихий успех между задачами:** «Ручная проверка не требуется» или пропустить секцию.
+     - **Explicit step-by-step:** только шаги из явного критерия задачи в tasks — не diff, не pipeline.
+     **Запрещено:** перечислять критерии **каждой** закрытой задачи в handoff.
    - `### 3. Следующие задачи` — таблица `Задача | Действие | Тип | Исполнитель | Зависит от | Статус`; 3–5 следующих. Для каждой:
      - **Задача** — ID `S<N>.<M>` / `S<N>.accept` (или legacy `S<N>.T<M>`) в backticks.
      - **Действие** — короткое описание задачи из `tasks.md` (одна фраза в «ёлочках» или без — глагол + что делается). Без имён процедур и кодов категорий.

@@ -17,7 +17,17 @@ writer → ReadLints → [fix if errors] → API EXISTENCE CHECK + METADATA CHEC
   reviewer (+ Linter Signals evidence incl. warnings; Phase 1b MUST_FIX in-scope + base path + verification result)
 ```
 
-**Метаданные:** имена объектов, типов и значений перечислений (`Перечисления.X.Y`, `Тип("СправочникСсылка.X")`, `Метаданные.<Kind>.<Name>`) проверяются по выгрузке `src/` тем же принципом — детали в `.cursor/rules/1c-metadata-validation.mdc` (globs `**/*.bsl`). Несуществующее имя → STOP (нет в выгрузке = либо опечатка, либо создание метаданных по `1c-no-metadata-creation.mdc`).
+**Метаданные:** имена объектов, типов и значений перечислений — см. `.cursor/rules/1c-metadata-validation.mdc`. Несуществующее имя → STOP (`1c-no-metadata-creation.mdc`).
+
+## LINT GATE
+
+**После каждой правки .bsl** (writer, Mechanical Mode, прямая правка) — **до вызова reviewer**:
+
+1. Вызвать `ReadLints` на изменённых `.bsl` файлах.
+2. Ошибки уровня **error** — исправить до reviewer (writer повторно; в apply/review — только writer).
+3. Блок **`## Linter Signals (evidence)`** для reviewer (`review/SKILL.md` шаг 1.8): **все** диагностики, включая **warning**.
+4. **Reviewer (Phase 1b):** in-scope warning/error → **MUST_FIX**; отложить на prerelease **запрещено** (`onec-code-reviewer.md` Phase 1b).
+5. Линтер недоступен — `Linter unavailable: <reason>`; reviewer проверяет документацию вручную.
 
 ## API EXISTENCE CHECK
 

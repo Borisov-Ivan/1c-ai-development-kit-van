@@ -18,6 +18,14 @@ snapshot:
   accepted_tasks:
     - S1.1
     - S1.accept
+  closed_decisions: []
+  # agent-only: id (snake_case), summary (prose), closed_at (ISO date), source (verify-user-answer | repair-from-verify)
+  open_decision_id: null
+  decision_round: 0
+  decision_round_max: 2
+  verify_depth: full
+  # full | incremental | lite — см. SKILL.md § verify depth
+  assumptions_accepted: []
   open_known_questions: []
   artifacts_mtime:
     proposal.md: "YYYY-MM-DDTHH:mm:ss"
@@ -53,7 +61,7 @@ snapshot:
 - **Layer 1 (Hygiene):** `PASS` (нечего править), `AUTOFIXED` (автоправки применены), `FAIL` (немеханические проблемы формата).
 - **Layer 2 (Internal Coherence):** `PASS`, `WARNING` (несущественные несостыковки артефактов), `FAIL` (циклы зависимостей, несовпадение spec ↔ tasks).
 - **Layer 3 (Problem-Solution Trace):** `PASS`, `WARNING` (орфаны без блокера), `FAIL` (Requirement без задач или задача без Requirement).
-- **Layer 4 (Independent Challenge):** `APPROVE`, `CHALLENGE`, `REJECT`, `SKIPPED-novelty` (mtime design.md ≤ snapshot.last_challenge_at), `SKIPPED-override` (`.gate-override.yaml` для challenge).
+- **Layer 4 (Independent Challenge):** `APPROVE`, `CHALLENGE`, `REJECT`, `CHALLENGE-saturated`, `SKIPPED-novelty`, `SKIPPED-override`, `SKIPPED-lite`.
 - **Layer 5 (Implementation Readiness):** `PASS`, `WARNING` (мелкие GAP реализуемости), `FAIL` (задача не реализуема as-is).
 
 ### `snapshot.last_challenge_at`

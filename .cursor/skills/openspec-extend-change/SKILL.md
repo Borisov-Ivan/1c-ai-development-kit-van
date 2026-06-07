@@ -282,6 +282,56 @@ Architect обязателен, если:
    - ссылки на отчёты architect/explorer;
    - следующий шаг.
 
+### 6a. Verify decision ledger (после user-extend `--from-verify` по decision)
+
+**Триггер:** user-extend с `--from-verify` после decision 3a (ответ пользователя на развилку verify).
+
+**Действия (до hint `/opsx:verify`, без ожидания следующего verification YAML):**
+
+1. Добавить/обновить `debug.md` § **`## Verify decision ledger`** (YAML-блок, agent-only):
+   ```yaml
+   closed_decisions:
+     - id: <snake_case>
+       summary: "<проза>"
+       closed_at: "YYYY-MM-DD"
+       source: verify-user-answer
+   open_decision_id: null
+   decision_round: <N+1>
+   verify_depth: incremental
+   assumptions_accepted: []
+   ```
+2. Добавить зеркало в `design.md` § **`## Решения verify (зафиксированo)`** — 1–2 строки прозой **без** `id:` (не дублировать параграфы из `## Decisions`).
+3. Удалить из `open_known_questions` (если велся в debug или последнем verification snapshot) темы, закрытые этим decision.
+4. Internal mapping: парсинг ответа пользователя → `decision_id` + вариант; при неоднозначности — один уточняющий вопрос **прозой**.
+
+**repair-from-verify:** ledger **не** меняет `decision_round`; только технические правки design/tasks.
+
+### 6c. Repair-from-verify: slice acceptance remediation
+
+**Триггер:** internal repair-from-verify; в `quality-control-*.md` или verification report есть блоки `### Remediation (auto-repair)` для slice acceptance alerts.
+
+**Ограничения:** repair **не** ставит `[x]` на accept; **не** архивирует; **не** меняет scope/spec Requirement без decision (merge cross-slice → decision, не auto).
+
+**Алгоритм:**
+
+1. Parse все `Remediation (auto-repair)` из последнего `reports/quality-control-*.md`.
+2. Порядок правок: `design.md` (`## Slices`, матрица, Primary column) → `tasks.md` (metadata, accept, merge) → sync `**Связь со spec:**`.
+3. По alert-id:
+   - `primary-acceptance-missing` — добавить `**Primary acceptance:**` в metadata; первый sub-bullet `**Primary (обязательно):**` в `S<N>.accept` из Behavior Contract / design.
+   - `accept-bullets-missing-scenario` — optional sub-bullet или задача `S<N>.<M>` «верифицировать на ИБ».
+   - `acceptance-simplicity-overload` — оставить один mandatory Primary; остальные → «(опционально)» или `S<N>.<M>`.
+   - `slice-not-vertical` / `slice-foundation-with-gate` — делегировать **onec-code-architect** `mode=slice-restructuring`; merge foundation → consumer; затем post-merge checklist ниже.
+4. Append `debug.md` § `## Verify repair — slice acceptance` (дата, alerts, files touched).
+
+**Post-merge checklist** (после merge foundation → consumer):
+
+1. Перенумерация `# Срез S<N>` и `S<N>.<M>` без пропусков.
+2. `**Зависимости:**` пересчитаны; нет ссылок на слитый срез.
+3. Ровно один `S<N>.accept` + `<!-- slice-gate -->` на оставшийся срез.
+4. `**Primary acceptance:**` синхронны в design и tasks.
+5. Append `debug.md` § `## Verify repair — slice merge` (было S1+S2 → стало S1).
+6. Grep: нет orphan `S<K>.` в задачах других срезов.
+
 ### 6b. Code-sync update rules (`--code-sync`)
 
 После подтверждения брифа:

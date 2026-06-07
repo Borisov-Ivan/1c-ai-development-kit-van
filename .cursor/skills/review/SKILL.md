@@ -5,7 +5,7 @@ license: MIT
 compatibility: Delegates to onec-code-reviewer (prompt_contract_version=3), onec-code-writer, onec-code-simplifier, onec-code-explorer, onec-code-architect. Requires Task tool.
 metadata:
   author: project
-  version: "2.0"
+  version: "2.2"
   expected_reviewer_prompt_contract_version: 3
 ---
 
@@ -13,15 +13,49 @@ metadata:
 
 **Input**: путь к модулю (.bsl), каталог, список файлов, имя расширения, имя ЗНИ (каталог `openspec/changes/<name>`), «текущий файл», либо **без аргументов** (тогда scope — изменения `.bsl` в рабочем дереве git).
 
+**Памятка заказчика (вызов, примеры, отличия `/review` vs `/release-review`):** [`.cursor/docs/review-guide.md`](../../docs/review-guide.md).
+
+**Входы:** `/review` — операционное ревью (этот skill, `release_mode=false`). `/release-review` — предрелиз (`release_mode=true`; команда [`.cursor/commands/release-review.md`](../../commands/release-review.md)).
+
+**Флаги (`/review` only):** `--full` (полное ревью, отключить light-review triage).
+
 **Review Focus Level:** `full` — ревью всего указанного кода в файлах; `diff-focused` — замечания только в изменённых процедурах/функциях и `[module-level]` участках (см. шаг 1.5 и `onec-code-reviewer.md`, Review Boundaries).
 
 **Ключевая архитектурная идея v2.0:** оркестратор собирает **evidence** (scope, границы, линтер, история, whitelist проекта, architectural context). Ревьювер — **единственный владелец вердиктов** (severity/kind/action/risk). AP-каталог — единственный источник истины для AP-правил (см. `.cursor/rules/bsl-antipatterns.mdc`).
 
 ---
 
+## Шаг 0. Флаги и `release_mode`
+
+Зафиксировать до резолва scope:
+
+| Переменная | Условие |
+|---|---|
+| `release_mode` | `true` — команда `/release-review`; `false` — `/review` |
+| `full_review` | `true`, если `--full` **или** `release_mode` |
+| `review_mode` | `full-extension` — `/release-review` без change; `change-scoped` — `/release-review` + change; иначе — по таблице 1.2 |
+| `extension_name` | имя папки cfe (из аргументов или контекста) |
+| `change_name` | имя каталога change при `change-scoped` |
+
+При `release_mode`: acknowledgement в шаге 1.1 — «Понял: запускаю **предрелизное** ревью…».
+
+---
+
 ## Шаг 1. Resolve scope (со smart defaults)
 
 Определить scope по **приоритету** (первое совпадение из контекста запроса пользователя). Зафиксировать **`review_focus`** глобально и/или **пофайлово** (см. шаг 1.5).
+
+### 1.0 Приоритет `/release-review` (`release_mode`, до таблицы 1.2)
+
+Если `release_mode = true`:
+
+| Ввод | Действие | `review_focus` |
+|---|---|---|
+| Расширение без change (`/release-review <ext>`) | Glob все `*.bsl` в `src/*/cfe/<ext>/`; `extension_all_bsl` = полный список | `full` |
+| Расширение + change (`/release-review <ext> <change>`) | Шаг **1.3a** (change-scoped resolver); Tier 1 = `target_files` | `diff-focused` |
+| Только change без расширения | Валидировать change; resolver 1.3a; cfe из путей в `target_files` | `diff-focused` |
+
+После резолва — шаг **1.3c** (`extension_all_bsl` для Tier 2). Light-review (1.4) **не применять**.
 
 ### 1.1 Smart defaults (S12)
 
@@ -44,7 +78,7 @@ metadata:
 | **Явные пути** к `.bsl` или каталогу | Нормализовать относительно корня репо; для каталога — все `*.bsl` под ним (Glob). | `full` |
 | **Текущий/открытый файл** («ревью этого модуля», `review current file`) | Путь из IDE; файл должен быть `.bsl`. | `full` |
 | **Расширение** (имя папки cfe или «ревью расширения X») | `openspec/project.md` → пути cfe; Glob `*.bsl` в каталоге расширения. | `full` |
-| **Имя ЗНИ / каталог change** (`openspec/changes/<name>`, `.../archive/<name>`, или явное имя в тексте) | Валидировать `tasks.md`. Список файлов: как в prerelease-review шаг 1.3a — только задачи `[x]`, пути из `` `src/...bsl` `` + наследование «тот же файл» в секции `##`. При пустом списке — git-fallback по slug. | `diff-focused` |
+| **Имя ЗНИ / каталог change** (`openspec/changes/<name>`, `.../archive/<name>`, или явное имя в тексте) | Валидировать `tasks.md`. Список файлов: задачи `[x]`, пути из `` `src/...bsl` `` + наследование «тот же файл» в секции `##`. При пустом списке — git-fallback по slug. | `diff-focused` |
 | **Без аргументов, активный change и непустой git diff** | Smart default (1.1 п.1). | `diff-focused` |
 | **Без аргументов, нет active change, есть git diff** | `git diff --name-only HEAD` ∪ `git diff --name-only --cached`, оставить `.bsl`. | `diff-focused` |
 | **Без аргументов, scope неясен, git diff пуст** | **AskQuestion** — указать файл/каталог, расширение, имя ЗНИ или подтвердить полное ревью с явным scope. | — |
@@ -52,6 +86,29 @@ metadata:
 **Валидация:** пути существуют, расширение `.bsl`. Исключить удалённые-only файлы из списка ревью.
 
 **Итог шага:** список путей к `.bsl` + для каждого файла черновик режима (`full` | `diff-focused`); окончательно уточняется в шагах 1.4–1.5.
+
+### 1.3a Change-scoped resolver (только `release_mode` + change)
+
+Построить списки с provenance:
+
+- **`target_files`** — `.bsl` внутри выбранного cfe; Tier 1 и mandatory evidence.
+- **`reference_files`** — `.bsl` вне cfe; read-only context, findings запрещены.
+- **`doc_files`** — markdown/spec; не в BSL reviewer.
+- **`ambiguous_files`** — пути без однозначного `src/`.
+
+**Источники (приоритет):** `reports/architecture-*.md` (`scope.files`) → `tasks.md` (`[x]`, backticks) → `design.md` (backticks) → git fallback по slug change.
+
+**Suffix matching:** для путей без `src/` — `Glob **/<suffix>`; 1 hit → resolve; >1 или 0 → `ambiguous_files`.
+
+**Scope Preview:** если `target_files` пуст **или** `ambiguous_files` не пуст — **AskQuestion**:
+
+> **Scope Preview:** Target: N, Reference: M, Ambiguous: K ([список]). Продолжить / переключиться в full-extension / остановиться?
+
+Если всё однозначно — продолжить без вопроса. Затем шаг 1.5 для `target_files` (Review Boundaries).
+
+### 1.3c `extension_all_bsl` (только `release_mode`)
+
+Glob `src/*/cfe/<extension>/**/*.bsl`. При `full-extension` — Tier 1 и Tier 2; при `change-scoped` — Tier 2 only (Tier 1 = `target_files`).
 
 ---
 
@@ -71,6 +128,7 @@ metadata:
 
 ### Решение
 
+- **`release_mode = true`** — пропустить шаг 1.4 целиком (как при `--full`).
 - **Активный `--full` флаг пользователя** (явное указание «полное ревью» / «не сокращай») — игнорировать триаж, идти в обычный flow.
 - **Default** (без `--full`): применить light review без AskQuestion; уведомить:
   > `Trivial diff detected (<whitespace/comments/renames>). Light review: linter + whitelist check only. Use /review --full to override.`
@@ -148,7 +206,7 @@ Focus: full (new file)
 
 ### 1.6.2 Обязательный контроль (regex-based rules)
 
-Если в п.1.6.1 таблица **«Обязательный контроль»** содержит строки с непустым **Regex допустимой строки** — оркестратор может выполнить проверку как evidence (не заменять ревьювера). Алгоритм — как в `prerelease-review/SKILL.md` шаг 1.7c. Результаты передавать в промпт ревьювера блоком `## Mandatory Control Signals (evidence)`:
+Если в п.1.6.1 таблица **«Обязательный контроль»** содержит строки с непустым **Regex допустимой строки** — оркестратор может выполнить проверку как evidence (не заменять ревьювера). Алгоритм mandatory control: regex из `project.md` § «Обязательный контроль» на первой значимой `//` после `#Вставка`. Результаты — блок `## Mandatory Control Signals (evidence)`:
 
 ```markdown
 ## Mandatory Control Signals (evidence)
@@ -201,7 +259,10 @@ Focus: full (new file)
 - **Version contract (S13):** в начало промпта вставить `expected_reviewer_prompt_contract_version: 3` (значение из frontmatter скилла). Ревьювер сверяет с `prompt_contract_version` в своём frontmatter; несовпадение → warning в отчёт.
 - Список файлов.
 - Стандарты: `.cursor/docs/1c-coding-standards.md`.
-- Задача: «Полный подробный ревью. Без `mode=prerelease`.» + при `diff-focused`: «Соблюдать `## Review Boundaries` (замечания только в границах).»
+- Задача:
+  - **`release_mode = false`:** «Полный подробный ревью. Без `mode=prerelease`.»
+  - **`release_mode = true`:** «Предрелизное ревью. **mode=prerelease**. Category 12 Release Readiness (`.cursor/docs/standard/reviewer-checks.md` §12). Эскалация severity по AP-каталогу. Release-hygiene AP-040..AP-045.»
+  - При `diff-focused`: «Соблюдать `## Review Boundaries` (замечания только в границах).»
 - **Whitelist & Mandatory Controls (from project.md)** — блок из шага 1.6.1.
 - **Mandatory Control Signals (evidence)** — блок из шага 1.6.2 (если есть).
 - **Linter Signals (evidence)** — блок из шага 1.8 (всегда, даже если пусто / unavailable).
@@ -249,20 +310,39 @@ Focus: full (new file)
 
 > Task Pre-call Checklist — `.cursor/rules/tool-name-guard.mdc` (subagent_type из списка; `model` — по `.cursor/rules/model-selection.mdc`).
 
-Вызвать **Task**(`subagent_type="onec-code-reviewer"`) с промптом по шаблону «Reviewer (ревью кода)» из `.cursor/skills/1c-agent-patterns/reviewer.md`:
+### Шаблон промпта
+
+| `release_mode` | Шаблон |
+|---|---|
+| `false` | «Reviewer (ревью кода)» — `.cursor/skills/1c-agent-patterns/reviewer.md` |
+| `true` | «Reviewer (предрелиз)» — тот же файл |
+
+Вызвать **Task**(`subagent_type="onec-code-reviewer"`) с промптом по выбранному шаблону:
 
 - Файлы: список из шага 1 (для батча — подмножество).
 - `expected_reviewer_prompt_contract_version`: 3.
+- **`release_mode = true`:** явно **`mode=prerelease`** в промпте; Category 12; release-hygiene focus.
+- **`release_mode = false`:** **не** передавать `mode=prerelease`.
 - Диагностики линтера: блок **`## Linter Signals (evidence)`** из шага 1.8 (все severity, включая warning; не сокращать до «линтер чист»).
 - Whitelist / Mandatory: блоки из шага 1.6.
 - Prior Findings History: блок из шага 2.1 (если есть).
 - Architectural Context: из шага 2.2 (если есть).
 - Review Boundaries: из шага 1.5 (при `diff-focused`).
+- Reference Files (только `change-scoped`): read-only context, findings запрещены.
 - Base-файл(ы): из шага 2 для файлов с &ИзменениеИКонтроль.
 - Resolved Contracts: при повторном прогоне.
-- Не передавать mode=prerelease.
 
-**Батчи:** >5–8 файлов — разбить. Для каждого батча формировать `## Review Boundaries` отдельно. Итоговый список findings — объединение с дедупликацией (см. шаг 4 S14).
+**Батчи:** >5–8 файлов — разбить. При **`release_mode = true`** — группы A (object/manager/common), B (`ВызовСервера`/`Глобальный`), C (`Forms/*/Module.bsl`); A >5 → A1/A2 по 3–5 файлов. Для каждого батча — отдельный `## Review Boundaries`. Итоговый список findings — объединение с дедупликацией (шаг 4 S14).
+
+### 3.2 Tier 2 — архитектурный explorer (только `release_mode`)
+
+Параллельно с шагом 3.1 (или после первого батча): **Task**(`subagent_type="onec-code-explorer"`) по шаблону «Explorer — deep-analysis» из `.cursor/skills/1c-agent-patterns/explorer.md`:
+
+- Scope: **`extension_all_bsl`** (все `.bsl` расширения).
+- Промпт: архитектурный анализ расширения; `mode=prerelease`; findings `kind=architecture`.
+- Результат объединить с Tier 1 в шаге 4 (дедупликация S14).
+
+**Risk Surfacing (release):** в слоте «Что важно» — при `change-scoped`: «Tier 2 покрыл всё расширение; изменения вне `target_files` не блокеры релиза для Tier 1».
 
 ### 3.1 Version contract check
 
@@ -331,7 +411,7 @@ Focus: full (new file)
 1. **Что отрецензировано** — UX-формулировка scope (модуль / файлы / расширение / ЗНИ).
 2. **Итог** — топ-3 находки в пользовательском языке + общее число (без severity-меток в заголовках).
 3. **Что важно** (Risk Surfacing) — «не покрыто этим ревью»: при `diff-focused` — неизменённый код, при `light review` — Phase 0 / AP-пасс, при mismatch контракта ревьювера — затронутые findings.
-4. **Куда дальше** — одна команда (устранение / extend / archive).
+4. **Куда дальше** — одна команда (устранение / extend / archive). При **`release_mode`:** если есть ARCH-findings или MUST_FIX scope/design — `/opsx:extend <change> --from-review <main-report-path>`; иначе устранение через writer или «только отчёт».
 
 Полный отчёт (счётчики CRITICAL/HIGH/MEDIUM/LOW, разделение CODE/ARCHITECTURE) остаётся в `reports/review-<scope-slug>-YYYY-MM-DD.md` и appendix.
 
@@ -376,7 +456,7 @@ Focus: full (new file)
 
 1. **MUST_FIX:** Task `onec-code-writer` по шаблону «Writer — review fix». В промпте findings отсортированы по `risk_score` desc.
 2. **REFACTOR:** Task `onec-code-simplifier` (шаблон: `.cursor/skills/1c-agent-patterns/simplifier.md`).
-3. **LINT GATE:** ReadLints → исправить ошибки.
+3. **LINT GATE** — см. [`.cursor/rules/1c-agent-delegation.mdc`](../../rules/1c-agent-delegation.mdc) § LINT GATE + [`.cursor/rules/1c-writer-pipeline.mdc`](../../rules/1c-writer-pipeline.mdc).
 4. **API EXISTENCE CHECK (smart default S12):**
    - По правилам из `1c-agent-delegation.mdc` проверить новые вызовы `МодульИмя.МетодИмя(` в diff.
    - **Auto-pass правило:** если каждый WARN-вызов имеет **≥ 3 hits в extension scope** (Grep по `МодульИмя\.МетодИмя\(`) — auto-pass с записью INFO в отчёт, без AskQuestion.
@@ -440,7 +520,7 @@ Focus: full (new file)
 ## Интеграция
 
 - **session-discipline.mdc:** первый инструмент в первом батче — Read этого скилла; протокол действует весь `/review`.
-- **1c-agent-delegation:** правки `.bsl` только через writer/simplifier; после правок — обязательный reviewer; LINT GATE и API EXISTENCE CHECK; EXTENSION GATE и EXTENSION VERIFICATION при `&ИзменениеИКонтроль`. **Investigation Loop** (шаг 3.5) — multi-iteration (max 3). Формат — секция CONTRACT RESOLUTION в `1c-agent-delegation.mdc`.
+- **1c-agent-delegation:** правки `.bsl` только через writer/simplifier; после правок — обязательный reviewer; LINT GATE (SSOT: `1c-agent-delegation.mdc` + `1c-writer-pipeline.mdc`) и API EXISTENCE CHECK; EXTENSION GATE и EXTENSION VERIFICATION при `&ИзменениеИКонтроль`. **Investigation Loop** (шаг 3.5) — multi-iteration (max 3). Формат — `1c-writer-pipeline.mdc` § CONTRACT RESOLUTION.
 - **Review Focus Boundaries:** при `diff-focused` оркестратор формирует `## Review Boundaries`; reviewer следует Review Boundaries Protocol.
 - **Evidence separation:** все механические проверки (linter, whitelist, mandatory controls, prior history) — **evidence**; вердикты (severity/kind/action/risk) — **reviewer**.
 - **Release-hygiene:** AP-040..AP-045 каталога (не grep оркестратора); reviewer использует Intent Map / Contract Map.

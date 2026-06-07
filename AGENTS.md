@@ -5,32 +5,31 @@
 
 ## OpenSpec Workflow
 
-`.cursor/rules/sdd-workflow.mdc` — explore → new/ff → verify → apply → verify → archive.
+`.cursor/rules/sdd-workflow.mdc` — explore → ff → verify → apply → verify → archive.
 
-Команды: `/opsx:explore` (точка входа; свободный текст = explore), `/opsx:new`, `/opsx:ff`, `/opsx:verify`, `/opsx:apply`, `/opsx:archive`, `/opsx:extend`, `/opsx:continue`, `/opsx:status`, `/opsx:migrate-slices`, `/opsx:estimate`, `/opsx:doc-tz`, `/opsx:knowledge-add`, `/opsx:sync`, `/opsx:bulk-archive`, `/review`, `/prerelease-review`, `/init-project`.
+Команды: `/opsx:explore`, `/opsx:ff`, `/opsx:verify`, `/opsx:apply`, `/opsx:archive`, `/opsx:extend`, `/opsx:status`, `/opsx:knowledge-add`, `/opsx:sync`, `/opsx:bulk-archive`, `/review`, `/release-review`, `/init-project`.
 
 ### Decision tree команд
 
-Полный глоссарий терминов: `openspec/glossary.md`.
+Термины workflow — в таблице ниже и в [`openspec/project.md`](openspec/project.md).
 
 | Задача пользователя | Команда | Чем отличается |
 |---------------------|---------|----------------|
 | Любой вопрос, дефект, идея, постановка (в т.ч. свободный текст) | `/opsx:explore` | Единая точка входа; бриф-чекпойнт; итог — блок `## Для /opsx:ff` в чате |
-| Создать change целиком разом (задача понятна) | `/opsx:ff <name>` | Все артефакты сразу |
-| Создать change пошагово | `/opsx:new <name>` → `/opsx:continue <name>` | По одному артефакту за шаг |
+| Создать или дозавершить change | `/opsx:ff <name>` | Все артефакты сразу; повторный вызов — resume |
 | Где я в этом change | `/opsx:status <name>` | Read-only снимок |
-| Можно ли запускать apply | `/opsx:verify <name>` | Pre-flight + self-repair; один вердикт в первой строке |
+| Можно ли запускать apply | `/opsx:verify <name>` | Pre-flight + self-repair; один вердикт в первой строке. Опционально `/opsx:verify <name> --lite` — только исполнимость без повторного независимого аудита (guardrails в SKILL verify). |
 | Добавить новое требование | `/opsx:extend <name>` | Бриф → правки → подсказка verify |
 | Учесть отчёт ревью/архитектора | `/opsx:extend <name> --from-review` / `--from-architecture` | Классификация findings → правки артефактов |
 | Код упростили вручную, артефакты отстали | `/opsx:extend <name> --code-sync` | explorer читает факт → артефакты догоняют |
-| Мигрировать старый tasks.md в срезы | `/opsx:migrate-slices <name>` | Реструктуризация + подтверждение diff |
 | Реализовать задачи | `/opsx:apply <name>` | Делегирует writer/reviewer; пауза на приёмке среза |
 | Архивировать завершённый change | `/opsx:archive <name>` | Финализация + извлечение ADR/KB |
-| Сгенерировать ТЗ по ЗНИ | `/opsx:doc-tz <name>` | Отдельно от verify |
-| Оценить трудозатраты | `/opsx:estimate <name>` | PERT по tasks.md |
-| Ревью кода | `/review` | Без аргумента — git diff; с аргументом — файл/модуль/расширение/ЗНИ |
-| Финальная проверка перед релизом | `/prerelease-review` | Расширение целиком или change scope |
+| Ревью кода (точечное) | `/review` | Git diff, файл, расширение, ЗНI; light-review на тривиальном diff. Памятка: [`.cursor/docs/review-guide.md`](.cursor/docs/review-guide.md) |
+| Предрелизное ревью | `/release-review …` | Все `.bsl` расширения или change-scoped; Category 12; Tier 2 explorer; без light-review. Примеры — там же |
 | Зафиксировать факты вне ЗНИ | `/opsx:knowledge-add <path>` | Без ЗНИ; source + KB-карточка |
+| Синхронизировать delta specs в main | `/opsx:sync` | Перенос specs из change без archive |
+| Архивировать несколько change | `/opsx:bulk-archive` | Пакетная архивация завершённых ЗНИ |
+| Первичная настройка проекта | `/init-project` | Phase 0–4 inline-протокол; без отдельного SKILL |
 
 ## Карта SSOT (один якорь на тему)
 
@@ -40,8 +39,9 @@
 - Словарь запретов (SSOT) → `.cursor/docs/chat-lexicon.md`; каталог AI-tells → `.cursor/skills/stop-slop/SKILL.md`.
 
 **Делегирование и код 1С:**
-- HALT, делегирование, APPLY/LIGHT/MECHANICAL MODE, LINT GATE, API CHECK, BSL+XML write guard → `.cursor/rules/1c-agent-delegation.mdc`.
-- Writer pipeline (API/extension/contract) → `.cursor/rules/1c-writer-pipeline.mdc` (globs `**/*.bsl`).
+- HALT (always-apply stub), делегирование, APPLY/XML write guard → `.cursor/rules/1c-agent-delegation.mdc`.
+- HALT-таблица, Light/Mechanical, исключения → `.cursor/rules/1c-halt-triggers.mdc` (on-demand, globs `**/*.bsl`).
+- LINT GATE (полный текст), writer pipeline → `.cursor/rules/1c-writer-pipeline.mdc` (globs `**/*.bsl`).
 - Запрет создания метаданных → `.cursor/rules/1c-no-metadata-creation.mdc`; валидация имён метаданных по выгрузке `src/` до использования → `.cursor/rules/1c-metadata-validation.mdc` (globs `**/*.bsl`).
 - Инструмент субагентов = Task → `.cursor/rules/tool-name-guard.mdc`; модели → `.cursor/rules/model-selection.mdc`.
 - Анализ ошибок (трасса → trace-analyst) → `.cursor/rules/1c-error-analysis.mdc`.
@@ -66,7 +66,9 @@
 - Knowledge Base → `openspec/knowledge/` + `.cursor/rules/knowledge-format.mdc`.
 - Маркеры разработчика → `openspec/project.md`; фиксация договорённостей → `.cursor/rules/capture-to-project.mdc`.
 - Пути к выгрузке (cf/cfe) → `openspec/project.md` + `.cursor/rules/project-paths.mdc`.
-- Словарь лексики ТЗ → `.cursor/docs/tz-lexicon-dictionary.md`; запрет ROI/оценок → `.cursor/rules/no-roi-estimates.mdc`.
+- Запрет ROI/оценок → `.cursor/rules/no-roi-estimates.mdc`.
 - Инфраструктура 1С → `.cursor/docs/onec-infrastructure.md`.
+
+**Ревью кода:** памятка заказчика → [`.cursor/docs/review-guide.md`](.cursor/docs/review-guide.md); команды → `/review`, `/release-review`; протокол → `.cursor/skills/review/SKILL.md`.
 
 **Доменные навыки 1С:** `1c-bsp`, `1c-extensions`, `1c-forms`, `1c-mxl`, `1c-roles`, `1c-query-optimization` — через `available_skills` и `.cursor/skills/*/SKILL.md`. Справочники: `.cursor/docs/platform/`, `.cursor/docs/standard/`.

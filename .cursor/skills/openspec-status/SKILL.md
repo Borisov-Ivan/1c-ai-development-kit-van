@@ -47,7 +47,7 @@ Read-only skill. Не вызывает субагентов, не правит �
    - Если slice mode и все `S<N>.accept` = `[x]` → `/opsx:archive <name>` (+ возможно `/opsx:verify <name>` если нет final verify).
    - Если есть `[ ]` в tasks и нет pre-apply verify отчёта → `/opsx:verify <name>`.
    - Если есть `[ ]` и есть pre-apply verify → `/opsx:apply <name>`.
-   - Если artifacts не `done` (нет tasks.md) → `/opsx:continue <name>` или `/opsx:ff <name>`.
+   - Если artifacts не `done` (нет tasks.md) → `/opsx:ff <name>` (resume).
    - Иначе — общая рекомендация с перечнем вариантов.
 
 7. **Output (полный формат, без `--short`).**

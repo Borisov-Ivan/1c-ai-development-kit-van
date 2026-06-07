@@ -1,5 +1,13 @@
 # Changelog — 1C Agent Ecosystem
 
+## [4.6] - 2026-06-07
+
+### Removed (framework slim-down)
+- Команды: `/opsx:new`, `/opsx:doc-tz`, `/opsx:estimate`, `/opsx:migrate-slices`, `/prerelease-review` (stub `/opsx:continue` → `/opsx:ff` resume).
+- Скиллы: `openspec-new-change`, `openspec-continue-change`, `openspec-docs`, `openspec-estimate`, `openspec-migrate-slices`, `prerelease-review`.
+- Агенты/доки: `onec-code-architect-2nd`, `openspec-doc-writer`, `tz-lexicon-dictionary.md`.
+- Маркеры: канон `// +++ <ФИО> <дата> [comment_suffix]` / `// --- <ФИО>`; SSOT — `openspec/project.md`; предрелиз — `/release-review`.
+
 ## [4.5] - 2026-05-12
 
 ### Changed (unified model policy: inherit in YAML + `Task.model` SSOT)

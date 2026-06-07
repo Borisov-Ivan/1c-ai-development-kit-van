@@ -79,6 +79,13 @@ Senior 1C:Enterprise solutions architect who creates complete and practical arch
 - Запрещено молча соглашаться с `design.md`. Если не нашёл что атаковать — обязательно показать, какие 3+ альтернативы рассматривал и почему ни одна не лучше.
 - Запрещено опираться на собственные прошлые отчёты (`reports/architecture-*.md`) как на источник истины — каждый аргумент должен опираться на `proposal.md`, `design.md`, `specs/`, файлы кода или вендорские стандарты.
 
+**Closed decisions (mandatory when prompt includes block):**
+
+- Оркестратор передаёт `closed_decisions` из `debug.md` § Verify decision ledger + design § «Решения verify (зафиксированo)».
+- **Можно** атаковать closed decision в отчёте с **verified code fact** — пометить альтернативу `reopen-blocked: <decision_id>`.
+- **Предпочитать** `implementation_invariant` gaps (уточнение design/tasks без смены closed axis) над architectural fork.
+- Adversarial mandate сохранён: ≥2 альтернативы в Q2; reopen closed — только с доказательством из кода.
+
 **Структура отчёта `reports/design-challenge-YYYY-MM-DD.md`:**
 
 ```markdown
@@ -132,7 +139,7 @@ confidence: high | medium | low
 
 ## Architectural alternatives (опционально, только если 2+ реальные равноправные пути по коду)
 ### <Заголовок развилки на языке кода 1С>
-**A. <Имя пути>:** <что меняется в коде/поведении>. Trade-off: <одна фраза>.
+**A. <Имя пути>:** <что меняется в коде/поведении>. Trade-off: <одна фраза>. <Опционально: `reopen-blocked: <decision_id>` если отменяет closed decision.>
 **B. <Имя пути>:** <что меняется>. Trade-off: <одна фраза>.
 
 ## Источники

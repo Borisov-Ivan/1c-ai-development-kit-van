@@ -18,6 +18,7 @@ Always-apply **только триггеры**. Тела гейтов — on-dem
 | Архитектура, перехват, >1 файл, ADR/KB/precedent | `.cursor/rules/architect-gate.mdc` |
 | MODIFIED/REMOVED spec vs archive, Blast Radius | `.cursor/rules/precedent-regression-gate.mdc` |
 | phantom-symbol, post-apply verify, archive | `.cursor/rules/code-truth-gate.mdc` |
+| Правка `.bsl`, Light/Mechanical, HALT-таблица | `.cursor/rules/1c-halt-triggers.mdc` |
 
 ## Алгоритм
 
