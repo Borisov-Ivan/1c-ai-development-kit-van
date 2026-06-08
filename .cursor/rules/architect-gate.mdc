@@ -35,7 +35,7 @@ priority: 200
 - Интеграция без `## Design Rationale` в design.md
 - Design Rationale без ссылки на `architecture-*.md` или подтверждения пользователя
 - Фикс меняет пользовательский сценарий (UX-значимый)
-- Бриф `/opsx:extend` фиксирует `Drift-check: drift-warning` или `Drift-check: scope-violation` (блок «Соответствие исходному scope» в T-BRIEF, см. `openspec-extend-change/SKILL.md`)
+- Internal block extend (`debug.md`) фиксирует `Drift-check: drift-warning` или `scope-violation` при user-extend (триггер брифа **B2**, см. `openspec-extend-change/SKILL.md`); `Drift-check` **не в чат**
 - **Precedent regression** (см. `.cursor/rules/precedent-regression-gate.mdc`): дельта `specs/**` содержит `MODIFIED`/`REMOVED` для capability, у которой в архиве есть `ADDED`; или в `design.md`/`proposal.md` есть явная отмена целей архивного change / пунктов `Protects-invariants` Load-Bearing ADR; или новый ADR **Supersedes** ADR со статусом Load-Bearing без секции `## Blast Radius` в новом ADR
 - Дельта spec или design противоречит KB с `invariant: true`, заявленному в Discovery по `anchor-paths`
 

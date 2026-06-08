@@ -21,7 +21,7 @@ metadata:
 
 **repair-from-verify:** без Entry Protocol, без lite-брифа, без «Подтвердить?»; сразу §6 Artifact update rules по remediation из отчёта verify; запись в `debug.md`; **0** строк в чат.
 
-**user-extend с `--from-verify` после decision:** lite-бриф (2–3 предложения) + «Подтвердить?» → после правок handoff на языке эффекта.
+**user-extend с `--from-verify` после decision:** бриф **B2** (delta extend) + «Подтвердить?» → после правок handoff на языке эффекта.
 
 Chat Surface Contract — §2.6 `opsx-output-style.md`.
 
@@ -64,19 +64,27 @@ Chat Surface Contract — §2.6 `opsx-output-style.md`.
 3. Выполнить `openspec instructions apply --change "<name>" --json`.
 4. Прочитать `openspec/project.md` и артефакты change из `contextFiles`: `proposal.md`, `design.md`, `tasks.md`, `specs/**` при наличии; для расширения scope также прочитать `debug.md` (если есть) — нужен для счётчика Scope Coherence Audit и записей `## Extend`.
 5. Прочитать только явно переданные source-файлы (`--from-*`, `@path`, пути в запросе). Трассы — через `/opsx:explore` (профиль bug). `--from-report` принимает (приоритет): `temp/reports/<тип>-YYYY-MM-DD-<slug>.md` (отчёт `Task` из Ultra-Lite explore), `temp/explore-handoff-*.md` (handoff с блоком `## Для /opsx:ff`), legacy `openspec/sessions/<slug>/analysis.md`. Если указан `--code-sync`, source = артефакты change + `debug.md` + отчёты `reports/**` + результаты Code-Truth Gate; чтение BSL/XML до брифа всё равно запрещено.
-5a. Для секции **KB в scope** брифа: прочитать `openspec/knowledge/_index.yaml` и при необходимости `_taxonomy.yaml` и выбранные KB `.md` — по алгоритму Entry Protocol шаг 1.5 `.cursor/skills/openspec-explore/SKILL.md` (anchor-paths из путей в уже прочитанных артефактах и source-файлах; бюджет Top-10; при отсутствии совпадений — «нет совпадений по anchor-paths и домену» или «Discovery не требовался» при явном отсутствии релевантных путей).
-6. Сформировать и показать **бриф extend** по шаблону ниже.
+5a. **KB Discovery (internal):** прочитать `openspec/knowledge/_index.yaml` и при необходимости `_taxonomy.yaml` и выбранные KB `.md` — по алгоритму Entry Protocol шаг 1.5 `.cursor/skills/openspec-explore/SKILL.md` (anchor-paths из путей в уже прочитанных артефактах и source-файлах; бюджет Top-10). Результат — **не в чат**, только для промптов architect/explorer после «да».
+5b. **Brief Depth Classifier** — `.cursor/docs/opsx-output-style.md` §5.1 (B1 по умолчанию; B2 при drift/decision/`--code-sync`/`--from-review` >3 findings/`--from-verify` после decision; **никогда B3**).
+6. Сформировать и показать **бриф extend** (B1 или B2) по шаблону ниже.
 7. **END TURN.** До подтверждения пользователя запрещены: запись артефактов, вызовы writer/reviewer, вызовы architect/explorer, чтение BSL/XML для анализа логики.
 
-Разрешённые действия до брифа: чтение этого скилла, `openspec list --json`, `openspec instructions apply --json`, чтение `project.md`, чтение артефактов change, чтение явно переданных markdown/text/source-report файлов, чтение `openspec/knowledge/_index.yaml` / `_taxonomy.yaml` и выбранных KB `.md` только для поля «KB в scope» (шаг 5a).
+Разрешённые действия до брифа: чтение этого скилла, `openspec list --json`, `openspec instructions apply --json`, чтение `project.md`, чтение артефактов change, чтение явно переданных markdown/text/source-report файлов, чтение `openspec/knowledge/_index.yaml` / `_taxonomy.yaml` и выбранных KB `.md` (шаг 5a, internal).
 
 ### Шаблон брифа (T-BRIEF)
 
-Единый каркас — `.cursor/docs/opsx-output-style.md` §5.1 в **чате** (5 секций: Что вижу, Хочу понять, Как буду искать, Что получите, Подтвердить?). Заголовок: `Бриф для исследования: /opsx:extend | change: <name>`. Файлы `temp/briefs/*.md` не создаются.
+SSOT: `.cursor/docs/opsx-output-style.md` §5.1 (Sync Card, уровни B0–B3). Заголовок: `Бриф: <change-name>`. Файлы `temp/briefs/*.md` не создаются.
 
-**Чат-бриф extend = только 5 слотов §5.1.** Поле **На выходе** = 2–3 предложения на языке эффекта (что именно допишется в план). Служебные блоки **в чат не выводятся**.
+**Чат-бриф extend = B1 или B2** (классификатор шаг 5b). Слоты:
 
-**Внутренние блоки (считаются перед брифом, в чат НЕ попадают — пишутся в `debug.md` / файл отчёта или применяются после подтверждения):**
+| Уровень | Слоты в чате | Бюджет |
+|---------|--------------|--------|
+| **B1** | **От вас** / **Цель** / **На выходе** / **Подтвердить?** | ≤6 строк |
+| **B2** | + **Риск / развилка** (одна A/B); опционально 1 строка **План** = «как проверим выбор» | ≤8 строк |
+
+**Запрещено в чат-брифе extend:** слот **План** с перечислением артефактов; `Как буду искать`; `Бриф для исследования`; `Drift-check:`; `proposal.md / design.md` как план шагов.
+
+**Внутренние блоки (до брифа, в чат НЕ попадают — в `debug.md` § Extend после подтверждения):**
 
 ```markdown
 # (internal, не в чат)
@@ -87,15 +95,30 @@ Chat Surface Contract — §2.6 `opsx-output-style.md`.
 - Меняет Behavior Contract: yes / no
 - Отменяет архивный инвариант: yes / no
 - Drift-check: pass / drift-warning / scope-violation
+
+План после подтверждения (internal):
+1. Уточнить неоднозначности при необходимости
+2. Проверить гейты архитектуры и факты в коде
+3. При --code-sync — делегировать исследователя кода → reports/exploration-code-sync-YYYY-MM-DD.md
+4. Обновить артефакты change
+5. Hint /opsx:verify <name>
 ```
 
-Если extend вызван **internal repair-from-verify** — **бриф не показывается**, правки сразу по §6.
+Если extend вызван **internal repair-from-verify** — **B0**, бриф не показывается, правки сразу по §6.
 
-Если extend вызван **user-extend с `--from-verify` после decision** — чат-бриф ужимается до поля **На выходе** (2–3 предложения сути); внутренние блоки — как выше, в файл.
+Если extend вызван **user-extend с `--from-verify` после decision** — **B2**: только delta extend («что допишем в постановку по вашему ответу»), **не** повтор verify-карточки.
 
-Секция **Как буду искать** того же сообщения: 1) уточнить неоднозначности через AskQuestion при необходимости; 2) проверить гейты архитектуры и факты в коде; 3) при `--code-sync` — после подтверждения делегировать исследователя кода и сохранить `reports/exploration-code-sync-YYYY-MM-DD.md`; 4) обновить артефакты change; 5) передать на `/opsx:verify <name>`. Завершить **Подтвердить?** по §5.1.
+**Матрица входов → уровень брифа:**
 
-Self-check перед выводом: чат-бриф = 5 слотов §5.1, 8–12 строк; в UX-полях нет `S<N>.T<M>` / `D<N>` / номеров задач; списки нумерованы; блок **«Соответствие исходному scope»** заполнен всеми **пятью** строками **внутренне (для файла/применения), в чат не выводится**.
+| Флаг / вход | Уровень |
+|-------------|---------|
+| `--code-sync` | B2 (всегда) |
+| `--from-review` с >3 findings | B2 (сводка + приоритет в **Риск / развилка**) |
+| `--from-verify` после decision | B2 |
+| Конкретное уточнение, drift pass | B1 |
+| `drift-warning` / `scope-violation` | B2 |
+
+Self-check перед выводом: уровень B1/B2 по классификатору; бюджет tier; UX-поля без `S<N>.T<M>` / `D<N>`; блок **«Соответствие исходному scope»** и **План после подтверждения** заполнены **внутренне**, в чат не выводятся; `rg`-HALT: нет `Как буду искать`, `Бриф для исследования`.
 
 **Развилки в чате после брифа:** любые варианты выбора до или после подтверждения (AskQuestion, неоднозначный `Drift-check` и т.п.) выводить блоками **«Решение N — …»** с развилками прозой (как в verify 3a, `verify-user-communication.mdc:43`), чтобы пользователь мог ответить одной строкой. Коды `<N>a` / `<N>b` / `<N>c` в чате запрещены. Варианты **в чате**, не только в длинном теле брифа.
 

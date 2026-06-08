@@ -36,7 +36,7 @@ description: Контролируемое расширение scope сущес�
 **Поведение (кратко):**
 1. Прочитать `openspec/changes/<name>/` (proposal, design, specs, tasks).
 2. Прочитать явно переданные файлы/отчёты и извлечь из них факты, findings, recommendations, open questions.
-3. Показать обязательный бриф (T-BRIEF в скилле), включая блок **«Соответствие исходному scope»** и при необходимости Scope Coherence Audit (`architecture-extend-coherence-*.md`). До подтверждения пользователя — никаких правок.
+3. Показать бриф **B1/B2** (T-BRIEF в скилле, §5.1 Sync Card). «Соответствие исходному scope», `Drift-check`, план правки артефактов — **internal** (`debug.md`), не в чат. При drift — Scope Coherence Audit (`architecture-extend-coherence-*.md`) после подтверждения. До «да» — никаких правок.
 4. Проанализировать новое требование: относится ли к существующему сценарию (Requirement / Scenario в spec) или требует нового.
 5. Обновить артефакты:
    - proposal.md — добавить в scope (секция `## Цель` или `## Scope`).

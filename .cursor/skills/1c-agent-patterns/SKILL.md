@@ -70,7 +70,7 @@ description: Reference guide for 1C agent delegation patterns - complexity asses
 - Файл трассы (PFF/TRACE) или стек ошибки 3+ строк
 - Перед вызовом: подготовить бриф.
   В extend — обогащённый бриф из артефактов change (`design.md`, `debug.md`) или из `temp/reports/<тип>-*.md` / `temp/explore-handoff-*.md`.
-  В explore — бриф из пользовательского ввода и блока «Хочу понять» в чате (Entry Protocol; `openspec-explore/SKILL.md`).
+  В explore — бриф B3 из пользовательского ввода и слота **Вопрос** в чате (`user-goal` в промпте; `openspec-explore/SKILL.md`).
 
 ### openspec-quality-controller
 - Domain-agnostic readonly Slice Coherence review
