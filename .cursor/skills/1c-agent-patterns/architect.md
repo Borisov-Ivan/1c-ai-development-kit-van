@@ -329,7 +329,9 @@ Task(
 
          Не оценивай: выполним ли приёмочный чеклист пользователем сейчас;
          нужны ли тестовые документы; есть ли эталон ИБ до перехвата;
-         smoke-сценарии. Это apply/archive.
+         smoke-сценарии. Это apply/archive. **Structural user-spike в
+         `S<N>.<M>` — in scope** (критерий 8), не путать с отсутствием
+         тестовых данных.
 
          ## Формат ответа
 
@@ -346,6 +348,7 @@ Task(
          | 5 | Согласованность | OK/GAP | ... |
          | 6 | Связность кода и порядок задач | OK/GAP | ... |
          | 7 | Архитектурная эстетика (Design Smells) | OK/SUBOPTIMAL | ... |
+         | 8 | User Task Contract | OK/GAP | user runtime-spike в `S<N>.<M>`? |
 
          ### Пробелы (только при GAP или SUBOPTIMAL)
          Для каждого GAP:
@@ -564,8 +567,9 @@ Task(
             следующий срез `S<K+1>` **подключает** этот код и даёт
             user-journey accept — **свернуть** S<K> и S<K+1> в один
             срез: код-задачи S<K> → `S<M>.<M>` внутри объединённого
-            среза; implementation Scenario → verification `S<M>.<M>`
-            с пометкой «(verification, не accept)»; приёмка S<K+1> →
+            среза; implementation Scenario → **agent** verification
+            `S<M>.<M>` («по коду», не user IB) с пометкой «(verification,
+            не accept)»; приёмка S<K+1> →
             `S<M>.accept` с black-box чеклистом; удалить блок
             `# Срез S<K>`; синхронизировать `design.md` `## Slices`.
 
@@ -623,9 +627,12 @@ Task(
          4. В каждом срезе — как минимум 1 приёмочный сценарий
             (описывается в поле «Приёмка»).
          5. Покрытие: каждый #### Scenario: из spec SHALL быть покрыт **primary-срезом**
-            (буллет `S<N>.accept` где код даёт UX) **или** verification-задачей
-            `S<N>.<M>` без отдельного accept. **Не** 1:1 Requirement → Slice.
-            Отдельный срез с accept — только для самостоятельного user outcome.
+            (буллет `S<N>.accept` где код даёт UX) **или** **agent** verification-задачей
+            `S<N>.<M>` («верифицировать по коду» / static) без отдельного accept.
+            User IB/runtime spike **запрещён** (User Task Contract).
+            **Не** 1:1 Requirement → Slice. Отдельный срез с accept — только для
+            самостоятельного user outcome. Risks с «runtime-verify» → Assumptions +
+            проверка в Primary accept, не user-задача.
          6. Размер порога (см. `.cursor/rules/vertical-slices.mdc` «ТРИГГЕРЫ И ПОРОГИ»):
             - ≤ 5 задач (Lite) — срезы опциональны (1 срез-контейнер).
             - 6–15 задач (Standard) — **1 срез по умолчанию**; второй+ только при
@@ -638,9 +645,10 @@ Task(
             где код **вызывается** и даёт наблюдаемый результат.
             Option B (новый API + потребитель) → **один срез**: API =
             первые задачи `S1.1`, один `S1.accept` на все Scenario.
-            «Ревью контракта», «код-ревью», «ручная сверка»,
-            programmatic smoke (вызов функции в отладчике) — задачи
-            `S<N>.<M>`, не `S<N>.accept`. См. QC критерии 8–9 в
+            «Ревью контракта», «код-ревью», static verification — agent
+            задачи `S<N>.<M>`, не `S<N>.accept`. User runtime (ИБ, отладчик,
+            консоль) — только `S<N>.accept` на границе среза, не spike
+            посередине. См. QC критерии 8–11 и User Task Contract в
             `.cursor/rules/vertical-slices.mdc`.
          8. НЕ использовать классификацию P0–P4, «# Фаза N»,
             «<!-- phase-gate -->» — эти концепции отменены.
@@ -758,10 +766,18 @@ Task(
              - Первый sub-bullet — **Primary (обязательно):** из
                `**Primary acceptance:**` metadata.
              - Остальные Scenario — «(опционально)» или `S<N>.<M>`.
-             - Каждый Scenario spec покрыт Primary, optional, или
-               `S<N>.<M>`.
+             - Каждый Scenario spec покрыт Primary, optional, или agent
+               `S<N>.<M>` (static verification only).
              - **Запрещено** mandatory programmatic-only в accept.
-             - Non-scenario: Assumptions / `S<N>.<M>` / Follow-up.
+             - Non-scenario: Assumptions / agent `S<N>.<M>` / Follow-up.
+         10.2. **User Task Contract** (`.cursor/rules/vertical-slices.mdc`):
+             - От пользователя в `S<N>.<M>`: только ручное конфигурирование.
+             - Unknown API/runtime → design § Assumptions + кодовая задача агента.
+             - **BAD:** `S<N>.<M>` На тестовой ИБ верифицировать вызов API и
+               зафиксировать порядок в debug.md.
+             - **OK:** `S<N>.<M>` В `Module.bsl` cf проследить контракт при пустом
+               параметре; допущение в design § Assumptions; observable outcome —
+               Primary accept «поле пусто после Прервать обработку».
              - **Пример OK:**
                ```
                - [ ] S3.accept Принять срез S3 — автосопоставление входящих:

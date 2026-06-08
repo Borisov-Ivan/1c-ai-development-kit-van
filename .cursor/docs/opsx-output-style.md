@@ -103,7 +103,15 @@ do2-pavlik-vizy-shablony-soglasovaniya-podbor — до старта разраб
 
 ### Правило 3 — Один сигнал ответственности
 
-В сообщении ровно **один** из: «ничего не требуется» | «выберите A или B» | «подтвердите» (только для user-extend / explore с реальной развилкой). **Смешение запрещено** (например «ничего не требуется» + «Подтвердить?»).
+В сообщении ровно **один** из:
+
+| Сигнал | Когда | Форма в чате |
+|--------|-------|--------------|
+| **user-action next step** | GO verify, ff, extend, apply final, status | `**Следующий шаг:** \`/opsx:<command> <name>\`` — одна команда, без флагов и путей |
+| **ответ в чате** | verify decision (A/B, supersedes), terminal fail repair | «ответьте в чате …» — без internal-команд |
+| **подтвердите** | explore / user-extend с реальной развилкой scope | «Подтвердить?» текстом |
+
+**Смешение запрещено** (например «ничего не требуется» + «Подтвердить?»). **Anti-pattern:** GO verify без слота `**Следующий шаг:**` с явной user-action командой.
 
 ### Правило 4 — Типографика скан-читаемости
 
@@ -128,6 +136,7 @@ do2-pavlik-vizy-shablony-soglasovaniya-podbor — до старта разраб
 3. Можно ответить, не открывая файл?
 4. Типографика: первая строка — суть; нет перегруза bold; нет инлайн-путей?
 5. Handoff на языке эффекта, не лог файлов?
+6. GO verify содержит `**Следующий шаг:**` + корректную команду (`/opsx:apply` при `pre-apply`, `/opsx:archive` при `post-apply`)?
 
 Зеркало HALT — [chat-output-budget.mdc](../rules/chat-output-budget.mdc) §7 и §1 (verify repair loop — 0 промежуточных сообщений).
 
@@ -135,7 +144,7 @@ do2-pavlik-vizy-shablony-soglasovaniya-podbor — до старта разраб
 
 | Команда | Terminal в чате |
 |---------|-----------------|
-| verify | «можно apply» \| один decision-вопрос \| «не удалось за N итераций — см. отчёт» |
+| verify | «можно apply» + **Следующий шаг** (`/opsx:apply` \| `/opsx:archive` по `verify_mode`) \| decision + ответ в чате \| terminal fail + чат или `/opsx:extend` |
 | extend (user) | «постановка дополнена» + опц. hint `/opsx:verify <name>` |
 | ff/new | «ЗНИ создано» + **один** next step |
 | apply | handoff среза / «срез готов» |
@@ -146,7 +155,7 @@ do2-pavlik-vizy-shablony-soglasovaniya-podbor — до старта разраб
 
 Источник — `layer_status` и коды алертов из отчёта verify:
 
-- **Repair (чинит verify сам, без чата):** Layer 1 AUTOFIXED; Layer 2/3/5 WARNING без развилки; алерты `*-orphan-*`, `*-drift`, `metadata-stale-*`, `task-missing-*`, отсутствие пометки «Конфигуратор», контракт-допущение не записан в design; **`implementation_invariant`** — после Post-challenge classifier; **slice acceptance repair:** `primary-acceptance-missing`, `accept-bullets-missing-scenario`, `acceptance-simplicity-overload`, `slice-not-vertical`, `slice-foundation-with-gate` (merge via architect in extend §6c).
+- **Repair (чинит verify сам, без чата):** Layer 1 AUTOFIXED; Layer 2/3/5 WARNING без развилки; алерты `*-orphan-*`, `*-drift`, `metadata-stale-*`, `task-missing-*`, отсутствие пометки «Конфигуратор», контракт-допущение не записан в design; **`implementation_invariant`** — после Post-challenge classifier; **slice acceptance repair:** `primary-acceptance-missing`, `accept-bullets-missing-scenario`, `acceptance-simplicity-overload`, `slice-not-vertical`, `slice-foundation-with-gate` (merge via architect in extend §6c); **`user-task-contract-violation`** (extend §6d).
 - **Decision (STOP, вопрос человеку):** Layer 4 CHALLENGE/REJECT с равноправными альтернативами **после classifier** (не reopen без verified fact); `scope-violation`; FAIL, требующий продуктового выбора A/B; противоречие Why ↔ plan; **`supersedes`** — одна прозаичная эскалация.
 - **Assumption defer (`GO-saturated`):** load-bearing допущение, duplicate challenge по closed axis при `decision_round >= max` — GO в чат с defer в S1.accept; **не** новая A/B.
 - **Смешанный отчёт:** decision имеет **приоритет** → сначала вопрос человеку; repair после ответа (user-extend `--from-verify` после decision).
@@ -159,14 +168,14 @@ do2-pavlik-vizy-shablony-soglasovaniya-podbor — до старта разраб
 
 | ID | Сценарий | Ожидание |
 |----|----------|----------|
-| A | verify, repair-only | 1 сообщение; GO; нет «Подтвердить?», internal-команд, списка файлов |
-| B | verify, decision | 1 блок вопроса; END TURN |
-| C | verify, silent_ok | 3–5 строк, статус прежний |
+| A | verify, repair-only | 1 сообщение; GO; `**Следующий шаг:**` + `/opsx:apply`; нет «Подтвердить?», internal-команд, списка файлов |
+| B | verify, decision | 1 блок вопроса; `**Следующий шаг:**` + «ответьте»; END TURN |
+| C | verify, silent_ok | ≤6 строк; статус прежний; `**Следующий шаг:**` + команда по `verify_mode` |
 | D | ff | T-CONFIRM, одна команда next: verify |
 | E | apply handoff | язык эффекта; user-action next step |
 | F | explore | бриф по Правилу 4; финал — блок или один вопрос |
 
-Anti-patterns (fail): «как в прошлой сессии»; internal-команды с путями; перечень файлов как handoff; explore-бриф на авторемонте; смешение «ничего не требуется» + «Подтвердить?»; решение требует открыть файл.
+Anti-patterns (fail): «как в прошлой сессии»; internal-команды с путями; перечень файлов как handoff; explore-бриф на авторемонте; смешение «ничего не требуется» + «Подтвердить?»; GO verify без `**Следующий шаг:**` + user-action команды; решение требует открыть файл.
 
 Спецификация сценариев: [ux-acceptance-isolated-chat.md](ux-acceptance-isolated-chat.md).
 
@@ -362,7 +371,7 @@ T-коды (T-BRIEF, T-HANDOFF, T-REPORT, T-STATUS, T-CONFIRM) — **внутр�
 
 | Вариант | Чат (минимум) |
 |---------|----------------|
-| `acceptance` | Заголовок среза с названием (§10); 1–2 строки «что сделано»; **одна** фраза «что проверить в 1С» или ссылка «сценарий в файле»; short-cut `принято S<N>`; **без** таблицы «Следующие задачи». |
+| `acceptance` | Заголовок среза с названием (§10); 1–2 строки «что сделано»; **одна** фраза «что проверить в 1С» или ссылка «сценарий в файле»; short-cut `принято S<N>`; после проверки — `принято S<N>` **или** снова `/opsx:apply <name>`; **без** таблицы «Следующие задачи». |
 | `pause` | Суть проблемы (UX); **варианты** короткими буллетами (без машинных кодов ответа); приглашение ответить **обычным текстом**; без таблиц прогресса. |
 | `final` | Одна строка: работы завершены; **следующий шаг** `/opsx:archive <name>` (без цепочки «сначала verify»). |
 
@@ -401,7 +410,7 @@ T-коды (T-BRIEF, T-HANDOFF, T-REPORT, T-STATUS, T-CONFIRM) — **внутр�
 #### Тонкий чат (по умолчанию), полный отчёт в файле
 
 - Полное тело отчёта (Executive Summary, Scorecard, таблицы, группы замечаний, Action items) — в файле `reports/*.md` по контракту соответствующего скилла.
-- Для **`/opsx:verify`** в чат — **строго по** `openspec-verify-change/templates/chat-summary.md`: **тихий** или **информативный** вариант; без блоков «Решение N» / «Как ответить» / кодов вида `<N>b`. Краткая разговорная развилка в секции «**Что обсудим**» при необходимости; полное тело блоков решения — только в файле.
+- Для **`/opsx:verify`** в чат — **строго по** `openspec-verify-change/templates/chat-summary.md`: **тихий** или **информативный** вариант; обязателен слот `**Следующий шаг:**` (зеркало Action items в файле); без блоков «Решение N» / «Как ответить» / кодов вида `<N>b`. Краткая разговорная развилка в секции «**Что обсудим**» при необходимости; полное тело блоков решения — только в файле.
 - Флага **`--verbose` для `/opsx:verify` нет** — чат всегда «тонкий»; файл отчёта при необходимости полный после шага 18 verify.
 
 #### Слоты полного отчёта (файл; эталон содержания)
@@ -417,7 +426,7 @@ T-коды (T-BRIEF, T-HANDOFF, T-REPORT, T-STATUS, T-CONFIRM) — **внутр�
    - где смотреть (код/артефакт) — `backticks` с путём и диапазоном строк;
    - технический код замечания — в скобках в конце пункта или в строке «Источники:».
 4. **Развилки пользователя** (опционально, для verify после Issue Classification карточек в **файле**; иные команды — по своим скиллам). В **чат verify** блок «Решения» с кодами **`Na`** **не используется** — только проза в «Что обсудим».
-5. **Action items.** Нумерованный список из 3–7 следующих шагов: что сделать пользователю (или что сделает следующая команда). Каждый пункт — одно действие.
+5. **Action items.** Нумерованный список из 3–7 следующих шагов: что сделать пользователю (или что сделает следующая команда). Каждый пункт — одно действие. Для verify GO **первый пункт** = та же команда, что в чате (`**Следующий шаг:**`).
 6. **Ссылки.** Пути к полным отчётам субагентов в `reports/` (по одной на строку).
 7. **Как ответить** (опционально: для отчётов с пронумерованными вариантами; **`/opsx:verify`** — не использует этот блок, ответ пользователя принимается **свободным текстом**). Если блок есть: три строки — как ответить, свободный текст, поведение при пустом ответе.
 

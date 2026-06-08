@@ -2,7 +2,7 @@
 
 Шаблоны для делегирования `Task(subagent_type="openspec-quality-controller")`. Domain-agnostic readonly-агент. Активная модель — фронтматтер `.cursor/agents/openspec-quality-controller.md`.
 
-         Критерии оценки (Slice Coherence: Scenario Coverage, Slice Independence, Slice Completeness, Slice Dependency Graph, Slice Gate Integrity, Acceptance Checklist 5b, Rework Risk, criteria 8–10) — `.cursor/rules/vertical-slices.mdc`.
+         Критерии оценки (Slice Coherence: Scenario Coverage, Slice Independence, Slice Completeness, Slice Dependency Graph, Slice Gate Integrity, Acceptance Checklist 5b, Rework Risk, criteria 8–11) — `.cursor/rules/vertical-slices.mdc`.
 
 Общие правила, обработка ошибок — `SKILL.md` (навигатор).
 
@@ -27,13 +27,16 @@ Task(
            <checklist table or 'none found'>
          - Mechanical check issues (verify steps 7A-7E):
            <list or 'none'>
+         - User Task Contract pre-check evidence (verify 2.1a):
+           <list of violations or 'none'>
          - Repository state: <list of existing objects/files
            mentioned in tasks, with empty/non-empty status>
 
          ## Out of scope
 
-         Не оценивай: качество формулировки приёмочных шагов, выполним ли
-         тест сейчас на ИБ, нужны ли тестовые данные. Это apply/archive.
+         Не оценивай: выполним ли приёмочный тест сейчас на ИБ, нужны ли
+         тестовые данные. Structural user-spike в `S<N>.<M>` — **in scope**
+         (критерий 11). Это apply/archive только для данных/эталонов.
 
          Save result to:
          openspec/changes/<change-name>/reports/quality-control-YYYY-MM-DD.md.

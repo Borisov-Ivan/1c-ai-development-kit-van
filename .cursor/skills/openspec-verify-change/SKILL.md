@@ -139,11 +139,13 @@ Layer 1 **никогда** не блокирует — только правит
 
 **Цель:** артефакты не противоречат друг другу.
 
+**2.1a. User Task Contract (mechanical pre-check)** — до QC: grep `tasks.md` по строкам `^- \[[ x]\] S\d+\.\d+` (не accept, не Follow-up) с таблицей DENY/ALLOW из `vertical-slices.mdc` § User Task Contract. Дополнительно: `При успешном verify S`, `после verify S`, `после стенда` в теле задачи → violation. Результат (список нарушений или «none») передать в промпт QC как **User Task Contract pre-check evidence**.
+
 **2.1. Slice Coherence (Quality Controller)** — делегировать **`openspec-quality-controller`** (Task **без** `model=`, по `model-selection.mdc`). Промпт: см. `1c-agent-patterns/quality-controller.md`. Получить `reports/quality-control-YYYY-MM-DD.md`.
 
-**Режим запуска:** `run_in_background: false` (sync, последовательно). Карточка Task не показывается в чате как отдельное сообщение — `tool_result` идёт во внутренний контекст оркестратора. В промпт обязательно включить блок **Final message constraint** из секции «Запуск агентов verify» ниже.
+**Режим запуска:** `run_in_background: false` (sync, последовательно). Карточка Task не показывается в чате как отдельное сообщение — `tool_result` идёт во внутренний контекст оркестратора. В промпт обязательно включить блок **Final message constraint** из секции «Запуск агентов verify» ниже и блок **User Task Contract pre-check evidence** из 2.1a.
 
-QC оценивает критерии 1–6, 8–10 из `vertical-slices.mdc` (Scenario Coverage, Slice Independence, Slice Completeness, Slice Dependency Graph, Slice Gate Integrity, Acceptance Checklist Coverage 5b amended, Rework Risk, Slice Verticality, Foundation slice with gate, Acceptance Simplicity).
+QC оценивает критерии 1–6, 8–11 из `vertical-slices.mdc` (Scenario Coverage, Slice Independence, Slice Completeness, Slice Dependency Graph, Slice Gate Integrity, Acceptance Checklist Coverage 5b amended, Rework Risk, Slice Verticality, Foundation slice with gate, Acceptance Simplicity, User Task Contract).
 
 **2.2. Code-Truth (механический)** — для каждого технического имени в backticks из `design.md`/`tasks.md`/`debug.md`/`specs/**` запустить `Grep` по путям из `openspec/project.md`. См. `.cursor/rules/code-truth-gate.mdc`.
 
@@ -178,7 +180,7 @@ CRITICAL `precedent-regression` / `invariant-drift` / `load-bearing-adr-bypass` 
 
 - `PASS` — все критерии OK / только INFO.
 - `WARNING` — есть несущественные несостыковки (один scenario без покрытия в матрице, лишний legacy-маркер). На вердикт идёт как «не блокирует apply».
-- `FAIL` — циклы зависимостей срезов, `accept-checklist-empty`, `primary-acceptance-missing`, `acceptance-simplicity-overload`, `slice-not-vertical`, `slice-foundation-with-gate`, дублирование `S<N>.accept` в одном срезе, CRITICAL `phantom-symbol` в post-apply, или CRITICAL precedent-regression (`precedent-regression` / `invariant-drift` / `load-bearing-adr-bypass`).
+- `FAIL` — циклы зависимостей срезов, `accept-checklist-empty`, `primary-acceptance-missing`, `acceptance-simplicity-overload`, `slice-not-vertical`, `slice-foundation-with-gate`, `user-task-contract-violation`, дублирование `S<N>.accept` в одном срезе, CRITICAL `phantom-symbol` в post-apply, или CRITICAL precedent-regression (`precedent-regression` / `invariant-drift` / `load-bearing-adr-bypass`).
 
 `FAIL` в Layer 2 — это **NO-GO**.
 
@@ -268,6 +270,8 @@ CRITICAL `precedent-regression` / `invariant-drift` / `load-bearing-adr-bypass` 
 3. Есть ли в плане «фикс симптома» вместо корня (для bug-fix change — критерий из `verified-cause-gate.mdc` HALT 1/2)?
 4. Порядок задач не создаёт «петлю» — нет ли задачи, которая ссылается на ещё не созданный объект?
 
+**8. User Task Contract** — user runtime-spike в `S<N>.<M>` (ИБ, консоль, отладчик, эмуляция API без UX-proxy) → **GAP (блокирует GO)**. **Запрещено** трактовать spike как «штатный apply-gate / не дефект постановки». Out of scope (нет тестовых данных) **не отменяет** structural user-spike. См. `vertical-slices.mdc` § User Task Contract.
+
 **5.1. Manual Configuration Sufficiency (механический, до архитектора).** Grep `tasks.md` (case-insensitive) на маркеры ручной конфигурации: «вручную», «в Конфигураторе», «создать реквизит», «добавить измерение», «настроить роль», «элемент формы», «реквизит формы». Если маркеры найдены — в `design.md` должна быть **дословная таблица-доказательство**: конкретные имена объектов/реквизитов, типы, элементы формы, которые пользователь создаёт руками. Нет полной таблицы (есть требование ручной настройки, но в design только общая фраза без имён/типов) → `manual-config-incomplete` (CRITICAL) → **NO-GO**. Это страховка: без точных имён разработчик не выполнит ручную часть, и apply встанет. Если маркеров нет — записать «маркеров ручной конфигурации не найдено» в info, без правок.
 
 Архитектор сохраняет `reports/architecture-task-readiness-YYYY-MM-DD.md`.
@@ -329,6 +333,17 @@ Layer 4 `CHALLENGE` или `REJECT` → NO-GO **кроме** CHALLENGE-saturated
 ### Output to chat
 
 Использовать `templates/chat-summary.md`. Первая строка — `templates/verdict-card.md`. Pre-send — `.cursor/rules/verify-user-communication.mdc` + Chat Surface Contract (§2.6 `opsx-output-style.md`). HALT — `.cursor/rules/chat-output-budget.mdc` §7. Тон — архитектор разработчику, на языке кода 1С.
+
+**HARD — слот «Следующий шаг»:** при GO / GO-saturated / silent_ok 1a — **всегда** строка `**Следующий шаг:**` с user-action командой:
+
+- `verify_mode = pre-apply` → `/opsx:apply <change-name>`
+- `verify_mode = post-apply` → `/opsx:archive <change-name>`
+
+Для silent_ok читать `verify_mode` из YAML `snapshot` последнего отчёта, **не** hardcode apply.
+
+При decision — `**Следующий шаг:** ответьте в чате (A или B)…`; при terminal fail — чат или `/opsx:extend <name>`.
+
+Self-check: «можно действовать без файла» = пользователь видит **конкретную команду** или явное приглашение ответить в чате.
 
 **Одна команда `/opsx:verify` → одно финальное сообщение в чат** (допустим progress marker при длинном Repair Loop).
 

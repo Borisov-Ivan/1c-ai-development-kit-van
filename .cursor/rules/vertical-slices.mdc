@@ -16,6 +16,31 @@ priority: 150
 
 **Срез (Slice)** — минимальная единица изменения, которую пользователь может **принять независимо**: открыть продукт, выполнить один пользовательский сценарий, получить ожидаемый результат (или нет — тогда срез не принят).
 
+## User Task Contract (Participant Split)
+
+**Исполнитель задачи важнее заголовка.** В `tasks.md` apply выполняет `S<N>.<M>` агент (writer/explorer); пользователь — только ручной конфиг и приёмка на границе среза.
+
+| Допустимо **пользователю** | Запрещено **пользователю** в `S<N>.<M>` |
+|---|---|
+| **Ручное конфигурирование** (маркеры: «Ручное конфигурирование», «Конфигуратор», adopt, «создать реквизит», «выгрузить») | Runtime-spike: «на тестовой ИБ», «на стенде верифицировать», «в консоли», «в отладчике», «вызвать API» без UX-proxy |
+| **`S<N>.accept`** — black-box приёмка **на границе среза** (slice-gate) | «спайк», «runtime-verify», «зафиксировать в debug.md результат стенда» как обязанность пользователя |
+| | Условные цепочки «При успешном verify S*.2» / «после стенда» — признак user-spike; repair снимает |
+
+**Допустимо агенту в `S<N>.<M>`** (не пользователю): правка BSL; «верифицировать **по коду**» / «по cf/cfe» / static analysis (Read/Grep выгрузки); NFR static review.
+
+**Неизвестное поведение внешнего API/ядра → агент:** статический разбор cf/cfe + `design.md` § Assumptions / § Decisions; при недостатке фактов — explorer в ff/apply; наблюдаемый исход — Primary или optional в `S<N>.accept`, не отдельный user-spike посередине среза.
+
+**Mechanical grep** (ff post-tasks, verify 2.1a): только строки `^- \[[ x]\] S\d+\.\d+` (не accept, не Follow-up).
+
+- **DENY** (CRITICAL без ALLOW-override): `тестовой ИБ`, `на ИБ вериф`, `на стенде`, `runtime-verify`, `спайк`, `в консоли`, `отладчик`, `эмулировать вызов`, `вызвать API` (без пути к файлу и без «по коду»).
+- **ALLOW-override:** `Ручное конфигурирование`, `Конфигуратор`, adopt, `выгрузить`.
+- **ALLOW-agent** (не DENY при «верифицир»): `верифицировать по коду`, `по cf`, `по cfe`, `static`, `Read/Grep`, `код-ревью`.
+- **Repair grep:** `При успешном verify S`, `после verify S`, `после стенда` в теле задачи → снять условие, слить зависимые кодовые задачи.
+
+**Negative example:** BAD — `S<N>.<M>` На тестовой ИБ верифицировать вызов API с пустым значением и зафиксировать порядок в debug.md.
+
+**Positive example:** OK — `S<N>.<M>` В `Module.bsl` cf проследить контракт процедуры при пустом параметре; допущение в design § Assumptions; наблюдаемый сброс — Primary accept «поле пусто после действия пользователя в UI».
+
 **Правила среза:**
 
 1. **Сценарно-ориентирован.** Один срез = 1–3 связанных пользовательских сценария. Каждый срез SHALL ссылаться на ≥1 `#### Scenario:` из `specs/**/spec.md`.
@@ -28,7 +53,7 @@ priority: 150
    | Что | Правило |
    |-----|---------|
    | **Blocking для `[x]`** | Только **Primary acceptance** (`**Primary acceptance:**` в metadata + первый mandatory sub-bullet в `S<N>.accept`) |
-   | **Остальные Scenario** | Sub-bullets с пометкой «опционально / при наличии данных» **или** задачи `S<N>.<M>` «верифицировать на ИБ / по коду» — **не** blocking для accept |
+   | **Остальные Scenario** | Sub-bullets «опционально / при наличии данных» **или** agent `S<N>.<M>` «верифицировать по коду» (static) — **не** blocking для accept; user IB/runtime spike **запрещён** (User Task Contract) |
    | **Coverage spec** | Каждый `#### Scenario:` из spec SHALL быть покрыт **хотя бы в одном месте**: Primary, optional sub-bullet accept, или задача `S<N>.<M>` |
    | **Частичная приёмка** | `[x]` на accept = Primary пройден; optional-сценарии фиксируются в `debug.md` / повторной приёмке, не блокируют закрытие среза |
 
@@ -39,7 +64,8 @@ priority: 150
      |---|---|---|
      | Инвариант модели данных / платформы | `design.md` секция `## Assumptions` | «Платформа гарантирует, что `RecordSetModule.ПередЗаписью` восстанавливает базовую строку» |
      | NFR / перформанс по коду или ТЖ | Обычная задача `S<N>.<M>` с текстом «верифицировать по коду / при возможности по ТЖ» (без приёмочного `S<N>.accept` пункта) | `S1.6 Верифицировать по коду, что запрос к РС выполняется один раз на прогон` |
-     | Регресс существующей функциональности | Обычная задача `S<N>.<M>` «Прогнать регресс на X» внутри соответствующего среза | — |
+     | Регресс существующей функциональности | Optional sub-bullet в `S<N>.accept` **или** agent static review в `S<N>.<M>`; **не** user-spike `S<N>.<M>` на ИБ | — |
+     | Неизвестность runtime внешнего API/ядра | `design.md` § Assumptions + static/explorer **агентом**; наблюдаемый исход → optional/Primary в `S<N>.accept` | — |
      | Архитектурный замер / релизная валидация | Блок `## Follow-up` в `tasks.md` **вне** срезов | — |
 
 **Граф зависимостей:** между срезами (slice-to-slice), внутри среза — между задачами. Циклов быть не должно.
@@ -159,7 +185,7 @@ priority: 150
 
 `/opsx:verify` использует два режима — **`pre-apply`** и **`post-apply`** — выводимые из состояния `tasks.md` (наличие `[ ]` хотя бы на одной задаче, включая `S<N>.accept`, → `pre-apply`; все `[x]` → `post-apply`). Узкий охват одного среза, переход между срезами и смешанный случай — частные случаи `pre-apply`, выводимые из текста запроса пользователя и контекста (свежий `reports/slice-acceptance-*`, блок в `debug.md`). Отдельных значений `slice-pre`, `slice-post`, `slice-scoped`, `slice-transition`, `legacy-pre`, `legacy-mixed`, `legacy-post` **нет**.
 
-- **Layer 2 Internal Coherence** прогоняет QC Slice Coherence (критерии 1–6, 8–10 ниже).
+- **Layer 2 Internal Coherence** прогоняет QC Slice Coherence (критерии 1–6, 8–11 ниже).
 - **Layer 5 Implementation Readiness** прогоняет Architect readiness per-slice.
 - **Предложение миграции в срезы** (нет `# Срез` или есть `<!-- phase-gate -->`): `/opsx:verify` **рекомендует** `/opsx:extend <name>` (architect slice decomposition) или ручную правку; не блокирует прогон.
 - **Предложение миграции приёмки** (есть `S<N>.T<M>` в активной ЗНИ — legacy acceptance): QC выдаёт SUGGESTION «Старая модель приёмки. Вручную: объединить `T<M>` в один `S<N>.accept`». Не блокирует прогон; legacy-формат остаётся работоспособным во всех командах.
@@ -170,7 +196,7 @@ Replace старого Phase Classification. Новые критерии QC:
 
 1. **Scenario Coverage** — каждый `#### Scenario:` из всех `specs/**/spec.md` покрыт **одним из**:
    - буллетом в `S<N>.accept` primary-среза (код вызывается в UX-контексте), **или**
-   - обычной задачей `S<N>.<M>` «верифицировать на ИБ / по коду» **без** отдельного accept (карта non-scenario, правило среза 6).
+   - agent-задачей `S<N>.<M>` «верифицировать **по коду**» (static) **без** отдельного accept (карта non-scenario, правило среза 6); user IB/runtime spike **запрещён** (User Task Contract).
    Отдельный срез с accept — **только** если Scenario описывает **самостоятельный** пользовательский outcome. Пропуски → WARNING: «Scenario "X" не покрыт».
 2. **Slice Independence** — каждый срез принимаем без следующих (зависимости только «назад»). Циклы → CRITICAL.
 3. **Slice Completeness** — в срезе есть все слои (метаданные, форма, BSL, тест), необходимые для его приёмочного сценария. Пропуски → WARNING: «S<N> не содержит задачи слоя <X>, требуемого для приёмки».
@@ -200,18 +226,21 @@ Replace старого Phase Classification. Новые критерии QC:
    - Severity: **CRITICAL** для любого tier при `# Срез`.
    - Remediation: свернуть S<K> в S<K+1>; `/opsx:extend <name>` (architect slice restructuring).
 
-10. **Acceptance Simplicity (`acceptance-simplicity-overload`)** — в теле `S<N>.accept` более одного **mandatory** (без пометки «опционально») black-box journey. Severity: **CRITICAL** при `# Срез`. Remediation: один mandatory Primary; остальное → optional или `S<N>.<M>`.
+10. **Acceptance Simplicity (`acceptance-simplicity-overload`)** — в теле `S<N>.accept` более одного **mandatory** (без пометки «опционально») black-box journey. Severity: **CRITICAL** при `# Срез`. Remediation: один mandatory Primary; остальное → optional или agent `S<N>.<M>`.
 
-**In scope для QC (критерии 8–10):**
+11. **User Task Contract (`user-task-contract-violation`)** — в `S<N>.<M>` (не accept, не Follow-up) обязанность **пользователя** на runtime (ИБ, консоль, отладчик, эмуляция API) или условная цепочка «после verify/stенда». Алгоритм: mechanical grep (DENY/ALLOW из User Task Contract) + семантика QC. Severity: **CRITICAL** при `# Срез`. Remediation: удалить spike-задачу; перенести знание в design § Assumptions; слить blocked кодовые задачи; перенумеровать `[ ]` задачи (`[x]` не трогать); observable outcome — в `S<N>.accept`; см. `openspec-extend-change` §6d.
+
+**In scope для QC (критерии 8–11):**
 - Вертикальность среза: Primary — наблюдаемый black-box сценарий, не programmatic-only accept на отдельном gate.
 - Foundation + dependent UX-срез с двумя gate — structural + semantic проверка.
 - Acceptance Simplicity: один blocking journey на срез.
+- User Task Contract: нет user runtime-spike в `S<N>.<M>` (критерий 11).
 
 **Out of scope для QC:**
 - Исполнимость шагов приёмки **прямо сейчас** (код ещё не подключён, нет выгрузки в ИБ).
 - Наличие тестовых данных и эталона ИБ.
 - Smoke-сценарии вне tasks.
-Это apply/archive. QC проверяет структурное покрытие **и** наблюдаемость приёмки (критерий 8).
+Это apply/archive. **Structural user-spike в tasks — in scope** (критерий 11), не путать с «нет тестовых данных». QC проверяет структурное покрытие **и** наблюдаемость приёмки (критерий 8).
 
 **Удалены:** Phase Classification P0–P4, alert `missing-phase-gate`, alert `phase-violation`, implicit `P2→P0` dependency logic, alert `acceptance-scenario-duplication` (заменён `accept-bullet-foreign-scenario`), alert `acceptance-overload` (модель один-`accept` его делает невозможным).
 

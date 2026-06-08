@@ -318,7 +318,7 @@ Architect обязателен, если:
 2. Порядок правок: `design.md` (`## Slices`, матрица, Primary column) → `tasks.md` (metadata, accept, merge) → sync `**Связь со spec:**`.
 3. По alert-id:
    - `primary-acceptance-missing` — добавить `**Primary acceptance:**` в metadata; первый sub-bullet `**Primary (обязательно):**` в `S<N>.accept` из Behavior Contract / design.
-   - `accept-bullets-missing-scenario` — optional sub-bullet или задача `S<N>.<M>` «верифицировать на ИБ».
+   - `accept-bullets-missing-scenario` — optional sub-bullet в `S<N>.accept` **или** agent `S<N>.<M>` «верифицировать по коду» **или** explorer в apply; user IB spike **запрещён** (User Task Contract).
    - `acceptance-simplicity-overload` — оставить один mandatory Primary; остальные → «(опционально)» или `S<N>.<M>`.
    - `slice-not-vertical` / `slice-foundation-with-gate` — делегировать **onec-code-architect** `mode=slice-restructuring`; merge foundation → consumer; затем post-merge checklist ниже.
 4. Append `debug.md` § `## Verify repair — slice acceptance` (дата, alerts, files touched).
@@ -331,6 +331,21 @@ Architect обязателен, если:
 4. `**Primary acceptance:**` синхронны в design и tasks.
 5. Append `debug.md` § `## Verify repair — slice merge` (было S1+S2 → стало S1).
 6. Grep: нет orphan `S<K>.` в задачах других срезов.
+
+### 6d. Repair-from-verify: user task contract
+
+**Триггер:** internal repair-from-verify; в `quality-control-*.md` или verification report есть `user-task-contract-violation` (CRITICAL).
+
+**Ограничения:** repair **не** ставит `[x]`; **не** меняет scope/spec Requirement без decision; `[x]` задачи **не** перенумеровывать.
+
+**Алгоритм:**
+
+1. Удалить нарушающие `S<N>.<M>` (user runtime-spike).
+2. Grep `tasks.md` и снять условные зависимости: «При успешном verify S*.2», «после verify S*», «после стенда».
+3. Слить blocked кодовые задачи в одну без условия «после стенда».
+4. `design.md`: open question из spike → § Assumptions; § Risks — «runtime-подтверждение в Primary accept среза».
+5. Перенумеровать только `[ ]` задачи; `[x]` не трогать (номера выполненных могут остаться с gap).
+6. Append `debug.md` § `## Verify repair — user task contract` (дата, удалённые задачи, files touched).
 
 ### 6b. Code-sync update rules (`--code-sync`)
 
@@ -354,6 +369,7 @@ Architect обязателен, если:
 - если specs менялись — пройти Delta Specs Gate;
 - если добавлены задачи фикса — проверить defect placement invariant из `vertical-slices.mdc`;
 - если запуск был `--code-sync` — выполнить Code-Truth Gate из `.cursor/rules/code-truth-gate.mdc`; `phantom-symbol` после синхронизации = BLOCKER до повторной правки артефактов;
+- **User Task Contract (user-extend):** mechanical grep DENY/ALLOW (`vertical-slices.mdc` § User Task Contract) на добавленные/изменённые `S<N>.<M>`; CRITICAL `user-task-contract-violation` → не завершать extend без правки;
 - следующий шаг для пользователя: `/opsx:verify <name>` (не дублировать в чат длинный handoff — см. п. 8).
 
 ### 8. Handoff

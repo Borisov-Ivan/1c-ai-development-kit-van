@@ -47,7 +47,7 @@ Do not duplicate or invent phase-gate logic. Phase classification P0-P4 is depre
 
 In slice mode, evaluate the criteria from `vertical-slices.mdc` (section «QUALITY CONTROLLER — SLICE COHERENCE»):
 
-1. Scenario Coverage — including verification-task path for implementation-only Scenarios (see `vertical-slices.mdc` criterion 1)
+1. Scenario Coverage — including **agent** verification-task path («верифицировать по коду» / static) for implementation-only Scenarios; user IB/runtime — only via accept optional/Primary (see `vertical-slices.mdc` criterion 1)
 2. Slice Independence
 3. Slice Completeness
 4. Slice Dependency Graph
@@ -62,6 +62,7 @@ In slice mode, evaluate the criteria from `vertical-slices.mdc` (section «QUALI
 8. Slice Verticality — `slice-not-vertical` when **no** mandatory Primary describes black-box behavior. **CRITICAL** when `# Срез` present.
 9. Foundation slice with gate — `slice-foundation-with-gate`. **CRITICAL** when `# Срез` present. Remediation: merge slices.
 10. Acceptance Simplicity — `acceptance-simplicity-overload` when >1 mandatory (non-optional) black-box journey in `S<N>.accept`. **CRITICAL**.
+11. User Task Contract — `user-task-contract-violation` when `S<N>.<M>` assigns **user** runtime work (ИБ, консоль, отладчик, API без UX-proxy) or conditional chains «после verify/stенда». Apply DENY/ALLOW grep from `vertical-slices.mdc` § User Task Contract; add semantic check for paraphrases. **CRITICAL** when `# Срез` present.
 
 Then evaluate task readability using `task-readability.mdc`.
 
@@ -73,7 +74,7 @@ Do NOT evaluate:
 - Smoke testing scenarios outside tasks.
 These are concerns for apply/archive. Do NOT emit alerts asking for test data or baseline snapshots.
 
-**In scope (criteria 8–10):** Primary black-box vs programmatic-only; foundation+consumer double gate; acceptance simplicity (one mandatory journey).
+**In scope (criteria 8–11):** Primary black-box vs programmatic-only; foundation+consumer double gate; acceptance simplicity (one mandatory journey); **structural user-spike in `S<N>.<M>` is in scope** (criterion 11) — do not confuse with missing test data.
 
 ## REMEDIATION BLOCK (mandatory per CRITICAL/WARNING alert)
 
@@ -86,7 +87,7 @@ For each alert that can be auto-repaired, append:
 - action: <concrete edit instruction>
 ```
 
-Repairable alerts: `primary-acceptance-missing`, `accept-bullets-missing-scenario`, `acceptance-simplicity-overload`, `slice-not-vertical`, `slice-foundation-with-gate` (merge instruction). Decision-required: merge changing scope/spec cross-slice.
+Repairable alerts: `primary-acceptance-missing`, `accept-bullets-missing-scenario`, `acceptance-simplicity-overload`, `slice-not-vertical`, `slice-foundation-with-gate` (merge instruction), `user-task-contract-violation` (extend §6d). Decision-required: merge changing scope/spec cross-slice.
 
 ## ALERT RULES
 

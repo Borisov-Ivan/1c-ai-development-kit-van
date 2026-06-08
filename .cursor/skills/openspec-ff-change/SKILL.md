@@ -176,7 +176,8 @@ Fast-forward through artifact creation - generate everything needed to start imp
           ```
           `[x]` = Primary пройден. Остальные Scenario — optional или `S<N>.<M>`.
         - Metadata: `**Primary acceptance:**` обязателен при `# Срез S<N>`.
-        - Ссылки: `.cursor/rules/vertical-slices.mdc` (правило среза 6 + секция «ФОРМАТ S<N>.accept»), `.cursor/rules/task-readability.mdc` (Исключение 1), `.cursor/skills/1c-agent-patterns/architect.md` (шаблон slice-aware task decomposition).
+        - **User Task Contract** (`.cursor/rules/vertical-slices.mdc` § User Task Contract): от пользователя — только ручное конфигурирование и `S<N>.accept`; unknown API/runtime → `design.md` § Assumptions + кодовые задачи агента; **запрещены** `S<N>.<M>` с user IB/runtime spike.
+        - Ссылки: `.cursor/rules/vertical-slices.mdc` (правило среза 6 + «ФОРМАТ S<N>.accept» + User Task Contract), `.cursor/rules/task-readability.mdc` (Исключение 1), `.cursor/skills/1c-agent-patterns/architect.md` (шаблон slice-aware task decomposition).
 
         The architect produces tasks.md with:
         - H1 headers `# Срез S<N>: <имя>` (one per slice from design)
@@ -199,7 +200,8 @@ Fast-forward through artifact creation - generate everything needed to start imp
         4. >1 mandatory sub-bullet без «опционально» → WARNING (`acceptance-simplicity-overload`).
         5. Scenario из spec не покрыт Primary/optional/`S<N>.<M>` → WARNING.
         6. Legacy `S<N>.T<M>` → SUGGESTION.
-        7. CRITICAL/WARNING → «Рекомендую `/opsx:verify <name>`».
+        7. **User Task Contract (grep):** строки `^- \[[ x]\] S\d+\.\d+` — DENY/ALLOW из `vertical-slices.mdc` § User Task Contract; CRITICAL `user-task-contract-violation` → не предлагать apply; в финале ff — «нужен `/opsx:verify <name>`» или inline-fix tasks (удалить spike, Assumptions в design) до завершения ff.
+        8. CRITICAL/WARNING → «Рекомендую `/opsx:verify <name>`».
       - **All other artifacts**: Create the artifact file using `template` as the structure
       - Apply `context` and `rules` as constraints - but do NOT copy them into the file
       - **Metadata block**: When creating `proposal.md`, ALWAYS add `## Metadata (comment markers)` (`developer`, `comment_suffix`) immediately after `## Why`.
@@ -272,7 +274,7 @@ Fast-forward through artifact creation - generate everything needed to start imp
       3. Grep `design.md` for existing `## Slices` section.
       4. **If `## Slices` section is absent (or empty) AND tier ≥ Standard:**
          - Delegate to **onec-code-architect** with the "Architect — slice decomposition" template (`1c-agent-patterns/architect.md`).
-         - Pass: paths to proposal.md, design.md (without Slices), specs/.
+         - Pass: paths to proposal.md, design.md (without Slices), specs/; **User Task Contract** — Risks с «runtime-verify» → Assumptions + «проверка в Primary accept», не user-задача.
          - The architect returns the `## Slices` block (table of slices + scenarios + files + acceptance + dependency graph + coverage matrix).
          - Insert the returned block into `design.md` (append after existing sections, before "Risks" if present).
          - Show the user a compact summary:
@@ -288,15 +290,17 @@ Fast-forward through artifact creation - generate everything needed to start imp
            - `Скорректировать` → принять пользовательский комментарий, повторно делегировать architect с этим комментарием, обновить `design.md`.
            - `Пересобрать срезы` → повторить делегирование со сменой модели или указанием «другое группирование».
       5. **If `## Slices` section is present:**
-         - Delegate to **openspec-quality-controller** (quick check — criteria 1, 3, 5, 5b, 8–10 from QC), see `openspec-quality-controller.md`. **Do NOT** grep keyword lists for criterion 8 — QC semantic judgment only.
+         - Delegate to **openspec-quality-controller** (quick check — criteria 1, 3, 5, 5b, 8–11 from QC), see `openspec-quality-controller.md`. **Do NOT** grep keyword lists for criterion 8 — QC semantic judgment only.
          - If critical issues — show the user and AskQuestion whether to regenerate.
          - Otherwise — proceed.
       6. **Foundation Slice Guard** (before AskQuestion «Принять» on proposed slices):
          1. Grep `specs/**/spec.md` for `scenario-implementation-leak` per `.cursor/rules/openspec-specs-gate.mdc` (implementation-leak markers in `- **THEN**` only — structural check).
          2. If QC (or architect output) indicates `slice-foundation-with-gate` / `slice-not-vertical` on a proposed decomposition — **do not offer «Принять»**; only «Скорректировать» / «Пересобрать» with explanation (merge foundation into primary slice).
          3. If `scenario-implementation-leak` found on a Requirement that would become its own slice — remediation: move to `design.md` Behavior Contract before accepting slices (or user override explicitly).
+         4. User-spike inside slice (Risks «пользователь верифицирует на ИБ») — **не принимать**; merge в Assumptions + Primary accept (User Task Contract).
       7. **Primary acceptance pre-check (правило среза 6):**
          - For each slice in `## Slices`: Primary acceptance column filled; one blocking journey.
+         - In § Risks design не должно остаться «пользователь верифицирует на ИБ» — только Assumptions + accept.
          - Hint for task decomposition: mandatory Primary sub-bullet in `S<N>.accept`.
       7. **Guardrail:** do NOT invoke the tasks architect template until `design.md` contains the `## Slices` section (or Lite tier was explicitly chosen).
 

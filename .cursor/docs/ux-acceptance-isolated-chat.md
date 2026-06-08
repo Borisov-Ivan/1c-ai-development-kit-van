@@ -18,9 +18,9 @@ SSOT контракта: `.cursor/docs/opsx-output-style.md` §2.6.
 
 | ID | Команда | Fixture | Pass |
 |----|---------|---------|------|
-| **A** | `/opsx:verify <name>` | ZNI с repair-only (текстовые пробелы, нет decision) | **1** сообщение; GO; нет «Подтвердить?», `/opsx:extend`, списка файлов |
-| **B** | `/opsx:verify <name>` | ZNI с CHALLENGE / A-B | **1** блок вопроса (проблема→последствия→варианты); END TURN |
-| **C** | `/opsx:verify <name>` | post-GO, артефакты не менялись | 3–5 строк; «статус прежний: можно apply» |
+| **A** | `/opsx:verify <name>` | ZNI с repair-only (текстовые пробелы, нет decision) | **1** сообщение; GO; `**Следующий шаг:**` + `/opsx:apply`; нет «Подтвердить?», `/opsx:extend`, списка файлов |
+| **B** | `/opsx:verify <name>` | ZNI с CHALLENGE / A-B | **1** блок вопроса (проблема→последствия→варианты); `**Следующий шаг:**` + «ответьте»; END TURN |
+| **C** | `/opsx:verify <name>` | post-GO, артефакты не менялись | ≤6 строк; «статус прежний: можно apply»; `**Следующий шаг:**` + команда по `verify_mode` |
 | **D** | `/opsx:ff <name>` | новый change | T-CONFIRM; **одна** команда next: verify; без перечня файлов |
 | **E** | `/opsx:apply <name>` | завершённый срез | handoff: **Primary acceptance** одной строкой; user-action next step; без meta pipeline |
 | **E2** | `/opsx:apply <name>` | кодовая задача без критерия приёмки (mechanical slice) | одна строка «реализована»; нет «пошаговая пауза»; нет diff-чеклиста; нет «автопроверки пройдены» |
@@ -31,7 +31,7 @@ SSOT контракта: `.cursor/docs/opsx-output-style.md` §2.6.
 
 | ID | Шаг | Pass |
 |----|-----|------|
-| **G1** | Новый чат: `/opsx:verify diadok-mchd-before-pack` после backfill ledger | GO **или** одна развилка; **0** agent-keys; нет reopen mount/cleanup |
+| **G1** | Новый чат: `/opsx:verify diadok-mchd-before-pack` после backfill ledger | GO **или** одна развилка; при GO — `**Следующий шаг:**` + user-action команда; **0** agent-keys; нет reopen mount/cleanup |
 | **G2** | Ответ на развилку → extend | Handoff на языке эффекта; ledger в debug.md |
 | **G3** | Повторный `/opsx:verify` в **той же** сессии | Блок «Уже зафиксировано»; **0** reopen закрытых решений |
 
@@ -44,6 +44,8 @@ SSOT контракта: `.cursor/docs/opsx-output-style.md` §2.6.
 - Перечень изменённых файлов как handoff
 - Explore-бриф на internal repair
 - «Ничего не требуется» + «Подтвердить?»
+- GO verify без `**Следующий шаг:**` + user-action команды
+- «Что нужно от вас: ничего» на GO без `/opsx:apply` или `/opsx:archive`
 - Перегруз bold/backticks; решение требует открыть файл
 - «пошаговая пауза» / «Ваш шаг (» в заголовках apply
 - Meta-статус pipeline: «автопроверки пройдены», «diff не обязателен», «reviewer PASS»
@@ -59,6 +61,7 @@ SSOT контракта: `.cursor/docs/opsx-output-style.md` §2.6.
 | E2 | mechanical slice (`**Режим apply:** mechanical`) или change без `**Приёмка:**` в рабочих задачах |
 | F | произвольный симптом ДО2 |
 | G1–G3 | `diadok-mchd-before-pack` — ledger backfill в debug.md |
+| **H** *(опционально)* | post-apply verify (все `[x]`) — next step = `/opsx:archive`, не apply |
 
 Опционально: `temp/ux-fixtures/README.md` с git tag на commit «до repair».
 
