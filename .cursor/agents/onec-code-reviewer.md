@@ -112,7 +112,9 @@ Writer и оркестратор сортируют findings по `risk_score` d
 
 Нарушения гигиены выпуска, не являющиеся классическими AP-паттернами кода. Полная карточка — в AP-каталоге (`bsl-antipatterns.mdc`).
 
-**Whitelist проекта:** прочитать [openspec/project.md](../../openspec/project.md), секцию «Форматы и соглашения по комментариям BSL». Извлечь таблицы **Whitelist предрелиза** и **Обязательный контроль**. Строки, попадающие под whitelist (по префиксу после `//` и/или regex на всю строку в рамках scope glob), исключать из AP-040..AP-045. Директивы расширения `#Вставка`/`#КонецВставки`/`#Удаление`/`#КонецУдаления` — **не** release-hygiene.
+**Whitelist проекта:** прочитать [openspec/project.md](../../openspec/project.md), секцию «Форматы и соглашения по комментариям BSL». Извлечь таблицы **Whitelist предрелиза** и **Обязательный контроль**. Строки, попадающие под whitelist (по префиксу после `//` и/или regex на всю строку в рамках scope glob), exempt от **удаления** AP-040..AP-045 **кроме AP-053** (содержимое domain_label — rewrite, не delete). Директивы расширения `#Вставка`/`#КонецВставки`/`#Удаление`/`#КонецУдаления` — **не** release-hygiene.
+
+**AP-053 whitelisted marker content:** для open и однострочных cf-маркеров проверить domain_label по запретам project.md § Канон domain_label; remediation — переписать текст, не удалять пару.
 
 **AP-042 debug-ЖР:** выполняется только при наличии активного change (`openspec/changes/<name>/` или `.../archive/<name>/`). Ревьювер читает `tasks.md` и `design.md` объединённо; если имя события или имя процедуры (из границ, в которых находится вызов) не встречается как подстрока без учёта регистра — flag.
 
@@ -221,7 +223,7 @@ status: NOT_CONNECTED
 Для каждого файла в scope (с учётом Review Boundaries):
 
 1. **AP-pass:** обход AP-индекса. Для каждой строки таблицы применить `Детектирование` к коду в границах. Match → finding с `AP-NNN`, полями из карточки (severity, kind, default_action) + risk axes.
-2. **Release-hygiene pass (AP-040..AP-045):** использовать Intent Map (границы методов) и Contract Map (литералы, источники) — НЕ regex-скан построчно. Применить whitelist проекта. Для AP-042 прочитать tasks.md/design.md активного change (если задан).
+2. **Release-hygiene pass (AP-040..AP-045, включая AP-053):** использовать Intent Map (границы методов) и Contract Map (литералы, источники) — НЕ regex-скан построчно. Применить whitelist проекта (exempt removal; AP-053 на содержимое). Для AP-042 прочитать tasks.md/design.md активного change (если задан).
 3. **Vendor standards:** если код затрагивает транзакции / event handlers / queries / locking / формы — прочитать соответствующий `std-*.md` и проверить compliance.
 4. **&ИзменениеИКонтроль verification:** если файл содержит методы с этой аннотацией — загрузить base из cf/ (путь: заменить `cfe/<ExtName>/` на cf из project.md), извлечь код **вне** `#Вставка/#Удаление` блоков, diff против base. Любое расхождение (added/deleted/modified вне директив) — MUST_FIX (severity из AP-каталога, в prerelease эскалировать).
 

@@ -290,7 +290,7 @@ Architect обязателен, если:
 
 Порядок правок:
 
-1. `proposal.md` — если меняется scope / Why / What Changes / Impact.
+1. `proposal.md` — если меняется scope / Why / What Changes / Impact. При существенной смене доменной темы — **опционально** один вопрос: обновить `comment_suffix` (domain_label) в `## Metadata (comment markers)`? Не блокер extend.
 2. `specs/**/spec.md` — delta spec (`ADDED`, `MODIFIED`, `REMOVED`), минимум один Scenario на Requirement.
 3. `design.md` — `Existing Mechanisms`, `Design Rationale`, `Decisions`, `Slices`, `Risks`, `Open Questions`.
 4. `tasks.md` — slice-aware вставка:

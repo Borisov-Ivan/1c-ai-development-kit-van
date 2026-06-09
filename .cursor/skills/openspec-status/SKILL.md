@@ -9,7 +9,7 @@ metadata:
 
 Read-only skill. Не вызывает субагентов, не правит артефакты. Задача — собрать фактические данные из `openspec/changes/<name>/` и показать компактный снимок.
 
-**Output style:** снимок выводится по шаблону **T-STATUS** из `.cursor/docs/opsx-output-style.md` §5.4 (Шапка → Прогресс срезов → Открытые решения → Последние отчёты → Рекомендуемая следующая команда). Перед выводом — self-check-5 (§7). Стиль вывода — см. `.cursor/docs/opsx-output-style.md` §2.5 «Человеческий слой». Для `--short` — только слоты 1, 2 (одной строкой), 5. Для `--reports` — только таблица «Последние отчёты».
+**Output style:** снимок выводится по шаблону **T-STATUS** из `.cursor/docs/opsx-output-style.md` §5.4 (Шапка → **Маркеры** → Прогресс срезов → …). Для `--short` — слоты 1, 3 (одной строкой), 6.
 
 ## Входные данные
 
@@ -25,6 +25,23 @@ Read-only skill. Не вызывает субагентов, не правит �
 2. **Schema & artifacts.**
    - `openspec status --change "<name>" --json` → `schemaName`, перечень артефактов (`proposal`, `design`, `specs`, `tasks`, `debug`).
    - Отметить: какие `done`, какие отсутствуют.
+
+2b. **Маркеры (comment markers snapshot).**
+
+   Read `proposal.md` § `## Metadata (comment markers)` + `openspec/project.md` (`defaultDeveloper`, `cfMarkerPrefix`, запреты domain_label).
+
+   **Dual-parser:** yaml (`developer:`, `comment_suffix:`, `marker_style:`) и list (`- **developer:**`, …).
+
+   Вывести в слот «Маркеры»:
+   - `developer`, `comment_suffix` (domain_label), `marker_style` (default `canonical`)
+   - **process-only:** `да` если suffix match запретам project.md § Канон domain_label; иначе `нет`
+   - **marker_scope:** Grep tasks/design на `src/.../*.bsl` → `cfe` | `cf-ea` | `mixed` | `не определён`
+   - **Preview transport** (date = сегодня `dd.MM.yyyy`):
+     - cfe: `// +++ {developer} {date} {suffix}` / `// --- {developer}`
+     - cf: `// {cfMarkerPrefix} {suffix} +++` / close по project.md
+   - Ссылка: `.cursor/docs/marker-layers-guide.md`
+
+   Если Metadata нет — «Metadata: не заполнена → `/opsx:ff` или дописать proposal».
 
 3. **Mode detection.**
    - Read `tasks.md`: Grep `^# Срез S\d+`. Если есть → **slice mode**, иначе **legacy**.

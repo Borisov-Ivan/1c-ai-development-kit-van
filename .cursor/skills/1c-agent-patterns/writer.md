@@ -26,7 +26,8 @@ Task(
          Все новые вставки кода должны быть обёрнуты в маркеры:
          Open: [вставить open_marker]
          Close: [вставить close_marker]
-         (Правила размещения — см. твой системный промпт).
+         domain_label на русском, без process-меток (openspec/project.md § Канон domain_label). При mixed scope — шаблон по пути файла.
+         (Правила размещения — см. твой системный промпт §3a).
 
          ## 4. INPUT CONTRACT
          [Вставить блок ## Project paths из project-paths.mdc]
@@ -97,7 +98,8 @@ Task(
          Все новые вставки кода должны быть обёрнуты в маркеры:
          Open: [вставить open_marker]
          Close: [вставить close_marker]
-         (Правила размещения — см. твой системный промпт).
+         domain_label на русском, без process-меток (openspec/project.md § Канон domain_label).
+         (Правила размещения — см. твой системный промпт §3a).
 
          ## 5. INPUT CONTRACT
          [Вставить блок ## Project paths из project-paths.mdc]
@@ -196,7 +198,8 @@ Task(
          Если исправление требует добавления новых строк — оберни их в маркеры:
          Open: [вставить open_marker]
          Close: [вставить close_marker]
-         (Правила размещения — см. твой системный промпт).
+         domain_label на русском, без process-меток (openspec/project.md § Канон domain_label).
+         (Правила размещения — см. твой системный промпт §3a).
 
          ## 5. GATES
          [Вставить блок DATA_CONTRACT_GATE]

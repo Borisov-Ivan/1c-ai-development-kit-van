@@ -194,13 +194,13 @@ Focus: full (new file)
 
 ## Шаг 1.6. Project constraints (evidence)
 
-**Только чтение `openspec/project.md`** для передачи ревьюверу как evidence. Механические grep-проходы (прошлые 1.6.2/1.6.3/1.6.5/1.6.6) перенесены в агент (AP-040..AP-045 каталога, Phase 2 «Release-hygiene pass»).
+**Только чтение `openspec/project.md`** для передачи ревьюверу как evidence. Механические grep-проходы (прошлые 1.6.2/1.6.3/1.6.5/1.6.6) перенесены в агент (AP-040..AP-045 каталога, Phase 2 «Release-hygiene pass»). Whitelist exempt **removal** only; AP-053 content — в Phase 2 reviewer.
 
 ### 1.6.1 Whitelist и обязательный контроль
 
-Прочитать [openspec/project.md](../../../openspec/project.md), секция **«Форматы и соглашения по комментариям BSL»**. Извлечь таблицы **Whitelist предрелиза** и **Обязательный контроль**. Если секции нет — обе таблицы пусты.
+Прочитать [openspec/project.md](../../../openspec/project.md), секция **«Форматы и соглашения по комментариям BSL»**. Извлечь таблицы **Whitelist предрелиза** и **Обязательный контроль**. Whitelist exempt AP-040 **removal**; содержимое domain_label — AP-053 в Phase 2 reviewer. Если секции нет — обе таблицы пусты.
 
-**Памятка по колонкам:** [.cursor/docs/bsl-comment-formats-project.md](../../docs/bsl-comment-formats-project.md).
+**Памятка по колонкам и слоям:** [.cursor/docs/bsl-comment-formats-project.md](../../docs/bsl-comment-formats-project.md), [.cursor/docs/marker-layers-guide.md](../../docs/marker-layers-guide.md).
 
 Результат передать в бриф шага 2 как `## Whitelist & Mandatory Controls (from project.md)` — две таблицы целиком + scope globs.
 

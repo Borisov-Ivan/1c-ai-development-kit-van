@@ -78,14 +78,17 @@ Archive a completed change in the experimental workflow.
 
    3.2. **Check developer comment markers balance (HARD BLOCKER)**
 
-   Read `proposal.md` and check for the `## Metadata (comment markers)` block.
-   - If the block exists, extract `developer` (ФИО).
+   Read `proposal.md` and `openspec/project.md` (`cfMarkerPrefix`) and check for the `## Metadata (comment markers)` block.
+   - If the block exists, extract `developer` (ФИО) via dual-parser (yaml or list `- **developer:**`).
    - Build a diff of all `*.bsl` files in the change relative to the baseline (merge-base with main/master).
-   - In the diff, count **added** lines that are open markers for this developer:
-     - **Canon:** `// +++ {developer}` (substring match on developer FIO)
-     - **Legacy:** `// +++ {developer} ... [` (contains `[ID#` or `[б/н#`)
-   - Count **added** close markers: `// --- {developer}` (optional trailing `[...]` for legacy).
-   - **If the counts do not match:** hard blocker — сообщить дисбаланс для `{developer}`, stop.
+   - In the diff, count **added** open markers:
+     - **cfe canon:** `// +++ {developer}` (substring match on developer FIO)
+     - **cfe legacy:** `// +++ {developer} ... [` (contains `[ID#` or `[б/н#` or `[б/н]`)
+     - **cf canon:** lines matching `// {cfMarkerPrefix}.*\+\+\+` (cfMarkerPrefix from project.md)
+   - Count **added** close markers:
+     - **cfe:** `// --- {developer}` (optional trailing `[...]` for legacy)
+     - **cf:** `// {cfMarkerPrefix without colon} ---`
+   - **If the counts do not match:** hard blocker — сообщить дисбаланс, stop.
    - **If `count_open = 0` and `count_close = 0`:** silent, proceed.
    - **If counts match:** proceed.
 

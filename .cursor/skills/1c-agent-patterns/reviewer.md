@@ -70,7 +70,11 @@ Task(
          Category 9 Code Cleanliness включая log-literal artefacts: имя события ЖР и текст сообщения/СтрШаблон не должны содержать маркеры постановки (S<N>, D<N>, kebab-case change, Decision); отладочный ЗаписьЖурналаРегистрации (Информация/Предупреждение/Примечание) без требования в tasks.md/design.md — удалить или оформить требование. Action: MUST_FIX.
          Пустые процедуры/функции/обработчики (empty-unused / empty-body / empty-handler) в границах ревью — Action: MUST_FIX (обработчики без привязки к элементу — инструкция правки Form.xml вручную).
          Если в промпте есть блок ## Mechanical findings (orchestrator) — не дублировать эти строки в findings; при необходимости дополнить контекстом (процедура, вызов).
-         Если передан блок ## Comment Markers Metadata — BORDER-PAIR-001: на каждый `// +++` с `developer` из metadata — парный `// --- {developer}` (legacy с `[ID#…]`/`[б/н#…]` в open допустим). Нет пары — HIGH [release-hygiene]. Чужие ФИО не проверять.
+         Если передан блок ## Comment Markers Metadata — BORDER-PAIR-001:
+         - **cfe:** на каждый `// +++` с `developer` из metadata — парный `// --- {developer}` (legacy `[ID#…]`/`[б/н#…]` в open допустим).
+         - **cf:** open `// {cfMarkerPrefix}… +++` (cfMarkerPrefix из project.md) — парный `// {cfMarkerPrefix без :} ---`.
+         Нет пары — HIGH [release-hygiene]. Чужие ФИО/префиксы не проверять.
+         Release-hygiene: AP-040..AP-045 включая AP-053 (whitelist exempt removal only).
 
          ## Проверка соблюдения gates (HALT-compliance)
          Проверить, что writer следовал gates из промпта.
@@ -196,7 +200,7 @@ Task(
          [## Review Boundaries — при diff-focused, как в шаблоне «Reviewer (ревью кода)»]
 
          РЕЖИМ: mode=prerelease. Применять Prerelease escalation из AP-каталога (HIGH→CRITICAL где указано).
-         Release-hygiene: AP-040..AP-045, BORDER-PAIR-001, AP-042/043 по evidence-блокам.
+         Release-hygiene: AP-040..AP-045 (whitelist exempt removal; AP-053 content), BORDER-PAIR-001 (cfe + cf dual-pattern), AP-042/043 по evidence-блокам.
          Category 12 Release Readiness — обязательно в prerelease.
          Язык комментариев (не JSDoc/маркеры): русский; англ. кроме TODO/FIXME — MEDIUM [style].
          AP-031 naming: доменный тест для идентификаторов; экспортные без домена — HIGH [style].

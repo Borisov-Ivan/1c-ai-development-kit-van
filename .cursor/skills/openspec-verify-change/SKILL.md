@@ -196,6 +196,7 @@ CRITICAL `precedent-regression` / `invariant-drift` / `load-bearing-adr-bypass` 
 4. **Slices → Acceptance.** Каждый Scenario, заявленный в `**Связь со spec:**` среза, есть буллетом в чеклисте `S<N>.accept` этого среза? Иначе — алерт `accept-bullets-missing-scenario` (WARNING) от Layer 2 (5b QC); Layer 3 не дублирует.
 5. **Slices → Tasks.** Для каждого среза есть рабочие задачи (`S<N>.<M>`) И ровно одна `S<N>.accept`. Срез без рабочих задач — алерт `slice-empty` (FAIL).
 6. **Scenario observability (`scenario-implementation-leak`).** Grep `specs/**/spec.md`: для каждого `#### Scenario:` проверить `- **THEN**` на маркеры implementation-leak (см. `.cursor/rules/openspec-specs-gate.mdc` секция «НАБЛЮДАЕМОСТЬ СЦЕНАРИЕВ»). При совпадении — **WARNING** `scenario-implementation-leak`; рекомендация: переписать THEN наблюдаемо, детали — в design.md. Не эскалирует в FAIL Layer 3, но включается в отчёт verify.
+7. **Metadata domain_label (`process-only-marker-suffix`).** Read `proposal.md` § `## Metadata (comment markers)` (dual-parser: yaml или list). Если `comment_suffix` match запретам `openspec/project.md` § Канон domain_label — **WARNING** `process-only-marker-suffix`; рекомендация: переписать suffix или `/opsx:extend` перед apply. Не FAIL Layer 3.
 
 `FAIL` в Layer 3 — **NO-GO**.
 

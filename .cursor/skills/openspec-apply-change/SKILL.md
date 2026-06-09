@@ -34,7 +34,7 @@ Implement tasks from an OpenSpec change.
 
    **Metadata Prep (MANDATORY):** Before writing any code, check `proposal.md` for comment marker placeholders:
    - Read or Grep `openspec/changes/<name>/proposal.md` for `<developer>`, `<ФИО>`, «Уточнить до `/opsx:apply`» or «Уточнить».
-   - If placeholders found, STOP — один вопрос в чат: ФИО (default из `project.md` § «Разработчик по умолчанию») и опциональный `comment_suffix`.
+   - If placeholders found, STOP — один вопрос в чат: ФИО (default из `project.md` § «Разработчик по умолчанию») и **domain_label** (`comment_suffix`).
    - Replace placeholders in `proposal.md`; mark F1 follow-up `[x]` if present.
 
 3. **Get apply instructions**
@@ -82,15 +82,31 @@ Implement tasks from an OpenSpec change.
    Verify check is advisory — does not block apply.
 
    **Metadata (comment markers) check:**
-   Прочитать `proposal.md` и `openspec/project.md` (ФИО по умолчанию).
-   - Если секция `## Metadata (comment markers)` есть — извлечь `developer` (trim, с пробелами в инициалах), `comment_suffix` (может быть пустым).
-   - Если `developer` пустой/плейсхолдер — взять из project.md или один вопрос в чат.
-   - Сформировать (date = текущая `dd.MM.yyyy`):
-     - `open_marker` = `// +++ {developer} {date}` если `comment_suffix` пуст;
-     - иначе `// +++ {developer} {date} {comment_suffix}`
-     - `close_marker` = `// --- {developer}`
-   - Если секции нет — один вопрос (ФИО + опц. комментарий), дописать Metadata в proposal.md.
-   Передать `open_marker` и `close_marker` в промпт `onec-code-writer`.
+   Прочитать `proposal.md` и `openspec/project.md` (секция «Разработчик по умолчанию»: `defaultDeveloper`, `cfMarkerPrefix`; § «Канон маркеров (domain_label)» — запреты).
+
+   **Извлечение Metadata (dual-parser):** из секции `## Metadata (comment markers)`:
+   - yaml-like: строки `developer:`, `comment_suffix:`, `marker_style:`
+   - list: `- **developer:**`, `- **comment_suffix:**`, `- **marker_style:**`
+   - `marker_style` default = `canonical` если не указан
+
+   **domain_label validation** (на `comment_suffix` после trim):
+   - Если match запретам из project.md § Канон domain_label → **STOP**, один вопрос: «перепишите domain_label для маркера» (как при плейсхолдере developer).
+   - Пустой `comment_suffix` без `marker_style: minimal` → STOP с предложением заполнить или пометить mechanical.
+
+   - Если `developer` пустой/плейсхолдер — взять `defaultDeveloper` из project.md или один вопрос в чат.
+
+   **marker_scope** (Grep `tasks.md` и при необходимости `design.md` на пути `src/.../*.bsl`):
+   - только `src/ЭДО и ЭА/cf/` → **cf-ea**
+   - только cfe (`src/ЭДО ПАО/cfe/`, `src/ДО3 Демо/cfe/`) → **cfe**
+   - оба → **mixed** (writer получает оба шаблона + таблицу «путь → шаблон»)
+
+   Сформировать (date = текущая `dd.MM.yyyy`):
+   - **cfe:** `open_marker` = `// +++ {developer} {date}` или `// +++ {developer} {date} {comment_suffix}`; `close_marker` = `// --- {developer}`
+   - **cf-ea:** `open_marker` = `// {cfMarkerPrefix} {comment_suffix} +++` (или однострочный `// {cfMarkerPrefix} {comment_suffix}` для целой процедуры); `close_marker` = `// {cfMarkerPrefix без двоеточия} ---`
+   - **mixed:** передать оба набора + явная инструкция scope по пути файла из задачи
+
+   Если секции Metadata нет — один вопрос (ФИО + domain_label), дописать Metadata в proposal.md.
+   Передать маркеры в промпт `onec-code-writer` (см. §3a COMMENT MARKERS).
 
 5. **Resume with pending verdict & Show current progress**
 

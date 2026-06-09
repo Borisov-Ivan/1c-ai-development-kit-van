@@ -61,33 +61,37 @@ Fast-forward through artifact creation - generate everything needed to start imp
 
 1.5. **Metadata Gate (MANDATORY для нового change)**
 
-   Read `openspec/project.md` → секция **«Разработчик по умолчанию»** → `defaultDeveloper` (ФИО с пробелами, trim).
+   Read `openspec/project.md` → секция **«Разработчик по умолчанию»** → `defaultDeveloper` (ФИО с пробелами, trim), `cfMarkerPrefix`. Канон domain_label и запреты — § «Канон маркеров (domain_label)» в project.md.
+
+   **Предзаполнение domain_label:** если в чате/handoff есть блок `## Для /opsx:ff` с полем **«Тема маркера»** — использовать как черновик; иначе после брифа предложить фразу из Why / What Changes (не kebab-name change, не process-метки).
 
    **Resume (каталог `openspec/changes/<name>/` уже существует):**
    - Если `proposal.md` есть и `developer` заполнен (не `<ФИО>` / `<developer>`) — **не спрашивать** Metadata Gate; использовать metadata из proposal.
-   - Если в proposal плейсхолдеры — один вопрос как ниже (только comment_suffix, если ФИО есть в project.md).
+   - Если в proposal плейсхолдеры — один вопрос как ниже (только domain_label / comment_suffix, если ФИО есть в project.md).
 
    **Новый change — один текстовый вопрос в чат** (без `AskQuestion`):
 
    - **Если `defaultDeveloper` задан в project.md:**
      ```
      ФИО для маркеров: <из project.md>.
-     Укажите краткий комментарий к маркеру (необязательно).
-     Пустой ответ → // +++ <ФИО> <дата> без дополнительного текста.
+     Доменное пояснение для маркера (1 фраза по-русски: что меняем и зачем).
+     Пустой ответ допустим только для mechanical change (marker_style: minimal) — иначе укажите domain_label.
      ```
    - **Если ФИО в project.md нет:**
      ```
-     Укажите ФИО (формат «<Фамилия И.О.>» с пробелами) и при необходимости краткий комментарий к маркеру.
-     Примеры ответа: «<Фамилия И.О.>» или «<Фамилия И.О.> <текст задачи>».
-     Пустой комментарий → // +++ <ФИО> <дата> без текста.
+     Укажите ФИО (формат «<Фамилия И.О.>» с пробелами) и доменное пояснение для маркера (1 фраза).
+     Примеры GOOD: «<Фамилия И.О.> при 429 не снимать операцию с опроса».
+     Примеры BAD: «<Фамилия И.Г.> устранение findings release-review».
      ```
 
-   Парсинг ответа:
-   - Первая часть до «лишнего» хвоста → `developer` (нормализовать пробелы в инициалах).
-   - Остаток строки → `comment_suffix` (может быть пустым).
-   - Если ФИО только из project.md и ответ пустой → `comment_suffix` пустой.
+   **Soft-reject:** если ответ (domain_label часть) матчит запреты из project.md § Канон domain_label — одна строка «это process-метка, укажите доменное пояснение» и **повтор вопроса** (не писать в proposal).
 
-   Допустимо: `пропустить` / `позже` → `developer: <ФИО>`, follow-up F1; `отмена` / `стоп` → завершить ff.
+   Парсинг ответа:
+   - Если ФИО только из project.md — вся строка ответа → `comment_suffix` (domain_label), если не пусто.
+   - Иначе первая часть → `developer` (нормализовать пробелы в инициалах); остаток → `comment_suffix`.
+   - Пустой suffix при новом change → только если пользователь явно указал mechanical / `minimal`; иначе повтор вопроса.
+
+   Допустимо: `пропустить` / `позже` → `developer: <ФИО>`, `marker_style: canonical`, follow-up F1; `отмена` / `стоп` → завершить ff.
 
    **После первого указания ФИО** (когда в project.md не было значения) — предложить записать в «Разработчик по умолчанию» по `.cursor/rules/capture-to-project.mdc`.
 
@@ -95,13 +99,18 @@ Fast-forward through artifact creation - generate everything needed to start imp
 
    **Guardrail:** `openspec new change` до завершения Metadata Gate для **нового** change запрещён.
 
-   Запись в `proposal.md` (шаг 5):
+   Запись в `proposal.md` (шаг 5) — **канонический формат** (не list с `zni_id` / `zni_name` / `generate_tz`):
    ```markdown
    ## Metadata (comment markers)
 
    developer: <ФИО>
-   comment_suffix: <опционально; пусто = только ФИО и дата>
+   comment_suffix: <domain_label; пусто только при marker_style: minimal>
+   marker_style: canonical
    ```
+
+   **Парсинг Metadata (resume / read):** поддерживать оба формата в proposal:
+   - yaml-like: `developer:`, `comment_suffix:`, `marker_style:`
+   - list: `- **developer:**`, `- **comment_suffix:**`, `- **marker_style:**`
    Follow-up при плейсхолдере: `- [ ] F1 Заполнить developer в proposal.md (и при необходимости project.md) до первого кода`
 
 2. **Create or resume the change directory**
@@ -204,7 +213,7 @@ Fast-forward through artifact creation - generate everything needed to start imp
         8. CRITICAL/WARNING → «Рекомендую `/opsx:verify <name>`».
       - **All other artifacts**: Create the artifact file using `template` as the structure
       - Apply `context` and `rules` as constraints - but do NOT copy them into the file
-      - **Metadata block**: When creating `proposal.md`, ALWAYS add `## Metadata (comment markers)` (`developer`, `comment_suffix`) immediately after `## Why`.
+      - **Metadata block**: When creating `proposal.md`, ALWAYS add `## Metadata (comment markers)` (`developer`, `comment_suffix`, `marker_style`) immediately after `## Why`.
       - Show brief progress: "✓ Created <artifact-id>"
 
    b. **Continue until all `applyRequires` artifacts are complete**

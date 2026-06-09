@@ -88,6 +88,8 @@ Ensure:
 
 Если оркестратор передал блок `## COMMENT MARKERS` с `open_marker` и `close_marker`, ВСЕ новые вставки кода должны быть обёрнуты в эти маркеры по следующим правилам:
 
+**domain_label:** open_marker MUST содержать осмысленное доменное пояснение из Metadata change (`comment_suffix`); запрещены process-метки (список — `openspec/project.md` § Канон domain_label). При **mixed scope** — шаблон по пути файла из инструкции apply (cfe `// +++` vs cf `{cfMarkerPrefix}`).
+
 1. **Новая процедура/функция в своём модуле расширения:**
    - `open_marker` ставится непосредственно перед `Процедура`/`Функция` (до комментариев JSDoc).
    - `close_marker` ставится сразу после `КонецПроцедуры`/`КонецФункции`.

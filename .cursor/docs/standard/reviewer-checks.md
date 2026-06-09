@@ -103,20 +103,25 @@ Check:
 
   Project-level whitelist: if openspec/project.md contains section «Форматы и соглашения по комментариям BSL»
   with subsection «Whitelist предрелиза» (table: prefix after //, optional regex on full // line, scope glob per row),
-  comments in files matching that scope that match the whitelist are NOT release-hygiene findings.
+  comments in files matching that scope that match the whitelist are exempt from AP-040 **removal** (not from AP-053 content check).
   Read project.md before flagging changelog-style markers (e.g. +++/---) in whitelisted lines.
 
   Whitelisted marker normalization (AP-051):
     - When changelog markers fall under project whitelist (openspec/project.md → Whitelist предрелиза),
       they are NOT removed (AP-040 does not apply), but they MUST be compact:
-      adjacent +++/--- blocks for the same [ID#NNN] and the same semantic change
+      adjacent +++/--- blocks for the same domain_label / [ID#NNN] and the same semantic change
       are merged into one outer block.
     - When merged opening markers carry different dates, keep the latest.
     - Do NOT propose marker merging where AP-040 applies (markers not in whitelist) —
       correct finding there is removal, not merging.
 
+  Whitelisted marker content (AP-053):
+    - Open and single-line cf whitelist markers MUST contain meaningful domain_label (Russian).
+    - Process-only suffix (release-review, findings, kebab change name, etc.) — MEDIUM; remediation: rewrite text, NOT delete pair.
+    - See openspec/project.md § Канон domain_label for forbidden list.
+
   Release hygiene (process metadata in comments only):
-    - Whitelisted ЗНИ-пары // +++ / // --- (openspec/project.md) — не считать findings AP-040 (см. AP-040 whitelist в bsl-antipatterns.mdc).
+    - Whitelisted ЗНИ-пары // +++ / // --- (openspec/project.md) — не AP-040 delete (см. AP-040 whitelist); содержимое — AP-053.
     - Устаревшие / вне-whitelist маркеры: // НАЧАЛО/КОНЕЦ Изменения, // РГИТС ..., Заявка №, Подрядчик:, date-author без шаблона whitelist — MEDIUM
     - JSDoc над Процедура/Функция: сноски (см. <kebab-change> ...), пути reports/openspec/temp/reports, упоминание *.md как доказательства решения — MEDIUM (AP-040)
     - Commented-out old code with replacement markers
