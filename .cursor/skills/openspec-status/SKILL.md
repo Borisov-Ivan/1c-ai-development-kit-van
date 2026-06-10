@@ -41,7 +41,7 @@ Read-only skill. Не вызывает субагентов, не правит �
      - cf: `// {cfMarkerPrefix} {suffix} +++` / close по project.md
    - Ссылка: `.cursor/docs/marker-layers-guide.md`
 
-   Если Metadata нет — «Metadata: не заполнена → `/opsx:ff` или дописать proposal».
+   Если Metadata нет — «Metadata: не заполнена → `/opsx:new` или дописать proposal».
 
 3. **Mode detection.**
    - Read `tasks.md`: Grep `^# Срез S\d+`. Если есть → **slice mode**, иначе **legacy**.
@@ -64,7 +64,7 @@ Read-only skill. Не вызывает субагентов, не правит �
    - Если slice mode и все `S<N>.accept` = `[x]` → `/opsx:archive <name>` (+ возможно `/opsx:verify <name>` если нет final verify).
    - Если есть `[ ]` в tasks и нет pre-apply verify отчёта → `/opsx:verify <name>`.
    - Если есть `[ ]` и есть pre-apply verify → `/opsx:apply <name>`.
-   - Если artifacts не `done` (нет tasks.md) → `/opsx:ff <name>` (resume).
+   - Если artifacts не `done` (нет tasks.md) → `/opsx:new <name>` (resume).
    - Иначе — общая рекомендация с перечнем вариантов.
 
 7. **Output (полный формат, без `--short`).**
@@ -73,7 +73,7 @@ Read-only skill. Не вызывает субагентов, не правит �
    ## OpenSpec Status — <change-name>
    
    **Schema:** <schemaName>
-   **Фаза:** pre-apply | post-apply (есть ли незакрытые `[ ]` в tasks.md)
+   **Режим verify:** pre-apply | post-apply (есть ли незакрытые `[ ]` в tasks.md)
    **Структура:** срезы | legacy
    **Прогресс:** K/M задач; принятых срезов: X/Y (slice mode)
    

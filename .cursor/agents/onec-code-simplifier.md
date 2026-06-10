@@ -510,7 +510,7 @@ Don't document:
 ## INVOCATION
 
 **Manual**: "упрости код", "улучши читаемость", "отрефактори"
-**Automatic**: After Phase 6 (code writing) in SDD workflow
+**Automatic**: REFACTOR-замечания из `/review` (см. `review/SKILL.md` шаг 6.4)
 
 ---
 

@@ -15,11 +15,11 @@ description: Reference guide for 1C agent delegation patterns - complexity asses
 
 | Агент | Файл | Шаблоны |
 |---|---|---|
-| `onec-code-architect` | [architect.md](architect.md) | проектирование, ревью плана, глубокий анализ, scope-coherence audit, task readiness review (verify 7.7), slice transition review (7.6b), slice restructuring (migrate-to-slices), slice decomposition, slice-aware task decomposition, fix quality review (debug 5.5), ADR extraction, multisampling arbiter, ТЗ quality review |
+| `onec-code-architect` | [architect.md](architect.md) | проектирование, ревью плана, глубокий анализ, scope-coherence audit, task readiness review (verify Layer 5), slice transition review (slice-gate, пересмотр следующего среза), slice restructuring (migrate-to-slices), slice decomposition, slice-aware task decomposition, fix quality review (debug 5.5), ADR extraction, multisampling arbiter, ТЗ quality review |
 | `onec-code-writer` | [writer.md](writer.md) | реализация задачи, bug fix, review fix |
 | `onec-code-reviewer` | [reviewer.md](reviewer.md) | ревью кода, ревью bug fix |
 | `onec-code-explorer` | [explorer.md](explorer.md) | исследование кода, верификация гипотез trace-analyst, contract resolution (deep) |
-| `openspec-quality-controller` | [quality-controller.md](quality-controller.md) | slice coherence review (verify 7.6) |
+| `openspec-quality-controller` | [quality-controller.md](quality-controller.md) | slice coherence review (verify Layer 2) |
 | `onec-code-simplifier` | [simplifier.md](simplifier.md) | рефакторинг (REFACTOR-замечания) |
 | `onec-trace-analyst` | (нет шаблона; контракт в `.cursor/agents/onec-trace-analyst.md`) | бриф готовится в чате (Ultra-Lite explore — см. `openspec-explore/SKILL.md`, шаг «Маршрут шагов»); полный отчёт → `temp/reports/trace-analysis-*.md` |
 
@@ -74,7 +74,7 @@ description: Reference guide for 1C agent delegation patterns - complexity asses
 
 ### openspec-quality-controller
 - Domain-agnostic readonly Slice Coherence review
-- Вызывается из `/opsx:verify` шаг 7.6 (MANDATORY)
+- Вызывается из `/opsx:verify` Layer 2 (MANDATORY)
 
 ### onec-code-simplifier
 - REFACTOR-замечания из ревью (запахи кода, читаемость)

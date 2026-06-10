@@ -45,8 +45,8 @@ priority: 240
 
 | Контекст | Действие |
 |----------|----------|
-| **explore / Structured Investigation** | В бриф и последующий промпт включить `## Cross-Archive Context` (до 3 архивных changes по совпадению capability + scope.files). Если триггер сработал — при продолжении в `/opsx:ff` или `/opsx:extend` потребовать `## Blast Radius` в design до закрытия Gate. |
-| **ff / new (Design Gate)** | Blocking: без заполненной секции `## Blast Radius` при активном триггере Design Gate не считается пройденным для области precedent (override только через явную документацию Blast Radius + пользователь). |
+| **explore / Structured Investigation** | В бриф и последующий промпт включить `## Cross-Archive Context` (до 3 архивных changes по совпадению capability + scope.files). Если триггер сработал — при продолжении в `/opsx:new` или `/opsx:extend` потребовать `## Blast Radius` в design до закрытия Gate. |
+| **new (Design Gate)** | Blocking: без заполненной секции `## Blast Radius` при активном триггере Design Gate не считается пройденным для области precedent (override только через явную документацию Blast Radius + пользователь). |
 | **extend** | Если бриф содержит «Отменяет архивный инвариант: yes» без Blast Radius в предлагаемых правках — `Drift-check: scope-violation` (`openspec-extend-change/SKILL.md`). |
 | **verify** | Layer 2, шаг 2.4 Cross-Archive Regression Audit; CRITICAL/INFO по матрице severity в скилле verify. |
 | **apply** | Pre-flight: если активный change имеет CRITICAL `precedent-regression` или `invariant-drift` не устранённые в артефактах — STOP до решения пользователя или `/opsx:extend`. |
@@ -56,10 +56,33 @@ priority: 240
 Gate считается удовлетворённым для затронутого прецедента, если выполняется **любое**:
 
 1. В `design.md` есть секция `## Blast Radius` с заполненными полями (контракт, источник archive/ADR/KB, бизнес-эффект, альтернативы, обоснование), и текущая дельта spec/design явно фиксирует осознанную отмену или замену прецедента **или** архитектор в режиме `precedent-coherence-audit` заключил `extends` без отмены (см. verify Layer 2.4 — понижение до INFO).
-2. Пользователь в Phase B verify выбрал вариант с явным принятием риска (карточка «Принятые риски») после блока Blast Radius.
+2. Пользователь в Repair Loop verify (класс `decision`) выбрал вариант с явным принятием риска (карточка «Принятые риски») после блока Blast Radius.
 3. Триггеры не сработали (нет пересечения с архивным `ADDED`, нет MODIFIED/REMOVED против него, нет противоречия invariant KB / Load-Bearing ADR).
 
 **Design Rationale без Blast Radius не закрывает Gate** при сработавшем триггере.
+
+## АЛГОРИТМ VERIFY LAYER 2.4 (SSOT)
+
+Механический, бюджет ≤ 10 архивных каталогов за прогон:
+
+1. Собрать множество `<capability>` из дельт `specs/**` текущего change, имеющих статус `MODIFIED`/`REMOVED`.
+2. Для каждого — `Glob openspec/changes/archive/**/specs/<capability>/spec.md`; извлечь требования/сценарии со статусом `ADDED`.
+3. Сопоставить с текущими `MODIFIED`/`REMOVED` по нормализованному заголовку **и** тексту `WHEN`/`THEN`.
+4. **Invariant KB:** `Read openspec/knowledge/_index.yaml`; для фактов с `invariant: true`, чьи anchor-paths пересекаются с путями текущего change, проверить противоречие тексту факта.
+5. **Load-Bearing ADR:** `Glob openspec/adrs/ADR-*.md`; если текущий change/design упоминает `Supersedes` ADR со статусом Load-Bearing — проверить наличие `## Blast Radius`.
+
+### Матрица severity
+
+| Условие | Severity | Алерт |
+|---|---|---|
+| Пара `ADDED → MODIFIED/REMOVED` с отменой семантики, нет `## Blast Radius` в design | CRITICAL | `precedent-regression` |
+| Прецедент закрыт `## Blast Radius` или архивный контракт сохранён | INFO | `precedent-documented` |
+| Только переименование/структура spec без изменения `WHEN`/`THEN` | INFO | `precedent-restructure` |
+| Противоречие invariant KB | CRITICAL | `invariant-drift` |
+| Supersedes Load-Bearing ADR без `## Blast Radius` в новом ADR/design | CRITICAL | `load-bearing-adr-bypass` |
+| Превышен бюджет архивов (> 10) | INFO | `precedent-audit-budget-exceeded` (рекомендация: повторить с узким scope) |
+
+CRITICAL `precedent-regression` / `invariant-drift` / `load-bearing-adr-bypass` → класс **decision** в Repair Loop verify (не понижать в repair-гигиену): развилка человеку с блоком Blast Radius, **NO-GO**.
 
 ## БЮДЖЕТ И ПРОИЗВОДИТЕЛЬНОСТЬ (verify Layer 2.4)
 
@@ -69,5 +92,5 @@ Gate считается удовлетворённым для затронуто
 
 ## ССЫЛКИ
 
-- Шаблон Blast Radius в design: `.cursor/skills/openspec-ff-change/SKILL.md`, `.cursor/skills/openspec-extend-change/SKILL.md`.
-- Алгоритм verify Layer 2.4: `.cursor/skills/openspec-verify-change/SKILL.md`.
+- Шаблон Blast Radius в design: `.cursor/skills/openspec-new-change/SKILL.md`, `.cursor/skills/openspec-extend-change/SKILL.md`.
+- Точка применения в verify: `.cursor/skills/openspec-verify-change/SKILL.md` Layer 2, шаг 2.4 (ссылается сюда, алгоритм не дублирует).

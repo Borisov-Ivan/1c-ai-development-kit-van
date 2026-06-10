@@ -7,4 +7,4 @@ alwaysApply: false
 
 **Не использовать.** См. [`.cursor/skills/openspec-explore/SKILL.md`](SKILL.md) — Ultra-Lite, без `openspec/sessions/`.
 
-Legacy read-only: существующие `openspec/sessions/*/analysis.md` — ff/extend fallback.
+Legacy read-only: существующие `openspec/sessions/*/analysis.md` — new/extend fallback.

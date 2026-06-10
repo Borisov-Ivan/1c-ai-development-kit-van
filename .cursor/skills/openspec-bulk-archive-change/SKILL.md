@@ -13,6 +13,8 @@ Archive multiple completed changes in a single operation.
 
 This skill allows you to batch-archive changes, handling spec conflicts intelligently by checking the codebase to determine what's actually implemented.
 
+**ПРОТОКОЛ АРХИВАЦИИ — ПОЛНЫЙ, per change (HARD).** Bulk-archive — это пакетный запуск **того же** протокола, что `/opsx:archive` (`.cursor/skills/openspec-archive-change/SKILL.md`): slice-gate (непринятые `S<N>.accept`), verify-отчёт, баланс маркеров `// +++`/`// ---`, code-truth, извлечение ADR/KB — для **каждого** change. Шаги ниже описывают только пакетную обёртку (выбор, конфликты specs, сводка). **Запрещено** архивировать change в обход полного протокола; если для какого-то change полный протокол не проходит (блокер slice-gate, незакрытые задачи) — этот change пропускается с пометкой в сводке, остальные продолжаются. Осознанный обход — только явный `--force-legacy` per change, как в одиночном archive.
+
 **Output style:** финальная сводка (что архивировано, какие конфликты были разрешены, следующие рекомендации) — шаблон **T-CONFIRM** из `.cursor/docs/opsx-output-style.md` §5.5. Перечень архивированных changes — нумерованный список (один change на строку, имя + новый путь). Конфликты и предупреждения — отдельная нумерованная секция. Перед выводом — self-check-5 (§7).
 
 **Input**: None required (prompts for selection)
@@ -118,25 +120,29 @@ This skill allows you to batch-archive changes, handling spec conflicts intellig
 
    If there are incomplete changes, make clear they'll be archived with warnings.
 
-8. **Execute archive for each confirmed change**
+8. **Execute archive for each confirmed change — full protocol**
 
-   Process changes in the determined order (respecting conflict resolution):
+   Process changes in the determined order (respecting conflict resolution). Для **каждого** change выполнить полный протокол `/opsx:archive` по `.cursor/skills/openspec-archive-change/SKILL.md`:
 
-   a. **Sync specs** if delta specs exist:
+   a. **Pre-archive gates** (из archive SKILL): slice-gate по непринятым `S<N>.accept` (вариант A/B/C/D — спрашивать per change), проверка свежего verify-отчёта, баланс маркеров `// +++`/`// ---`, code-truth по `code-truth-gate.mdc`. Блокер → change получает статус Skipped (причина в сводке), переходим к следующему.
+
+   b. **Sync specs** if delta specs exist:
       - Use the openspec-sync-specs approach (agent-driven intelligent merge)
       - For conflicts, apply in resolved order
       - Track if sync was done
 
-   b. **Perform the archive**:
+   c. **Perform the archive** (тот же механизм, что в archive SKILL):
       ```bash
       mkdir -p openspec/changes/archive
       mv openspec/changes/<name> openspec/changes/archive/YYYY-MM-DD-<name>
       ```
 
-   c. **Track outcome** for each change:
-      - Success: archived successfully
+   d. **Facts extraction** (из archive SKILL): извлечение ADR/KB по `adr-format.mdc` / `knowledge-format.mdc` — per change, не пропускается из-за пакетного режима.
+
+   e. **Track outcome** for each change:
+      - Success: archived successfully (полный протокол пройден)
       - Failed: error during archive (record error)
-      - Skipped: user chose not to archive (if applicable)
+      - Skipped: gate-блокер или user chose not to archive (причина в сводке)
 
 9. **Display summary**
 
@@ -231,10 +237,11 @@ Failed K changes:
 ```
 ## No Changes to Archive
 
-No active changes found. Use `/opsx:ff` to create a new change.
+No active changes found. Use `/opsx:new` to create a new change.
 ```
 
 **Guardrails**
+- Full archive protocol per change (slice-gate, verify, markers, code-truth, ADR/KB) — bulk режим не сокращает протокол, только группирует подтверждения
 - Allow any number of changes (1+ is fine, 2+ is the typical use case)
 - Always prompt for selection, never auto-select
 - Detect spec conflicts early and resolve by checking codebase

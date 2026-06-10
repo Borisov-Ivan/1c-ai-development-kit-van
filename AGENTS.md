@@ -5,9 +5,11 @@
 
 ## OpenSpec Workflow
 
-`.cursor/rules/sdd-workflow.mdc` — explore → ff → verify → apply → verify → archive.
+`.cursor/rules/sdd-workflow.mdc` — explore → new → verify → apply → verify → archive.
 
-Команды: `/opsx:explore`, `/opsx:ff`, `/opsx:verify`, `/opsx:apply`, `/opsx:archive`, `/opsx:extend`, `/opsx:status`, `/opsx:knowledge-add`, `/opsx:sync`, `/opsx:bulk-archive`, `/review`, `/release-review`, `/init-project`.
+Команды: `/opsx:explore`, `/opsx:new`, `/opsx:verify`, `/opsx:apply`, `/opsx:archive`, `/opsx:extend`, `/opsx:status`, `/opsx:knowledge-add`, `/opsx:knowledge-init`, `/opsx:knowledge-audit`, `/opsx:sync`, `/opsx:bulk-archive`, `/review`, `/release-review`, `/init-project`.
+
+Устаревшие алиасы: `/opsx:ff` и `/opsx:continue` → `/opsx:new <name>` (stub-redirect, новых сценариев не несут).
 
 ### Decision tree команд
 
@@ -15,8 +17,8 @@
 
 | Задача пользователя | Команда | Чем отличается |
 |---------------------|---------|----------------|
-| Любой вопрос, дефект, идея, постановка (в т.ч. свободный текст) | `/opsx:explore` | Единая точка входа; бриф-чекпойнт; итог — блок `## Для /opsx:ff` в чате |
-| Создать или дозавершить change | `/opsx:ff <name>` | Все артефакты сразу; повторный вызов — resume |
+| Любой вопрос, дефект, идея, постановка (в т.ч. свободный текст) | `/opsx:explore` | Единая точка входа; бриф-чекпойнт. Итог: дефект — блок `## Постановка ЗНИ` в чате; вопрос — свод «Итог / Вердикт / Дальше»; фича без исследования — redirect на `/opsx:new` |
+| Создать или дозавершить change | `/opsx:new <name>` | Все артефакты сразу; повторный вызов — resume |
 | Где я в этом change | `/opsx:status <name>` | Read-only снимок |
 | Можно ли запускать apply | `/opsx:verify <name>` | Pre-flight + self-repair; один вердикт в первой строке. Опционально `/opsx:verify <name> --lite` — только исполнимость без повторного независимого аудита (guardrails в SKILL verify). |
 | Добавить новое требование | `/opsx:extend <name>` | Бриф → правки → подсказка verify |
@@ -27,6 +29,8 @@
 | Ревью кода (точечное) | `/review` | Git diff, файл, расширение, ЗНI; light-review на тривиальном diff. Памятка: [`.cursor/docs/review-guide.md`](.cursor/docs/review-guide.md) |
 | Предрелизное ревью | `/release-review …` | Все `.bsl` расширения или change-scoped; Category 12; Tier 2 explorer; без light-review. Примеры — там же |
 | Зафиксировать факты вне ЗНИ | `/opsx:knowledge-add <path>` | Без ЗНИ; source + KB-карточка |
+| Создать/обновить таксономию KB | `/opsx:knowledge-init` | Bootstrap или идемпотентный re-sync `_taxonomy.yaml` |
+| Ревизия базы знаний | `/opsx:knowledge-audit` | TTL, якоря, индекс, метрики, taxonomy-sync |
 | Синхронизировать delta specs в main | `/opsx:sync` | Перенос specs из change без archive |
 | Архивировать несколько change | `/opsx:bulk-archive` | Пакетная архивация завершённых ЗНИ |
 | Первичная настройка проекта | `/init-project` | Phase 0–4 inline-протокол; без отдельного SKILL |

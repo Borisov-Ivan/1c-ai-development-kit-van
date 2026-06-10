@@ -385,9 +385,9 @@ facts:
 - `/opsx:knowledge-audit` — все режимы.
 
 **НЕ пишут** (только read + proposal):
-- `/opsx:explore` — drift копится в Explore Summary, обрабатывается через audit по запросу пользователя.
+- `/opsx:explore` — drift копится в итоговом сообщении explore (свод / блок «Постановка ЗНИ»), обрабатывается через audit по запросу пользователя.
 - `Architect Gate` — факты передаются архитектору как контекст, drift в architecture-report.
-- `explore`, `ff`, `verify`, `apply`, `archive`, `extend`, `status`, `sync`, `bulk-archive`, `knowledge-add`, `review`, `init-project` — read-only (кроме явных write-режимов команды).
+- `explore`, `new`, `verify`, `apply`, `archive`, `extend`, `status`, `sync`, `bulk-archive`, `knowledge-add`, `review`, `init-project` — read-only (кроме явных write-режимов команды).
 
 ### Ретроактивная миграция НЕ делается
 
@@ -445,7 +445,7 @@ facts:
 | **archive** (шаг 5.5) | Основная точка создания из `reports/`. Бюджет ≤5 KB. |
 | **archive** (шаг 2b) | Verify KB в scope git-diff. Drift в warnings, не создание. |
 | **knowledge-add** | Создание из standalone reports/markdown вне ЗНИ. Бюджет ≤5 KB, source bundle только после подтверждения пользователя. При пустом вызове разрешён Session Context Fallback: source берётся только из уже видимых в сессии путей и всё равно подтверждается через AskQuestion. |
-| **explore** (Knowledge Discovery) | Read-only + drift accumulator → Explore Summary. |
+| **explore** (Knowledge Discovery) | Read-only + drift accumulator → итоговое сообщение explore (свод / блок «Постановка ЗНИ»). |
 | **Architect Gate** | Read-only, передача фактов в промпт архитектора. |
 | **knowledge-audit** | Массовая ревизия (TTL / drift / metrics / reindex) + full-revisit Reuse Value Test для отсева шума. |
 

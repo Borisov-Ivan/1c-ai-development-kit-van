@@ -17,7 +17,7 @@ priority: 999
 
 **ПРИНЦИП:** BSL write guard → halt-triggers (Light/Mechanical/исключения); XML → § XML WRITE GUARD; гейты → `gate-dispatcher.mdc`; Task → `tool-name-guard.mdc`; пути → `project-paths.mdc`.
 
-**Explore-mode guard:** `/opsx:explore` без active change — writer/reviewer запрещены → `/opsx:ff`.
+**Explore-mode guard:** `/opsx:explore` без active change — writer/reviewer запрещены → `/opsx:new`.
 
 ## APPLY GATE
 
@@ -75,6 +75,8 @@ Architect может рекомендовать новые объекты в des
 | Архитектура (не точечная правка) | **onec-code-architect** | Да, до реализации. Триггеры — `architect-gate.mdc` |
 | Исследование 3+ модулей | **onec-code-explorer** | Рекомендуется |
 | Ошибка с трассой/стеком | **onec-trace-analyst** | Да, см. `1c-error-analysis.mdc` |
+| REFACTOR-замечания из ревью (запахи кода, читаемость) | **onec-code-simplifier** | Да в `/review` (шаг 6.4); поведение не меняется — см. `1c-utility-agents.mdc` |
+| Slice Coherence review (verify Layer 2) | **openspec-quality-controller** | Да в pre-apply `/opsx:verify` (MANDATORY); readonly, domain-agnostic |
 
 Шаблоны промптов, оценка сложности, интеграция со скиллами: `.cursor/skills/1c-agent-patterns/SKILL.md`.
 
@@ -146,23 +148,38 @@ Architect может рекомендовать новые объекты в des
 
 После каждой правки `.bsl` — **до reviewer**: `ReadLints` → fix errors → блок `## Linter Signals (evidence)` для reviewer.
 
-**SSOT:** [`.cursor/rules/1c-writer-pipeline.mdc`](1c-writer-pipeline.mdc) § LINT GATE; формат evidence — `review/SKILL.md` шаг 1.8.
+**SSOT деталей:** [`.cursor/rules/1c-writer-pipeline.mdc`](1c-writer-pipeline.mdc) § LINT GATE; формат evidence — `review/SKILL.md` шаг 1.8. Место шага в потоке — эталонный пайплайн ниже (§ WRITER PIPELINE), здесь не дублируется.
 
-Поток: `writer → ReadLints → [fix if errors] → API EXISTENCE CHECK → reviewer (+ Linter Signals + API check results)`
+## WRITER PIPELINE (эталонный порядок)
 
-## WRITER PIPELINE (детали)
-
-API EXISTENCE CHECK, EXTENSION GATE + VERIFICATION, CONTRACT RESOLUTION (формат Resolved Contracts и investigation loop) — в on-demand правиле `.cursor/rules/1c-writer-pipeline.mdc` (подгружается по globs `**/*.bsl`).
-
-Сквозной поток пайплайна:
+**Единственный эталон сквозного потока.** Все другие файлы (`1c-writer-pipeline.mdc`, `review/SKILL.md`, `openspec-apply-change/SKILL.md`) ссылаются сюда и не приводят собственные варианты порядка.
 
 ```
-writer → ReadLints → [fix if errors] → API EXISTENCE CHECK →
+writer → ReadLints → [fix if errors] → API EXISTENCE CHECK + METADATA CHECK →
+  [AskQuestion при WARNING по API/метаданным] →
   EXTENSION VERIFICATION (если &ИзменениеИКонтроль) →
   reviewer (+ Linter Signals evidence + API check results + base path + verification result)
 ```
 
-Investigation loop — по запросу ревьювера: `1c-writer-pipeline.mdc`, `review/SKILL.md` шаг 3.5.
+| Шаг | Исполнитель | Детали |
+|-----|-------------|--------|
+| writer | `onec-code-writer` (Task) | INPUT CONTRACT — `.cursor/agents/onec-code-writer.md` |
+| ReadLints + fix errors | оркестратор (fix — снова writer) | `1c-writer-pipeline.mdc` § LINT GATE |
+| API EXISTENCE CHECK | оркестратор (Grep) | `1c-writer-pipeline.mdc` § API EXISTENCE CHECK |
+| METADATA CHECK | оркестратор (Grep по src/) | `1c-metadata-validation.mdc` |
+| EXTENSION VERIFICATION | оркестратор (Read base + сравнение) | `1c-writer-pipeline.mdc` § EXTENSION GATE |
+| reviewer | `onec-code-reviewer` (Task) | evidence-блоки обязательны |
+| Investigation loop (по запросу reviewer) | `onec-code-explorer` (Task) | `1c-writer-pipeline.mdc` § CONTRACT RESOLUTION; `review/SKILL.md` шаг 3.5 |
+
+Детали шагов (API EXISTENCE CHECK, EXTENSION GATE + VERIFICATION, CONTRACT RESOLUTION) — в on-demand правиле `.cursor/rules/1c-writer-pipeline.mdc` (подгружается по globs `**/*.bsl`).
+
+### Лимиты итераций (сводно — три разных цикла, не путать)
+
+| Цикл | Лимит | Где определён |
+|------|-------|----------------|
+| writer ↔ reviewer (исправление замечаний) | **2** итерации | этот файл § АВТО-ИСПРАВЛЕНИЕ РЕВЬЮ; writer Phase 7 |
+| Investigation loop (reviewer → explorer → reviewer) | **3** итерации | `review/SKILL.md` шаг 3.5 |
+| Self-review агента writer (внутренний) | **2** прохода | `onec-code-writer.md` |
 
 ---
 

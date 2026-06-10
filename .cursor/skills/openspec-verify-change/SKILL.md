@@ -75,11 +75,12 @@ Verify не правит scope артефактов. Если в запросе 
 |----------------|----------------|------|
 | Первый verify или `decision_round=0`, без `--lite` | `full` | L1–L5 |
 | После **user-extend** по decision (`decision_round>0`) | `incremental` | L1 diff + L4 targeted + L5 если менялся tasks |
+| **Между срезами** (после приёмки `S<N>.accept`, запрос вида «проверь срез S<K>» / verify на slice-gate из apply) **и** design.md не менялся с последнего challenge | `incremental` | L2 + L5 по затронутому срезу; L4 `SKIPPED-novelty` (design не менялся) |
 | `/opsx:verify <name> --lite` **и** нет открытой развилки **и** `decision_round=0` | `lite` | L2 + L5; L4 `SKIPPED-lite` |
 
 **Guardrails `--lite`:** запрещён при `open_decision_id != null`, `decision_round > 0`, или открытой развилке в последнем отчёте. В чате: «проверена исполнимость без повторного независимого аудита постановки» (без слова lite в HALT).
 
-**Guardrails `incremental`:** только после user-extend по decision; **не** после internal Repair Loop (repair → `verify_depth: full` как сейчас).
+**Guardrails `incremental`:** только после user-extend по decision **или** на границе среза (slice-gate); **не** после internal Repair Loop (repair → `verify_depth: full` как сейчас). Если `design_mtime` > `last_challenge_at` — incremental на границе среза недоступен, нужен `full` (L4 обязателен). `/opsx:apply` на slice-gate ссылается на этот режим вместо полного прогона.
 
 Записать выбранный `verify_depth` в snapshot отчёта.
 
@@ -113,7 +114,7 @@ Grep `tasks.md` на `^- \[[ ]\]` — если найдено хотя бы од
    - **Не создавать новый файл отчёта.**
    - Прочитать тело последнего `reports/verification-*.md` (не только YAML).
    - **Не опираться на историю чата** («вы уже подтвердили», prior turns) — только YAML `snapshot`, mtime артефактов и тело последнего отчёта.
-   - В чат — «тихий» вариант `templates/chat-summary.md`: **1a**, если прошлый вердикт «можно apply»; **1b-decision**, если есть открытая развилка; **1b-repair**, если только repair-блокеры — запустить **Repair Loop** (без сообщения в чат), затем один финальный ответ. Запрещено выводить список «Что доработать» пунктами в чате.
+   - В чат — «тихий» вариант `.cursor/skills/openspec-verify-change/templates/chat-summary.md`: **1a**, если прошлый вердикт «можно apply»; **1b-decision**, если есть открытая развилка; **1b-repair**, если только repair-блокеры — запустить **Repair Loop** (без сообщения в чат), затем один финальный ответ. Запрещено выводить список «Что доработать» пунктами в чате.
 4. Если хотя бы один флаг разошёлся — продолжить со слоя 1.
 
 ### Layer 1 — Гигиена артефактов (тихая, авто-исправление)
@@ -131,7 +132,7 @@ Grep `tasks.md` на `^- \[[ ]\]` — если найдено хотя бы од
 | Незакрытые backtick-блоки в `design.md`/`tasks.md` | Закрыть | `unbalanced-fences` (auto-fix) |
 | ID задачи без префикса среза, когда есть `# Срез` | Лог в info без правки | `task-without-slice-prefix` (info) |
 
-**Если правок не было** — записать `layer_1_hygiene: PASS`. Если были — `AUTOFIXED` + список в `### Авто-исправлено (Layer 1)` отчёта в техническом формате (файл, строка, что изменено).
+**Если правок не было** — записать `layer_1_hygiene: PASS`. Если были — `AUTOFIXED` + список в `### Авто-исправлено (Layer 1)` отчёта в техническом формате (файл, строка, что изменено); каркас таблицы — `.cursor/skills/openspec-verify-change/templates/layer-1-hygiene-table.md`.
 
 Layer 1 **никогда** не блокирует — только правит или сообщает в info.
 
@@ -153,28 +154,7 @@ QC оценивает критерии 1–6, 8–11 из `vertical-slices.mdc` 
 
 **2.3. Spec ↔ Tasks ↔ Design coverage** — каждый `#### Scenario:` из `specs/**/spec.md` должен встречаться в `## Slices` design (строка «Scenarios из spec») И в чеклисте какого-то `S<N>.accept`. Иначе — алерт `scenario-orphan-design` или `scenario-orphan-accept`.
 
-**2.4. Cross-Archive Regression Audit (precedent regression)** — защита от молчаливой отмены ранее принятого контракта. Источник правил: `.cursor/rules/precedent-regression-gate.mdc`. Выполняется в `pre-apply`; в `post-apply` для непринятых задач/срезов; пропускается, когда все задачи `[x]` (постфактум приёмка не пересматривает регрессию дельты).
-
-Алгоритм (механический, бюджет ≤ 10 архивных каталогов за прогон):
-
-1. Собрать множество `<capability>` из дельт `specs/**` текущего change, имеющих статус `MODIFIED`/`REMOVED`.
-2. Для каждого — `Glob openspec/changes/archive/**/specs/<capability>/spec.md`; извлечь требования/сценарии со статусом `ADDED`.
-3. Сопоставить с текущими `MODIFIED`/`REMOVED` по нормализованному заголовку **и** тексту `WHEN`/`THEN`.
-4. **Invariant KB:** `Read openspec/knowledge/_index.yaml`; для фактов с `invariant: true`, чьи anchor-paths пересекаются с путями текущего change, проверить противоречие тексту факта.
-5. **Load-Bearing ADR:** `Glob openspec/adrs/ADR-*.md`; если текущий change/design упоминает `Supersedes` ADR со статусом Load-Bearing — проверить наличие `## Blast Radius`.
-
-Матрица severity:
-
-| Условие | Severity | Алерт |
-|---|---|---|
-| Пара `ADDED → MODIFIED/REMOVED` с отменой семантики, нет `## Blast Radius` в design | CRITICAL | `precedent-regression` |
-| Прецедент закрыт `## Blast Radius` или архивный контракт сохранён | INFO | `precedent-documented` |
-| Только переименование/структура spec без изменения `WHEN`/`THEN` | INFO | `precedent-restructure` |
-| Противоречие invariant KB | CRITICAL | `invariant-drift` |
-| Supersedes Load-Bearing ADR без `## Blast Radius` в новом ADR/design | CRITICAL | `load-bearing-adr-bypass` |
-| Превышен бюджет архивов (> 10) | INFO | `precedent-audit-budget-exceeded` (рекомендация: повторить с узким scope) |
-
-CRITICAL `precedent-regression` / `invariant-drift` / `load-bearing-adr-bypass` → класс **decision** в Repair Loop (не понижать в repair-гигиену): развилка человеку с блоком Blast Radius, **NO-GO**.
+**2.4. Cross-Archive Regression Audit (precedent regression)** — защита от молчаливой отмены ранее принятого контракта. **SSOT (триггеры, алгоритм, матрица severity, бюджет ≤10 архивов):** `.cursor/rules/precedent-regression-gate.mdc`, секция «АЛГОРИТМ VERIFY LAYER 2.4» — Read и выполнить, здесь не дублируется. Выполняется в `pre-apply`; в `post-apply` для непринятых задач/срезов; пропускается, когда все задачи `[x]` (постфактум приёмка не пересматривает регрессию дельты). CRITICAL `precedent-regression` / `invariant-drift` / `load-bearing-adr-bypass` → класс **decision** в Repair Loop.
 
 **Итоговый статус слоя:**
 
@@ -202,7 +182,7 @@ CRITICAL `precedent-regression` / `invariant-drift` / `load-bearing-adr-bypass` 
 
 ### Layer 4 — Independent Challenge (архитектурный адверсариальный аудит)
 
-**Цель:** независимое подтверждение, что выбранный design **решает** проблему **оптимальным** способом. Это не дублирует Architect Gate из ff/explore: ff даёт согласие на подход (auctorial), challenge даёт независимое подтверждение (adversarial). Подробности — `.cursor/rules/architect-gate.mdc` секция «INDEPENDENT CHALLENGE».
+**Цель:** независимое подтверждение, что выбранный design **решает** проблему **оптимальным** способом. Это не дублирует Architect Gate из new/explore: new даёт согласие на подход (auctorial), challenge даёт независимое подтверждение (adversarial). Подробности — `.cursor/rules/architect-gate.mdc` секция «INDEPENDENT CHALLENGE».
 
 **Триггеры запуска (любой):**
 
@@ -258,7 +238,7 @@ CRITICAL `precedent-regression` / `invariant-drift` / `load-bearing-adr-bypass` 
   - **Defensive filter reopen:** альтернатива с тегом `reopen-blocked: <id>`, противоречащая `closed_decisions` без verified new fact — **не** в чат.
 - `REJECT` → после classifier: если gap = `implementation_invariant` only → Repair; иначе **NO-GO**. `last_challenge_at` **не обновляется** при REJECT, блокирующем apply.
 
-**Важно:** Layer 4 нельзя «обойти» прогоном `--skip-architect`, переданным в ff. Этот флаг закрывает только Architect Gate из ff. Layer 4 verify имеет собственный override-механизм через `.gate-override.yaml gate: design-challenge`.
+**Важно:** Layer 4 нельзя «обойти» прогоном `--skip-architect`, переданным в new. Этот флаг закрывает только Architect Gate из new. Layer 4 verify имеет собственный override-механизм через `.gate-override.yaml gate: design-challenge`.
 
 ### Layer 5 — Implementation Readiness (реализуемость)
 
@@ -316,9 +296,9 @@ Layer 4 `CHALLENGE` или `REJECT` → NO-GO **кроме** CHALLENGE-saturated
 
 ### Save report
 
-Если хоть один слой не `PASS` либо были автоправки — сохранить `reports/verification-YYYY-MM-DD.md` строго в следующем порядке (полный шаблон — `templates/executive-summary.md` и `templates/report-header.md`):
+Если хоть один слой не `PASS` либо были автоправки — сохранить `reports/verification-YYYY-MM-DD.md` строго в следующем порядке (полный шаблон — `.cursor/skills/openspec-verify-change/templates/executive-summary.md` и `.cursor/skills/openspec-verify-change/templates/report-header.md`):
 
-1. **YAML front-matter** — `templates/report-header.md`. Внутреннее состояние (verdict, layer_status, snapshot) для движка и фильтра новизны.
+1. **YAML front-matter** — `.cursor/skills/openspec-verify-change/templates/report-header.md`. Внутреннее состояние (verdict, layer_status, snapshot) для движка и фильтра новизны.
 2. **`## Резюме для разработчика`** — первый видимый раздел. Зеркало финального сообщения чата + 1–2 абзаца контекста (модули, процедуры, директивы). На языке кода 1С, без жаргона движка.
 3. **`## Решения до apply`** — только при NO-GO. Развёрнутые развилки прозой; каждая `###` с конкретными именами `Функция/Процедура/Модуль/Реквизит`. Внутренние коды развилок — НЕ здесь.
 4. **`## Что меняется в постановке`** — карточка изменений для разработчика: путь в `src/`, точки изменения, что НЕ меняется, связанные ADR/KB/архив.
@@ -333,7 +313,7 @@ Layer 4 `CHALLENGE` или `REJECT` → NO-GO **кроме** CHALLENGE-saturated
 
 ### Output to chat
 
-Использовать `templates/chat-summary.md`. Первая строка — `templates/verdict-card.md`. Pre-send — `.cursor/rules/verify-user-communication.mdc` + Chat Surface Contract (§2.6 `opsx-output-style.md`). HALT — `.cursor/rules/chat-output-budget.mdc` §7. Тон — архитектор разработчику, на языке кода 1С.
+Использовать `.cursor/skills/openspec-verify-change/templates/chat-summary.md`. Первая строка — `.cursor/skills/openspec-verify-change/templates/verdict-card.md`. Pre-send — `.cursor/rules/verify-user-communication.mdc` + Chat Surface Contract (§2.6 `opsx-output-style.md`). HALT — `.cursor/rules/chat-output-budget.mdc` §7. Тон — архитектор разработчику, на языке кода 1С.
 
 **HARD — слот «Следующий шаг»:** при GO / GO-saturated / silent_ok 1a — **всегда** строка `**Следующий шаг:**` с user-action командой:
 
@@ -391,7 +371,7 @@ Self-check: «можно действовать без файла» = польз
 2. **Запустить QC sync** — `run_in_background: false`. Дождаться результата. Карточки в чате нет.
 3. **Запустить task-readiness sync** — `run_in_background: false`. Дождаться результата. Карточки в чате нет.
 4. **Дождаться завершения design-challenge** (если ещё не завершён).
-5. **Синтез** — оркестратор пишет **одно** финальное сообщение пользователю по `templates/chat-summary.md`. Промежуточные карточки Task **не цитируются** и **не упоминаются**.
+5. **Синтез** — оркестратор пишет **одно** финальное сообщение пользователю по `.cursor/skills/openspec-verify-change/templates/chat-summary.md`. Промежуточные карточки Task **не цитируются** и **не упоминаются**.
 
 ### Final message constraint (HARD — обязательно в каждом промпте)
 
@@ -450,7 +430,7 @@ the file and synthesizes a single message for the user. Anything you put
 - Слои, шаблоны, YAML, чат — `.cursor/skills/openspec-verify-change/templates/`.
 - Коммуникация — `.cursor/rules/verify-user-communication.mdc`.
 - Бюджет чата — `.cursor/rules/chat-output-budget.mdc`.
-- Architect Gate / Layer 4 vs ff — `.cursor/rules/architect-gate.mdc`.
+- Architect Gate / Layer 4 vs new — `.cursor/rules/architect-gate.mdc`.
 - Code-Truth — `.cursor/rules/code-truth-gate.mdc`.
 - Verified Cause — `.cursor/rules/verified-cause-gate.mdc`.
 - Vertical Slices / acceptance format — `.cursor/rules/vertical-slices.mdc`.

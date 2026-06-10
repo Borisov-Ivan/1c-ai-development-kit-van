@@ -21,11 +21,11 @@ SSOT контракта: `.cursor/docs/opsx-output-style.md` §2.6.
 | **A** | `/opsx:verify <name>` | ZNI с repair-only (текстовые пробелы, нет decision) | **1** сообщение; GO; `**Следующий шаг:**` + `/opsx:apply`; нет «Подтвердить?», `/opsx:extend`, списка файлов |
 | **B** | `/opsx:verify <name>` | ZNI с CHALLENGE / A-B | **1** блок вопроса (проблема→последствия→варианты); `**Следующий шаг:**` + «ответьте»; END TURN |
 | **C** | `/opsx:verify <name>` | post-GO, артефакты не менялись | ≤6 строк; «статус прежний: можно apply»; `**Следующий шаг:**` + команда по `verify_mode` |
-| **D** | `/opsx:ff <name>` | новый change | T-CONFIRM; **одна** команда next: verify; без перечня файлов |
+| **D** | `/opsx:new <name>` | новый change | T-CONFIRM; **одна** команда next: verify; без перечня файлов |
 | **E** | `/opsx:apply <name>` | завершённый срез | handoff: **Primary acceptance** одной строкой; user-action next step; без meta pipeline |
 | **E2** | `/opsx:apply <name>` | кодовая задача без критерия приёмки (mechanical slice) | одна строка «реализована»; нет «пошаговая пауза»; нет diff-чеклиста; нет «автопроверки пройдены» |
 | **E3** | `/opsx:apply <name>` | slice-gate handoff | Primary acceptance; ≤7 строк в «Что проверить СЕЙЧАС»; T-HANDOFF §2 без перечня всех задач |
-| **F** | `/opsx:explore` | симптом | бриф **B3** (`Бриф:`, От вас / Вопрос / План / На выходе / Подтвердить?); финал — блок `## Для /opsx:ff` или один вопрос |
+| **F** | `/opsx:explore` | симптом | бриф **B3** (`Бриф:` + связный абзац + якорь **Вопрос** + Подтвердить?; План — только при выборе маршрута); финал — блок `## Постановка ЗНИ` или один вопрос |
 | **F2** | `/opsx:extend <change>` | чёткое уточнение scope | бриф **B1** ≤6 строк; нет `Как буду искать`; END TURN на «Подтвердить?» |
 | **F3** | `/opsx:extend <change>` | расширение с drift-warning | бриф **B2** ≤8 строк; одна A/B; `Drift-check` не в чате |
 
@@ -58,7 +58,7 @@ SSOT контракта: `.cursor/docs/opsx-output-style.md` §2.6.
 |----------|---------------------|
 | A, C | `do2-pavlik-predzapolnenie-viz-shablony` — после repair или tag «до repair» |
 | B | тот же change с открытым CHALLENGE (контракт схемы КП) |
-| D | любой новый ff из explore-блока |
+| D | любой новый запуск new из explore-блока |
 | E, E3 | любой change с готовым срезом к приёмке (Primary в metadata) |
 | E2 | mechanical slice (`**Режим apply:** mechanical`) или change без `**Приёмка:**` в рабочих задачах |
 | F | произвольный симптом ДО2 |
@@ -74,7 +74,7 @@ SSOT контракта: `.cursor/docs/opsx-output-style.md` §2.6.
 - [ ] A — repair-only verify в новом чате
 - [ ] B — decision verify в новом чате
 - [ ] C — silent_ok в новом чате
-- [ ] D — ff hint verify в новом чате
+- [ ] D — new hint verify в новом чате
 - [ ] E — apply handoff (Primary)
 - [ ] E2 — apply mechanical task (тихий успех)
 - [ ] E3 — apply slice-gate handoff

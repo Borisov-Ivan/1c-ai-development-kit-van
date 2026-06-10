@@ -13,4 +13,4 @@ Archive a completed change in the experimental workflow.
 
 Input:
 - Optionally specify a change name (e.g., `/opsx:archive add-auth`). If omitted, the skill will prompt for selection (step 1).
-- **`--force-legacy`:** пропуск slice-gate на шаге 3.5 при непринятых **`S<N>.T<M>`** (архив без отметки в `tasks.md`, warnings). Иначе при `[ ]` на приёмочных тестах — карточка и **AskQuestion** (подтверждение как на slice gate в apply: отметка и продолжение / стоп / force-legacy).
+- **`--force-legacy`:** пропуск slice-gate на шаге 3.5 при непринятых **`S<N>.accept`** (legacy `S<N>.T<M>`) — архив без отметки в `tasks.md`, warnings. Иначе при `[ ]` на приёмочных задачах — карточка и **AskQuestion** (подтверждение как на slice gate в apply: отметка и продолжение / стоп / force-legacy).

@@ -2,7 +2,7 @@
 
 Шаблоны для делегирования `Task(subagent_type="onec-code-writer")`. Общие правила, выбор модели, обработка ошибок, Shared instruction blocks (DATA_CONTRACT_GATE, INTEGRATION_CONTRACT_GATE, EXISTING_MECHANISM_GATE, EXTENSION_GUARD, CONTEXT_SAFETY, CONDITIONAL_ACTION_GATE, ORCHESTRATOR_IMPLEMENTATION_GATE) — `SKILL.md` (навигатор), секция «Shared instruction blocks».
 
-**Частный случай writer:** во всех режимах передавать **`Task(..., model=...)`** по таблице в `.cursor/rules/model-selection.mdc` для `onec-code-writer` (Primary и fallback); во frontmatter агента — `model: inherit`. Детали — `tool-name-guard.mdc`.
+**Модель writer:** по таблице `.cursor/rules/model-selection.mdc` writer вызывается **без** параметра `model=` (inherit — модель родительского чата); во frontmatter агента — `model: inherit`. Явный `model=` — только по запросу пользователя. Детали — `tool-name-guard.mdc`.
 
 ---
 
@@ -56,11 +56,12 @@ Task(
          - Для новых функций/процедур: параметры не перезаписываются (AP-007); при нормализации ввести локальную переменную
 
          ## 8. OUTPUT REQUIREMENTS
-         В финальном ответе обязательны блоки:
+         В финальном ответе обязательны блоки (полный формат — onec-code-writer.md § OUTPUT FORMAT):
          - ## Changes (с полными code fences или diff)
+         - ## Code-Truth Symbols (mandatory, YAML по формату агента)
          - ## Gate Results (G14, G16, G18, G19, G20)
-         - ## Self-Assessment (Readability/Correctness/Standards: 1-5)
          - ## Key Decisions
+         - ## Acceptance Criteria
          - ## Next Steps",
   subagent_type="onec-code-writer"
 )
@@ -128,11 +129,12 @@ Task(
          - Для новых функций/процедур: параметры не перезаписываются (AP-007); при нормализации ввести локальную переменную
 
          ## 9. OUTPUT REQUIREMENTS
-         В финальном ответе обязательны блоки:
+         В финальном ответе обязательны блоки (полный формат — onec-code-writer.md § OUTPUT FORMAT):
          - ## Changes (с полными code fences или diff)
+         - ## Code-Truth Symbols (mandatory, YAML по формату агента)
          - ## Gate Results (G14, G16, G18, G19, G20)
-         - ## Self-Assessment (Readability/Correctness/Standards: 1-5)
          - ## Key Decisions
+         - ## Acceptance Criteria
          - ## Next Steps",
   subagent_type="onec-code-writer"
 )
@@ -219,11 +221,12 @@ Task(
          - Код вне #Вставка/#Удаление не изменён (для &ИзменениеИКонтроль); используй rollback protocol из onec-code-writer.md → Phase 5 п.6 при обнаружении нарушения
 
          ## 8. OUTPUT REQUIREMENTS
-         В финальном ответе обязательны блоки:
+         В финальном ответе обязательны блоки (полный формат — onec-code-writer.md § OUTPUT FORMAT):
          - ## Changes (с полными code fences или diff)
+         - ## Code-Truth Symbols (mandatory, YAML по формату агента)
          - ## Gate Results (G14, G16, G18, G19, G20)
-         - ## Self-Assessment (Readability/Correctness/Standards: 1-5)
          - ## Key Decisions
+         - ## Acceptance Criteria
          - ## Next Steps",
   subagent_type="onec-code-writer"
 )

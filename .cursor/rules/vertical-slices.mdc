@@ -6,7 +6,7 @@ priority: 150
 
 # Vertical Slices — вертикальные пользовательские срезы
 
-Единственный источник истины для декомпозиции ЗНИ OpenSpec. Ссылаются: `openspec-ff-change`, `openspec-apply-change`, `openspec-verify-change`, `openspec-explore`, `openspec-archive-change`, `sdd-workflow.mdc`, `1c-agent-patterns`, `openspec-quality-controller`.
+Единственный источник истины для декомпозиции ЗНИ OpenSpec. Ссылаются: `openspec-new-change`, `openspec-apply-change`, `openspec-verify-change`, `openspec-explore`, `openspec-archive-change`, `sdd-workflow.mdc`, `1c-agent-patterns`, `openspec-quality-controller`.
 
 ## ПРОБЛЕМА
 
@@ -28,9 +28,9 @@ priority: 150
 
 **Допустимо агенту в `S<N>.<M>`** (не пользователю): правка BSL; «верифицировать **по коду**» / «по cf/cfe» / static analysis (Read/Grep выгрузки); NFR static review.
 
-**Неизвестное поведение внешнего API/ядра → агент:** статический разбор cf/cfe + `design.md` § Assumptions / § Decisions; при недостатке фактов — explorer в ff/apply; наблюдаемый исход — Primary или optional в `S<N>.accept`, не отдельный user-spike посередине среза.
+**Неизвестное поведение внешнего API/ядра → агент:** статический разбор cf/cfe + `design.md` § Assumptions / § Decisions; при недостатке фактов — explorer в new/apply; наблюдаемый исход — Primary или optional в `S<N>.accept`, не отдельный user-spike посередине среза.
 
-**Mechanical grep** (ff post-tasks, verify 2.1a): только строки `^- \[[ x]\] S\d+\.\d+` (не accept, не Follow-up).
+**Mechanical grep** (new post-tasks, verify 2.1a): только строки `^- \[[ x]\] S\d+\.\d+` (не accept, не Follow-up).
 
 - **DENY** (CRITICAL без ALLOW-override): `тестовой ИБ`, `на ИБ вериф`, `на стенде`, `runtime-verify`, `спайк`, `в консоли`, `отладчик`, `эмулировать вызов`, `вызвать API` (без пути к файлу и без «по коду»).
 - **ALLOW-override:** `Ручное конфигурирование`, `Конфигуратор`, adopt, `выгрузить`.
@@ -159,7 +159,7 @@ priority: 150
 
 ## ДЕКОМПОЗИЦИЯ (кто и когда)
 
-- **При создании ЗНИ** (`/opsx:ff`) — архитектор формирует секцию `## Slices` в `design.md` **до** генерации `tasks.md`. Затем `tasks.md` генерируется с `# Срез S<N>` по этой секции. См. шаблоны «Architect — slice decomposition» и «Architect — slice-aware task decomposition» в `1c-agent-patterns/architect.md`.
+- **При создании ЗНИ** (`/opsx:new`) — архитектор формирует секцию `## Slices` в `design.md` **до** генерации `tasks.md`. Затем `tasks.md` генерируется с `# Срез S<N>` по этой секции. См. шаблоны «Architect — slice decomposition» и «Architect — slice-aware task decomposition» в `1c-agent-patterns/architect.md`.
 - **При добавлении задач к существующему change** (`/opsx:extend`, `/opsx:explore` → extend) — placement задач фикса **строго** по разделу **«ИНВАРИАНТ: Defect placement»** ниже (по умолчанию — inside-slice; новый срез `S<N+1>` только при выполнении условий инварианта).
 - **При пересмотре на границе среза** (`/opsx:apply` → slice-gate → опция «пересмотр») — архитектор через «Architect — slice transition review» оценивает актуальность следующего среза.
 - **При миграции легаси-ЗНИ** (tasks.md без `# Срез`) — через `/opsx:extend <name>` (architect slice restructuring) или ручная правка по этому файлу.
@@ -171,13 +171,26 @@ priority: 150
 - **Slice-gate (передача на приёмку):** после последней non-acceptance задачи среза агент НЕ задаёт вопрос о вердикте в текущей сессии. Вместо этого:
   1. Append в `debug.md` `## Slice Gate Decisions` запись `Решение: awaiting-acceptance`.
   2. Сгенерировать Acceptance Handoff Card — что сделано + **Primary acceptance** из metadata + optional одной строкой + `/opsx:apply <name>`.
-  3. Сгенерировать Session Handoff Summary с заголовком `## Paused for Acceptance — S<N>`.
+  3. Сгенерировать Session Handoff Summary с заголовком T-HANDOFF варианта `acceptance` — `## Срез S<N> — передача на приёмку: <change-name>` (§5.2 `opsx-output-style.md`).
   4. Завершить apply.
+
+### SLICE-GATE — сводная таблица элементов (SSOT)
+
+| Элемент | Формат | Где определён |
+|---------|--------|----------------|
+| Маркер конца среза | `<!-- slice-gate: <критерий, одно предложение> -->` | этот файл, § СТРУКТУРА TASKS.MD |
+| Приёмочный чекбокс | ровно один `- [ ] S<N>.accept …` (legacy `S<N>.T<M>`) | этот файл, § ФОРМАТ `S<N>.accept` |
+| Запись в debug | `debug.md` `## Slice Gate Decisions`, поле `Решение:` | этот файл, § ФИКСАЦИЯ РЕШЕНИЙ |
+| Заголовок handoff | `## Срез S<N> — передача на приёмку: <change-name>` (T-HANDOFF `acceptance`) | `opsx-output-style.md` §5.2 |
+| Отчёт приёмки | `reports/slice-acceptance-S<N>-YYYY-MM-DD.md` | этот файл, § ФИКСАЦИЯ РЕШЕНИЙ |
+| Команда возобновления | `/opsx:apply <name>` (или обычная фраза «принято») | `openspec-apply-change/SKILL.md` шаг 5 |
+
+Дубли этих форматов в скиллах — только ссылками сюда.
 
 - **Slice-gate (вердикт, при следующем /opsx:apply):** см. `.cursor/skills/openspec-apply-change/SKILL.md`, шаг 5 "Resume with pending verdict". Первым действием агент задаёт AskQuestion с 3 опциями — [1] Принят / [2] Не принят / [3] Дефект в предыдущем срезе S<K>. Для **[3]** — проверка `S<K>.accept` (или `S<K>.T<M>` в legacy) в `tasks.md` и ветвление **inside-slice rework** vs **fix-срез** по разделу **«ИНВАРИАНТ: Defect placement»** (этот файл). При вердикте «Принят» оркестратор ставит `[x]` именно на `S<N>.accept` (родительский чекбокс), не на отдельные sub-bullets чеклиста.
 До ответа — никаких других действий (не читает tasks помимо необходимого, не запускает writer/reviewer).
 
-- **Shortcut (опционально):** пользователь может явной командой "принято S<N>" / "accept S<N>" в середине сессии отметить `S<N>.accept` (или legacy `S<N>.T<M>`) = `[x]` без handoff-карточки. Используется, когда приёмка проведена параллельно.
+- **Shortcut (опционально):** пользователь может **обычной фразой** («принято», «срез S2 принят», «проверил, работает») в середине сессии отметить `S<N>.accept` (или legacy `S<N>.T<M>`) = `[x]` без handoff-карточки. Магический формат команды не требуется; при неоднозначности (несколько срезов в ожидании) — одно уточнение, какой срез. Используется, когда приёмка проведена параллельно.
 
 - **Стоп (отдельно):** запрос "стоп" / "прекрати" от пользователя — завершает apply в любой точке, не связан с acceptance-флоу.
 
@@ -209,7 +222,7 @@ Replace старого Phase Classification. Новые критерии QC:
    - `accept-bullet-foreign-scenario` — **WARNING**: Scenario другого среза в accept.
    - Legacy (`S<N>.T<M>` без `S<N>.accept`): алерты `acceptance-without-scenario` (WARNING); новые алерты к legacy не применяются.
 6. **Rework Risk** — срез опирается на непринятый предыдущий без явной зависимости, или сценарий среза повторяет сценарий другого среза. → WARNING / SUGGESTION в зависимости от остроты.
-8. **Slice Verticality / Acceptance Observability** — приёмка среза SHALL описывать **наблюдаемое** (black-box) поведение, а не заглядывание «внутрь» кода. **Оценка — семантическая (суждение QC-агента), не grep подстрок.** Оркестратор в ff/verify **не** применяет списки ключевых слов к критерию 8; вывод делегируется QC.
+8. **Slice Verticality / Acceptance Observability** — приёмка среза SHALL описывать **наблюдаемое** (black-box) поведение, а не заглядывание «внутрь» кода. **Оценка — семантическая (суждение QC-агента), не grep подстрок.** Оркестратор в new/verify **не** применяет списки ключевых слов к критерию 8; вывод делегируется QC.
 
    Алгоритм для каждого среза `S<N>` (QC-агент):
    - Собрать все приёмочные пункты: буллеты тела `S<N>.accept` **или** строки legacy `S<N>.T<M>` (если `S<N>.accept` отсутствует).
@@ -244,7 +257,7 @@ Replace старого Phase Classification. Новые критерии QC:
 
 **Удалены:** Phase Classification P0–P4, alert `missing-phase-gate`, alert `phase-violation`, implicit `P2→P0` dependency logic, alert `acceptance-scenario-duplication` (заменён `accept-bullet-foreign-scenario`), alert `acceptance-overload` (модель один-`accept` его делает невозможным).
 
-## ПОВЕДЕНИЕ CONTINUE
+## ПОВЕДЕНИЕ NEW (resume)
 
 - При создании следующего артефакта: `proposal → specs → design (с `## Slices`) → tasks (с `# Срез`)`. Архитектор формирует `## Slices` при переходе к tasks для ЗНИ с 6+ задачами; **по умолчанию — один срез**, дополнительные — только при независимых outcomes (см. «ТРИГГЕРЫ И ПОРОГИ»).
 - При добавлении задачи вручную в существующий tasks.md:

@@ -96,7 +96,7 @@ alwaysApply: false
 
 | Точка workflow | Действие |
 |----------------|----------|
-| **archive** (шаг 4.5) | Основная точка. Если `reports/architecture-*.md` есть — предложить извлечь ADR |
+| **archive** (шаг 5) | Основная точка. Если `reports/architecture-*.md` есть — предложить извлечь ADR |
 | **archive** (шаг 5.5.b invariant extraction) | Для контрактов из `## Goals` / `## Decisions`, влияющих на будущие ЗНИ — кандидат в ADR со статусом **Load-Bearing** или **Load-bearing: yes** и заполненным **Protects-invariants** |
 | **explore** (Structured Investigation) | При обнаружении архитектурного решения — предложить создать ADR |
 | **ff / new** (Design Gate) | Перед design — поиск существующих ADR по области (ADR Discovery) |

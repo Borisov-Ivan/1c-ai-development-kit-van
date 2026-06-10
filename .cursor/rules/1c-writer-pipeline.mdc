@@ -9,13 +9,7 @@ priority: 800
 
 Подключается при редактировании/чтении `.bsl`. Дополняет `1c-agent-delegation.mdc` — детали пайплайна писателя, которые **не** нужны всегда (только в момент работы с кодом 1С).
 
-Сквозной поток (подробности — ниже):
-
-```
-writer → ReadLints → [fix if errors] → API EXISTENCE CHECK + METADATA CHECK →
-  [AskQuestion if WARNING on API/metadata] → EXTENSION VERIFICATION (если &ИзменениеИКонтроль) →
-  reviewer (+ Linter Signals evidence incl. warnings; Phase 1b MUST_FIX in-scope + base path + verification result)
-```
+**Эталон сквозного потока и таблица «шаг → исполнитель» — `1c-agent-delegation.mdc` § WRITER PIPELINE (эталонный порядок).** Здесь — только детали отдельных шагов; порядок не дублируется.
 
 **Метаданные:** имена объектов, типов и значений перечислений — см. `.cursor/rules/1c-metadata-validation.mdc`. Несуществующее имя → STOP (`1c-no-metadata-creation.mdc`).
 
@@ -26,7 +20,7 @@ writer → ReadLints → [fix if errors] → API EXISTENCE CHECK + METADATA CHEC
 1. Вызвать `ReadLints` на изменённых `.bsl` файлах.
 2. Ошибки уровня **error** — исправить до reviewer (writer повторно; в apply/review — только writer).
 3. Блок **`## Linter Signals (evidence)`** для reviewer (`review/SKILL.md` шаг 1.8): **все** диагностики, включая **warning**.
-4. **Reviewer (Phase 1b):** in-scope warning/error → **MUST_FIX**; отложить на prerelease **запрещено** (`onec-code-reviewer.md` Phase 1b).
+4. **Reviewer (Phase 1b — Linter Signals Gate):** in-scope warning/error → **MUST_FIX**; отложить на prerelease **запрещено** (`.cursor/docs/standard/reviewer-checks.md` § Phase 1b).
 5. Линтер недоступен — `Linter unavailable: <reason>`; reviewer проверяет документацию вручную.
 
 ## API EXISTENCE CHECK
@@ -87,7 +81,7 @@ AskQuestion:
 
 ### Триггер
 
-Ревьювер после Phase 0–2.5 включает в отчёт секцию `## Investigation Request` с таблицей источников, требующих резолва контракта. Оркестратор парсит эту секцию и запускает investigation loop (шаг 3.5 в `review/SKILL.md`).
+Ревьювер после Phase 0–2.5 включает в отчёт секцию `## Investigation Request` с таблицей источников, требующих резолва контракта. Оркестратор парсит эту секцию и запускает investigation loop (шаг 3.5 в `review/SKILL.md`). **Лимит — 3 итерации** (сводная таблица лимитов — `1c-agent-delegation.mdc` § WRITER PIPELINE).
 
 Без секции Investigation Request — CONTRACT RESOLUTION не выполняется.
 
@@ -147,7 +141,7 @@ writer'а (HALT с MISSING_INPUT при получении).
 4. Сравнить код вне директив с base. При расхождении — **СТОП**, вернуть writer на исправление.
 5. Путь к base-файлу и результат проверки («verified: совпадает» или «расхождение в строках N-M») передать в промпт reviewer.
 
-Поток: `detect &ИзменениеИКонтроль → enrich writer prompt → writer → EXTENSION VERIFICATION → ReadLints → reviewer (+ base path + verification result)`
+Место шага в потоке — после LINT GATE и API/METADATA CHECK, до reviewer (эталон — `1c-agent-delegation.mdc` § WRITER PIPELINE). При обнаружении `&ИзменениеИКонтроль` дополнительно: enrich writer prompt блоком EXTENSION_GUARD **до** вызова writer (см. EXTENSION GATE выше).
 
 ---
 

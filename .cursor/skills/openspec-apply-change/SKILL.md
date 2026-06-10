@@ -24,6 +24,18 @@ Implement tasks from an OpenSpec change.
 
    Always announce: "Using change: <name>" and how to override (e.g., `/opsx:apply <other>`).
 
+1b. **Parse флаги команды** (см. `.cursor/commands/opsx-apply.md`):
+
+   | Флаг | Эффект в скилле |
+   |------|-----------------|
+   | *(нет флагов)* | default = **step-by-slice** от первого непринятого среза до конца |
+   | `--slice S<N>` | выполнить **только** срез S<N>, без перехода к следующему (целевой фикс / повтор после rejection) |
+   | `--since-slice S<N>` | начать со среза S<N>, пропуская предыдущие (в т.ч. не помеченные `[x]` — legacy / частично принятые) |
+   | `--step-by-step` | пауза после **каждой задачи** вместо приёмки целого среза (отладка) |
+   | `--batch` | все оставшиеся срезы без остановок на slice-gate (только явный флаг или legacy-ЗНИ без срезов) |
+
+   Конфликт флагов (`--slice` + `--batch` и т.п.) — одно уточнение пользователю. Выбранный режим зафиксировать в TodoWrite-плане сессии.
+
 2. **Check status to understand the schema and verify Metadata**
    ```bash
    openspec status --change "<name>" --json
@@ -50,7 +62,7 @@ Implement tasks from an OpenSpec change.
    - Dynamic instruction based on current state
 
    **Handle states:**
-   - If `state: "blocked"` (missing artifacts): show message, suggest `/opsx:ff <name>` (resume)
+   - If `state: "blocked"` (missing artifacts): show message, suggest `/opsx:new <name>` (resume)
    - If `state: "all_done"`: congratulate, suggest archive
    - Otherwise: proceed to implementation
 
@@ -158,7 +170,7 @@ Implement tasks from an OpenSpec change.
    1. Grep `tasks.md` for `^# Срез S\d+` — if found, ЗНИ is in **slice mode** (default).
    2. Read slice metadata blocks (Сценарий, Приёмка, Связь со spec, Зависимости) for each slice.
    3. Glob `reports/quality-control-*.md` in change dir — if found, use slice dependency graph and coverage matrix from it.
-   4. Order slices by dependency graph: S<N> can start only when all slices in `**Зависимости:**` have `S<K>.T<M>` = `[x]`.
+   4. Order slices by dependency graph: S<N> can start only when all slices in `**Зависимости:**` have `S<K>.accept` (or legacy `S<K>.T<M>`) = `[x]`.
    5. Within a slice, group tasks by layer/file:
       - Tasks touching different files = independent = can run in parallel (up to 3 concurrent via Task tool).
       - Tasks touching the same file = sequential.
@@ -276,7 +288,7 @@ Implement tasks from an OpenSpec change.
    | Приёмочная задача (`S<N>.accept` или legacy `S<N>.T<M>`) | «ручной тест», «убедиться», `S<N>.accept`, `S<N>.T<M>` | **Режимы по срезам / пошаговый** (внутренние коды `step-by-slice` / `step-by-step`): trigger Slice Gate (см. шаг 6). **Legacy batch:** пропустить с предупреждением; включить в Session Summary секцию «Отложенные ручные тесты» |
    | Создание метаданных | «создать регистр», «создать справочник», «создать форму» | **СТОП** — блокер пользователю (`1c-no-metadata-creation.mdc`) |
 
-   **HALT:** Оркестратор НЕ реализует задачи типов BSL-код и модули формы самостоятельно. Оркестратор готовит промпт и делегирует. Прямое использование Write/StrReplace для .bsl и **любая правка Form.xml** (включая скрипты/JSON-конвейеры) — запрещены. Для `Form.xml`/Конфигуратора: СТОП — инструкция ручного конфигурирования и WAIT до выгрузки/приёмки пользователя. Для программного создания элементов в `Form/Module.bsl`: обычный BSL pipeline (`onec-code-writer` → `ReadLints` → `onec-code-reviewer`). Ref: `1c-agent-delegation.mdc` (§ XML WRITE GUARD), `1c-utility-agents.mdc`.
+   **HALT:** Оркестратор НЕ реализует задачи типов BSL-код и модули формы самостоятельно. Оркестратор готовит промпт и делегирует. Прямое использование Write/StrReplace для .bsl и **любая правка Form.xml** (включая скрипты/JSON-конвейеры) — запрещены. Для `Form.xml`/Конфигуратора: СТОП — инструкция ручного конфигурирования и WAIT до выгрузки/приёмки пользователя. Для программного создания элементов в `Form/Module.bsl`: обычный BSL pipeline — полный эталонный порядок в `1c-agent-delegation.mdc` § WRITER PIPELINE (writer → ReadLints → API/METADATA CHECK → EXTENSION VERIFICATION → reviewer). Ref: `1c-agent-delegation.mdc` (§ XML WRITE GUARD), `1c-utility-agents.mdc`.
 
    **Code-Truth Journal (mandatory after writer/reviewer success):**
    - После каждой BSL/form-module задачи извлечь из ответа `onec-code-writer` блок `created_or_modified_symbols`.
@@ -329,7 +341,7 @@ Implement tasks from an OpenSpec change.
      `/opsx:apply <change-name>` — новая сессия начнётся с запроса вердикта (принят / не принят / дефект в предыдущем срезе). Если нужно изменить scope/design/tasks — `/opsx:extend <change-name>`; затем снова `/opsx:apply <change-name>`. Пока вы проверяете в 1С — оркестратор ничего не делает.
 
      ### 4. Short-cut
-     Если уже проверено и принято — напишите `принято S<N>` / `accept S<N>`, отмечу без полного handoff.
+     Если уже проверено и принято — напишите обычной фразой («принято», «срез S<N> принят»), отмечу без полного handoff.
      ```
 
      Параллельно:
@@ -345,7 +357,7 @@ Implement tasks from an OpenSpec change.
      2. T-HANDOFF вариант `acceptance` по шаблону шага 7 (заголовок — `## Срез S<N> — передача на приёмку: <change-name>`). Секция «Что проверить СЕЙЧАС» заполняется чеклистом сценариев из `S<N>.accept` (или legacy `S<N>.T<M>`) — та же информация, что в Acceptance Handoff Card выше.
      3. Завершить сессию.
    - **Manual acceptance shortcut:**
-     Если пользователь в любой момент сессии явно говорит "принято S<N>" / "accept S<N>" / "S<N> принят" (для среза, у которого все рабочие задачи [x] и приёмка [ ]):
+     Если пользователь в любой момент сессии обычной фразой подтверждает приёмку («принято», «срез S<N> принят», «проверил, работает») — для среза, у которого все рабочие задачи [x] и приёмка [ ]; при неоднозначности (несколько срезов в ожидании) — одно уточнение, какой срез:
      1. Не генерировать Acceptance Handoff Card.
      2. Отметить **родительский** чекбокс приёмки среза: `S<N>.accept` = `[x]`. Для legacy-формата (`S<N>.T<M>` без `S<N>.accept`) — отметить все `S<N>.T<M>` среза = `[x]`.
      3. Append в debug.md "решение: принят (manual shortcut)".
@@ -407,7 +419,7 @@ Implement tasks from an OpenSpec change.
    - Continue to next task
 
    **Pause if:**
-   - **Slice Gate reached** — шаблон B (§6)
+   - **Slice Gate reached** — шаблон B «приёмка среза» (выше в этом шаге)
    - **Explicit step-by-step** — шаблон A только при явном критерии в tasks
    - Task is unclear → ask for clarification
    - Implementation reveals a design/scope issue → stop implementation and suggest `/opsx:extend <change-name>` (or `/opsx:extend <change-name> --from-review <report-path>` if the issue came from review), затем снова `/opsx:apply <change-name>` после обновления постановки
@@ -440,7 +452,7 @@ Implement tasks from an OpenSpec change.
    - `### 4. Как вернуться` — `/opsx:apply <change-name>`, одна строка. Если выявлен scope/design mismatch, добавить вторую строку: `Обновить scope: /opsx:extend <change-name>` (затем снова `/opsx:apply <change-name>`).
    - `### 5. Blockers` — нумерованный список задач, которые не могут продолжаться, и почему.
    - `### 6. Issue` — **только в варианте `pause`**: описание проблемы 1 абзац + нумерованные **Options** из 2–3 вариантов решения. **Тонкий чат:** при сообщении пользователю дублировать развилку блоком прозой по стилю Варианта 3 verify (полное Issue и таблицы — в файле `reports/handoff-*.md`, см. §5.2 выше).
-   - `### 7. Short-cut` — **только в варианте `acceptance`**: строка про `принято S<N>` / `accept S<N>`.
+   - `### 7. Short-cut` — **только в варианте `acceptance`**: строка про подтверждение обычной фразой («принято», «срез принят»).
 
    Если все срезы приняты (`final`) — добавить строку «All tasks complete. Ready to archive: `/opsx:archive <change-name>`». Если `pause` из-за design/scope mismatch — предложить `Follow-up: /opsx:extend <change-name>` рядом с вариантами решения. Если `pause` — ждать ответа пользователя. Если `acceptance` — end turn.
 
@@ -507,7 +519,7 @@ Implement tasks from an OpenSpec change.
 
 <!-- только для варианта `acceptance` -->
 ### 7. Short-cut
-Если уже проверено и принято — напишите `принято S<N>` / `accept S<N>`, отмечу без полного handoff.
+Если уже проверено и принято — напишите обычной фразой («принято», «срез S<N> принят»), отмечу без полного handoff.
 
 <!-- только для варианта `final` -->
 > All tasks complete. Ready to archive: `/opsx:archive <change-name>`.
@@ -526,7 +538,7 @@ Implement tasks from an OpenSpec change.
 8. **Англицизмы** (`Step-by-step`, `checkpoint`, `Tier`, `Standard/Lite/Full` как метки) и имена движка (`Architect Gate`, `Slice Gate`, `Implementation Impact Gate`) — в пользовательский вывод не попадают; внутренние ID триггеров (`slice-size-threshold`, `awaiting-acceptance`) — только в `debug.md` / в скрытом контексте модели.
 
 **Guardrails**
-- **Output style:** T-HANDOFF §5.2 + **Chat Surface Contract** §2.6 `opsx-output-style.md`: handoff среза на языке эффекта; next step — только user-action команды (`/opsx:verify`, `/opsx:apply`, `/opsx:archive`); thin handoff `acceptance` **включает** строку «после проверки: `принято S<N>` или `/opsx:apply <name>`»; без internal-команд и перечней файлов. Self-check §2.6 перед отправкой.
+- **Output style:** T-HANDOFF §5.2 + **Chat Surface Contract** §2.6 `opsx-output-style.md`: handoff среза на языке эффекта; next step — только user-action команды (`/opsx:verify`, `/opsx:apply`, `/opsx:archive`); thin handoff `acceptance` **включает** строку «после проверки: обычная фраза „принято“ или `/opsx:apply <name>`»; без internal-команд и перечней файлов. Self-check §2.6 перед отправкой.
 - Keep going through tasks until done or blocked
 - Always read context files before starting (from the apply instructions output)
 - **Spot-check after each task:** Grep (or Read) to confirm the change; for 5+ files, check at least 3. Do not mark task complete if verification fails.

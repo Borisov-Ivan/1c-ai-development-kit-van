@@ -8,11 +8,11 @@
 
 ---
 
-## Quality Controller — slice coherence review (verify шаг 7.6)
+## Quality Controller — slice coherence review (verify Layer 2)
 
-Used by `/opsx:verify` step 7.6 — MANDATORY in every pre-apply verification. Domain-agnostic assessment of task ordering, dependencies, and execution risk. Complements the architect's realizability review (step 7.7).
+Used by `/opsx:verify` Layer 2 — MANDATORY in every pre-apply verification. Domain-agnostic assessment of task ordering, dependencies, and execution risk. Complements the architect's realizability review (Layer 5).
 
-**Agent file:** `.cursor/agents/openspec-quality-controller.md` (model: Opus, readonly). Role, evaluation criteria and output format defined in agent system prompt.
+**Agent file:** `.cursor/agents/openspec-quality-controller.md` (readonly; модель — по `model-selection.mdc`). Role, evaluation criteria and output format defined in agent system prompt.
 
 ```
 Task(

@@ -246,7 +246,7 @@ Focus: full (new file)
 | 1 | syntax-checker | X.bsl:45 | error | Unclosed НачатьТранзакцию | AP-015 |
 ```
 
-- Блок передаётся ревьюверу. Ревьювер в **Phase 1b** (`.cursor/agents/onec-code-reviewer.md`) обязан обработать каждую in-scope диагностику: по умолчанию **confirm → MUST_FIX**; dismiss только с явной причиной (`out-of-scope`, `false-positive`, `pre-existing-unchanged`). **Запрещено** откладывать in-scope warning на prerelease («погасим техдолг позже»).
+- Блок передаётся ревьюверу. Ревьювер в **Phase 1b** (`.cursor/docs/standard/reviewer-checks.md` § Phase 1b: BSL Linter Signals Gate) обязан обработать каждую in-scope диагностику: по умолчанию **confirm → MUST_FIX**; dismiss только с явной причиной (`out-of-scope`, `false-positive`, `pre-existing-unchanged`). **Запрещено** откладывать in-scope warning на prerelease («погасим техдолг позже»).
 
 **Важно:** оркестратор НЕ переводит сигналы в findings и не выставляет Action — это работа ревьювера (единый источник вердиктов — S3 принцип). Оркестратор **обязан** передать warnings в блоке evidence, не отфильтровывая их.
 
@@ -458,7 +458,7 @@ Focus: full (new file)
 2. **REFACTOR:** Task `onec-code-simplifier` (шаблон: `.cursor/skills/1c-agent-patterns/simplifier.md`).
 3. **LINT GATE** — см. [`.cursor/rules/1c-agent-delegation.mdc`](../../rules/1c-agent-delegation.mdc) § LINT GATE + [`.cursor/rules/1c-writer-pipeline.mdc`](../../rules/1c-writer-pipeline.mdc).
 4. **API EXISTENCE CHECK (smart default S12):**
-   - По правилам из `1c-agent-delegation.mdc` проверить новые вызовы `МодульИмя.МетодИмя(` в diff.
+   - По правилам из `1c-writer-pipeline.mdc` § API EXISTENCE CHECK проверить новые вызовы `МодульИмя.МетодИмя(` в diff (порядок шага — `1c-agent-delegation.mdc` § WRITER PIPELINE).
    - **Auto-pass правило:** если каждый WARN-вызов имеет **≥ 3 hits в extension scope** (Grep по `МодульИмя\.МетодИмя\(`) — auto-pass с записью INFO в отчёт, без AskQuestion.
    - Если < 3 hits — AskQuestion как обычно.
 5. При `&ИзменениеИКонтроль` — EXTENSION VERIFICATION (base vs код вне #Вставка/#Удаление).

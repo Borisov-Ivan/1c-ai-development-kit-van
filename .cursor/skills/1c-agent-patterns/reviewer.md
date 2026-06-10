@@ -20,7 +20,7 @@ Task(
          Base-файл (для &ИзменениеИКонтроль): [путь к base в cf/ или 'не применимо']
 
          ## Linter Signals (evidence)
-         [Блок из шага 1.8 review/SKILL.md — таблица ReadLints/bsl-language-server (все severity, включая warning); либо 'Linter unavailable: <reason>'. Reviewer Phase 1b: in-scope warning → MUST_FIX по умолчанию; отложить на prerelease запрещено.]
+         [Блок из шага 1.8 review/SKILL.md — таблица ReadLints/bsl-language-server (все severity, включая warning); либо 'Linter unavailable: <reason>'. Reviewer Phase 1b (reviewer-checks.md § Phase 1b: BSL Linter Signals Gate): in-scope warning → MUST_FIX по умолчанию; отложить на prerelease запрещено.]
 
          ## Whitelist & Mandatory Controls (from project.md)
          [Блок из шага 1.6.1 — две таблицы (Whitelist предрелиза, Обязательный контроль) для release-hygiene rules AP-040..AP-043.]
@@ -41,9 +41,6 @@ Task(
 
          [Если оркестратор собрал diff-focused scope — вставить блок ## Review Boundaries целиком (см. `.cursor/skills/review/SKILL.md`, шаг 1.5). При полном ревью (focus=full для всех файлов батча) секцию ## Review Boundaries не вставлять. В смешанном батче — по подзаголовку ### Файл: <path> и Focus: full | diff-focused на каждый файл. Соблюдай Review Boundaries Protocol в onec-code-reviewer.md.]
 
-         ## Architectural Context
-         [Если оркестратор передал контекст из design.md и/или architecture-*.md — вставить его сюда. Оценивать решения в коде на соответствие этому контексту.]
-
          ## Reasoning focus (Phase 0 — выполнять ПЕРВЫМ)
          Перед проверкой стандартов и паттернов — понять код:
          1. Для каждого блока: что он делает? (Intent Map)
@@ -51,7 +48,7 @@ Task(
          3. Согласованы ли обращения? Пропорциональна ли сложность?
          4. Автор знает контракт или компенсирует незнание?
          Артефакты Phase 0 включить в отчёт.
-         Заполнить Evaluation Checklist (все 5 вопросов); пропуск вопроса 5 (Попытка as contract compensation) недопустим.
+         Заполнить Evaluation Checklist (все 6 вопросов); пропуск вопроса 5 (Попытка as contract compensation) недопустим.
 
          ## Code Smells & Elegance (Эстетика и запахи кода)
          Оцени код на предмет 'дурного запаха' (code smells) и когнитивной перегрузки. Код должен быть не только рабочим, но и красивым, лаконичным и легко читаемым.
@@ -137,17 +134,11 @@ Task(
          при интеграции — HIGH: missing mechanism analysis.
 
          ## Формат замечаний
-         Каждое замечание содержит обязательные поля:
-         - Procedure: имя процедуры/функции
-         - Anchor: 1-2 уникальные строки кода (для Grep-поиска после правок)
-         - Action: MUST_FIX / REFACTOR / VERIFIED_OK / OPTIONAL
-           MUST_FIX = дефект, нарушение стандарта (обязательно исправить).
-           REFACTOR = код работает, но требует улучшения читаемости/структуры (запахи кода).
-           VERIFIED_OK = проверено и подтверждено корректным (нет действий).
-           OPTIONAL = улучшение на усмотрение.
-         - Type: CODE / ARCHITECTURE
-           Укажи ARCHITECTURE, если исправление требует изменения метаданных, контрактов API, структуры хранения, прав (RLS) или кардинальной смены точки расширения (например, перенос из формы в модуль объекта). Иначе — CODE.
-           
+         Строго по REPORT FORMAT v3 из onec-code-reviewer.md (системный промпт агента):
+         обязательные поля Procedure, Anchor, Action (MUST_FIX / REFACTOR / VERIFIED_OK / OPTIONAL),
+         Type (CODE / ARCHITECTURE — ARCHITECTURE при изменении метаданных, контрактов API,
+         структуры хранения, прав/RLS или смене точки расширения).
+
          ### Оценка эстетики кода (Elegance Score)
          В конце отчета выведи блок:
          - Читаемость: [оценка 1-5] ([краткий комментарий])
@@ -321,17 +312,11 @@ Task(
          при интеграции — HIGH: missing mechanism analysis.
 
          ## Формат замечаний
-         Каждое замечание содержит обязательные поля:
-         - Procedure: имя процедуры/функции
-         - Anchor: 1-2 уникальные строки кода (для Grep-поиска после правок)
-         - Action: MUST_FIX / REFACTOR / VERIFIED_OK / OPTIONAL
-           MUST_FIX = дефект, нарушение стандарта (обязательно исправить).
-           REFACTOR = код работает, но требует улучшения читаемости/структуры (запахи кода).
-           VERIFIED_OK = проверено и подтверждено корректным (нет действий).
-           OPTIONAL = улучшение на усмотрение.
-         - Type: CODE / ARCHITECTURE
-           Укажи ARCHITECTURE, если исправление требует изменения метаданных, контрактов API, структуры хранения, прав (RLS) или кардинальной смены точки расширения (например, перенос из формы в модуль объекта). Иначе — CODE.
-           
+         Строго по REPORT FORMAT v3 из onec-code-reviewer.md (системный промпт агента):
+         обязательные поля Procedure, Anchor, Action (MUST_FIX / REFACTOR / VERIFIED_OK / OPTIONAL),
+         Type (CODE / ARCHITECTURE — ARCHITECTURE при изменении метаданных, контрактов API,
+         структуры хранения, прав/RLS или смене точки расширения).
+
          ### Оценка эстетики кода (Elegance Score)
          В конце отчета выведи блок:
          - Читаемость: [оценка 1-5] ([краткий комментарий])

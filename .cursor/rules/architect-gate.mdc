@@ -21,7 +21,7 @@ priority: 200
 - Новый объект метаданных в design (Grep design.md)
 - В `debug.md` change: **M ≥ 3** строк с `Architect Gate:\s*(не вызывался|не требовался|declined|—)` (см. `.cursor/skills/openspec-extend-change/SKILL.md`, п. 5a, Триггер 2) **и** (нет `reports/architecture-extend-coherence-*.md` **или** дата последней секции `## Extend — YYYY-MM-DD` в `debug.md` новее даты в имени новейшего `architecture-extend-coherence-*.md`)
 
-Детальные списки grep-фраз (объективные и семантические маркеры для design.md / tasks.md) — в `.cursor/skills/openspec-verify-change/SKILL.md` шаг 9 «Architect Gate Check».
+Детальные списки grep-фраз (объективные и семантические маркеры для design.md / tasks.md) — в `.cursor/skills/openspec-verify-change/SKILL.md`, Layer 4 (Independent Challenge) и Layer 2 (структурные проверки design).
 
 ### Семантические
 
@@ -78,7 +78,7 @@ priority: 200
 
 Формат: .cursor/rules/knowledge-format.mdc
 
-## PRECEDENT DISCOVERY (при срабатывании Gate или перед ff/verify по триггерам precedent-regression-gate)
+## PRECEDENT DISCOVERY (при срабатывании Gate или перед new/verify по триггерам precedent-regression-gate)
 
 Дополнительно к ADR Discovery и KB Discovery — контекст **архивных** changes той же capability и пересекающихся файлов:
 
@@ -102,15 +102,17 @@ priority: 200
 
 Зависит от контекста вызова (определяется в каждом скилле):
 
-| Контекст | Действие |
-|----------|----------|
-| **explore** (Structured Investigation, шаг Decide) | Архитектор **обязателен**. AskQuestion пользователю: «Сработали триггеры [...]. Запустить архитектора?» без равноправной опции пропуска. Отказ только через явный пользовательский ввод с причиной; фиксируется в Explore Summary как `declined: <reason>`. Если архитектор не запущен и отказ не зафиксирован — статус `required-pending`, `/opsx:ff` не рекомендовать |
-| **ff / new** (Design Gate) | Blocking. Без опции пропуска. Escape только через флаг `--skip-architect <причина>`, оставляющий явный аудит-след `.gate-override.yaml`. |
-| **verify** Layer 4 (Independent Challenge) | Архитектор в режиме `design-challenge` — **независимый адверсариальный аудит** `proposal.md` ↔ `design.md`. Триггер: первый pre-apply прогон verify по ЗНИ или mtime `design.md` > `snapshot.last_challenge_at`. Отчёт `reports/design-challenge-YYYY-MM-DD.md`. Это **не дублирует** Architect Gate из ff/explore: ff даёт согласие на подход (auctorial), challenge даёт независимое подтверждение (adversarial). См. `.cursor/skills/openspec-verify-change/SKILL.md` Layer 4. |
-| **verify** Layer 5 (Implementation Readiness) | Архитектор в режиме `task-readiness` — оценка реализуемости задач. CRITICAL в отчёте verify при GAP. Не пересматривает архитектурный подход (это сделал Layer 4). |
-| **apply** (pre-flight) | Soft redirect на `/opsx:verify`. Если в change dir не найден ни один из `reports/verification-*.md` — предупреждение. Не дублирует проверку триггеров |
-| **1c-agent-delegation** (правка .bsl вне OpenSpec) | При срабатывании → onec-code-architect до реализации |
-| **extend** (Scope Coherence Audit) | При срабатывании scope-drift триггеров (см. `openspec-extend-change/SKILL.md` п. 5a) → onec-code-architect в режиме `scope-coherence-audit`; отчёт `reports/architecture-extend-coherence-*.md` |
+Матрица «этап → тип гейта»: **blocking** — без архитектора дальше нельзя; **readiness** — оценка без блокировки этапа; **audit** — проверка соответствия; этап **не повторяет** гейты соседних этапов.
+
+| Контекст | Тип | Действие |
+|----------|-----|----------|
+| **explore** (Structured Investigation, шаг Decide) | blocking | Архитектор **обязателен**. AskQuestion пользователю: «Сработали триггеры [...]. Запустить архитектора?» без равноправной опции пропуска. Отказ только через явный пользовательский ввод с причиной; фиксируется в блоке «Постановка ЗНИ» как `declined: <reason>`. Если архитектор не запущен и отказ не зафиксирован — статус `required`, `/opsx:new` не рекомендовать |
+| **new** (Design Gate) | blocking | Без опции пропуска. Escape только через флаг `--skip-architect <причина>`, оставляющий явный аудит-след `.gate-override.yaml`. |
+| **verify** Layer 4 (Independent Challenge) | audit | Архитектор в режиме `design-challenge` — **независимый адверсариальный аудит** `proposal.md` ↔ `design.md`. Триггер: первый pre-apply прогон verify по ЗНИ или mtime `design.md` > `snapshot.last_challenge_at`. Отчёт `reports/design-challenge-YYYY-MM-DD.md`. Это **не дублирует** Architect Gate из new/explore: new даёт согласие на подход (auctorial), challenge даёт независимое подтверждение (adversarial). См. `.cursor/skills/openspec-verify-change/SKILL.md` Layer 4. |
+| **verify** Layer 5 (Implementation Readiness) | readiness | Архитектор в режиме `task-readiness` — оценка реализуемости задач. CRITICAL в отчёте verify при GAP. Не пересматривает архитектурный подход (это сделал Layer 4). |
+| **apply** (pre-flight) | readiness | Soft redirect на `/opsx:verify`. Если в change dir не найден ни один из `reports/verification-*.md` — предупреждение. **Не дублирует** проверку триггеров new/verify |
+| **1c-agent-delegation** (правка .bsl вне OpenSpec) | blocking | При срабатывании → onec-code-architect до реализации |
+| **extend** (Scope Coherence Audit) | audit | При срабатывании scope-drift триггеров (см. `openspec-extend-change/SKILL.md` п. 5a) → onec-code-architect в режиме `scope-coherence-audit`; отчёт `reports/architecture-extend-coherence-*.md` |
 
 ## SIMPLICITY CHECK (обязательный выход архитектора)
 
@@ -131,7 +133,7 @@ priority: 200
 
 - Light Mode (см. 1c-agent-delegation.mdc) без семантических триггеров и без изменения UX-сценария
 - Mechanical Mode (find-replace, #Область, удаление комментариев)
-- Пользователь явно отклонил архитектора через легальный путь (флаг `--skip-architect` в ff/new)
+- Пользователь явно отклонил архитектора через легальный путь (флаг `--skip-architect` в new)
 - Архитектор уже вызывался по этой теме (файл `architecture-*.md` существует в reports/) — **не распространяется** на триггеры **scope-drift** из `/opsx:extend`; для них закрытие только по `architecture-extend-coherence-*.md` (см. ЗАКРЫТИЕ GATE п. 5)
 - Рефакторинг без изменения поведения
 - Опечатки, переименования, комментарии
@@ -141,7 +143,7 @@ priority: 200
 Gate считается пройденным, если выполняется **любое** из:
 1. Файл `architecture-*.md` существует в `reports/` change или `temp/reports/`, и его `scope.files` или `scope.modules` в YAML front-matter пересекаются с текущей задачей. (Одиночный старый отчёт без пересечения scope — Gate НЕ закрыт).
 2. Отчёт зарегистрирован в `reports/_manifest.yaml` со статусом `active` и подходящим `scope`.
-3. Пользователь явно отклонил архитектора через флаг `--skip-architect` (задокументировано в `.gate-override.yaml`) или через `Architect Gate: declined: <reason>` в Explore Summary. При последующем `/opsx:ff` причина из Explore Summary должна быть подтверждена флагом `--skip-architect <причина>` и перенесена в `.gate-override.yaml`; без этого Design Gate снова срабатывает.
+3. Пользователь явно отклонил архитектора через флаг `--skip-architect` (задокументировано в `.gate-override.yaml`) или через `Architect Gate: declined: <reason>` в поле «Architect / verify» блока «Постановка ЗНИ». При последующем `/opsx:new` причина из блока должна быть подтверждена флагом `--skip-architect <причина>` и перенесена в `.gate-override.yaml`; без этого Design Gate снова срабатывает.
 4. Триггеры не сработали (ни один из трёх групп).
 5. Для **scope-drift** триггеров (объективный счётчик Extend без архитектора и семантический `Drift-check` из брифа `/opsx:extend`): Gate закрывается **только** файлом `reports/architecture-extend-coherence-*.md`, созданным **после** события, поднявшего триггер. Обычные `architecture-*.md` и `architecture-extend-*.md` (без суффикса coherence) **не закрывают** отдельно зафиксированную scope-drift проблему.
 
@@ -149,11 +151,11 @@ Gate считается пройденным, если выполняется **
 
 6. Для **precedent-regression** триггеров (`.cursor/rules/precedent-regression-gate.mdc`): помимо п.1–5, Gate считается закрытым по архитектурной части только если выполняется **любое**: (a) в `design.md` есть заполненная секция `## Blast Radius`; (b) существует `reports/architecture-precedent-coherence-*.md` с вердиктом «extends / без отмены архивного контракта» для всех затронутых прецедентов; (c) триггеры precedent не сработали. Обычный `architecture-*.md` без явного разбора Cross-Archive Context **не закрывает** precedent-regression.
 
-## INDEPENDENT CHALLENGE (verify Layer 4 vs ff Architect Gate)
+## INDEPENDENT CHALLENGE (verify Layer 4 vs new Architect Gate)
 
-Architect Gate из ff/explore (`design`-режим) и Independent Challenge из verify (`design-challenge`-режим) — **разные роли**, не дублирующие друг друга.
+Architect Gate из new/explore (`design`-режим) и Independent Challenge из verify (`design-challenge`-режим) — **разные роли**, не дублирующие друг друга.
 
-| Свойство | ff/explore Architect Gate | verify Layer 4 Independent Challenge |
+| Свойство | new/explore Architect Gate | verify Layer 4 Independent Challenge |
 |----------|---------------------------|--------------------------------------|
 | Роль | автор design-решения | адверсарий, атакует чужой design |
 | Цель | предложить подход | подтвердить, что подход решает Why оптимально |
@@ -162,7 +164,7 @@ Architect Gate из ff/explore (`design`-режим) и Independent Challenge и
 | Тип отчёта | `reports/architecture-*.md` | `reports/design-challenge-*.md` |
 | Триггер запуска | триггеры выше при создании ЗНИ | первый pre-apply verify или mtime(design.md) > snapshot.last_challenge_at |
 
-**Запрет.** Architect Gate из ff/explore **не закрывается** файлом `design-challenge-*.md`, и наоборот — Layer 4 verify не считается выполненным по факту наличия `architecture-*.md`. Каждый gate ищет свой файл отчёта.
+**Запрет.** Architect Gate из new/explore **не закрывается** файлом `design-challenge-*.md`, и наоборот — Layer 4 verify не считается выполненным по факту наличия `architecture-*.md`. Каждый gate ищет свой файл отчёта.
 
 ---
 

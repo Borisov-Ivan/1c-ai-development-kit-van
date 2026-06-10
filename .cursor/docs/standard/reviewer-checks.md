@@ -45,7 +45,7 @@ Evaluate:
   - Testability
   - Stub/placeholder code returning empty or dummy values (empty Thumbprint, hardcoded "TODO", always-false conditions) — HIGH — AP-024. See anti-pattern registry
   - AP-007: Parameter overwrite / collection mutation — HIGH/MEDIUM. See anti-pattern registry
-  - Duplicated magic constant: same numeric literal (not 0/1/-1) or same string literal appears 2+ times in module — MEDIUM. Exception: query text, structure keys, metadata names, 0/1/-1/Истина/Ложь. See 1c-coding-standards.mdc rule 22
+  - Duplicated magic constant: same numeric literal (not 0/1/-1) or same string literal appears 2+ times in module — MEDIUM. Exception: query text, structure keys, metadata names, 0/1/-1/Истина/Ложь
   - Mixed responsibilities: procedure >40 lines combining 3+ distinct concerns (rights check, transaction management, business logic, persistence/write, logging, UI feedback) — MEDIUM. Sign: procedure could be split into independent functions without passing internal state
 ```
 
@@ -457,7 +457,7 @@ Completeness gate: 7 строк в таблице. Меньше — Phase 0 не
    - Design authority: design.md decisions do NOT exempt code from anti-pattern checks. Tag: "design-prescribed anti-pattern".
    - Detect stub/placeholder code: empty Thumbprint, hardcoded "TODO" return values, always-false conditions — HIGH — AP-024 (always, not prerelease-only). See anti-pattern registry
    - Parameter integrity: в†' see AP-007 in anti-pattern registry (category 16)
-   - Magic constants: detect same numeric (not 0/1/-1) or string literal appearing 2+ times in module. See 1c-coding-standards.mdc rule 22
+   - Magic constants: detect same numeric (not 0/1/-1) or string literal appearing 2+ times in module (критерии — category 4, Duplicated magic constant)
    - Mixed responsibilities: detect procedures >40 lines combining 3+ concerns (rights, transaction, business logic, persistence, logging, UI)
 
 4.5. Попытка/Исключение audit — see Phase 2.5 (dedicated pass).
@@ -835,7 +835,7 @@ Required Improvements (вместо секции "Рекомендации"):
 - Ternary operator ?() usage (style preference)
 - Probable band-aid (TODO workaround, duplicated logic with variation)
 - Collection mutation on parameter without out contract — category 4 (rule 21)
-- Duplicated magic constant (same literal 2+ times in module) — category 4 (rule 22)
+- Duplicated magic constant (same literal 2+ times in module) — category 4
 - Mixed responsibilities (procedure >40 lines, 3+ concerns) — category 4
 - Inconsistent prefix usage (exports with and without prefix in same module) — category 8
 - AP-031: Domain naming test failure (meta-names, implementation-role names) — MEDIUM (export: HIGH). See anti-pattern registry
@@ -899,7 +899,7 @@ kind=style:
   - Module header name mismatch
   - Missing module header, event handler without description, header format not matching BSP
   - Collection mutation on parameter without out contract (rule 21)
-  - Duplicated magic constant (rule 22)
+  - Duplicated magic constant (category 4)
   - Mixed responsibilities (procedure >40 lines, 3+ concerns)
   - Inconsistent prefix usage (exports with/without prefix in same module)
   - Excessive info logging (ЗаписьЖурналаРегистрации Информация in loop or 3+ calls)

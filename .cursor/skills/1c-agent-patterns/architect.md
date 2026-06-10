@@ -178,7 +178,7 @@ Task(
 
 ## Architect — design challenge (verify Layer 4)
 
-Used by `/opsx:verify` Layer 4 — независимый адверсариальный аудит, что `design.md` действительно решает проблему из `proposal.md` оптимальным способом. **Не** дублирует Architect Gate из `/opsx:ff` (там — auctorial design); здесь — adversarial challenge.
+Used by `/opsx:verify` Layer 4 — независимый адверсариальный аудит, что `design.md` действительно решает проблему из `proposal.md` оптимальным способом. **Не** дублирует Architect Gate из `/opsx:new` (там — auctorial design); здесь — adversarial challenge.
 
 Подробный протокол (адверсариальная установка, Three-Question Challenge, формат отчёта, маппинг вердикта) — см. `.cursor/agents/onec-code-architect.md` секция «Режим `design-challenge`».
 
@@ -253,9 +253,9 @@ Task(
 
 ---
 
-## Architect — task readiness review (verify шаг 7.7)
+## Architect — task readiness review (verify Layer 5)
 
-Used by `/opsx:verify` step 7.7 — MANDATORY in every pre-apply verification. The architect evaluates holistic readiness: can the ЗНИ be implemented as-is by agents and users without returning for clarification?
+Used by `/opsx:verify` Layer 5 (Implementation Readiness) — MANDATORY in every pre-apply verification. The architect evaluates holistic readiness: can the ЗНИ be implemented as-is by agents and users without returning for clarification?
 
 ```
 Task(
@@ -266,8 +266,9 @@ Task(
          
          Оцени готовность ЗНИ `<name>` к реализации.
          Не детали кода — целостная оценка: можно ли по этим
-         артефактам реализовать ЗНИ силами агентов (writer,
-         form-generator) и пользователя (ручная конфигурация)
+         артефактам реализовать ЗНИ силами агентов (writer — BSL,
+         включая программное создание элементов формы в модуле)
+         и пользователя (ручная конфигурация в Конфигураторе)
          без возвратов на уточнение?
 
          ## Артефакты
@@ -276,11 +277,11 @@ Task(
          - design: <путь>
          - tasks: <путь>
          - specs: <путь>
-         - Чеклист ручной конфигурации (verify, шаг 7.5):
+         - Чеклист ручной конфигурации (verify, Layer 2):
            <чеклист-таблица или «маркеров не найдено»>
-         - Замечания механических проверок (verify, шаги 7A-7E):
+         - Замечания механических проверок (verify, Layers 1–3):
            <список или «замечаний нет»>
-         - Executability issues (verify, шаг 7F): <список или «замечаний нет»>
+         - Executability issues (verify, Layer 5 pre-screen): <список или «замечаний нет»>
 
          ## Критерии оценки
 
@@ -290,9 +291,10 @@ Task(
             реализовать каждую задачу, имея только design + spec
             + текст задачи? Непонятно ЧТО или ГДЕ делать?
 
-         2. **Реализуемость форм и метаданных.** Может ли
-            form-generator построить форму по design? Может ли
-            пользователь создать метаданные без вопросов?
+         2. **Реализуемость форм и метаданных.** Достаточно ли design
+            для ручной конфигурации формы в Конфигураторе или
+            программного создания элементов в модуле формы (BSL)?
+            Может ли пользователь создать метаданные без вопросов?
             Описаны ли элементы формы, UX-сценарий?
 
          3. **Разрешённость решений.** Все ли «или»/«/» разрешены?
@@ -355,7 +357,7 @@ Task(
          - Задача / артефакт
          - Что отсутствует / неоднозначно
          - Рекомендация (что дополнить, где)
-         - Если GAP связан с отсутствием пути, подсистемы или пропущенной задачей из design, предоставь готовый сниппет (строку) для автоматической вставки в артефакт, чтобы оркестратор мог применить его в Phase A.
+         - Если GAP связан с отсутствием пути, подсистемы или пропущенной задачей из design, предоставь готовый сниппет (строку) для автоматической вставки в артефакт, чтобы оркестратор мог применить его как авто-исправление Layer 1.
 
          НЕ НУЖНО: ревью архитектуры, оценка рисков,
          альтернативные подходы.
@@ -394,9 +396,9 @@ Task(
 
 ---
 
-## Architect — slice transition review (verify шаг 7.6b)
+## Architect — slice transition review (slice-gate)
 
-Used by `/opsx:verify` in slice-transition mode (after a slice is accepted, before starting the next). Assesses whether upcoming slices are still valid given what was implemented in the accepted slice.
+Used on the slice boundary (option «пересмотр» on `/opsx:apply` slice-gate, or `/opsx:verify` pre-apply scoped to the transition between slices). Assesses whether upcoming slices are still valid given what was implemented in the accepted slice.
 
 ```
 Task(
@@ -598,7 +600,7 @@ Task(
 
 ## Architect — slice decomposition (декомпозиция на вертикальные срезы)
 
-Used BEFORE task decomposition: architect produces the `## Slices` section of `design.md`. Входит в Slice Generation Gate скилла `openspec-ff-change`.
+Used BEFORE task decomposition: architect produces the `## Slices` section of `design.md`. Входит в Slice Generation Gate скилла `openspec-new-change`.
 
 ```
 Task(

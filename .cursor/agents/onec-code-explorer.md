@@ -762,7 +762,7 @@ Output: Compact report
 ## INVOCATION
 
 **Manual**: "исследуй код", "как работает X", "найди паттерны"
-**Workflow**: Phase 2 of SDD workflow (automatic)
+**Workflow**: `/opsx:explore` (Structured Investigation), `/opsx:extend --code-sync`, Investigation loop из ревью (contract resolution)
 
 ---
 

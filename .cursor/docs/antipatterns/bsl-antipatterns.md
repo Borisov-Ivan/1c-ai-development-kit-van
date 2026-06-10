@@ -2643,7 +2643,7 @@ Whitelisted-маркеры ЗНИ `// +++ ... [ID#NNN]` / `// --- ... [ID#NNN]` 
 
 Whitelist exempt — **удаление** пары (AP-040). **Содержимое** открывающих whitelist-строк и однострочных cf-маркеров (`// {cfMarkerPrefix} …` без `+++`) должно быть осмысленным **domain_label** на русском, без process-меток.
 
-Запреты domain_label — SSOT в `openspec/project.md` § Канон domain_label (ff/apply/reviewer ссылаются, не дублируют).
+Запреты domain_label — SSOT в `openspec/project.md` § Канон domain_label (new/apply/reviewer ссылаются, не дублируют).
 
 ### Область
 

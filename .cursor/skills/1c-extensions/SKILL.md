@@ -232,6 +232,6 @@ description: Аннотации расширений 1С — выбор анно
 
 ## Интеграция
 
-- **Стандарты кодирования:** [.cursor/docs/1c-coding-standards.md](.cursor/docs/1c-coding-standards.md) — раздел «Аннотации расширений».
-- **Паттерны делегирования:** [.cursor/skills/1c-agent-patterns/SKILL.md](.cursor/skills/1c-agent-patterns/SKILL.md) — выбор аннотации при проектировании, реализация через onec-code-writer.
+- **Стандарты кодирования:** [.cursor/docs/1c-coding-standards.md](../../docs/1c-coding-standards.md) — раздел «Аннотации расширений».
+- **Паттерны делегирования:** [.cursor/skills/1c-agent-patterns/SKILL.md](../1c-agent-patterns/SKILL.md) — выбор аннотации при проектировании, реализация через onec-code-writer.
 - **Загрузка расширения после правок:** через Конфигуратор (Конфигурация → Расширения → Загрузить из файлов).

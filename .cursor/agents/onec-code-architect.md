@@ -65,7 +65,7 @@ Senior 1C:Enterprise solutions architect who creates complete and practical arch
 
 - **Q1 — Problem-Solution Fit.** Решает ли выбранный design **именно** проблему из `## Why` (а не похожую / упрощённую / симптом)? Перечислить буллетами: «Why говорит о X → design адресует X через Y» либо «Why говорит о X → design адресует Z, X не покрыт».
 - **Q2 — Optimality.** Оптимален ли выбранный путь по сравнению с альтернативами (включая ≥2 не упомянутые)? Что именно делает его лучшим: меньшее число точек перехвата / меньшая инвазивность / переиспользование штатного API / меньший Blast Radius / лучшая обратимость? Если у альтернативы есть преимущество — назвать его явно.
-- **Q3 — Fresh-Eye Approval.** Согласовал бы ты этот design, увидев впервые, без знания истории `/opsx:explore`/`/opsx:ff` сессии? Перечислить 1–3 причины «да» или 1–3 причины «нет».
+- **Q3 — Fresh-Eye Approval.** Согласовал бы ты этот design, увидев впервые, без знания истории `/opsx:explore`/`/opsx:new` сессии? Перечислить 1–3 причины «да» или 1–3 причины «нет».
 
 **Вердикт:**
 
@@ -81,7 +81,7 @@ Senior 1C:Enterprise solutions architect who creates complete and practical arch
 
 **Closed decisions (mandatory when prompt includes block):**
 
-- Оркестратор передаёт `closed_decisions` из `debug.md` § Verify decision ledger + design § «Решения verify (зафиксированo)».
+- Оркестратор передаёт `closed_decisions` из `debug.md` § Verify decision ledger + design § «Решения verify (зафиксировано)».
 - **Можно** атаковать closed decision в отчёте с **verified code fact** — пометить альтернативу `reopen-blocked: <decision_id>`.
 - **Предпочитать** `implementation_invariant` gaps (уточнение design/tasks без смены closed axis) над architectural fork.
 - Adversarial mandate сохранён: ≥2 альтернативы в Q2; reopen closed — только с доказательством из кода.
@@ -157,7 +157,7 @@ confidence: high | medium | low
 
 ### Режим `fix-quality` — подкритерий (e) Precedent Awareness
 
-В блоке **Качество фиксов**, дополнительно к (a)–(d): **(e) Precedent Awareness** — если фикс затрагивает те же объекты или capability, что и архивный change: задокументирована ли осознанная отмена предыдущего контракта (`## Blast Radius` или отчёт precedent-coherence)? Если нет — GAP. (Сопоставимо с подпунктом «Precedent Awareness» в промпте verify шага 7.7.)
+В блоке **Качество фиксов**, дополнительно к (a)–(d): **(e) Precedent Awareness** — если фикс затрагивает те же объекты или capability, что и архивный change: задокументирована ли осознанная отмена предыдущего контракта (`## Blast Radius` или отчёт precedent-coherence)? Если нет — GAP. (Сопоставимо с подпунктом «Precedent Awareness» в промпте verify Layer 5, task-readiness.)
 
 ## HALT: INSUFFICIENT CONTEXT
 
@@ -908,7 +908,7 @@ Guards NOT needed:
 ## INVOCATION
 
 **Manual**: "спроектируй архитектуру", "создай план", "ревью плана"
-**Workflow**: Phase 4 and Phase 5 of SDD workflow (automatic)
+**Workflow**: Architect Gate (`/opsx:explore`, `/opsx:new` Design Gate), `/opsx:verify` Layer 4/5, `/opsx:extend` scope-coherence, `/opsx:archive` ADR extraction
 
 ---
 

@@ -21,11 +21,12 @@ description: Контролируемое расширение scope сущес�
 - Опционально — ссылка на файл/отчёт, который нужно проанализировать как основание для правки ЗНИ:
   - `@path/to/file.md`
   - `--from-review <path>` — отчёт `/review`
-  - `--from-report <path>` — итог `/opsx:explore`: `temp/reports/<тип>-YYYY-MM-DD-<slug>.md` (полный отчёт `Task`: trace-analysis, exploration, architecture), `temp/explore-handoff-*.md` (опциональный handoff с блоком `## Для /opsx:ff`), или legacy `openspec/sessions/<slug>/analysis.md`. Основной путь capture fix.
+  - `--from-report <path>` — итог `/opsx:explore`: `temp/reports/<тип>-YYYY-MM-DD-<slug>.md` (полный отчёт `Task`: trace-analysis, exploration, architecture), `temp/explore-handoff-*.md` (опциональный handoff с блоком `## Постановка ЗНИ`), или legacy `openspec/sessions/<slug>/analysis.md`. Основной путь capture fix.
   - `--from-debug <path>` — устаревший alias: `debug.md` или RCA в change (предпочтительно `--from-report`)
   - `--from-verify <path>` — отчёт `/opsx:verify`
   - `--from-architecture <path>` — отчёт архитектора
-  - `--from-explore <path>` — legacy Explore Summary (`temp/explore-summary-*.md`)
+  - `--from-explore <path>` — legacy-источники, только по явной ссылке пользователя (`temp/explore-summary-*.md`, `openspec/sessions/<slug>/analysis.md`)
+  - `--code-sync` — код упростили/поменяли вручную, артефакты отстали: explorer читает факт кода → артефакты догоняют (режим в SKILL extend)
 
 **Примеры:**
 
@@ -42,11 +43,11 @@ description: Контролируемое расширение scope сущес�
    - proposal.md — добавить в scope (секция `## Цель` или `## Scope`).
    - specs/*/spec.md — добавить Requirement/Scenario (через openspec delta-формат, см. `openspec-specs-gate.mdc`).
    - design.md — дополнить `## Slices` (новый срез `S<N+1>`, если новое требование не укладывается в существующие).
-   - tasks.md — добавить задачи по правилам vertical-slices.mdc «Поведение continue» (вставка в существующий срез или новый срез).
+   - tasks.md — добавить задачи по правилам vertical-slices.mdc «ПОВЕДЕНИЕ NEW (resume)» (вставка в существующий срез или новый срез).
 6. Зафиксировать в `debug.md` секцию `## Extend — YYYY-MM-DD`: источник, что добавлено, disposition.
 7. **user-extend:** hint `/opsx:verify <name>` одной строкой (язык эффекта, без перечня файлов). **repair-from-verify:** шаг 7 **не** выводится в чат.
 
 **Ограничения:**
 - Не вызывает writer/reviewer — реализация остаётся за `/opsx:apply`.
 - Не применяется к архивным change.
-- При добавлении задач в **уже принятый** срез (`S<N>.T<M>` = `[x]`) — предупреждение: «Потребуется повторная приёмка; S<N>.T<M> будет открыт заново.»
+- При добавлении задач в **уже принятый** срез (`S<N>.accept` = `[x]`, legacy `S<N>.T<M>`) — предупреждение: «Потребуется повторная приёмка; `S<N>.accept` будет открыт заново.»

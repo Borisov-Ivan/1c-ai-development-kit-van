@@ -2,16 +2,13 @@
 name: /opsx:ff
 id: opsx-ff
 category: Workflow
-description: Создание или дозавершение change со всеми артефактами для реализации
+description: "УСТАРЕЛО — используйте /opsx:new <name>"
 ---
 
-Fast-forward through artifact creation — **новый** change или **resume** существующего (дозавершение артефактов).
+**Команда переименована в `/opsx:new`.** Тот же skill, та же семантика (новый change или resume):
 
-**Первое действие:** прочитать `.cursor/skills/openspec-ff-change/SKILL.md` и далее идти по его шагам. До прочтения скилла — никаких чтений артефактов, трасс, модулей.
+```
+/opsx:new <name>
+```
 
-**Бриф (Sync Card):** B0 при `## Для /opsx:ff` в чате/handoff (≤1 строка, текстовое «да»); B1 при свободном тексте (≤6 строк: От вас / Цель / На выходе / Подтвердить?) — см. `opsx-output-style.md` §5.1.
-
-**Второе действие (только новый change):** Metadata Gate. Read `openspec/project.md` (`defaultDeveloper`, канон `domain_label`). Один вопрос: **доменное пояснение для маркера** (не «необязательный комментарий»); soft-reject process-only. Без ответа `openspec new change` не запускается. Resume — metadata из proposal.md, gate пропускается.
-
-Input: argument after the command is the change name (kebab-case) or a description of what they want to build.
-Optional flag: `--skip-architect "<причина>"` to bypass mandatory Architect Gate.
+**Первое действие:** прочитать `.cursor/skills/openspec-new-change/SKILL.md` и идти по его шагам.

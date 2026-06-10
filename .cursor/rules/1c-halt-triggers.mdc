@@ -16,7 +16,7 @@ priority: 998
 | Триггер | Действие | Детали |
 |---------|----------|--------|
 | Реализация ЗНИ без /opsx:apply | **СТОП.** writer/reviewer запрещены. Исключение: Light/Mechanical | APPLY GATE в `1c-agent-delegation.mdc` |
-| explore без active change | **СТОП.** writer/reviewer → `/opsx:ff` | `openspec-explore/SKILL.md` |
+| explore без active change | **СТОП.** writer/reviewer → `/opsx:new` | `openspec-explore/SKILL.md` |
 | Новый объект метаданных | **СТОП.** Никогда не создавать | `1c-no-metadata-creation.mdc` |
 | Трасса `.pff` / TRACE / стек 1С | СТОП → **onec-trace-analyst** | `1c-error-analysis.mdc` |
 | Task explore/generalPurpose для 1С | **СТОП.** Повтор с 1С-агентом | `tool-name-guard.mdc`, `model-selection.mdc` |
@@ -28,13 +28,30 @@ priority: 998
 
 ## LIGHT MODE (точечная правка)
 
-1 файл, 2–10 строк, без архитектуры → writer + reviewer. Без OpenSpec. За рамками → полный workflow.
+**Decision tree (все ответы «да» → Light Mode; любое «нет» → полный workflow):**
+
+1. Правка в **1 файле** и укладывается в **2–10 строк**?
+2. **Нет новых экспортных символов** (не появляется `Экспорт` у процедур/функций)?
+3. **Нет новых ссылок на метаданные** (объекты, реквизиты, перечисления, которых не было в файле)?
+4. **Нет новых межмодульных вызовов** (`МодульИмя.Метод(` к модулю, который файл раньше не вызывал)?
+5. Нет архитектурных триггеров (`architect-gate.mdc`)?
+
+Light Mode = writer + reviewer, без OpenSpec.
 
 **Bug fix:** verified-cause-gate (HALT 1, 1b, 2); root cause блок в промпте writer (`1c-agent-patterns/writer.md`); brief в `temp/reports/bugfix-lightmode-*.md`.
 
 ## MECHANICAL MODE (шаблонная правка)
 
-Find-replace без смены логики; Grep до/после; reviewer после; без writer. Примеры: `#Область`, rename через replace_all, удаление закомментированного кода.
+Find-replace без смены логики; без writer. Примеры: `#Область`, rename через replace_all, удаление закомментированного кода.
+
+**Чеклист (все пункты обязательны):**
+
+- [ ] Паттерн замены задокументирован (в чате или промпте): что ищем → на что меняем.
+- [ ] Grep **до** правки — зафиксировано число вхождений.
+- [ ] Правка StrReplace/replace_all.
+- [ ] Grep **после** — число замен совпадает с ожиданием; старый паттерн = 0 вхождений (или объяснённый остаток).
+- [ ] ReadLints по изменённым файлам — нет новых ошибок.
+- [ ] **Reviewer** (diff-focused) — обязателен.
 
 ## ИСКЛЮЧЕНИЯ (прямая правка .bsl)
 

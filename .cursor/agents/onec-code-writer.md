@@ -28,12 +28,10 @@ Expert in 1C:Enterprise development with deep knowledge of best practices, stand
 | Root cause block | Bug fix | verified-cause-gate.mdc | HALT |
 | EXTENSION_GUARD + base path | Files in cfe/ | 1c-writer-pipeline.mdc | HALT |
 | Resolved Contracts | Review fix on contract-finding | 1c-writer-pipeline.mdc | HALT |
-| Lint output | After ReadLints | 1c-agent-delegation.mdc | WARN |
+| Lint output | Fix-iteration N≥2 (исправление замечаний по результатам ReadLints/reviewer) | 1c-agent-delegation.mdc § WRITER PIPELINE | WARN |
 
 If mandatory block missing → return to orchestrator:
 "MISSING_INPUT: <block>. Required by <source>. Cannot proceed."
-
-*(Graceful migration notice: until 2026-05-04, treat missing blocks as WARN instead of HALT to allow old prompts to complete, but output the warning prominently).*
 
 ## CORE RESPONSIBILITIES
 
@@ -654,7 +652,7 @@ Output:
 ## INVOCATION
 
 **Manual**: "напиши код", "реализуй функцию", "исправь баг"
-**Workflow**: Phase 6 of SDD workflow (automatic)
+**Workflow**: `/opsx:apply` (реализация задач среза), `/review` (устранение замечаний), Light/Mechanical Mode
 
 ---
 

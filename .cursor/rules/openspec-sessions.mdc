@@ -9,9 +9,9 @@ alwaysApply: false
 
 Актуально: [`.cursor/skills/openspec-explore/SKILL.md`](../skills/openspec-explore/SKILL.md) — Ultra-Lite, без создания `openspec/sessions/`. Отчёты — `temp/reports/`.
 
-Legacy read-only (не удалять из ff/extend):
+Legacy read-only (не удалять из new/extend):
 
-- `openspec-ff-change` — fallback `Glob openspec/sessions/*/analysis.md` (≤48ч)
+- `openspec-new-change` — fallback `Glob openspec/sessions/*/analysis.md` (≤48ч)
 - `openspec-extend-change` — `--from-report` для старых путей
 
 Создание новых каталогов `openspec/sessions/` **запрещено**.

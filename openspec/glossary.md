@@ -7,7 +7,7 @@
 - **ЗНИ** — Запрос на изменение. Каталог в `openspec/changes/<name>/` с артефактами (proposal, design, tasks, specs). В коде/командах — «change».
 - **Артефакты ЗНИ** — `proposal.md` (зачем и что), `design.md` (как: поведение и реализация), `tasks.md` (план работ), `specs/**` (delta-спецификации требований).
 - **Workflow** — explore → new/ff → verify → apply → verify → archive. Карта: `.cursor/rules/sdd-workflow.mdc`.
-- **explore** — исследование задачи/дефекта/идеи до создания ЗНИ; итог — блок `## Для /opsx:ff` в чате.
+- **explore** — исследование задачи/дефекта/идеи до создания ЗНИ; итог — блок `## Постановка ЗНИ` в чате.
 - **ff (fast-forward)** — создание всех артефактов ЗНИ разом, когда задача понятна.
 - **new + continue** — пошаговое создание артефактов по одному.
 - **apply** — реализация задач: делегирование `onec-code-writer` → `onec-code-reviewer`.

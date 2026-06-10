@@ -1,5 +1,16 @@
 # Changelog — 1C Agent Ecosystem
 
+## [4.7] - 2026-06-10
+
+### Changed (framework polish: rename ff→new, pipeline sync, reviewer v3 pointers)
+- **Rename:** `/opsx:ff` → `/opsx:new` (стало основным именем; `/opsx:ff` и `/opsx:continue` — deprecated-stubs); скилл `openspec-ff-change` → `openspec-new-change`; блок handoff «## Для /opsx:ff» → «## Постановка ЗНИ» (SSOT каркаса — `openspec-explore/templates/handoff-block.md`).
+- **Pipeline:** единственный эталон порядка writer-пайплайна — `1c-agent-delegation.mdc` § WRITER PIPELINE (writer → ReadLints → API/METADATA CHECK → EXTENSION VERIFICATION → reviewer) + таблица «шаг → исполнитель» и сводная таблица лимитов итераций; `1c-writer-pipeline.mdc`, `review/SKILL.md`, `openspec-apply-change/SKILL.md` ссылаются, не дублируют.
+- **onec-code-writer:** удалён истёкший grace period в INPUT CONTRACT; «Lint output» обязателен только для fix-итераций N≥2; OUTPUT в шаблонах `1c-agent-patterns/writer.md` выровнен с агентом (`Code-Truth Symbols`, `Acceptance Criteria` вместо `Self-Assessment`).
+- **onec-code-reviewer:** добавлен INPUT CONTRACT (evidence-блоки: Linter Signals, Base-файл, Resolved Contracts, Review Boundaries); ссылки «Phase 1b» перенаправлены на реализацию `.cursor/docs/standard/reviewer-checks.md` § Phase 1b; формат findings в шаблонах — указателем на REPORT FORMAT v3; Evaluation Checklist — 6 вопросов.
+- **INVOCATION всех агентов:** рудиментные «Phase 2/4/5/6 of SDD workflow» заменены на текущие команды (`/opsx:apply`, `/opsx:explore`, `/opsx:verify` Layer 4/5, `/review`); `form-generator` из промптов architect убран (ручная конфигурация или программное создание элементов формы в BSL).
+- **Light/Mechanical Mode** (`1c-halt-triggers.mdc`): Light — decision tree (1 файл, 2–10 строк, нет новых экспортных символов / metadata-ссылок / межмодульных вызовов); Mechanical — чеклист (паттерн задокументирован, Grep до/после, ReadLints, diff-focused reviewer).
+- **Removed:** `openspec-composer` — удалён из `.cursor/agents/` (legacy `openspec/sessions/` больше не собираются; чтение существующих legacy-сессий — только по явной ссылке пользователя).
+
 ## [4.6] - 2026-06-07
 
 ### Removed (framework slim-down)
@@ -50,7 +61,7 @@
 ## [4.0] - 2026-04-17
 
 ### Removed
-- onec-form-generator: конфликт с запретом правки Form.xml (1c-xml-write-guard.mdc)
+- onec-form-generator: конфликт с запретом правки Form.xml (1c-xml-write-guard.mdc; правило позже слито в `1c-agent-delegation.mdc` § XML WRITE GUARD)
 - onec-test-generator: автотесты в проекте не используются, 0 вызовов в changes
 - onec-metadata-helper: MCP user-PROJECT-graph не развёрнут, функции поглощены onec-code-explorer
 - onec-query-optimizer: 0 вызовов в changes, функции поглощены onec-code-architect и onec-code-reviewer (последний с загрузкой скилла 1c-query-optimization)
