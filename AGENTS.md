@@ -39,7 +39,7 @@
 
 **Чат и стиль:**
 - Лимиты, non-events, HALT-жаргон, 5 принципов диалога, роль навигатора → `.cursor/rules/chat-output-budget.mdc`.
-- Бриф = Sync Card (уровни B0–B3, классификатор) → `.cursor/docs/opsx-output-style.md` §5.1.
+- Бриф = Sync Card (карточка слотов B0–B3) → `.cursor/docs/templates/brief-card.md`; классификатор → `.cursor/docs/opsx-output-style.md` §5.1.
 - Язык, тон, шаблоны вывода, Chat Surface Contract (§2.6) → `.cursor/docs/opsx-output-style.md`.
 - Словарь запретов (SSOT) → `.cursor/docs/chat-lexicon.md`; каталог AI-tells → `.cursor/skills/stop-slop/SKILL.md`.
 

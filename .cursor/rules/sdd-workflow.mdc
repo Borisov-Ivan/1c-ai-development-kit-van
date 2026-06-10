@@ -18,7 +18,7 @@ review/explore → extend (user) → verify → apply
 
 | Этап | Команда | Что происходит | Агенты |
 |------|---------|----------------|--------|
-| **Исследование** | `/opsx:explore` | Компактный бриф 8–12 строк → ≤3 `Task` (trace + explorer) → превью + **Итог / Вердикт / Дальше** в чате → финал bug: блок `## Постановка ЗНИ` **в чате**. Полные отчёты — `temp/reports/`. Опциональный handoff — `temp/explore-handoff-*.md` по словесной просьбе. Профили bug/question. **Knowledge Discovery**. | onec-code-explorer, onec-trace-analyst, onec-code-architect |
+| **Исследование** | `/opsx:explore` | Карточный бриф B3 (`brief-card.md`) → ≤3 `Task` (trace + explorer) → превью + **Итог / Вердикт / Дальше** в чате → финал bug: блок `## Постановка ЗНИ` **в чате**. Полные отчёты — `temp/reports/`. Опциональный handoff — `temp/explore-handoff-*.md` по словесной просьбе. Профили bug/question. **Knowledge Discovery**. | onec-code-explorer, onec-trace-analyst, onec-code-architect |
 | **Создание / resume change** | `/opsx:new` | proposal → design (вкл. `## Slices`) → specs → tasks (с `# Срез S<N>`). Повторный вызов — дозавершение артефактов. | onec-code-architect (slice decomposition + slice-aware task decomposition) |
 | **Проверка** | `/opsx:verify` | Pre-flight + **internal Repair Loop** (max 2) для repair-класса без чата. Decision → один вопрос A/B, END TURN. Одна команда → **одно** финальное сообщение. `snapshot` без опоры на историю чата. | onec-code-architect, openspec-quality-controller |
 | **Расширение scope** | `/opsx:extend` | **user-extend:** бриф → правки → hint verify. **repair-from-verify:** internal из verify, **без** сообщений в чат. | onec-code-architect, onec-code-explorer |
