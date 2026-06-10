@@ -301,7 +301,7 @@ T-коды (T-BRIEF, T-HANDOFF, T-REPORT, T-STATUS, T-CONFIRM) — **внутр�
 
 **HALT-строки для greppable self-check (extend/new B1/B2):** `proposal.md / design.md`, `1) уточнить`, `обновить артефакты`, `Drift-check:`.
 
-Подтверждение — **всегда текстом**, не `AskQuestion` (исключения: Metadata Gate команды new — готовый маркер через `AskQuestion`; один `AskQuestion` именной сверки в explore до брифа). UX-секции — без внутренних ID (§3). `temp/briefs/*.md` не создаются.
+Подтверждение — **всегда текстом**, не `AskQuestion` (исключения: Metadata Gate команды new — согласование **описания** маркера (`AskQuestion` с preview ФИО+дата; ФИО из project.md); один `AskQuestion` именной сверки в explore до брифа). UX-секции — без внутренних ID (§3). `temp/briefs/*.md` не создаются.
 
 Полные эталоны B1/B2/B3 — в `templates/brief-card.md` и `openspec-explore/test-cases/`.
 

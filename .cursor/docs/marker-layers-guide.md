@@ -21,6 +21,8 @@ Metadata (proposal) → SSOT (project.md) → Transport (apply) → BSL (src) �
 
 **Вручную:** открыть `openspec/changes/<name>/proposal.md`, секция `## Metadata (comment markers)`.
 
+**Metadata Gate (`/opsx:new`):** согласует слой 1 — только `comment_suffix` (описание); ФИО из `defaultDeveloper` в project.md или отдельный текстовый шаг; preview с датой — иллюстрация transport, SSOT metadata — proposal. Полный scope-specific preview — в status/apply после tasks.
+
 ## Как посмотреть SSOT проекта
 
 Read [openspec/project.md](../../openspec/project.md):
