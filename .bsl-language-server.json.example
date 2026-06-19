@@ -1,24 +1,7 @@
 {
     "$schema": "https://1c-syntax.github.io/bsl-language-server/configuration/schema.json",
     "language": "ru",
-
-    // -------------------------------------------------------------------------
-    // Профиль configurationRoot — выберите ОДИН (остальные закомментируйте).
-    // После смены: Developer: Reload Window + синхронизируйте rootPath в .vscode/settings.json
-    // -------------------------------------------------------------------------
-
-    // ДО2 — cf + все cfe этой линии
-    "configurationRoot": "src/ДО2",
-
-    // ДО3 — cf + cfe линии 3.0
-    // "configurationRoot": "src/ДО3",
-
-    // -------------------------------------------------------------------------
-    // Узкий профиль — одно расширение (быстрее, если работаете только в нём)
-    // -------------------------------------------------------------------------
-    // "configurationRoot": "src/ДО2/cfe/ДО2_КнопкаHelp",
-    // "configurationRoot": "src/ДО3/cfe/АдаптацияДО3",
-
+    "configurationRoot": "src/ЭДО ПАО",
     "diagnostics": {
         "computeTrigger": "onSave",
         "skipSupport": "withSupportLocked",
