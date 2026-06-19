@@ -46,7 +46,9 @@ Implement tasks from an OpenSpec change.
 
    **Metadata Prep (MANDATORY):** Before writing any code, check `proposal.md` for comment marker placeholders:
    - Read or Grep `openspec/changes/<name>/proposal.md` for `<developer>`, `<ФИО>`, «Уточнить до `/opsx:apply`» or «Уточнить».
-   - If placeholders found, STOP — один вопрос в чат: ФИО (default из `project.md` § «Разработчик по умолчанию») и **domain_label** (`comment_suffix`).
+   - If `developer` placeholder and `defaultDeveloper` empty — STOP, один вопрос в чат: только ФИО (Фамилия И.О.).
+   - If `comment_suffix` placeholder or empty without `marker_style: minimal` — STOP, один вопрос: только **описание** для маркера (`comment_suffix`; можно пусто → `marker_style: minimal`).
+   - Не монолит «ФИО + domain_label» в одном сообщении.
    - Replace placeholders in `proposal.md`; mark F1 follow-up `[x]` if present.
 
 3. **Get apply instructions**
@@ -105,7 +107,7 @@ Implement tasks from an OpenSpec change.
    - Если match запретам из project.md § Канон domain_label → **STOP**, один вопрос: «перепишите domain_label для маркера» (как при плейсхолдере developer).
    - Пустой `comment_suffix` без `marker_style: minimal` → STOP с предложением заполнить или пометить mechanical.
 
-   - Если `developer` пустой/плейсхолдер — взять `defaultDeveloper` из project.md или один вопрос в чат.
+   - Если `developer` пустой/плейсхолдер — взять `defaultDeveloper` из project.md; если и там пусто — один вопрос в чат: **только ФИО** (не смешивать с описанием).
 
    **marker_scope** (Grep `tasks.md` и при необходимости `design.md` на пути `src/.../*.bsl`):
    - только `src/ЭДО и ЭА/cf/` → **cf-ea**
@@ -117,7 +119,7 @@ Implement tasks from an OpenSpec change.
    - **cf-ea:** `open_marker` = `// {cfMarkerPrefix} {comment_suffix} +++` (или однострочный `// {cfMarkerPrefix} {comment_suffix}` для целой процедуры); `close_marker` = `// {cfMarkerPrefix без двоеточия} ---`
    - **mixed:** передать оба набора + явная инструкция scope по пути файла из задачи
 
-   Если секции Metadata нет — один вопрос (ФИО + domain_label), дописать Metadata в proposal.md.
+   Если секции Metadata нет — сначала ФИО (если нет `defaultDeveloper`), затем отдельный вопрос про **описание** (`comment_suffix`; можно пусто → `marker_style: minimal`); дописать Metadata в proposal.md. Не монолит «ФИО + domain_label».
    Передать маркеры в промпт `onec-code-writer` (см. §3a COMMENT MARKERS).
 
 5. **Resume with pending verdict & Show current progress**

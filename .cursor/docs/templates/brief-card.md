@@ -31,7 +31,17 @@
 
 **HALT-строки (extend/new B1/B2):** `proposal.md / design.md`, `1) уточнить`, `обновить артефакты`, `Drift-check:`.
 
-Подтверждение — **текстом**, не `AskQuestion` (исключения: Metadata Gate new; один `AskQuestion` именной сверки в explore **до** брифа).
+Подтверждение — **текстом**, не `AskQuestion` (исключения: Metadata Gate new — `AskQuestion` про **описание** маркера (preview с ФИО и датой); один `AskQuestion` именной сверки в explore **до** брифа).
+
+---
+
+## Metadata Gate (new, не бриф)
+
+Отдельный шаг после имени change; **не** входит в B0/B1.
+
+- `AskQuestion` — только про `comment_suffix` (описание); ФИО из `defaultDeveloper` в project.md или текстовый вопрос **до** описания.
+- Preview transport: `// +++ {ФИО} {dd.MM.yyyy} {описание}` — иллюстрация; SSOT metadata — proposal.
+- Пустое описание допустимо → `marker_style: minimal` (только ФИО и дата в коде).
 
 ---
 
