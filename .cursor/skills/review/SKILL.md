@@ -302,6 +302,7 @@ Focus: full (new file)
 ### 2.2 Architectural Context
 
 - Если ревью в рамках ЗНИ (`openspec/changes/<name>`): прочитать `design.md` и `reports/architecture-*.md`. Передать в промпт как `## Architectural Context` (сокращённо или целевой раздел).
+- **Change-scoped:** если есть `reports/code-map.md` — передать выжимку как `## Карта правок ЗНI (ориентир)` (человекочитаемые пункты; формат — `opsx-output-style.md` §5.2 «Язык карты»). Карта — контекст scope; findings только в Review Boundaries.
 - Если ЗНИ нет — блок пропустить.
 
 ---
@@ -329,6 +330,7 @@ Focus: full (new file)
 - Architectural Context: из шага 2.2 (если есть).
 - Review Boundaries: из шага 1.5 (при `diff-focused`).
 - Reference Files (только `change-scoped`): read-only context, findings запрещены.
+- **Карта правок ЗНI (ориентир)** (только `change-scoped`): если есть `openspec/changes/<change-name>/reports/code-map.md` — блок `## Карта правок ЗНI (ориентир)` из человекочитаемой выжимки (формат — `opsx-output-style.md` §5.2 «Язык карты»). Findings **только** в границах Review Boundaries; карта — контекст scope, не замена границ.
 - Base-файл(ы): из шага 2 для файлов с &ИзменениеИКонтроль.
 - Resolved Contracts: при повторном прогоне.
 
