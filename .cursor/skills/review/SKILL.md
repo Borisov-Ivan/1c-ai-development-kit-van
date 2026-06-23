@@ -218,7 +218,39 @@ Focus: full (new file)
 
 Ревьювер обязан для каждой строки выдать confirm/dismiss/reclassify.
 
-**Прочие grep-эвристики (kebab-case, жаргон, log-literal, empty methods) оркестратор НЕ выполняет.** Они делегированы агенту (AP-040..AP-045 + AP-031 naming) с использованием Intent Map / Contract Map.
+**Прочие grep-эвристики (kebab-case, жаргон, log-literal, empty methods) оркестратор НЕ выполняет** — кроме **Naming Provenance** (шаг 1.9). Остальное делегировано агенту (AP-040..AP-045 + AP-031 naming в Phase 0/1c) с использованием Intent Map / Contract Map.
+
+---
+
+## Шаг 1.9. Naming Provenance pass (evidence, не findings)
+
+Выполнить **после** шага 1.8, **до** вызова ревьювера. Алгоритм — **SSOT:** `.cursor/rules/1c-writer-pipeline.mdc` § NAMING PROVENANCE CHECK.
+
+### Входные параметры
+
+- **apply/review в рамках ЗНИ:** `openspec/changes/<name>/proposal.md`, `tasks.md`, имя change.
+- **Standalone `/review` без change:** только статический blocklist из pipeline; ticket/slug — пропустить (grep по blocklist).
+- **Scope:** изменённые `.bsl` из writer-diff (apply) или in-scope файлы из Review Boundaries (full-file / Mechanical).
+
+### Обработка
+
+- Выполнить grep по алгоритму pipeline (3 класса целей, исключения whitelist-маркеров).
+- Агрегировать в блок **`## Naming Signals (evidence)`** — всегда передавать reviewer (clean / matches / `Naming scan skipped: no diff`).
+- Оркестратор **не** создаёт findings — только evidence (аналог шага 1.8).
+
+```markdown
+## Naming Signals (evidence)
+
+| # | File:Line | Match | Class | Suggested |
+|---|-----------|-------|-------|-----------|
+| 1 | Module.bsl:287 | ВыполнитьPostWrite… | procedure | AP-031 MUST_FIX |
+```
+
+Если совпадений нет: `Naming Signals: clean (N files scanned)`.
+
+- Блок передаётся ревьюверу. Ревьювер в **Phase 1c** (`.cursor/docs/standard/reviewer-checks.md` § Phase 1c: Naming Provenance Gate) обязан обработать каждую строку evidence: по умолчанию **confirm → AP-031 MUST_FIX**; dismiss только с явной причиной (`metadata-name`, `false-positive`, `pre-existing-unchanged`).
+
+**Важно:** оркестратор НЕ переводит сигналы в findings — это работа ревьювера. Оркестратор **обязан** передать блок evidence, не отфильтровывая совпадения (кроме исключений pipeline).
 
 ---
 
@@ -266,6 +298,7 @@ Focus: full (new file)
 - **Whitelist & Mandatory Controls (from project.md)** — блок из шага 1.6.1.
 - **Mandatory Control Signals (evidence)** — блок из шага 1.6.2 (если есть).
 - **Linter Signals (evidence)** — блок из шага 1.8 (всегда, даже если пусто / unavailable).
+- **Naming Signals (evidence)** — блок из шага 1.9 (всегда: clean / matches / skipped).
 - **Prior Findings History (S8)** — см. блок ниже.
 - **Architectural Context** — см. блок ниже.
 - **Review Boundaries** — при `diff-focused` (шаг 1.5), только для файлов батча.
@@ -325,6 +358,7 @@ Focus: full (new file)
 - **`release_mode = true`:** явно **`mode=prerelease`** в промпте; Category 12; release-hygiene focus.
 - **`release_mode = false`:** **не** передавать `mode=prerelease`.
 - Диагностики линтера: блок **`## Linter Signals (evidence)`** из шага 1.8 (все severity, включая warning; не сокращать до «линтер чист»).
+- Naming Provenance: блок **`## Naming Signals (evidence)`** из шага 1.9 (clean / matches / skipped).
 - Whitelist / Mandatory: блоки из шага 1.6.
 - Prior Findings History: блок из шага 2.1 (если есть).
 - Architectural Context: из шага 2.2 (если есть).

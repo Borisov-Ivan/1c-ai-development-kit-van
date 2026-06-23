@@ -369,7 +369,7 @@ Evaluation Checklist (включить в отчёт в секции Reasoning A
 | 3 | Knowledge: источники с verdict PARTIAL или ABSENT? | yes/no | | KNOWLEDGE_DEFICIT |
 | 4 | Exploratory: поля с access=EXPLORATORY? | yes/no | | CONTRACT_INFERENCE |
 | 5 | Попытка as contract compensation: источник PARTIAL/ABSENT + Попытка на его полях? | yes/no | | KNOWLEDGE_DEFICIT + contract-compensating-try |
-| 6 | Naming: есть идентификаторы, чьё имя (a) отражает постановку/оркестрацию, (b) описывает роль в коде (контейнер, промежуточное, накопитель) без доменного квалификатора, или (c) при наличии в том же scope доменно названных данных — контейнер для них не отсылает к домену? Тест: мысленно убрать реализационное слово (Массив, Новый, Добавляемые) — остаётся ли доменный смысл? (см. AP-031) | yes/no | | CLARITY_DEFICIT + Supporting AP-031 (или отдельное finding AP-031 без дублирования с CLARITY в том же месте) |
+| 6 | Naming: есть идентификатор, чьё имя (a) отражает постановку/оркестрацию, (b) содержит номер ЗНИ/задачи или kebab-токен change-name, (c) содержит jargon blocklist (`Fallback`, `PostWrite`, `PreWrite`, `Guard`, `Mechanics`/`Механика`, `Gate`/`Гейт`, `Temp`/`Tmp`, `Wrapper`, `Orchestrat`), (d) описывает роль в коде (контейнер, промежуточное, накопитель) без доменного квалификатора, или (e) при наличии в том же scope доменно названных данных — контейнер для них не отсылает к домену? Тест: мысленно убрать реализационное слово (Массив, Новый, Добавляемые) — остаётся ли доменный смысл? (см. AP-031; при наличии `## Naming Signals (evidence)` — Phase 1c приоритетнее) | yes/no | | CLARITY_DEFICIT + Supporting AP-031 (или отдельное finding AP-031 без дублирования с CLARITY в том же месте) |
 | 7 | Authority: код локально реализует поведение, у которого есть явный владелец (база, БСП, платформа, общий модуль, внешний контракт), и доступен механизм делегирования владельцу? | yes/no | | AUTHORITY_MISPLACEMENT + Supporting AP-047 |
 
 Completeness gate: 7 строк в таблице. Меньше — Phase 0 не завершена.
@@ -425,7 +425,38 @@ Completeness gate: 7 строк в таблице. Меньше — Phase 0 не
   LinterVerdict: confirm
 ```
 
-**Status PASS:** только если нет unresolved MUST_FIX из Phase 0, Phase 1b, Phase 2–2.5 и Standards.
+**Status PASS:** только если нет unresolved MUST_FIX из Phase 0, Phase 1b, Phase 1c, Phase 2–2.5 и Standards.
+
+### Phase 1c: Naming Provenance Gate (ОБЯЗАТЕЛЬНО при наличии блока `## Naming Signals (evidence)` с ≥1 match)
+
+**Политика:** артефакты ЗНИ/оркестрации в **идентификаторах** (номер задачи, kebab-токены change-name, jargon blocklist) — AP-031 MUST_FIX. Оркестратор передаёт механический grep-evidence; reviewer обязан confirm/dismiss каждую строку (fail-closed).
+
+**In-scope:** каждая строка таблицы Naming Signals, кроме `Naming Signals: clean` и `Naming scan skipped: no diff`.
+
+**Алгоритм (для каждой строки evidence):**
+
+| Шаг | Действие |
+|-----|----------|
+| 1 | **confirm → AP-031 MUST_FIX** (default). Severity: **HIGH** если export / `&После` / `&Перед`; иначе **MEDIUM**. |
+| 2 | **Remediation:** конкретный доменный синоним (не «переименовать»). |
+| 3 | **dismiss** — только с явной причиной: `metadata-name` (likely-metadata + цитата метаданных), `false-positive` (обоснование + строка кода), `pre-existing-unchanged` (full-review: строка не в diff). |
+
+**Completeness gate Phase 1c:** если в промпте есть `## Naming Signals (evidence)` с ≥1 match и ни одного finding AP-031 или явного dismiss в отчёте — Phase 1c **не завершена**; Status ≠ PASS.
+
+**Если блок отсутствует или `Naming scan skipped`:** зафиксировать в Summary `Naming Signals: skipped`; для full-review — дополнительно Phase 0 Q6 и AP-031 pass в Phase 2.
+
+**Формат finding (Naming):**
+```yaml
+[MEDIUM] Line N: AP-031 meta-name from change artifact
+  Procedure: <имя>
+  Anchor: <строка объявления или ключ ДопСвойств>
+  Action: MUST_FIX
+  Issue: Identifier embeds ticket/slug/orchestration jargon (Naming Signals evidence)
+  Fix: <конкретный доменный синоним>
+  kind: naming-signal
+  AP: AP-031
+  NamingVerdict: confirm | dismiss (metadata-name | false-positive | pre-existing-unchanged)
+```
 
 ### Phase 2: Deep Analysis
 ```yaml
@@ -727,9 +758,10 @@ D. Investigation Request (резолв контрактов по запросу 
    - Status: PASS | FAIL | NEEDS_WORK
    - Phase 0: N findings (РїРѕ severity)
    - Linter Signals (Phase 1b): K confirmed MUST_FIX, D dismissed, U unavailable
+   - Naming Signals (Phase 1c): K confirmed, D dismissed, S skipped
    - Standards: M findings (РїРѕ severity)
    - Overall: итоговая формулировка
-   - PASS запрещён при unresolved MUST_FIX из Phase 1b (in-scope linter warnings без fix/dismiss)
+   - PASS запрещён при unresolved MUST_FIX из Phase 1b (in-scope linter warnings без fix/dismiss) или Phase 1c (Naming evidence match без AP-031 finding/dismiss)
 ```
 
 Required Improvements (вместо секции "Рекомендации"):

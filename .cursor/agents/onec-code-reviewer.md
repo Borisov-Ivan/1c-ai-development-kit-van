@@ -30,6 +30,7 @@ Expert code reviewer for 1C:Enterprise (BSL) with deep knowledge of БСП stand
 | Блок | Обязателен когда | Источник | При отсутствии |
 |------|------------------|----------|----------------|
 | `## Linter Signals (evidence)` (или `Linter unavailable: <reason>`) | Always | `review/SKILL.md` шаг 1.8 | WARN в отчёте; Phase 1b по доступным данным |
+| `## Naming Signals (evidence)` (или `Naming scan skipped: …` / `Naming Signals: clean …`) | Always | `review/SKILL.md` шаг 1.9 | WARN в отчёте; Phase 1c по доступным данным; full-review — Phase 0 Q6 + AP-031 |
 | Base-файл (путь в cf/) | Файл содержит `&ИзменениеИКонтроль` | EXTENSION GATE (`1c-writer-pipeline.mdc`) | Вывести самостоятельно: заменить `cfe/<ExtName>/` на cf-путь из project.md; зафиксировать derived-path в отчёте |
 | `## Resolved Contracts` | Повторный прогон после Investigation loop | `1c-writer-pipeline.mdc` § CONTRACT RESOLUTION | Трактовать контракт как `unknown` |
 | `## Review Boundaries` | diff-focused ревью | `review/SKILL.md` шаг 1.5 | Полное ревью файла |
@@ -215,17 +216,18 @@ status: NOT_CONNECTED
 | 3 | **Knowledge deficit:** Есть ли источники с `verdict = PARTIAL/ABSENT` в Knowledge Assessment и отсутствие evidence установления контракта (комментарий, документация, Resolved Contracts)? | KNOWLEDGE_DEFICIT |
 | 4 | **Contract inference:** Есть ли поля с `access = EXPLORATORY` (несколько альтернативных путей к одному семантическому значению)? | CONTRACT_INFERENCE |
 | 5 | **Попытка as contract compensation:** Есть ли блок Попытка, защищающий доступ к полям источника с `verdict = PARTIAL/ABSENT`? | KNOWLEDGE_DEFICIT + contract-compensating-try |
-| 6 | **Naming clarity (AP-031):** Есть ли идентификатор, чьё имя отражает постановку/оркестрацию или роль-в-коде без домена (тест: убрать реализационное слово — остаётся ли доменный смысл)? | CLARITY_DEFICIT (+ Supporting AP-031 без дублирования) |
+| 6 | **Naming clarity (AP-031):** Есть ли идентификатор с номером ЗНИ/задачи, kebab change-name, jargon blocklist (`Fallback`, `PostWrite`, …), или имя отражает постановку/оркестрацию / роль-в-коде без домена? (При `## Naming Signals (evidence)` — Phase 1c приоритетнее.) | CLARITY_DEFICIT (+ Supporting AP-031 без дублирования) |
 
 **Каждый yes → finding с counterfactual.** Обоснование — ссылка на артефакт (Intent Map / Contract Map / Knowledge Assessment), не арифметика. Без обоснования ответ считается пропущенным.
 
-### Phase 1: Syntax, Linter Signals, AP Registry Load
+### Phase 1: Syntax, Linter Signals, Naming Signals, AP Registry Load
 
-1. Если в промпте есть `## Linter Signals (evidence)` — для каждого сигнала: confirm/dismiss/reclassify.
-2. Иначе — опционально `user-1c-syntax-checker-syntaxcheck` / `user-1c-code-checker-check_1c_code`.
-3. **Прочитать AP-индекс:** `.cursor/rules/bsl-antipatterns.mdc` (таблица). Карточки — по необходимости из `.cursor/docs/antipatterns/bsl-antipatterns.md`.
-4. Прочитать стандарты: `.cursor/docs/1c-coding-standards.md`.
-5. Вендорские стандарты (для доменов, затронутых кодом): `.cursor/skills/1c-vendor-standards/SKILL.md` → `.cursor/docs/standard/std-*.md`. Читать выборочно, не рутинно.
+1. Если в промпте есть `## Linter Signals (evidence)` — для каждого сигнала: confirm/dismiss/reclassify (Phase 1b).
+2. Если в промпте есть `## Naming Signals (evidence)` с ≥1 match — для каждой строки: confirm/dismiss (Phase 1c, AP-031 MUST_FIX по умолчанию).
+3. Иначе — опционально `user-1c-syntax-checker-syntaxcheck` / `user-1c-code-checker-check_1c_code`.
+4. **Прочитать AP-индекс:** `.cursor/rules/bsl-antipatterns.mdc` (таблица). Карточки — по необходимости из `.cursor/docs/antipatterns/bsl-antipatterns.md`.
+5. Прочитать стандарты: `.cursor/docs/1c-coding-standards.md`.
+6. Вендорские стандарты (для доменов, затронутых кодом): `.cursor/skills/1c-vendor-standards/SKILL.md` → `.cursor/docs/standard/std-*.md`. Читать выборочно, не рутинно.
 
 ### Phase 2: AP Registry pass + Release-hygiene pass
 

@@ -78,6 +78,14 @@ Ensure:
       design decisions, change names (fix-signing-result, add-feature-X),
       proposal/architecture/exploration refs, task numbers (п. 3.1),
       ЗНИ, ADR. Comments describe code intent in domain terms only.
+  - NEVER use development artifacts in identifiers (Процедура/Функция/переменные,
+      ключи ДополнительныеСвойства.Вставить("…"), #Область):
+      * ticket number / ID#NNNN embedded in name (e.g. pav74261_, ПрограммныйИнтерфейс74261);
+      * kebab-tokens from change-name slug (proyden, usloviya, …);
+      * orchestration jargon: Fallback, PostWrite, PreWrite, Guard, Mechanics/Механика,
+        Gate/Гейт, Temp/Tmp, Wrapper, Orchestrat.
+      Extension namespace: domain prefix only (pav_), without ticket number.
+      Exception: [ID#NNNN] in // +++ / // --- comment markers (project whitelist) — allowed.
   - History and decisions are tracked in Git and OpenSpec, not in code comments
   - Handle errors and edge cases
 ```
