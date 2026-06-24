@@ -1,5 +1,13 @@
 # Changelog — 1C Agent Ecosystem
 
+## [4.8] - 2026-06-24
+
+### Fixed (framework coherence restore)
+- **Revert `747b336` («карта правок»):** снято случайное восстановление slim-down артефактов (doc-tz, estimate, migrate-slices, prerelease-review, openspec-docs/estimate/ff-change, architect-2nd stub, openspec-composer).
+- **Сохранено:** reviewer contract v3 (`fb7991e`), verify v8, explore Ultra-Lite v3.
+- **Добавлено в git:** intake/debug команды и скиллы, always-apply rules (conversational-discipline, command-skill-gate, bsl-write-guard, orchestrator-as-navigator, …), секция составного брифа intake→explore/debug в `opsx-output-style.md` §5.1.
+- **AGENTS.md:** команды `/opsx:intake`, `/opsx:debug` в decision tree.
+
 ## [4.7] - 2026-06-10
 
 ### Changed (framework polish: rename ff→new, pipeline sync, reviewer v3 pointers)

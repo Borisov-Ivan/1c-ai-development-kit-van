@@ -7,7 +7,7 @@
 
 `.cursor/rules/sdd-workflow.mdc` — explore → new → verify → apply → verify → archive.
 
-Команды: `/opsx:explore`, `/opsx:new`, `/opsx:verify`, `/opsx:apply`, `/opsx:archive`, `/opsx:extend`, `/opsx:status`, `/opsx:knowledge-add`, `/opsx:knowledge-init`, `/opsx:knowledge-audit`, `/opsx:sync`, `/opsx:bulk-archive`, `/review`, `/release-review`, `/init-project`.
+Команды: `/opsx:intake`, `/opsx:explore`, `/opsx:debug`, `/opsx:new`, `/opsx:verify`, `/opsx:apply`, `/opsx:archive`, `/opsx:extend`, `/opsx:status`, `/opsx:knowledge-add`, `/opsx:knowledge-init`, `/opsx:knowledge-audit`, `/opsx:sync`, `/opsx:bulk-archive`, `/review`, `/release-review`, `/init-project`.
 
 Устаревшие алиасы: `/opsx:ff` и `/opsx:continue` → `/opsx:new <name>` (stub-redirect, новых сценариев не несут).
 
@@ -17,7 +17,9 @@
 
 | Задача пользователя | Команда | Чем отличается |
 |---------------------|---------|----------------|
+| Сырой текст/скрины заказчика, неясная постановка | `/opsx:intake` | Нормализация в Intake Brief; маршрут в explore/debug/new без чтения кода и трасс |
 | Любой вопрос, дефект, идея, постановка (в т.ч. свободный текст) | `/opsx:explore` | Единая точка входа; бриф-чекпойнт. Итог: дефект — блок `## Постановка ЗНИ` в чате; вопрос — свод «Итог / Вердикт / Дальше»; фича без исследования — redirect на `/opsx:new` |
+| Дефект в контексте ЗНИ (трасса, RCA, debug.md) | `/opsx:debug` | RCA в артефактах change; без правки BSL оркестратором |
 | Создать или дозавершить change | `/opsx:new <name>` | Все артефакты сразу; повторный вызов — resume |
 | Где я в этом change | `/opsx:status <name>` | Read-only снимок |
 | Можно ли запускать apply | `/opsx:verify <name>` | Pre-flight + self-repair; один вердикт в первой строке. Опционально `/opsx:verify <name> --lite` — только исполнимость без повторного независимого аудита (guardrails в SKILL verify). |
