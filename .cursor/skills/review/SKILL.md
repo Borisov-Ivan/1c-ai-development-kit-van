@@ -218,7 +218,7 @@ Focus: full (new file)
 
 Ревьювер обязан для каждой строки выдать confirm/dismiss/reclassify.
 
-**Прочие grep-эвристики (kebab-case, жаргон, log-literal, empty methods) оркестратор НЕ выполняет** — кроме **Naming Provenance** (шаг 1.9). Остальное делегировано агенту (AP-040..AP-045 + AP-031 naming в Phase 0/1c) с использованием Intent Map / Contract Map.
+**Прочие grep-эвристики (kebab-case, жаргон, log-literal, empty methods) оркестратор НЕ выполняет** — кроме **Naming Provenance** (шаг 1.9) и **Comment Hygiene** (шаг 1.9b). Остальное делегировано агенту (AP-040..AP-045 + AP-031 naming в Phase 0/1c + AP-054 в Phase 1d) с использованием Intent Map / Contract Map.
 
 ---
 
@@ -249,6 +249,36 @@ Focus: full (new file)
 Если совпадений нет: `Naming Signals: clean (N files scanned)`.
 
 - Блок передаётся ревьюверу. Ревьювер в **Phase 1c** (`.cursor/docs/standard/reviewer-checks.md` § Phase 1c: Naming Provenance Gate) обязан обработать каждую строку evidence: по умолчанию **confirm → AP-031 MUST_FIX**; dismiss только с явной причиной (`metadata-name`, `false-positive`, `pre-existing-unchanged`).
+
+**Важно:** оркестратор НЕ переводит сигналы в findings — это работа ревьювера. Оркестратор **обязан** передать блок evidence, не отфильтровывая совпадения (кроме исключений pipeline).
+
+---
+
+## Шаг 1.9b. Comment Hygiene pass (evidence, не findings)
+
+Выполнить **после** шага 1.9, **до** вызова ревьювера. Алгоритм — **SSOT:** `.cursor/rules/1c-writer-pipeline.mdc` § COMMENT HYGIENE CHECK; blocklist — `openspec/project.md` § AP-054.
+
+### Входные параметры
+
+- **Scope:** те же файлы, что для шага 1.9 (изменённые `.bsl` из writer-diff или in-scope из Review Boundaries).
+
+### Обработка
+
+- Выполнить grep по blocklist AP-054 в строках `//` и JSDoc (см. pipeline § Шаг 3–4).
+- Агрегировать в блок **`## Comment Hygiene (evidence)`** — всегда передавать reviewer (clean / matches / `Comment Hygiene scan skipped: no diff`).
+- Оркестратор **не** создаёт findings — только evidence (аналог шага 1.9).
+
+```markdown
+## Comment Hygiene (evidence)
+
+| # | File:Line | Match | Class | Suggested |
+|---|-----------|-------|-------|-----------|
+| 1 | Module.bsl:267 | Guard | jargon-en | AP-054 MUST_FIX |
+```
+
+Если совпадений нет: `Comment Hygiene: clean (N files scanned)`.
+
+- Блок передаётся ревьюверу. Ревьювер в **Phase 1d** (`.cursor/docs/standard/reviewer-checks.md` § Phase 1d: Comment Hygiene Gate) обязан обработать каждую строку evidence: по умолчанию **confirm → AP-054 MUST_FIX**; dismiss только с явной причиной (`established-term`, `code-identifier`, `false-positive`, `pre-existing-unchanged`).
 
 **Важно:** оркестратор НЕ переводит сигналы в findings — это работа ревьювера. Оркестратор **обязан** передать блок evidence, не отфильтровывая совпадения (кроме исключений pipeline).
 

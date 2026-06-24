@@ -31,6 +31,7 @@ Expert code reviewer for 1C:Enterprise (BSL) with deep knowledge of БСП stand
 |------|------------------|----------|----------------|
 | `## Linter Signals (evidence)` (или `Linter unavailable: <reason>`) | Always | `review/SKILL.md` шаг 1.8 | WARN в отчёте; Phase 1b по доступным данным |
 | `## Naming Signals (evidence)` (или `Naming scan skipped: …` / `Naming Signals: clean …`) | Always | `review/SKILL.md` шаг 1.9 | WARN в отчёте; Phase 1c по доступным данным; full-review — Phase 0 Q6 + AP-031 |
+| `## Comment Hygiene (evidence)` (или `Comment Hygiene scan skipped: …` / `Comment Hygiene: clean …`) | Always | `review/SKILL.md` шаг 1.9b | WARN в отчёте; Phase 1d по доступным данным; full-review — §9 AP-054 в Phase 2 |
 | Base-файл (путь в cf/) | Файл содержит `&ИзменениеИКонтроль` | EXTENSION GATE (`1c-writer-pipeline.mdc`) | Вывести самостоятельно: заменить `cfe/<ExtName>/` на cf-путь из project.md; зафиксировать derived-path в отчёте |
 | `## Resolved Contracts` | Повторный прогон после Investigation loop | `1c-writer-pipeline.mdc` § CONTRACT RESOLUTION | Трактовать контракт как `unknown` |
 | `## Review Boundaries` | diff-focused ревью | `review/SKILL.md` шаг 1.5 | Полное ревью файла |
@@ -220,21 +221,22 @@ status: NOT_CONNECTED
 
 **Каждый yes → finding с counterfactual.** Обоснование — ссылка на артефакт (Intent Map / Contract Map / Knowledge Assessment), не арифметика. Без обоснования ответ считается пропущенным.
 
-### Phase 1: Syntax, Linter Signals, Naming Signals, AP Registry Load
+### Phase 1: Syntax, Linter Signals, Naming Signals, Comment Hygiene, AP Registry Load
 
 1. Если в промпте есть `## Linter Signals (evidence)` — для каждого сигнала: confirm/dismiss/reclassify (Phase 1b).
 2. Если в промпте есть `## Naming Signals (evidence)` с ≥1 match — для каждой строки: confirm/dismiss (Phase 1c, AP-031 MUST_FIX по умолчанию).
-3. Иначе — опционально `user-1c-syntax-checker-syntaxcheck` / `user-1c-code-checker-check_1c_code`.
-4. **Прочитать AP-индекс:** `.cursor/rules/bsl-antipatterns.mdc` (таблица). Карточки — по необходимости из `.cursor/docs/antipatterns/bsl-antipatterns.md`.
-5. Прочитать стандарты: `.cursor/docs/1c-coding-standards.md`.
-6. Вендорские стандарты (для доменов, затронутых кодом): `.cursor/skills/1c-vendor-standards/SKILL.md` → `.cursor/docs/standard/std-*.md`. Читать выборочно, не рутинно.
+3. Если в промпте есть `## Comment Hygiene (evidence)` с ≥1 match — для каждой строки: confirm/dismiss (Phase 1d, AP-054 MUST_FIX по умолчанию).
+4. Иначе — опционально `user-1c-syntax-checker-syntaxcheck` / `user-1c-code-checker-check_1c_code`.
+5. **Прочитать AP-индекс:** `.cursor/rules/bsl-antipatterns.mdc` (таблица). Карточки — по необходимости из `.cursor/docs/antipatterns/bsl-antipatterns.md`.
+6. Прочитать стандарты: `.cursor/docs/1c-coding-standards.md`.
+7. Вендорские стандарты (для доменов, затронутых кодом): `.cursor/skills/1c-vendor-standards/SKILL.md` → `.cursor/docs/standard/std-*.md`. Читать выборочно, не рутинно.
 
 ### Phase 2: AP Registry pass + Release-hygiene pass
 
 Для каждого файла в scope (с учётом Review Boundaries):
 
 1. **AP-pass:** обход AP-индекса. Для каждой строки таблицы применить `Детектирование` к коду в границах. Match → finding с `AP-NNN`, полями из карточки (severity, kind, default_action) + risk axes.
-2. **Release-hygiene pass (AP-040..AP-045, включая AP-053):** использовать Intent Map (границы методов) и Contract Map (литералы, источники) — НЕ regex-скан построчно. Применить whitelist проекта (exempt removal; AP-053 на содержимое). Для AP-042 прочитать tasks.md/design.md активного change (если задан).
+2. **Release-hygiene pass (AP-040..AP-045, AP-051, AP-053, AP-054):** использовать Intent Map (границы методов) и Contract Map (литералы, источники) — НЕ regex-скан построчно. Применить whitelist проекта (exempt removal; AP-053 на содержимое открывающего маркера; AP-054 на текст комментариев/JSDoc, blocklist — project.md § AP-054). Для AP-042 прочитать tasks.md/design.md активного change (если задан).
 3. **Vendor standards:** если код затрагивает транзакции / event handlers / queries / locking / формы — прочитать соответствующий `std-*.md` и проверить compliance.
 4. **&ИзменениеИКонтроль verification:** если файл содержит методы с этой аннотацией — загрузить base из cf/ (путь: заменить `cfe/<ExtName>/` на cf из project.md), извлечь код **вне** `#Вставка/#Удаление` блоков, diff против base. Любое расхождение (added/deleted/modified вне директив) — MUST_FIX (severity из AP-каталога, в prerelease эскалировать).
 
