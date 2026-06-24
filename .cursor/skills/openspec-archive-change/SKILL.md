@@ -273,6 +273,8 @@ Archive a completed change in the experimental workflow.
    mv openspec/changes/<name> openspec/changes/archive/YYYY-MM-DD-<name>
    ```
 
+   **`reports/code-map.md`:** при архивации переезжает вместе с каталогом change в `openspec/changes/archive/YYYY-MM-DD-<name>/reports/` как **история правок для человека** (non-event в чат — не дублировать путь отдельной строкой, если нет других материальных результатов).
+
 7. **Display summary**
 
    Собрать **T-CONFIRM** в чат по правилам **skip-on-empty** и **§3a** `chat-output-budget.mdc`.

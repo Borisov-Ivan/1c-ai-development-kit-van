@@ -4,6 +4,7 @@
 
 ### Fixed (framework coherence restore)
 - **Revert `747b336` («карта правок»):** снято случайное восстановление slim-down артефактов (doc-tz, estimate, migrate-slices, prerelease-review, openspec-docs/estimate/ff-change, architect-2nd stub, openspec-composer).
+- **Восстановлено (cherry-pick из `747b336`/`fb7991e`):** спецификация **Карта правок** (`reports/code-map.md`) — `openspec-apply-change`, `opsx-output-style` §5.2, `chat-output-budget` §1c, `openspec-archive-change`.
 - **Сохранено:** reviewer contract v3 (`fb7991e`), verify v8, explore Ultra-Lite v3.
 - **Добавлено в git:** intake/debug команды и скиллы, always-apply rules (conversational-discipline, command-skill-gate, bsl-write-guard, orchestrator-as-navigator, …), секция составного брифа intake→explore/debug в `opsx-output-style.md` §5.1.
 - **AGENTS.md:** команды `/opsx:intake`, `/opsx:debug` в decision tree.

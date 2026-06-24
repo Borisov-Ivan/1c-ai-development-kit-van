@@ -306,6 +306,18 @@ Implement tasks from an OpenSpec change.
      ```
    - Запрещено писать в `debug.md` имена процедур/хелперов, которых нет в `created_or_modified_symbols` или spot-check.
 
+   **Карта правок (`reports/code-map.md`, mandatory at Slice Gate):**
+   - **Автор:** оркестратор (механическое сведение journal + `tasks.md`; без нового агента).
+   - **Источник:** записи `### Code-Truth — <task-id>` текущего среза S<N> в `debug.md` + формулировка задачи из `tasks.md` (поле «суть» — одно предложение на русском; **не** из ответа writer).
+   - **Файл:** `openspec/changes/<name>/reports/code-map.md` — **append** секция `# Срез S<N> — <имя среза> (YYYY-MM-DD)`; накопительный артефакт на всё ЗНИ.
+   - **Формат строки в файле** (эталон):
+     ```markdown
+     - **S<N>.<M>** · <модуль/объект> · <процедура/функция> (<created|modified>) — <суть из tasks.md>. [`src/.../Module.bsl`](src/.../Module.bsl):<start>-<end>
+     ```
+   - **Чат (acceptance-handoff):** блок `### Карта правок (перед тестом)` — до **5** нумерованных пунктов: **одно предложение прозой**, затем один code-citation [`start:end:path`](...). Строка «Полная карта: `openspec/changes/<name>/reports/code-map.md`». **Не** дублировать §1 «Что реализовано» телеграммой путей.
+   - **HALT в блоке карты (чат):** подстроки из `chat-output-budget.mdc` §7; `created_or_modified_symbols`, `spot-check`, имена агентов, «источник: writer», YAML, internal Review Boundaries.
+   - **Self-check apply (карта):** каждый пункт карты в чате понятен без открытия `debug.md`; в блоке карты нет HALT-подстрок.
+
    **Investigation Loop при apply.** Если reviewer в отчёте включил секцию `## Investigation Request`:
    1. Вызвать explorer (contract resolution deep) по таблице из Investigation Request. Шаблон: «Explorer — contract resolution (deep)» из `1c-agent-patterns/explorer.md`.
    2. Сохранить вывод в `reports/resolved-contract-<slug>-YYYY-MM-DD.md` (артифакт ЗНИ).
@@ -336,6 +348,9 @@ Implement tasks from an OpenSpec change.
      <2–3 предложения прозой: что именно сделано в коде, какие файлы затронуты. Для нетривиальных срезов — краткое описание логики. Без однострочных списков-телеграмм.>
      - [только при проблеме] Замечание: <spot-check / линтер / ревью — одна строка>
 
+     ### Карта правок (перед тестом)
+     <до 5 пунктов: проза + [`start:end:path`](...); полная карта — в `reports/code-map.md`>
+
      ### 2. Что проверить СЕЙЧАС
      **Primary acceptance** из metadata среза (императив, 1 нумерованный список). Optional-сценарии — одной строкой «остальные — см. tasks.md». Legacy `S<N>.T<M>` — Primary или первый UX-сценарий.
 
@@ -347,17 +362,19 @@ Implement tasks from an OpenSpec change.
      ```
 
      Параллельно:
-     1. Append в `debug.md` `## Slice Gate Decisions`:
+     1. **Карта правок:** собрать символы среза из journal + `tasks.md`; **Write/append** `reports/code-map.md` (секция `# Срез S<N> — …`).
+     2. Append в `debug.md` `## Slice Gate Decisions`:
         ```markdown
         ### Slice S<N> — <имя> (YYYY-MM-DD)
         Срез: S<N> — <имя>
         Решение: awaiting-acceptance
         Обоснование: все рабочие задачи реализованы; приёмочная задача передана на ручной прогон Primary.
         Изменения tasks: нет (S<N>.accept остаётся [ ])
-        Связанный отчёт: —
+        Связанный отчёт: reports/handoff-acceptance-S<N>-YYYY-MM-DD.md
         ```
-     2. T-HANDOFF вариант `acceptance` по шаблону шага 7 (заголовок — `## Срез S<N> — передача на приёмку: <change-name>`). Секция «Что проверить СЕЙЧАС» заполняется чеклистом сценариев из `S<N>.accept` (или legacy `S<N>.T<M>`) — та же информация, что в Acceptance Handoff Card выше.
-     3. Завершить сессию.
+     3. **Write** полный handoff в `reports/handoff-acceptance-S<N>-YYYY-MM-DD.md` (T-HANDOFF §5.2; все слоты варианта `acceptance`, включая «Карта правок» между «Что реализовано» и «Что проверить СЕЙЧАС»). **Обязательно** — не только тонкий чат.
+     4. T-HANDOFF вариант `acceptance` в **чат** по шаблону шага 7 (заголовок — `## Срез S<N> — передача на приёмку: <change-name>`). Секция «Что проверить СЕЙЧАС» — чеклист из `S<N>.accept` (или legacy `S<N>.T<M>`). Блок «Карта правок» — компактно (до 5 пунктов).
+     5. Завершить сессию.
    - **Manual acceptance shortcut:**
      Если пользователь в любой момент сессии обычной фразой подтверждает приёмку («принято», «срез S<N> принят», «проверил, работает») — для среза, у которого все рабочие задачи [x] и приёмка [ ]; при неоднозначности (несколько срезов в ожидании) — одно уточнение, какой срез:
      1. Не генерировать Acceptance Handoff Card.
@@ -439,6 +456,7 @@ Implement tasks from an OpenSpec change.
    **Имена секций одинаковы во всех трёх вариантах** (см. раздел «Output — T-HANDOFF» ниже):
 
    - `### 1. Что реализовано` — за каждую задачу этого сеанса: `[x] N.M — описание`, файл `path` со строками, «что изменено» одним предложением; строка про автопроверку — **только** при расхождении или замечании ревью (без «OK» в успешном пути — §3a `chat-output-budget.mdc`). Для нетривиальных срезов в чате допускается **2–3 предложения прозой** (что именно сделано в коде, какие файлы затронуты) вместо списка-телеграммы.
+   - `### Карта правок (перед тестом)` — **только вариант `acceptance`**: до 5 пунктов (проза + citation); в файле handoff — полный список секции среза из `code-map.md`. Язык — §5.2 «Язык карты».
    - `### 2. Что проверить СЕЙЧАС` — **три режима** (согласовано с §5.6):
      - **Slice-gate / acceptance handoff:** только **Primary acceptance** из metadata + optional одной строкой.
      - **Тихий успех между задачами:** «Ручная проверка не требуется» или пропустить секцию.
@@ -492,6 +510,11 @@ Implement tasks from an OpenSpec change.
    - Файл: `<path>`, строки X-Y
    - Что изменено: <одно предложение>
    - [только при проблеме] Замечание: <spot-check / линтер / ревью — кратко>
+
+### Карта правок (перед тестом)
+1. <проза> — [`start:end:path`](...)
+...
+Полная карта: `openspec/changes/<name>/reports/code-map.md`
 
 ### 2. Что проверить СЕЙЧАС
 1. <шаг 1 в императиве> → <ожидаемый результат> (регрессия R<N>, если применима)
@@ -549,6 +572,7 @@ Implement tasks from an OpenSpec change.
 - Keep code changes minimal and scoped to each task
 - Update task checkbox immediately after completing each task
 - **Code-Truth Journal:** for every writer-completed BSL/form task, append factual symbols from `created_or_modified_symbols` to `debug.md`; if code and artifacts diverge, pause and route to `/opsx:extend <change-name> --code-sync`.
+- **Code Map:** at Slice Gate (acceptance), append `reports/code-map.md` and mandatory `reports/handoff-acceptance-S<N>-YYYY-MM-DD.md`; chat block «Карта правок» — human prose first, anchors second (≤5 items).
 - Pause on errors, blockers, or unclear requirements - don't guess
 - Use contextFiles from CLI output, don't assume specific file names
 - **Task Dispatch:** classify each task before implementation; delegate to the correct executor per dispatch table. Orchestrator MUST NOT implement BSL or form-module tasks directly — only prepare context and delegate.
