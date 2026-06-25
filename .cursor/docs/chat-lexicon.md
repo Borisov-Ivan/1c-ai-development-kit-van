@@ -17,7 +17,7 @@
 
 Запрещены в чате (регистронезависимо, вне `` `имя-файла` `` и вне строки «Источники: …»):
 
-`CRITICAL`, `WARNING`, `SUGGESTION`, `Severity`, `GO`, `NO-GO`, `PASS`, `FAIL`, `GAP`, `APPROVE`, `CHALLENGE`, `REJECT`, `Layer 1`…`Layer 5`, `verify_mode`, `verdict:`, `snapshot`, `last_challenge_at`, `novelty`, `SKIPPED-novelty`, `SKIPPED-lite`, `CHALLENGE-saturated`, `phantom-symbol`, `design-challenge`, `task-readiness`, `quality-controller`, `slice coherence`, `code-truth`, `Promotion Test`, `Determinism Test`, `Three-Question Challenge`, `Simplicity Check`, `Acceptance Checklist Coverage`, `Problem-Solution Trace`, `Independent Challenge`, `Implementation Readiness`, `Blast Radius`, `precedent-regression`, `invariant-drift`, `artifact-hygiene`, `slice-pre`, `slice-post`, `slice-transition`, `Tier`, `low-confidence`, `checkpoint`, `closed_decisions`, `decision_round`, `decision_id`, `open_decision_id`, `verify_depth`, `incremental`, `GO-with-assumptions`, `reopen-blocked`, `supersedes`, `implementation_invariant`, `D0`, `D1`, `D2`, `D3`, `D4`, `D5`, `mount_context`, `context_cleanup`, имена агентов `onec-code-*` / `openspec-*`, имена гейтов (`Architect Gate`, `Code-Truth Gate`, `Slice Gate`, `Precedent Regression Gate`), **`пошаговая пауза`**, **`Ваш шаг (`**, **`автопроверки пройдены`**, **`diff не обязателен`**, **`reviewer PASS`**, **`линтер чист`**.
+`CRITICAL`, `WARNING`, `SUGGESTION`, `Severity`, `GO`, `NO-GO`, `PASS`, `FAIL`, `GAP`, `APPROVE`, `CHALLENGE`, `REJECT`, `Layer 1`…`Layer 5`, `verify_mode`, `verdict:`, `snapshot`, `last_challenge_at`, `novelty`, `SKIPPED-novelty`, `SKIPPED-lite`, `CHALLENGE-saturated`, `phantom-symbol`, `design-challenge`, `task-readiness`, `quality-controller`, `slice coherence`, `code-truth`, `Promotion Test`, `Determinism Test`, `Three-Question Challenge`, `Simplicity Check`, `Acceptance Checklist Coverage`, `Problem-Solution Trace`, `Independent Challenge`, `Implementation Readiness`, `Blast Radius`, `precedent-regression`, `invariant-drift`, `artifact-hygiene`, `slice-pre`, `slice-post`, `slice-transition`, `Tier`, `low-confidence`, `checkpoint`, `closed_decisions`, `decision_round`, `decision_id`, `open_decision_id`, `verify_depth`, `incremental`, `GO-with-assumptions`, `reopen-blocked`, `supersedes`, `implementation_invariant`, `D0`, `D1`, `D2`, `D3`, `D4`, `D5`, `OQ1`…`OQ\d`, `interim`, `default для apply`, `mount_context`, `context_cleanup`, имена агентов `onec-code-*` / `openspec-*`, имена гейтов (`Architect Gate`, `Code-Truth Gate`, `Slice Gate`, `Precedent Regression Gate`), **`пошаговая пауза`**, **`Ваш шаг (`**, **`автопроверки пройдены`**, **`diff не обязателен`**, **`reviewer PASS`**, **`линтер чист`**.
 
 | Код движка | Замена в чате |
 |------------|----------------|
@@ -28,8 +28,12 @@
 | CRITICAL / WARNING | «блокер» / «замечание» |
 | пошаговая пауза / Ваш шаг ( | «Задача выполнена» + шаги приёмки; slice-gate: `## Срез S<N>: «…» — проверка на ИБ` |
 | автопроверки пройдены / diff не обязателен / reviewer PASS / линтер чист | не выводить (non-event); только эффект для пользователя |
+| OQ1 / OQ\d (открытый вопрос) | заголовок-проблема прозой: «когда формировать таблицу лимитов по бюджетам»; код — только в скобках после расшифровки |
+| interim / default для apply | «временное решение как сейчас» / «вариант по умолчанию» прозой |
 
 **Имя агента в чате** — «агент», «архитектор», «ревьюер»; полное имя — только в строке «Источники: …».
+
+**Развилка/блокер с выбором** — всегда по единому контракту `.cursor/docs/templates/decision-block.md` (блок «Что решить» + триада, суть inline). Голый код решения (`OQ1`, `S1.1a`) как замена сути — провал self-check `chat-output-budget.mdc` §1b.8.
 
 ---
 

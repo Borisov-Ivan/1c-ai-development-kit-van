@@ -1,5 +1,7 @@
 ## Развёрнутая карточка развилки
 
+> **SSOT контракта развилки** — `.cursor/docs/templates/decision-block.md` (единый формат «Что решить» + триада + запрет голых internal-ID для всех команд). Этот файл — **verify-специфика**: связь с `chat-summary.md` 3a-decision, `## Решения до apply`, `decision_id`/ledger. Канон триады не дублировать — он в SSOT.
+
 Используется в **двух местах**:
 
 1. **`## Решения до apply`** в файле отчёта `reports/verification-YYYY-MM-DD.md` — связной прозой на языке кода 1С (`templates/executive-summary.md`).

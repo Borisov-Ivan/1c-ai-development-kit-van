@@ -137,11 +137,6 @@ Check:
         Task number refs: п. 3.1, задача 2.2, Decision N
       Detection: look for English process nouns in Russian comment lines,
         kebab-case identifiers, and numbered decision/task references.
-    - Orchestration jargon and anglicisms in comments/JSDoc — MEDIUM (AP-054):
-        Blocklist: openspec/project.md § AP-054 (Guard, Fallback, Gate, …; транслит: коммит, таска, фикс, …).
-        Scope: all // lines and method headers, including body of +++/--- blocks.
-        Semantic level: any Latin in Russian prose where a domain Russian equivalent exists.
-        Remediation: rewrite comment; do NOT delete whitelisted marker pairs.
 
   Code waste:
     - Dead code — see category 15 (Obsolete and Unused Code)
@@ -430,7 +425,7 @@ Completeness gate: 7 строк в таблице. Меньше — Phase 0 не
   LinterVerdict: confirm
 ```
 
-**Status PASS:** только если нет unresolved MUST_FIX из Phase 0, Phase 1b, Phase 1c, Phase 1d, Phase 2–2.5 и Standards.
+**Status PASS:** только если нет unresolved MUST_FIX из Phase 0, Phase 1b, Phase 1c, Phase 2–2.5 и Standards.
 
 ### Phase 1c: Naming Provenance Gate (ОБЯЗАТЕЛЬНО при наличии блока `## Naming Signals (evidence)` с ≥1 match)
 
@@ -461,36 +456,6 @@ Completeness gate: 7 строк в таблице. Меньше — Phase 0 не
   kind: naming-signal
   AP: AP-031
   NamingVerdict: confirm | dismiss (metadata-name | false-positive | pre-existing-unchanged)
-```
-
-### Phase 1d: Comment Hygiene Gate (ОБЯЗАТЕЛЬНО при наличии блока `## Comment Hygiene (evidence)` с ≥1 match)
-
-**Политика:** жаргон оркестрации и англицизмы в **тексте** комментариев и JSDoc — AP-054 MUST_FIX. Оркестратор передаёт механический grep-evidence по blocklist `openspec/project.md` § AP-054; reviewer обязан confirm/dismiss каждую строку (fail-closed).
-
-**In-scope:** каждая строка таблицы Comment Hygiene, кроме `Comment Hygiene: clean` и `Comment Hygiene scan skipped: no diff`.
-
-**Алгоритм (для каждой строки evidence):**
-
-| Шаг | Действие |
-|-----|----------|
-| 1 | **confirm → AP-054 MUST_FIX** (default). Severity: **MEDIUM**. |
-| 2 | **Remediation:** конкретная русская доменная формулировка (не «переписать комментарий»). |
-| 3 | **dismiss** — только с явной причиной: `established-term` (аббревиатура из исключений project.md § AP-054), `code-identifier` (likely-code-identifier + цитата символа), `false-positive` (обоснование + строка), `pre-existing-unchanged` (full-review: строка не в diff). |
-
-**Completeness gate Phase 1d:** если в промпте есть `## Comment Hygiene (evidence)` с ≥1 match и ни одного finding AP-054 или явного dismiss в отчёте — Phase 1d **не завершена**; Status ≠ PASS.
-
-**Если блок отсутствует или `Comment Hygiene scan skipped`:** зафиксировать в Summary `Comment Hygiene: skipped`; для full-review — дополнительно §9 AP-054 pass в Phase 2.
-
-**Формат finding (Comment Hygiene):**
-```yaml
-[MEDIUM] Line N: AP-054 orchestration jargon in comment
-  Anchor: <строка // или JSDoc>
-  Action: MUST_FIX
-  Issue: Comment contains blocklisted jargon/anglicism (Comment Hygiene evidence)
-  Fix: <конкретная русская формулировка>
-  kind: comment-hygiene-signal
-  AP: AP-054
-  CommentHygieneVerdict: confirm | dismiss (established-term | code-identifier | false-positive | pre-existing-unchanged)
 ```
 
 ### Phase 2: Deep Analysis
@@ -581,7 +546,7 @@ Completeness gate: 7 строк в таблице. Меньше — Phase 0 не
    - Detect logic duplication between modules
    - Detect commented-out code without explanation
 
-10. Specific 1C patterns: в†' see AP-001..AP-054 in anti-pattern registry (category 16)
+10. Specific 1C patterns: в†' see AP-001..AP-050 in anti-pattern registry (category 16)
   AP-033: Export procedure/function in form module (Form-as-Service) — HIGH
     Remain inline:
     - Ternary operator ?() — MEDIUM
@@ -794,10 +759,9 @@ D. Investigation Request (резолв контрактов по запросу 
    - Phase 0: N findings (РїРѕ severity)
    - Linter Signals (Phase 1b): K confirmed MUST_FIX, D dismissed, U unavailable
    - Naming Signals (Phase 1c): K confirmed, D dismissed, S skipped
-   - Comment Hygiene (Phase 1d): K confirmed, D dismissed, S skipped
    - Standards: M findings (РїРѕ severity)
    - Overall: итоговая формулировка
-   - PASS запрещён при unresolved MUST_FIX из Phase 1b (in-scope linter warnings без fix/dismiss), Phase 1c (Naming evidence match без AP-031 finding/dismiss) или Phase 1d (Comment Hygiene evidence match без AP-054 finding/dismiss)
+   - PASS запрещён при unresolved MUST_FIX из Phase 1b (in-scope linter warnings без fix/dismiss) или Phase 1c (Naming evidence match без AP-031 finding/dismiss)
 ```
 
 Required Improvements (вместо секции "Рекомендации"):
@@ -882,7 +846,6 @@ Required Improvements (вместо секции "Рекомендации"):
 ```yaml
 - Phase 0: CLARITY_DEFICIT (намерение блока неочевидно из кода)
 - AP-031: мета-имена из постановки/оркестрации (доменный тест + маркеры в карточке AP-031); экспортные процедуры/функции — HIGH; в finding обязательно предложить доменный синоним
-- AP-054: жаргон оркестрации и англицизмы в комментариях и JSDoc; blocklist — project.md § AP-054; в finding — конкретная русская формулировка
 - Naming convention violations
 - Missing documentation
 - Suboptimal algorithms
@@ -908,7 +871,6 @@ Required Improvements (вместо секции "Рекомендации"):
 - Mixed responsibilities (procedure >40 lines, 3+ concerns) — category 4
 - Inconsistent prefix usage (exports with and without prefix in same module) — category 8
 - AP-031: Domain naming test failure (meta-names, implementation-role names) — MEDIUM (export: HIGH). See anti-pattern registry
-- AP-054: Orchestration jargon/anglicisms in comments and JSDoc — MEDIUM. See anti-pattern registry; blocklist — project.md § AP-054
 ```
 
 ### Low (исправить, минимальный приоритет)

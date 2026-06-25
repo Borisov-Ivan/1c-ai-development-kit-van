@@ -82,63 +82,9 @@ Naming Signals: clean (N files scanned)
 
 Оркестратор **не** создаёт findings — только evidence (`review/SKILL.md` шаг 1.9).
 
-## COMMENT HYGIENE CHECK
-
-**После NAMING PROVENANCE CHECK, до API EXISTENCE CHECK.** Механический grep по строкам `//` и JSDoc в изменённых `.bsl` на жаргон/англицизмы из blocklist AP-054. Оркестратор собирает evidence; reviewer обрабатывает в Phase 1d (`.cursor/docs/standard/reviewer-checks.md` § Phase 1d).
-
-### Шаг 1. Blocklist (SSOT)
-
-Читать `openspec/project.md` § «Запрещённый жаргон/англицизмы в комментариях (AP-054)» — таблица механического blocklist (латиница-жаргон + транслит-слэнг). При расхождении приоритет у `project.md`.
-
-### Шаг 2. Scope
-
-- **apply/review с diff:** только изменённые `.bsl` из writer-diff.
-- **Без diff** (Mechanical Mode / full-file review): in-scope файлы из `## Review Boundaries`.
-- Нет scope → `Comment Hygiene scan skipped: no diff`.
-
-### Шаг 3. Grep-цели
-
-Для каждого файла in-scope и каждого токена blocklist:
-
-1. Строки, начинающиеся с `//` (после пробелов), содержащие токен как **целое слово** (граница слова: не буква/цифра `_` с обеих сторон; для кириллицы — аналогично).
-2. Строки JSDoc в блоке шапки метода: непустые `//` между предыдущим объявлением и строкой `Процедура`/`Функция` (включая `// Возвращаемое значение:` и продолжения).
-
-**В scope:** тело whitelisted-блоков `// +++` / `// ---` (строки между открывающим и закрывающим маркером).
-
-### Шаг 4. Исключения (не включать в evidence)
-
-- Строка — **только** whitelisted-маркер `// +++ …` или `// --- …` без доменного текста после автора/даты/`[ID#NNNN]` (синтаксис маркера; domain_label открывающего — AP-053).
-- Токен — часть **имени метаданных/метода/типа** в комментарии как ссылка на символ кода (например `// см. Справочник.Контрагенты`) → в evidence с пометкой `likely-code-identifier` (reviewer может dismiss как `code-identifier`).
-- Токен из списка **исключений** project.md § AP-054 (аббревиатуры `HTTP`, `JSON`, …).
-
-### Шаг 5. Выход — блок для reviewer
-
-Если совпадений нет:
-
-```markdown
-## Comment Hygiene (evidence)
-
-Comment Hygiene: clean (N files scanned)
-```
-
-Если есть совпадения:
-
-```markdown
-## Comment Hygiene (evidence)
-
-| # | File:Line | Match | Class | Suggested |
-|---|-----------|-------|-------|-----------|
-| 1 | Module.bsl:267 | Guard | jargon-en | AP-054 MUST_FIX |
-```
-
-- **Class:** `jargon-en` | `jargon-translit` | `likely-code-identifier`.
-- **Suggested:** всегда `AP-054 MUST_FIX` (severity MEDIUM).
-
-Оркестратор **не** создаёт findings — только evidence (`review/SKILL.md` шаг 1.9b).
-
 ## API EXISTENCE CHECK
 
-**После COMMENT HYGIENE CHECK, до вызова reviewer.** Проверяет, что вызовы `МодульИмя.МетодИмя()`, появившиеся в **новых строках diff** после writer, реально определены в коде репозитория. Поиск ведётся по **всему src/** (cf + все cfe).
+**После NAMING PROVENANCE CHECK, до вызова reviewer.** Проверяет, что вызовы `МодульИмя.МетодИмя()`, появившиеся в **новых строках diff** после writer, реально определены в коде репозитория. Поиск ведётся по **всему src/** (cf + все cfe).
 
 ### Шаг 1. Извлечь новые вызовы
 

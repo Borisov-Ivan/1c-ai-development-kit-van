@@ -95,6 +95,14 @@ Implement tasks from an OpenSpec change.
 
    Verify check is advisory — does not block apply.
 
+   **Open decision at entry (MANDATORY):**
+   После чтения отчёта verify проверить открытую развилку:
+   - YAML `snapshot.open_decision_id != null` в последнем `reports/verification-*.md`, **или**
+   - `debug.md` § `## Verify decision ledger` → `open_decision_id` не пуст, **или**
+   - в `design.md` есть незакрытый вопрос (`## Open Questions`) / зеркало `## Решения verify (зафиксировано)` с пометкой open.
+
+   Если открытая развилка есть — **на входе apply** (не только на pause) вывести блок развилки **строго** по `.cursor/docs/templates/decision-block.md`: «**Что решить:** <заголовок прозой>» + триада «В чём проблема / На что влияет / Если A·B» + варианты A/B. Текст брать из человекочитаемого зеркала (отчёт verify § «Решения до apply» / design § «Решения verify (зафиксировано)»), **не** из YAML-кодов. Голый `OQ1` / `S1.1a` / `interim` без расшифровки — запрещён (§1b.8 `chat-output-budget.mdc`). Пользователь отвечает в чате; зафиксировать через `/opsx:extend <name> --from-verify` до старта зависимого среза. END TURN, если развилка блокирует ближайший срез.
+
    **Metadata (comment markers) check:**
    Прочитать `proposal.md` и `openspec/project.md` (секция «Разработчик по умолчанию»: `defaultDeveloper`, `cfMarkerPrefix`; § «Канон маркеров (domain_label)» — запреты).
 
@@ -471,7 +479,7 @@ Implement tasks from an OpenSpec change.
      - **Статус** — `[x]` / `[ ]`.
    - `### 4. Как вернуться` — `/opsx:apply <change-name>`, одна строка. Если выявлен scope/design mismatch, добавить вторую строку: `Обновить scope: /opsx:extend <change-name>` (затем снова `/opsx:apply <change-name>`).
    - `### 5. Blockers` — нумерованный список задач, которые не могут продолжаться, и почему.
-   - `### 6. Issue` — **только в варианте `pause`**: описание проблемы 1 абзац + нумерованные **Options** из 2–3 вариантов решения. **Тонкий чат:** при сообщении пользователю дублировать развилку блоком прозой по стилю Варианта 3 verify (полное Issue и таблицы — в файле `reports/handoff-*.md`, см. §5.2 выше).
+   - `### 6. Issue` — **только в варианте `pause`**: развилка собирается **строго** по единому контракту `.cursor/docs/templates/decision-block.md` — блок «**Что решить:** <заголовок прозой>» + триада «В чём проблема / На что влияет / Если A·B» + варианты A/B с «но/зато», **суть inline**. **Запрещено** заменять суть ссылкой-указателем («см. отчёт») или голым кодом решения (`OQ1`, `S1.1a`, `interim`, `default для apply`) без расшифровки в той же строке (§1b.8 / §7 `chat-output-budget.mdc`). Полное Issue и таблицы — в файле `reports/handoff-*.md`, см. §5.2 выше.
    - `### 7. Short-cut` — **только в варианте `acceptance`**: строка про подтверждение обычной фразой («принято», «срез принят»).
 
    Если все срезы приняты (`final`) — добавить строку «All tasks complete. Ready to archive: `/opsx:archive <change-name>`». Если `pause` из-за design/scope mismatch — предложить `Follow-up: /opsx:extend <change-name>` рядом с вариантами решения. Если `pause` — ждать ответа пользователя. Если `acceptance` — end turn.
@@ -537,10 +545,14 @@ Implement tasks from an OpenSpec change.
 
 <!-- только для варианта `pause` -->
 ### 6. Issue
-<1 абзац: описание проблемы>
+<Развилка собирается по `.cursor/docs/templates/decision-block.md`: блок «Что решить» + триада «В чём проблема / На что влияет / Если A·B», суть inline. Голый код решения (`OQ1`, `S1.1a`, `interim`) без расшифровки — запрещён (§1b.8 chat-output-budget).>
 
-**Options:**
-<Развилка прозой по стилю Варианта 3 verify: контекст → варианты с но/зато>
+**Что решить: <заголовок-проблема прозой>**
+
+<связный абзац: проблема + влияние>
+
+- **A. <вариант>** — <что получите, с честным «но»>
+- **B. <вариант>** — <что получите, с честным «но»>
 
 <!-- только для варианта `acceptance` -->
 ### 7. Short-cut

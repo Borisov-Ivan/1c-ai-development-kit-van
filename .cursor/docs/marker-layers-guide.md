@@ -52,6 +52,7 @@ Read [openspec/project.md](../../openspec/project.md):
 | **AP-040** | Whitelist exempt — **не удалять** пару; process-метки вне whitelist — удалить |
 | **AP-051** | Сжимать смежные пары одного domain_label / developer / даты |
 | **AP-053** | Содержимое domain_label осмысленное, без process-only; remediation — **переписать**, не delete |
+| **MARKER-PLACEMENT-001** | Закрывающий маркер конца процедуры/функции — **в одной строке** с `КонецПроцедуры`/`КонецФункции` (`КонецПроцедуры // --- …`), не на отдельной строке. Причина — разбивка кода при сравнении/объединении. SSOT: `openspec/project.md` § «Размещение закрывающего маркера». Не путать с AP-051/MARKER-MERGE-001 (сжатие смежных пар). |
 
 Change-scoped: `/review` с metadata из proposal. Полный scope: `/release-review`.
 

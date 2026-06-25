@@ -25,9 +25,6 @@ Task(
          ## Naming Signals (evidence)
          [Блок из шага 1.9 review/SKILL.md — таблица grep (clean / matches / skipped). Reviewer Phase 1c (reviewer-checks.md § Phase 1c: Naming Provenance Gate): match → AP-031 MUST_FIX по умолчанию; dismiss только metadata-name / false-positive / pre-existing-unchanged.]
 
-         ## Comment Hygiene (evidence)
-         [Блок из шага 1.9b review/SKILL.md — таблица grep (clean / matches / skipped). Reviewer Phase 1d (reviewer-checks.md § Phase 1d: Comment Hygiene Gate): match → AP-054 MUST_FIX по умолчанию; dismiss только established-term / code-identifier / false-positive / pre-existing-unchanged.]
-
          ## Whitelist & Mandatory Controls (from project.md)
          [Блок из шага 1.6.1 — две таблицы (Whitelist предрелиза, Обязательный контроль) для release-hygiene rules AP-040..AP-043.]
 
@@ -179,9 +176,6 @@ Task(
          ## Naming Signals (evidence)
          [Блок из шага 1.9 review/SKILL.md — clean / matches / skipped; Phase 1c → AP-031 MUST_FIX по умолчанию]
 
-         ## Comment Hygiene (evidence)
-         [Блок из шага 1.9b review/SKILL.md — clean / matches / skipped; Phase 1d → AP-054 MUST_FIX по умолчанию]
-
          ## Whitelist & Mandatory Controls (from project.md)
          [Блок из шага 1.6.1]
 
@@ -230,7 +224,6 @@ Task(
          Стандарты: .cursor/docs/1c-coding-standards.md
          Диагностики линтера: блок ## Linter Signals (evidence) — таблица ReadLints/bsl-language-server (включая warning); reviewer Phase 1b → in-scope MUST_FIX, без отложения на prerelease
          Naming Provenance: блок ## Naming Signals (evidence) — grep из шага 1.9; reviewer Phase 1c → AP-031 MUST_FIX по умолчанию
-         Comment Hygiene: блок ## Comment Hygiene (evidence) — grep из шага 1.9b; reviewer Phase 1d → AP-054 MUST_FIX по умолчанию
          Base-файл (для &ИзменениеИКонтроль): [путь к base в cf/ или 'не применимо']
 
          [Если оркестратор собрал diff-focused scope — вставить блок ## Review Boundaries (как в шаблоне «Reviewer (ревью кода)»). При focus=full для всех файлов — секцию не вставлять.]
