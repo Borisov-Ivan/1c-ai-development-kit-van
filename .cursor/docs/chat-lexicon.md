@@ -13,9 +13,21 @@
 
 ---
 
-## Слой 1 — коды и имена движка (ЖЁСТКИЙ БАН в чате)
+## Слой 0 — принцип понятности (механизм; над списками)
 
-Запрещены в чате (регистронезависимо, вне `` `имя-файла` `` и вне строки «Источники: …»):
+**Списки ниже — не механизм, а примеры.** Механизм понятности — **Тест понятности** (`chat-output-budget.mdc` §1c), применяется к любому сообщению с развилкой/блокером:
+
+1. **Тест читателя.** Разработчик 1С без открытых артефактов OpenSpec выбирает A/B, прочитав **только** сообщение. Нужен файл или внутренний словарь — переписать.
+2. **Allow-list токенов.** Допустимо: обычный русский / бизнес-термин; идентификатор кода 1С в backticks **с пояснением рядом**. Всё прочее (англ-метки, коды решений, жаргон движка) — перевести. Новое незнакомое слово закрывается автоматически.
+3. **No-copy.** Формулировки для пользователя синтезируются из смысла, не копируются из `design/tasks/verification-*.md`.
+
+Слои 1–3 — **быстрый детектор и словарь замен** для прогона теста, а не его замена. Полнота — по Слою 0, не по длине списков.
+
+---
+
+## Слой 1 — коды и имена движка (примеры для детектора; бан в чате)
+
+Запрещены в чате (регистронезависимо, вне `` `имя-файла` `` и вне строки «Источники: …»). Список **иллюстративный** — не исчерпывающий; полноту даёт Слой 0:
 
 `CRITICAL`, `WARNING`, `SUGGESTION`, `Severity`, `GO`, `NO-GO`, `PASS`, `FAIL`, `GAP`, `APPROVE`, `CHALLENGE`, `REJECT`, `Layer 1`…`Layer 5`, `verify_mode`, `verdict:`, `snapshot`, `last_challenge_at`, `novelty`, `SKIPPED-novelty`, `SKIPPED-lite`, `CHALLENGE-saturated`, `phantom-symbol`, `design-challenge`, `task-readiness`, `quality-controller`, `slice coherence`, `code-truth`, `Promotion Test`, `Determinism Test`, `Three-Question Challenge`, `Simplicity Check`, `Acceptance Checklist Coverage`, `Problem-Solution Trace`, `Independent Challenge`, `Implementation Readiness`, `Blast Radius`, `precedent-regression`, `invariant-drift`, `artifact-hygiene`, `slice-pre`, `slice-post`, `slice-transition`, `Tier`, `low-confidence`, `checkpoint`, `closed_decisions`, `decision_round`, `decision_id`, `open_decision_id`, `verify_depth`, `incremental`, `GO-with-assumptions`, `reopen-blocked`, `supersedes`, `implementation_invariant`, `D0`, `D1`, `D2`, `D3`, `D4`, `D5`, `OQ1`…`OQ\d`, `interim`, `default для apply`, `mount_context`, `context_cleanup`, имена агентов `onec-code-*` / `openspec-*`, имена гейтов (`Architect Gate`, `Code-Truth Gate`, `Slice Gate`, `Precedent Regression Gate`), **`пошаговая пауза`**, **`Ваш шаг (`**, **`автопроверки пройдены`**, **`diff не обязателен`**, **`reviewer PASS`**, **`линтер чист`**.
 
