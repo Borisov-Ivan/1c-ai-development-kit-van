@@ -104,7 +104,7 @@ Implement tasks from an OpenSpec change.
    Если открытая развилка есть — **на входе apply** (не только на pause) вывести блок развилки **строго** по `.cursor/docs/templates/decision-block.md`: «**Что решить:** <заголовок прозой>» + триада «В чём проблема / На что влияет / Если A·B» + варианты A/B. Факты брать из человекочитаемого зеркала (отчёт verify § «Решения до apply» / design § «Решения verify (зафиксировано)»), **синтезируя формулировки прозой по §1c** (`chat-output-budget.mdc` Тест понятности), **не копируя** метки/ID/англ-термины из артефакта. Голый `OQ1` / `S1.1a` / `interim` / англ-метка варианта без перевода — запрещён (§1b.8 / §1c). Пользователь отвечает в чате; зафиксировать через `/opsx:extend <name> --from-verify` до старта зависимого среза. END TURN, если развилка блокирует ближайший срез.
 
    **Metadata (comment markers) check:**
-   Прочитать `proposal.md` и `openspec/project.md` (секция «Разработчик по умолчанию»: `defaultDeveloper`, `cfMarkerPrefix`; § «Канон маркеров (domain_label)» — запреты).
+   Прочитать `proposal.md` и `openspec/project.md` (секция «Разработчик по умолчанию»: `defaultDeveloper`, `cfMarkerPrefix`). Baseline запреты domain_label — `.cursor/docs/marker-canon.md` ⊕ project overlay.
 
    **Извлечение Metadata (dual-parser):** из секции `## Metadata (comment markers)`:
    - yaml-like: строки `developer:`, `comment_suffix:`, `marker_style:`
@@ -112,7 +112,7 @@ Implement tasks from an OpenSpec change.
    - `marker_style` default = `canonical` если не указан
 
    **domain_label validation** (на `comment_suffix` после trim):
-   - Если match запретам из project.md § Канон domain_label → **STOP**, один вопрос: «перепишите domain_label для маркера» (как при плейсхолдере developer).
+   - Если match baseline запретам из `marker-canon.md` (и project overlay) → **STOP**, один вопрос: «перепишите domain_label для маркера» (как при плейсхолдере developer).
    - Пустой `comment_suffix` без `marker_style: minimal` → STOP с предложением заполнить или пометить mechanical.
 
    - Если `developer` пустой/плейсхолдер — взять `defaultDeveloper` из project.md; если и там пусто — один вопрос в чат: **только ФИО** (не смешивать с описанием).

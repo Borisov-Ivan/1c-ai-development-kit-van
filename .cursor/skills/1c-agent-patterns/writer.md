@@ -26,7 +26,7 @@ Task(
          Все новые вставки кода должны быть обёрнуты в маркеры:
          Open: [вставить open_marker]
          Close: [вставить close_marker]
-         domain_label на русском, без process-меток (openspec/project.md § Канон domain_label). При mixed scope — шаблон по пути файла.
+         domain_label на русском, без process-меток (`.cursor/docs/marker-canon.md` § baseline запреты; project overlay). При mixed scope — шаблон по пути файла.
          (Правила размещения — см. твой системный промпт §3a. Закрывающий маркер конца процедуры/функции — в той же строке с КонецПроцедуры/КонецФункции: `КонецПроцедуры {close_marker}`, не на отдельной строке — для корректной разбивки при сравнении/объединении.)
 
          ## 4. INPUT CONTRACT
@@ -99,7 +99,7 @@ Task(
          Все новые вставки кода должны быть обёрнуты в маркеры:
          Open: [вставить open_marker]
          Close: [вставить close_marker]
-         domain_label на русском, без process-меток (openspec/project.md § Канон domain_label).
+         domain_label на русском, без process-меток (`.cursor/docs/marker-canon.md` § baseline запреты; project overlay).
          (Правила размещения — см. твой системный промпт §3a).
 
          ## 5. INPUT CONTRACT
@@ -200,7 +200,7 @@ Task(
          Если исправление требует добавления новых строк — оберни их в маркеры:
          Open: [вставить open_marker]
          Close: [вставить close_marker]
-         domain_label на русском, без process-меток (openspec/project.md § Канон domain_label).
+         domain_label на русском, без process-меток (`.cursor/docs/marker-canon.md` § baseline запреты; project overlay).
          (Правила размещения — см. твой системный промпт §3a).
 
          ## 5. GATES

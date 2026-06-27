@@ -71,7 +71,7 @@
 **Знания и решения:**
 - ADR → `openspec/adrs/` + `.cursor/rules/adr-format.mdc`.
 - Knowledge Base → `openspec/knowledge/` + `.cursor/rules/knowledge-format.mdc`.
-- Маркеры разработчика → `openspec/project.md`; фиксация договорённостей → `.cursor/rules/capture-to-project.mdc`.
+- Маркеры разработчика → MECHANISM: [`.cursor/docs/marker-canon.md`](.cursor/docs/marker-canon.md); VALUE/overlay: [`openspec/project.md`](openspec/project.md); фиксация договорённостей → [`.cursor/rules/capture-to-project.mdc`](.cursor/rules/capture-to-project.mdc).
 - Пути к выгрузке (cf/cfe) → `openspec/project.md` + `.cursor/rules/project-paths.mdc`.
 - Запрет ROI/оценок → `.cursor/rules/no-roi-estimates.mdc`.
 - Инфраструктура 1С → `.cursor/docs/onec-infrastructure.md`.

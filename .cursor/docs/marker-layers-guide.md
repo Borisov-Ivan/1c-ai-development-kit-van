@@ -1,18 +1,22 @@
 # Маркеры ЗНИ — четыре слоя (обзор без скриптов)
 
-Единое поле смысла: **`domain_label`** (= `comment_suffix` в `proposal.md`). Канон синтаксиса и запреты — в [openspec/project.md](../../openspec/project.md) § «Форматы и соглашения по комментариям BSL».
+Единое поле смысла: **`domain_label`** (= `comment_suffix` в `proposal.md`).
+
+**SSOT механики и baseline:** [marker-canon.md](marker-canon.md) (kit).  
+**SSOT значений проекта:** [openspec/project.md](../../openspec/project.md) (`defaultDeveloper`, `cfMarkerPrefix`, строки Whitelist).
 
 ## Четыре слоя
 
 | Слой | Где | Что содержит |
 |------|-----|--------------|
 | **1. Metadata** | `openspec/changes/<name>/proposal.md` → `## Metadata (comment markers)` | `developer`, `comment_suffix` (domain_label), `marker_style` (`canonical` \| `minimal`) |
-| **2. SSOT** | `openspec/project.md` | `defaultDeveloper`, `cfMarkerPrefix`, whitelist, канон domain_label, MARKER-MERGE-001 |
+| **2. SSOT values** | `openspec/project.md` | `defaultDeveloper`, `cfMarkerPrefix`, строки Whitelist / Обязательный контроль, project-расширения списков |
+| **2b. SSOT mechanism** | `.cursor/docs/marker-canon.md` | грамматика маркера, MARKER-MERGE-001, MARKER-PLACEMENT-001, baseline запреты domain_label, дефолтный FORMAT |
 | **3. Transport** | Вычисляется в `/opsx:apply` | `open_marker` / `close_marker` (cfe или cf по scope задач) → writer §3a |
-| **4. BSL + гигиена** | `src/**/*.bsl` | Фактические строки `// +++ …`, `// --- …`, `{cfMarkerPrefix} …`; AP-040 / AP-051 / AP-053 |
+| **4. BSL + гигиена** | `src/**/*.bsl` | Фактические строки `// +++ …`, `// --- …`, `{cfMarkerPrefix} …`; AP-040 / AP-044 / AP-045 / AP-051 / AP-053 / AP-054 |
 
 ```text
-Metadata (proposal) → SSOT (project.md) → Transport (apply) → BSL (src) → Review (AP-*)
+Metadata (proposal) → values (project.md) + mechanism (marker-canon) → Transport (apply) → BSL (src) → Review (AP-*)
 ```
 
 ## Как посмотреть по change
@@ -23,36 +27,35 @@ Metadata (proposal) → SSOT (project.md) → Transport (apply) → BSL (src) �
 
 **Metadata Gate (`/opsx:new`):** согласует слой 1 — только `comment_suffix` (описание); ФИО из `defaultDeveloper` в project.md или отдельный текстовый шаг; preview с датой — иллюстрация transport, SSOT metadata — proposal. Полный scope-specific preview — в status/apply после tasks.
 
-## Как посмотреть SSOT проекта
+## Как посмотреть SSOT
 
-Read [openspec/project.md](../../openspec/project.md):
+**Kit (механика, baseline):** Read [marker-canon.md](marker-canon.md) — CRC, MERGE-001, PLACEMENT-001, baseline запреты domain_label, дефолтный формат `+++`/`---`.
+
+**Project (значения):** Read [openspec/project.md](../../openspec/project.md):
 
 - `#### Разработчик по умолчанию` — `defaultDeveloper`, `cfMarkerPrefix`
-- `#### Whitelist предрелиза` — scope glob и префиксы
-- `#### Канон маркеров (domain_label)` — таблица open/close по scope, GOOD/BAD, запреты
+- `#### Whitelist предрелиза` — scope glob и regex/prefix (project overlay распознавания)
+- опционально: расширения allow-list AP-054, дополнительные запреты/допуски domain_label
 
-Навигация: [bsl-comment-formats-project.md](bsl-comment-formats-project.md).
+Навигация по таблицам: [bsl-comment-formats-project.md](bsl-comment-formats-project.md).
 
 ## Как посмотреть BSL (слой 4)
 
-Поиск в IDE / ripgrep по scope из таблицы канона:
+Поиск в IDE / ripgrep по scope из таблицы Whitelist в project.md (glob на строку таблицы).
 
-| Scope | Паттерн поиска |
-|-------|----------------|
-| PAO cfe | `// +++`, `// ---` в `src/ЭДО ПАО/cfe/` |
-| ДО3 cfe | `// +++`, `// ---` в `src/ДО3 Демо/cfe/` |
-| EA cf | значение `cfMarkerPrefix` из project.md в `src/ЭДО и ЭА/cf/` |
+Дефолтный kit-формат cfe: `// +++`, `// ---`. Cf: значение `cfMarkerPrefix` из project.md.
 
-Расширение `src/ЭДО ПАО/cfe/рг_РусГидро/` — **вне** канона ЗНИ (`+++`/`---`); не смешивать с whitelist PAO/ДО3.
-
-## Гигиена (AP-040 / AP-051 / AP-053)
+## Гигиена (семейство Comment Hygiene: AP-040 / AP-044 / AP-045 / AP-051 / AP-053 / AP-054)
 
 | Правило | Смысл для whitelist-маркеров |
 |---------|------------------------------|
 | **AP-040** | Whitelist exempt — **не удалять** пару; process-метки вне whitelist — удалить |
-| **AP-051** | Сжимать смежные пары одного domain_label / developer / даты |
-| **AP-053** | Содержимое domain_label осмысленное, без process-only; remediation — **переписать**, не delete |
-| **MARKER-PLACEMENT-001** | Закрывающий маркер конца процедуры/функции — **в одной строке** с `КонецПроцедуры`/`КонецФункции` (`КонецПроцедуры // --- …`), не на отдельной строке. Причина — разбивка кода при сравнении/объединении. SSOT: `openspec/project.md` § «Размещение закрывающего маркера». Не путать с AP-051/MARKER-MERGE-001 (сжатие смежных пар). |
+| **AP-044** | Комментарий не пересказывает оператор снизу |
+| **AP-045** | Без даты+времени без обоснования |
+| **AP-051** | MARKER-MERGE-001 — сжимать смежные пары |
+| **AP-053** | Содержимое domain_label осмысленное; baseline запреты — `marker-canon.md`; remediation — **переписать**, не delete |
+| **AP-054** | **Текст** комментария/JSDoc и **тело** блоков `+++`/`---` — на русском; SSOT allow-list — карточка AP-054 + `marker-canon.md` |
+| **MARKER-PLACEMENT-001** | Inline-close с `КонецПроцедуры`/`КонецФункции`; SSOT — `marker-canon.md` |
 
 Change-scoped: `/review` с metadata из proposal. Полный scope: `/release-review`.
 
@@ -60,5 +63,6 @@ Change-scoped: `/review` с metadata из proposal. Полный scope: `/releas
 
 ## Whitelist vs содержимое (кратко)
 
-> Whitelist защищает **пару от удаления** (AP-040) и задаёт **формат** (AP-051).  
-> **Текст** открывающих и однострочных whitelist-строк проверяет **AP-053**.
+> Whitelist защищает **пару от удаления** (AP-040) и задаёт **распознавание** формата (AP-051).  
+> **Текст** открывающих и однострочных whitelist-строк (`domain_label`) проверяет **AP-053** (baseline — `marker-canon.md`).  
+> **Язык** текста комментария, шапки JSDoc и тела блока `+++`/`---` проверяет **AP-054** — whitelist от этого не освобождает.

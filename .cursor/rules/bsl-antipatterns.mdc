@@ -55,7 +55,7 @@ Writer-агенту доступен ТОЛЬКО этот список (име�
 - AP-037: Избегать Cognitive Overload (сложные условия выносить в переменные).
 - AP-038: НЕ искать в цикле по Массиву/ТЗ (использовать Соответствие/Структуру).
 - AP-039: Использовать `УстановитьДействие`, а не `.ОбработчикСобытия`.
-- AP-040: НЕ ссылаться в `//` на артефакты OpenSpec (kebab-case имена change, `reports/…`, `openspec/…`, `.md` в JSDoc); whitelist-маркеры `openspec/project.md` — не AP-040 delete; process-only содержимое — AP-053.
+- AP-040: НЕ ссылаться в `//` на артефакты OpenSpec (kebab-case имена change, `reports/…`, `openspec/…`, `.md` в JSDoc); whitelist-маркеры (baseline + project overlay) — не AP-040 delete; process-only содержимое — AP-053.
 - AP-041: НЕ оставлять маркеры постановки в ЖР/СтрШаблон.
 - AP-042: НЕ использовать отладочный ЖР без требования.
 - AP-043: НЕ оставлять пустые процедуры/функции/обработчики.
@@ -67,8 +67,9 @@ Writer-агенту доступен ТОЛЬКО этот список (име�
 - AP-049: НЕ получать числовую строку через `Строка()` + удаление НПП; использовать `Формат(<Число>, "ЧГ=0")`.
 - AP-050: НЕ выдавать блокирующее сообщение без фактического и ожидаемого состояния, если пользователь должен исправить данные.
 - AP-051: НЕ дублировать смежные блоки маркеров ЗНИ с одним `[ID#NNN]` или одним domain_label — объединять; при разных датах оставлять позднюю.
-- AP-053: Whitelist-маркеры MUST содержать осмысленный domain_label; process-only — rewrite, не AP-040 delete. Запреты — project.md § Канон domain_label.
+- AP-053: Whitelist-маркеры MUST содержать осмысленный domain_label; process-only — rewrite, не AP-040 delete. Baseline запреты — `.cursor/docs/marker-canon.md`; project.md расширяет.
 - AP-052: НЕ фильтровать строки таблицы формы через `УсловноеОформление` + `"Видимость" = Ложь`; использовать `Элементы.<ИмяТаблицы>.ОтборСтрок`.
+- AP-054: Текст комментариев и JSDoc — на русском доменном языке; англицизм/английское слово вне allow-list (backtick-идентификатор, протокол HTTP/JSON/GUID…, имя веб-сервиса, имя продукта, TODO/FIXME) — MUST_FIX. Не словарь стоп-слов: детектор латиницы в прозе, allow-list полон по построению.
 
 ## Колонки таблицы
 
@@ -82,6 +83,18 @@ Writer-агенту доступен ТОЛЬКО этот список (име�
 - **Детектирование** — компактное описание сигнала.
 
 Reviewer обязан использовать `Severity`, `Kind`, `Prerelease escalation`, `Default action` из этой таблицы без дублирования значений в промпте. Override `default_action` допустим только с явным Evidence-блоком (см. `.cursor/agents/onec-code-reviewer.md`, Phase 2.5).
+
+## Config Resolution Contract
+
+```
+effective(X) = kit_baseline(X) ⊕ project_overlay(X)
+  VALUE     → project.md (пути, defaultDeveloper, cfMarkerPrefix)
+  LIST      → kit ∪ project (allow-list AP-054, запреты domain_label, whitelist rows)
+  FORMAT    → kit DEFAULT ⊕ project override (cfMarkerPrefix, marker_style, whitelist regex)
+  MECHANISM → kit only (marker-canon.md: грамматика, MERGE-001, PLACEMENT-001, гигиена)
+```
+
+SSOT: [`.cursor/docs/marker-canon.md`](../docs/marker-canon.md). Zero-config: без project.md — kit baseline; VALUE без дефолта — спросить.
 
 ## Каталог
 
@@ -126,7 +139,7 @@ Reviewer обязан использовать `Severity`, `Kind`, `Prerelease e
 | AP-037 | Cognitive Overload (Когнитивный перегруз) | readability | MEDIUM | style | MEDIUM→HIGH | REFACTOR | Сложные многосоставные условия (более 3 логических операторов `И`/`ИЛИ`/`НЕ` в одном выражении) без промежуточных переменных с говорящими именами (self-documenting variables). |
 | AP-038 | Inefficient Collection Lookup (Неэффективный поиск в коллекции) | performance | HIGH | functional | HIGH→CRITICAL | MUST_FIX | Поиск элемента перебором в цикле (`Для Каждого` или `Пока`) по `Массив` или `ТаблицаЗначений` (без индексов), особенно внутри другого цикла. Следует использовать `Соответствие`, `Структура` или индексированные таблицы значений. |
 | AP-039 | ОбработчикСобытия у элемента формы вместо УстановитьДействие | api | HIGH | functional | HIGH→CRITICAL | MUST_FIX | Вызов `.<...>.ОбработчикСобытия("Событие", "Процедура")` у объекта из `Элементы.Добавить`/`Вставить` (`ПолеФормы` и др.) — метода нет; использовать `УстановитьДействие("Событие", "Процедура")` |
-| AP-040 | Changelog/work-artefact metadata в комментариях | release-hygiene | MEDIUM | release-hygiene | MEDIUM→HIGH | MUST_FIX | В строках `//` (включая **JSDoc** над `Процедура`/`Функция`): сноски `(см. <kebab-case-change-name> …)`, `см. reports/`, `см. openspec/`, `см. temp/reports/`, путь к файлу `*.md`; kebab-case имена change и process-термины (design, proposal, ЗНИ, ADR) вне доменного смысла; `// Design §…`, `// D11`, task numbers. Старые маркеры: `// НАЧАЛО/КОНЕЦ Изменения`, `Заявка №`, `Подрядчик:`; commented-out old code с метками постановки; work instructions в комментариях. **Исключения (не AP-040):** пары `// +++` / `// ---` из whitelist `openspec/project.md` (маркеры apply); директивы `#Вставка`/`#Удаление`. `AI-typography markers`: как ранее (стрелки, em-dash, «ёлочки», декораторы, 3+ `*`/`=` вне шапки метода). Исключения: литералы строк; шапки БСП; whitelist проекта. |
+| AP-040 | Changelog/work-artefact metadata в комментариях | release-hygiene | MEDIUM | release-hygiene | MEDIUM→HIGH | MUST_FIX | В строках `//` (включая **JSDoc** над `Процедура`/`Функция`): сноски `(см. <kebab-case-change-name> …)`, `см. reports/`, `см. openspec/`, `см. temp/reports/`, путь к файлу `*.md`; kebab-case имена change и process-термины (design, proposal, ЗНИ, ADR) вне доменного смысла; `// Design §…`, `// D11`, task numbers. Старые маркеры: `// НАЧАЛО/КОНЕЦ Изменения`, `Заявка №`, `Подрядчик:`; commented-out old code с метками постановки; work instructions в комментариях. **Исключения (не AP-040):** пары whitelist-маркеров (kit baseline + project overlay); директивы `#Вставка`/`#Удаление`. `AI-typography markers`: как ранее (стрелки, em-dash, «ёлочки», декораторы, 3+ `*`/`=` вне шапки метода). Исключения: литералы строк; шапки БСП; whitelist проекта. |
 | AP-041 | Log-literal artefacts (маркеры постановки в литералах ЖР/СтрШаблон) | release-hygiene | MEDIUM | release-hygiene | MEDIUM→HIGH | MUST_FIX | Первый строковый аргумент `ЗаписьЖурналаРегистрации(` (имя события) или текст/СтрШаблон в сообщении содержит `\.[SDTF]\d+` (`.S4`, `.D16`), `Decision\s*\d+`, kebab-case имя change (`[a-z][a-z0-9]*-[a-z0-9]+-[a-z0-9-]+`). Remediation: переименовать в доменные термины (префикс журнала из openspec/docs/ + операция) |
 | AP-042 | Debug-level ЖР без требования в tasks.md/design.md | release-hygiene | MEDIUM | release-hygiene | MEDIUM→HIGH | MUST_FIX | `ЗаписьЖурналаРегистрации(... УровеньЖурналаРегистрации.Информация/.Предупреждение/.Примечание ...)` и ни имя события, ни имя процедуры/функции не встречаются как подстроки в tasks.md/design.md активного change — удалить или зафиксировать требование |
 | AP-043 | Empty procedure/function/handler | design | MEDIUM | style | MEDIUM→HIGH | MUST_FIX | Тело процедуры/функции пустое после удаления комментариев (допускается одинокий `Возврат;` у процедуры без результата). Вариации: `empty-unused` (нет вызовов — удалить), `empty-body` (есть вызовы — реализовать или удалить вызовы), `empty-handler` (обработчик формы без привязки в Form.xml — удалить из Form.xml вручную) |
@@ -138,8 +151,13 @@ Reviewer обязан использовать `Severity`, `Kind`, `Prerelease e
 | AP-049 | Числовая строка через Строка() + удаление НПП | integration | MEDIUM | style | MEDIUM→HIGH | MUST_FIX | `СтрЗаменить(Строка(<Число>), Символы.НПП, "")` или аналогичная очистка пробелов после `Строка(<Число>)` для внешнего контракта; использовать `Формат(<Число>, "ЧГ=0")`. |
 | AP-050 | Неинформативное блокирующее сообщение | ux | MEDIUM | style | MEDIUM→HIGH | REFACTOR | Сообщение рядом с `Отказ = Истина`, `ВызватьИсключение`, `СообщитьПользователю`, `ПоказатьПредупреждение` блокирует сценарий, но не сообщает фактическое и ожидаемое состояние при проверке статуса, заполненности, права действия или возможности обмена. Не применять как массовый lint всех строк. |
 | AP-051 | Несжатые смежные changelog-маркеры одного ЗНИ | release-hygiene | MEDIUM | release-hygiene | MEDIUM→HIGH | MUST_FIX | Подряд идущие пары whitelist-маркеров с одним `[ID#NNN]` **или** одним domain_label + developer + семантикой — объединить; при разных датах — поздняя. Разные ID/смысл или чужой код между блоками — не объединять. |
-| AP-053 | Process-only содержимое whitelisted-маркера | release-hygiene | MEDIUM | release-hygiene | MEDIUM→HIGH | MUST_FIX | Open/однострочные cf whitelist-строки без осмысленного domain_label или с process-лексикой (запреты — project.md § Канон domain_label). Remediation: rewrite текста; не AP-040 delete. |
+| AP-053 | Process-only содержимое whitelisted-маркера | release-hygiene | MEDIUM | release-hygiene | MEDIUM→HIGH | MUST_FIX | Open/однострочные cf whitelist-строки без осмысленного domain_label или с process-лексикой (baseline запреты — `.cursor/docs/marker-canon.md`; project расширяет). Remediation: rewrite текста; не AP-040 delete. |
 | AP-052 | Фильтрация строк формы через условное оформление | api | HIGH | functional | HIGH→CRITICAL | MUST_FIX | В модуле формы `Forms/*/Ext/Form/Module.bsl` процедура одновременно: добавляет `УсловноеОформление.Элементы.Добавить()`; в `Поля.Добавить().Поле = Новый ПолеКомпоновкиДанных("<Имя>")` указывает имя самой таблицы (а не колонки/группы); в `Отбор` использует поля строки этой таблицы (`Объект.<Таблица>.<Реквизит>` или иной путь к строке); параметр оформления `"Видимость"` устанавливается в `Ложь`. Усилители: имя/комментарий содержит `Скрытия`, `Скрыть`, `Фильтр строк`, `Исключённых`; в сценарии отсутствует присваивание `Элементы.<Таблица>.ОтборСтрок`. Исключения: `"Видимость"` применяется к конкретной колонке/полю внутри строки (легитимное скрытие ячеек); используются параметры цвет/шрифт/доступность (легитимное оформление, не фильтрация). |
+| AP-054 | Англицизм/непрозрачный термин в тексте комментария | readability | MEDIUM | style | MEDIUM→HIGH | MUST_FIX | Латиница в прозе `//` (вкл. JSDoc-шапку и тело блоков `+++`/`---`; синтаксис маркера `+++`/`---`/ФИО/дата/`[ID#…]` не считается) вне allow-list: backtick-идентификатор кода (`code-identifier`), протокол/аббревиатура `HTTP`/`JSON`/`XML`/`GUID`/`SQL`/`API`/`URL`/`UUID`/`RLS`/`TLS`/`RMQ`/`UI`/`XDTO`/`БСП` (`protocol`), имя веб-сервиса/поля внешней системы std-06 (`web-service-name`), имя продукта/компании std-02 (`product-name`), `TODO`/`FIXME`. Также семантически: транслит-слэнг с русским аналогом. Механизм — детектор латиницы, **не** словарь стоп-слов; allow-list baseline — `marker-canon.md`, project расширяет. Remediation: переписать на русский доменный язык или внести в allow-list. |
+
+## Семейство Comment Hygiene
+
+Правила гигиены комментариев `//` (включая JSDoc): **AP-040** (артефакты процесса), **AP-044** (пересказ оператора), **AP-045** (дата+время), **AP-051** (сжатие смежных маркеров), **AP-053** (содержимое open-маркера `domain_label`), **AP-054** (англицизм/непрозрачный термин в тексте). Детекторы латиницы и evidence — `.cursor/rules/1c-writer-pipeline.mdc` § COMMENT HYGIENE CHECK; обработка ревьювером — `.cursor/docs/standard/reviewer-checks.md` § Phase 1d.
 
 ---
 

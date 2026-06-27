@@ -68,7 +68,7 @@ metadata:
 
 1.5. **Metadata Gate (MANDATORY для нового change)**
 
-   Read `openspec/project.md` → секция **«Разработчик по умолчанию»** → `defaultDeveloper` (ФИО с пробелами, trim), `cfMarkerPrefix`. Канон domain_label и запреты — § «Канон маркеров (domain_label)» в project.md.
+   Read `openspec/project.md` → секция **«Разработчик по умолчанию»** → `defaultDeveloper` (ФИО с пробелами, trim), `cfMarkerPrefix`. Baseline запреты domain_label — `.cursor/docs/marker-canon.md` ⊕ project overlay.
 
    **Resume (каталог `openspec/changes/<name>/` уже существует):**
    - Если `proposal.md` есть и `developer` заполнен (не `<ФИО>` / `<developer>`) — **не спрашивать** Metadata Gate; использовать metadata из proposal.
@@ -81,7 +81,7 @@ metadata:
 
    2a. **Если `defaultDeveloper` пуст** — один текстовый вопрос только ФИО: «ФИО для маркеров (Фамилия И.О.)» → `developer` (нормализовать пробелы в инициалах). Не смешивать с описанием в одном сообщении. **Иначе** — `developer` = `defaultDeveloper` (trim), без вопроса.
 
-   2b. **Собрать черновик `comment_suffix`** (по убыванию приоритета): поле **«Тема маркера»** из блока `## Постановка ЗНИ` → выжимка из «Симптом»/«Что менять» блока → фраза из Why / What Changes. Требования: 1 фраза по-русски «что меняем и зачем», не kebab-name change, не process-метка (канон — project.md § Канон domain_label).
+   2b. **Собрать черновик `comment_suffix`** (по убыванию приоритета): поле **«Тема маркера»** из блока `## Постановка ЗНИ` → выжимка из «Симптом»/«Что менять» блока → фраза из Why / What Changes. Требования: 1 фраза по-русски «что меняем и зачем», не kebab-name change, не process-метка (baseline — `.cursor/docs/marker-canon.md` § baseline запреты).
 
    2c. **Если черновик собран и `developer` известен** — один `AskQuestion` только про описание. Текст prompt (не опции):
 
@@ -100,7 +100,7 @@ metadata:
 
    3. **Если черновик собрать не из чего** (нет блока, нет Why) — fallback: один текстовый вопрос «Описание для маркера (1 фраза по-русски: что меняем и зачем; можно пусто)». Если `developer` ещё не известен — сначала шаг 2a. Не «ФИО + domain_label» в одном сообщении.
 
-   4. **Soft-reject** (fallback-путь и Other): ответ матчит запреты § Канон domain_label → одна строка «это process-метка, укажите доменное пояснение» и повтор (не писать в proposal). При известном `developer`: Other с `// +++ …` или ФИО в начале → «укажите только описание» и повтор.
+   4. **Soft-reject** (fallback-путь и Other): ответ матчит baseline запретам `marker-canon.md` (и project overlay) → одна строка «это process-метка, укажите доменное пояснение» и повтор (не писать в proposal). При известном `developer`: Other с `// +++ …` или ФИО в начале → «укажите только описание» и повтор.
 
    **Чистота гейта (HALT):** в вопрос Metadata Gate **запрещено** подмешивать другие решения (развилки A/B, выбор дизайна, имя change). Открытые развилки из постановки идут отдельной карточкой через поле «Открытые решения» (шаг 1.25).
 

@@ -25,7 +25,10 @@ Task(
          ## Naming Signals (evidence)
          [Блок из шага 1.9 review/SKILL.md — таблица grep (clean / matches / skipped). Reviewer Phase 1c (reviewer-checks.md § Phase 1c: Naming Provenance Gate): match → AP-031 MUST_FIX по умолчанию; dismiss только metadata-name / false-positive / pre-existing-unchanged.]
 
-         ## Whitelist & Mandatory Controls (from project.md)
+         ## Comment Hygiene Signals (evidence)
+         [Блок из шага 1.10 review/SKILL.md — таблица grep латиницы в // и JSDoc (clean / matches / skipped). Reviewer Phase 1d (reviewer-checks.md § Phase 1d: Comment Hygiene Gate): match → AP-054 MUST_FIX по умолчанию; dismiss только code-identifier / protocol / web-service-name / product-name. Транслит-слэнг и непрозрачный термин кириллицей — семантически в Category 9.]
+
+         ## Whitelist & Mandatory Controls (marker-canon + project.md)
          [Блок из шага 1.6.1 — две таблицы (Whitelist предрелиза, Обязательный контроль) для release-hygiene rules AP-040..AP-043.]
 
          ## Comment Markers Metadata (from proposal.md)
@@ -74,7 +77,8 @@ Task(
          - **cfe:** на каждый `// +++` с `developer` из metadata — парный `// --- {developer}` (legacy `[ID#…]`/`[б/н#…]` в open допустим).
          - **cf:** open `// {cfMarkerPrefix}… +++` (cfMarkerPrefix из project.md) — парный `// {cfMarkerPrefix без :} ---`.
          Нет пары — HIGH [release-hygiene]. Чужие ФИО/префиксы не проверять.
-         Release-hygiene: AP-040..AP-045 включая AP-053 (whitelist exempt removal only).
+         Release-hygiene: AP-040..AP-045 включая AP-051/AP-053 (whitelist exempt removal only).
+         Comment Hygiene (семейство): AP-054 — англицизм/непрозрачный термин в тексте `//` и JSDoc (вкл. тело блоков `+++`/`---`); обработка — Phase 1d по блоку ## Comment Hygiene Signals; allow-list (backtick-идентификатор, протокол, имя веб-сервиса/продукта, TODO/FIXME) — dismiss, иначе MUST_FIX [style].
 
          ## Проверка соблюдения gates (HALT-compliance)
          Проверить, что writer следовал gates из промпта.
@@ -176,7 +180,10 @@ Task(
          ## Naming Signals (evidence)
          [Блок из шага 1.9 review/SKILL.md — clean / matches / skipped; Phase 1c → AP-031 MUST_FIX по умолчанию]
 
-         ## Whitelist & Mandatory Controls (from project.md)
+         ## Comment Hygiene Signals (evidence)
+         [Блок из шага 1.10 review/SKILL.md — clean / matches / skipped; Phase 1d → AP-054 MUST_FIX по умолчанию]
+
+         ## Whitelist & Mandatory Controls (marker-canon + project.md)
          [Блок из шага 1.6.1]
 
          ## Comment Markers Metadata (from proposal.md)
@@ -197,9 +204,9 @@ Task(
          [## Review Boundaries — при diff-focused, как в шаблоне «Reviewer (ревью кода)»]
 
          РЕЖИМ: mode=prerelease. Применять Prerelease escalation из AP-каталога (HIGH→CRITICAL где указано).
-         Release-hygiene: AP-040..AP-045 (whitelist exempt removal; AP-053 content), BORDER-PAIR-001 (cfe + cf dual-pattern), AP-042/043 по evidence-блокам.
+         Release-hygiene: AP-040..AP-045 (whitelist exempt removal; AP-053 content), AP-051, BORDER-PAIR-001 (cfe + cf dual-pattern), AP-042/043 по evidence-блокам.
          Category 12 Release Readiness — обязательно в prerelease.
-         Язык комментариев (не JSDoc/маркеры): русский; англ. кроме TODO/FIXME — MEDIUM [style].
+         Язык комментариев (AP-054): текст `//` и **JSDoc**, а также **тело** блоков `+++`/`---` — на русском доменном языке; латиница вне allow-list (backtick-идентификатор, протокол, имя веб-сервиса/продукта, TODO/FIXME) — MEDIUM→HIGH [style]; синтаксис маркера (`+++`/`---`/ФИО/дата/`[ID#…]`) не считается, его содержимое-domain_label — AP-053. Обработка — Phase 1d по блоку ## Comment Hygiene Signals.
          AP-031 naming: доменный тест для идентификаторов; экспортные без домена — HIGH [style].
 
          [Далее — Reasoning focus, Code Smells, gates HALT-compliance, формат замечаний — как в «Reviewer (ревью кода)»;

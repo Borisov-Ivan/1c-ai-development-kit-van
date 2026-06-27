@@ -101,13 +101,13 @@ Check:
   Principle: comments describe code intent, not change history.
   Do NOT treat as release-hygiene or remove: directives #Вставка, #КонецВставки, #Удаление, #КонецУдаления — they are 1C extension override syntax, required for correct merge.
 
-  Project-level whitelist: if openspec/project.md contains section «Форматы и соглашения по комментариям BSL»
+  Project-level whitelist: baseline — `.cursor/docs/marker-canon.md` (CRC, zero-config). Overlay: if `openspec/project.md` contains section «Форматы и соглашения по комментариям BSL»
   with subsection «Whitelist предрелиза» (table: prefix after //, optional regex on full // line, scope glob per row),
   comments in files matching that scope that match the whitelist are exempt from AP-040 **removal** (not from AP-053 content check).
-  Read project.md before flagging changelog-style markers (e.g. +++/---) in whitelisted lines.
+  Read marker-canon + project.md before flagging changelog-style markers (e.g. +++/---) in whitelisted lines. Empty/missing whitelist → strict hygiene (marker-canon).
 
   Whitelisted marker normalization (AP-051):
-    - When changelog markers fall under project whitelist (openspec/project.md → Whitelist предрелиза),
+    - When changelog markers fall under project whitelist (openspec/project.md → Whitelist предрелиза; baseline marker-canon),
       they are NOT removed (AP-040 does not apply), but they MUST be compact:
       adjacent +++/--- blocks for the same domain_label / [ID#NNN] and the same semantic change
       are merged into one outer block.
@@ -118,10 +118,10 @@ Check:
   Whitelisted marker content (AP-053):
     - Open and single-line cf whitelist markers MUST contain meaningful domain_label (Russian).
     - Process-only suffix (release-review, findings, kebab change name, etc.) — MEDIUM; remediation: rewrite text, NOT delete pair.
-    - See openspec/project.md § Канон domain_label for forbidden list.
+    - See `.cursor/docs/marker-canon.md` § «Канон domain_label — baseline запреты» (+ project overlay).
 
   Release hygiene (process metadata in comments only):
-    - Whitelisted ЗНИ-пары // +++ / // --- (openspec/project.md) — не AP-040 delete (см. AP-040 whitelist); содержимое — AP-053.
+    - Whitelisted ЗНИ-пары // +++ / // --- (kit baseline + project whitelist overlay) — не AP-040 delete (см. AP-040 whitelist); содержимое — AP-053.
     - Устаревшие / вне-whitelist маркеры: // НАЧАЛО/КОНЕЦ Изменения, // РГИТС ..., Заявка №, Подрядчик:, date-author без шаблона whitelist — MEDIUM
     - JSDoc над Процедура/Функция: сноски (см. <kebab-change> ...), пути reports/openspec/temp/reports, упоминание *.md как доказательства решения — MEDIUM (AP-040)
     - Commented-out old code with replacement markers
@@ -137,6 +137,19 @@ Check:
         Task number refs: п. 3.1, задача 2.2, Decision N
       Detection: look for English process nouns in Russian comment lines,
         kebab-case identifiers, and numbered decision/task references.
+
+  Comment language (AP-054 — family Comment Hygiene):
+    - Текст комментария //, шапка JSDoc и ТЕЛО блоков // +++ / // --- — на русском
+      доменном языке. Любое латинское слово в прозе (eligibility, pre-matrix,
+      re-fetch, in-place, fallback…) вне allow-list — MEDIUM [style] (AP-054).
+    - Allow-list (не нарушение): идентификатор кода в backticks; протокол/аббревиатура
+      (HTTP/JSON/XML/GUID/SQL/API/URL/UUID/RLS/TLS/RMQ/UI/XDTO/БСП + project.md);
+      имя веб-сервиса/поля внешней системы (std-06 §1); имя продукта (std-02 §1.3);
+      TODO/FIXME.
+    - Транслит-слэнг (коммит, таска, баг, флоу) с русским аналогом — MEDIUM [style].
+    - Mechanism: детектор латиницы, НЕ словарь стоп-слов; allow-list полон по построению.
+      Evidence — // Comment Hygiene Signals (Phase 1d); граница: синтаксис маркера и
+      open-domain_label — не AP-054 (AP-053). См. std-06 §1, §7.1.
 
   Code waste:
     - Dead code — see category 15 (Obsolete and Unused Code)
@@ -425,7 +438,7 @@ Completeness gate: 7 строк в таблице. Меньше — Phase 0 не
   LinterVerdict: confirm
 ```
 
-**Status PASS:** только если нет unresolved MUST_FIX из Phase 0, Phase 1b, Phase 1c, Phase 2–2.5 и Standards.
+**Status PASS:** только если нет unresolved MUST_FIX из Phase 0, Phase 1b, Phase 1c, Phase 1d, Phase 2–2.5 и Standards.
 
 ### Phase 1c: Naming Provenance Gate (ОБЯЗАТЕЛЬНО при наличии блока `## Naming Signals (evidence)` с ≥1 match)
 
@@ -456,6 +469,41 @@ Completeness gate: 7 строк в таблице. Меньше — Phase 0 не
   kind: naming-signal
   AP: AP-031
   NamingVerdict: confirm | dismiss (metadata-name | false-positive | pre-existing-unchanged)
+```
+
+### Phase 1d: Comment Hygiene Gate (ОБЯЗАТЕЛЬНО при наличии блока `## Comment Hygiene Signals (evidence)` с ≥1 match)
+
+**Политика:** код и комментарии — экспортный артефакт для непосвящённого читателя. Англицизм / непрозрачный английский термин в **тексте** комментария `//`, **шапке JSDoc** и **теле** блоков `// +++`/`// ---` — AP-054 MUST_FIX. Механизм — детектор латиницы в прозе, **не** словарь стоп-слов: allow-list полон по построению. Оркестратор передаёт grep-evidence; reviewer обязан confirm/dismiss каждую строку (fail-closed).
+
+**In-scope:** каждая строка таблицы Comment Hygiene Signals, кроме `Comment Hygiene Signals: clean` и `Comment Hygiene scan skipped: no diff`.
+
+**Алгоритм (для каждой строки evidence):**
+
+| Шаг | Действие |
+|-----|----------|
+| 1 | **confirm → AP-054 MUST_FIX [style]** (default). Prerelease escalation: MEDIUM→HIGH. |
+| 2 | **Remediation:** конкретный русский доменный синоним (не «перевести»); либо предложить внести термин в allow-list project.md, если это легитимная аббревиатура. |
+| 3 | **dismiss** — только с явной причиной: `code-identifier` (идентификатор кода в backticks), `protocol` (HTTP/JSON/XML/GUID/SQL/API/URL/UUID/RLS/TLS/RMQ/UI/XDTO/БСП и расширения project.md), `web-service-name` (std-06 §1), `product-name` (std-02 §1.3). |
+
+**Семантический проход (всегда, без grep — Category 9):** транслит-слэнг разработки (`коммит`, `таска`, `баг`, `флоу`…) и непрозрачный термин кириллицей, у которого есть русский доменный аналог → AP-054.
+
+**Граница:** синтаксис whitelist-маркера (`+++`/`---`/ФИО/дата/`[ID#NNNN]`) — не AP-054; содержимое open-`domain_label` — AP-053.
+
+**Completeness gate Phase 1d:** если в промпте есть `## Comment Hygiene Signals (evidence)` с ≥1 match и ни одного finding AP-054 или явного dismiss в отчёте — Phase 1d **не завершена**; Status ≠ PASS.
+
+**Если блок отсутствует или `Comment Hygiene scan skipped`:** зафиксировать в Summary `Comment Hygiene Signals: skipped`; для full-review — выполнить семантический проход Category 9 (латиница в русской прозе вне allow-list).
+
+**Формат finding (Comment Hygiene):**
+```yaml
+[MEDIUM] Line N: AP-054 anglicism in comment text
+  Procedure: <имя или [module-level]>
+  Anchor: <строка комментария / JSDoc>
+  Action: MUST_FIX
+  Issue: Latin/anglicism in comment prose (Comment Hygiene evidence): "<слово>"
+  Fix: <русский доменный синоним>
+  kind: comment-hygiene
+  AP: AP-054
+  HygieneVerdict: confirm | dismiss (code-identifier | protocol | web-service-name | product-name)
 ```
 
 ### Phase 2: Deep Analysis
@@ -759,9 +807,10 @@ D. Investigation Request (резолв контрактов по запросу 
    - Phase 0: N findings (РїРѕ severity)
    - Linter Signals (Phase 1b): K confirmed MUST_FIX, D dismissed, U unavailable
    - Naming Signals (Phase 1c): K confirmed, D dismissed, S skipped
+   - Comment Hygiene Signals (Phase 1d): K confirmed, D dismissed, S skipped
    - Standards: M findings (РїРѕ severity)
    - Overall: итоговая формулировка
-   - PASS запрещён при unresolved MUST_FIX из Phase 1b (in-scope linter warnings без fix/dismiss) или Phase 1c (Naming evidence match без AP-031 finding/dismiss)
+   - PASS запрещён при unresolved MUST_FIX из Phase 1b (in-scope linter warnings без fix/dismiss), Phase 1c (Naming evidence match без AP-031 finding/dismiss) или Phase 1d (Comment Hygiene evidence match без AP-054 finding/dismiss)
 ```
 
 Required Improvements (вместо секции "Рекомендации"):
@@ -943,7 +992,7 @@ kind=release-hygiene:
   - Design/process artifact references in comments (short-form D11/F5, natural-language
     "По design Decision N (change-name)", process terms, kebab-case change names, task numbers)
   Not release-hygiene: #Вставка, #КонецВставки, #Удаление, #КонецУдаления — extension override directives, do not remove or flag.
-  Project-level override: comments matching openspec/project.md «Whitelist предрелиза» patterns within the row's scope (glob) — NOT release-hygiene. Check project.md before flagging.
+  Project-level override: comments matching project.md «Whitelist предрелиза» (+ baseline marker-canon) patterns within the row's scope (glob) — NOT release-hygiene. Read marker-canon + project.md before flagging.
 
 kind=functional (category 15 — unused/obsolete):
   - Unused export procedure/function (no callers in extension scope) — dead API surface

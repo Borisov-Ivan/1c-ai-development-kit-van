@@ -94,11 +94,11 @@ Ensure:
 
 Если оркестратор передал блок `## COMMENT MARKERS` с `open_marker` и `close_marker`, ВСЕ новые вставки кода должны быть обёрнуты в эти маркеры по следующим правилам:
 
-**domain_label:** open_marker MUST содержать осмысленное доменное пояснение из Metadata change (`comment_suffix`); запрещены process-метки (список — `openspec/project.md` § Канон domain_label). При **mixed scope** — шаблон по пути файла из инструкции apply (cfe `// +++` vs cf `{cfMarkerPrefix}`).
+**domain_label:** open_marker MUST содержать осмысленное доменное пояснение из Metadata change (`comment_suffix`); запрещены process-метки (baseline — `.cursor/docs/marker-canon.md` § Канон domain_label; project overlay расширяет). При **mixed scope** — шаблон по пути файла из инструкции apply (cfe `// +++` vs cf `{cfMarkerPrefix}`).
 
 1. **Новая процедура/функция в своём модуле расширения:**
    - `open_marker` ставится непосредственно перед `Процедура`/`Функция` (до комментариев JSDoc).
-   - `close_marker` для конца процедуры ставится **в той же строке** с `КонецПроцедуры`/`КонецФункции` как trailing-комментарий: `КонецПроцедуры {close_marker}` (например `КонецПроцедуры // --- ПР_РС_ОбновлениеЕРПУХ_БорисовИГ`). **Не** выносить `close_marker` на отдельную строку после `КонецПроцедуры`/`КонецФункции`. Причина: при сравнении/объединении конфигураций в Конфигураторе маркер на отдельной строке отрывается от метода (разбивка кода по операторным скобкам); inline-форма держит закрывающий маркер привязанным к телу процедуры. SSOT — `openspec/project.md` § «Размещение закрывающего маркера» (MARKER-PLACEMENT-001).
+   - `close_marker` для конца процедуры ставится **в той же строке** с `КонецПроцедуры`/`КонецФункции` как trailing-комментарий: `КонецПроцедуры {close_marker}` (например `КонецПроцедуры // --- ПР_РС_ОбновлениеЕРПУХ_БорисовИГ`). **Не** выносить `close_marker` на отдельную строку после `КонецПроцедуры`/`КонецФункции`. Причина: при сравнении/объединении конфигураций в Конфигураторе маркер на отдельной строке отрывается от метода (разбивка кода по операторным скобкам); inline-форма держит закрывающий маркер привязанным к телу процедуры. SSOT — `.cursor/docs/marker-canon.md` § MARKER-PLACEMENT-001.
 2. **Вставка внутри перехвата (`#Вставка`):**
    - `open_marker` ставится первой строкой после `#Вставка`.
    - `close_marker` ставится последней строкой перед `#КонецВставки` (или перед следующим значимым кодом типового, если вставка в середине).
@@ -321,6 +321,15 @@ If file does not exist — STOP (see CRITICAL RULE 12).
 3. Documentation:
    - JSDoc-style for exported functions
    - Brief comments for complex logic
+   - **Язык комментариев и JSDoc — русский доменный (AP-054).** Текст комментариев `//`,
+     шапки JSDoc и тело блоков `// +++`/`// ---` пишутся на русском языке конфигурации.
+     **Не копировать** оркестрационный/процессный жаргон и англицизмы из `design.md`,
+     `tasks.md`, `reports/`, `debug.md`, handoff (eligibility, pre-matrix, re-fetch,
+     in-place, fallback, guard…) в комментарии кода — **переводить** в русский доменный
+     термин. Артефакты процесса — источник фактов, не формулировок для BSL.
+   - Допустимая латиница (allow-list): идентификатор кода в backticks; протокол/аббревиатура
+     (HTTP/JSON/XML/GUID/SQL/API/URL/UUID/RLS/TLS/RMQ/UI/XDTO/БСП); имя веб-сервиса/поля
+     внешней системы (std-06 §1); имя продукта (std-02 §1.3); `TODO`/`FIXME`.
 
 4. Error handling:
    - Use Попытка/Исключение only for expected failures; in Исключение always log (ЗаписьЖурналаРегистрации with context); avoid silent Возврат. See .cursor/docs/1c-coding-standards.md (Обработка исключений).
@@ -636,7 +645,7 @@ Output:
 5. **Use БСП** - Reuse standard subsystems
 6. **Handle errors** - Попытка only with identified external factor; justification gate (rule 20). No traceless suppression, no silent degradation
 7. **Validate with BSL LSP** - Clean diagnostics
-8. **Document exported functions** - JSDoc-style
+8. **Document exported functions** - JSDoc-style; **комментарии и JSDoc — на русском доменном языке** (AP-054); не переносить англицизмы/жаргон из артефактов процесса в `//` — переводить (allow-list: backtick-идентификатор, протокол/аббревиатура, имя веб-сервиса/продукта, TODO/FIXME)
 9. **Iterate until clean** - Don't present with issues
 10. **Meet acceptance criteria** - All must be satisfied
 11. **SCOPE: ONLY edit existing .bsl files.** FORBIDDEN: creating new files/folders (new CommonModules/Name/, new Module.bsl), creating or modifying metadata (.xml, Configuration.xml). If the plan requires a new module or metadata object — do NOT proceed, STOP and report to user.

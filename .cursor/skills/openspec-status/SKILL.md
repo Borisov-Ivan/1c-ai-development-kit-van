@@ -28,13 +28,13 @@ Read-only skill. Не вызывает субагентов, не правит �
 
 2b. **Маркеры (comment markers snapshot).**
 
-   Read `proposal.md` § `## Metadata (comment markers)` + `openspec/project.md` (`defaultDeveloper`, `cfMarkerPrefix`, запреты domain_label).
+   Read `proposal.md` § `## Metadata (comment markers)` + `openspec/project.md` (`defaultDeveloper`, `cfMarkerPrefix`) + baseline `.cursor/docs/marker-canon.md` (запреты domain_label).
 
    **Dual-parser:** yaml (`developer:`, `comment_suffix:`, `marker_style:`) и list (`- **developer:**`, …).
 
    Вывести в слот «Маркеры»:
    - `developer`, `comment_suffix` (domain_label), `marker_style` (default `canonical`)
-   - **process-only:** `да` если suffix match запретам project.md § Канон domain_label; иначе `нет`
+   - **process-only:** `да` если suffix match baseline запретам `marker-canon.md` (и project overlay); иначе `нет`
    - **marker_scope:** Grep tasks/design на `src/.../*.bsl` → `cfe` | `cf-ea` | `mixed` | `не определён`
    - **Preview transport** (date = сегодня `dd.MM.yyyy`):
      - cfe: `// +++ {developer} {date} {suffix}` / `// --- {developer}`

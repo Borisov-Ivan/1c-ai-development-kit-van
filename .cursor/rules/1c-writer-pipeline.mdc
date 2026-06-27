@@ -82,6 +82,61 @@ Naming Signals: clean (N files scanned)
 
 Оркестратор **не** создаёт findings — только evidence (`review/SKILL.md` шаг 1.9).
 
+## COMMENT HYGIENE CHECK
+
+**После NAMING PROVENANCE CHECK, до API EXISTENCE CHECK.** Механический grep по изменённым `.bsl` на **англицизмы в тексте комментариев и JSDoc** (AP-054). Принцип — **детектор латиницы в прозе**, не словарь стоп-слов: что не русское и не входит в allow-list (полон по построению) — кандидат. Оркестратор собирает evidence; reviewer обрабатывает в Phase 1d (`.cursor/docs/standard/reviewer-checks.md` § Phase 1d). Работает **без** `openspec/project.md`: встроенный allow-list — дефолт, project.md только **расширяет**.
+
+### Шаг 1. Scope
+
+- **apply/review с diff:** изменённые `.bsl` из writer-diff.
+- **Без diff** (Mechanical Mode / full-file review): in-scope файлы из `## Review Boundaries`.
+- Нет scope → `Comment Hygiene scan skipped: no diff`.
+
+### Шаг 2. Цели — строки комментариев
+
+Для каждой строки `//` in-scope (включая JSDoc-шапки над `Процедура`/`Функция` и **тело** блоков `// +++` / `// ---`):
+
+1. Удалить backtick-фрагменты (`` `...` `` — идентификаторы кода).
+2. Снять синтаксис whitelist-маркера: префикс `+++`/`---`, ФИО автора, дата, `[ID#NNNN]` (содержимое open-`domain_label` — это AP-053, не AP-054).
+3. Найти латинские слова `[A-Za-z]{2,}`.
+
+### Шаг 3. Allow-list (не включать в evidence)
+
+| Класс | dismiss-причина | Примеры |
+|-------|-----------------|---------|
+| Идентификатор кода 1С в backticks | `code-identifier` | `` `ПродолжитьВызов` ``, `` `XMLСтрока` `` |
+| Протокол/формат/аббревиатура | `protocol` | `HTTP`, `HTTPS`, `JSON`, `XML`, `XDTO`, `GUID`, `UUID`, `SQL`, `URL`, `RLS`, `TLS`, `API`, `RMQ`, `UI`, `БСП` |
+| Имя веб-сервиса/метода/поля внешней системы (std-06 §1) | `web-service-name` | `TestConnection`, `EnterpriseDataExchange` |
+| Имя продукта/компании (std-02 §1.3) | `product-name` | `Microsoft Excel` |
+| Служебный маркер | — | `TODO`, `FIXME` |
+
+Allow-list baseline — `.cursor/docs/marker-canon.md`; расширяется project.md (секция «Расширения allow-list AP-054» или эквивалент). При отсутствии project overlay — только baseline kit.
+
+### Шаг 4. Выход — блок для reviewer
+
+Если совпадений нет:
+
+```markdown
+## Comment Hygiene Signals (evidence)
+
+Comment Hygiene Signals: clean (N files scanned)
+```
+
+Если есть совпадения:
+
+```markdown
+## Comment Hygiene Signals (evidence)
+
+| # | File:Line | Match | Context | Suggested |
+|---|-----------|-------|---------|-----------|
+| 1 | Module.bsl:407 | eligibility | JSDoc | AP-054 MUST_FIX |
+| 2 | Module.bsl:749 | re-fetch | // body | AP-054 MUST_FIX |
+```
+
+- **Suggested:** всегда `AP-054 MUST_FIX`.
+- Оркестратор **не** создаёт findings — только evidence. Reviewer в Phase 1d даёт confirm/dismiss (dismiss-причины: `code-identifier`, `protocol`, `web-service-name`, `product-name`).
+- Транслит-слэнг (`коммит`, `таска`, `флоу`) и непрозрачный термин кириллицей — **семантический** слой ревьювера, не grep.
+
 ## API EXISTENCE CHECK
 
 **После NAMING PROVENANCE CHECK, до вызова reviewer.** Проверяет, что вызовы `МодульИмя.МетодИмя()`, появившиеся в **новых строках diff** после writer, реально определены в коде репозитория. Поиск ведётся по **всему src/** (cf + все cfe).

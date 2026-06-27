@@ -31,6 +31,7 @@ Expert code reviewer for 1C:Enterprise (BSL) with deep knowledge of БСП stand
 |------|------------------|----------|----------------|
 | `## Linter Signals (evidence)` (или `Linter unavailable: <reason>`) | Always | `review/SKILL.md` шаг 1.8 | WARN в отчёте; Phase 1b по доступным данным |
 | `## Naming Signals (evidence)` (или `Naming scan skipped: …` / `Naming Signals: clean …`) | Always | `review/SKILL.md` шаг 1.9 | WARN в отчёте; Phase 1c по доступным данным; full-review — Phase 0 Q6 + AP-031 |
+| `## Comment Hygiene Signals (evidence)` (или `Comment Hygiene scan skipped: …` / `Comment Hygiene Signals: clean …`) | Always | `review/SKILL.md` шаг 1.10 | WARN в отчёте; Phase 1d по доступным данным; full-review — семантический проход Category 9 + AP-054 |
 | Base-файл (путь в cf/) | Файл содержит `&ИзменениеИКонтроль` | EXTENSION GATE (`1c-writer-pipeline.mdc`) | Вывести самостоятельно: заменить `cfe/<ExtName>/` на cf-путь из project.md; зафиксировать derived-path в отчёте |
 | `## Resolved Contracts` | Повторный прогон после Investigation loop | `1c-writer-pipeline.mdc` § CONTRACT RESOLUTION | Трактовать контракт как `unknown` |
 | `## Review Boundaries` | diff-focused ревью | `review/SKILL.md` шаг 1.5 | Полное ревью файла |
@@ -118,15 +119,17 @@ Writer и оркестратор сортируют findings по `risk_score` d
 
 ---
 
-## RELEASE-HYGIENE RULES (AP-040..AP-045)
+## RELEASE-HYGIENE RULES (AP-040..AP-045, AP-051, AP-053, AP-054)
 
-Нарушения гигиены выпуска, не являющиеся классическими AP-паттернами кода. Полная карточка — в AP-каталоге (`bsl-antipatterns.mdc`).
+Нарушения гигиены выпуска, не являющиеся классическими AP-паттернами кода. Полная карточка — в AP-каталоге (`bsl-antipatterns.mdc`). Семейство **Comment Hygiene** — AP-040, AP-044, AP-045, AP-051, AP-053, AP-054.
 
-**Whitelist проекта:** прочитать [openspec/project.md](../../openspec/project.md), секцию «Форматы и соглашения по комментариям BSL». Извлечь таблицы **Whitelist предрелиза** и **Обязательный контроль**. Строки, попадающие под whitelist (по префиксу после `//` и/или regex на всю строку в рамках scope glob), exempt от **удаления** AP-040..AP-045 **кроме AP-053** (содержимое domain_label — rewrite, не delete). Директивы расширения `#Вставка`/`#КонецВставки`/`#Удаление`/`#КонецУдаления` — **не** release-hygiene.
+**Whitelist проекта:** прочитать baseline `.cursor/docs/marker-canon.md` (CRC, zero-config при отсутствии project.md). Прочитать [openspec/project.md](../../openspec/project.md), секцию «Форматы и соглашения по комментариям BSL» — извлечь таблицы **Whitelist предрелиза** и **Обязательный контроль** (project overlay; если секции нет — таблицы пусты, строгая гигиена). Строки, попадающие под whitelist (по префиксу после `//` и/или regex на всю строку в рамках scope glob), exempt от **удаления** AP-040..AP-045 **кроме AP-053** (содержимое domain_label — rewrite, не delete). Директивы расширения `#Вставка`/`#КонецВставки`/`#Удаление`/`#КонецУдаления` — **не** release-hygiene.
 
-**Inline-close (MARKER-PLACEMENT-001):** закрывающий маркер конца процедуры в форме `КонецПроцедуры // --- …` / `КонецФункции // --- …` — валидный whitelist-маркер (close-regex допускают опциональный `КонецПроцедуры`/`КонецФункции` перед `//`). **Не** флагить как AP-044 (narration) и **не** считать разрывом пары для AP-051. Маркер `// ---` на отдельной строке после `КонецПроцедуры` для конца процедуры — отклонение от канона (MARKER-PLACEMENT-001), фикс — через writer.
+**Граница whitelist vs язык (AP-054):** whitelist защищает **пару маркеров от удаления** (AP-040) и задаёт **формат**. Он **не** освобождает **текст** комментария/JSDoc и **тело** блока `// +++`/`// ---` от требования русского языка: англицизмы внутри whitelist-блока — это AP-054. Освобождён от AP-054 только **синтаксис** маркера (`+++`/`---`/ФИО/дата/`[ID#…]`), а содержимое open-`domain_label` — AP-053.
 
-**AP-053 whitelisted marker content:** для open и однострочных cf-маркеров проверить domain_label по запретам project.md § Канон domain_label; remediation — переписать текст, не удалять пару.
+**Inline-close (MARKER-PLACEMENT-001):** закрывающий маркер конца процедуры в форме `КонецПроцедуры // --- …` / `КонецФункции // --- …` — валидный whitelist-маркер (close-regex допускают опциональный `КонецПроцедуры`/`КонецФункции` перед `//`). **Не** флагить как AP-044 (narration) и **не** считать разрывом пары для AP-051. Маркер `// ---` на отдельной строке после `КонецПроцедуры` для конца процедуры — отклонение от канона (MARKER-PLACEMENT-001), фикс — через writer. SSOT — `.cursor/docs/marker-canon.md`.
+
+**AP-053 whitelisted marker content:** для open и однострочных cf-маркеров проверить domain_label по baseline запретам `.cursor/docs/marker-canon.md` ⊕ project overlay; remediation — переписать текст, не удалять пару.
 
 **AP-042 debug-ЖР:** выполняется только при наличии активного change (`openspec/changes/<name>/` или `.../archive/<name>/`). Ревьювер читает `tasks.md` и `design.md` объединённо; если имя события или имя процедуры (из границ, в которых находится вызов) не встречается как подстрока без учёта регистра — flag.
 
@@ -135,6 +138,8 @@ Writer и оркестратор сортируют findings по `risk_score` d
 **AP-044 AI-narration:** для каждого `//` в границах проверить связь с ближайшим оператором снизу (≤ 2 строки пустых/комментариев). Если первая значимая лексема комментария дублирует имя конструкции (`Цикл`, `Проверка`, `Присваиваем`, `Возвращаем`, `Обработчик`) и комментарий не добавляет «зачем/почему» — flag. Исключения: whitelist проекта; шапки БСП; комментарий поясняет контекст (ссылка на стандарт/тикет/домен).
 
 **AP-045 date+time:** regex по строкам `//` в границах: `\b\d{2}\.\d{2}\.\d{4}\s+\d{1,2}:\d{2}` или `\b\d{4}-\d{2}-\d{2}\s+\d{1,2}:\d{2}`. При совпадении — flag; Evidence-override `spec-explicit-timestamp` оставляет OK (например, фиксирование времени ограничения по часовому поясу сеанса).
+
+**AP-054 язык комментариев (Phase 1d):** обработать блок `## Comment Hygiene Signals (evidence)` — каждая строка по умолчанию **confirm → AP-054 MUST_FIX [style]**; dismiss только с явной причиной: `code-identifier` (идентификатор кода в backticks), `protocol` (HTTP/JSON/XML/GUID/SQL/API/URL/UUID/RLS/TLS/RMQ/UI/XDTO/БСП и расширения project.md), `web-service-name` (std-06 §1), `product-name` (std-02 §1.3). Область — текст `//`, **шапка JSDoc** и **тело** блоков `+++`/`---`; синтаксис маркера не считается. Семантически (без grep, Category 9): транслит-слэнг (`коммит`, `таска`, `флоу`…) и непрозрачный термин кириллицей, у которого есть русский доменный аналог. Принцип: детектор латиницы, **не** словарь стоп-слов — allow-list полон по построению. Remediation — переписать на русский доменный язык или внести термин в allow-list project.md.
 
 ---
 
@@ -222,10 +227,11 @@ status: NOT_CONNECTED
 
 **Каждый yes → finding с counterfactual.** Обоснование — ссылка на артефакт (Intent Map / Contract Map / Knowledge Assessment), не арифметика. Без обоснования ответ считается пропущенным.
 
-### Phase 1: Syntax, Linter Signals, Naming Signals, AP Registry Load
+### Phase 1: Syntax, Linter Signals, Naming Signals, Comment Hygiene, AP Registry Load
 
 1. Если в промпте есть `## Linter Signals (evidence)` — для каждого сигнала: confirm/dismiss/reclassify (Phase 1b).
 2. Если в промпте есть `## Naming Signals (evidence)` с ≥1 match — для каждой строки: confirm/dismiss (Phase 1c, AP-031 MUST_FIX по умолчанию).
+2a. Если в промпте есть `## Comment Hygiene Signals (evidence)` с ≥1 match — для каждой строки: confirm/dismiss (Phase 1d, AP-054 MUST_FIX по умолчанию; dismiss — `code-identifier`/`protocol`/`web-service-name`/`product-name`).
 3. Иначе — опционально `user-1c-syntax-checker-syntaxcheck` / `user-1c-code-checker-check_1c_code`.
 4. **Прочитать AP-индекс:** `.cursor/rules/bsl-antipatterns.mdc` (таблица). Карточки — по необходимости из `.cursor/docs/antipatterns/bsl-antipatterns.md`.
 5. Прочитать стандарты: `.cursor/docs/1c-coding-standards.md`.
@@ -236,7 +242,7 @@ status: NOT_CONNECTED
 Для каждого файла в scope (с учётом Review Boundaries):
 
 1. **AP-pass:** обход AP-индекса. Для каждой строки таблицы применить `Детектирование` к коду в границах. Match → finding с `AP-NNN`, полями из карточки (severity, kind, default_action) + risk axes.
-2. **Release-hygiene pass (AP-040..AP-045, включая AP-053):** использовать Intent Map (границы методов) и Contract Map (литералы, источники) — НЕ regex-скан построчно. Применить whitelist проекта (exempt removal; AP-053 на содержимое). Для AP-042 прочитать tasks.md/design.md активного change (если задан).
+2. **Release-hygiene pass (AP-040..AP-045, AP-051, AP-053, AP-054):** использовать Intent Map (границы методов) и Contract Map (литералы, источники) — НЕ regex-скан построчно. Применить whitelist проекта (exempt removal; AP-053 на содержимое open-маркера; AP-054 на язык текста/JSDoc/тела блока). Для AP-042 прочитать tasks.md/design.md активного change (если задан). AP-054 — обработать блок `## Comment Hygiene Signals` (Phase 1d) + семантический проход Category 9.
 3. **Vendor standards:** если код затрагивает транзакции / event handlers / queries / locking / формы — прочитать соответствующий `std-*.md` и проверить compliance.
 4. **&ИзменениеИКонтроль verification:** если файл содержит методы с этой аннотацией — загрузить base из cf/ (путь: заменить `cfe/<ExtName>/` на cf из project.md), извлечь код **вне** `#Вставка/#Удаление` блоков, diff против base. Любое расхождение (added/deleted/modified вне директив) — MUST_FIX (severity из AP-каталога, в prerelease эскалировать).
 
@@ -406,7 +412,7 @@ Status: PASS | FAIL | NEEDS_WORK
 Phase 0: N findings (X HIGH, Y MEDIUM)   # если Phase 0 выполнялась
 Попытка Audit: P blocks checked, Q findings   # Phase 2.5
 AP Registry: M findings (CRITICAL: ..., HIGH: ..., MEDIUM: ..., LOW: ...)
-Release-hygiene: K findings (AP-040..AP-045)
+Release-hygiene: K findings (AP-040..AP-045, AP-051, AP-053, AP-054)
 Top-risk items: <топ-3 по risk_score с AP-ID и Procedure>
 Overall: <итоговая формулировка — 1 предложение>
 ```

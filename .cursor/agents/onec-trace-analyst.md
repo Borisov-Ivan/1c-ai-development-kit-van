@@ -158,6 +158,41 @@ Common anomalies (when investigating errors):
   - Writes inside BP/transaction handlers
 ```
 
+### 2.5 Decision Fork Audit (значимые развилки)
+
+**Always run** after EXECUTION FLOW is read (§1.1), **before** deep RCA in §3. If no significant forks appear in coverage — collapse the output section to one line (see OUTPUT FORMAT); do not emit an empty table.
+
+**Source:** EXECUTION FLOW already read in §1.1 — no bulk read of `=== MODULES ===`. Point `Grep` on `.bsl` only within the existing §3b budget (5 modules); fork audit does not add new bulk reads.
+
+**What counts as a fork (grep-first on FLOW, then confirm in code at gate lines):**
+
+```yaml
+Gate / feature flags:
+  - ЗначениеДополнительнойНастройки(
+  - ДополнительнаяФункцияВключена(
+  - Similar boolean gate helpers visible in FLOW
+
+Branch / early exit:
+  - Если … Тогда on FLOW lines (especially Не … / = Ложь / = Истина)
+  - Early Возврат or ВызватьИсключение that truncates the call chain before symptom zone
+
+Missing downstream:
+  - Procedure expected on the active path (from brief, CALL INDEX, or caller context)
+    with 0 occurrences in EXECUTION FLOW after the gate
+```
+
+**Verdict per fork:**
+
+| Verdict | Meaning |
+|---------|---------|
+| **TAKEN** | Branch active — gate true / handler reached / downstream calls present |
+| **SKIPPED** | Early return, flag = Ложь (or default false), or mandatory downstream = 0 calls in FLOW |
+| **UNKNOWN** | Gate or branch in hidden coverage — report in `## Insufficient data`, **not** as RCA |
+
+**Priority rule:** If a **SKIPPED** fork cuts off the path to the symptom zone (preflight, disabled setting, early return before target logic) — treat it as a **root-cause candidate and verify before** deep RCA on eligibility, matrix, dual-instance, etc.
+
+**Anti-pattern (forbidden):** Treating «0 calls of X in trace» as root cause **without** checking an upstream gate or early `Возврат` that blocks the path to X.
+
 ### 3. Context Verification (CRITICAL)
 
 **Do not rely only on trace data.** Trace lines may be truncated; variables and full query text are often missing in COMPACT.
@@ -269,7 +304,7 @@ SemanticSearch:
 
 ## OUTPUT FORMAT
 
-Provide a report that the parent (or onec-code-architect) can use without re-reading the full trace. Section "Key findings" and optional "Anomalies / concerns" depend on the analysis focus; include only what is relevant.
+Provide a report that the parent (or onec-code-architect) can use without re-reading the full trace. Section `## Развилки` (§2.5) precedes `## Key findings`; optional sections depend on the analysis focus.
 
 Перед финальным ответом выполнить **Cite Verification**:
 
@@ -287,8 +322,8 @@ Provide a report that the parent (or onec-code-architect) can use without re-rea
 
 1. **Что наблюдаешь у себя** — дословно `user-goal` из брифа (симптом пользователя, не симптом трассы).
 2. **Почему так устроено** — one-liner про механизм находки.
-3. **Связано ли это с симптомом** — `объясняет полностью` | `объясняет частично, есть ещё причина` | `не объясняет, симптом из другой ветки`.
-4. **Что чинить и где** — модуль/расширение + поле/процедура; маркер `[verified]` или `[hypothesis: <план>]`. Если п.3 = «не объясняет» — **другая** причина, не «допустимое поведение».
+3. **Связано ли это с симптомом** — `объясняет полностью` | `объясняет частично, есть ещё причина` | `не объясняет, симптом из другой ветки`. Если в `## Развилки` есть **SKIPPED**-gate, который обрывает путь к симптому, и это подтверждено — п.3 = «объясняет полностью».
+4. **Что чинить и где** — модуль/расширение + поле/процедура; маркер `[verified]` или `[hypothesis: <план>]`. Если п.3 = «не объясняет» — **другая** причина, не «допустимое поведение». Если SKIPPED-gate объясняет симптом — п.4 = «включить настройку / проверить preflight на ИБ», не «чинить eligibility / логику в глубине».
 
 **Архивные гипотезы** (если передан `open_hypotheses_from_archive[]`): для каждой — одна строка: «Гипотеза `<id>` из `<source>` — подтверждается | опровергается | остаётся открытой | неприменима к этому симптому».
 
@@ -306,6 +341,14 @@ Provide a report that the parent (or onec-code-architect) can use without re-rea
 |-----|-------------|-------------------|
 | M01 | ... | ... |
 | M03 | ... | ... |
+
+## Развилки (decision fork audit)
+
+(Section **before** `## Key findings` — mandatory output of §2.5. If no significant forks in coverage: one line «значимых развилок в покрытии не найдено»; do not emit an empty table.)
+
+| Развилка | Ветка | Факт (#event :line) | Downstream-следствие |
+|----------|-------|---------------------|----------------------|
+| <gate / условие / early return> | TAKEN \| SKIPPED \| UNKNOWN | #3377 Mxx:750 флаг Ложь | <expected call> 0 вызовов в FLOW |
 
 ## Key findings
 (Content depends on analysis focus: e.g. write points, slow calls, lock order, branch taken, extension sequence — whatever is relevant to the user's query.)
@@ -348,6 +391,7 @@ Provide a report that the parent (or onec-code-architect) can use without re-rea
 4. **Output for architect** — Your report is input for onec-code-architect; keep it structured and citation-ready (file:line, event ID).
 5. **Cite Verification** — Re-read ±5 source lines for every critical `file:line` before finalizing.
 6. **Escalation** — Clearly state when you stopped due to insufficient data and what is needed (e.g. TRACE_FULL path or command).
+7. **Fork audit before deep RCA** — §2.5 runs on every trace. A **SKIPPED** gate that explains the symptom outranks hypotheses about eligibility, matrix logic, or downstream code defects until the gate is ruled out.
 
 **Anti-patterns (forbidden):**
 
@@ -356,6 +400,7 @@ Provide a report that the parent (or onec-code-architect) can use without re-rea
 - Linear reading of `=== MODULES ===` — duplicate of code in `src/`
 - Analyzing every `Mxx` in MAP — only brief-relevant modules
 - Reconstructing hidden events without evidence in FLOW/INDEX
+- Treating «0 calls of X in trace» as root cause without checking upstream gate / early `Возврат` that blocks the path to X
 
 ---
 

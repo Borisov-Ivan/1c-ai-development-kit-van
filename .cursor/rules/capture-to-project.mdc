@@ -17,8 +17,10 @@ alwaysApply: false
    - Если **`openspec/project.md` есть** — прочитать файл: секции, формат таблиц, стиль формулировок.
    - Если **файла нет** (или каталога `openspec/` нет):
      - При необходимости создать скелет OpenSpec по **Phase 0** `.cursor/commands/init-project.md` (`openspec/`, `openspec/changes/`, `openspec/changes/_template/`, `openspec/specs/`, `openspec/docs/`, `openspec/adrs/`, `openspec/config.yaml` — как в команде; `project.md` можно сразу заполнить черновиком ниже).
-     - Взять **полный шаблон структуры** `project.md` из **Phase 4** того же файла `init-project.md` (блок markdown с `# OpenSpec:` … таблицы BSL).
+     - Взять **полный шаблон структуры** `project.md` из **Phase 4** того же файла `init-project.md` (блок markdown с `# OpenSpec:` … overlay-таблицы BSL).
+     - MECHANISM (MARKER-MERGE, PLACEMENT, baseline запреты domain_label) **не дублировать** — только ссылка на `.cursor/docs/marker-canon.md`.
      - В шаблон встроить только то, что **явно согласовано** в диалоге; прочие секции — нейтральные заглушки (без выдуманного домена), таблицы комментариев BSL — пустые строки-заглушки или пометка «уточнить», **без** примера EX-001 без подтверждения пользователя (как в init-project).
+     - Добавить `framework_contract_version: 2026-06` в шапку (версия kit — `.cursor/templates/project-overlay.template.md`).
 
 2. **Зеркало** — показать пользователю:
    - при существующем файле: целевая секция и фрагмент / строка таблицы в её формате;
@@ -30,12 +32,13 @@ alwaysApply: false
 
 - Не дописывать домыслы: только то, что явно следует из диалога и подтверждено на шаге зеркала.
 - Не дублировать содержимое, уже присутствующее в `project.md`.
-- Договорённости по **комментариям BSL** — адаптировать под таблицы **Whitelist** и **Обязательный контроль** в секции «Форматы и соглашения по комментариям BSL»; памятка по колонкам: `.cursor/docs/bsl-comment-formats-project.md`.
+- **Не записывать** в project.md MECHANISM из kit (§ Канон domain_label как полный список, MARKER-MERGE-001, MARKER-PLACEMENT-001) — SSOT: `.cursor/docs/marker-canon.md`.
+- Договорённости по **комментариям BSL** — адаптировать под overlay-таблицы **Whitelist предрелиза** и **Обязательный контроль**; памятка: `.cursor/docs/bsl-comment-formats-project.md`.
 
 ## Связь
 
-- Полное интервью, бутстрап OpenSpec и эталон структуры: `.cursor/commands/init-project.md` (**Phase 0** — каталоги и файлы; **Phase 4** — шаблон `project.md`; **Блок 7** — соглашения по комментариям).
+- Полное интервью, бутстрап OpenSpec и эталон overlay: `.cursor/commands/init-project.md` (**Phase 0**, **Phase 4**, **Phase 4.5**, **Блок 7**).
+- Kit baseline: `.cursor/docs/marker-canon.md`; overlay-шаблон: `.cursor/templates/project-overlay.template.md`.
 - Применение whitelist/обязательного контроля: `.cursor/skills/review/SKILL.md` (шаги 1.6–1.6.2); усиленный режим — `/release-review`.
 
 ---
-

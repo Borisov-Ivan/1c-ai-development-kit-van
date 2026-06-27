@@ -137,9 +137,10 @@ Glob `src/*/cfe/<extension>/**/*.bsl`. При `full-extension` — Tier 1 и Tie
 
 - Выполнить шаг 1.8 (Linter pass) — обязательно.
 - Выполнить чтение whitelist из project.md (шаг 1.6).
+- Выполнить шаг 1.10 (Comment Hygiene pass) — **обязательно для comment-only diff**: латиница в `//`/JSDoc (AP-054) не должна молча пройти при тривиальной правке комментариев.
 - Пропустить шаги 1.5 (procedure mapping не нужен для простых diff), 2–3 (агент не вызывается).
-- Отчёт (шаг 4) — короткая сводка: «Light review; линтер: N диагностик; whitelist: K нарушений».
-- Если линтер или whitelist-проверка нашли проблемы — эскалировать: AskQuestion «Переключиться в полное ревью?».
+- Отчёт (шаг 4) — короткая сводка: «Light review; линтер: N диагностик; whitelist: K нарушений; Comment Hygiene: M кандидатов».
+- Если линтер, whitelist- или Comment Hygiene-проверка нашли проблемы — эскалировать: AskQuestion «Переключиться в полное ревью?».
 
 Если триаж НЕ сработал — продолжать стандартный flow с шага 1.5.
 
@@ -194,15 +195,15 @@ Focus: full (new file)
 
 ## Шаг 1.6. Project constraints (evidence)
 
-**Только чтение `openspec/project.md`** для передачи ревьюверу как evidence. Механические grep-проходы (прошлые 1.6.2/1.6.3/1.6.5/1.6.6) перенесены в агент (AP-040..AP-045 каталога, Phase 2 «Release-hygiene pass»). Whitelist exempt **removal** only; AP-053 content — в Phase 2 reviewer.
+**Чтение:** baseline `.cursor/docs/marker-canon.md` (CRC, zero-config) + `openspec/project.md` (whitelist overlay). Механические grep-проходы перенесены в агент (AP-040..AP-054, Phase 2 «Release-hygiene pass»). Whitelist exempt **removal** only; AP-053 content — в Phase 2 reviewer.
 
 ### 1.6.1 Whitelist и обязательный контроль
 
-Прочитать [openspec/project.md](../../../openspec/project.md), секция **«Форматы и соглашения по комментариям BSL»**. Извлечь таблицы **Whitelist предрелиза** и **Обязательный контроль**. Whitelist exempt AP-040 **removal**; содержимое domain_label — AP-053 в Phase 2 reviewer. Если секции нет — обе таблицы пусты.
+Прочитать `.cursor/docs/marker-canon.md` (baseline). Прочитать [openspec/project.md](../../../openspec/project.md), секция **«Форматы и соглашения по комментариям BSL»** — извлечь таблицы **Whitelist предрелиза** и **Обязательный контроль** (project overlay). Whitelist exempt AP-040 **removal**; содержимое domain_label — AP-053 (baseline marker-canon). Если секции project нет — overlay-таблицы пусты, строгая гигиена.
 
-**Памятка по колонкам и слоям:** [.cursor/docs/bsl-comment-formats-project.md](../../docs/bsl-comment-formats-project.md), [.cursor/docs/marker-layers-guide.md](../../docs/marker-layers-guide.md).
+**Памятка по колонкам и слоям:** [.cursor/docs/bsl-comment-formats-project.md](../../docs/bsl-comment-formats-project.md), [.cursor/docs/marker-layers-guide.md](../../docs/marker-layers-guide.md), [.cursor/docs/marker-canon.md](../../docs/marker-canon.md).
 
-Результат передать в бриф шага 2 как `## Whitelist & Mandatory Controls (from project.md)` — две таблицы целиком + scope globs.
+Результат передать в бриф шага 2 как `## Whitelist & Mandatory Controls (marker-canon + project.md)` — две overlay-таблицы целиком + scope globs + ссылка на marker-canon baseline.
 
 ### 1.6.2 Обязательный контроль (regex-based rules)
 
@@ -251,6 +252,35 @@ Focus: full (new file)
 - Блок передаётся ревьюверу. Ревьювер в **Phase 1c** (`.cursor/docs/standard/reviewer-checks.md` § Phase 1c: Naming Provenance Gate) обязан обработать каждую строку evidence: по умолчанию **confirm → AP-031 MUST_FIX**; dismiss только с явной причиной (`metadata-name`, `false-positive`, `pre-existing-unchanged`).
 
 **Важно:** оркестратор НЕ переводит сигналы в findings — это работа ревьювера. Оркестратор **обязан** передать блок evidence, не отфильтровывая совпадения (кроме исключений pipeline).
+
+---
+
+## Шаг 1.10. Comment Hygiene pass (evidence, не findings)
+
+Выполнить **после** шага 1.9, **до** вызова ревьювера. Алгоритм — **SSOT:** `.cursor/rules/1c-writer-pipeline.mdc` § COMMENT HYGIENE CHECK. Детектор **латиницы в прозе комментариев и JSDoc** (AP-054) — не словарь стоп-слов; allow-list полон по построению. Работает **без** `openspec/project.md` (встроенный allow-list); project.md только расширяет.
+
+### Входные параметры
+
+- **Scope:** изменённые `.bsl` из writer-diff (apply) или in-scope файлы из Review Boundaries (full-file / Mechanical).
+
+### Обработка
+
+- Выполнить grep по алгоритму pipeline: строки `//` (вкл. JSDoc-шапки и тело блоков `+++`/`---`), убрать backtick-фрагменты и синтаксис маркера, найти латинские слова `[A-Za-z]{2,}`, отфильтровать allow-list (backtick-идентификатор, протокол, имя веб-сервиса, имя продукта, TODO/FIXME).
+- Агрегировать в блок **`## Comment Hygiene Signals (evidence)`** — всегда передавать reviewer (clean / matches / `Comment Hygiene scan skipped: no diff`).
+- Оркестратор **не** создаёт findings — только evidence (аналог шага 1.9).
+
+```markdown
+## Comment Hygiene Signals (evidence)
+
+| # | File:Line | Match | Context | Suggested |
+|---|-----------|-------|---------|-----------|
+| 1 | Module.bsl:407 | eligibility | JSDoc | AP-054 MUST_FIX |
+```
+
+Если совпадений нет: `Comment Hygiene Signals: clean (N files scanned)`.
+
+- Блок передаётся ревьюверу. Ревьювер в **Phase 1d** (`.cursor/docs/standard/reviewer-checks.md` § Phase 1d: Comment Hygiene Gate) обрабатывает каждую строку: по умолчанию **confirm → AP-054 MUST_FIX**; dismiss только с явной причиной (`code-identifier`, `protocol`, `web-service-name`, `product-name`).
+- Транслит-слэнг и непрозрачный термин кириллицей — **семантический** слой ревьювера (Category 9), не grep.
 
 ---
 

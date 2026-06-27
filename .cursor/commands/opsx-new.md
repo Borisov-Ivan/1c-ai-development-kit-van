@@ -11,7 +11,7 @@ description: Создание или дозавершение change (ЗНИ) с
 
 **Бриф (Sync Card):** B0 при `## Постановка ЗНИ` в чате/handoff (информирующая строка, без согласования имени); B1 при свободном тексте — карточка **Изменение** + Подтвердить? — см. `.cursor/docs/templates/brief-card.md`.
 
-**Второе действие (только новый change):** Metadata Gate. Read `openspec/project.md` (`defaultDeveloper`, канон `domain_label`). Агент собирает черновик **описания** (`comment_suffix`) из «Темы маркера» / Why; ФИО — из project.md или отдельный текстовый шаг; preview `// +++ ФИО дата описание`; `AskQuestion` — только при черновике **и** известном ФИО. Без metadata `openspec new change` не запускается. Resume — metadata из proposal.md, gate пропускается.
+**Второе действие (только новый change):** Metadata Gate. Read `openspec/project.md` (`defaultDeveloper`, `cfMarkerPrefix`); baseline запреты `domain_label` — `.cursor/docs/marker-canon.md` ⊕ project overlay. Агент собирает черновик **описания** (`comment_suffix`) из «Темы маркера» / Why; ФИО — из project.md или отдельный текстовый шаг; preview `// +++ ФИО дата описание`; `AskQuestion` — только при черновике **и** известном ФИО. Без metadata `openspec new change` не запускается. Resume — metadata из proposal.md, gate пропускается.
 
 Input: argument after the command is the change name (kebab-case) or a description of what they want to build.
 Optional flag: `--skip-architect "<причина>"` to bypass mandatory Architect Gate.

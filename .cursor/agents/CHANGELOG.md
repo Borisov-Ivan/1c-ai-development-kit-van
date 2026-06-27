@@ -1,5 +1,24 @@
 # Changelog — 1C Agent Ecosystem
 
+## [4.10] - 2026-06-27
+
+### Changed (project.md / kit SSOT split)
+- **`.cursor/docs/marker-canon.md`** — kit SSOT: CRC, грамматика маркера, MARKER-MERGE-001, MARKER-PLACEMENT-001, baseline запреты domain_label, дефолтный FORMAT `+++`/`---`, zero-config.
+- **Config Resolution Contract** в `.cursor/rules/bsl-antipatterns.mdc`: VALUE → project.md; LIST/FORMAT baseline ⊕ project overlay; MECHANISM → kit only.
+- **Потребители** (writer, reviewer, apply, verify, new, status, review, pipeline) читают `marker-canon.md` baseline + project overlay; AP-040..045 источник → kit.
+- **`framework_contract_version: 2026-06`** + `.cursor/templates/project-overlay.template.md` + Phase 4.5 Framework Contract Sync в `/init-project`.
+- **Навигация:** `marker-layers-guide.md`, `bsl-comment-formats-project.md`, `capture-to-project.mdc`, `AGENTS.md` — разделение mechanism/values.
+
+## [4.9] - 2026-06-27
+
+### Added (Comment Hygiene: AP-054)
+- **AP-054** (англицизм/непрозрачный термин в тексте комментария и JSDoc): карточка в `.cursor/docs/antipatterns/bsl-antipatterns.md`, индекс в `.cursor/rules/bsl-antipatterns.mdc` (буллет + строка таблицы + блок «Семейство Comment Hygiene»). Механизм — детектор латиницы в прозе с allow-list, полным по построению (не словарь стоп-слов); SSOT allow-list baseline — `marker-canon.md` + карточка AP-054; project.md — опциональное расширение.
+- **COMMENT HYGIENE CHECK** (`.cursor/rules/1c-writer-pipeline.mdc`): evidence-проход оркестратора (аналог NAMING PROVENANCE) → блок `## Comment Hygiene Signals`; место в пайплайне — `1c-agent-delegation.mdc` § WRITER PIPELINE.
+- **Phase 1d: Comment Hygiene Gate** (`.cursor/docs/standard/reviewer-checks.md`, `.cursor/agents/onec-code-reviewer.md`): обработка evidence ревьювером; release-hygiene расширен до AP-040..AP-045 + AP-051/053/054.
+- **review/SKILL.md:** шаг 1.10; light-review для comment-only diff больше не пропускает языковую проверку.
+- **onec-code-writer.md:** текст JSDoc — на русском доменном языке; запрет копировать оркестрационный жаргон из `design`/`tasks`/`reports` в комментарии.
+- **Семейство Comment Hygiene:** cross-ref в карточках AP-040/044/045/053; навигация в `1c-coding-standards.md`, `marker-layers-guide.md`.
+
 ## [4.8] - 2026-06-24
 
 ### Fixed (framework coherence restore)
