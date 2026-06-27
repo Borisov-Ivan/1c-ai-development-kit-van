@@ -20,6 +20,7 @@ priority: 200
 - Перехват/компенсация базовой платформенной процедуры (Grep design.md)
 - Новый объект метаданных в design (Grep design.md)
 - В `debug.md` change: **M ≥ 3** строк с `Architect Gate:\s*(не вызывался|не требовался|declined|—)` (см. `.cursor/skills/openspec-extend-change/SKILL.md`, п. 5a, Триггер 2) **и** (нет `reports/architecture-extend-coherence-*.md` **или** дата последней секции `## Extend — YYYY-MM-DD` в `debug.md` новее даты в имени новейшего `architecture-extend-coherence-*.md`)
+- **Петля приёмки (acceptance loop):** для среза `S<N>` с `S<N>.accept = [ ]` метрика `max(AcceptLoop, PatchRounds) >= acceptance_loop_max` (SSOT — `.cursor/rules/vertical-slices.mdc` § ДЕТЕКТОР ПЕТЛИ ПРИЁМКИ) **и** нет `reports/architecture-loop-redesign-*.md` новее последней `awaiting-acceptance` этого среза **и** нет действующего (`≤7 дней`) `.gate-override.yaml` с `gate: acceptance-loop`. Потребители — verify Layer 2.5 (blocking) и extend §5a Триггер 3; режим архитектора — `deep-analysis`
 
 Детальные списки grep-фраз (объективные и семантические маркеры для design.md / tasks.md) — в `.cursor/skills/openspec-verify-change/SKILL.md`, Layer 4 (Independent Challenge) и Layer 2 (структурные проверки design).
 
@@ -108,6 +109,7 @@ priority: 200
 |----------|-----|----------|
 | **explore** (Structured Investigation, шаг Decide) | blocking | Архитектор **обязателен**. AskQuestion пользователю: «Сработали триггеры [...]. Запустить архитектора?» без равноправной опции пропуска. Отказ только через явный пользовательский ввод с причиной; фиксируется в блоке «Постановка ЗНИ» как `declined: <reason>`. Если архитектор не запущен и отказ не зафиксирован — статус `required`, `/opsx:new` не рекомендовать |
 | **new** (Design Gate) | blocking | Без опции пропуска. Escape только через флаг `--skip-architect <причина>`, оставляющий явный аудит-след `.gate-override.yaml`. |
+| **verify** Layer 2.5 (Loop Detection) | blocking | При срабатывании петли приёмки (объективный триггер выше) → архитектор в режиме `deep-analysis` — редизайн-аудит петлевого среза; отчёт `reports/architecture-loop-redesign-*.md`; FAIL → NO-GO. Зеркало в extend §5a Триггер 3. См. `.cursor/skills/openspec-verify-change/SKILL.md` Layer 2.5. |
 | **verify** Layer 4 (Independent Challenge) | audit | Архитектор в режиме `design-challenge` — **независимый адверсариальный аудит** `proposal.md` ↔ `design.md`. Триггер: первый pre-apply прогон verify по ЗНИ или mtime `design.md` > `snapshot.last_challenge_at`. Отчёт `reports/design-challenge-YYYY-MM-DD.md`. Это **не дублирует** Architect Gate из new/explore: new даёт согласие на подход (auctorial), challenge даёт независимое подтверждение (adversarial). См. `.cursor/skills/openspec-verify-change/SKILL.md` Layer 4. |
 | **verify** Layer 5 (Implementation Readiness) | readiness | Архитектор в режиме `task-readiness` — оценка реализуемости задач. CRITICAL в отчёте verify при GAP. Не пересматривает архитектурный подход (это сделал Layer 4). |
 | **apply** (pre-flight) | readiness | Soft redirect на `/opsx:verify`. Если в change dir не найден ни один из `reports/verification-*.md` — предупреждение. **Не дублирует** проверку триггеров new/verify |
@@ -116,7 +118,7 @@ priority: 200
 
 ## SIMPLICITY CHECK (обязательный выход архитектора)
 
-Каждый отчёт `onec-code-architect` в режимах `design`, `plan-review`, `task-readiness`, `fix-quality`, `slice-decomposition`, `task-decomposition` обязан содержать секцию ниже. Режимы **`scope-coherence-audit`**, **`precedent-coherence-audit`**, **`invariant-extraction`**, **`design-challenge`** Simplicity Check **не требуют** — это аудиты соответствия / адверсариальный challenge, а не выбор технического решения в одном change.
+Каждый отчёт `onec-code-architect` в режимах `design`, `plan-review`, `task-readiness`, `fix-quality`, `slice-decomposition`, `task-decomposition`, `deep-analysis` обязан содержать секцию ниже. Для `deep-analysis` (редизайн петлевого среза) Simplicity Check обязателен: редизайн предлагает техническое решение (consolidation vs минимум), а не аудит соответствия. Режимы **`scope-coherence-audit`**, **`precedent-coherence-audit`**, **`invariant-extraction`**, **`design-challenge`** Simplicity Check **не требуют** — это аудиты соответствия / адверсариальный challenge, а не выбор технического решения в одном change.
 
 ```markdown
 ## Simplicity Check
@@ -170,7 +172,7 @@ Architect Gate из new/explore (`design`-режим) и Independent Challenge �
 
 ## DESIGN REVIEW (качество постановки)
 
-Отдельный набор триггеров для оценки **качества артефактов** (не архитектурного подхода). Основной потребитель — `/opsx:verify` (шаг 10). Apply не дублирует триггеры.
+Отдельный набор триггеров для оценки **качества артефактов** (не архитектурного подхода). Основной потребитель — `/opsx:verify` (Layer 5 — Implementation Readiness, `mode=task-readiness`). Apply не дублирует триггеры.
 
 Триггеры (ANY → мягкая рекомендация через AskQuestion, не блокирующая):
 

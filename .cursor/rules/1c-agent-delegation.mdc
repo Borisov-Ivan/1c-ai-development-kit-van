@@ -87,7 +87,7 @@ Architect может рекомендовать новые объекты в des
 ## KB CONTEXT
 
 При делегировании 1С-агентам (`onec-code-explorer`, `onec-code-architect`, `onec-trace-analyst`) включать в промпт блок `## Existing Knowledge` со списком фактов из Discovery:
-- explore — Entry Protocol шаг 1.5 в `.cursor/skills/openspec-explore/SKILL.md`;
+- explore — Entry Protocol шаг 1.6 (KB Discovery) в `.cursor/skills/openspec-explore/SKILL.md`;
 - Architect Gate — секция `KNOWLEDGE DISCOVERY` в `.cursor/rules/architect-gate.mdc`.
 
 Формат записи факта:

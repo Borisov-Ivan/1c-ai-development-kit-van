@@ -64,7 +64,7 @@ Chat Surface Contract — §2.6 `opsx-output-style.md`.
 3. Выполнить `openspec instructions apply --change "<name>" --json`.
 4. Прочитать `openspec/project.md` и артефакты change из `contextFiles`: `proposal.md`, `design.md`, `tasks.md`, `specs/**` при наличии; для расширения scope также прочитать `debug.md` (если есть) — нужен для счётчика Scope Coherence Audit и записей `## Extend`.
 5. Прочитать только явно переданные source-файлы (`--from-*`, `@path`, пути в запросе). Трассы — через `/opsx:explore` (профиль bug). `--from-report` принимает (приоритет): `temp/reports/<тип>-YYYY-MM-DD-<slug>.md` (отчёт `Task` из Ultra-Lite explore), `temp/explore-handoff-*.md` (handoff с блоком `## Постановка ЗНИ`); legacy-файлы — только через `--from-explore` по явной ссылке пользователя. Если указан `--code-sync`, source = артефакты change + `debug.md` + отчёты `reports/**` + результаты Code-Truth Gate; чтение BSL/XML до брифа всё равно запрещено.
-5a. **KB Discovery (internal):** прочитать `openspec/knowledge/_index.yaml` и при необходимости `_taxonomy.yaml` и выбранные KB `.md` — по алгоритму Entry Protocol шаг 1.5 `.cursor/skills/openspec-explore/SKILL.md` (anchor-paths из путей в уже прочитанных артефактах и source-файлах; бюджет Top-10). Результат — **не в чат**, только для промптов architect/explorer после «да».
+5a. **KB Discovery (internal):** прочитать `openspec/knowledge/_index.yaml` и при необходимости `_taxonomy.yaml` и выбранные KB `.md` — по алгоритму Entry Protocol шаг 1.6 (KB Discovery) `.cursor/skills/openspec-explore/SKILL.md` (anchor-paths из путей в уже прочитанных артефактах и source-файлах; бюджет Top-10). Результат — **не в чат**, только для промптов architect/explorer после «да».
 5b. **Brief Depth Classifier** — `.cursor/docs/opsx-output-style.md` §5.1 (B1 по умолчанию; B2 при drift/decision/`--code-sync`/`--from-review` >3 findings/`--from-verify` после decision; **никогда B3**).
 6. Сформировать и показать **бриф extend** (B1 или B2) по шаблону ниже.
 7. **END TURN.** До подтверждения пользователя запрещены: запись артефактов, вызовы writer/reviewer, вызовы architect/explorer, чтение BSL/XML для анализа логики.
@@ -237,6 +237,23 @@ Self-check перед выводом: уровень B1/B2 по классифи
 
 Примечание: **M** — число строк в `debug.md`, где поле `Architect Gate:` совпадает с шаблоном «Extend без архитектора» (маркеры выше); это приближение к числу секций `## Extend —`, после которых архитектор не вызывался.
 
+**Триггер 3 (объективный, петля приёмки — зеркало verify Layer 2.5):**
+
+Цель — поймать петлю **до** дорогого `/opsx:verify`, пока пользователь ещё в `/opsx:extend`. Метрика и порог — SSOT `.cursor/rules/vertical-slices.mdc` § ДЕТЕКТОР ПЕТЛИ ПРИЁМКИ (`AcceptLoop`, `PatchRounds`, `acceptance_loop_max` default 3).
+
+1. Для каждого среза `S<N>` с `S<N>.accept = [ ]` вычислить `AcceptLoop(S<N>)` и `PatchRounds(S<N>)` по `debug.md` (§ Slice Gate Decisions + § Extend —).
+2. Триггер 3 срабатывает, если для какого-либо `S<N>`: `max(AcceptLoop, PatchRounds) >= acceptance_loop_max`, **и** нет `reports/architecture-loop-redesign-*.md` новее последней `awaiting-acceptance` этого среза, **и** нет действующего (`≤7 дней`) `.gate-override.yaml` с `gate: acceptance-loop`.
+
+**Если сработал Триггер 3** (приоритет над Триггерами 1/2 — разбирается корень, а не дрейф):
+
+1. Выполнить ADR Discovery и KB Discovery (как ниже).
+2. Вызвать `Task(subagent_type="onec-code-architect")` с `mode=deep-analysis` и loop-контекстом: история раундов `S<N>` (записи Slice Gate Decisions + Extend —), ссылки на трассы/отчёты/`debug.md`, вопрос «корень один или N независимых дефектов; consolidation vs минимум».
+3. Сохранить полный отчёт в `reports/architecture-loop-redesign-YYYY-MM-DD.md`.
+4. Добавить в `debug.md` секцию `## Loop Detection — YYYY-MM-DD` (формат — `vertical-slices.mdc`).
+5. Через decision-card (по `.cursor/docs/templates/decision-block.md`) предложить: (a) принять consolidation-редизайн архитектора, (b) минимальный фикс с фиксацией риска в `debug.md`, (c) отложить разбор (`.gate-override.yaml`, `gate: acceptance-loop`). Simplicity Check для `deep-analysis` **требуется** (см. `architect-gate.mdc`).
+
+Если Триггер 3 разобран (есть свежий `architecture-loop-redesign-*.md` или override), дальнейший extend идёт обычным путём (Триггеры 1/2 как раньше).
+
 **Если сработал Триггер 1 или Триггер 2:**
 
 **Грейс-исключение (антидубль):** если в ответ на **этот же** подтверждённый бриф уже записан файл `reports/architecture-extend-coherence-YYYY-MM-DD.md`, повторный Scope Coherence Audit до завершения handoff не вызывать. Следующий прогон `/opsx:extend` — новый бриф, грейс не действует.
@@ -304,6 +321,7 @@ Architect обязателен, если:
    - источник (`--from-review`, `--from-debug`, ...);
    - что добавлено/изменено;
    - disposition по findings: `accepted`, `rejected`, `deferred`;
+   - **`Architect Gate:`** — **обязательное** поле в каждой секции `## Extend —`. Значение: либо ссылка на отчёт (`reports/architecture-extend-*.md` / `architecture-extend-coherence-*.md` / `architecture-loop-redesign-*.md`), либо одно из `не вызывался` / `не требовался` / `declined` / `—`. Поле — детерминированный вход счётчика **M** Триггера 2 (§5a); без него M недосчитывает раунды без архитектора.
    - ссылки на отчёты architect/explorer;
    - следующий шаг.
 

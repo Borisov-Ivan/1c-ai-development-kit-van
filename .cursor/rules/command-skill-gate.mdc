@@ -24,7 +24,7 @@ priority: 997
 Если инструмент `Read` возвращает сообщение об обрезке файла (обычно при размере SKILL.md > 80 КБ, лимит ~100000 символов), оркестратор обязан **во втором батче** подгрузить вынесенные шаблоны вывода, чтобы не потерять форматы отчётов.
 
 **Критичные шаблоны по скиллам:**
-- Для `openspec-verify-change/SKILL.md`: если файл обрезан, обязательно прочитать файлы `templates/*.md` (например, `templates/card-decision.md`, `templates/card-hygiene.md`, `templates/report-header.md`, `templates/executive-summary.md`, `templates/info-section.md`, `templates/phase-a-table.md`). Размер каждого шаблона мал (<10 КБ), поэтому `offset/limit` не требуется.
+- Для `openspec-verify-change/SKILL.md`: если файл обрезан, обязательно прочитать файлы `templates/*.md` (например, `templates/card-decision.md`, `templates/card-hygiene.md`, `templates/report-header.md`, `templates/executive-summary.md`, `templates/info-section.md`, `templates/layer-1-hygiene-table.md`). Размер каждого шаблона мал (<10 КБ), поэтому `offset/limit` не требуется.
 - *(Будущие большие скиллы добавляют свои шаблоны сюда)*
 
 *Резервный механизм (backup):* Если шаблоны по какой-то причине недоступны, использовать `Read offset=N limit=M` для чтения завершающих шагов скилла как страховку последней надежды. Основной формат вывода всегда должен следовать принципу Compact Brief из `conversational-discipline.mdc`.

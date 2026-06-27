@@ -26,7 +26,9 @@ metadata:
 flowchart TD
   start[verify start] --> L1[Layer 1: Hygiene auto-fixes]
   L1 --> L2[Layer 2: Internal Coherence QC + code-truth]
-  L2 --> L3[Layer 3: Problem-Solution Trace Why-Req-Tasks]
+  L2 --> L25[Layer 2.5: Loop Detection acceptance loop]
+  L25 -->|петля >= max и нет redesign| LoopNoGo[NO-GO: architect deep-analysis redesign]
+  L25 -->|нет петли| L3[Layer 3: Problem-Solution Trace Why-Req-Tasks]
   L3 --> Trigger{Layer 4 нужен?}
   Trigger -->|первый pre-apply OR mtime design.md - last_challenge_at| L4[Layer 4: Independent Challenge architect design-challenge]
   Trigger -->|design не менялся| Skip[Skip L4]
@@ -164,6 +166,28 @@ QC оценивает критерии 1–6, 8–11 из `vertical-slices.mdc` 
 
 `FAIL` в Layer 2 — это **NO-GO**.
 
+### Layer 2.5 — Loop Detection (петля приёмки)
+
+**Цель:** поймать «хождение по кругу» — один срез многократно патчится / уходит на приёмку без подписания (`S<N>.accept` = `[ ]`). Каждый патч-раунд по отдельности исполним (Layer 5 PASS), поэтому петлю видит только метрика **поверх раундов**.
+
+**Метрика и порог** — SSOT `.cursor/rules/vertical-slices.mdc` § ДЕТЕКТОР ПЕТЛИ ПРИЁМКИ (`AcceptLoop`, `PatchRounds`, `acceptance_loop_max` default 3). Считается grep по `debug.md` § Slice Gate Decisions и § Extend —; здесь не дублируется.
+
+**Выполняется во всех `verify_depth`** — детект дешёвый (grep по уже загруженному `debug.md`); запуск архитектора — **только** при фактическом срабатывании.
+
+**Алгоритм:**
+
+1. Для каждого среза `S<N>` с `S<N>.accept = [ ]` вычислить `AcceptLoop(S<N>)` и `PatchRounds(S<N>)`.
+2. Ни для одного среза порог не достигнут → `layer_2_5_loop_detection: PASS`, идти на Layer 3.
+3. Порог достигнут для среза `S<N>`:
+   - **Override:** в корне change есть `.gate-override.yaml` с `gate: acceptance-loop` — прочитать `timestamp`: ≤7 дней → `SKIPPED-override` (одна строка в чат: «Разбор петли приёмки отложен по вашему решению от <дата>; отсрочка истекает через <N> дней»), идти на Layer 3; >7 дней → override истёк (`gate-override-expired` в info), продолжить как срабатывание.
+   - **Закрытие:** существует `reports/architecture-loop-redesign-*.md`, датированный **позже** последней `awaiting-acceptance` среза `S<N>` → петля уже разобрана архитектором → `layer_2_5_loop_detection: PASS`, идти на Layer 3.
+   - Иначе — **запустить редизайн-аудит:** `Task(onec-code-architect, mode=deep-analysis)` (цепочка моделей — `model-selection.mdc`) с loop-контекстом: история раундов `S<N>` (записи Slice Gate Decisions + Extend —), ссылки на трассы/отчёты/`debug.md`, явный вопрос «корень один или это N независимых дефектов; предложить consolidation vs минимум». Запуск — `run_in_background: true`, блок **Final message constraint** (как Layer 4). Сохранить `reports/architecture-loop-redesign-YYYY-MM-DD.md`. Append `debug.md` § Loop Detection (формат — `vertical-slices.mdc`).
+   - Статус слоя `acceptance-loop-detected` → **FAIL → NO-GO**. Decision-card в чат (по `.cursor/docs/templates/decision-block.md`): суть петли (срез, сколько раз вернулся без приёмки) + рекомендация архитектора (consolidation / минимум) прозой; **Следующий шаг:** `/opsx:extend <name> --from-architecture <redesign-report>`.
+
+**Порядок и cap.** Layer 2.5 идёт **до** Layer 4; его FAIL — всегда NO-GO. Decision-fatigue cap (GO-saturated) гасит только остаточный Layer 4 challenge и петлю подавить **не может**.
+
+`FAIL` в Layer 2.5 — это **NO-GO**.
+
 ### Layer 3 — Problem-Solution Trace
 
 **Цель:** план реально решает проблему из `## Why`, а не похожую.
@@ -269,6 +293,7 @@ QC оценивает критерии 1–6, 8–11 из `vertical-slices.mdc` 
 verdict = GO  if and only if
   layer_1_hygiene ∈ {PASS, AUTOFIXED}
   AND layer_2_internal_coherence ∈ {PASS, WARNING}
+  AND layer_2_5_loop_detection ∈ {PASS, SKIPPED-override}
   AND layer_3_problem_solution ∈ {PASS, WARNING}
   AND layer_4_independent_challenge ∈ {APPROVE, SKIPPED-novelty, SKIPPED-override, SKIPPED-lite, CHALLENGE-saturated}
   AND layer_5_implementation_readiness ∈ {PASS, WARNING}
@@ -281,7 +306,7 @@ verdict = NO-GO  otherwise
 Применяется **только если** одновременно:
 
 - `decision_round >= decision_round_max` (default 2), **и**
-- L2/3/5 = PASS или WARNING без FAIL, **и**
+- L2/2.5/3/5 = PASS или WARNING без FAIL, **и**
 - остаток L4 после classifier = `assumption_deferrable` **или** duplicate challenge по тому же closed axis (de-dupe), **и**
 - Layer 4 **не** REJECT с gap корректности / security / resource-leak.
 
@@ -291,7 +316,7 @@ verdict = NO-GO  otherwise
 
 Явный accept risk пользователя («принимаю риск», «apply без further verify») → `assumptions_accepted` в ledger + GO; одна строка прозой в design § Risks.
 
-Любой `FAIL` в Layer 2/3/5 → NO-GO.
+Любой `FAIL` в Layer 2/2.5/3/5 → NO-GO. `acceptance-loop-detected` (Layer 2.5) cap **не** снимает.
 Layer 4 `CHALLENGE` или `REJECT` → NO-GO **кроме** CHALLENGE-saturated и случаев, когда classifier перевёл всё в repair/drop.
 
 ### Save report
@@ -362,6 +387,7 @@ Self-check: «можно действовать без файла» = польз
 | Layer | Агент | Mode | `run_in_background` | Когда |
 |---|---|---|---|---|
 | 2 | `openspec-quality-controller` | — (без `model=`) | **false** (sync) | Всегда |
+| 2.5 | `onec-code-architect` | `deep-analysis` | **true** (background) | **Только** при срабатывании петли приёмки (см. Layer 2.5) |
 | 4 | `onec-code-architect` | `design-challenge` | **true** (background) | По триггеру (см. Layer 4) |
 | 5 | `onec-code-architect` | `task-readiness` | **false** (sync) | Всегда |
 

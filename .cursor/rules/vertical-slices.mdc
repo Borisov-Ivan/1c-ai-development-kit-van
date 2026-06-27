@@ -295,6 +295,33 @@ Replace старого Phase Classification. Новые критерии QC:
 - **`reports/slice-acceptance-S<N>-YYYY-MM-DD.md`** — отчёт приёмки среза: изменения, **Primary acceptance: pass | fail | skipped**, optional-сценарии, результат.
 - **`reports/verification-YYYY-MM-DD.md`** — отчёт verify (единое имя; если прогон scoped на срез — срез/фаза указываются в YAML `snapshot`, не в имени файла).
 - **`reports/quality-control-YYYY-MM-DD.md`** — содержимое перестроено под Slice Coherence (имя файла то же).
+- **`reports/architecture-loop-redesign-YYYY-MM-DD.md`** — отчёт архитектора (`mode=deep-analysis`) при срабатывании детектора петли приёмки (см. § ДЕТЕКТОР ПЕТЛИ ПРИЁМКИ). Закрывает петлю для `openspec-verify-change` Layer 2.5 и `openspec-extend-change` §5a Триггер 3.
+
+## ДЕТЕКТОР ПЕТЛИ ПРИЁМКИ (Acceptance Loop) — SSOT метрики
+
+**Назначение.** Поймать «хождение по кругу»: один срез многократно патчится / уходит на приёмку без подписания (`S<N>.accept` остаётся `[ ]`) — команда лечит симптом по кругу вместо устранения корня. Каждый патч-раунд по отдельности исполним (Layer 5 PASS), поэтому петлю видит только метрика **поверх раундов**. На эти определения ссылаются `openspec-verify-change` (Layer 2.5) и `openspec-extend-change` (§5a Триггер 3); дубли — только ссылкой сюда.
+
+**Метрика (детерминированная, grep по структурным записям `debug.md`, без скрейпа прозы):**
+
+- `AcceptLoop(S<N>)` = число записей в `## Slice Gate Decisions`, где `Срез:` = `S<N>` и `Решение:` ∈ {`awaiting-acceptance`, `не принят`, `inside-slice rework`}, при условии что в `tasks.md` `S<N>.accept` = `[ ]` (срез ещё не подписан).
+- `PatchRounds(S<N>)` = число секций `## Extend —`, добавивших/изменивших задачи среза `S<N>`, **плюс** записи `Решение: inside-slice rework` для `S<N>`.
+- **Срабатывание петли:** `max(AcceptLoop(S<N>), PatchRounds(S<N>)) >= acceptance_loop_max`.
+- **`acceptance_loop_max`** — порог, по умолчанию **3** (конфигурируется в YAML `snapshot` отчёта verify, поле `acceptance_loop_max`; по аналогии с `decision_round_max`). 3-й повтор по одному срезу = сигнал петли (ловит до 4-го патч-раунда).
+
+**Закрытие петли (общее для verify и extend — даёт де-дубль между ними):** существует `reports/architecture-loop-redesign-YYYY-MM-DD.md`, датированный **позже** последней записи `awaiting-acceptance` петлевого среза; **или** в корне change есть `.gate-override.yaml` с `gate: acceptance-loop` (осознанный обход пользователя, поле `timestamp`, отсрочка ≤7 дней — как override Layer 4).
+
+**Запись в `debug.md` при срабатывании — секция `## Loop Detection — YYYY-MM-DD`:**
+
+```markdown
+## Loop Detection — YYYY-MM-DD
+
+- Триггер: verify Layer 2.5 | extend §5a Триггер 3
+- Срез: S<N>
+- AcceptLoop / PatchRounds: <K> / <L> (порог acceptance_loop_max=<N>)
+- Отчёт редизайна: `reports/architecture-loop-redesign-YYYY-MM-DD.md`
+- Рекомендация архитектора: consolidation | minimal | продолжить патчи (с обоснованием)
+- Решение пользователя: accepted redesign | override (продолжить патч) — <кратко>
+```
 
 ## ИНВАРИАНТ: Defect placement (fix-срез vs inside-slice)
 

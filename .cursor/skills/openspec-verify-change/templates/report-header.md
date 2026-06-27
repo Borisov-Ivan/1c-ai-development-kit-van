@@ -11,10 +11,15 @@ verdict: <GO | NO-GO>
 layer_status:
   layer_1_hygiene: <PASS | AUTOFIXED | FAIL>
   layer_2_internal_coherence: <PASS | WARNING | FAIL>
+  layer_2_5_loop_detection: <PASS | acceptance-loop-detected | SKIPPED-override>
   layer_3_problem_solution: <PASS | WARNING | FAIL>
   layer_4_independent_challenge: <APPROVE | CHALLENGE | REJECT | SKIPPED-novelty | SKIPPED-override>
   layer_5_implementation_readiness: <PASS | WARNING | FAIL>
 snapshot:
+  acceptance_loop_max: 3
+  # порог петли приёмки — SSOT .cursor/rules/vertical-slices.mdc § ДЕТЕКТОР ПЕТЛИ ПРИЁМКИ
+  repair_attempt: 0
+  # счётчик internal repair-from-verify в текущем цикле (см. SKILL.md § Repair Loop)
   accepted_tasks:
     - S1.1
     - S1.accept
@@ -60,6 +65,7 @@ snapshot:
 
 - **Layer 1 (Hygiene):** `PASS` (нечего править), `AUTOFIXED` (автоправки применены), `FAIL` (немеханические проблемы формата).
 - **Layer 2 (Internal Coherence):** `PASS`, `WARNING` (несущественные несостыковки артефактов), `FAIL` (циклы зависимостей, несовпадение spec ↔ tasks).
+- **Layer 2.5 (Loop Detection):** `PASS` (петли нет / уже разобрана редизайном), `acceptance-loop-detected` (петля → NO-GO, запущен `deep-analysis`), `SKIPPED-override` (действующий `.gate-override.yaml gate: acceptance-loop`).
 - **Layer 3 (Problem-Solution Trace):** `PASS`, `WARNING` (орфаны без блокера), `FAIL` (Requirement без задач или задача без Requirement).
 - **Layer 4 (Independent Challenge):** `APPROVE`, `CHALLENGE`, `REJECT`, `CHALLENGE-saturated`, `SKIPPED-novelty`, `SKIPPED-override`, `SKIPPED-lite`.
 - **Layer 5 (Implementation Readiness):** `PASS`, `WARNING` (мелкие GAP реализуемости), `FAIL` (задача не реализуема as-is).
@@ -84,6 +90,14 @@ ISO-метка времени модификации `design.md` на момен
 - `F<k>` — Follow-up.
 
 Старый формат `S<N>.T<M>` (несколько приёмочных задач на срез) поддерживается в legacy-режиме — verify читает оба формата, но новые ЗНИ через `/opsx:new` генерируют только `S<N>.accept`.
+
+### `snapshot.acceptance_loop_max`
+
+Порог детектора петли приёмки (Layer 2.5), по умолчанию **3**. SSOT определения метрик `AcceptLoop` / `PatchRounds` и условий закрытия — `.cursor/rules/vertical-slices.mdc` § ДЕТЕКТОР ПЕТЛИ ПРИЁМКИ. Значение переносится из снапшота в снапшот; меняется только осознанно (например, при `.gate-override.yaml`).
+
+### `snapshot.repair_attempt`
+
+Счётчик проходов internal repair-from-verify в текущем цикле verify (см. SKILL.md § Repair Loop). Сохраняется в снапшоте, чтобы повторный verify знал номер попытки и не зациклил авторемонт. Сбрасывается в `0` при вердикте GO или после user-decision.
 
 ### `snapshot.artifacts_mtime`
 
