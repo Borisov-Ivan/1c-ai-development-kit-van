@@ -402,6 +402,21 @@ Completeness gate: 7 строк в таблице. Меньше — Phase 0 не
 
 **Авторитет:** этот доменный тест — **ворота**, блок `## Naming Signals (evidence)` от оркестратора — только подсказка. Сообщение «латинских кандидатов не найдено» **не** освобождает от таблицы и **не** даёт PASS. Запрет: при непустом diff с новыми символами и **пустой** (или отсутствующей) таблице доменного теста — Phase 0 **не завершена**, `Status != PASS`. `design.md`/`tasks.md` — источник фактов, **не** имён: «термин из постановки» НЕ является основанием verdict=OK.
 
+**Touched-scope identifiers (domain test) — обязательная таблица (fail-closed).** Если diff изменил **≥1 строку** внутри тела процедуры/функции, в Reasoning Artifacts включить:
+
+```markdown
+## Touched-scope identifiers (domain test)
+
+| Символ | Процедура | Scope | Доменное значение одной фразой | Verdict |
+|--------|-----------|-------|--------------------------------|---------|
+| БылиPreMatrixОтмены | pav_Синхронизировать… | touched-procedure | — (латиница PreMatrix) | AP-031 MUST_FIX |
+| БылиОтменыОтрицательныхВиз | pav_Синхронизировать… | new-line | флаг: были отмены отрицательных виз | OK |
+```
+
+**Регрессионный пример (guard-fix без rename):** diff меняет только `<> Истина` в процедуре, но оставляет `БылиPreMatrixОтмены` → Verdict **AP-031 MUST_FIX**, dismiss `pre-existing-unchanged` **запрещён** (процедура изменена).
+
+Пустая или отсутствующая таблица при ≥1 изменённой процедуре/функции → Phase 0 **не завершена**, `Status != PASS`.
+
 ### Phase 1: Initial Analysis
 ```yaml
 1. Check syntax (primary): user-1c-syntax-checker-syntaxcheck(code)
@@ -467,13 +482,15 @@ Completeness gate: 7 строк в таблице. Меньше — Phase 0 не
 |-----|----------|
 | 1 | **confirm → AP-031 MUST_FIX** (default). Severity: **HIGH** если export / `&После` / `&Перед`; иначе **MEDIUM**. |
 | 2 | **Remediation:** конкретный доменный синоним (не «переименовать»). |
-| 3 | **dismiss** — только с явной причиной: `metadata-name` (имя метаданного из `src/`), `code-prefix` (`pav_`/`lvv_`/`пр_` перед доменным русским именем), `protocol` (аббревиатура из allow-list), `false-positive` (обоснование + строка кода), `pre-existing-unchanged` (full-review: строка не в diff). **`design term` / «терминология ЗНИ» — НЕ допустимый dismiss.** |
+| 3 | **dismiss** — только с явной причиной: `metadata-name` (имя метаданного из `src/`), `code-prefix` (`pav_`/`lvv_`/`пр_` перед доменным русским именем), `protocol` (аббревиатура из allow-list), `false-positive` (обоснование + строка кода), `pre-existing-unchanged` (**только** если процедура/функция **не менялась** в текущем diff — 0 изменённых строк в span от объявления до `КонецПроцедуры`/`КонецФункции`). Если процедура изменена, а идентификатор с латиницей остался → **confirm → AP-031 MUST_FIX**. **`design term` / «терминология ЗНИ» — НЕ допустимый dismiss.** |
 
-2. **Если evidence пуст / «кандидатов не найдено» / `skipped`** — это НЕ освобождает от проверки: заполнить таблицу `## New identifiers (domain test)` (Phase 0) по всем новым символам и вынести verdict вручную (семантический доменный тест, в т.ч. для чисто кириллических непрозрачных имён, которые grep не ловит).
+2. **Если evidence пуст / «кандидатов не найдено» / `skipped`** — заполнить таблицы `## New identifiers (domain test)` и при изменённых процедурах — `## Touched-scope identifiers (domain test)`; вынести verdict вручную.
 
 **Completeness gate Phase 1c (fail-closed):**
 - evidence содержит ≥1 кандидата и нет ни одного finding AP-031 / явного dismiss → Phase 1c **не завершена**;
 - diff вводит новые символы, а таблица `## New identifiers (domain test)` пуста или отсутствует → Phase 1c **не завершена**;
+- diff изменил ≥1 процедуру/функцию, а таблица `## Touched-scope identifiers (domain test)` пуста или отсутствует → Phase 1c **не завершена**;
+- кандидат `Scope: touched-procedure` в evidence без AP-031 finding/dismiss → Phase 1c **не завершена**;
 - в обоих случаях `Status != PASS`.
 
 **Формат finding (Naming):**

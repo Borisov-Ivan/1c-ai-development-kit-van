@@ -300,6 +300,8 @@ Implement tasks from an OpenSpec change.
 
    **HALT:** Оркестратор НЕ реализует задачи типов BSL-код и модули формы самостоятельно. Оркестратор готовит промпт и делегирует. Прямое использование Write/StrReplace для .bsl и **любая правка Form.xml** (включая скрипты/JSON-конвейеры) — запрещены. Для `Form.xml`/Конфигуратора: СТОП — инструкция ручного конфигурирования и WAIT до выгрузки/приёмки пользователя. Для программного создания элементов в `Form/Module.bsl`: обычный BSL pipeline — полный эталонный порядок в `1c-agent-delegation.mdc` § WRITER PIPELINE (writer → ReadLints → IDENTIFIER HYGIENE CHECK → API/METADATA CHECK → EXTENSION VERIFICATION → reviewer). Ref: `1c-agent-delegation.mdc` (§ XML WRITE GUARD), `1c-utility-agents.mdc`.
 
+   **Naming evidence (apply, обязательно):** IDENTIFIER HYGIENE CHECK включает шаг 2b **touched-procedure scope** (`1c-writer-pipeline.mdc`). В промпт reviewer передавать полную таблицу `## Naming Signals (evidence)` с колонкой `Scope`. **Запрещено** помечать legacy-идентификаторы в изменённых процедурах как «pre-existing — skip» / «новых символов нет → naming OK». Reviewer обязан заполнить `Touched-scope identifiers (domain test)` при изменённых процедурах.
+
    **Code-Truth Journal (mandatory after writer/reviewer success):**
    - После каждой BSL/form-module задачи извлечь из ответа `onec-code-writer` блок `created_or_modified_symbols`.
    - Spot-check: Grep/Read каждый `evidence` или `name` в указанном файле. Если символ не найден — НЕ отмечать задачу `[x]`; pause с рекомендацией `/opsx:extend <change-name> --code-sync`.

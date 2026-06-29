@@ -225,16 +225,16 @@ status: NOT_CONNECTED
 | 3 | **Knowledge deficit:** Есть ли источники с `verdict = PARTIAL/ABSENT` в Knowledge Assessment и отсутствие evidence установления контракта (комментарий, документация, Resolved Contracts)? | KNOWLEDGE_DEFICIT |
 | 4 | **Contract inference:** Есть ли поля с `access = EXPLORATORY` (несколько альтернативных путей к одному семантическому значению)? | CONTRACT_INFERENCE |
 | 5 | **Попытка as contract compensation:** Есть ли блок Попытка, защищающий доступ к полям источника с `verdict = PARTIAL/ABSENT`? | KNOWLEDGE_DEFICIT + contract-compensating-try |
-| 6 | **Naming / Export Language (AP-031):** Среди **новых символов** есть имя, проваливающее доменный тест (коллега без ЗНИ не объяснит смысл одной фразой)? Триггеры: латиница вне allow-list (`PreMatrix`…), терминология постановки/оркестрации, номер ЗНИ/задачи, kebab change-name, роль-в-коде без домена. Блок `## Naming Signals (evidence)` — **подсказка**, доменный тест ревьювера — ворота; «не найдено» НЕ освобождает от теста. | CLARITY_DEFICIT (+ Supporting AP-031 без дублирования) |
+| 6 | **Naming / Export Language (AP-031):** Среди **новых символов** и **legacy-идентификаторов в изменённых процедурах** (touched-scope) есть имя, проваливающее доменный тест? Триггеры: латиница вне allow-list (`PreMatrix`…), терминология постановки, номер ЗНИ, kebab change-name. Evidence — подсказка; таблицы `New identifiers` + `Touched-scope identifiers` — ворота. | CLARITY_DEFICIT (+ Supporting AP-031) |
 
 **Каждый yes → finding с counterfactual.** Обоснование — ссылка на артефакт (Intent Map / Contract Map / Knowledge Assessment), не арифметика. Без обоснования ответ считается пропущенным.
 
-**Обязательная таблица `## New identifiers (domain test)`:** при непустом diff с новыми идентификаторами — перечислить каждый символ + доменное значение одной фразой + verdict (OK / AP-031 MUST_FIX). Пустая или отсутствующая таблица на непустом diff → Phase 0 не завершена, `Status != PASS`. Детали — `.cursor/docs/standard/reviewer-checks.md` § 0.4, § Phase 1c.
+**Обязательные таблицы:** `## New identifiers (domain test)` — при новых символах в diff; `## Touched-scope identifiers (domain test)` — при ≥1 изменённой строке в теле процедуры/функции. Пустая таблица → Phase 0 не завершена, `Status != PASS`.
 
 ### Phase 1: Syntax, Linter Signals, Naming Signals, Comment Hygiene, AP Registry Load
 
 1. Если в промпте есть `## Linter Signals (evidence)` — для каждого сигнала: confirm/dismiss/reclassify (Phase 1b).
-2. `## Naming Signals (evidence)` — если есть строки-кандидаты, для каждой confirm/dismiss (Phase 1c, AP-031 MUST_FIX по умолчанию). **Если кандидатов нет / `clean` / skipped — Phase 1c всё равно выполняется** доменным тестом по новым символам (таблица `## New identifiers (domain test)`); evidence — подсказка, не вердикт.
+2. `## Naming Signals (evidence)` — confirm/dismiss каждого кандидата (Phase 1c). **Если кандидатов нет / `clean` — Phase 1c всё равно выполняется** таблицами `New identifiers` и `Touched-scope identifiers`; «не найдено» ≠ «именование OK».
 2a. Если в промпте есть `## Comment Hygiene Signals (evidence)` с ≥1 match — для каждой строки: confirm/dismiss (Phase 1d, AP-054 MUST_FIX по умолчанию; dismiss — `code-identifier`/`protocol`/`web-service-name`/`product-name`).
 3. Иначе — опционально `user-1c-syntax-checker-syntaxcheck` / `user-1c-code-checker-check_1c_code`.
 4. **Прочитать AP-индекс:** `.cursor/rules/bsl-antipatterns.mdc` (таблица). Карточки — по необходимости из `.cursor/docs/antipatterns/bsl-antipatterns.md`.

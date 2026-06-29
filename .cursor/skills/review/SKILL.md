@@ -230,7 +230,7 @@ Focus: full (new file)
 
 ### Входные параметры
 
-- **Scope:** идентификаторы на новых `+`-строках writer-diff (apply) или in-scope файлы из Review Boundaries (full-file / Mechanical).
+- **Scope:** идентификаторы на новых `+`-строках writer-diff **и** (шаг 2b pipeline) все идентификаторы тел процедур/функций с ≥1 изменённой строкой в diff; full-file — in-scope файлы из Review Boundaries.
 - Ticket/slug/blocklist — **необязательное усиление**, не основа: основа — латиница в имени вне allow-list (работает и без change-контекста).
 
 ### Обработка
@@ -242,14 +242,15 @@ Focus: full (new file)
 ```markdown
 ## Naming Signals (evidence)
 
-| # | File:Line | Match | Class | Suggested |
-|---|-----------|-------|-------|-----------|
-| 1 | Module.bsl:824 | БылиPreMatrixОтмены | variable | AP-031 MUST_FIX |
+| # | File:Line | Match | Class | Scope | Suggested |
+|---|-----------|-------|-------|-------|-----------|
+| 1 | Module.bsl:824 | БылиPreMatrixОтмены | variable | touched-procedure | AP-031 MUST_FIX |
 ```
 
 Если кандидатов нет: `Identifier scan: латинских кандидатов не найдено (N файлов). НЕ заменяет доменный тест ревьювера.`
 
-- Блок — **подсказка**, не вердикт. Ревьювер в **Phase 1c** (`.cursor/docs/standard/reviewer-checks.md` § Phase 1c: Identifier Hygiene Gate) обрабатывает кандидаты (по умолчанию **confirm → AP-031 MUST_FIX**; dismiss с причиной `metadata-name`/`code-prefix`/`protocol`/`false-positive`/`pre-existing-unchanged`; **`design term` недопустим**) **и** при «не найдено» всё равно выполняет доменный тест по новым символам (таблица `## New identifiers (domain test)`).
+- Блок — **подсказка**, не вердикт. Ревьювер в **Phase 1c** обрабатывает кандидаты (по умолчанию **confirm → AP-031 MUST_FIX**; dismiss с причиной `metadata-name`/`code-prefix`/`protocol`/`false-positive`/`pre-existing-unchanged` **только если процедура не менялась в diff**; **`design term` недопустим**) **и** таблицы `New identifiers` + `Touched-scope identifiers` (domain test).
+- **Запрещено** в промпте reviewer: «pre-existing — skip naming», «новых идентификаторов нет → naming OK» для legacy в изменённых процедурах.
 
 **Важно:** «scan clean» НЕ означает «именование OK». Оркестратор передаёт evidence без фильтрации совпадений (кроме исключений pipeline); финальный вердикт по именованию — за ревьювером.
 

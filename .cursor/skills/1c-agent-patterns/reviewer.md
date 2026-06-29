@@ -23,7 +23,7 @@ Task(
          [Блок из шага 1.8 review/SKILL.md — таблица ReadLints/bsl-language-server (все severity, включая warning); либо 'Linter unavailable: <reason>'. Reviewer Phase 1b (reviewer-checks.md § Phase 1b: BSL Linter Signals Gate): in-scope warning → MUST_FIX по умолчанию; отложить на prerelease запрещено.]
 
          ## Naming Signals (evidence)
-         [Блок из шага 1.9 review/SKILL.md — таблица детектора латиницы в идентификаторах (кандидаты / «не найдено» / skipped); подсказка, не вердикт. Reviewer Phase 1c (reviewer-checks.md § Phase 1c: Identifier Hygiene Gate, семейство Export Language): кандидат → AP-031 MUST_FIX по умолчанию; dismiss только metadata-name / code-prefix / protocol / false-positive / pre-existing-unchanged (НЕ design term). «не найдено» НЕ даёт PASS — доменный тест по новым символам (таблица New identifiers) обязателен.]
+         [Блок из шага 1.9 review/SKILL.md — таблица детектора латиницы (колонка Scope: new-line | touched-procedure). Phase 1c: кандидат → AP-031 MUST_FIX; dismiss `pre-existing-unchanged` только если процедура не менялась в diff. Таблицы New identifiers + Touched-scope identifiers обязательны.]
 
          ## Comment Hygiene Signals (evidence)
          [Блок из шага 1.10 review/SKILL.md — таблица grep латиницы в // и JSDoc (clean / matches / skipped). Reviewer Phase 1d (reviewer-checks.md § Phase 1d: Comment Hygiene Gate): match → AP-054 MUST_FIX по умолчанию; dismiss только code-identifier / protocol / web-service-name / product-name. Транслит-слэнг и непрозрачный термин кириллицей — семантически в Category 9.]
