@@ -382,12 +382,25 @@ Evaluation Checklist (включить в отчёт в секции Reasoning A
 | 3 | Knowledge: источники с verdict PARTIAL или ABSENT? | yes/no | | KNOWLEDGE_DEFICIT |
 | 4 | Exploratory: поля с access=EXPLORATORY? | yes/no | | CONTRACT_INFERENCE |
 | 5 | Попытка as contract compensation: источник PARTIAL/ABSENT + Попытка на его полях? | yes/no | | KNOWLEDGE_DEFICIT + contract-compensating-try |
-| 6 | Naming: есть идентификатор, чьё имя (a) отражает постановку/оркестрацию, (b) содержит номер ЗНИ/задачи или kebab-токен change-name, (c) содержит jargon blocklist (`Fallback`, `PostWrite`, `PreWrite`, `Guard`, `Mechanics`/`Механика`, `Gate`/`Гейт`, `Temp`/`Tmp`, `Wrapper`, `Orchestrat`), (d) описывает роль в коде (контейнер, промежуточное, накопитель) без доменного квалификатора, или (e) при наличии в том же scope доменно названных данных — контейнер для них не отсылает к домену? Тест: мысленно убрать реализационное слово (Массив, Новый, Добавляемые) — остаётся ли доменный смысл? (см. AP-031; при наличии `## Naming Signals (evidence)` — Phase 1c приоритетнее) | yes/no | | CLARITY_DEFICIT + Supporting AP-031 (или отдельное finding AP-031 без дублирования с CLARITY в том же месте) |
+| 6 | Naming (Export Language, AP-031): среди **новых символов** есть имя, проваливающее доменный тест? Первичный критерий: разработчик, знающий конфигурацию, но **не** читавший ЗНИ, не может одной фразой объяснить смысл имени. Триггеры-подсказки (не исчерпывающий список): (a) латиница в идентификаторе вне allow-list (`PreMatrix`, `PostWrite`…), (b) терминология постановки/оркестрации, (c) номер ЗНИ/задачи или kebab-токен change-name, (d) роль в реализации (контейнер, промежуточное, накопитель) без доменного квалификатора, (e) безликий контейнер рядом с доменно названными данными. Тест уровня абстракции: убрать реализационное слово (Массив, Новый, Добавляемые) — остаётся ли доменный смысл? | yes/no | | CLARITY_DEFICIT + Supporting AP-031 (или отдельное finding AP-031 без дублирования с CLARITY в том же месте) |
 | 7 | Authority: код локально реализует поведение, у которого есть явный владелец (база, БСП, платформа, общий модуль, внешний контракт), и доступен механизм делегирования владельцу? | yes/no | | AUTHORITY_MISPLACEMENT + Supporting AP-047 |
 
 Completeness gate: 7 строк в таблице. Меньше — Phase 0 не завершена.
 
 Каждый yes → замечание с counterfactual. Supporting: при совпадении с AP указать AP-NNN, не дублировать.
+
+**New identifiers (domain test) — обязательная таблица (fail-closed).** Q6 — не субъективный вопрос «бросилось ли в глаза», а проверка **каждого** нового символа. Если diff вводит новые идентификаторы (процедуры, функции, переменные, параметры, ключи ДопСвойств, `#Область`), в Reasoning Artifacts включить:
+
+```markdown
+## New identifiers (domain test)
+
+| Символ | Доменное значение одной фразой | Verdict |
+|--------|--------------------------------|---------|
+| pav_ОтменитьОтрицательные… | отменяет отрицательные согласования по условию | OK |
+| БылиPreMatrixОтмены | — (латиница, ЗНИ-жаргон) | AP-031 MUST_FIX |
+```
+
+**Авторитет:** этот доменный тест — **ворота**, блок `## Naming Signals (evidence)` от оркестратора — только подсказка. Сообщение «латинских кандидатов не найдено» **не** освобождает от таблицы и **не** даёт PASS. Запрет: при непустом diff с новыми символами и **пустой** (или отсутствующей) таблице доменного теста — Phase 0 **не завершена**, `Status != PASS`. `design.md`/`tasks.md` — источник фактов, **не** имён: «термин из постановки» НЕ является основанием verdict=OK.
 
 ### Phase 1: Initial Analysis
 ```yaml
@@ -440,31 +453,36 @@ Completeness gate: 7 строк в таблице. Меньше — Phase 0 не
 
 **Status PASS:** только если нет unresolved MUST_FIX из Phase 0, Phase 1b, Phase 1c, Phase 1d, Phase 2–2.5 и Standards.
 
-### Phase 1c: Naming Provenance Gate (ОБЯЗАТЕЛЬНО при наличии блока `## Naming Signals (evidence)` с ≥1 match)
+### Phase 1c: Identifier Hygiene Gate (Naming, AP-031 — семейство Export Language)
 
-**Политика:** артефакты ЗНИ/оркестрации в **идентификаторах** (номер задачи, kebab-токены change-name, jargon blocklist) — AP-031 MUST_FIX. Оркестратор передаёт механический grep-evidence; reviewer обязан confirm/dismiss каждую строку (fail-closed).
+**Политика:** идентификаторы — экспортный артефакт на русском доменном языке (тот же принцип, что AP-054 для комментариев). Латиница в имени вне allow-list, терминология постановки/оркестрации, номер задачи, kebab-токены change-name — AP-031 MUST_FIX. Механизм — **детектор латиницы + доменный тест**, не словарь стоп-слов; allow-list закрыт по построению.
 
-**In-scope:** каждая строка таблицы Naming Signals, кроме `Naming Signals: clean` и `Naming scan skipped: no diff`.
+**Авторитет (главное):** блок `## Naming Signals (evidence)` от оркестратора — **подсказка**, а доменный тест ревьювера (Phase 0 Q6 + таблица `## New identifiers (domain test)`) — **ворота**. Сообщение «латинских кандидатов не найдено» / `clean` НЕ означает «именование OK» и НЕ даёт PASS — оно лишь подтверждает, что узкий grep ничего не подсветил. Phase 1c выполняется **всегда** при непустом diff с новыми символами, независимо от содержимого evidence-блока.
 
-**Алгоритм (для каждой строки evidence):**
+**Алгоритм:**
+
+1. **Если в evidence есть строки-кандидаты** — для каждой:
 
 | Шаг | Действие |
 |-----|----------|
 | 1 | **confirm → AP-031 MUST_FIX** (default). Severity: **HIGH** если export / `&После` / `&Перед`; иначе **MEDIUM**. |
 | 2 | **Remediation:** конкретный доменный синоним (не «переименовать»). |
-| 3 | **dismiss** — только с явной причиной: `metadata-name` (likely-metadata + цитата метаданных), `false-positive` (обоснование + строка кода), `pre-existing-unchanged` (full-review: строка не в diff). |
+| 3 | **dismiss** — только с явной причиной: `metadata-name` (имя метаданного из `src/`), `code-prefix` (`pav_`/`lvv_`/`пр_` перед доменным русским именем), `protocol` (аббревиатура из allow-list), `false-positive` (обоснование + строка кода), `pre-existing-unchanged` (full-review: строка не в diff). **`design term` / «терминология ЗНИ» — НЕ допустимый dismiss.** |
 
-**Completeness gate Phase 1c:** если в промпте есть `## Naming Signals (evidence)` с ≥1 match и ни одного finding AP-031 или явного dismiss в отчёте — Phase 1c **не завершена**; Status ≠ PASS.
+2. **Если evidence пуст / «кандидатов не найдено» / `skipped`** — это НЕ освобождает от проверки: заполнить таблицу `## New identifiers (domain test)` (Phase 0) по всем новым символам и вынести verdict вручную (семантический доменный тест, в т.ч. для чисто кириллических непрозрачных имён, которые grep не ловит).
 
-**Если блок отсутствует или `Naming scan skipped`:** зафиксировать в Summary `Naming Signals: skipped`; для full-review — дополнительно Phase 0 Q6 и AP-031 pass в Phase 2.
+**Completeness gate Phase 1c (fail-closed):**
+- evidence содержит ≥1 кандидата и нет ни одного finding AP-031 / явного dismiss → Phase 1c **не завершена**;
+- diff вводит новые символы, а таблица `## New identifiers (domain test)` пуста или отсутствует → Phase 1c **не завершена**;
+- в обоих случаях `Status != PASS`.
 
 **Формат finding (Naming):**
 ```yaml
-[MEDIUM] Line N: AP-031 meta-name from change artifact
+[MEDIUM] Line N: AP-031 export-language violation (non-domain identifier)
   Procedure: <имя>
-  Anchor: <строка объявления или ключ ДопСвойств>
+  Anchor: <строка объявления, переменная, параметр или ключ ДопСвойств>
   Action: MUST_FIX
-  Issue: Identifier embeds ticket/slug/orchestration jargon (Naming Signals evidence)
+  Issue: Identifier carries Latin/orchestration jargon, fails domain test (export artefact must be Russian domain language)
   Fix: <конкретный доменный синоним>
   kind: naming-signal
   AP: AP-031
@@ -806,11 +824,11 @@ D. Investigation Request (резолв контрактов по запросу 
    - Status: PASS | FAIL | NEEDS_WORK
    - Phase 0: N findings (РїРѕ severity)
    - Linter Signals (Phase 1b): K confirmed MUST_FIX, D dismissed, U unavailable
-   - Naming Signals (Phase 1c): K confirmed, D dismissed, S skipped
+   - Identifier Hygiene (Phase 1c): T новых символов в domain-test, K confirmed AP-031, D dismissed (evidence — подсказка, не вердикт; «scan clean» ≠ «именование OK»)
    - Comment Hygiene Signals (Phase 1d): K confirmed, D dismissed, S skipped
    - Standards: M findings (РїРѕ severity)
    - Overall: итоговая формулировка
-   - PASS запрещён при unresolved MUST_FIX из Phase 1b (in-scope linter warnings без fix/dismiss), Phase 1c (Naming evidence match без AP-031 finding/dismiss) или Phase 1d (Comment Hygiene evidence match без AP-054 finding/dismiss)
+   - PASS запрещён при unresolved MUST_FIX из Phase 1b (in-scope linter warnings без fix/dismiss), Phase 1c (кандидат evidence без AP-031 finding/dismiss **либо** пустая таблица `## New identifiers (domain test)` на непустом diff с новыми символами) или Phase 1d (Comment Hygiene evidence match без AP-054 finding/dismiss)
 ```
 
 Required Improvements (вместо секции "Рекомендации"):

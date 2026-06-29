@@ -30,7 +30,7 @@ Expert code reviewer for 1C:Enterprise (BSL) with deep knowledge of БСП stand
 | Блок | Обязателен когда | Источник | При отсутствии |
 |------|------------------|----------|----------------|
 | `## Linter Signals (evidence)` (или `Linter unavailable: <reason>`) | Always | `review/SKILL.md` шаг 1.8 | WARN в отчёте; Phase 1b по доступным данным |
-| `## Naming Signals (evidence)` (или `Naming scan skipped: …` / `Naming Signals: clean …`) | Always | `review/SKILL.md` шаг 1.9 | WARN в отчёте; Phase 1c по доступным данным; full-review — Phase 0 Q6 + AP-031 |
+| `## Naming Signals (evidence)` (подсказка: кандидаты / «латинских кандидатов не найдено» / `Identifier scan skipped: …`) | Always | `review/SKILL.md` шаг 1.9 | Phase 1c всё равно выполняется доменным тестом по новым символам. **«не найдено» ≠ «именование OK»** — это не вердикт, а отсутствие grep-подсветки |
 | `## Comment Hygiene Signals (evidence)` (или `Comment Hygiene scan skipped: …` / `Comment Hygiene Signals: clean …`) | Always | `review/SKILL.md` шаг 1.10 | WARN в отчёте; Phase 1d по доступным данным; full-review — семантический проход Category 9 + AP-054 |
 | Base-файл (путь в cf/) | Файл содержит `&ИзменениеИКонтроль` | EXTENSION GATE (`1c-writer-pipeline.mdc`) | Вывести самостоятельно: заменить `cfe/<ExtName>/` на cf-путь из project.md; зафиксировать derived-path в отчёте |
 | `## Resolved Contracts` | Повторный прогон после Investigation loop | `1c-writer-pipeline.mdc` § CONTRACT RESOLUTION | Трактовать контракт как `unknown` |
@@ -122,6 +122,8 @@ Writer и оркестратор сортируют findings по `risk_score` d
 ## RELEASE-HYGIENE RULES (AP-040..AP-045, AP-051, AP-053, AP-054)
 
 Нарушения гигиены выпуска, не являющиеся классическими AP-паттернами кода. Полная карточка — в AP-каталоге (`bsl-antipatterns.mdc`). Семейство **Comment Hygiene** — AP-040, AP-044, AP-045, AP-051, AP-053, AP-054.
+
+**Семейство Export Language (один принцип, две поверхности):** код — экспортный артефакт на русском доменном языке для читателя без ЗНИ. **AP-054** покрывает текст комментариев/JSDoc, **AP-031** — идентификаторы (имена процедур, функций, переменных, параметров, ключи ДопСвойств, `#Область`). Механизм один: детектор латиницы/непрозрачности + закрытый по построению allow-list, **не** словарь стоп-слов. Терминология `design.md`/`tasks.md` — источник фактов, **не** имён и формулировок для кода: латиница из постановки в идентификаторе — AP-031, в комментарии — AP-054.
 
 **Whitelist проекта:** прочитать baseline `.cursor/docs/marker-canon.md` (CRC, zero-config при отсутствии project.md). Прочитать [openspec/project.md](../../openspec/project.md), секцию «Форматы и соглашения по комментариям BSL» — извлечь таблицы **Whitelist предрелиза** и **Обязательный контроль** (project overlay; если секции нет — таблицы пусты, строгая гигиена). Строки, попадающие под whitelist (по префиксу после `//` и/или regex на всю строку в рамках scope glob), exempt от **удаления** AP-040..AP-045 **кроме AP-053** (содержимое domain_label — rewrite, не delete). Директивы расширения `#Вставка`/`#КонецВставки`/`#Удаление`/`#КонецУдаления` — **не** release-hygiene.
 
@@ -223,14 +225,16 @@ status: NOT_CONNECTED
 | 3 | **Knowledge deficit:** Есть ли источники с `verdict = PARTIAL/ABSENT` в Knowledge Assessment и отсутствие evidence установления контракта (комментарий, документация, Resolved Contracts)? | KNOWLEDGE_DEFICIT |
 | 4 | **Contract inference:** Есть ли поля с `access = EXPLORATORY` (несколько альтернативных путей к одному семантическому значению)? | CONTRACT_INFERENCE |
 | 5 | **Попытка as contract compensation:** Есть ли блок Попытка, защищающий доступ к полям источника с `verdict = PARTIAL/ABSENT`? | KNOWLEDGE_DEFICIT + contract-compensating-try |
-| 6 | **Naming clarity (AP-031):** Есть ли идентификатор с номером ЗНИ/задачи, kebab change-name, jargon blocklist (`Fallback`, `PostWrite`, …), или имя отражает постановку/оркестрацию / роль-в-коде без домена? (При `## Naming Signals (evidence)` — Phase 1c приоритетнее.) | CLARITY_DEFICIT (+ Supporting AP-031 без дублирования) |
+| 6 | **Naming / Export Language (AP-031):** Среди **новых символов** есть имя, проваливающее доменный тест (коллега без ЗНИ не объяснит смысл одной фразой)? Триггеры: латиница вне allow-list (`PreMatrix`…), терминология постановки/оркестрации, номер ЗНИ/задачи, kebab change-name, роль-в-коде без домена. Блок `## Naming Signals (evidence)` — **подсказка**, доменный тест ревьювера — ворота; «не найдено» НЕ освобождает от теста. | CLARITY_DEFICIT (+ Supporting AP-031 без дублирования) |
 
 **Каждый yes → finding с counterfactual.** Обоснование — ссылка на артефакт (Intent Map / Contract Map / Knowledge Assessment), не арифметика. Без обоснования ответ считается пропущенным.
+
+**Обязательная таблица `## New identifiers (domain test)`:** при непустом diff с новыми идентификаторами — перечислить каждый символ + доменное значение одной фразой + verdict (OK / AP-031 MUST_FIX). Пустая или отсутствующая таблица на непустом diff → Phase 0 не завершена, `Status != PASS`. Детали — `.cursor/docs/standard/reviewer-checks.md` § 0.4, § Phase 1c.
 
 ### Phase 1: Syntax, Linter Signals, Naming Signals, Comment Hygiene, AP Registry Load
 
 1. Если в промпте есть `## Linter Signals (evidence)` — для каждого сигнала: confirm/dismiss/reclassify (Phase 1b).
-2. Если в промпте есть `## Naming Signals (evidence)` с ≥1 match — для каждой строки: confirm/dismiss (Phase 1c, AP-031 MUST_FIX по умолчанию).
+2. `## Naming Signals (evidence)` — если есть строки-кандидаты, для каждой confirm/dismiss (Phase 1c, AP-031 MUST_FIX по умолчанию). **Если кандидатов нет / `clean` / skipped — Phase 1c всё равно выполняется** доменным тестом по новым символам (таблица `## New identifiers (domain test)`); evidence — подсказка, не вердикт.
 2a. Если в промпте есть `## Comment Hygiene Signals (evidence)` с ≥1 match — для каждой строки: confirm/dismiss (Phase 1d, AP-054 MUST_FIX по умолчанию; dismiss — `code-identifier`/`protocol`/`web-service-name`/`product-name`).
 3. Иначе — опционально `user-1c-syntax-checker-syntaxcheck` / `user-1c-code-checker-check_1c_code`.
 4. **Прочитать AP-индекс:** `.cursor/rules/bsl-antipatterns.mdc` (таблица). Карточки — по необходимости из `.cursor/docs/antipatterns/bsl-antipatterns.md`.

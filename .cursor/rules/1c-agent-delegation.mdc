@@ -148,14 +148,14 @@ Architect может рекомендовать новые объекты в des
 
 После каждой правки `.bsl` — **до reviewer**: `ReadLints` → fix errors → блок `## Linter Signals (evidence)` для reviewer.
 
-**SSOT деталей:** [`.cursor/rules/1c-writer-pipeline.mdc`](1c-writer-pipeline.mdc) § LINT GATE; формат evidence — `review/SKILL.md` шаг 1.8. § NAMING PROVENANCE CHECK — шаг 1.9. Место шага в потоке — эталонный пайплайн ниже (§ WRITER PIPELINE), здесь не дублируется.
+**SSOT деталей:** [`.cursor/rules/1c-writer-pipeline.mdc`](1c-writer-pipeline.mdc) § LINT GATE; формат evidence — `review/SKILL.md` шаг 1.8. § IDENTIFIER HYGIENE CHECK (Naming Provenance) — шаг 1.9. Место шага в потоке — эталонный пайплайн ниже (§ WRITER PIPELINE), здесь не дублируется.
 
 ## WRITER PIPELINE (эталонный порядок)
 
 **Единственный эталон сквозного потока.** Все другие файлы (`1c-writer-pipeline.mdc`, `review/SKILL.md`, `openspec-apply-change/SKILL.md`) ссылаются сюда и не приводят собственные варианты порядка.
 
 ```
-writer → ReadLints → [fix if errors] → NAMING PROVENANCE CHECK →
+writer → ReadLints → [fix if errors] → IDENTIFIER HYGIENE CHECK →
   COMMENT HYGIENE CHECK →
   API EXISTENCE CHECK + METADATA CHECK →
   [AskQuestion при WARNING по API/метаданным] →
@@ -167,7 +167,7 @@ writer → ReadLints → [fix if errors] → NAMING PROVENANCE CHECK →
 |-----|-------------|--------|
 | writer | `onec-code-writer` (Task) | INPUT CONTRACT — `.cursor/agents/onec-code-writer.md` |
 | ReadLints + fix errors | оркестратор (fix — снова writer) | `1c-writer-pipeline.mdc` § LINT GATE |
-| NAMING PROVENANCE CHECK | оркестратор (Grep) | `1c-writer-pipeline.mdc` § NAMING PROVENANCE CHECK; evidence — `review/SKILL.md` шаг 1.9 |
+| IDENTIFIER HYGIENE CHECK (Naming Provenance) | оркестратор (Grep) | `1c-writer-pipeline.mdc` § IDENTIFIER HYGIENE CHECK; evidence — `review/SKILL.md` шаг 1.9 |
 | COMMENT HYGIENE CHECK | оркестратор (Grep) | `1c-writer-pipeline.mdc` § COMMENT HYGIENE CHECK; evidence — `review/SKILL.md` шаг 1.10 |
 | API EXISTENCE CHECK | оркестратор (Grep) | `1c-writer-pipeline.mdc` § API EXISTENCE CHECK |
 | METADATA CHECK | оркестратор (Grep по src/) | `1c-metadata-validation.mdc` |

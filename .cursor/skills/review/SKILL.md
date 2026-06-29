@@ -137,10 +137,11 @@ Glob `src/*/cfe/<extension>/**/*.bsl`. При `full-extension` — Tier 1 и Tie
 
 - Выполнить шаг 1.8 (Linter pass) — обязательно.
 - Выполнить чтение whitelist из project.md (шаг 1.6).
+- Выполнить шаг 1.9 (Identifier Hygiene pass) — **обязательно для rename-only diff**: латиница в новом имени (AP-031) не должна молча пройти при тривиальном переименовании.
 - Выполнить шаг 1.10 (Comment Hygiene pass) — **обязательно для comment-only diff**: латиница в `//`/JSDoc (AP-054) не должна молча пройти при тривиальной правке комментариев.
 - Пропустить шаги 1.5 (procedure mapping не нужен для простых diff), 2–3 (агент не вызывается).
-- Отчёт (шаг 4) — короткая сводка: «Light review; линтер: N диагностик; whitelist: K нарушений; Comment Hygiene: M кандидатов».
-- Если линтер, whitelist- или Comment Hygiene-проверка нашли проблемы — эскалировать: AskQuestion «Переключиться в полное ревью?».
+- Отчёт (шаг 4) — короткая сводка: «Light review; линтер: N диагностик; whitelist: K нарушений; Identifier Hygiene: L кандидатов; Comment Hygiene: M кандидатов».
+- Если линтер, whitelist-, Identifier Hygiene- или Comment Hygiene-проверка нашли проблемы — эскалировать: AskQuestion «Переключиться в полное ревью?».
 
 Если триаж НЕ сработал — продолжать стандартный flow с шага 1.5.
 
@@ -219,24 +220,23 @@ Focus: full (new file)
 
 Ревьювер обязан для каждой строки выдать confirm/dismiss/reclassify.
 
-**Прочие grep-эвристики (kebab-case, жаргон, log-literal, empty methods) оркестратор НЕ выполняет** — кроме **Naming Provenance** (шаг 1.9). Остальное делегировано агенту (AP-040..AP-045 + AP-031 naming в Phase 0/1c) с использованием Intent Map / Contract Map.
+**Прочие grep-эвристики (kebab-case, жаргон, log-literal, empty methods) оркестратор НЕ выполняет** — кроме **Identifier Hygiene** (шаг 1.9). Остальное делегировано агенту (AP-040..AP-045 + AP-031 naming в Phase 0/1c) с использованием Intent Map / Contract Map.
 
 ---
 
-## Шаг 1.9. Naming Provenance pass (evidence, не findings)
+## Шаг 1.9. Identifier Hygiene pass (Naming Provenance — evidence, не findings)
 
-Выполнить **после** шага 1.8, **до** вызова ревьювера. Алгоритм — **SSOT:** `.cursor/rules/1c-writer-pipeline.mdc` § NAMING PROVENANCE CHECK.
+Выполнить **после** шага 1.8, **до** вызова ревьювера. Алгоритм — **SSOT:** `.cursor/rules/1c-writer-pipeline.mdc` § IDENTIFIER HYGIENE CHECK. Детектор **латиницы в идентификаторе** (AP-031, семейство Export Language вместе с AP-054) — не словарь стоп-слов; allow-list закрыт по построению.
 
 ### Входные параметры
 
-- **apply/review в рамках ЗНИ:** `openspec/changes/<name>/proposal.md`, `tasks.md`, имя change.
-- **Standalone `/review` без change:** только статический blocklist из pipeline; ticket/slug — пропустить (grep по blocklist).
-- **Scope:** изменённые `.bsl` из writer-diff (apply) или in-scope файлы из Review Boundaries (full-file / Mechanical).
+- **Scope:** идентификаторы на новых `+`-строках writer-diff (apply) или in-scope файлы из Review Boundaries (full-file / Mechanical).
+- Ticket/slug/blocklist — **необязательное усиление**, не основа: основа — латиница в имени вне allow-list (работает и без change-контекста).
 
 ### Обработка
 
-- Выполнить grep по алгоритму pipeline (3 класса целей, исключения whitelist-маркеров).
-- Агрегировать в блок **`## Naming Signals (evidence)`** — всегда передавать reviewer (clean / matches / `Naming scan skipped: no diff`).
+- Выполнить grep по алгоритму pipeline (объявления процедур/функций, `#Область`, **переменные и параметры**, ключи ДопСвойств; детектор латиницы; allow-list).
+- Агрегировать в блок **`## Naming Signals (evidence)`** — всегда передавать reviewer (кандидаты / «не найдено» / `Identifier scan skipped: no diff`).
 - Оркестратор **не** создаёт findings — только evidence (аналог шага 1.8).
 
 ```markdown
@@ -244,14 +244,14 @@ Focus: full (new file)
 
 | # | File:Line | Match | Class | Suggested |
 |---|-----------|-------|-------|-----------|
-| 1 | Module.bsl:287 | ВыполнитьPostWrite… | procedure | AP-031 MUST_FIX |
+| 1 | Module.bsl:824 | БылиPreMatrixОтмены | variable | AP-031 MUST_FIX |
 ```
 
-Если совпадений нет: `Naming Signals: clean (N files scanned)`.
+Если кандидатов нет: `Identifier scan: латинских кандидатов не найдено (N файлов). НЕ заменяет доменный тест ревьювера.`
 
-- Блок передаётся ревьюверу. Ревьювер в **Phase 1c** (`.cursor/docs/standard/reviewer-checks.md` § Phase 1c: Naming Provenance Gate) обязан обработать каждую строку evidence: по умолчанию **confirm → AP-031 MUST_FIX**; dismiss только с явной причиной (`metadata-name`, `false-positive`, `pre-existing-unchanged`).
+- Блок — **подсказка**, не вердикт. Ревьювер в **Phase 1c** (`.cursor/docs/standard/reviewer-checks.md` § Phase 1c: Identifier Hygiene Gate) обрабатывает кандидаты (по умолчанию **confirm → AP-031 MUST_FIX**; dismiss с причиной `metadata-name`/`code-prefix`/`protocol`/`false-positive`/`pre-existing-unchanged`; **`design term` недопустим**) **и** при «не найдено» всё равно выполняет доменный тест по новым символам (таблица `## New identifiers (domain test)`).
 
-**Важно:** оркестратор НЕ переводит сигналы в findings — это работа ревьювера. Оркестратор **обязан** передать блок evidence, не отфильтровывая совпадения (кроме исключений pipeline).
+**Важно:** «scan clean» НЕ означает «именование OK». Оркестратор передаёт evidence без фильтрации совпадений (кроме исключений pipeline); финальный вердикт по именованию — за ревьювером.
 
 ---
 
@@ -328,7 +328,7 @@ Focus: full (new file)
 - **Whitelist & Mandatory Controls (from project.md)** — блок из шага 1.6.1.
 - **Mandatory Control Signals (evidence)** — блок из шага 1.6.2 (если есть).
 - **Linter Signals (evidence)** — блок из шага 1.8 (всегда, даже если пусто / unavailable).
-- **Naming Signals (evidence)** — блок из шага 1.9 (всегда: clean / matches / skipped).
+- **Naming Signals (evidence)** — блок из шага 1.9 (всегда: кандидаты / «не найдено» / skipped); подсказка, не вердикт.
 - **Prior Findings History (S8)** — см. блок ниже.
 - **Architectural Context** — см. блок ниже.
 - **Review Boundaries** — при `diff-focused` (шаг 1.5), только для файлов батча.
@@ -387,7 +387,7 @@ Focus: full (new file)
 - **`release_mode = true`:** явно **`mode=prerelease`** в промпте; Category 12; release-hygiene focus.
 - **`release_mode = false`:** **не** передавать `mode=prerelease`.
 - Диагностики линтера: блок **`## Linter Signals (evidence)`** из шага 1.8 (все severity, включая warning; не сокращать до «линтер чист»).
-- Naming Provenance: блок **`## Naming Signals (evidence)`** из шага 1.9 (clean / matches / skipped).
+- Identifier Hygiene: блок **`## Naming Signals (evidence)`** из шага 1.9 (кандидаты / «не найдено» / skipped); подсказка ревьюверу, не финальный вердикт по именованию.
 - Whitelist / Mandatory: блоки из шага 1.6.
 - Prior Findings History: блок из шага 2.1 (если есть).
 - Architectural Context: из шага 2.2 (если есть).

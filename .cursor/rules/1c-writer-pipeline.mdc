@@ -23,68 +23,76 @@ priority: 800
 4. **Reviewer (Phase 1b — Linter Signals Gate):** in-scope warning/error → **MUST_FIX**; отложить на prerelease **запрещено** (`.cursor/docs/standard/reviewer-checks.md` § Phase 1b).
 5. Линтер недоступен — `Linter unavailable: <reason>`; reviewer проверяет документацию вручную.
 
-## NAMING PROVENANCE CHECK
+## IDENTIFIER HYGIENE CHECK (Naming Provenance)
 
-**После LINT GATE, до API EXISTENCE CHECK.** Механический grep по изменённым `.bsl` на артефакты ЗНИ/оркестрации в **идентификаторах** (не в whitelist-маркерах). Оркестратор собирает evidence; reviewer обрабатывает в Phase 1c (`.cursor/docs/standard/reviewer-checks.md` § Phase 1c).
+**После LINT GATE, до API EXISTENCE CHECK.** Семейство **Export Language** вместе с COMMENT HYGIENE (AP-031 для идентификаторов = тот же принцип, что AP-054 для комментариев). Код — экспортный артефакт для читателя без ЗНИ; идентификаторы — на русском доменном языке.
 
-### Шаг 1. Собрать параметры сканирования
+**Принцип — детектор латиницы в идентификаторе, НЕ словарь стоп-слов.** allow-list закрыт по построению (как AP-054); что содержит латиницу и не входит в allow-list — кандидат. Любое будущее английское слово (`PreMatrix`, `PostMatrix`, …) закрывается автоматически, без правки списка. Это **подсказка** ревьюверу, **не** ворота: «кандидатов не найдено» НЕ заменяет доменный тест ревьювера (Phase 1c / Phase 0 Q6 — `.cursor/docs/standard/reviewer-checks.md`).
 
-| Источник | Что извлечь |
-|----------|-------------|
-| `openspec/changes/<name>/proposal.md`, `tasks.md` | `ID#(\d+)` → ticket numbers |
-| Имя change (`<name>`) | суффикс `-(\d{4,})`; kebab-токены slug длиной ≥4 символов (разделитель `-`) |
-| Статический blocklist | `Fallback`, `PostWrite`, `PreWrite`, `Guard`, `Mechanics`, `Механика`, `Gate`, `Гейт`, `Temp`, `Tmp`, `Wrapper`, `Orchestrat` |
+> **Зачем отказались от blocklist.** Конечный список запрещённых токенов (`PreWrite`, `Guard`, …) пропускает всё, чего в нём нет — `PreMatrix` так и проскочил. Закрытый allow-list + детектор латиницы покрывают класс целиком. Blocklist остаётся лишь **необязательным усилением** (см. ниже), не основой.
 
-Объединить ticket numbers + kebab-токены + blocklist в набор `patterns` для grep.
-
-### Шаг 2. Scope
+### Шаг 1. Scope
 
 - **apply/review с diff:** только изменённые `.bsl` из writer-diff (как API EXISTENCE CHECK).
 - **Без diff** (Mechanical Mode / full-file review): in-scope файлы из `## Review Boundaries`.
-- Нет scope → `Naming scan skipped: no diff`.
+- Нет scope → `Identifier scan skipped: no diff`.
 
-### Шаг 3. Grep-цели (3 класса)
+### Шаг 2. Цели — идентификаторы на новых строках
 
-Для каждого файла in-scope и каждого паттерна из `patterns`:
+Для каждой **новой `+`-строки diff** (или каждой in-scope строки при full-review) собрать идентификаторы из 4 классов:
 
-1. **Объявления:** `(Процедура|Функция)\s+\w*{pattern}\w*` (case-insensitive для Latin).
-2. **Области:** `#Область\s+\w*{pattern}`.
-3. **Ключи ДопСвойств:** `Вставить\s*\(\s*"[^"]*{pattern}`.
+1. **Объявления процедур/функций:** `(Процедура|Функция)\s+(\w+)` → имя метода.
+2. **Области:** `#Область\s+(\w+)`.
+3. **Переменные и параметры:** имена слева от `=` (`(\w+)\s*=`), переменные `Перем\s+(\w+)`, имена параметров в списке `(Процедура|Функция)\s+\w+\((.*)\)`.
+4. **Ключи ДопСвойств:** строковый литерал в `Вставить\s*\(\s*"([^"]+)"` и `Свойство\s*\(\s*"([^"]+)"`.
 
-### Шаг 4. Исключения (не включать в evidence)
+### Шаг 3. Детектор (для каждого собранного идентификатора/ключа)
 
-- Строки маркеров `// +++` / `// ---` (whitelist project.md).
-- Строка содержит только `[ID#NNNN]` в комментарии, без идентификатора на той же строке.
-- Совпадение с существующим именем метаданных (Grep по `src/` на точное имя) → в evidence с пометкой `likely-metadata` (reviewer может dismiss как `metadata-name`).
+1. Найти латинские подстроки `[A-Za-z]{2,}` внутри имени (в т.ч. внутри кириллического: `БылиPreMatrixОтмены` → `PreMatrix`).
+2. Отфильтровать allow-list (Шаг 4). Остаток с латиницей — кандидат AP-031.
+3. **Необязательное усиление (опционально):** если имя содержит токен из orchestration-blocklist (`Fallback`, `PostWrite`, `PreWrite`, `Guard`, `Mechanics`/`Механика`, `Gate`/`Гейт`, `Temp`/`Tmp`, `Wrapper`, `Orchestrat`), номер тикета `\d{4,}` или kebab-токен slug change-name — пометить как кандидат **даже если кириллический** (доменную непрозрачность чисто кириллических имён ловит ревьювер семантически).
+
+### Шаг 4. Allow-list (закрыт по построению — не включать в evidence)
+
+| Класс | dismiss-причина | Примеры |
+|-------|-----------------|---------|
+| Префикс расширения / разработчика | `code-prefix` | `pav_`, `lvv_`, `пр_` как префикс перед доменным русским именем |
+| Имя метаданного/типа/метода/параметра, существующее в `src/` | `metadata-name` | проверка Grep по `src/` на точное имя |
+| Протокол/формат/аббревиатура | `protocol` | `HTTP`, `JSON`, `XML`, `XDTO`, `GUID`, `UUID`, `SQL`, `URL`, `RLS`, `TLS`, `API`, `RMQ`, `UI`, `БСП` |
+| Имя веб-сервиса/метода/поля внешней системы (std-06 §1) | `web-service-name` | `TestConnection`, `EnterpriseDataExchange` |
+| Имя продукта/компании (std-02 §1.3) | `product-name` | `Microsoft Excel` |
+
+Allow-list baseline — `.cursor/docs/marker-canon.md`; project.md только **расширяет**. **`design.md`/`tasks.md` НЕ источник имён** — терминология ЗНИ не легитимизирует латиницу в идентификаторе.
 
 ### Шаг 5. Выход — блок для reviewer
 
-Если совпадений нет:
+Если кандидатов нет:
 
 ```markdown
 ## Naming Signals (evidence)
 
-Naming Signals: clean (N files scanned)
+Identifier scan: латинских кандидатов не найдено (N файлов). НЕ заменяет доменный тест ревьювера (Phase 1c / Phase 0 Q6).
 ```
 
-Если есть совпадения:
+Если есть кандидаты:
 
 ```markdown
 ## Naming Signals (evidence)
 
 | # | File:Line | Match | Class | Suggested |
 |---|-----------|-------|-------|-----------|
-| 1 | Module.bsl:287 | pav74261_Применить… | procedure | AP-031 MUST_FIX |
+| 1 | Module.bsl:824 | БылиPreMatrixОтмены | variable | AP-031 MUST_FIX |
+| 2 | Module.bsl:287 | pav74261_Применить… | procedure | AP-031 MUST_FIX |
 ```
 
-- **Class:** `procedure` | `function` | `#Область` | `property-key`.
+- **Class:** `procedure` | `function` | `#Область` | `variable` | `parameter` | `property-key`.
 - **Suggested:** всегда `AP-031 MUST_FIX` (severity определяет reviewer: HIGH для export/&После/&Перед).
 
-Оркестратор **не** создаёт findings — только evidence (`review/SKILL.md` шаг 1.9).
+Оркестратор **не** создаёт findings — только evidence (`review/SKILL.md` шаг 1.9). Блок передаётся ревьюверу **всегда** (кандидаты / «не найдено» / skipped); «не найдено» обязывает ревьювера выполнить доменный тест по новым символам.
 
 ## COMMENT HYGIENE CHECK
 
-**После NAMING PROVENANCE CHECK, до API EXISTENCE CHECK.** Механический grep по изменённым `.bsl` на **англицизмы в тексте комментариев и JSDoc** (AP-054). Принцип — **детектор латиницы в прозе**, не словарь стоп-слов: что не русское и не входит в allow-list (полон по построению) — кандидат. Оркестратор собирает evidence; reviewer обрабатывает в Phase 1d (`.cursor/docs/standard/reviewer-checks.md` § Phase 1d). Работает **без** `openspec/project.md`: встроенный allow-list — дефолт, project.md только **расширяет**.
+**После IDENTIFIER HYGIENE CHECK, до API EXISTENCE CHECK.** Семейство **Export Language** вместе с IDENTIFIER HYGIENE (AP-054 для комментариев = тот же принцип, что AP-031 для идентификаторов). Механический grep по изменённым `.bsl` на **англицизмы в тексте комментариев и JSDoc** (AP-054). Принцип — **детектор латиницы в прозе**, не словарь стоп-слов: что не русское и не входит в allow-list (полон по построению) — кандидат. Оркестратор собирает evidence; reviewer обрабатывает в Phase 1d (`.cursor/docs/standard/reviewer-checks.md` § Phase 1d). Работает **без** `openspec/project.md`: встроенный allow-list — дефолт, project.md только **расширяет**.
 
 ### Шаг 1. Scope
 
@@ -139,7 +147,7 @@ Comment Hygiene Signals: clean (N files scanned)
 
 ## API EXISTENCE CHECK
 
-**После NAMING PROVENANCE CHECK, до вызова reviewer.** Проверяет, что вызовы `МодульИмя.МетодИмя()`, появившиеся в **новых строках diff** после writer, реально определены в коде репозитория. Поиск ведётся по **всему src/** (cf + все cfe).
+**После COMMENT HYGIENE CHECK, до вызова reviewer.** Проверяет, что вызовы `МодульИмя.МетодИмя()`, появившиеся в **новых строках diff** после writer, реально определены в коде репозитория. Поиск ведётся по **всему src/** (cf + все cfe).
 
 ### Шаг 1. Извлечь новые вызовы
 
