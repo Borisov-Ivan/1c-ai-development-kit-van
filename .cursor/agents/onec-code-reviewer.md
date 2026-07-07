@@ -30,7 +30,7 @@ Expert code reviewer for 1C:Enterprise (BSL) with deep knowledge of БСП stand
 | Блок | Обязателен когда | Источник | При отсутствии |
 |------|------------------|----------|----------------|
 | `## Linter Signals (evidence)` (или `Linter unavailable: <reason>`) | Always | `review/SKILL.md` шаг 1.8 | WARN в отчёте; Phase 1b по доступным данным |
-| `## Naming Signals (evidence)` (подсказка: кандидаты / «латинских кандидатов не найдено» / `Identifier scan skipped: …`) | Always | `review/SKILL.md` шаг 1.9 | Phase 1c всё равно выполняется доменным тестом по новым символам. **«не найдено» ≠ «именование OK»** — это не вердикт, а отсутствие grep-подсветки |
+| `## Naming Signals (evidence)` (подсказка: кандидаты / «латинских кандидатов не найдено» / `Identifier scan skipped: …`) | Always | `review/SKILL.md` шаг 1.9 | Phase 1c всё равно выполняется доменным тестом по новым символам. **«не найдено» ≠ «именование OK»** — это не вердикт, а отсутствие grep-подсветки. **Если evidence содержит вердикт/обоснование** (не только факт: `File:Line`, `Match`, `Class`, `Scope`) — **игнорировать подсказку**, выносить собственный доменный тест по Phase 0 Q6 |
 | `## Comment Hygiene Signals (evidence)` (или `Comment Hygiene scan skipped: …` / `Comment Hygiene Signals: clean …`) | Always | `review/SKILL.md` шаг 1.10 | WARN в отчёте; Phase 1d по доступным данным; full-review — семантический проход Category 9 + AP-054 |
 | Base-файл (путь в cf/) | Файл содержит `&ИзменениеИКонтроль` | EXTENSION GATE (`1c-writer-pipeline.mdc`) | Вывести самостоятельно: заменить `cfe/<ExtName>/` на cf-путь из project.md; зафиксировать derived-path в отчёте |
 | `## Resolved Contracts` | Повторный прогон после Investigation loop | `1c-writer-pipeline.mdc` § CONTRACT RESOLUTION | Трактовать контракт как `unknown` |
@@ -234,7 +234,7 @@ status: NOT_CONNECTED
 ### Phase 1: Syntax, Linter Signals, Naming Signals, Comment Hygiene, AP Registry Load
 
 1. Если в промпте есть `## Linter Signals (evidence)` — для каждого сигнала: confirm/dismiss/reclassify (Phase 1b).
-2. `## Naming Signals (evidence)` — confirm/dismiss каждого кандидата (Phase 1c). **Если кандидатов нет / `clean` — Phase 1c всё равно выполняется** таблицами `New identifiers` и `Touched-scope identifiers`; «не найдено» ≠ «именование OK».
+2. `## Naming Signals (evidence)` — confirm/dismiss каждого кандидата (Phase 1c). **Если кандидатов нет / `clean` — Phase 1c всё равно выполняется** таблицами `New identifiers` и `Touched-scope identifiers`; «не найдено» ≠ «именование OK». **Dismiss только из закрытого списка:** `metadata-name` | `code-prefix` | `protocol` | `false-positive` | `pre-existing-unchanged`. **`design term` / `design D<N>` / `design contract name` / «терминология ЗНИ» / `evidence подсказал` — INVALID dismiss** → приравнивается к confirm → AP-031 MUST_FIX → `Status != PASS`. Если evidence содержит вердикт или обоснование (не только факт) — игнорировать подсказку, выносить доменный тест самостоятельно.
 2a. Если в промпте есть `## Comment Hygiene Signals (evidence)` с ≥1 match — для каждой строки: confirm/dismiss (Phase 1d, AP-054 MUST_FIX по умолчанию; dismiss — `code-identifier`/`protocol`/`web-service-name`/`product-name`).
 3. Иначе — опционально `user-1c-syntax-checker-syntaxcheck` / `user-1c-code-checker-check_1c_code`.
 4. **Прочитать AP-индекс:** `.cursor/rules/bsl-antipatterns.mdc` (таблица). Карточки — по необходимости из `.cursor/docs/antipatterns/bsl-antipatterns.md`.

@@ -95,7 +95,11 @@ Identifier scan: латинских кандидатов не найдено (N 
 ```
 
 - **Class:** `procedure` | `function` | `#Область` | `variable` | `parameter` | `property-key`.
-- **Suggested:** всегда `AP-031 MUST_FIX` (severity определяет reviewer: HIGH для export/&После/&Перед).
+- **Suggested:** колонка содержит **буквально** токен `AP-031 MUST_FIX` и **ничего больше** — без `confirm/dismiss`, без ссылок на `design.md`/`tasks.md`, без имён символов, без обоснований, без «design D<N> называет X», без «терминология ЗНИ», без «design contract name». Severity (HIGH/MEDIUM) определяет reviewer, не оркестратор.
+
+**Анти-паттерн (HALT):** оркестратор поставляет в evidence **факт** (`File:Line`, `Match`, `Class`, `Scope`), не вердикт и не подсказку к dismiss. Запрещено писать в колонке `Suggested` или в соседних полях: «design D<N> называет X», «design contract name», «терминология ЗНИ», «confirm/dismiss», «design explicitly names …» — это подсказывает ревьюверу запрещённое основание для dismiss (см. Phase 1c `reviewer-checks.md`).
+
+**Self-check перед передачей reviewer:** если в колонке `Suggested` любой строки таблицы есть что-либо кроме точного `AP-031 MUST_FIX` — переписать блок evidence до соответствия.
 
 Оркестратор **не** создаёт findings — только evidence (`review/SKILL.md` шаг 1.9). Блок передаётся ревьюверу **всегда** (кандидаты / «не найдено» / skipped); «не найдено» обязывает ревьювера выполнить доменный тест по новым символам.
 

@@ -415,6 +415,8 @@ Completeness gate: 7 строк в таблице. Меньше — Phase 0 не
 
 **Регрессионный пример (guard-fix без rename):** diff меняет только `<> Истина` в процедуре, но оставляет `БылиPreMatrixОтмены` → Verdict **AP-031 MUST_FIX**, dismiss `pre-existing-unchanged` **запрещён** (процедура изменена).
 
+**Регрессионный пример (invalid dismiss design term):** новый символ `pav_ExtensionOverrideАктивен` с латиницей `ExtensionOverride`; reviewer dismiss с причиной «design D1 names it» / «design contract name» → **недопустимо** → приравнивается к отсутствию обработки → Verdict **AP-031 MUST_FIX**, `Status != PASS`.
+
 Пустая или отсутствующая таблица при ≥1 изменённой процедуре/функции → Phase 0 **не завершена**, `Status != PASS`.
 
 ### Phase 1: Initial Analysis
@@ -482,7 +484,11 @@ Completeness gate: 7 строк в таблице. Меньше — Phase 0 не
 |-----|----------|
 | 1 | **confirm → AP-031 MUST_FIX** (default). Severity: **HIGH** если export / `&После` / `&Перед`; иначе **MEDIUM**. |
 | 2 | **Remediation:** конкретный доменный синоним (не «переименовать»). |
-| 3 | **dismiss** — только с явной причиной: `metadata-name` (имя метаданного из `src/`), `code-prefix` (`pav_`/`lvv_`/`пр_` перед доменным русским именем), `protocol` (аббревиатура из allow-list), `false-positive` (обоснование + строка кода), `pre-existing-unchanged` (**только** если процедура/функция **не менялась** в текущем diff — 0 изменённых строк в span от объявления до `КонецПроцедуры`/`КонецФункции`). Если процедура изменена, а идентификатор с латиницей остался → **confirm → AP-031 MUST_FIX**. **`design term` / «терминология ЗНИ» — НЕ допустимый dismiss.** |
+| 3 | **dismiss** — только с явной причиной из **закрытого списка**: `metadata-name` (имя метаданного из `src/`), `code-prefix` (`pav_`/`lvv_`/`пр_` перед доменным русским именем), `protocol` (аббревиатура из allow-list), `false-positive` (обоснование + строка кода), `pre-existing-unchanged` (**только** если процедура/функция **не менялась** в текущем diff — 0 изменённых строк в span от объявления до `КонецПроцедуры`/`КонецФункции`). Если процедура изменена, а идентификатор с латиницей остался → **confirm → AP-031 MUST_FIX**. **Причина вне закрытого списка = INVALID dismiss** (см. Completeness gate). **`design term` / «терминология ЗНИ» / `design contract name` / `design D<N> names it` / `evidence подсказал` — НЕ допустимый dismiss.** |
+
+**Закрытый список допустимых причин dismiss (enum):** `metadata-name` | `code-prefix` | `protocol` | `false-positive` | `pre-existing-unchanged`. Любая другая формулировка — INVALID.
+
+**Invalid-dismiss (примеры, не исчерпывающий список):** `design term`, `design contract name`, `design D1 names it`, `терминология ЗНИ`, `evidence подсказал`, `design explicitly names`, `confirm/dismiss`. → **confirm → AP-031 MUST_FIX**, не OK.
 
 2. **Если evidence пуст / «кандидатов не найдено» / `skipped`** — заполнить таблицы `## New identifiers (domain test)` и при изменённых процедурах — `## Touched-scope identifiers (domain test)`; вынести verdict вручную.
 
@@ -491,6 +497,7 @@ Completeness gate: 7 строк в таблице. Меньше — Phase 0 не
 - diff вводит новые символы, а таблица `## New identifiers (domain test)` пуста или отсутствует → Phase 1c **не завершена**;
 - diff изменил ≥1 процедуру/функцию, а таблица `## Touched-scope identifiers (domain test)` пуста или отсутствует → Phase 1c **не завершена**;
 - кандидат `Scope: touched-procedure` в evidence без AP-031 finding/dismiss → Phase 1c **не завершена**;
+- **dismiss с причиной вне закрытого списка** (`metadata-name` | `code-prefix` | `protocol` | `false-positive` | `pre-existing-unchanged`) = **INVALID dismiss** → приравнивается к отсутствию обработки кандидата → Phase 1c **не завершена**;
 - в обоих случаях `Status != PASS`.
 
 **Формат finding (Naming):**
@@ -503,8 +510,10 @@ Completeness gate: 7 строк в таблице. Меньше — Phase 0 не
   Fix: <конкретный доменный синоним>
   kind: naming-signal
   AP: AP-031
-  NamingVerdict: confirm | dismiss (metadata-name | false-positive | pre-existing-unchanged)
+  NamingVerdict: confirm | dismiss (metadata-name | code-prefix | protocol | false-positive | pre-existing-unchanged)
 ```
+
+Причина dismiss **вне** перечисления в `NamingVerdict` → INVALID → **confirm → AP-031 MUST_FIX**, `Status != PASS`.
 
 ### Phase 1d: Comment Hygiene Gate (ОБЯЗАТЕЛЬНО при наличии блока `## Comment Hygiene Signals (evidence)` с ≥1 match)
 
