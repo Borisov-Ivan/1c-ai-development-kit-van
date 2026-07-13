@@ -122,7 +122,14 @@ Archive a completed change in the experimental workflow.
 
       Пояснение одной строкой: без **`[x]`** на accept контракт среза не закрыт. Опция **A** — подтверждение, что **Primary пройден на ИБ** (ответственность пользователя).
 
-   4. **Условие опции A:** опция **A** в AskQuestion допустима **только если** каждый срез, в котором есть `[ ]` в acceptance set, уже **«готов»** (все рабочие задачи среза `[x]`). Если условие не выполнено — перед AskQuestion вывести строку «**Вариант A недоступен:** есть срезы с незакрытыми задачами реализации; завершите через `/opsx:apply <name>`.» и выдать **AskQuestion только с опциями B, C, D**.
+   3a. **Self-Achievable Primary (hard gate для варианта A)** — до AskQuestion проверить каждый непринятый срез `S<N>` по критерию QC 8b (`.cursor/rules/vertical-slices.mdc` § критерий 8b):
+
+      - **Признак `slice-accept-not-self-achievable`:** Primary `S<N>` дублирует Primary `S<N+1>` (один user-journey); **или** Primary требует слой/результат, который в задачах `S<N>` отсутствует, а есть только в `S<N+1>` при `**Зависимости:** S<N>`.
+      - Если срез `S<N>` помечен как недостижимый **и** срез `S<N+1>` (или иной срез, где живёт тот же результат) **не принят** (`accept` = `[ ]`) — **вариант A для `S<N>` недоступен**: нельзя подписать приёмку того, что в этом срезе никогда не было достижимо.
+      - В карточке п.3 добавить колонку **«Primary достижим в срезе»** (да / нет). Для срезов с «нет» — одна строка в чат: «**Вариант A недоступен для S<N>:** приёмка описана, но результат виден только после следующего среза; объедините срезы через `/opsx:extend <name>` или используйте `--force-legacy`.»
+      - AskQuestion: если **хотя бы один** непринятый срез с недостижимым Primary — **исключить опцию A** (оставить B, C, D и при необходимости `--force-legacy`), даже если все рабочие задачи среза `[x]`.
+
+   4. **Условие опции A:** опция **A** в AskQuestion допустима **только если** (а) каждый срез с `[ ]` в acceptance set **«готов»** (все рабочие задачи `[x]`); **(б)** ни один такой срез **не** помечен `slice-accept-not-self-achievable` (п.3a). Если (а) не выполнено — перед AskQuestion вывести строку «**Вариант A недоступен:** есть срезы с незакрытыми задачами реализации; завершите через `/opsx:apply <name>`.» и выдать **AskQuestion только с опциями B, C, D**. Если (б) не выполнено — см. п.3a (AskQuestion без A).
 
    5. **AskQuestion** (исключение из auto-yes). Подписи опций должны явно содержать дисклеймер: подтверждение успешного прогона на ИБ — ответственность пользователя.
 
@@ -308,7 +315,7 @@ Archive a completed change in the experimental workflow.
 **Guardrails**
 - Always prompt for change selection if not provided (step 1 only)
 - Use artifact graph (`openspec status --json`) for completion checking
-- **Don't block archive** на soft-gates; hard blockers — шаги 3.2 (дисбаланс маркеров), 3.5 (карточка), 3.6 (phantom по принятому scope), внутренний verify 2a при блокерах.
+- **Don't block archive** на soft-gates; hard blockers — шаги 3.2 (дисбаланс маркеров), 3.5 (карточка + **3a self-achievable gate** — вариант A запрещён при недостижимом Primary), 3.6 (phantom по принятому scope), внутренний verify 2a при блокерах.
 - **EXCEPTION (slice mode, step 3.5):** при любой приёмочной задаче среза (`S<N>.accept` или legacy `S<N>.T<M>`) = `[ ]` — **pause** до **AskQuestion**: варианты **A** (отметить `[x]` и продолжить при готовых срезах), **B/C** (стоп), **D** / **`--force-legacy`**. Флаг **`--force-legacy`** в команде обходит карточку.
 - **Recommended actions are automatic:** delta spec sync when merge is needed; ADR extraction for all ADR-worthy decisions from `reports/architecture-*.md`
 - Preserve `.openspec.yaml` when moving to archive (it moves with the directory)

@@ -18,7 +18,7 @@ metadata:
 3. **Без скидок по объёму.** Глубина проверки одинакова для маленьких и больших ЗНИ — одна сломанная задача может остановить пользователя так же, как 25. **Исключение:** режимы `verify_depth` (`incremental`, `lite`) с guardrails — см. § «Verify depth» ниже; не ослабляют adversarial Layer 4 на первом прогоне.
 4. **Verify чинит repair-класс сам.** Содержательные правки scope — через user `/opsx:extend`. Детерминированные пробелы постановки (карта repair в §2.6 `opsx-output-style.md`) — **internal Repair Loop** внутри verify, без user-facing extend и без «Подтвердить?».
 5. **Один файл отчёта в день.** Полный отчёт `reports/verification-YYYY-MM-DD.md` создаётся, только если что-то найдено или исправлено; «тихий» прогон по фильтру новизны новый файл не пишет.
-6. **Verify оценивает постановку, не приёмку.** Приёмочные тесты, тестовые данные, эталоны ИБ, smoke-проверки — это apply/archive (срез либо принят, либо нет). Verify не задаёт вопросов про тесты и не блокирует apply из-за отсутствия тестовых данных.
+6. **Verify оценивает постановку, не приёмку на ИБ.** Приёмочные тесты, тестовые данные, эталоны ИБ, smoke-проверки — это apply/archive (срез либо принят, либо нет). Verify не задаёт вопросов про тесты и не блокирует apply из-за **отсутствия тестовых данных** (transient). **Исключение:** структурная недостижимость Primary внутри среза (QC 8b `slice-accept-not-self-achievable`) — дефект постановки; Layer 2 **FAIL** → NO-GO.
 
 ## Архитектура (5 слоёв)
 
@@ -148,7 +148,7 @@ Layer 1 **никогда** не блокирует — только правит
 
 **Режим запуска:** `run_in_background: false` (sync, последовательно). Карточка Task не показывается в чате как отдельное сообщение — `tool_result` идёт во внутренний контекст оркестратора. В промпт обязательно включить блок **Final message constraint** из секции «Запуск агентов verify» ниже и блок **User Task Contract pre-check evidence** из 2.1a.
 
-QC оценивает критерии 1–6, 8–11 из `vertical-slices.mdc` (Scenario Coverage, Slice Independence, Slice Completeness, Slice Dependency Graph, Slice Gate Integrity, Acceptance Checklist Coverage 5b amended, Rework Risk, Slice Verticality, Foundation slice with gate, Acceptance Simplicity, User Task Contract).
+QC оценивает критерии 1–6, 8, **8b**, 9–11 из `vertical-slices.mdc` (Scenario Coverage, Slice Independence, Slice Completeness, Slice Dependency Graph, Slice Gate Integrity, Acceptance Checklist Coverage 5b amended, Rework Risk, Slice Verticality, **Self-Achievable Acceptance**, Foundation slice with gate, Acceptance Simplicity, User Task Contract).
 
 **2.2. Code-Truth (механический)** — для каждого технического имени в backticks из `design.md`/`tasks.md`/`debug.md`/`specs/**` запустить `Grep` по путям из `openspec/project.md`. См. `.cursor/rules/code-truth-gate.mdc`.
 
@@ -162,7 +162,7 @@ QC оценивает критерии 1–6, 8–11 из `vertical-slices.mdc` 
 
 - `PASS` — все критерии OK / только INFO.
 - `WARNING` — есть несущественные несостыковки (один scenario без покрытия в матрице, лишний legacy-маркер). На вердикт идёт как «не блокирует apply».
-- `FAIL` — циклы зависимостей срезов, `accept-checklist-empty`, `primary-acceptance-missing`, `acceptance-simplicity-overload`, `slice-not-vertical`, `slice-foundation-with-gate`, `user-task-contract-violation`, дублирование `S<N>.accept` в одном срезе, CRITICAL `phantom-symbol` в post-apply, или CRITICAL precedent-regression (`precedent-regression` / `invariant-drift` / `load-bearing-adr-bypass`).
+- `FAIL` — циклы зависимостей срезов, `accept-checklist-empty`, `primary-acceptance-missing`, `acceptance-simplicity-overload`, `slice-not-vertical`, **`slice-accept-not-self-achievable`**, `slice-foundation-with-gate`, `user-task-contract-violation`, дублирование `S<N>.accept` в одном срезе, CRITICAL `phantom-symbol` в post-apply, или CRITICAL precedent-regression (`precedent-regression` / `invariant-drift` / `load-bearing-adr-bypass`).
 
 `FAIL` в Layer 2 — это **NO-GO**.
 
@@ -357,7 +357,9 @@ Self-check: «можно действовать без файла» = польз
 
 После NO-GO классифицировать блокеры по карте repair/decision (§2.6 `opsx-output-style.md`, `layer_status` и коды алертов отчёта):
 
-1. **Decision blockers** (CHALLENGE/REJECT с A/B **после classifier**, `scope-violation`, FAIL с продуктовым выбором, Why ↔ plan, `supersedes`) → chat **3a-decision**, **END TURN**. Repair не запускать без ответа пользователя.
+1. **Decision blockers** (CHALLENGE/REJECT с A/B **после classifier**, `scope-violation`, FAIL с продуктовым выбором, Why ↔ plan, `supersedes`, **`slice-accept-not-self-achievable`**) → chat **3a-decision**, **END TURN**. Repair не запускать без ответа пользователя.
+
+   Для **`slice-accept-not-self-achievable`:** развилка на человеческом языке по `.cursor/docs/templates/decision-block.md` — **объединить срезы** (рекомендуется) **или** переписать Primary проблемного среза на исход, достижимый его собственными задачами. **Запрещено** как разрешение блокера: «процедурно не подписывать `S<N>.accept` до завершения более позднего среза без правки `tasks.md` / `design.md`» (вариант C из QC — создаёт пустую формальность).
 2. **Repair only** (включая `implementation_invariant` от classifier) + `repair_attempt < 2`:
    - Вызвать `apply_repairs_from_report()` — internal `/opsx:extend <name> --from-verify <отчёт>` в режиме **repair-from-verify** (без брифа, без сообщений в чат; порядок правок — extend §6).
    - **Не END TURN** → полный re-verify (слои 1–5) с `repair_attempt + 1`.
@@ -437,8 +439,9 @@ the file and synthesizes a single message for the user. Anything you put
 - **Не правит scope** (proposal/design/tasks/specs) через user-facing extend — только Layer 1 авто-гигиена и **internal Repair Loop** для repair-класса.
 - **Не мигрирует** legacy tasks в срезы автоматически — рекомендует `/opsx:extend <name>` или ручную правку; не объединяет `S<N>.T<M>` в `S<N>.accept` без правки артефакта.
 - **Не выполняет** apply, не отмечает задачи `[x]`.
-- **Не оценивает** выполнимость приёмочных тестов пользователем.
-- **Не требует** тестовые данные или эталоны ИБ (это зона ответственности apply/archive).
+- **Не оценивает** выполнимость приёмочных тестов пользователем на ИБ (нет тестовых данных, нет выгрузки) — **transient**.
+- **Оценивает** структурную недостижимость Primary внутри среза (QC 8b) — **дефект постановки**, Layer 2 FAIL.
+- **Не требует** тестовые данные или эталоны ИБ (это зона ответственности apply/archive для transient-пробелов).
 
 ## Legacy compat (acceptance)
 

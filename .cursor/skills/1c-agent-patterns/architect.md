@@ -561,8 +561,9 @@ Task(
             **перед** `S<K>.T<M>`, удалить блок `# Срез S<N+1>` целиком,
             поправить `design.md` `## Slices` (убрать строку лишнего среза)
             и при необходимости `debug.md` (`Решение: inside-slice rework`).
-         11. **Remediation: non-vertical / foundation срез (`slice-not-vertical`,
-             `slice-foundation-with-gate`, QC критерии 8–9).**
+         11. **Remediation: non-vertical / foundation / non-self-achievable срез
+             (`slice-not-vertical`, `slice-foundation-with-gate`,
+             `slice-accept-not-self-achievable`, QC критерии 8, 8b, 9).**
             Если срез `S<K>` содержит только подготовительный код (функция,
             API, хелпер) и programmatic-only accept (вызов функции,
             проверка возвращаемого значения, код-ревью контракта), а
@@ -650,7 +651,7 @@ Task(
             «Ревью контракта», «код-ревью», static verification — agent
             задачи `S<N>.<M>`, не `S<N>.accept`. User runtime (ИБ, отладчик,
             консоль) — только `S<N>.accept` на границе среза, не spike
-            посередине. См. QC критерии 8–11 и User Task Contract в
+            посередине. См. QC критерии 8, 8b, 9–11 и User Task Contract в
             `.cursor/rules/vertical-slices.mdc`.
          8. НЕ использовать классификацию P0–P4, «# Фаза N»,
             «<!-- phase-gate -->» — эти концепции отменены.
@@ -664,9 +665,12 @@ Task(
             - Запрещён programmatic-only Primary (diff, API, отладчик).
             - Инварианты/NFR — `design.md#Assumptions` или `S<N>.<M>`, не accept.
          10. **Self-check перед выводом `## Slices`:** для каждого среза —
-            «Может ли пользователь принять этот срез без следующего
+            (а) «Может ли пользователь принять этот срез без следующего
             **в терминах Why/proposal**?» Если нет — объединить срезы.
-            Запрещён `foundation-slice-with-gate` (QC критерии 8–9).
+            (б) «Достижим ли Primary силами задач **самого** среза, не заимствуя
+            результат следующего?» Если нет — объединить срезы (правило 4a,
+            критерий QC 8b `slice-accept-not-self-achievable`).
+            Запрещён `foundation-slice-with-gate` (QC критерии 8–8b–9).
 
          Формат вывода — готовый блок для вставки в design.md:
 
@@ -771,6 +775,9 @@ Task(
              - Каждый Scenario spec покрыт Primary, optional, или agent
                `S<N>.<M>` (static verification only).
              - **Запрещено** mandatory programmatic-only в accept.
+             - **Self-check перед `S<N>.accept`:** Primary достижим задачами
+               этого среза? Если единственный видимый результат — в следующем
+               срезе — не создавать отдельный accept; объединить срезы.
              - Non-scenario: Assumptions / agent `S<N>.<M>` / Follow-up.
          10.2. **User Task Contract** (`.cursor/rules/vertical-slices.mdc`):
              - От пользователя в `S<N>.<M>`: только ручное конфигурирование.

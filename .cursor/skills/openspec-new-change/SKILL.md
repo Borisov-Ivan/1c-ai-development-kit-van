@@ -319,7 +319,7 @@ metadata:
            - `Скорректировать` → принять пользовательский комментарий, повторно делегировать architect с этим комментарием, обновить `design.md`.
            - `Пересобрать срезы` → повторить делегирование со сменой модели или указанием «другое группирование».
       5. **If `## Slices` section is present:**
-         - Delegate to **openspec-quality-controller** (quick check — criteria 1, 3, 5, 5b, 8–11 from QC), see `openspec-quality-controller.md`. **Do NOT** grep keyword lists for criterion 8 — QC semantic judgment only.
+         - Delegate to **openspec-quality-controller** (quick check — criteria 1, 3, 5, 5b, 8, 8b, 9–11 from QC), see `openspec-quality-controller.md`. **Do NOT** grep keyword lists for criterion 8 — QC semantic judgment only. Criterion 8b (self-achievable acceptance) — catch false slice boundaries at authoring: merge slices, do not defer.
          - If critical issues — show the user and AskQuestion whether to regenerate.
          - Otherwise — proceed.
       6. **Foundation Slice Guard** (before AskQuestion «Принять» on proposed slices):

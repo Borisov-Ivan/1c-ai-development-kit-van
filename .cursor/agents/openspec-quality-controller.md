@@ -21,6 +21,7 @@ You are domain-agnostic. Do not review code quality, architecture, implementatio
 - slice-gate integrity
 - rework risk
 - slice verticality / acceptance observability (semantic black-box vs programmatic-only)
+- self-achievable acceptance detection (критерий 8b — Primary достижим внутри среза)
 - foundation slice with gate detection
 - primary acceptance presence and simplicity (criteria 10, amended 5b)
 - task readability as formulation quality
@@ -60,6 +61,7 @@ In slice mode, evaluate the criteria from `vertical-slices.mdc` (section «QUALI
    - Legacy: `acceptance-without-scenario` (WARNING) only.
 6. Rework Risk
 8. Slice Verticality — `slice-not-vertical` when **no** mandatory Primary describes black-box behavior. **CRITICAL** when `# Срез` present.
+8b. Self-Achievable Acceptance — `slice-accept-not-self-achievable` when mandatory Primary `S<N>` недостижим силами задач этого среза (дубль journey с `S<N+1>`, forward-зависимость приёмки от более позднего среза). **CRITICAL** when `# Срез` present. Remediation: merge slices (decision-required).
 9. Foundation slice with gate — `slice-foundation-with-gate`. **CRITICAL** when `# Срез` present. Remediation: merge slices.
 10. Acceptance Simplicity — `acceptance-simplicity-overload` when >1 mandatory (non-optional) black-box journey in `S<N>.accept`. **CRITICAL**.
 11. User Task Contract — `user-task-contract-violation` when `S<N>.<M>` assigns **user** runtime work (ИБ, консоль, отладчик, API без UX-proxy) or conditional chains «после verify/stенда». Apply DENY/ALLOW grep from `vertical-slices.mdc` § User Task Contract; add semantic check for paraphrases. **CRITICAL** when `# Срез` present.
@@ -69,12 +71,12 @@ Then evaluate task readability using `task-readability.mdc`.
 ## OUT OF SCOPE
 
 Do NOT evaluate:
-- Whether acceptance steps are **executable right now** (code not wired, extension not loaded in IB).
+- Whether acceptance steps are **executable right now** on IB (code not wired, extension not loaded, **no test data**) — **transient** environment gap; not the same as **structural** Primary unreachable inside the slice (criterion 8b, **in scope**).
 - Whether test data, test documents, or baseline DB snapshots are specified.
 - Smoke testing scenarios outside tasks.
-These are concerns for apply/archive. Do NOT emit alerts asking for test data or baseline snapshots.
+These are concerns for apply/archive for **transient** gaps. Do NOT emit alerts asking for test data or baseline snapshots.
 
-**In scope (criteria 8–11):** Primary black-box vs programmatic-only; foundation+consumer double gate; acceptance simplicity (one mandatory journey); **structural user-spike in `S<N>.<M>` is in scope** (criterion 11) — do not confuse with missing test data.
+**In scope (criteria 8–8b–11):** Primary black-box vs programmatic-only; **self-achievable acceptance** (8b — structural unreachability inside slice); foundation+consumer double gate; acceptance simplicity (one mandatory journey); **structural user-spike in `S<N>.<M>` is in scope** (criterion 11).
 
 ## REMEDIATION BLOCK (mandatory per CRITICAL/WARNING alert)
 
@@ -87,7 +89,11 @@ For each alert that can be auto-repaired, append:
 - action: <concrete edit instruction>
 ```
 
-Repairable alerts: `primary-acceptance-missing`, `accept-bullets-missing-scenario`, `acceptance-simplicity-overload`, `slice-not-vertical`, `slice-foundation-with-gate` (merge instruction), `user-task-contract-violation` (extend §6d). Decision-required: merge changing scope/spec cross-slice.
+Repairable alerts: `primary-acceptance-missing`, `accept-bullets-missing-scenario`, `acceptance-simplicity-overload`, `slice-not-vertical`, `slice-foundation-with-gate` (merge instruction), `user-task-contract-violation` (extend §6d).
+
+**Decision-required (не auto-repair):** `slice-accept-not-self-achievable` — объединение срезов или переписывание Primary меняет структуру ЗНИ; remediation: merge slices (default) или rewrite Primary на собственный видимый путь; **запрещено** «процедурно не подписывать accept до следующего среза».
+
+Decision-required (прочее): merge changing scope/spec cross-slice.
 
 ## ALERT RULES
 
