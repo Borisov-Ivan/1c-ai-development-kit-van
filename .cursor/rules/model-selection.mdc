@@ -16,7 +16,7 @@ priority: 200
 
 | `subagent_type` | Primary `Task.model` | Fallback 1 | Fallback 2 (последний: без `model=`, inherit) |
 |-----------------|----------------------|------------|------------------------------------------------|
-| `onec-code-architect` | `claude-opus-4-8-thinking-high` | `gemini-3.1-pro` | опустить `model` |
+| `onec-code-architect` | `claude-opus-5-thinking-high` | `gemini-3.1-pro` | опустить `model` |
 | `onec-code-writer` | *(без `model`)* | — | — |
 | `onec-code-explorer` | *(без `model`)* | — | — |
 | `onec-code-reviewer` | `gemini-3.1-pro` | — | опустить `model` |
@@ -28,11 +28,11 @@ priority: 200
 
 ## Ограничение enum параметра `Task.model`
 
-В ряде сборок Cursor параметр `Task(..., model=...)` принимает **только** перечисленные slug'и, например:
+В ряде сборок Cursor параметр `Task(..., model=...)` принимает **только** перечисленные slug'и (актуально на 2026-07-25; сверка с Settings → Models и enum инструмента `Task`):
 
-`claude-4.6-sonnet-medium-thinking`, `claude-opus-4-8-thinking-high`, `composer-2.5-fast`, `gemini-3.1-pro`, `gpt-5.3-codex`, `gpt-5.5-medium`.
+`claude-fable-5-thinking-high`, `claude-opus-5-thinking-high`, `claude-sonnet-5-thinking-high`, `composer-2.5-fast`, `cursor-grok-4.5-high-fast`, `gemini-3.1-pro`, `gpt-5.6-sol-medium`, `gpt-5.6-terra-medium`.
 
-Primary в таблице — только slug'и из enum или «без model=». Устаревшие **`default`**, **`claude-opus-4-7-thinking-xhigh`**, **`composer-2-fast`** в Primary **не использовать**.
+Primary в таблице — только slug'и из enum или «без model=». Устаревшие **`default`**, **`claude-opus-4-8-thinking-high`**, **`claude-4.6-sonnet-medium-thinking`**, **`gpt-5.5-medium`**, **`gpt-5.3-codex`**, **`claude-opus-4-7-thinking-xhigh`**, **`composer-2-fast`** в Primary **не использовать** (модели выключены или сняты из enum).
 
 **Поведение оркестратора:** при `Invalid model selection` или ином сбое на шаге Primary — сразу перейти к Fallback 1 (если есть). Фраза «если снова сбой» означает **сбой уже на шаге Fallback 1** (не повторный вызов того же Primary). Если для роли нет Fallback 1 — сразу переход к вызову **без** `model=`. После сбоя на последнем доступном шаге с `model=` — вызвать тот же `subagent_type` **без** `model=` (inherit / модель чата), если это предусмотрено цепочкой для роли. **Одной строкой** в чате предупредить пользователя (без жаргона движка из `chat-output-budget.mdc`). Полная последовательность шагов — в разделе **«Целостность цепочки Task»** ниже.
 
@@ -42,7 +42,7 @@ Primary в таблице — только slug'и из enum или «без mod
 
 Один агент `onec-code-architect` (отдельного `*_2nd` нет). Все режимы (`design`, `task-readiness`, `design-challenge`, `slice-decomposition` и пр., см. `.cursor/agents/onec-code-architect.md` секцию MODE) используют **одну и ту же** цепочку моделей:
 
-1. `Task(subagent_type="onec-code-architect", model="claude-opus-4-8-thinking-high", ...)`.
+1. `Task(subagent_type="onec-code-architect", model="claude-opus-5-thinking-high", ...)`.
 2. При сбое — `Task(subagent_type="onec-code-architect", model="gemini-3.1-pro", ...)`.
 3. При сбое — `Task(subagent_type="onec-code-architect", ...)` **без** `model=`.
 

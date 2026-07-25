@@ -1,5 +1,12 @@
 # Changelog — 1C Agent Ecosystem
 
+## [4.11] - 2026-07-25
+
+### Changed (Task.model enum sync: Opus 5 / Sonnet 5 / GPT-5.6)
+- **`.cursor/rules/model-selection.mdc`:** Primary архитектора `claude-opus-4-8-thinking-high` → **`claude-opus-5-thinking-high`** (Opus 4.8 выключен в Settings → Models). Обновлён список допустимых slug'ов enum `Task.model` под текущую сборку Cursor; в «устаревшие» добавлены `claude-opus-4-8-thinking-high`, `claude-4.6-sonnet-medium-thinking`, `gpt-5.5-medium`, `gpt-5.3-codex`.
+- **`.cursor/rules/architect-gate.mdc`:** ссылка на Primary в цепочке вызовов синхронизирована с `model-selection.mdc`.
+- Reviewer/simplifier Primary (`gemini-3.1-pro`), writer/explorer/trace/QC (без `model=`) — без изменений; `gemini-3.1-pro` остаётся в enum и включён.
+
 ## [4.10] - 2026-06-27
 
 ### Changed (project.md / kit SSOT split)
