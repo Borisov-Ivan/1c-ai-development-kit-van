@@ -6,7 +6,7 @@ description: Designing 1C registers — dimensions, resources, attributes, perio
 
 Registers are the spine of any non-trivial 1C configuration; mistakes here are expensive to undo because they are usually wired into document posting, RLS, and reports. This file consolidates the design decisions worth thinking through **before** running the metadata skill.
 
-> **Scope.** This file owns *design* rules. XML / schema mechanics live in инструкция Конфигуратор + `.cursor/rules/1c-no-metadata-creation.mdc` (сырой Write XML запрещён). Queries against registers — start at the router `.cursor/docs/1c-coding-standards.md` (запросы) + `1c-query-optimization` (hard rules in `.cursor/docs/1c-coding-standards.md §3 → "Queries"`, anti-patterns in `.cursor/docs/antipatterns/bsl-antipatterns.md`).
+> **Scope.** This file owns *design* rules. XML / schema mechanics live in инструкция Конфигуратор + `.cursor/rules/1c-no-metadata-creation.mdc` (сырой Write XML запрещён). Queries against registers — start at the router `.cursor/docs/1c-coding-standards.md` → `.cursor/docs/standard/std-04-queries.md` + skill `1c-query-optimization`; anti-patterns — `.cursor/docs/antipatterns/bsl-antipatterns.md`.
 
 ## 1. Choosing the register type
 
@@ -62,7 +62,7 @@ When a register has balances, the platform exposes virtual tables:
 | `СрезПервых(&Период, Условие)` (info reg.) | First record on or after the date. |
 | `СрезПоследних(&Период, Условие)` (info reg.) | Last record on or before the date. |
 
-**Filter virtual tables via parameters, not `ГДЕ` after the call** — hard rule (owner: `.cursor/docs/1c-coding-standards.md §3 → "Queries"`; catalog entry with fix template: `anti-patterns.md §4`). Putting the filter into the parameter pushes it into the engine and uses indexes; putting it into `ГДЕ` reads the full virtual table first.
+**Filter virtual tables via parameters, not `ГДЕ` after the call** — hard rule (owner: `.cursor/docs/standard/std-04-queries.md`; catalog: `.cursor/docs/antipatterns/bsl-antipatterns.md`). Putting the filter into the parameter pushes it into the engine and uses indexes; putting it into `ГДЕ` reads the full virtual table first.
 
 ## 8. Posting / reposting
 
@@ -91,6 +91,6 @@ When a register has balances, the platform exposes virtual tables:
 |---|---|
 | XML / schema mechanics for register objects | инструкция Конфигуратор + `.cursor/rules/1c-no-metadata-creation.mdc` (сырой Write XML запрещён) (skill) |
 | Query anti-patterns (loops, dot-notation, subselects) | `.cursor/docs/antipatterns/bsl-antipatterns.md` |
-| Authoritative query rules | `.cursor/docs/1c-coding-standards.md §3 → "Queries"` |
+| Authoritative query rules | `.cursor/docs/standard/std-04-queries.md` (+ skill `1c-query-optimization`) |
 | Locks during posting | `./locks-and-transactions.md` |
 | Reporting against registers (DCS) | `./dcs-design.md` |

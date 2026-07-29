@@ -4,6 +4,8 @@
 
 ## Phase 0 — Диагностика и бутстрап
 
+Поставка kit в другой проект: [kit-template-workflow.md](./kit-template-workflow.md) — копировать только `.cursor/` + `AGENTS.md`; **не** мержить WIP `openspec/changes/<kit-evolution-*>` в main целевого проекта; после копирования — **Reload Window** в Cursor.
+
 Агент **молча** проверяет наличие ключевых каталогов и файлов (Glob/Read) и выводит пользователю **чеклист состояния**:
 
 ### Шаг 1 — Сбор состояния

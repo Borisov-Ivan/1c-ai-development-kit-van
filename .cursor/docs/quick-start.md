@@ -24,6 +24,7 @@ Reload Window в Cursor. Папку `openspec/changes/` из шаблонног�
 | Проверить постановку | `/opsx:verify <slug>` |
 | Реализовать | `/opsx:apply <slug>` |
 | Сохранить сессию и уйти | `/session-save` → в новом чате `/session-restore` |
+| Ретроспектива сессии | `/session-retro` |
 
 ## 3. Формы и макеты
 
@@ -36,7 +37,7 @@ Reload Window в Cursor. Папку `openspec/changes/` из шаблонног�
 | `1c-forms` | info / validate / patterns (compile — при режиме «автоматически» / `assisted`) |
 | `1c-mxl` | compile / validate макетов |
 | `1c-agent-patterns` | шаблоны промптов агентов |
-| `session-save` / `restore` | непрерывность чата без авто-apply |
+| `session-save` / `restore` / `retro` | непрерывность чата и ретро; **не** авто-apply |
 | Кейсбуки | `.cursor/docs/casebooks/` |
 
 Полный индекс workflow — в корневом `AGENTS.md`.

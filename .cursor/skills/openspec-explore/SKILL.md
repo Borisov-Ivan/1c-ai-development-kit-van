@@ -45,6 +45,8 @@ metadata:
 
 **Допустимо до брифа:** Read этого SKILL, `openspec/project.md`, KB Discovery (`openspec/knowledge/_index.yaml`), `Glob` по **именам** из постановки (1–3 вызова), `openspec list --json`, `AskQuestion` **только** для §2 (неоднозначная именная сверка) — **не** для утверждения плана.
 
+**Triage hint (микрофикс):** если очевидно 1 файл `.bsl`, правка 2–10 строк, без архитектуры — **Read** `.cursor/rules/task-triage.mdc`. При явном согласии пользователя на quick-fix / Light Mode — **не** раздувать в полную `## Постановка ЗНИ` без нужды (иначе — обычный bug/feature профиль).
+
 ### 0. Активные ЗНИ (контекст, не redirect)
 
 `openspec list --json`. Если есть change в той же области: строка «Контекст ЗНИ: `<name>`» добавляется в бриф **только если** ЗНИ блокирует продолжение **или** название ЗНИ явно упомянуто пользователем. Иначе результат `openspec list` — это **non-event**, в чат не выводится. Capture fix — после ответа: `/opsx:extend <change> --from-report <path>`.

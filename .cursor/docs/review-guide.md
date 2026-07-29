@@ -71,9 +71,9 @@ Whitelist и mandatory control из `project.md` проверяются в об�
 
 ## Что ожидать в чате
 
-**`/review`:** «Понял: запускаю ревью…» → карточка с итогом → полный отчёт в `openspec/changes/<change>/reports/review-*.md` или `temp/reports/review-*.md`.
+**`/review`:** «Ревью: <scope>, файлов: N…» → карточка с итогом → полный отчёт в `openspec/changes/<change>/reports/review-*.md` или `temp/reports/review-*.md`.
 
-**`/release-review`:** «Понял: запускаю **предрелизное** ревью…» → при change-scoped возможен Scope Preview → карточка с Tier 1/Tier 2 → отчёт с Category 12 / release-hygiene.
+**`/release-review`:** «Предрелизное ревью: <scope>, файлов: N…» → при change-scoped возможен Scope Preview → карточка с Tier 1/Tier 2 → отчёт с Category 12 / release-hygiene.
 
 После отчёта агент предложит устранить MUST_FIX через writer или extend.
 

@@ -1,5 +1,17 @@
 # Changelog — 1C Agent Ecosystem
 
+## [4.11] - 2026-07-29
+
+### Fixed (framework review coherence)
+- **Persistence / Ultra-Lite:** `command-session-persistence` — `/opsx:new` + handoff; не live `/opsx:ff`.
+- **Verify chat:** user-facing verdict-card / `verify-user-communication`; GO/NO-GO только в reports.
+- **Light/Mechanical:** якоря → `1c-halt-triggers.mdc`; Mechanical carve-out в `bsl-write-guard`.
+- **`/review`:** scope-строка без «Понял» (No Acknowledgement).
+- **`_template`:** Why/Slices/slice-gate; удалены orphan `estimate.md` / `ТЗ.md`.
+- **Coding standards:** агенты/casebooks → router + std-* + antipatterns (не вымышленный §3).
+- **Pipeline:** COMMENT HYGIENE в apply/review §6.4; slim XML в delegation → `1c-xml-write-guard`.
+- **Routing/indexes:** triage = 1 файл; free-text → explore; session-*; init-project ↔ kit-template; optional fixtures README.
+
 ## [4.10] - 2026-06-27
 
 ### Changed (project.md / kit SSOT split)

@@ -25,9 +25,11 @@
 
 Копируются `.cursor` + `AGENTS.md`. ЗНИ эволюции kit ведутся на ветке шаблонного репо; папку `openspec/changes/` в main потребителей не мержат. См. [kit-template-workflow.md](./kit-template-workflow.md).
 
-## session-restore и apply
+## session-save / restore / retro
 
-`/session-restore` только показывает заметки и **предлагает** команду. Сам apply / writer **не** запускает.
+- **`/session-save`** — заметки в `temp/session-notes.md` для продолжения в другом чате.
+- **`/session-restore`** — только читает заметки и **предлагает** команду. Сам apply / writer **не** запускает.
+- **`/session-retro`** — краткая ретроспектива в `temp/session-retro-*.md`; без apply.
 
 ## «Замер → вывод» vs verify
 

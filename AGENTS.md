@@ -11,7 +11,7 @@
 
 **Единый вход исследования:** `/opsx:explore` (вопрос, дефект, сырой текст заказчика, идея). Дальше по сценарию: `/opsx:new` → `/opsx:verify` → `/opsx:apply` → `/opsx:archive`.
 
-Команды: `/opsx:explore`, `/opsx:new`, `/opsx:verify`, `/opsx:apply`, `/opsx:archive`, `/opsx:extend`, `/opsx:status`, `/opsx:knowledge-add`, `/opsx:knowledge-init`, `/opsx:knowledge-audit`, `/opsx:sync`, `/opsx:bulk-archive`, `/review`, `/release-review`, `/init-project`.
+Команды: `/opsx:explore`, `/opsx:new`, `/opsx:verify`, `/opsx:apply`, `/opsx:archive`, `/opsx:extend`, `/opsx:status`, `/opsx:knowledge-add`, `/opsx:knowledge-init`, `/opsx:knowledge-audit`, `/opsx:sync`, `/opsx:bulk-archive`, `/review`, `/release-review`, `/init-project`, `/session-save`, `/session-restore`, `/session-retro`.
 
 Устаревшие алиасы: `/opsx:ff` и `/opsx:continue` → `/opsx:new <name>` (stub-redirect).
 

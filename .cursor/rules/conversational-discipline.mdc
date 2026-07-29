@@ -5,6 +5,8 @@ alwaysApply: true
 
 # Conversational Discipline (Осознанный диалог)
 
+**Runtime stub;** полный контракт — [`chat-output-budget.mdc`](chat-output-budget.mdc) / [`chat-output-budget-full.mdc`](chat-output-budget-full.mdc).
+
 Приоритет над длинными брифами скиллов в чат. Entry-бриф — по §5.1 `opsx-output-style.md`; отчёты — в `reports/`.
 
 **Runtime-контракт (лимиты, HALT, non-events, 5 принципов):** [`.cursor/rules/chat-output-budget.mdc`](chat-output-budget.mdc); полное тело — `chat-output-budget-full.mdc`.

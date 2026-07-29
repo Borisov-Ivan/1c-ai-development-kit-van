@@ -36,11 +36,11 @@ priority: 996
    | explore | «добавь X» | Воспринять как директиву, редактировать файл | Это тема для обсуждения. Предложить зафиксировать, дождаться подтверждения |
    | explore | «измени design» | Молча StrReplace в design.md | Проверить gates (Architect, Verified Cause, auto-capture). Предложить правку, не делать |
    | explore | «обследуй» / «проверь в коде» / «найди где вызывается» | Grep/Glob/Read по .bsl самостоятельно | Бриф → делегировать explorer. Контекст оркестратора — не для обследования |
-   | explore | «создай ЗНИ» / «заведи ЗНИ» | Создать артефакты вручную (Write proposal, design, tasks) | СТОП (Change Creation Gate). Explore Summary + redirect на `/opsx:ff <name>` |
+   | explore | «создай ЗНИ» / «заведи ЗНИ» | Создать артефакты вручную (Write proposal, design, tasks) | СТОП (Change Creation Gate). Блок `## Постановка ЗНИ` / `temp/explore-handoff-*.md` → `/opsx:new <name>`; при существующем change — вилка `/opsx:extend` |
    | apply | «а может лучше по-другому?» | Начать explore-стиль обсуждение | Предложить вернуться в explore для перепроектирования |
-   | ff/new | Пропустить Design Gate после design.md | Продолжить без проверки | СТОП, выполнить Design Gate по протоколу скилла |
-   | ff | Есть свежий `temp/explore-summary-*.md` | Использовать только имя change | Прочитать как source context: `Architect Gate`, ключевые решения, knowledge findings; передать в Design Gate и шаблоны артефактов |
-   | ff | Follow-up с правкой артефакта | Обработать follow-up, забыв о незавершённых артефактах | Сначала `openspec status --json` — завершить незаконченные артефакты, затем обработать follow-up |
+   | new | Пропустить Design Gate после design.md | Продолжить без проверки | СТОП, выполнить Design Gate по протоколу скилла |
+   | new | Есть свежий `temp/explore-handoff-*.md` (или legacy `temp/explore-summary-*.md` по явной ссылке) | Использовать только имя change | Прочитать как source context: постановка / Architect Gate, ключевые решения, knowledge findings; передать в Design Gate и шаблоны артефактов |
+   | new | Follow-up с правкой артефакта | Обработать follow-up, забыв о незавершённых артефактах | Сначала `openspec status --json` — завершить незаконченные артефакты, затем обработать follow-up |
 
 ## WHY
 

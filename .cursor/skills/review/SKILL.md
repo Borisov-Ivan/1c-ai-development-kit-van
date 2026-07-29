@@ -37,7 +37,7 @@ metadata:
 | `extension_name` | имя папки cfe (из аргументов или контекста) |
 | `change_name` | имя каталога change при `change-scoped` |
 
-При `release_mode`: acknowledgement в шаге 1.1 — «Понял: запускаю **предрелизное** ревью…».
+При `release_mode`: первая строка шага 1.1 — «Предрелизное ревью: <scope>, файлов: N. Если scope другой — скажите.»
 
 ---
 
@@ -59,8 +59,8 @@ metadata:
 
 ### 1.1 Smart defaults (S12)
 
-**Acknowledgement first:** При получении запроса на ревью (любой вариант из таблицы 1.2) **первой строкой** ответа, до вызова любых инструментов (Glob, Shell, Read), вывести:
-> «Понял: запускаю ревью по <scope: диффу .bsl / файлу / расширению> в <change / ветке>, файлов: N. Если scope другой — скажите.» (подставить актуальный scope).
+**Scope first:** При получении запроса на ревью (любой вариант из таблицы 1.2) **первой строкой** ответа, до вызова любых инструментов (Glob, Shell, Read), вывести:
+> «Ревью: <scope: дифф .bsl / файл / расширение> в <change / ветке>, файлов: N. Если scope другой — скажите.» (подставить актуальный scope). Без «Понял» / acknowledgement (см. `chat-output-budget.mdc` § No Acknowledgement).
 
 Вместо AskQuestion при неоднозначности — применить следующие правила:
 
@@ -523,12 +523,14 @@ Focus: full (new file)
 1. **MUST_FIX:** Task `onec-code-writer` по шаблону «Writer — review fix». В промпте findings отсортированы по `risk_score` desc.
 2. **REFACTOR:** Task `onec-code-simplifier` (шаблон: `.cursor/skills/1c-agent-patterns/simplifier.md`).
 3. **LINT GATE** — см. [`.cursor/rules/1c-agent-delegation.mdc`](../../rules/1c-agent-delegation.mdc) § LINT GATE + [`.cursor/rules/1c-writer-pipeline.mdc`](../../rules/1c-writer-pipeline.mdc).
-4. **API EXISTENCE CHECK (smart default S12):**
+4. **IDENTIFIER HYGIENE CHECK** (шаг 1.9) — evidence `## Naming Signals` обязателен; алгоритм — `1c-writer-pipeline.mdc` § IDENTIFIER HYGIENE CHECK.
+5. **COMMENT HYGIENE CHECK** (шаг 1.10) — evidence `## Comment Hygiene Signals` обязателен; алгоритм — `1c-writer-pipeline.mdc` § COMMENT HYGIENE CHECK.
+6. **API EXISTENCE CHECK (smart default S12):**
    - По правилам из `1c-writer-pipeline.mdc` § API EXISTENCE CHECK проверить новые вызовы `МодульИмя.МетодИмя(` в diff (порядок шага — `1c-agent-delegation.mdc` § WRITER PIPELINE).
    - **Auto-pass правило:** если каждый WARN-вызов имеет **≥ 3 hits в extension scope** (Grep по `МодульИмя\.МетодИмя\(`) — auto-pass с записью INFO в отчёт, без AskQuestion.
    - Если < 3 hits — AskQuestion как обычно.
-5. При `&ИзменениеИКонтроль` — EXTENSION VERIFICATION (base vs код вне #Вставка/#Удаление).
-6. Task `onec-code-reviewer` по изменённым файлам. Пересобрать `## Review Boundaries` (новый diff).
+7. При `&ИзменениеИКонтроль` — EXTENSION VERIFICATION (base vs код вне #Вставка/#Удаление).
+8. Task `onec-code-reviewer` по изменённым файлам. Пересобрать `## Review Boundaries` (новый diff). Передать Linter / Naming / Comment Hygiene evidence.
 
 **Максимум 2 итерации writer → review.** После — к шагу 7 даже при оставшихся findings.
 
@@ -611,7 +613,7 @@ Focus: full (new file)
 ## Self-check (Conversational Discipline)
 
 Перед выводом финального сообщения пользователю проверить:
-1. **Acknowledgement:** первая строка ответа была «Понял: запускаю ревью...» (шаг 1.1).
+1. **Scope line:** первая строка ответа была «Ревью: …» / «Предрелизное ревью: …» (шаг 1.1), без «Понял».
 2. **Карточка 4 слота:** сводка выведена строго в 4 слота (Что отрецензировано / Итог / Что важно / Куда дальше).
 3. **Risk Surfacing:** слот «Что важно» заполнен (неизменённый код, AP-пасс, unresolved contracts).
 4. **Honest Subagent:** сбои агентов названы честно (`failed` / `interrupted-by-user`), без выдуманных причин.

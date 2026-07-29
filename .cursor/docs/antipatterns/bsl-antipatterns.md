@@ -546,7 +546,7 @@ Callee возвращает структуру «Успех/Данные» вм�
 
 ### Ссылки
 
-- .cursor/docs/1c-coding-standards.md, rule 20 (Попытка Justification Gate)
+- .cursor/docs/1c-coding-standards.md (router) + writer G19 / AP-008 (Попытка Justification Gate)
 
 ---
 
@@ -1458,7 +1458,7 @@ Runtime: «Метод объекта не обнаружен» / «Процед�
 ### Ссылки
 
 - AP-008 (Попытка вокруг детерминированной операции), AP-009 (часто сопутствует — silent degradation в fallback)
-- .cursor/docs/1c-coding-standards.md, rule 20 (Попытка Justification Gate)
+- .cursor/docs/1c-coding-standards.md (router) + writer G19 / AP-008 (Попытка Justification Gate)
 
 ---
 
@@ -1574,7 +1574,7 @@ Writer не знает контракт внешнего API и компенси
 ### Ссылки
 
 - AP-008 (Попытка вокруг детерминированной операции), AP-004 (defensive check), AP-027 (guard-then-catch)
-- .cursor/docs/1c-coding-standards.md, rule 20 (Попытка Justification Gate), rule 14 (контракт источника данных)
+- .cursor/docs/1c-coding-standards.md (router) + writer G19 / AP-008 (Попытка Justification Gate), rule 14 (контракт источника данных)
 
 ---
 
@@ -1668,7 +1668,7 @@ Writer не знает контракт внешнего API и компенси
 
 ### Ссылки
 
-- .cursor/docs/1c-coding-standards.md, rule 20 (Попытка Justification Gate), rule 24 (Partial Execution Gate: фиксация в design обязательна)
+- .cursor/docs/1c-coding-standards.md (router) + writer G19 / AP-008 (Попытка Justification Gate), rule 24 (Partial Execution Gate: фиксация в design обязательна)
 - AP-009 (Silent degradation), AP-010 (бесследное подавление)
 
 ---

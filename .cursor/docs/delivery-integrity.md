@@ -17,4 +17,4 @@
 11. **Ориентиры commands/skills:** `init-project` — тонкий вход + SSOT `.cursor/docs/init-project-protocol.md`; топ-skills (verify/new/…) при обрезке — страховка `templates/` (см. `command-skill-gate.mdc`).
 12. **Grep-критерий scrub:** в поставке `.cursor/` + корневые `AGENTS.md`/`README.md` — **0** рабочих рекомендаций `/opsx:intake`|`/opsx:debug` как входа (исторические CHANGELOG / change-отчёты — исключение).
 
-См. также: [kit-template-workflow.md](./kit-template-workflow.md), [quick-start.md](./quick-start.md), [faq-kit.md](./faq-kit.md).
+См. также: [kit-template-workflow.md](./kit-template-workflow.md), [quick-start.md](./quick-start.md), [faq-kit.md](./faq-kit.md). Опциональные smoke-docs: [mxl-roundtrip-fixture.md](./mxl-roundtrip-fixture.md), [proportional-surface.md](./proportional-surface.md) + [temp/fixtures/README.md](../../temp/fixtures/README.md).

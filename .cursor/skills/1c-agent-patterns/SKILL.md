@@ -122,7 +122,7 @@ HALT. Не знаешь тип — прочитай метаданные (XML в
 Свойство() — ИСКЛЮЧИТЕЛЬНО Структура / ФиксированнаяСтруктура; на любом
 другом типе (ссылка, объект, строка ТЗ) — runtime-ошибка. Defensive cake
 (стек 2+ проверок на одном значении, где одна поглощается другой) запрещён
-при ЛЮБОМ контракте (fixed и dynamic). См. rule 14 в .cursor/docs/1c-coding-standards.md.
+при ЛЮБОМ контракте (fixed и dynamic). См. G14 в `onec-code-writer.md` / AP-004 в `bsl-antipatterns.md`.
 ```
 
 ### INTEGRATION_CONTRACT_GATE
@@ -199,7 +199,7 @@ Conditional action gate: если вся оставшаяся логика пр�
 к выходу, а не к действию. Ранний выход (guard clause) допустим
 только как предусловие В НАЧАЛЕ процедуры, после которого идёт
 основная логика из нескольких действий.
-См. rule 23 в .cursor/docs/1c-coding-standards.md.
+См. conditional-action / early-return guidance in std-06 via router `1c-coding-standards.md` (не отдельный «rule 23» в router-файле).
 ```
 
 ### ORCHESTRATOR_IMPLEMENTATION_GATE
@@ -208,8 +208,8 @@ Conditional action gate: если вся оставшаяся логика пр�
 Orchestrator implementation gate: если промпт описывает конкретный
 паттерн реализации (Попытка, проверки, fallback, структуру кода) —
 это ПОДСКАЗКА, не директива. Перед реализацией подсказанного паттерна:
-1. Попытка — rule 20 (внешний фактор? fallback не silent degradation?)
-2. Guard/проверка — rule 14 (контракт фиксирован? есть ли defensive cake?)
+1. Попытка — G19 (внешний фактор? fallback не silent degradation?)
+2. Guard/проверка — G14 (контракт фиксирован? есть ли defensive cake?)
 3. Fallback — не создаёт ли неотличимый от успеха результат (AP-009)?
 Если подсказка нарушает стандарт — НЕ реализовывать, обосновать отказ.
 ```

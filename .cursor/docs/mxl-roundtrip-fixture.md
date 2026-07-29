@@ -1,6 +1,6 @@
 # MXL round-trip (T1, без ИБ)
 
-Фикстура: `temp/fixtures/mxl-roundtrip-sample.json`.
+**Optional smoke** (не обязательная поставка). Фикстура: `temp/fixtures/mxl-roundtrip-sample.json` — создать локально при проверке; см. [temp/fixtures/README.md](../../temp/fixtures/README.md).
 
 ```powershell
 # только при artifact_mode assisted на прикладной ЗНИ

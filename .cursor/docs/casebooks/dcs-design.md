@@ -6,7 +6,7 @@ description: 1C Data Composition System (СКД / DCS) design rules — data set
 
 The 1C Data Composition System (СхемаКомпоновкиДанных, СКД) is the canonical engine for reports. The rules below cover design decisions that recur in code review and that the structural skill (`.cursor/skills/1c-query-optimization/SKILL.md` (DCS/query; XML макета отчёта — Конфигуратор / Mode Gate)) intentionally does not opine on.
 
-> **Scope.** This file owns *report design* rules. XML / schema mechanics for `.dcs` files live in the `.cursor/skills/1c-query-optimization/SKILL.md` (DCS/query; XML макета отчёта — Конфигуратор / Mode Gate) skill (XML structure, datasets API, query parameters API). Anti-patterns of slow queries inside a DCS — `.cursor/docs/antipatterns/bsl-antipatterns.md` and `.cursor/docs/1c-coding-standards.md §3 → "Queries"`.
+> **Scope.** This file owns *report design* rules. XML / schema mechanics for `.dcs` files live in the `.cursor/skills/1c-query-optimization/SKILL.md` (DCS/query; XML макета отчёта — Конфигуратор / Mode Gate) skill (XML structure, datasets API, query parameters API). Anti-patterns of slow queries inside a DCS — `.cursor/docs/antipatterns/bsl-antipatterns.md` and `.cursor/docs/standard/std-04-queries.md` (via router `.cursor/docs/1c-coding-standards.md`).
 
 ## 1. Choosing the data-set type
 
@@ -116,7 +116,7 @@ Notes:
 ## 7. Performance checklist
 
 - **Indexed filter fields** — every parameter pushed into a query `ГДЕ` must hit an index. Check via the configurator's "Анализ производительности" or `СтруктураХраненияБазыДанных`.
-- **Virtual tables** — filter through parameters (`Остатки(&Период, Условие)`), never through `ГДЕ` after the virtual call. Hard rule (owner: `.cursor/docs/1c-coding-standards.md §3 → "Queries"`; catalog entry with fix template: `anti-patterns.md §4`).
+- **Virtual tables** — filter through parameters (`Остатки(&Период, Условие)`), never through `ГДЕ` after the virtual call. Hard rule (owner: `.cursor/docs/standard/std-04-queries.md`; catalog: `.cursor/docs/antipatterns/bsl-antipatterns.md`).
 - **`ПЕРВЫЕ N`** when the report is paginated or "top-N" by nature — push the limit into the query, not into the row-formatting hook.
 - **Avoid `ВЫРАЗИТЬ` on the left side of `ГДЕ`** — it disables index usage.
 - **`Объект`-typed datasets** that pull large `ТаблицаЗначений` from BSL are the most common performance trap; consider materializing into a temporary information register if the data must be reused.
@@ -127,6 +127,6 @@ Notes:
 |---|---|
 | XML / schema mechanics for `.dcs` | `.cursor/skills/1c-query-optimization/SKILL.md` (DCS/query; XML макета отчёта — Конфигуратор / Mode Gate) (skill) |
 | Query anti-patterns | `.cursor/docs/antipatterns/bsl-antipatterns.md` |
-| Authoritative query rules | `.cursor/docs/1c-coding-standards.md §3 → "Queries"` |
+| Authoritative query rules | `.cursor/docs/standard/std-04-queries.md` (+ skill `1c-query-optimization`) |
 | Long-running report execution | `./platform-solutions.md §2 → "Long-running operations"` |
 | Register design (data side) | `./registers-design.md` |

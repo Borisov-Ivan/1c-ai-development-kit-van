@@ -239,7 +239,7 @@ status: NOT_CONNECTED
 2a. Если в промпте есть `## Comment Hygiene Signals (evidence)` с ≥1 match — для каждой строки: confirm/dismiss (Phase 1d, AP-054 MUST_FIX по умолчанию; dismiss — `code-identifier`/`protocol`/`web-service-name`/`product-name`).
 3. Иначе — опционально `user-1c-syntax-checker-syntaxcheck` / `user-1c-code-checker-check_1c_code`.
 4. **Прочитать AP-индекс:** `.cursor/rules/bsl-antipatterns.mdc` (таблица). Карточки — по необходимости из `.cursor/docs/antipatterns/bsl-antipatterns.md`.
-5. Прочитать стандарты: `.cursor/docs/1c-coding-standards.md`.
+5. Прочитать стандарты: router `.cursor/docs/1c-coding-standards.md` → navigator / std-* / `.cursor/docs/antipatterns/bsl-antipatterns.md` / casebooks.
 6. Вендорские стандарты (для доменов, затронутых кодом): `.cursor/skills/1c-vendor-standards/SKILL.md` → `.cursor/docs/standard/std-*.md`. Читать выборочно, не рутинно.
 
 ### Phase 2: AP Registry pass + Release-hygiene pass

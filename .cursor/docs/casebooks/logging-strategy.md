@@ -1,10 +1,10 @@
 ---
-description: Positive logging strategy for 1C — when to write to the event log, which severity levels and category names to use, structured payload via `ДанныеЖурналаРегистрации`, secrets / PII bans. Complements the bans in `dev-standards-code-style.md → "Forbidden Calls and Constructs"` and `.cursor/docs/1c-coding-standards.md §3 → "Error Handling"`.
+description: Positive logging strategy for 1C — when to write to the event log, which severity levels and category names to use, structured payload via `ДанныеЖурналаРегистрации`, secrets / PII bans. Complements bans in `.cursor/docs/antipatterns/bsl-antipatterns.md` (AP-008 / empty `Попытка`) and router `.cursor/docs/1c-coding-standards.md` → `std-06-code-modules.md` (исключения).
 ---
 
 # Logging Strategy
 
-`dev-standards-code-style.md → "Forbidden Calls and Constructs"` bans `ЗаписьЖурналаРегистрации` without an explicit task; `.cursor/docs/1c-coding-standards.md §3 → "Error Handling"` bans empty `Попытка / Исключение`. This file is the **positive** companion: when logging *is* explicitly requested, this is how to do it.
+Unsolicited `ЗаписьЖурналаРегистрации` without an explicit task is an antipattern (see `.cursor/docs/antipatterns/bsl-antipatterns.md` + router `.cursor/docs/1c-coding-standards.md`). Empty `Попытка / Исключение` — AP-008 / std-06. This file is the **positive** companion: when logging *is* explicitly requested, this is how to do it.
 
 ## 1. When to log
 
@@ -135,8 +135,8 @@ Rules:
 
 | Concern | File |
 |---|---|
-| Ban on uninvited `ЗаписьЖурналаРегистрации` calls | `dev-standards-code-style.md → "Forbidden Calls and Constructs"` |
-| Ban on empty `Попытка / Исключение` | `.cursor/docs/1c-coding-standards.md §3 → "Error Handling"` |
+| Ban on uninvited `ЗаписьЖурналаРегистрации` calls | `.cursor/docs/antipatterns/bsl-antipatterns.md` + router `1c-coding-standards.md` |
+| Ban on empty `Попытка / Исключение` | AP-008 in `bsl-antipatterns.md`; `std-06-code-modules.md` (исключения) |
 | Removing `Debug.*` log entries before commit | `verification-delivery.md → "Soft gate A"`, `systematic-debugging.md → "Phase 4"` |
 | Background-job lifecycle logging | `./platform-solutions.md §2 → "Long-running operations"` |
 | Integration request / response logging | `integrations-add.md` |

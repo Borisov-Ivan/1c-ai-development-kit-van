@@ -71,7 +71,8 @@ review/explore → extend (user) → verify → apply
 - Атомарные задачи с критериями приёмки в tasks.md, ID по схеме `S<N>.<M>`
 - Каждый срез заканчивается приёмочной задачей `S<N>.accept` и `<!-- slice-gate: ... -->`
 - BSL — только через агентов (onec-code-writer → onec-code-reviewer)
-- Для точечных правок (2–10 строк, 1 файл) — Light Mode (см. 1c-agent-delegation.mdc); для slice mode оформить как минимальный срез S<N> с одной задачей и приёмочным тестом
+- Для точечных правок (2–10 строк, 1 файл) — Light Mode (см. `1c-halt-triggers.mdc` § LIGHT MODE); для slice mode оформить как минимальный срез S<N> с одной задачей и приёмочным тестом
+- Pre-apply `/opsx:verify` **не блокирует** `/opsx:apply` (advisory). Пропуск post-apply verify закрывает archive (auto-verify) или явный `/opsx:verify` после apply.
 
 ## СПРАВОЧНИК ПАТТЕРНОВ
 

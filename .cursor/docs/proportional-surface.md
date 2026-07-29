@@ -18,4 +18,4 @@
 - Apply/review: не закрывать задачу с таким REFACTOR без `onec-code-simplifier` или явного waive пользователя.
 - Sidecar (S5) **не** несёт этот MUST.
 
-Фикстура: `temp/fixtures/proportional-surface-noisy-module.bsl`.
+Фикстура (optional smoke): `temp/fixtures/proportional-surface-noisy-module.bsl` — см. [temp/fixtures/README.md](../../temp/fixtures/README.md).

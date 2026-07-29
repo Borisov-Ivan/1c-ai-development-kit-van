@@ -8,7 +8,7 @@ Rules for using the asynchronous mechanism introduced in platform 8.3.18+.
 
 Applies to: client-side code with asynchronous calls (`&НаКлиенте`).
 
-Authoritative reference: `.cursor/docs/1c-coding-standards.md §3 → "Async and Modality"`. This file gives the practical patterns and the pitfalls.
+Authoritative reference: this casebook + router `.cursor/docs/1c-coding-standards.md` → `.cursor/docs/standard/std-07-client-server.md` / `std-09-forms-ui.md`. This file gives the practical patterns and the pitfalls.
 
 ---
 

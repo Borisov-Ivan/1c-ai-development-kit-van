@@ -1,13 +1,15 @@
-## Proposal
+## Why
 
-### Цель
 - …
 
-### Контекст
+## What Changes
+
 - …
 
-### Критерии приёмки
-- …
+## Scope
+
+- In scope: …
+- Out of scope: …
 
 ## Metadata (comment markers)
 

@@ -11,7 +11,7 @@ This file owns form-module-specific topics: event-handler wiring, reserved names
 
 ## Client-Server Interaction and Compilation Directives
 
-Single source of truth — `.cursor/docs/1c-coding-standards.md`; examples — `.cursor/docs/antipatterns/bsl-antipatterns.md`. Not duplicated here.
+Router — `.cursor/docs/1c-coding-standards.md` → `std-*` / navigator; examples — `.cursor/docs/antipatterns/bsl-antipatterns.md`. Not duplicated here.
 
 ## Async Programming
 

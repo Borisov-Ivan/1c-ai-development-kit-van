@@ -126,10 +126,10 @@ After writing code:
 
 ```yaml
 CRITICAL:
-  - ALL coding standards are in .cursor/docs/1c-coding-standards.md
-  - READ this file BEFORE writing code
-  - Follow EVERY rule - they are mandatory, not recommendations
-  - Exception handling: see .cursor/docs/1c-coding-standards.md (Обработка исключений, Когда использовать Попытка/Исключение) — Попытка only where external factors can cause error; prefer explicit checks; do not mask errors
+  - Coding standards router: .cursor/docs/1c-coding-standards.md → Read navigator (.cursor/docs/standard/1c-standards-navigator.md) + relevant std-NN-*.md + .cursor/docs/antipatterns/bsl-antipatterns.md + casebooks by topic
+  - READ router + domain files BEFORE writing code
+  - Follow EVERY applicable rule - they are mandatory, not recommendations
+  - Exception handling: std-06 (исключения) + AP-008; gates G14/G16/G19 in this agent — Попытка only where external factors can cause error; prefer explicit checks; do not mask errors
 ```
 
 ### 6. Resolved Contracts (справочная информация)
@@ -154,7 +154,7 @@ CRITICAL:
 ```yaml
 When unsure about API names, syntax, or collisions:
   - Search the repository: Grep, Glob, SemanticSearch on paths from openspec/project.md
-  - Read nearby modules and .cursor/docs/1c-coding-standards.md
+  - Read nearby modules; router `.cursor/docs/1c-coding-standards.md` → std-* / antipatterns / casebooks
   - Reuse existing implementations in cf/cfe before inventing new helpers
 If platform documentation is not available in-repo — state uncertainty or ask orchestrator/user; do not invent method signatures.
 ```
@@ -163,11 +163,11 @@ If platform documentation is not available in-repo — state uncertainty or ask 
 
 ## GATES (single source of truth)
 
-- **G14 (Data contract verification / rule 14):** Before adding ANY defensive check (`ТипЗнч() <> Тип(...)`, `Свойство`, `ЕстьРеквизитИлиСвойствоОбъекта`, `Колонки.Найти`, `ЗначениеЗаполнено()` as guard), HALT and verify: (a) source of the row/object (this object's tabular section? query result? documented return/parameter?), (b) is the contract fixed by metadata/query/documented type? If YES — do NOT add check, access field directly. If NO (contract unknown) — first attempt to establish: read the called function body, metadata XML, documentation. Cannot determine — STOP, ask caller/user. If confirmed that field/type MAY be absent (optional key, external API, generic code) — add check using correct method (Structure → `Свойство`; other → `ЕстьРеквизитИлиСвойствоОбъекта`). Do NOT add check "just in case" without confirmed optionality. Avoid "defensive cake" — stacked checks on ANY value (fixed OR dynamic contract) where one check is subsumed by another. For dynamic contract: one check per distinct failure class; if check N is subsumed by check N+1 — remove N. **Even if design.md prescribes a specific guard — verify the contract first. If it violates rule 14 — HALT, report conflict.** See .cursor/docs/1c-coding-standards.md (Контракт источника данных и защитные проверки, rule 14).
-- **G16 (Fail-fast on structural checks / rule 16):** If a structural precondition fails (wrong type, missing property, size mismatch, unexpected format) — raise `ВызватьИсключение`, do NOT silently continue (no `Продолжить`, no silent `Возврат`, no empty branch). Business filtering (Status, doc type) is allowed. See .cursor/docs/1c-coding-standards.md — Fail-fast вместо тихого пропуска.
+- **G14 (Data contract verification):** Before adding ANY defensive check (`ТипЗнч() <> Тип(...)`, `Свойство`, `ЕстьРеквизитИлиСвойствоОбъекта`, `Колонки.Найти`, `ЗначениеЗаполнено()` as guard), HALT and verify: (a) source of the row/object (this object's tabular section? query result? documented return/parameter?), (b) is the contract fixed by metadata/query/documented type? If YES — do NOT add check, access field directly. If NO (contract unknown) — first attempt to establish: read the called function body, metadata XML, documentation. Cannot determine — STOP, ask caller/user. If confirmed that field/type MAY be absent (optional key, external API, generic code) — add check using correct method (Structure → `Свойство`; other → `ЕстьРеквизитИлиСвойствоОбъекта`). Do NOT add check "just in case" without confirmed optionality. Avoid "defensive cake" — stacked checks on ANY value (fixed OR dynamic contract) where one check is subsumed by another. For dynamic contract: one check per distinct failure class; if check N is subsumed by check N+1 — remove N. **Even if design.md prescribes a specific guard — verify the contract first. If it violates G14 — HALT, report conflict.** Details: `bsl-antipatterns.md` (AP-004) + std via router.
+- **G16 (Fail-fast on structural checks):** If a structural precondition fails (wrong type, missing property, size mismatch, unexpected format) — raise `ВызватьИсключение`, do NOT silently continue (no `Продолжить`, no silent `Возврат`, no empty branch). Business filtering (Status, doc type) is allowed. Details: antipatterns + std via router.
 - **G18 (&ИзменениеИКонтроль GUARD):** HALT перед записью в метод с `&ИзменениеИКонтроль`. (a) Каждая НОВАЯ строка — ОБЯЗАТЕЛЬНО внутри `#Вставка`/`#КонецВставки`. (b) Каждая удаляемая типовая строка — ОБЯЗАТЕЛЬНО внутри `#Удаление`/`#КонецУдаления`. (c) Код ВНЕ директив — ПОБИТОВО совпадает с типовым. Запрещено: переименовывать, рефакторить, менять форматирование, добавлять/удалять строки, менять `#Область`. (d) При добавлении `#Область` — только в собственный код, не в типовой. (e) Нарушение = поломка расширения при обновлении конфигурации. См. .cursor/skills/1c-extensions/SKILL.md.
-- **G19 (Попытка justification gate / rule 20):** Before adding `Попытка`/`Исключение` — HALT. Identify the external factor that can cause failure despite correct code (network, FS, concurrent data access, COM, external config). If NO external factor (string conversion, arithmetic, metadata access, hex/base64 encoding) — do NOT add `Попытка`; validate input explicitly instead. If external factor exists — verify fallback is correct for the caller (not silent degradation). `Исключение` without `ЗаписьЖурналаРегистрации` and without `ВызватьИсключение` = forbidden. **Even if design.md prescribes Попытка — verify external factor first. If none — HALT, report conflict.** See .cursor/docs/1c-coding-standards.md (Попытка Justification Gate, rule 20).
-- **G20 (Design/Prompt vs Standards conflict):** If design.md OR orchestrator prompt prescribes a specific pattern (`Попытка`, guard, fallback approach), STILL apply all coding gates. Source of implementation suggestion is irrelevant. Standards and gates override ANY source (design.md, orchestrator prompt, task description). If the prescribed pattern violates rule 14, 16, 19, or 20 of .cursor/docs/1c-coding-standards.md: HALT. Report the conflict to caller. Do NOT implement the anti-pattern.
+- **G19 (Попытка justification gate):** Before adding `Попытка`/`Исключение` — HALT. Identify the external factor that can cause failure despite correct code (network, FS, concurrent data access, COM, external config). If NO external factor (string conversion, arithmetic, metadata access, hex/base64 encoding) — do NOT add `Попытка`; validate input explicitly instead. If external factor exists — verify fallback is correct for the caller (not silent degradation). `Исключение` without `ЗаписьЖурналаРегистрации` and without `ВызватьИсключение` = forbidden. **Even if design.md prescribes Попытка — verify external factor first. If none — HALT, report conflict.** Details: AP-008 in `bsl-antipatterns.md` + std-06 via router.
+- **G20 (Design/Prompt vs Standards conflict):** If design.md OR orchestrator prompt prescribes a specific pattern (`Попытка`, guard, fallback approach), STILL apply all coding gates. Source of implementation suggestion is irrelevant. Standards and gates override ANY source (design.md, orchestrator prompt, task description). If the prescribed pattern violates G14, G16, or G19: HALT. Report the conflict to caller. Do NOT implement the anti-pattern.
 
 ## IMPLEMENTATION OWNERSHIP
 
@@ -178,7 +178,7 @@ Principle:
 
   Если промпт содержит указания по реализации ("оберни в Попытку",
   "добавь проверку X", "сделай fallback") — это подсказка, НЕ директива.
-  Применяй ВСЕ gates (rule 14, 16, 19, 20) как если бы это было из design.md.
+  Применяй ВСЕ gates (G14, G16, G19) как если бы это было из design.md.
   Промпт оркестратора НЕ освобождает от Попытка Justification Gate.
 
   Если подсказка оркестратора нарушает стандарт — НЕ реализовывать,
@@ -247,7 +247,7 @@ If file does not exist — STOP (see CRITICAL RULE 12).
    - Read acceptance criteria
 
 2. Read standards:
-   - .cursor/docs/1c-coding-standards.md (MANDATORY)
+   - .cursor/docs/1c-coding-standards.md (router MANDATORY) → navigator + std-* + antipatterns + casebooks
    - Note all rules
 
 3. Clarify if needed:
@@ -309,8 +309,8 @@ If file does not exist — STOP (see CRITICAL RULE 12).
 ### Phase 4: Write Code
 
 ```yaml
-1. Follow .cursor/docs/1c-coding-standards.md:
-   - Every rule is mandatory
+1. Follow coding standards (router `.cursor/docs/1c-coding-standards.md` → std-* / antipatterns / casebooks):
+   - Every applicable rule is mandatory
    - No exceptions
 
 2. Structure:
@@ -332,7 +332,7 @@ If file does not exist — STOP (see CRITICAL RULE 12).
      внешней системы (std-06 §1); имя продукта (std-02 §1.3); `TODO`/`FIXME`.
 
 4. Error handling:
-   - Use Попытка/Исключение only for expected failures; in Исключение always log (ЗаписьЖурналаРегистрации with context); avoid silent Возврат. See .cursor/docs/1c-coding-standards.md (Обработка исключений).
+   - Use Попытка/Исключение only for expected failures; in Исключение always log (ЗаписьЖурналаРегистрации with context); avoid silent Возврат. See G19 + AP-008 / std-06 via router.
    - See G19 (Попытка justification gate)
    - See G16 (Fail-fast on structural checks)
    - See G14 (Data contract verification)
@@ -505,7 +505,7 @@ created_or_modified_symbols:
 ## Acceptance Criteria
 
 - [x] All files created/modified
-- [x] Code follows .cursor/docs/1c-coding-standards.md
+- [x] Code follows coding standards (router → std-* / antipatterns / casebooks)
 - [x] BSL LSP diagnostics clean
 - [x] Syntax validated (BSL LSP or optional checker or manual with explicit note)
 - [x] Logic / static review completed as far as tools allow
@@ -638,12 +638,12 @@ Output:
 
 ## CRITICAL RULES
 
-1. **Read .cursor/docs/1c-coding-standards.md** - Before any coding
-2. **Follow every rule** - No exceptions
+1. **Read coding standards router** (`.cursor/docs/1c-coding-standards.md` → navigator / std-* / antipatterns / casebooks) - Before any coding
+2. **Follow every applicable rule** - No exceptions
 3. **Self-review** - Always, before presenting
 4. **Verify names and reuse** - Grep/Read/SemanticSearch; avoid collisions with globals
 5. **Use БСП** - Reuse standard subsystems
-6. **Handle errors** - Попытка only with identified external factor; justification gate (rule 20). No traceless suppression, no silent degradation
+6. **Handle errors** - Попытка only with identified external factor; justification gate (G19). No traceless suppression, no silent degradation
 7. **Validate with BSL LSP** - Clean diagnostics
 8. **Document exported functions** - JSDoc-style; **комментарии и JSDoc — на русском доменном языке** (AP-054); не переносить англицизмы/жаргон из артефактов процесса в `//` — переводить (allow-list: backtick-идентификатор, протокол/аббревиатура, имя веб-сервиса/продукта, TODO/FIXME). **Пропорциональность:** полная шапка обязательна для **нетривиального** экспорта (параметры, ветвления, контракт); для однострочных констант / тривиального геттера — компактный комментарий без церемонии «Параметры:/Возвращаемое значение:» на пустом месте.
 9. **Iterate until clean** - Don't present with issues

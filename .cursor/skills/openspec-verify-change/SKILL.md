@@ -1,6 +1,6 @@
 ---
 name: openspec-verify-change
-description: Universal quality gate for OpenSpec changes — independent pre-implementation review with binary verdict (GO / NO-GO). Five layers: Hygiene, Internal Coherence, Problem-Solution Trace, Independent Challenge, Implementation Readiness. Two modes: pre-apply, post-apply.
+description: Universal quality gate for OpenSpec changes — independent pre-implementation review; chat verdict via verdict-card (можно apply / выбор / terminal repair). Internal layers use GO/NO-GO only in reports. Five layers: Hygiene, Internal Coherence, Problem-Solution Trace, Independent Challenge, Implementation Readiness. Two modes: pre-apply, post-apply.
 license: MIT
 compatibility: Requires openspec CLI.
 metadata:
@@ -9,12 +9,12 @@ metadata:
   generatedBy: "1.1.1"
 ---
 
-`/opsx:verify <name>` — независимое согласование ЗНИ перед `/opsx:apply`. Главный вопрос пользователя: «**могу ли я безопасно запустить apply?**» Ответ — бинарный (**GO** / **NO-GO**) и предъявлен в первой строке чата.
+`/opsx:verify <name>` — независимое согласование ЗНИ перед `/opsx:apply`. Главный вопрос пользователя: «**могу ли я безопасно запустить apply?**» Первая строка чата — шаблон `.cursor/skills/openspec-verify-change/templates/verdict-card.md` («можно apply» / «до старта нужен ваш выбор» / terminal repair). Имена `GO` / `NO-GO` / `Layer N` / `PASS` / `FAIL` — **только** в `reports/*.md` и internal ledger; в чат — `.cursor/rules/verify-user-communication.mdc` + §7 `chat-output-budget.mdc`.
 
 ## Принципы
 
 1. **Пять слоёв, в строгом порядке.** Каждый слой имеет единственную цель; пропуск/слияние слоёв запрещены, кроме явного триггера Layer 4.
-2. **Бинарный вердикт.** Чат всегда даёт `GO` (можно apply) или `NO-GO` (на обсуждение). Не «WARNING/SUGGESTION», не «PASS/FAIL» в чат.
+2. **Бинарный вердикт (internal → chat).** Internal ledger: `GO` / `NO-GO`. В чат — формулировки verdict-card (не сырые `GO`/`NO-GO`, не «WARNING/SUGGESTION», не «PASS/FAIL»).
 3. **Без скидок по объёму.** Глубина проверки одинакова для маленьких и больших ЗНИ — одна сломанная задача может остановить пользователя так же, как 25. **Исключение:** режимы `verify_depth` (`incremental`, `lite`) с guardrails — см. § «Verify depth» ниже; не ослабляют adversarial Layer 4 на первом прогоне.
 4. **Verify чинит repair-класс сам.** Содержательные правки scope — через user `/opsx:extend`. Детерминированные пробелы постановки (карта repair в §2.6 `opsx-output-style.md`) — **internal Repair Loop** внутри verify, без user-facing extend и без «Подтвердить?».
 5. **Один файл отчёта в день.** Полный отчёт `reports/verification-YYYY-MM-DD.md` создаётся, только если что-то найдено или исправлено; «тихий» прогон по фильтру новизны новый файл не пишет.

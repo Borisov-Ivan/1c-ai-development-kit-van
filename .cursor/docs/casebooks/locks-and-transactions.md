@@ -213,7 +213,7 @@ See `systematic-debugging.md` for the surrounding methodology — locks must be 
 |---|---|
 | Worked posting example | `./platform-solutions.md §9 → "Managed locks and deadlock prevention"` |
 | Transaction nesting in event handlers | `./platform-solutions.md §4 → "Transactions in event handlers"` |
-| Authoritative query rules under locks | `.cursor/docs/1c-coding-standards.md §3 → "Queries"` |
+| Authoritative query rules under locks | `.cursor/docs/standard/std-04-queries.md` (+ skill `1c-query-optimization`) |
 | Logging lock-conflict events | `./logging-strategy.md` |
 | Systematic debugging of lock incidents | `systematic-debugging.md` |
 | Register design (what gets locked) | `./registers-design.md` |

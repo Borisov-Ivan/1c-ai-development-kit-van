@@ -13,7 +13,7 @@ alwaysApply: false
 | Маршрут | Когда | Что делать |
 |---------|-------|------------|
 | **docs-fix** | Опечатка в docs/rules/skills, без BSL/XML `src/` | Правка напрямую; без ЗНИ |
-| **quick-fix** (Light Mode) | 1–2 файла `.bsl`, очевидный фикс, нет архитектуры | Light Mode по `1c-halt-triggers.mdc`; без полного explore→new при явном согласии |
+| **quick-fix** (Light Mode) | **1 файл** `.bsl`, очевидный фикс, нет архитектуры | Light Mode по `1c-halt-triggers.mdc`; без полного explore→new при явном согласии |
 | **full-cycle** | Новая фича, форма/макет, >2 модулей, неочевидный дефект | `/opsx:explore` → `/opsx:new` → verify → apply |
 
 ## Promotion-триггеры (quick → full)

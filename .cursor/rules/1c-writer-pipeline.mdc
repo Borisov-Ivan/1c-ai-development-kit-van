@@ -276,7 +276,7 @@ writer'а (HALT с MISSING_INPUT при получении).
 4. Сравнить код вне директив с base. При расхождении — **СТОП**, вернуть writer на исправление.
 5. Путь к base-файлу и результат проверки («verified: совпадает» или «расхождение в строках N-M») передать в промпт reviewer.
 
-Место шага в потоке — после LINT GATE и API/METADATA CHECK, до reviewer (эталон — `1c-agent-delegation.mdc` § WRITER PIPELINE). При обнаружении `&ИзменениеИКонтроль` дополнительно: enrich writer prompt блоком EXTENSION_GUARD **до** вызова writer (см. EXTENSION GATE выше).
+Место шага в потоке — после LINT GATE, IDENTIFIER HYGIENE CHECK, COMMENT HYGIENE CHECK и API/METADATA CHECK, до reviewer (эталон — `1c-agent-delegation.mdc` § WRITER PIPELINE). При обнаружении `&ИзменениеИКонтроль` дополнительно: enrich writer prompt блоком EXTENSION_GUARD **до** вызова writer (см. EXTENSION GATE выше).
 
 ---
 
