@@ -46,22 +46,9 @@ metadata:
    - Если на шаге 1b.2 уже прочитан legacy-источник — использовать его.
    - Если имя передано аргументом и `exploreContext` ещё не задан — сначала просмотреть контекст сессии на блок `## Постановка ЗНИ` (или legacy `## Для /opsx:ff`), затем `Glob temp/explore-handoff-*.md` (≤48ч); legacy-файлы — только по явной ссылке пользователя.
 
-   **Handoff Contract — поля блока `## Постановка ЗНИ` (полный список парсинга):**
+   **Handoff Contract — поля блока `## Постановка ЗНИ`:** см. `templates/handoff-contract.md` (при обрезке SKILL — Read шаблон во втором батче).
 
-   | Поле | Обязательность | Куда идёт |
-   |------|----------------|-----------|
-   | Симптом | да | `## Why` |
-   | Корневая причина (`[verified]` / `[hypothesis: план]`) | да | `## What Changes` |
-   | Что менять | да | scope / `## What Changes` |
-   | Файлы | да | `## Scope` |
-   | Приёмка | да | `## Acceptance Criteria` / scenarios |
-   | Связь с архивом (extends / новый / unrelated) | да | `## Decisions` (precedent) |
-   | Architect / verify (`required` \| `not-required` \| `report: <путь>`) | да | Design Gate (шаг 5e.3) |
-   | Тема маркера | опционально | Metadata Gate (черновик `comment_suffix`; без ФИО и даты) |
-   | Срезы (черновик) | опционально | подсказка slice decomposition (шаг 5e.1) |
-   | Открытые решения | опционально | `design.md` § Открытые вопросы + карточка решения до apply |
-
-   Для legacy-источников — `Architect Gate`, `Ключевые решения`, `Knowledge findings`, `Рекомендации по срезам`.
+   Для legacy-источников — поля из `templates/handoff-contract.md` (legacy-блок).
    - Если найден блок `## Постановка ЗНИ` (в чате или handoff) — это **primary source** для `proposal`, `design`, `specs`, `tasks`; не пересобирать вручную.
    - Если источник старше 48 часов или не относится к change — считать, что `exploreContext` отсутствует.
    - Если `exploreContext` отсутствует, это не блокирует простой запуск new. Design Gate ниже выполнит hard-gate только при структурных триггерах.
@@ -132,6 +119,28 @@ metadata:
    - yaml-like: `developer:`, `comment_suffix:`, `marker_style:`
    - list: `- **developer:**`, `- **comment_suffix:**`, `- **marker_style:**`
    Follow-up при плейсхолдере: `- [ ] F1 Заполнить developer в proposal.md (и при необходимости project.md) до первого кода`
+
+1.55. **Forms / MXL Mode Gate (когда постановка затрагивает форму или макет)**
+
+   **Read** `.cursor/rules/forms-mxl-mode-gate.mdc` при триггерах из правила (форма / Form.xml / макет / Template.xml / MXL).
+
+   - ЗНИ без UI → в proposal `artifact_mode: n/a`, вопрос **не** задавать.
+   - Иначе — **отдельный** вопрос в чат: копировать **только** секцию «Формулировка вопроса (чат)» из Mode Gate (проза: вручную / автоматически / программно). **Не** выводить enum-список `manual`/`assisted`/`bsl-only` как заголовки вариантов. Mapping ответа → `artifact_mode` — по таблице в том же правиле (пусто/«да» → `manual`).
+   - Режим «автоматически» (`assisted`) для Form при отсутствии skill `1c-forms/compile`|`edit` → HALT→`manual` (предпочтительно зафиксировать `manual` и сообщить).
+   - «Заимствовать в расширение» в постановке → блокер человеку, Mode Gate не снимает.
+   - Запись в `proposal.md`:
+
+   ```markdown
+   ## Forms & layouts mode
+
+   artifact_mode: manual | assisted | bsl-only | n/a
+   ```
+
+   Resume: валидная секция уже есть → не переспрашивать без смены UI-scope.
+
+1.56. **Frontload материальных вопросов (до apply)**
+
+   До передачи на `/opsx:apply` собрать в new/extend: Mode Gate (если UI), открытые продуктовые развилки, triage-маршрут при сомнении (см. `task-triage.mdc`). Не оставлять серию уточнений «на потом в apply».
 
 2. **Create or resume the change directory**
 
@@ -234,6 +243,7 @@ metadata:
       - **All other artifacts**: Create the artifact file using `template` as the structure
       - Apply `context` and `rules` as constraints - but do NOT copy them into the file
       - **Metadata block**: When creating `proposal.md`, ALWAYS add `## Metadata (comment markers)` (`developer`, `comment_suffix`, `marker_style`) immediately after `## Why`.
+      - **Forms & layouts mode**: When creating `proposal.md`, ALWAYS add `## Forms & layouts mode` with `artifact_mode:` (`manual` | `assisted` | `bsl-only` | `n/a`) per Mode Gate (шаг 1.55 / `forms-mxl-mode-gate.mdc`). Без UI → `n/a`.
       - Show brief progress: "✓ Created <artifact-id>"
 
    b. **Continue until all `applyRequires` artifacts are complete**

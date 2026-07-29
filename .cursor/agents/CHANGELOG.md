@@ -1,12 +1,5 @@
 # Changelog — 1C Agent Ecosystem
 
-## [4.11] - 2026-07-25
-
-### Changed (Task.model enum sync: Opus 5 / Sonnet 5 / GPT-5.6)
-- **`.cursor/rules/model-selection.mdc`:** Primary архитектора `claude-opus-4-8-thinking-high` → **`claude-opus-5-thinking-high`** (Opus 4.8 выключен в Settings → Models). Обновлён список допустимых slug'ов enum `Task.model` под текущую сборку Cursor; в «устаревшие» добавлены `claude-opus-4-8-thinking-high`, `claude-4.6-sonnet-medium-thinking`, `gpt-5.5-medium`, `gpt-5.3-codex`.
-- **`.cursor/rules/architect-gate.mdc`:** ссылка на Primary в цепочке вызовов синхронизирована с `model-selection.mdc`.
-- Reviewer/simplifier Primary (`gemini-3.1-pro`), writer/explorer/trace/QC (без `model=`) — без изменений; `gemini-3.1-pro` остаётся в enum и включён.
-
 ## [4.10] - 2026-06-27
 
 ### Changed (project.md / kit SSOT split)
@@ -33,7 +26,7 @@
 - **Восстановлено (cherry-pick из `747b336`/`fb7991e`):** спецификация **Карта правок** (`reports/code-map.md`) — `openspec-apply-change`, `opsx-output-style` §5.2, `chat-output-budget` §1c, `openspec-archive-change`.
 - **Сохранено:** reviewer contract v3 (`fb7991e`), verify v8, explore Ultra-Lite v3.
 - **Добавлено в git:** intake/debug команды и скиллы, always-apply rules (conversational-discipline, command-skill-gate, bsl-write-guard, orchestrator-as-navigator, …), секция составного брифа intake→explore/debug в `opsx-output-style.md` §5.1.
-- **AGENTS.md:** команды `/opsx:intake`, `/opsx:debug` в decision tree.
+- **AGENTS.md:** *(deprecated)* ранее команды `/opsx:intake`, `/opsx:debug` в decision tree — удалены; вход — `/opsx:explore`.
 
 ## [4.7] - 2026-06-10
 

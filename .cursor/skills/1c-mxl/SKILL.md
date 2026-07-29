@@ -7,9 +7,24 @@ description: Complete toolkit for 1C spreadsheet templates (MXL) - compile from 
 
 Полный набор инструментов для работы с макетами табличных документов 1С (Template.xml). Поддержка JSON DSL для быстрого создания печатных форм.
 
+**Mode Gate:** `.cursor/rules/forms-mxl-mode-gate.mdc` — режим из proposal (`artifact_mode`).
+
+## Режимы (`artifact_mode`)
+
+| Режим | Template.xml | Действие |
+|-------|--------------|----------|
+| **manual** (default) | Не compile агентом | Инструкция / WAIT; правки в Конфигураторе + выгрузка |
+| **assisted** | Через skill | `1c-mxl/compile` → `validate`; **без** сырого Write Template.xml |
+| **bsl-only** | Не менять | Код заполнения макета без правки Template.xml |
+| **n/a** | — | ЗНИ без макета |
+
+Compile Form.xml: `1c-forms/compile` + `edit` при `assisted`. Запрет form-add / ChildObjects / `-FromObject` — в SKILL compile/edit и halt-triggers.
+
+**Маркеры задач (apply):** в тексте tasks допустимы `[mxl:assisted]` / `[mxl:manual]` — оркестратор сверяет с `artifact_mode` proposal; при расхождении — STOP / extend. `assisted` → только `1c-mxl/compile`+validate; `manual` → WAIT/инструкция без compile.
+
 ## Quick Start
 
-### Создать макет из JSON
+### Создать макет из JSON (только `assisted`)
 ```bash
 # 1. Создать JSON описание макета
 # 2. Скомпилировать в Template.xml
@@ -31,6 +46,7 @@ description: Complete toolkit for 1C spreadsheet templates (MXL) - compile from 
 - Компилирует JSON (20-30 строк) в Template.xml (200-500+ строк)
 - Автоматически создает области, параметры, колонки
 - Поддержка всех типов ячеек (Text, Number, Date, Picture)
+- На apply: только при `artifact_mode: assisted`
 
 ### 2. decompile - Декомпиляция в JSON DSL
 **Путь**: `1c-mxl/decompile/SKILL.md`
@@ -53,16 +69,15 @@ description: Complete toolkit for 1C spreadsheet templates (MXL) - compile from 
 ## Workflow
 
 ```yaml
-Создание печатной формы:
-  1. Спроектировать структуру (JSON DSL)
-  2. Скомпилировать: 1c-mxl compile
-  3. Валидировать: 1c-mxl validate
-  4. Интегрировать в конфигурацию
-
-Редактирование существующей:
-  1. Декомпилировать: 1c-mxl decompile
-  2. Отредактировать JSON
+Создание печатной формы (assisted):
+  1. Mode Gate: artifact_mode: assisted
+  2. Спроектировать структуру (JSON DSL)
   3. Скомпилировать: 1c-mxl compile
   4. Валидировать: 1c-mxl validate
+  5. Интегрировать в конфигурацию
+
+manual:
+  1. Инструкция Конфигуратор + выгрузка (WAIT)
+  2. Без compile оркестратором
 ```
 

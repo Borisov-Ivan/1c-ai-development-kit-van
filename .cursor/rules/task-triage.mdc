@@ -1,0 +1,36 @@
+---
+description: "On-demand triage маршрута задачи 1С: docs-fix / quick-fix / full-cycle; стык с Light Mode; promotion-триггеры"
+globs:
+alwaysApply: false
+---
+
+# Task Triage (on-demand)
+
+Загружать при выборе маршрута: «малый фикс» vs полный OpenSpec-цикл. Не заменяет Mode Gate и XML write guard.
+
+## Маршруты
+
+| Маршрут | Когда | Что делать |
+|---------|-------|------------|
+| **docs-fix** | Опечатка в docs/rules/skills, без BSL/XML `src/` | Правка напрямую; без ЗНИ |
+| **quick-fix** (Light Mode) | 1–2 файла `.bsl`, очевидный фикс, нет архитектуры | Light Mode по `1c-halt-triggers.mdc`; без полного explore→new при явном согласии |
+| **full-cycle** | Новая фича, форма/макет, >2 модулей, неочевидный дефект | `/opsx:explore` → `/opsx:new` → verify → apply |
+
+## Promotion-триггеры (quick → full)
+
+Эскалировать в **full-cycle**, если всплывает любой из:
+
+- транзакции / управляемые блокировки;
+- новый или меняющийся **экспортный API**;
+- wired metadata (новые реквизиты/ТЧ/формы как объекты);
+- RLS / права / роли;
+- Mode Gate форма/макет;
+- неочевидный root cause.
+
+## Запрет эскалации «ок → meta/form-add»
+
+Triage **никогда** не предлагает: заимствование в расширение, form-add, template-add, правку ChildObjects, meta-compile. Это всегда блокер человеку (`1c-no-metadata-creation.mdc`).
+
+## Clarification frontload
+
+Материальные вопросы (режим формы, scope, инварианты) — **до** `/opsx:apply`. В apply — один preflight (metadata/маркеры/открытая развилка), без серии mid-apply уточнений.

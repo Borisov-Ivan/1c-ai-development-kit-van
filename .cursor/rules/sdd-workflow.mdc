@@ -61,7 +61,7 @@ review/explore → extend (user) → verify → apply
 
 | Порог (задач в tasks.md) | Поведение в workflow |
 |--------------------------|----------------------|
-| **≤ 5 задач** | **Lite tier ЗНИ**: slice decomposition опциональна, срезов может быть 1 (или legacy без срезов). На глубину verify это **не** влияет — облегчённый режим verify включается только флагом `--lite` (guardrails — SKILL verify). |
+| **≤ 5 задач** | **Lite tier ЗНИ**: slice decomposition опциональна, срезов может быть 1 (или legacy без срезов). На глубину verify это **не** влияет — глубину выбирает оркестратор внутри SKILL verify по внутренней таблице условий (без ключа в палитре). |
 | **≥ 6 задач** | **Slice Generation Gate**: design.md обязан содержать `## Slices`. new не разрешает переход к tasks без срезов. Legacy tasks — `/opsx:extend <name>` или ручная правка. |
 
 ## ПРИНЦИПЫ

@@ -18,6 +18,10 @@ priority: 998
 | Реализация ЗНИ без /opsx:apply | **СТОП.** writer/reviewer запрещены. Исключение: Light/Mechanical | APPLY GATE в `1c-agent-delegation.mdc` |
 | explore без active change | **СТОП.** writer/reviewer → `/opsx:new` | `openspec-explore/SKILL.md` |
 | Новый объект метаданных | **СТОП.** Никогда не создавать | `1c-no-metadata-creation.mdc` |
+| Form.xml / Template.xml / «заимствовать» / form-add / template-add / ChildObjects | Mode Gate + XML guard; заимствование и form-add — **всегда** блокер человеку | `forms-mxl-mode-gate.mdc`, `1c-xml-write-guard.mdc` |
+| `assisted` + Form.xml без skill compile/edit | **HALT → manual** (не сырой Write) | `forms-mxl-mode-gate.mdc` |
+| `-FromObject` / borrow / регистрация формы в ChildObjects объекта | **СТОП** (запрещено в kit-van v1) | `1c-forms/compile`, `1c-forms/edit` |
+| Выбор маршрута docs-fix / quick-fix / full-cycle | Read `task-triage.mdc`; promotion-триггеры; запрет «ок → meta/form-add» | `.cursor/rules/task-triage.mdc` |
 | Трасса `.pff` / TRACE / стек 1С | СТОП → **onec-trace-analyst** | `1c-error-analysis.mdc` |
 | Task explore/generalPurpose для 1С | **СТОП.** Повтор с 1С-агентом | `tool-name-guard.mdc`, `model-selection.mdc` |
 | Light Mode: 2–10 строк, 1 файл | **onec-code-writer** + **onec-code-reviewer** | см. LIGHT MODE |

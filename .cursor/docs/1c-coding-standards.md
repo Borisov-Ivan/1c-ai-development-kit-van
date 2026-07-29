@@ -16,6 +16,21 @@ globs: "**/*.bsl"
 
 **FIRST ACTION**: При написании или ревью кода 1С обязательно прочитай релевантный доменный файл из `.cursor/docs/standard/` (через navigator) и `.cursor/docs/antipatterns/bsl-antipatterns.md`.
 
+## Доменные кейсбуки (on-demand)
+
+Проектирование блокировок, журнала, регистров, СКД, async и типовых ловушек платформы — **не** вендорский `std-*`. Канон: [`.cursor/docs/casebooks/`](casebooks/README.md) (D2).
+
+| Тема | Файл |
+|------|------|
+| Блокировки и транзакции | `.cursor/docs/casebooks/locks-and-transactions.md` |
+| Журнал регистрации | `.cursor/docs/casebooks/logging-strategy.md` |
+| Регистры | `.cursor/docs/casebooks/registers-design.md` |
+| СКД (дизайн отчёта) | `.cursor/docs/casebooks/dcs-design.md` |
+| Async на клиенте | `.cursor/docs/casebooks/async-methods.md` |
+| Ловушки платформы | `.cursor/docs/casebooks/platform-solutions.md` |
+| Модуль формы / reserved names | `.cursor/docs/casebooks/form-module-notes.md` |
+| XML pitfalls (ручные инструкции) | `.cursor/docs/casebooks/metadata-xml-workarounds.md` |
+
 ## Release-hygiene и маркеры ЗНИ (rule 17)
 
 Комментарии, попадающие под **Whitelist предрелиза** (baseline `.cursor/docs/marker-canon.md` + строки в [openspec/project.md](../../openspec/project.md), секция «Форматы и соглашения по комментариям BSL») в рамках scope glob, **exempt от удаления** по AP-040..AP-045 — **кроме AP-053** (содержимое `domain_label` в whitelist-строках: rewrite, не delete). При отсутствии project whitelist — строгая гигиена (marker-canon). Навигация: [.cursor/docs/bsl-comment-formats-project.md](bsl-comment-formats-project.md), [.cursor/docs/marker-layers-guide.md](marker-layers-guide.md), [.cursor/docs/marker-canon.md](marker-canon.md).

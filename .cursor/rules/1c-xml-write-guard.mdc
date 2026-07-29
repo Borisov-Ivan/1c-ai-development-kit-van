@@ -14,10 +14,12 @@ globs: "src/**/*.xml"
 
 ## ДЕЛЕГИРОВАНИЕ
 
+Сырой Write/StrReplace/Delete оркестратора по `src/**/*.xml` — **запрещён всегда**. Узкое исключение Form.xml / Template.xml — только при `artifact_mode: assisted` **и** вызове соответствующего skill (см. `.cursor/rules/forms-mxl-mode-gate.mdc`).
+
 | Файл / артефакт | Инструмент |
 |-----------------|------------|
-| Form.xml (управляемая форма) | **СТОП.** Сформировать инструкцию ручного конфигурирования для пользователя **или** постановку на программное создание элементов в **модуле формы (BSL)**. Не генерировать и не править `Form.xml` через JSON DSL, скиллы-компиляторы или произвольные скрипты — генераторы форм из фреймворка удалены. WAIT после ручной части до выгрузки. |
-| Template.xml (макет табличного документа) | Скилл 1c-mxl/compile |
+| Form.xml (управляемая форма) | По умолчанию / `manual` / `bsl-only`: **СТОП** — инструкция ручного конфигурирования **или** программные элементы в модуле формы (BSL). **`assisted`:** только skill `1c-forms/compile` или `1c-forms/edit`; если skill отсутствует — **HALT → manual** (не ослаблять guard «заранее», не сырой Write и не произвольные скрипты). WAIT после ручной части до выгрузки. |
+| Template.xml (макет табличного документа) | **`assisted`:** скилл `1c-mxl/compile` → validate. **`manual` / иное:** инструкция / WAIT — без compile и без сырого Write. |
 | Rights.xml (роль) | Скилл 1c-roles/compile через агента |
 | Остальные XML в src/ (метаданные, конфигурация) | **СТОП** — блокер пользователю по `1c-no-metadata-creation.mdc` |
 
@@ -48,11 +50,12 @@ globs: "src/**/*.xml"
 ## ИСКЛЮЧЕНИЯ
 
 - Правки файлов в `openspec/`, `.cursor/` (не XML метаданных 1С в src/) — разрешены.
-- Чтение (Read) XML для анализа — разрешено. Запрещены только Write, StrReplace, Delete.
+- Чтение (Read) XML для анализа — разрешено. Запрещены сырые Write, StrReplace, Delete оркестратора.
+- Form.xml / Template.xml при `assisted` — **только** через skill из таблицы выше (не через произвольный скрипт/JSON вне skill).
 
 ## СВЯЗЬ
 
-Ref: `1c-agent-delegation.mdc` (ПРИНЦИП), `1c-utility-agents.mdc`, `openspec-apply-change/SKILL.md` (Task Dispatch, Form tasks).
+Ref: `forms-mxl-mode-gate.mdc`, `1c-agent-delegation.mdc` (ПРИНЦИП), `1c-utility-agents.mdc`, `openspec-apply-change/SKILL.md` (Task Dispatch, Form tasks).
 
 ---
 

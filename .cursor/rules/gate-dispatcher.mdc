@@ -21,6 +21,8 @@ Always-apply **только триггеры**. Тела гейтов — on-dem
 | Delta specs (создание/правка `specs/**` в new/extend; полнота на verify/apply/archive) | `.cursor/rules/openspec-specs-gate.mdc` |
 | Срезы: декомпозиция, slice-gate, defect placement (new/extend/apply/verify/archive) | `.cursor/rules/vertical-slices.mdc` |
 | Правка `.bsl`, Light/Mechanical, HALT-таблица | `.cursor/rules/1c-halt-triggers.mdc` |
+| Форма / Form.xml / макет / Template.xml / MXL в new·apply·verify | `.cursor/rules/forms-mxl-mode-gate.mdc` |
+| Выбор маршрута docs-fix / quick-fix / full-cycle | `.cursor/rules/task-triage.mdc` |
 
 ## Алгоритм
 
@@ -28,8 +30,13 @@ Always-apply **только триггеры**. Тела гейтов — on-dem
 2. Пройти триггеры из таблицы; при **любом** совпадении — **Read** файл гейта до действия.
 3. Не дублировать тела гейтов в чат — только результат для заказчика.
 
+## On-demand кейсбуки (не gate-файлы)
+
+При проектировании/ревью по теме — **Read** соответствующий файл из `.cursor/docs/casebooks/` (индекс `README.md`): locks / logging / registers / dcs / async / platform-solutions / form-module / metadata-xml-workarounds. Это docs, не always-apply гейт.
+
 ## SSOT
 
 - Модели Task → только `model-selection.mdc`
 - Жаргон чата → `.cursor/docs/chat-lexicon.md`
 - Делегирование 1С → `1c-agent-delegation.mdc`
+- Кейсбуки → `.cursor/docs/casebooks/` (не `docs/standard/std-*`)

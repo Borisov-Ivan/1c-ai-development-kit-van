@@ -9,6 +9,8 @@ Reference of standard managed form design patterns for 1C. Load when requirement
 
 **How to use:** pick a matching archetype, apply naming conventions, use advanced patterns as needed.
 
+**Смежные кейсбуки:** reserved names и wiring модуля формы — [`.cursor/docs/casebooks/form-module-notes.md`](../../../docs/casebooks/form-module-notes.md); типичные XML-ошибки для **ручных** инструкций — [`.cursor/docs/casebooks/metadata-xml-workarounds.md`](../../../docs/casebooks/metadata-xml-workarounds.md); async на клиенте — [`.cursor/docs/casebooks/async-methods.md`](../../../docs/casebooks/async-methods.md).
+
 ---
 
 ## Form Archetypes

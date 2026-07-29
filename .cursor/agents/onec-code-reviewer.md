@@ -221,6 +221,7 @@ status: NOT_CONNECTED
 | # | Вопрос | Finding при yes |
 |---|--------|------------------|
 | 1 | **Complexity justified:** Оправдана ли сложность реализации **присущей сложностью домена** (а не незнанием контракта, копипастой или попыткой учесть «всё подряд»)? Если нет — yes. | DISPROPORTIONATE_COMPLEXITY |
+| 1b | **Signal density / поверхность:** Есть ли систематический шум поверхности (церемония, пустые слои, раздутые имена/ветки) **без вклада** в поведение или ясность — даже если Q1 = complexity justified и нет точного AP-match? Если да — yes. **Не** дублировать и не переписывать Q1. | DISPROPORTIONATE_SURFACE (+ Action REFACTOR) |
 | 2 | **Contract consistency:** Есть ли источник, где часть полей читается DIRECT, а часть DEFENSIVE/EXPLORATORY без внешнего обоснования в Evidence? | CONTRACT_INCONSISTENCY |
 | 3 | **Knowledge deficit:** Есть ли источники с `verdict = PARTIAL/ABSENT` в Knowledge Assessment и отсутствие evidence установления контракта (комментарий, документация, Resolved Contracts)? | KNOWLEDGE_DEFICIT |
 | 4 | **Contract inference:** Есть ли поля с `access = EXPLORATORY` (несколько альтернативных путей к одному семантическому значению)? | CONTRACT_INFERENCE |
@@ -505,6 +506,7 @@ Remediation: См. std-transaction.md / AP-015 карточку.
 - Вердикт: краткий вывод о необходимости рефакторинга
 ```
 
+**HARD (поверхность):** низкая читаемость из‑за **шума поверхности** (не intrinsic complexity домена) **обязана** порождать ≥1 finding с `Action = REFACTOR` (`DISPROPORTIONATE_SURFACE` или эквивалент). Elegance Score **не** единственный канал — advisory-only недостаточно, если Q1b = yes.
 ### Reasoning Appendix
 
 Разделы:

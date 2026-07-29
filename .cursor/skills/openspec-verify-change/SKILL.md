@@ -69,20 +69,28 @@ Verify не правит scope артефактов. Если в запросе 
 
 Если запрос — только имя ЗНИ — Scope Gate проходит молча.
 
-### 1c. Verify depth и флаги запроса
+### 1c. Verify depth (внутренняя таблица; без ключа в палитре)
 
-Разобрать запрос пользователя:
+Оркестратор выбирает `verify_depth` по состоянию change (пользователю ключи не предлагать):
 
-| Флаг / условие | `verify_depth` | Слои |
-|----------------|----------------|------|
-| Первый verify или `decision_round=0`, без `--lite` | `full` | L1–L5 |
+| Условие | `verify_depth` | Слои |
+|---------|----------------|------|
+| Первый verify / `decision_round=0` / смена оси design / REJECT security·correctness | `full` | L1–L5 (независимый аудит) |
+| Повторный verify, design не менялся, нет открытой развилки | `lite` | L2 + L5; L4 `SKIPPED-lite` — только исполнимость |
 | После **user-extend** по decision (`decision_round>0`) | `incremental` | L1 diff + L4 targeted + L5 если менялся tasks |
-| **Между срезами** (после приёмки `S<N>.accept`, запрос вида «проверь срез S<K>» / verify на slice-gate из apply) **и** design.md не менялся с последнего challenge | `incremental` | L2 + L5 по затронутому срезу; L4 `SKIPPED-novelty` (design не менялся) |
-| `/opsx:verify <name> --lite` **и** нет открытой развилки **и** `decision_round=0` | `lite` | L2 + L5; L4 `SKIPPED-lite` |
+| **Между срезами** (после приёмки `S<N>.accept` / slice-gate из apply) **и** design.md не менялся с последнего challenge | `incremental` | L2 + L5 по затронутому срезу; L4 `SKIPPED-novelty` |
 
-**Guardrails `--lite`:** запрещён при `open_decision_id != null`, `decision_round > 0`, или открытой развилке в последнем отчёте. В чате: «проверена исполнимость без повторного независимого аудита постановки» (без слова lite в HALT).
+**Guardrails `lite` (авто):** недоступен при `open_decision_id != null`, `decision_round > 0`, или открытой развилке в последнем отчёте. В чате: «проверена исполнимость без повторного независимого аудита постановки».
 
-**Guardrails `incremental`:** только после user-extend по decision **или** на границе среза (slice-gate); **не** после internal Repair Loop (repair → `verify_depth: full` как сейчас). Если `design_mtime` > `last_challenge_at` — incremental на границе среза недоступен, нужен `full` (L4 обязателен). `/opsx:apply` на slice-gate ссылается на этот режим вместо полного прогона.
+**Guardrails `incremental`:** только после user-extend по decision **или** на границе среза (slice-gate); **не** после internal Repair Loop (repair → `verify_depth: full`). Если `design_mtime` > `last_challenge_at` — incremental на границе среза недоступен, нужен `full` (L4 обязателен). `/opsx:apply` на slice-gate ссылается на этот режим вместо полного прогона.
+
+**Ось архитектуры (лаконичность, D5):** полный независимый аудит (L4 full) обязателен при **смене оси** (новый архитектурный рычаг / REJECT security·correctness / явный redesign), а **не** при каждом `mtime(design.md)` после APPROVE закрытой оси. После GO + закрытая развилка + ось не менялась → default `lite` / `incremental` (см. таблицу). **Не ужимать:** первый full по ЗНИ; петля приёмки среза; аудит при смене оси или REJECT.
+
+**Repair-класс:** точечный re-check слоёв согласованности/готовности без полного пакета независимых аудитов «с нуля». Жёстче насыщение развилок (`decision_round_max` / earlier saturated) — не разгонять форум гипотез через серию full verify.
+
+**Контекст агентов verify:** в промпт — delta design + сводка `closed_decisions`, не полный `debug.md` каждый раз.
+
+**Research ≠ verify:** цикл «замер → вывод» → `/opsx:explore` + при необходимости `/opsx:extend`; verify = исполнимость зафиксированного плана. Граница с triage: triage выбирает маршрут цикла; verify не заменяет research.
 
 Записать выбранный `verify_depth` в snapshot отчёта.
 
@@ -133,6 +141,9 @@ Grep `tasks.md` на `^- \[[ ]\]` — если найдено хотя бы од
 | `<!-- phase-gate -->` (legacy маркер фазы) | Заменить на пометку `legacy-phase-gate-deprecated` в info-секции отчёта | `legacy-phase-gate` (info) |
 | Незакрытые backtick-блоки в `design.md`/`tasks.md` | Закрыть | `unbalanced-fences` (auto-fix) |
 | ID задачи без префикса среза, когда есть `# Срез` | Лог в info без правки | `task-without-slice-prefix` (info) |
+| UI-задачи (Form.xml / Template.xml / «форма»+compile) без секции `## Forms & layouts mode` / `artifact_mode` в proposal | Info + ссылка на `forms-mxl-mode-gate.mdc`; **не** авто-выбирать `assisted` | `missing-artifact-mode` (info) |
+| `artifact_mode: bsl-only` при задачах compile Form/Template | Info / repair-кандидат согласованности | `bsl-only-vs-xml-task` (info) |
+| `artifact_mode: assisted` + Form.xml при отсутствии skill `1c-forms/compile`\|`edit` | Info: ожидаем HALT→manual на apply | `assisted-form-without-skill` (info) |
 
 **Если правок не было** — записать `layer_1_hygiene: PASS`. Если были — `AUTOFIXED` + список в `### Авто-исправлено (Layer 1)` отчёта в техническом формате (файл, строка, что изменено); каркас таблицы — `.cursor/skills/openspec-verify-change/templates/layer-1-hygiene-table.md`.
 

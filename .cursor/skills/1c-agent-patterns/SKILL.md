@@ -9,6 +9,10 @@ description: Reference guide for 1C agent delegation patterns - complexity asses
 
 Шаблоны промптов разнесены по ролевым файлам. Этот файл — навигатор: оценка сложности, маршрутизация по ролям, выбор модели, общие блоки инструкций (Shared instruction blocks), batch-операции, обработка ошибок и пороги делегирования.
 
+**Доменные кейсбуки (on-demand):** при проектировании блокировок/регистров/СКД/async/журнала/ловушек платформы — Read `.cursor/docs/casebooks/` (индекс `README.md`). Не путать с вендорским `std-*`.
+
+**Sidecar-промпты Task:** [sidecar.md](sidecar.md) — explorer-impact / explorer-patterns / worker-bounded-edit / reviewer-diff-first (без MUST плотности — S8).
+
 ---
 
 ## РОЛЕВЫЕ МОДУЛИ (где какой шаблон)

@@ -645,7 +645,7 @@ Output:
 5. **Use БСП** - Reuse standard subsystems
 6. **Handle errors** - Попытка only with identified external factor; justification gate (rule 20). No traceless suppression, no silent degradation
 7. **Validate with BSL LSP** - Clean diagnostics
-8. **Document exported functions** - JSDoc-style; **комментарии и JSDoc — на русском доменном языке** (AP-054); не переносить англицизмы/жаргон из артефактов процесса в `//` — переводить (allow-list: backtick-идентификатор, протокол/аббревиатура, имя веб-сервиса/продукта, TODO/FIXME)
+8. **Document exported functions** - JSDoc-style; **комментарии и JSDoc — на русском доменном языке** (AP-054); не переносить англицизмы/жаргон из артефактов процесса в `//` — переводить (allow-list: backtick-идентификатор, протокол/аббревиатура, имя веб-сервиса/продукта, TODO/FIXME). **Пропорциональность:** полная шапка обязательна для **нетривиального** экспорта (параметры, ветвления, контракт); для однострочных констант / тривиального геттера — компактный комментарий без церемонии «Параметры:/Возвращаемое значение:» на пустом месте.
 9. **Iterate until clean** - Don't present with issues
 10. **Meet acceptance criteria** - All must be satisfied
 11. **SCOPE: ONLY edit existing .bsl files.** FORBIDDEN: creating new files/folders (new CommonModules/Name/, new Module.bsl), creating or modifying metadata (.xml, Configuration.xml). If the plan requires a new module or metadata object — do NOT proceed, STOP and report to user.

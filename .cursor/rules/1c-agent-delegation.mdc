@@ -40,12 +40,14 @@ Architect может рекомендовать новые объекты в des
 
 ## XML WRITE GUARD
 
-**Оркестратор НЕ использует Write/StrReplace/Delete для XML-файлов 1С в `src/`** (Form.xml, Template.xml, Rights.xml, Configuration.xml, любые `*.xml` метаданных). Чтение (Read) для анализа — разрешено. Правки в `openspec/`, `.cursor/` — это не XML метаданных 1С, разрешены.
+**Оркестратор НЕ использует сырой Write/StrReplace/Delete для XML-файлов 1С в `src/`** (Form.xml, Template.xml, Rights.xml, Configuration.xml, любые `*.xml` метаданных). Чтение (Read) для анализа — разрешено. Правки в `openspec/`, `.cursor/` — это не XML метаданных 1С, разрешены.
+
+Перед задачами Form.xml / Template.xml — **Read** `.cursor/rules/forms-mxl-mode-gate.mdc` (`artifact_mode` из proposal).
 
 | Файл / артефакт | Действие |
 |-----------------|----------|
-| Form.xml (управляемая форма) | **СТОП.** Инструкция ручного конфигурирования (шаблон ниже) **или** постановка на программное создание элементов в **модуле формы (BSL)**. Не генерировать/править `Form.xml` через JSON DSL или скрипты — генераторы форм удалены. WAIT после ручной части до выгрузки. |
-| Template.xml (макет) | Скилл `1c-mxl/compile` |
+| Form.xml (управляемая форма) | `manual` / default: инструкция Конфигуратор (шаблон ниже) **или** программные элементы в модуле формы (BSL). `assisted`: только skill `1c-forms/compile`\|`edit`; **нет skill → HALT → manual** (не сырой Write, не произвольные скрипты). `bsl-only`: не менять Form.xml. WAIT после ручной части до выгрузки. |
+| Template.xml (макет) | `assisted`: скилл `1c-mxl/compile` → validate. Иначе: инструкция / WAIT без compile. |
 | Rights.xml (роль) | Скилл `1c-roles/compile` через агента |
 | Остальные XML в src/ | **СТОП** — блокер по `1c-no-metadata-creation.mdc` |
 
@@ -106,6 +108,8 @@ Architect может рекомендовать новые объекты в des
 
 Все кодовые замечания (critical/high/medium/low) → автоматически writer с замечаниями → повторный reviewer. Макс. 2 итерации — согласовано с Phase 7 агента writer.
 Архитектурные замечания (новый объект, API, структура хранения, RLS) → СТОП, к пользователю.
+
+**Поверхность (DISPROPORTIONATE_SURFACE / REFACTOR по шуму):** при полном ревью нового/переписанного модуля с REFACTOR по поверхности — **не закрывать** задачу apply/`/review` без `onec-code-simplifier` или **явного waive** пользователя. Sidecar-шаблоны (`1c-agent-patterns/sidecar.md`) этот MUST **не** содержат — политика только здесь + `review/SKILL.md` + `1c-utility-agents.mdc`.
 
 **Без прямого StrReplace.** Все кодовые замечания — через writer. Оркестратор НЕ исправляет замечания ревью напрямую (StrReplace), даже если правка кажется «однострочной». Spot-check corrections после writer — тоже через writer.
 
