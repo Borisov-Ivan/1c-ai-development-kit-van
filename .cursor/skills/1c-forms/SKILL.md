@@ -1,6 +1,6 @@
 ---
 name: 1c-forms
-description: "Управляемые формы 1С — анализ/валидация выгрузки (info, validate), паттерны; compile/edit Form.xml — только при artifact_mode assisted и наличии skill (иначе HALT→manual / Конфигуратор / BSL модуля формы)."
+description: "Управляемые формы 1С — анализ/валидация выгрузки (info, validate), паттерны; compile/edit Form.xml — только при form_mode assisted (или legacy artifact_mode) и наличии skill (иначе HALT→manual / Конфигуратор / BSL модуля формы)."
 ---
 
 # 1C Forms — анализ, валидация, режимы поставки
@@ -8,14 +8,16 @@ description: "Управляемые формы 1С — анализ/валид�
 Платформенный референс: `.cursor/docs/platform/Глава 7. Формы.md` (Grep+Read, не целиком).  
 Mode Gate: `.cursor/rules/forms-mxl-mode-gate.mdc`.
 
-## Режимы (`artifact_mode` из proposal)
+## Режимы (`form_mode` из proposal; per-form)
+
+Источник: секция `## Forms mode` — скаляр `form_mode:` или map `forms:` (ключ метаданных → mode). Fallback: lone legacy `artifact_mode` → одинаковый режим на весь текущий form-scope.
 
 | Режим | Form.xml | Что делать |
 |-------|----------|------------|
 | **manual** (default) | Не писать агентом | Инструкция Конфигуратор → выгрузка **или** программные элементы в `Module.bsl` |
 | **assisted** | Только через skill | `1c-forms/compile` и/или `edit` при наличии skill; нет skill → HALT → manual |
 | **bsl-only** | Не менять | UX только в модуле формы (BSL) |
-| **n/a** | — | ЗНИ без UI / метапроект |
+| **n/a** | — | ЗНИ без форм / метапроект; при задаче на форму без режима — STOP/extend |
 
 Сырой Write/StrReplace Form.xml оркестратором **запрещён** всегда (`1c-xml-write-guard.mdc`).
 
@@ -48,8 +50,9 @@ Mode Gate: `.cursor/rules/forms-mxl-mode-gate.mdc`.
 
 ## OpenSpec / apply
 
-1. Прочитать `artifact_mode` (Mode Gate).
-2. **manual** — ручное конфигурирование + выгрузка и/или BSL модуля формы.
-3. **assisted** — только skill compile/edit; нет skill → предложить manual.
-4. **bsl-only** — без задач на правку Form.xml.
-5. Заимствование / form-add / ChildObjects — всегда блокер человеку.
+1. Прочитать режим **этой** формы: `form_mode` / map `forms:` (+ fallback lone `artifact_mode`) — Mode Gate.
+2. Пустой/`n/a` при задаче на форму без legacy → STOP/extend (не default молча).
+3. **manual** — ручное конфигурирование + выгрузка и/или BSL модуля формы.
+4. **assisted** — только skill compile/edit; нет skill → предложить manual.
+5. **bsl-only** — без задач на правку Form.xml.
+6. Заимствование / form-add / ChildObjects — всегда блокер человеку.

@@ -14,12 +14,12 @@ globs: "src/**/*.xml"
 
 ## ДЕЛЕГИРОВАНИЕ
 
-Сырой Write/StrReplace/Delete оркестратора по `src/**/*.xml` — **запрещён всегда**. Узкое исключение Form.xml / Template.xml — только при `artifact_mode: assisted` **и** вызове соответствующего skill (см. `.cursor/rules/forms-mxl-mode-gate.mdc`).
+Сырой Write/StrReplace/Delete оркестратора по `src/**/*.xml` — **запрещён всегда**. Узкое исключение Form.xml — только при `form_mode: assisted` (или legacy `artifact_mode: assisted`) **и** skill `1c-forms/compile`|`edit`. Template.xml — только при записанном разрешении apply + skill `1c-mxl/compile` (см. `.cursor/rules/forms-mxl-mode-gate.mdc`).
 
 | Файл / артефакт | Инструмент |
 |-----------------|------------|
-| Form.xml (управляемая форма) | По умолчанию / `manual` / `bsl-only`: **СТОП** — инструкция ручного конфигурирования **или** программные элементы в модуле формы (BSL). **`assisted`:** только skill `1c-forms/compile` или `1c-forms/edit`; если skill отсутствует — **HALT → manual** (не ослаблять guard «заранее», не сырой Write и не произвольные скрипты). WAIT после ручной части до выгрузки. |
-| Template.xml (макет табличного документа) | **`assisted`:** скилл `1c-mxl/compile` → validate. **`manual` / иное:** инструкция / WAIT — без compile и без сырого Write. |
+| Form.xml (управляемая форма) | Режим **этой** формы: `form_mode` / map `forms:` (+ fallback lone `artifact_mode`). `manual` / `bsl-only`: **СТОП** — инструкция ручного конфигурирования **или** программные элементы в модуле формы (BSL). **`assisted`:** только skill `1c-forms/compile` или `1c-forms/edit`; если skill отсутствует — **HALT → manual** (не ослаблять guard «заранее», не сырой Write и не произвольные скрипты). WAIT после ручной части до выгрузки. |
+| Template.xml (макет табличного документа) | Default **manual**: инструкция / WAIT. Non-manual / compile — только при разрешении apply (`debug.md` § Apply permissions или `[mxl:assisted]`) → скилл `1c-mxl/compile` → validate. Без сырого Write. |
 | Rights.xml (роль) | Скилл 1c-roles/compile через агента |
 | Остальные XML в src/ (метаданные, конфигурация) | **СТОП** — блокер пользователю по `1c-no-metadata-creation.mdc` |
 
@@ -51,7 +51,8 @@ globs: "src/**/*.xml"
 
 - Правки файлов в `openspec/`, `.cursor/` (не XML метаданных 1С в src/) — разрешены.
 - Чтение (Read) XML для анализа — разрешено. Запрещены сырые Write, StrReplace, Delete оркестратора.
-- Form.xml / Template.xml при `assisted` — **только** через skill из таблицы выше (не через произвольный скрипт/JSON вне skill).
+- Form.xml при `form_mode: assisted` (или legacy `artifact_mode: assisted`) — **только** через skill из таблицы выше (не через произвольный скрипт/JSON вне skill).
+- Template.xml при non-manual — только при записанном разрешении apply + skill `1c-mxl/compile`.
 
 ## СВЯЗЬ
 

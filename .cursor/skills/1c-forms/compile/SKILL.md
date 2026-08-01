@@ -1,11 +1,11 @@
 ---
 name: 1c-forms-compile
-description: "Compile Form.xml from JSON DSL. Only when proposal artifact_mode is assisted. No -FromObject, no form-add/ChildObjects."
+description: "Compile Form.xml from JSON DSL. Only when proposal form_mode (or legacy artifact_mode) for this form is assisted. No -FromObject, no form-add/ChildObjects."
 ---
 
 # 1c-forms/compile
 
-Сборка **существующего** пути `Form.xml` из JSON DSL. Только при `artifact_mode: assisted`.
+Сборка **существующего** пути `Form.xml` из JSON DSL. Только при `form_mode: assisted` для этой формы (или legacy `artifact_mode: assisted`).
 
 ## Hard rules (kit-van v1)
 

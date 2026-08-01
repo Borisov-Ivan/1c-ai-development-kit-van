@@ -141,9 +141,12 @@ Grep `tasks.md` на `^- \[[ ]\]` — если найдено хотя бы од
 | `<!-- phase-gate -->` (legacy маркер фазы) | Заменить на пометку `legacy-phase-gate-deprecated` в info-секции отчёта | `legacy-phase-gate` (info) |
 | Незакрытые backtick-блоки в `design.md`/`tasks.md` | Закрыть | `unbalanced-fences` (auto-fix) |
 | ID задачи без префикса среза, когда есть `# Срез` | Лог в info без правки | `task-without-slice-prefix` (info) |
-| UI-задачи (Form.xml / Template.xml / «форма»+compile) без секции `## Forms & layouts mode` / `artifact_mode` в proposal | Info + ссылка на `forms-mxl-mode-gate.mdc`; **не** авто-выбирать `assisted` | `missing-artifact-mode` (info) |
-| `artifact_mode: bsl-only` при задачах compile Form/Template | Info / repair-кандидат согласованности | `bsl-only-vs-xml-task` (info) |
-| `artifact_mode: assisted` + Form.xml при отсутствии skill `1c-forms/compile`\|`edit` | Info: ожидаем HALT→manual на apply | `assisted-form-without-skill` (info) |
+| Задачи на управляемую форму (Form.xml / «форма»+compile) без секции `## Forms mode` (или legacy `## Forms & layouts mode`) / без `form_mode`/`forms:` и без lone legacy `artifact_mode` | Info + ссылка на `forms-mxl-mode-gate.mdc`; **не** авто-выбирать `assisted` | `missing-form-mode` (info) |
+| Задача на конкретную форму при пустом/`n/a` режиме этой формы (и без валидного lone legacy `artifact_mode`) | Info / repair-кандидат: STOP/extend на apply | `empty-form-mode` (info) |
+| `form_mode`/`forms:`/`artifact_mode: bsl-only` при задачах compile Form.xml | Info / repair-кандидат согласованности | `bsl-only-vs-xml-task` (info) |
+| `form_mode`/`forms:`/`artifact_mode: assisted` + Form.xml при отсутствии skill `1c-forms/compile`\|`edit` | Info: ожидаем HALT→manual на apply | `assisted-form-without-skill` (info) |
+| Отсутствие Mode Gate макета / поля `layout_mode` в proposal при задачах Template/MXL | **Не** дефект этой политики; макет — manual default + permission on apply | `layout-mode-gate-absent` (info, non-blocking) |
+| Legacy lone `artifact_mode` при отсутствии `form_mode`/`forms:` | Info: readers трактуют как гомогенный `form_mode` на form-scope | `legacy-artifact-mode-fallback` (info) |
 
 **Если правок не было** — записать `layer_1_hygiene: PASS`. Если были — `AUTOFIXED` + список в `### Авто-исправлено (Layer 1)` отчёта в техническом формате (файл, строка, что изменено); каркас таблицы — `.cursor/skills/openspec-verify-change/templates/layer-1-hygiene-table.md`.
 

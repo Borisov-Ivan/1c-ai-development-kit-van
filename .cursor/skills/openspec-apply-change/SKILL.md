@@ -130,6 +130,13 @@ Implement tasks from an OpenSpec change.
    Если секции Metadata нет — сначала ФИО (если нет `defaultDeveloper`), затем отдельный вопрос про **описание** (`comment_suffix`; можно пусто → `marker_style: minimal`); дописать Metadata в proposal.md. Не монолит «ФИО + domain_label».
    Передать маркеры в промпт `onec-code-writer` (см. §3a COMMENT MARKERS).
 
+   **Forms mode (per-form) — читать до Form.xml-задач:**
+   - Секция proposal: целевое `## Forms mode`; readers также `## Forms & layouts mode` (legacy-заголовок).
+   - Источник истины: скаляр `form_mode:` **или** map `forms:` (ключ метаданных → mode). Значения: `manual` | `assisted` | `bsl-only` | `n/a`.
+   - Fallback: lone `artifact_mode` **только** если нет `form_mode` и нет `forms:` → одинаковый режим на весь текущий form-scope.
+   - Задача на управляемую форму при пустом/`n/a` режиме этой формы (и без валидного lone legacy) → **STOP** / `/opsx:extend` (дозаполнить режим); не копировать режим соседней формы; не выбирать default молча.
+   - **Template/MXL:** Mode-вопрос new не используется. Default — **manual** (инструкция / WAIT). Non-manual (`1c-mxl/compile`) — только при записанном разрешении: ответ в чате apply / AskQuestion / маркер `[mxl:…]` / явная запись в tasks + запись в `debug.md` § `## Apply permissions`. Без разрешения — не молчаливый assisted. SSOT: `forms-mxl-mode-gate.mdc`.
+
 5. **Resume with pending verdict & Show current progress**
 
    **Resume with pending verdict (FIRST ACTION, before any work):**
@@ -293,8 +300,8 @@ Implement tasks from an OpenSpec change.
    |---|---|---|
    | BSL-код (новая логика, правка процедур) | «реализовать», «добавить», «доработать» + путь к .bsl | **onec-code-writer** + **onec-code-reviewer** после |
    | Модуль формы (BSL) | путь `Forms/.../Ext/Form/Module.bsl`, «программно создать элемент», «Элементы.Добавить», «видимость элементов» без правки `Form.xml` | **onec-code-writer** + **onec-code-reviewer** после |
-   | Макет / Template.xml | «Template.xml», «макет», «печатная форма», MXL, маркеры `[mxl:assisted]` / `[mxl:manual]` | **Read** Mode Gate; сверить маркер с `artifact_mode`. `assisted` → `1c-mxl/compile`+validate (без сырого Write). `manual` → WAIT/инструкция. `bsl-only` → код заполнения без Template.xml |
-   | Форма / Form.xml / Конфигуратор | «Form.xml», «реквизиты формы», «добавить форму», «колонки в Конфигураторе», создание/изменение XML формы | **Read** `forms-mxl-mode-gate.mdc`. `manual`/default: инструкция Конфигуратор + WAIT. `assisted`: только skill `1c-forms/compile`\|`edit` (без `-FromObject`/form-add/ChildObjects); нет skill → HALT→manual. `bsl-only`: не трогать Form.xml — только Module.bsl. Сырой Write Form.xml запрещён |
+   | Макет / Template.xml | «Template.xml», «макет», «печатная форма», MXL, маркеры `[mxl:assisted]` / `[mxl:manual]` | **Read** Mode Gate § Политика макетов. Default **manual** (WAIT/инструкция). Non-manual / `assisted` → только при записанном разрешении apply (`debug.md` § Apply permissions или маркер `[mxl:…]`) → `1c-mxl/compile`+validate (без сырого Write). Без разрешения — не interpret как form `assisted`. Код заполнения без Template.xml — допустим без permission |
+   | Форма / Form.xml / Конфигуратор | «Form.xml», «реквизиты формы», «добавить форму», «колонки в Конфигураторе», создание/изменение XML формы | **Read** `forms-mxl-mode-gate.mdc`. Режим **этой** формы: `form_mode` / map `forms:` (+ fallback lone `artifact_mode`). Пустой/`n/a` без legacy → STOP/extend. `manual`: инструкция Конфигуратор + WAIT. `assisted`: только skill `1c-forms/compile`\|`edit` (без `-FromObject`/form-add/ChildObjects); нет skill → HALT→manual. `bsl-only`: не трогать Form.xml — только Module.bsl. Сырой Write Form.xml запрещён |
    | Верификация метаданных | «проверить соответствие», «проверить наличие» | Оркестратор (Glob/Grep/Read — только проверка, не реализация) |
    | Приёмочная задача (`S<N>.accept` или legacy `S<N>.T<M>`) | «ручной тест», «убедиться», `S<N>.accept`, `S<N>.T<M>` | **Режимы по срезам / пошаговый** (внутренние коды `step-by-slice` / `step-by-step`): trigger Slice Gate (см. шаг 6). **Legacy batch:** пропустить с предупреждением; включить в Session Summary секцию «Отложенные ручные тесты» |
    | Создание метаданных | «создать регистр», «создать справочник», «создать форму» | **СТОП** — блокер пользователю (`1c-no-metadata-creation.mdc`) |
@@ -591,8 +598,8 @@ Implement tasks from an OpenSpec change.
 - Pause on errors, blockers, or unclear requirements - don't guess
 - Use contextFiles from CLI output, don't assume specific file names
 - **Task Dispatch:** classify each task before implementation; delegate to the correct executor per dispatch table. Orchestrator MUST NOT implement BSL or form-module tasks directly — only prepare context and delegate.
-- **Form XML / Configurator tasks:** Read Mode Gate (`forms-mxl-mode-gate.mdc`). `manual` — manual configuration instructions (`1c-agent-delegation.mdc` § XML WRITE GUARD); do not raw-edit `Form.xml`. `assisted` — only via `1c-forms/compile|edit` skill; no skill → HALT→manual. Do not continue past WAIT until user re-exported (manual path).
-- **Template.xml / MXL tasks:** Mode Gate: `assisted` → `1c-mxl/compile`+validate; else WAIT/instruction; no raw Write.
+- **Form XML / Configurator tasks:** Read Mode Gate (`forms-mxl-mode-gate.mdc`). Resolve per-form `form_mode` / `forms:` (+ legacy `artifact_mode`). Empty/`n/a` for in-scope form without legacy → STOP/extend. `manual` — Configurator instructions (`1c-agent-delegation.mdc` § XML WRITE GUARD); do not raw-edit `Form.xml`. `assisted` — only via `1c-forms/compile|edit` skill; no skill → HALT→manual. Do not continue past WAIT until user re-exported (manual path).
+- **Template.xml / MXL tasks:** Default manual (WAIT/instruction). Non-manual/`assisted` → only with recorded apply permission (`debug.md` § Apply permissions or `[mxl:…]`); then `1c-mxl/compile`+validate; no raw Write. Do not resurrect Mode Gate layout question in new.
 - **Form module BSL tasks:** if the task changes `Forms/.../Ext/Form/Module.bsl` only (for example `Элементы.Добавить`, visibility, event handlers), run the standard BSL writer/reviewer pipeline; this is not a `Form.xml` task.
 - Reference: `1c-agent-delegation.mdc` (BSL gate), `1c-utility-agents.mdc` (forms, queries, tests).
 - **vertical-slices.mdc:** вердикт Slice Gate **[3]** и любое добавление `# Срез` — только по **ИНВАРИАНТ: Defect placement** (не создавать fix-срез при приёмочной задаче среза `S<K>.accept` (или legacy `S<K>.T<M>`) = `[ ]` без cross-slice).

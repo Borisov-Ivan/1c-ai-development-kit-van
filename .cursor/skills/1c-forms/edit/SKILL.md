@@ -1,11 +1,11 @@
 ---
 name: 1c-forms-edit
-description: "Edit existing Form.xml via JSON patch. Only when artifact_mode is assisted. No form-add/ChildObjects."
+description: "Edit existing Form.xml via JSON patch. Only when form_mode (or legacy artifact_mode) for this form is assisted. No form-add/ChildObjects."
 ---
 
 # 1c-forms/edit
 
-Точечная правка **существующего** `Form.xml` по JSON. Только при `artifact_mode: assisted`.
+Точечная правка **существующего** `Form.xml` по JSON. Только при `form_mode: assisted` для этой формы (или legacy `artifact_mode: assisted`).
 
 ## Hard rules
 

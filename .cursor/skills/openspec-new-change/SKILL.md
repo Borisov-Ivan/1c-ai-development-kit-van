@@ -89,7 +89,9 @@ metadata:
 
    4. **Soft-reject** (fallback-путь и Other): ответ матчит baseline запретам `marker-canon.md` (и project overlay) → одна строка «это process-метка, укажите доменное пояснение» и повтор (не писать в proposal). При известном `developer`: Other с `// +++ …` или ФИО в начале → «укажите только описание» и повтор.
 
-   **Чистота гейта (HALT):** в вопрос Metadata Gate **запрещено** подмешивать другие решения (развилки A/B, выбор дизайна, имя change). Открытые развилки из постановки идут отдельной карточкой через поле «Открытые решения» (шаг 1.25).
+   **Чистота гейта (HALT):** в вопрос Metadata Gate **запрещено** подмешивать другие решения (развилки A/B, выбор дизайна, имя change, Mode Gate формы). Открытые развилки из постановки идут отдельной карточкой через поле «Открытые решения» (шаг 1.25).
+
+   **Инвариант одного вопроса выбора за ход:** в одном сообщении оркестратора — не больше одного `AskQuestion` / нумерованного взаимоисключающего выбора. После вопроса Metadata Gate — **END TURN** (дождаться ответа). **Запрещено** в том же ходе вызывать Mode Gate (шаг 1.55 / design-stage), Design Gate selection или любой второй вопрос выбора.
 
    Парсинг ответа (fallback/Other):
    - «Принять черновик» → `comment_suffix` = черновик, `marker_style: canonical`.
@@ -102,7 +104,7 @@ metadata:
 
    **После первого указания ФИО** (когда в project.md не было значения) — предложить записать в «Разработчик по умолчанию» по `.cursor/rules/capture-to-project.mdc`.
 
-   **STOP:** дождаться ответа (кроме resume с валидным proposal metadata).
+   **STOP / END TURN:** дождаться ответа (кроме resume с валидным proposal metadata). После сообщения с вопросом Metadata — завершить ход; Mode Gate и прочие выборы — только в последующих сообщениях.
 
    **Guardrail:** `openspec new change` до завершения Metadata Gate для **нового** change запрещён.
 
@@ -120,27 +122,17 @@ metadata:
    - list: `- **developer:**`, `- **comment_suffix:**`, `- **marker_style:**`
    Follow-up при плейсхолдере: `- [ ] F1 Заполнить developer в proposal.md (и при необходимости project.md) до первого кода`
 
-1.55. **Forms / MXL Mode Gate (когда постановка затрагивает форму или макет)**
+1.55. **Forms Mode Gate — не здесь (этап design)**
 
-   **Read** `.cursor/rules/forms-mxl-mode-gate.mdc` при триггерах из правила (форма / Form.xml / макет / Template.xml / MXL).
+   Вопрос режима поставки **управляемой формы** задаётся **на этапе design** (шаг 5.d.1), после стабилизации списка форм в scope — **не** сразу после Metadata и **не** до scaffold. Макет (Template/MXL) в `/opsx:new` **не** спрашивается (политика макета — на apply, см. `forms-mxl-mode-gate.mdc`).
 
-   - ЗНИ без UI → в proposal `artifact_mode: n/a`, вопрос **не** задавать.
-   - Иначе — **отдельный** вопрос в чат: копировать **только** секцию «Формулировка вопроса (чат)» из Mode Gate (проза: вручную / автоматически / программно). **Не** выводить enum-список `manual`/`assisted`/`bsl-only` как заголовки вариантов. Mapping ответа → `artifact_mode` — по таблице в том же правиле (пусто/«да» → `manual`).
-   - Режим «автоматически» (`assisted`) для Form при отсутствии skill `1c-forms/compile`|`edit` → HALT→`manual` (предпочтительно зафиксировать `manual` и сообщить).
-   - «Заимствовать в расширение» в постановке → блокер человеку, Mode Gate не снимает.
-   - Запись в `proposal.md`:
+   При создании `proposal.md` всегда добавлять секцию `## Forms mode` (см. шаг 5.a): без форм / kit → `form_mode: n/a`; при формах в постановке допустим черновик `form_mode: n/a` или пустой map до цикла Mode на design — финальные режимы дописываются на шаге 5.d.1.
 
-   ```markdown
-   ## Forms & layouts mode
-
-   artifact_mode: manual | assisted | bsl-only | n/a
-   ```
-
-   Resume: валидная секция уже есть → не переспрашивать без смены UI-scope.
+   **Не в том же ходе, что Metadata Gate:** запрещено вызывать Mode Gate формы в сообщении с вопросом маркера / любым вторым выбором.
 
 1.56. **Frontload материальных вопросов (до apply)**
 
-   До передачи на `/opsx:apply` собрать в new/extend: Mode Gate (если UI), открытые продуктовые развилки, triage-маршрут при сомнении (см. `task-triage.mdc`). Не оставлять серию уточнений «на потом в apply».
+   До передачи на `/opsx:apply` собрать в new/extend: Mode Gate **форм** на design (если есть формы в scope), открытые продуктовые развилки, triage-маршрут при сомнении (см. `task-triage.mdc`). Не оставлять серию уточнений «на потом в apply». Mode-вопрос макета в new **не** входит в frontload.
 
 2. **Create or resume the change directory**
 
@@ -243,7 +235,7 @@ metadata:
       - **All other artifacts**: Create the artifact file using `template` as the structure
       - Apply `context` and `rules` as constraints - but do NOT copy them into the file
       - **Metadata block**: When creating `proposal.md`, ALWAYS add `## Metadata (comment markers)` (`developer`, `comment_suffix`, `marker_style`) immediately after `## Why`.
-      - **Forms & layouts mode**: When creating `proposal.md`, ALWAYS add `## Forms & layouts mode` with `artifact_mode:` (`manual` | `assisted` | `bsl-only` | `n/a`) per Mode Gate (шаг 1.55 / `forms-mxl-mode-gate.mdc`). Без UI → `n/a`.
+      - **Forms mode**: When creating `proposal.md`, ALWAYS add `## Forms mode` with `form_mode:` (`manual` | `assisted` | `bsl-only` | `n/a`) или map `forms:` — по `forms-mxl-mode-gate.mdc`. Без управляемых форм / kit → `form_mode: n/a`. Единый `artifact_mode` в **новых** change не писать как SSOT. Финальные per-form режимы (если формы в scope) — цикл на шаге 5.d.1 до Design Gate AskQuestion.
       - Show brief progress: "✓ Created <artifact-id>"
 
    b. **Continue until all `applyRequires` artifacts are complete**
@@ -263,7 +255,23 @@ metadata:
          `Связанные ADR: ADR-NNNN (краткое описание) — [ссылка]`
       4. If relevant ADRs found and the proposed approach contradicts an existing ADR — note this explicitly in design.md Risks section
 
-   e. **Design Gate (MANDATORY — after design, before specs/tasks)**:
+   d.1. **Forms Mode Gate (этап design — после стабилизации scope форм, до Design Gate AskQuestion)**
+
+      **Read** `.cursor/rules/forms-mxl-mode-gate.mdc`.
+
+      **Когда:** после того как черновик design / What Changes позволяет перечислить формы в scope (см. enumeration в Mode Gate); **до** AskQuestion приёмки design/срезов (Design Gate selection). Mode Gate **никогда** не в одном сообщении с Design Gate selection / Metadata.
+
+      **Алгоритм:**
+      1. Построить список управляемых форм в scope (без Template/MXL). Пока список нестабилен — Mode-вопросы не начинать; продолжить уточнение scope.
+      2. Нет форм / kit → записать `form_mode: n/a` в `## Forms mode`, вопрос **не** задавать.
+      3. Для каждой формы без валидного записанного режима: **один** вопрос (формулировка из Mode Gate с именем **этой** формы) → **END TURN** → записать режим в proposal (`form_mode` скаляр при N=1 или map `forms:` при N≥1 / предпочтительно map при N>1) → следующая форма.
+      4. Resume: валидные режимы уже записанных форм не переспрашивать. Lone legacy `artifact_mode` без `form_mode`/`forms:` → считать одинаковым `form_mode` на весь текущий form-scope (не переспрашивать гомогенный набор); новая форма без записи — вопрос только для неё.
+      5. `assisted` при отсутствии skill `1c-forms/compile`|`edit` → HALT→`manual` (зафиксировать и сообщить).
+      6. «Заимствовать в расширение» → блокер человеку; Mode не снимает.
+      7. Макет в new не спрашивать.
+      8. Все вопросы режимов форм **закрыты записью** в proposal до перехода к Design Gate AskQuestion.
+
+   e. **Design Gate (MANDATORY — after design + Forms Mode Gate, before specs/tasks)**:
 
       After the `design` artifact is created and written, **before** proceeding to `specs` or `tasks`:
 
@@ -375,6 +383,7 @@ After completing all artifacts, summarize in chat (T-CONFIRM, Chat Surface Contr
 - **Implementation Options (for design artifact)**: для UI, интеграций, перехватов и переносов поведения добавить секцию `## Implementation Options`. Минимум: `Option A / Option B`, выбранный вариант, почему он проще/надёжнее, какие варианты отклонены. Конкретная реализация в `tasks.md` должна ссылаться на выбранный вариант, но задача формулируется через результат, а не через рецепт.
 
 **Guardrails**
+- **HALT — dual selection questions (self-check перед отправкой):** если черновик ответа содержит **два или более** вопроса выбора (`AskQuestion`, нумерованные взаимоисключающие варианты, две карточки выбора) — **не отправлять**; пересобрать сообщение с ровно одним вопросом выбора. Metadata Gate и Mode Gate в одном сообщении — запрещены.
 - **Metadata Gate MUST NOT be silently skipped** (новый change): не вызывать `openspec new change` без ответа на Metadata Gate. Перед финальной сводкой проверить `proposal.md` на `<ФИО>`, `<developer>`, «Уточнить до». Если плейсхолдеры и пользователь не выбирал «пропустить» — WARNING в сводке.
 - **Explore context MUST NOT be used only for naming**: Если в последних сообщениях чата найден свежий блок `## Постановка ЗНИ` или относится свежий `temp/explore-handoff-*.md`, прочитать как source context и перенести все поля Handoff Contract (Симптом, Корневая причина с маркером, Что менять, Файлы, Приёмка, Связь с архивом, Architect/verify, Тема маркера, Срезы (черновик), Открытые решения) в `proposal`, `design`, `specs`, `tasks`, Metadata Gate и Design Gate. Legacy-файлы — только по явной ссылке пользователя (шаг 1.b, «Legacy-источники»).
 - Create ALL artifacts needed for implementation (as defined by schema's `apply.requires`)

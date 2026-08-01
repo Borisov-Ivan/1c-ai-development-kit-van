@@ -7,20 +7,19 @@ description: Complete toolkit for 1C spreadsheet templates (MXL) - compile from 
 
 Полный набор инструментов для работы с макетами табличных документов 1С (Template.xml). Поддержка JSON DSL для быстрого создания печатных форм.
 
-**Mode Gate:** `.cursor/rules/forms-mxl-mode-gate.mdc` — режим из proposal (`artifact_mode`).
+**Политика макета:** `.cursor/rules/forms-mxl-mode-gate.mdc` § Политика макетов. Mode Gate `/opsx:new` **не** спрашивает способ поставки макета. Default — **manual**. Non-manual — только с разрешением на apply.
 
-## Режимы (`artifact_mode`)
+## Политика поставки Template/MXL
 
 | Режим | Template.xml | Действие |
 |-------|--------------|----------|
 | **manual** (default) | Не compile агентом | Инструкция / WAIT; правки в Конфигураторе + выгрузка |
-| **assisted** | Через skill | `1c-mxl/compile` → `validate`; **без** сырого Write Template.xml |
-| **bsl-only** | Не менять | Код заполнения макета без правки Template.xml |
-| **n/a** | — | ЗНИ без макета |
+| **assisted** (только с разрешением apply) | Через skill | `1c-mxl/compile` → `validate`; **без** сырого Write Template.xml |
+| код заполнения без XML | Не менять | Код заполнения макета без правки Template.xml — без Mode-вопроса |
 
-Compile Form.xml: `1c-forms/compile` + `edit` при `assisted`. Запрет form-add / ChildObjects / `-FromObject` — в SKILL compile/edit и halt-triggers.
+Compile Form.xml: см. `1c-forms` + per-form `form_mode`. Запрет form-add / ChildObjects / `-FromObject` — в SKILL compile/edit и halt-triggers.
 
-**Маркеры задач (apply):** в тексте tasks допустимы `[mxl:assisted]` / `[mxl:manual]` — оркестратор сверяет с `artifact_mode` proposal; при расхождении — STOP / extend. `assisted` → только `1c-mxl/compile`+validate; `manual` → WAIT/инструкция без compile.
+**Разрешение non-manual (apply):** маркер `[mxl:assisted]` / явная запись в tasks **или** утвердительный ответ / AskQuestion в чате apply; факт — в `debug.md` § `## Apply permissions`. Без разрешения — только manual (WAIT). Не resurrect Mode Gate макета в `/opsx:new`.
 
 ## Quick Start
 
@@ -46,7 +45,7 @@ Compile Form.xml: `1c-forms/compile` + `edit` при `assisted`. Запрет fo
 - Компилирует JSON (20-30 строк) в Template.xml (200-500+ строк)
 - Автоматически создает области, параметры, колонки
 - Поддержка всех типов ячеек (Text, Number, Date, Picture)
-- На apply: только при `artifact_mode: assisted`
+- На apply: только при записанном разрешении non-manual (`[mxl:assisted]` / Apply permissions)
 
 ### 2. decompile - Декомпиляция в JSON DSL
 **Путь**: `1c-mxl/decompile/SKILL.md`
@@ -69,14 +68,14 @@ Compile Form.xml: `1c-forms/compile` + `edit` при `assisted`. Запрет fo
 ## Workflow
 
 ```yaml
-Создание печатной формы (assisted):
-  1. Mode Gate: artifact_mode: assisted
+Создание печатной формы (non-manual, только с разрешением apply):
+  1. Разрешение apply зафиксировано (чат / [mxl:assisted] / debug § Apply permissions)
   2. Спроектировать структуру (JSON DSL)
   3. Скомпилировать: 1c-mxl compile
   4. Валидировать: 1c-mxl validate
   5. Интегрировать в конфигурацию
 
-manual:
+manual (default, без Mode-вопроса в new):
   1. Инструкция Конфигуратор + выгрузка (WAIT)
   2. Без compile оркестратором
 ```
