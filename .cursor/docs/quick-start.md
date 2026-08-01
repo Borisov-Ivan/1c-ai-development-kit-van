@@ -28,14 +28,14 @@ Reload Window в Cursor. Папку `openspec/changes/` из шаблонног�
 
 ## 3. Формы и макеты
 
-На ЗНИ с формой/макетом `/opsx:new` спросит по-русски: **вручную** / **автоматически** (через skill) / **программно**. Пустой ответ → вручную (`artifact_mode: manual`). Подробнее: `.cursor/rules/forms-mxl-mode-gate.mdc`. FAQ: [faq-kit.md](./faq-kit.md).
+На ЗНИ с **управляемой формой** `/opsx:new` спросит по-русски: **вручную** / **автоматически** (правки Form.xml в репозитории) / **программно**. Пустой ответ → вручную (`form_mode: manual`). Макет на new **не** спрашивается. Подробнее: `.cursor/rules/forms-mxl-mode-gate.mdc`. FAQ: [faq-kit.md](./faq-kit.md).
 
 ## 4. Каталог skills (частое)
 
 | Skill | Зачем |
 |-------|-------|
-| `1c-forms` | info / validate / patterns (compile — при режиме «автоматически» / `assisted`) |
-| `1c-mxl` | compile / validate макетов |
+| `1c-forms` | info / validate / patterns; правка Form.xml — при режиме «автоматически» (`assisted`) |
+| `1c-mxl` | макеты на apply (по разрешению); не вопрос Mode на new |
 | `1c-agent-patterns` | шаблоны промптов агентов |
 | `session-save` / `restore` / `retro` | непрерывность чата и ретро; **не** авто-apply |
 | Кейсбуки | `.cursor/docs/casebooks/` |

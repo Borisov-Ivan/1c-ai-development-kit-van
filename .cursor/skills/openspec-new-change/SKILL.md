@@ -82,7 +82,7 @@ metadata:
    ```
 
    - `{date}` = сегодня `dd.MM.yyyy`. При опции «Без описания» — preview без `{comment_suffix}`.
-   - Опции: «Принять черновик (Recommended)» / «Без описания — только ФИО и дата» / Other.
+   - Опции: «Принять черновик» / «Без описания — только ФИО и дата» / Other.
    - **Preview на шаге 1.5:** scope (`cfe` / `cf-ea`) ещё неизвестен — tasks создаются позже. В gate показывать **cfe-preview** как иллюстрацию transport; полный scope-specific preview — в `/opsx:status` и apply. Cf-формат — в status после tasks.
 
    3. **Если черновик собрать не из чего** (нет блока, нет Why) — fallback: один текстовый вопрос «Описание для маркера (1 фраза по-русски: что меняем и зачем; можно пусто)». Если `developer` ещё не известен — сначала шаг 2a. Не «ФИО + domain_label» в одном сообщении.
@@ -261,10 +261,12 @@ metadata:
 
       **Когда:** после того как черновик design / What Changes позволяет перечислить формы в scope (см. enumeration в Mode Gate); **до** AskQuestion приёмки design/срезов (Design Gate selection). Mode Gate **никогда** не в одном сообщении с Design Gate selection / Metadata.
 
+      **HALT процессных преамбул:** перед вопросом режима формы **не** выводить процессные non-events («Маркер записан», «proposal/design набросаны», лог шагов new и аналоги). Сообщение в чат = канон вопроса из Mode Gate (и при необходимости **одна** строка, зачем нужен выбор) — без преамбулы внутренних шагов.
+
       **Алгоритм:**
       1. Построить список управляемых форм в scope (без Template/MXL). Пока список нестабилен — Mode-вопросы не начинать; продолжить уточнение scope.
       2. Нет форм / kit → записать `form_mode: n/a` в `## Forms mode`, вопрос **не** задавать.
-      3. Для каждой формы без валидного записанного режима: **один** вопрос (формулировка из Mode Gate с именем **этой** формы) → **END TURN** → записать режим в proposal (`form_mode` скаляр при N=1 или map `forms:` при N≥1 / предпочтительно map при N>1) → следующая форма.
+      3. Для каждой формы без валидного записанного режима: **один** вопрос (формулировка из Mode Gate с именем **этой** формы; без процессной преамбулы — см. HALT выше) → **END TURN** → записать режим в proposal (`form_mode` скаляр при N=1 или map `forms:` при N≥1 / предпочтительно map при N>1) → следующая форма.
       4. Resume: валидные режимы уже записанных форм не переспрашивать. Lone legacy `artifact_mode` без `form_mode`/`forms:` → считать одинаковым `form_mode` на весь текущий form-scope (не переспрашивать гомогенный набор); новая форма без записи — вопрос только для неё.
       5. `assisted` при отсутствии skill `1c-forms/compile`|`edit` → HALT→`manual` (зафиксировать и сообщить).
       6. «Заимствовать в расширение» → блокер человеку; Mode не снимает.
@@ -287,15 +289,15 @@ metadata:
          - Legacy-ключи `passed: <path>` / `required-pending` / `declined: <reason>` распознаются как `report:` / `required` / `required` соответственно.
       4. **Hard-gate when no exploreContext exists:** if `exploreContext` is absent, structural triggers fired (`>1 file affected`, `>10 lines of change`, or contract/API change), no architecture report exists, and `--skip-architect <причина>` was not provided — stop after showing:
          ```
-         Design создан. Сработали структурные триггеры Architect Gate, но постановки из explore (блок «Постановка ЗНИ» или handoff ≤48ч) нет.
+         Design создан. Нужен архитектурный разбор (структурные критерии), но постановки из explore (блок «Постановка ЗНИ» или handoff ≤48ч) нет.
          Для сложной постановки сначала выполните `/opsx:explore` или сознательно повторите `/opsx:new <name> --skip-architect <причина>`.
          Создание specs/tasks остановлено.
          ```
       5. **If triggers fired AND no architecture report**:
          - **MANDATORY PAUSE** — Если пользователь не передал флаг `--skip-architect <причина>`, вывести информационное сообщение (без AskQuestion с выбором пропуска):
            ```
-           Design создан. Сработали триггеры Architect Gate: [list].
-           Архитектурный анализ обязателен и запускается сейчас.
+           Design создан. Нужен архитектурный разбор: [list].
+           Анализ запускается сейчас.
            Если нужно сознательно отложить — завершите сессию и запустите `/opsx:new` повторно с флагом `--skip-architect <причина>`.
            ```
          - Delegate to `onec-code-architect` with design review brief. Save report to `reports/architecture-new-YYYY-MM-DD.md`. If architect suggests design changes — apply them to design.md, show diff to user.

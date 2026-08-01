@@ -7,7 +7,7 @@ description: Form-module code (`Form.Module.bsl` / ФормаМодуль) — c
 
 This file owns form-module-specific topics: event-handler wiring, reserved names, form data. Everything else delegates to its single source of truth.
 
-**Kit note:** привязка обработчиков к `Form.xml` — через вопрос режима формы/макета: **вручную** (Конфигуратор → `manual`); **автоматически** через skill (`assisted`); **программно** в модуле без правки XML (`bsl-only`). Сырой Write `Form.xml` оркестратором запрещён.
+**Kit note:** привязка обработчиков к `Form.xml` — через вопрос режима формы: **вручную** (Конфигуратор → `manual`); **автоматически** (правки Form.xml в репозитории → `assisted`); **программно** в модуле без правки XML (`bsl-only`). Макет на new не спрашивается. Сырой Write `Form.xml` оркестратором запрещён.
 
 ## Client-Server Interaction and Compilation Directives
 
