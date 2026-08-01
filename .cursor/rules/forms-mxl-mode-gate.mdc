@@ -1,62 +1,105 @@
 ---
-description: "Mode Gate forms/mxl — режимы manual / assisted / bsl-only при ЗНИ с формой или макетом; ban заимствования"
+description: "Mode Gate форм — per-form form_mode (manual / assisted / bsl-only / n/a); макеты вне Mode Gate (manual default + permission on apply)"
 alwaysApply: false
 ---
 
-# Forms / MXL Mode Gate
+# Forms Mode Gate
 
-**When to Read:** `/opsx:new` / `/opsx:apply` / `/opsx:verify`, если постановка или задачи затрагивают управляемую форму (`Form.xml`, форма, UI формы) или табличный макет (`Template.xml`, MXL, печатная форма). Триггер также в `gate-dispatcher.mdc` и `1c-halt-triggers.mdc`.
+**When to Read:** `/opsx:new` (этап design), `/opsx:apply`, `/opsx:verify`, если постановка или задачи затрагивают управляемую форму (`Form.xml`, форма, UI формы) **или** табличный макет (`Template.xml`, MXL) — для политики макета на apply. Триггер также в `gate-dispatcher.mdc` и `1c-halt-triggers.mdc`.
 
-## Режимы (`artifact_mode`)
+## Режимы формы (`form_mode`)
 
-| Режим | Смысл | Form.xml | Template.xml |
-|-------|--------|----------|--------------|
-| **manual** (default) | Конфигуратор + выгрузка; агент не пишет XML | Инструкция / WAIT | Инструкция / WAIT (без compile) |
-| **assisted** | XML только через skill | Только `1c-forms/compile` или `edit`; нет skill → HALT → manual | Только `1c-mxl/compile` → validate |
-| **bsl-only** | UX без правки XML | Не менять Form.xml; программные элементы в `Module.bsl` | Не менять Template.xml; код заполнения без compile |
+| Режим | Смысл | Form.xml |
+|-------|--------|----------|
+| **manual** (default) | Конфигуратор + выгрузка; агент не пишет XML | Инструкция / WAIT |
+| **assisted** | XML только через skill | Только `1c-forms/compile` или `edit`; нет skill → HALT → manual |
+| **bsl-only** | UX без правки XML | Не менять Form.xml; программные элементы в `Module.bsl` |
+| **n/a** | Нет управляемых форм в scope / kit | Вопрос Mode Gate **не** задавать |
 
-Метапроект / ЗНИ без UI: `artifact_mode: n/a` — вопрос Mode Gate **не** задавать.
+**Макет (Template/MXL) — вне Mode Gate `/opsx:new`:** вопрос про способ поставки макета **не** задаётся. Default на apply — **manual** (инструкция / WAIT). Non-manual (`1c-mxl/compile` и т.п.) — только по **явному разрешению** на `/opsx:apply` (см. § Политика макетов).
 
-## Триггеры вопроса (только `/opsx:new`, отдельный вопрос)
+## Триггеры вопроса (только `/opsx:new`, этап design)
 
-Задать Mode Gate, если в постановке / Why / What Changes / файлах есть хотя бы одно:
+Задать Mode Gate **по одной форме**, если после стабилизации scope (Decision 3a / `openspec-new-change`) в списке форм есть управляемая форма **без** записанного валидного режима этой формы:
 
-- форма, Form.xml, управляемая форма, реквизиты/элементы формы (не только Module.bsl);
-- макет, Template.xml, MXL, печатная форма, табличный документ как layout.
+- форма, Form.xml, управляемая форма, реквизиты/элементы формы (не только Module.bsl как единственный артефакт без Form.xml в scope).
 
-**Не** смешивать с Metadata Gate (маркеры комментариев). **Не** выбирать `assisted` молча из контекста.
+**Не** включать в список Mode: макет, Template.xml, MXL, печатная форма как layout.
+
+**Не** смешивать с Metadata Gate. **Не** смешивать с Design Gate selection. **Не** выбирать `assisted` молча из контекста.
+
+### Enumeration «формы в scope»
+
+Список строится на design, когда scope форм стабилен: (1) формы, явно названные в proposal/design/handoff; (2) задачи/сценарии на Form.xml / модуль формы. Пока список не стабилен — Mode-вопросы не начинать. Новая форма при extend — отдельный вопрос **только** для неё.
 
 ### Формулировка вопроса (чат)
 
-SSOT текста для чата (оркестратор копирует **как есть**, без подмешивания enum-заголовков из таблицы режимов выше). Mapping → `artifact_mode` в proposal — в скобках у вариантов и в правилах ответа ниже.
+SSOT текста для чата (оркестратор копирует **как есть**, подставляя **имя конкретной формы**; без enum-заголовков из таблицы режимов). Mapping → `form_mode` — в скобках у вариантов и в таблице ответа ниже.
 
 ```text
-Как поставляем форму/макет в этой ЗНИ?
+Как поставляем форму «<ИмяФормы / канонический ключ метаданных>» в этой ЗНИ?
 1) вручную — правки в Конфигураторе, выгрузка в src (по умолчанию)
-2) автоматически — правки в файлы репозитория через skill compile/edit (Form: только если skill уже в поставке)
-3) программно — без правки Form.xml/Template.xml; UX в модуле формы / коде заполнения
+2) автоматически — правки в файлы репозитория через skill compile/edit (только если skill уже в поставке)
+3) программно — без правки Form.xml; UX в модуле формы
 ```
 
-| Ответ в чате | `artifact_mode` |
-|--------------|-----------------|
+| Ответ в чате | `form_mode` |
+|--------------|-------------|
 | «вручную» / 1 / «да» / пусто / «по умолчанию» / пропуск | `manual` |
 | «автоматически» / 2 | `assisted` |
 | «программно» / 3 | `bsl-only` |
 
+- Цикл: **одна форма → один вопрос → END TURN → запись** → следующая форма без режима.
 - Для **Form** + `assisted`: skill `1c-forms/compile`|`edit` обязателен; если отсутствует → **HALT → manual**. `-FromObject` / form-add / ChildObjects — запрещены.
 - Подпись «автоматически» **не** означает сырой Write Form.xml оркестратором — только путь через skill.
 
 ## Запись в proposal.md
 
-Секция (рядом с Metadata или после Why):
+Целевая секция (рядом с Metadata или после Why):
 
 ```markdown
-## Forms & layouts mode
+## Forms mode
 
-artifact_mode: manual | assisted | bsl-only | n/a
+form_mode: n/a
 ```
 
-При resume: если секция уже заполнена валидным значением — **не** переспрашивать, пока extend не меняет scope UI.
+или одна форма (скаляр **или** map из одного ключа):
+
+```markdown
+## Forms mode
+
+form_mode: manual
+```
+
+или несколько форм (**только** map):
+
+```yaml
+## Forms mode
+forms:
+  "Document.ЗаказКлиента.Form.ФормаДокумента": manual
+  "Document.ЗаказКлиента.Form.ФормаСписка": bsl-only
+```
+
+**Канон ключа:** полное имя объекта формы в терминах метаданных (`Документ.<Имя>.Форма.<ИмяФормы>` / `Document.<Name>.Form.<FormName>` — один стиль на change). Не использовать путь выгрузки `src/.../Form.xml` как ключ SSOT.
+
+Readers также принимают legacy-заголовок `## Forms & layouts mode` (только чтение).
+
+**Legacy fallback:** lone `artifact_mode` **только** если нет ни скаляра `form_mode`, ни map `forms:` → одинаковый валидный `form_mode` для **всех** форм, уже входящих в scope на момент чтения (N≥1), без переспроса. Макет из legacy Mode-вопрос **не** получает.
+
+**Новые** change **не** пишут единый `artifact_mode` как SSOT для форм.
+
+Resume: валидные режимы уже записанных форм **не** переспрашивать; форма без режима — вопрос только для неё. Без форм / kit → `form_mode: n/a`, вопрос не задавать.
+
+Пустой / `n/a` при задаче на конкретную форму без валидного режима этой формы (и без lone legacy) — блокер apply/verify; не копировать режим соседней формы; не выбирать default молча.
+
+## Политика макетов (apply, не Mode Gate new)
+
+| Условие | Поведение apply |
+|---------|-----------------|
+| Нет явного разрешения non-manual | **manual**: инструкция Конфигуратор + WAIT; без `1c-mxl/compile` |
+| Разрешение есть | non-manual (`assisted` / compile) допускается |
+
+**Форма разрешения (норма):** (a) одноразовый AskQuestion или однозначный утвердительный ответ в чате apply **или** (b) маркер задачи `[mxl:assisted]` / явная запись non-manual в tasks до apply. Факт зафиксировать в `debug.md` § `## Apply permissions` (что разрешено, кем/когда). Это **не** поле `layout_mode` в proposal и не Mode-вопрос в `/opsx:new`.
 
 ## Ban: заимствование
 
@@ -64,21 +107,24 @@ artifact_mode: manual | assisted | bsl-only | n/a
 
 ## Поведение на apply / verify
 
-| `artifact_mode` | Apply (Form.xml / Template.xml) | Verify |
-|-----------------|----------------------------------|--------|
-| `manual` / отсутствует при UI-задачах | Form/Template: инструкция Конфигуратор + WAIT; сырой Write XML запрещён | Предупреждение, если задачи обещают compile без режима |
-| `assisted` | Template → `1c-mxl/compile`+validate; Form → skill compile/edit **или** HALT→manual если skill нет; сырой Write запрещён | Проверить согласованность tasks со skill |
-| `bsl-only` | Задачи на compile Form/Template — блокер/переформулировать в Module.bsl | Задачи Form.xml/Template.xml на compile = FAIL гигиены |
-| `n/a` | UI XML-задач быть не должно | — |
+| Режим формы | Apply (Form.xml) | Verify |
+|-------------|------------------|--------|
+| `manual` / отсутствует при задаче на форму без legacy | Инструкция Конфигуратор + WAIT; сырой Write XML запрещён | Блокер / предупреждение: дозаполнить режим формы |
+| `assisted` | skill compile/edit **или** HALT→manual если skill нет; сырой Write запрещён | Согласованность tasks со skill |
+| `bsl-only` | Задачи на compile Form.xml — блокер/переформулировать в Module.bsl | compile Form.xml = FAIL гигиены |
+| `n/a` без задач на форму | UI Form.xml-задач быть не должно | — |
+| Template/MXL | См. § Политика макетов (не `form_mode`) | Отсутствие Mode Gate макета в new — **не** дефект |
 
 ## Инварианты
 
 1. Оркестратор **никогда** не делает сырой Write/StrReplace/Delete по `src/**/*.xml`.
-2. Исключение Form.xml/Template.xml — **только** `assisted` + соответствующий skill (см. `1c-xml-write-guard.mdc`, D1: Form skill атомарно с S7).
-3. Default при пустом ответе — **manual**, не assisted.
+2. Исключение Form.xml — **только** `form_mode: assisted` (или legacy `artifact_mode: assisted`) + skill `1c-forms/compile`|`edit` (см. `1c-xml-write-guard.mdc`).
+3. Исключение Template.xml — **только** при записанном разрешении apply + skill `1c-mxl/compile`.
+4. Default ответа на вопрос формы — **manual**, не assisted.
+5. В одном сообщении — не больше одного вопроса выбора (форма / Metadata / Design).
 
 ## Связь
 
 - Guards: `1c-xml-write-guard.mdc`, `1c-no-metadata-creation.mdc`, `1c-agent-delegation.mdc` § XML WRITE GUARD
 - Skills: `1c-forms/SKILL.md`, `1c-mxl/SKILL.md`
-- Workflow: `openspec-new-change`, `openspec-apply-change`, `openspec-verify-change`, handoff explore
+- Workflow: `openspec-new-change` (design-stage цикл), `openspec-apply-change`, `openspec-verify-change`, handoff explore

@@ -27,7 +27,7 @@
 
 ## Forms / MXL
 
-Режим поставки формы/макета в **прикладной** ЗНИ задаётся Mode Gate при `/opsx:new` (см. `.cursor/rules/forms-mxl-mode-gate.mdc`). В метапроекте эволюции kit: `artifact_mode: n/a`.
+Режим поставки **управляемой формы** в прикладной ЗНИ задаётся Mode Gate на этапе design `/opsx:new` — per-form `form_mode` / map `forms:` (см. `.cursor/rules/forms-mxl-mode-gate.mdc`). Макет (Template/MXL) в new не спрашивается; default на apply — вручную, non-manual только с разрешением. В метапроекте эволюции kit: `form_mode: n/a`.
 
 ## Связь
 

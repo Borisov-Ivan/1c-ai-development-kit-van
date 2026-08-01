@@ -122,29 +122,17 @@ metadata:
    - list: `- **developer:**`, `- **comment_suffix:**`, `- **marker_style:**`
    Follow-up при плейсхолдере: `- [ ] F1 Заполнить developer в proposal.md (и при необходимости project.md) до первого кода`
 
-1.55. **Forms / MXL Mode Gate (когда постановка затрагивает форму или макет)**
+1.55. **Forms Mode Gate — не здесь (этап design)**
 
-   **Read** `.cursor/rules/forms-mxl-mode-gate.mdc` при триггерах из правила (форма / Form.xml / макет / Template.xml / MXL).
+   Вопрос режима поставки **управляемой формы** задаётся **на этапе design** (шаг 5.d.1), после стабилизации списка форм в scope — **не** сразу после Metadata и **не** до scaffold. Макет (Template/MXL) в `/opsx:new` **не** спрашивается (политика макета — на apply, см. `forms-mxl-mode-gate.mdc`).
 
-   **Не в том же ходе, что Metadata Gate:** Mode Gate — только после ответа на Metadata (или resume без вопроса Metadata) и только отдельным сообщением с **одним** вопросом выбора → END TURN. Не батчить с AskQuestion маркера / Design Gate.
+   При создании `proposal.md` всегда добавлять секцию `## Forms mode` (см. шаг 5.a): без форм / kit → `form_mode: n/a`; при формах в постановке допустим черновик `form_mode: n/a` или пустой map до цикла Mode на design — финальные режимы дописываются на шаге 5.d.1.
 
-   - ЗНИ без UI → в proposal `artifact_mode: n/a`, вопрос **не** задавать.
-   - Иначе — **отдельный** вопрос в чат: копировать **только** секцию «Формулировка вопроса (чат)» из Mode Gate (проза: вручную / автоматически / программно). **Не** выводить enum-список `manual`/`assisted`/`bsl-only` как заголовки вариантов. Mapping ответа → `artifact_mode` — по таблице в том же правиле (пусто/«да» → `manual`).
-   - Режим «автоматически» (`assisted`) для Form при отсутствии skill `1c-forms/compile`|`edit` → HALT→`manual` (предпочтительно зафиксировать `manual` и сообщить).
-   - «Заимствовать в расширение» в постановке → блокер человеку, Mode Gate не снимает.
-   - Запись в `proposal.md`:
-
-   ```markdown
-   ## Forms & layouts mode
-
-   artifact_mode: manual | assisted | bsl-only | n/a
-   ```
-
-   Resume: валидная секция уже есть → не переспрашивать без смены UI-scope.
+   **Не в том же ходе, что Metadata Gate:** запрещено вызывать Mode Gate формы в сообщении с вопросом маркера / любым вторым выбором.
 
 1.56. **Frontload материальных вопросов (до apply)**
 
-   До передачи на `/opsx:apply` собрать в new/extend: Mode Gate (если UI), открытые продуктовые развилки, triage-маршрут при сомнении (см. `task-triage.mdc`). Не оставлять серию уточнений «на потом в apply».
+   До передачи на `/opsx:apply` собрать в new/extend: Mode Gate **форм** на design (если есть формы в scope), открытые продуктовые развилки, triage-маршрут при сомнении (см. `task-triage.mdc`). Не оставлять серию уточнений «на потом в apply». Mode-вопрос макета в new **не** входит в frontload.
 
 2. **Create or resume the change directory**
 
@@ -247,7 +235,7 @@ metadata:
       - **All other artifacts**: Create the artifact file using `template` as the structure
       - Apply `context` and `rules` as constraints - but do NOT copy them into the file
       - **Metadata block**: When creating `proposal.md`, ALWAYS add `## Metadata (comment markers)` (`developer`, `comment_suffix`, `marker_style`) immediately after `## Why`.
-      - **Forms & layouts mode**: When creating `proposal.md`, ALWAYS add `## Forms & layouts mode` with `artifact_mode:` (`manual` | `assisted` | `bsl-only` | `n/a`) per Mode Gate (шаг 1.55 / `forms-mxl-mode-gate.mdc`). Без UI → `n/a`.
+      - **Forms mode**: When creating `proposal.md`, ALWAYS add `## Forms mode` with `form_mode:` (`manual` | `assisted` | `bsl-only` | `n/a`) или map `forms:` — по `forms-mxl-mode-gate.mdc`. Без управляемых форм / kit → `form_mode: n/a`. Единый `artifact_mode` в **новых** change не писать как SSOT. Финальные per-form режимы (если формы в scope) — цикл на шаге 5.d.1 до Design Gate AskQuestion.
       - Show brief progress: "✓ Created <artifact-id>"
 
    b. **Continue until all `applyRequires` artifacts are complete**
@@ -267,7 +255,23 @@ metadata:
          `Связанные ADR: ADR-NNNN (краткое описание) — [ссылка]`
       4. If relevant ADRs found and the proposed approach contradicts an existing ADR — note this explicitly in design.md Risks section
 
-   e. **Design Gate (MANDATORY — after design, before specs/tasks)**:
+   d.1. **Forms Mode Gate (этап design — после стабилизации scope форм, до Design Gate AskQuestion)**
+
+      **Read** `.cursor/rules/forms-mxl-mode-gate.mdc`.
+
+      **Когда:** после того как черновик design / What Changes позволяет перечислить формы в scope (см. enumeration в Mode Gate); **до** AskQuestion приёмки design/срезов (Design Gate selection). Mode Gate **никогда** не в одном сообщении с Design Gate selection / Metadata.
+
+      **Алгоритм:**
+      1. Построить список управляемых форм в scope (без Template/MXL). Пока список нестабилен — Mode-вопросы не начинать; продолжить уточнение scope.
+      2. Нет форм / kit → записать `form_mode: n/a` в `## Forms mode`, вопрос **не** задавать.
+      3. Для каждой формы без валидного записанного режима: **один** вопрос (формулировка из Mode Gate с именем **этой** формы) → **END TURN** → записать режим в proposal (`form_mode` скаляр при N=1 или map `forms:` при N≥1 / предпочтительно map при N>1) → следующая форма.
+      4. Resume: валидные режимы уже записанных форм не переспрашивать. Lone legacy `artifact_mode` без `form_mode`/`forms:` → считать одинаковым `form_mode` на весь текущий form-scope (не переспрашивать гомогенный набор); новая форма без записи — вопрос только для неё.
+      5. `assisted` при отсутствии skill `1c-forms/compile`|`edit` → HALT→`manual` (зафиксировать и сообщить).
+      6. «Заимствовать в расширение» → блокер человеку; Mode не снимает.
+      7. Макет в new не спрашивать.
+      8. Все вопросы режимов форм **закрыты записью** в proposal до перехода к Design Gate AskQuestion.
+
+   e. **Design Gate (MANDATORY — after design + Forms Mode Gate, before specs/tasks)**:
 
       After the `design` artifact is created and written, **before** proceeding to `specs` or `tasks`:
 
