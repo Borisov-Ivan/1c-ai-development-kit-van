@@ -491,18 +491,18 @@ T-коды (T-BRIEF, T-HANDOFF, T-REPORT, T-STATUS, T-CONFIRM, T-OVERVIEW) — *
 
 Запрещено длинное описание «почему сделано» — это место для объяснения выбирает пользователь через отдельный вопрос.
 
-### 5.6. T-OVERVIEW — описание для согласования
+### 5.6. T-OVERVIEW — лаконичное описание проекта
 
 Используется в: `/opsx:overview`.
 
-**Файл** `temp/overview-YYYY-MM-DD-<slug>.md` — полный связный текст по шаблону `.cursor/skills/openspec-overview/templates/customer-overview.md` (стиль — `style-checklist.md`, структура — `fixtures/golden-88781-overview.md`, голос этапа — `fixtures/voice-good-stage.md`). Аудитория: ФА / аналитик / заказчик (слой «документ заказчику» в `chat-lexicon.md`).
+**Файл** `temp/overview-YYYY-MM-DD-<slug>.md` — полный связный текст по шаблону `.cursor/skills/openspec-overview/templates/customer-overview.md` (стиль — `style-checklist.md`, структура — `fixtures/golden-88781-overview.md`, голос этапа — `fixtures/voice-good-stage.md`). Аудитория: ФА / аналитик / заказчик; жанр — **лаконичное описание проекта** (`chat-lexicon.md`).
 
 **Чат** (тонкий, ≤ ~8 строк):
 
 1. Путь к записанному файлу.
 2. Блок «Что согласовать» — 3–5 пунктов из финала документа (язык эффекта, без кодов `S`/`D` и имён change в заголовках).
 
-Запрещено: печатать весь overview в чат; заголовки этапов = kebab-имя ЗНИ **или название механизма** («автомат при записи», «серверный алгоритм» — см. voice в style-checklist); англицизмы из style-checklist (`runtime`, `UX`, `kill-switch`, …).
+Запрещено: печатать весь overview в чат; заголовки этапов = kebab-имя ЗНИ **или название механизма** («автомат при записи», «серверный алгоритм»); tutor-маркеры в файле overview (мета-ТЗ внутри этапов, «Итого этап», уговоры, советы стенда — § Laconic / anti-tutor); англицизмы из style-checklist (`runtime`, `UX`, `kill-switch`, …).
 
 ## 6. Пары bad → good
 
