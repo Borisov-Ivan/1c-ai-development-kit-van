@@ -11,13 +11,13 @@ alwaysApply: false
 
 ## ТРИГГЕР
 
-Получен отчёт от аналитического субагента.
+Получен отчёт от аналитического субагента **или** завершён выход `/opsx:explain` (журнал прохода — см. тип `explain` ниже).
 
 ## ДЕЙСТВИЕ
 
 1. Сохранить **полный** текст отчёта в файл:
-   - Если есть активный change: `openspec/changes/<id>/reports/<тип>-<ГГГГ-ММ-ДД>.md`.
-   - Если активного change нет: `temp/reports/<тип>-<ГГГГ-ММ-ДД>.md`.
+   - Если есть активный change: `openspec/changes/<id>/reports/<тип>-<ГГГГ-ММ-ДД>.md` (для explain — `explain-YYYY-MM-DD-<slug>.md`).
+   - Если активного change нет: `temp/reports/<тип>-<ГГГГ-ММ-ДД>.md` (explain — туда же).
    - Корневой `reports/` под репозиторием запрещён: его статус не определён, отчёты там не должны создаваться и не участвуют в Session Context Fallback команд KB.
 2. В design.md / tasks.md — ссылаться на полный отчёт (`см. reports/<файл>`), а не дублировать выжимку.
 3. Пользователю — дать краткое резюме и указать путь к полному отчёту.
@@ -37,6 +37,8 @@ alwaysApply: false
 
 Вывод onec-code-explorer в контексте Investigation Loop (резолв контрактов) сохраняется с типом `resolved-contract` (а не `exploration`), т.к. это отдельный артифакт с конкретным назначением — содержит верифицированные контракты для writer и reviewer. Сохранение выполняет оркестратор по review/SKILL.md шаг 3a.
 
+**Оркестраторский журнал (не Task):** тип `explain` — полный журнал прохода `/opsx:explain`. Пишет оркестратор на выходе (§4 skill). Маршрут temp vs change — тот же, что выше; каркас — `.cursor/skills/openspec-explain/templates/explain-report.md`.
+
 ## ЧТО СОХРАНЯТЬ (ПОЛНОСТЬЮ, БЕЗ СОКРАЩЕНИЙ)
 
 - Mermaid-диаграммы (sequence, flowchart)
@@ -50,6 +52,7 @@ alwaysApply: false
 - `architecture` — отчёт onec-code-architect
 - `exploration` — отчёт onec-code-explorer
 - `trace-analysis` — отчёт onec-trace-analyst
+- `explain` — журнал прохода `/opsx:explain` (оркестратор). Канон: `explain-YYYY-MM-DD-<slug>.md` в `temp/reports/` или `openspec/changes/<id>/reports/` при привязке к ЗНИ. SSOT каркаса — `openspec-explain/templates/explain-report.md`.
 - `resolved-contract` — результат резолва контрактов (investigation loop, onec-code-explorer). **Канонический путь:** `openspec/changes/<id>/reports/resolved-contract-<scope-slug>-ГГГГ-ММ-ДД.md`; fallback `temp/reports/resolved-contract-<scope-slug>-ГГГГ-ММ-ДД.md` **только** при отсутствии активного change. Этот путь — единственный источник правды для reviewer (повторный прогон) и writer (review-fix); AGENTS.md и `1c-agent-delegation.mdc` ссылаются на тот же формат.
 
 ## ИСКЛЮЧЕНИЯ
@@ -61,6 +64,7 @@ alwaysApply: false
 ## ИНТЕГРАЦИЯ
 
 - **1c-agent-delegation.mdc:** после вызова architect/explorer/trace-analyst применяется это правило.
+- **openspec-explain:** на выходе прохода — обязательный `Write` типа `explain` (не субагент).
 - **AGENTS.md:** при реализации change отчёты субагентов сохраняются в reports/.
 - **Knowledge Base:** KB-факты (в `openspec/knowledge/`) ссылаются на эти отчёты как на источник истины (`source.report`), но **не заменяют** их. Отчёты остаются полным контекстом исследования.
 

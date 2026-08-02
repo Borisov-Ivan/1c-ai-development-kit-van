@@ -15,7 +15,7 @@ metadata:
 
 **Output style:**
 - Сводка в чате («что создано», следующий шаг) — шаблон **T-CONFIRM** §5.5 + **Chat Surface Contract** §2.6: handoff на языке эффекта, **без** перечня файлов; **один** next step — `/opsx:verify <name>` (не «verify или apply», без auto-chain).
-- **Подтверждение постановки перед scaffold:** бриф по `templates/brief-card.md` (§5.1 Sync Card). **B0** при свежем `## Постановка ЗНИ` в чате/handoff — **одна информирующая строка без согласования имени** (slug — техническая деталь; END TURN не делается). **B1** при свободном тексте — слот **Изменение** (+ опц. **Затронутое**) + `Подтвердить?`; план работ в чат **запрещён**. KB-discovery — internal, в чат не выводится. `temp/briefs/*.md` не создаются.
+- **Подтверждение постановки перед scaffold:** бриф по `templates/brief-card.md` (§5.1 Sync Card). **B0** при свежем `## Постановка ЗНИ` в чате / журнале explain / explore-handoff — **одна информирующая строка без согласования имени** (slug — техническая деталь; END TURN не делается). **B1** при свободном тексте — слот **Изменение** (+ опц. **Затронутое**) + `Подтвердить?`; план работ в чат **запрещён**. KB-discovery — internal, в чат не выводится. `temp/briefs/*.md` не создаются.
 - **Генерируемые артефакты** `proposal.md`, `design.md`, `tasks.md`, spec deltas — подчиняются §1 «Три слоя» и §3 «Запрет внутренних ID в пользовательских полях»: секции для заказчика/приёмки (`Why`, `What Changes`, `Scope`, `Scenarios`, `Requirements`) — UX-слой; внутренние ID (`S<N>.<M>`, `S<N>.accept`, `D<N>`, `R<N>`, `I<N>`, номера задач `12.9`) — только в `## Slices`, `## Decisions`, `## Tasks`, `## Risks`. Перечисления — нумерованные списки. Перед записью — self-check-5 (§7).
 
 **Steps**
@@ -24,17 +24,18 @@ metadata:
 
    a. **If argument provided** — use it as change name (kebab-case). Proceed to step 2.
 
-   b. **If no argument — auto-detect from context (приоритет источников: чат → handoff → legacy → запрос):**
+   b. **If no argument — auto-detect from context (приоритет источников: чат → explain с постановкой → explore-handoff → legacy → запрос):**
       0. **Chat short-circuit (приоритет 1):** Найти в **контексте текущей сессии** **самый свежий** блок `## Постановка ЗНИ` (формат — см. `openspec-explore/SKILL.md`, секция «Финал bug-профиля»; legacy-заголовок `## Для /opsx:ff` распознаётся как синоним). **Критерий совпадения темы:** при `/opsx:new` без аргумента берётся последний блок в сессии; при `/opsx:new <name>` — сверка `<name>` со slug темы или путями из «Файлы»; при сомнении — один текстовый вопрос. Если найден:
          - **B0** — одна информирующая строка: «Создаю ЗНИ `<slug>` по постановке из чата.» — **без согласования имени, без END TURN**; сразу к шагу 1.5. Slug — техническая деталь; переименование — только по явной просьбе пользователя.
          - Имя change: derive из **темы** блока / брифа explore (2–4 значимых слова kebab-case), не из «Что менять»/«Файлы».
          - `exploreContext` = разобранные поля блока (полный список — шаг 1.25). Это **primary source** для `proposal`, `design`, `tasks`; не пересобирать вручную.
-      1. **Handoff-файл (приоритет 2):** `Glob temp/explore-handoff-*.md` за последние **48 часов**. Если найден свежий файл, тема совпадает:
+      1. **Журнал explain с постановкой (приоритет 2):** `Glob temp/reports/explain-*.md` за последние **48 часов**; при совпадении темы — Read; если есть секция `## Постановка ЗНИ` → `exploreContext` (полный журнал — доп. контекст: заметки, цитаты). **B0:** «Создаю ЗНИ `<name>` из журнала explain.» — без согласования имени.
+      2. **Handoff-файл explore (приоритет 3):** `Glob temp/explore-handoff-*.md` за последние **48 часов**. Если найден свежий файл, тема совпадает:
          - Read; извлечь блок `## Постановка ЗНИ` (тот же формат; legacy `## Для /opsx:ff` — синоним) → `exploreContext`.
          - **B0:** «Создаю ЗНИ `<name>` из handoff.» — без согласования имени.
-      2. **Legacy-источники (приоритет 3, только если шаги 0–1 пусты и пользователь явно сослался на старый файл):** `openspec/sessions/*/analysis.md` (`## Готовый материал для ЗНИ`) или `temp/explore-summary-*.md` (поля `Architect Gate`, `Ключевые решения`, `Knowledge findings`, `Рекомендации по срезам`) → `exploreContext`. **B0:** «Создаю ЗНИ `<name>` из legacy-файла.»
-      3. **`openspec list --json`:** если ровно 1 активный change с незакрытыми артефактами — одна строка в чат: «Найден активный change `<name>`. Продолжить с ним или новый?» (текстом).
-      4. **Запрос пользователю (последний шаг):** «Не нашёл готовой постановки в чате или handoff. Опишите change — оформлю по шаблону.» Derive kebab-case name из описания; здесь бриф **B1** с «Подтвердить?».
+      3. **Legacy-источники (приоритет 4, только если шаги 0–2 пусты и пользователь явно сослался на старый файл):** `openspec/sessions/*/analysis.md` (`## Готовый материал для ЗНИ`) или `temp/explore-summary-*.md` (поля `Architect Gate`, `Ключевые решения`, `Knowledge findings`, `Рекомендации по срезам`) → `exploreContext`. **B0:** «Создаю ЗНИ `<name>` из legacy-файла.»
+      4. **`openspec list --json`:** если ровно 1 активный change с незакрытыми артефактами — одна строка в чат: «Найден активный change `<name>`. Продолжить с ним или новый?» (текстом).
+      5. **Запрос пользователю (последний шаг):** «Не нашёл готовой постановки в чате, журнале explain или handoff. Опишите change — оформлю по шаблону.» Derive kebab-case name из описания; здесь бриф **B1** с «Подтвердить?».
 
    **IMPORTANT**: имя change не согласовывается отдельно (B0); подтверждение постановки нужно только на пути B1 (свободный текст, шаг 4).
 
@@ -42,14 +43,15 @@ metadata:
 
    После определения имени change зафиксировать `exploreContext` (тот же приоритет источников, что в шаге 1b):
    - Если на шаге 1b.0 уже найден блок `## Постановка ЗНИ` в чате — использовать его (primary).
-   - Если на шаге 1b.1 уже прочитан `temp/explore-handoff-*.md` — использовать его.
-   - Если на шаге 1b.2 уже прочитан legacy-источник — использовать его.
-   - Если имя передано аргументом и `exploreContext` ещё не задан — сначала просмотреть контекст сессии на блок `## Постановка ЗНИ` (или legacy `## Для /opsx:ff`), затем `Glob temp/explore-handoff-*.md` (≤48ч); legacy-файлы — только по явной ссылке пользователя.
+   - Если на шаге 1b.1 уже прочитан `temp/reports/explain-*.md` с `## Постановка ЗНИ` — использовать его (журнал — доп. контекст).
+   - Если на шаге 1b.2 уже прочитан `temp/explore-handoff-*.md` — использовать его.
+   - Если на шаге 1b.3 уже прочитан legacy-источник — использовать его.
+   - Если имя передано аргументом и `exploreContext` ещё не задан — сначала просмотреть контекст сессии на блок `## Постановка ЗНИ` (или legacy `## Для /opsx:ff`), затем `Glob temp/reports/explain-*.md` (≤48ч, с секцией постановки), затем `Glob temp/explore-handoff-*.md` (≤48ч); legacy-файлы — только по явной ссылке пользователя.
 
    **Handoff Contract — поля блока `## Постановка ЗНИ`:** см. `templates/handoff-contract.md` (при обрезке SKILL — Read шаблон во втором батче).
 
    Для legacy-источников — поля из `templates/handoff-contract.md` (legacy-блок).
-   - Если найден блок `## Постановка ЗНИ` (в чате или handoff) — это **primary source** для `proposal`, `design`, `specs`, `tasks`; не пересобирать вручную.
+   - Если найден блок `## Постановка ЗНИ` (в чате, журнале explain или handoff) — это **primary source** для `proposal`, `design`, `specs`, `tasks`; не пересобирать вручную.
    - Если источник старше 48 часов или не относится к change — считать, что `exploreContext` отсутствует.
    - Если `exploreContext` отсутствует, это не блокирует простой запуск new. Design Gate ниже выполнит hard-gate только при структурных триггерах.
 
@@ -188,7 +190,7 @@ metadata:
         - `outputPath`: Where to write the artifact
         - `dependencies`: Completed artifacts to read for context
       - Read any completed dependency files for context
-      - If the change name/brief was derived from a `## Постановка ЗНИ` block (chat or `temp/explore-handoff-*.md`) — or from a legacy-файла по явной ссылке пользователя (шаг 1.b, «Legacy-источники») — use it as `exploreContext` for `proposal`, `design`, `specs`, and `tasks` (verified sections only; hypotheses — с пометкой `[hypothesis: план]`).
+      - If the change name/brief was derived from a `## Постановка ЗНИ` block (chat, `temp/reports/explain-*.md`, or `temp/explore-handoff-*.md`) — or from a legacy-файла по явной ссылке пользователя (шаг 1.b, «Legacy-источники») — use it as `exploreContext` for `proposal`, `design`, `specs`, and `tasks` (verified sections only; hypotheses — с пометкой `[hypothesis: план]`).
       - If `exploreContext` exists, use it as source context for `proposal`, `design`, `specs`, and `tasks`: для нового формата (`## Постановка ЗНИ`) — Симптом → `## Why`, Корневая причина / Что менять → `## What Changes` / scope, Файлы → `## Scope`, Приёмка → `## Acceptance Criteria` / scenarios, Связь с архивом → `## Decisions` (extends/precedent), Architect/verify → Design Gate, Срезы (черновик) → подсказка `## Slices`, Тема маркера → Metadata Gate, **Открытые решения → `design.md` § Открытые вопросы** (и карточка решения пользователю до apply, если решение блокирующее). Для legacy — `Ключевые решения` → scope/design rationale, `Knowledge findings` → context/assumptions, `Рекомендации по срезам` → `## Slices`, `Architect Gate` → Design Gate. Treat `exploreContext` as verified investigation context only to the extent its reports are referenced; do not invent code facts from prose.
       - **Special case: `tasks` artifact (slice-aware task decomposition)**:
         Before delegating tasks, the **Slice Generation Gate** must have been passed (see step 5e.1 below) and design.md MUST contain a `## Slices` section.
@@ -387,7 +389,7 @@ After completing all artifacts, summarize in chat (T-CONFIRM, Chat Surface Contr
 **Guardrails**
 - **HALT — dual selection questions (self-check перед отправкой):** если черновик ответа содержит **два или более** вопроса выбора (`AskQuestion`, нумерованные взаимоисключающие варианты, две карточки выбора) — **не отправлять**; пересобрать сообщение с ровно одним вопросом выбора. Metadata Gate и Mode Gate в одном сообщении — запрещены.
 - **Metadata Gate MUST NOT be silently skipped** (новый change): не вызывать `openspec new change` без ответа на Metadata Gate. Перед финальной сводкой проверить `proposal.md` на `<ФИО>`, `<developer>`, «Уточнить до». Если плейсхолдеры и пользователь не выбирал «пропустить» — WARNING в сводке.
-- **Explore context MUST NOT be used only for naming**: Если в последних сообщениях чата найден свежий блок `## Постановка ЗНИ` или относится свежий `temp/explore-handoff-*.md`, прочитать как source context и перенести все поля Handoff Contract (Симптом, Корневая причина с маркером, Что менять, Файлы, Приёмка, Связь с архивом, Architect/verify, Тема маркера, Срезы (черновик), Открытые решения) в `proposal`, `design`, `specs`, `tasks`, Metadata Gate и Design Gate. Legacy-файлы — только по явной ссылке пользователя (шаг 1.b, «Legacy-источники»).
+- **Explore context MUST NOT be used only for naming**: Если в последних сообщениях чата найден свежий блок `## Постановка ЗНИ`, или свежий `temp/reports/explain-*.md` с секцией `## Постановка ЗНИ`, или свежий `temp/explore-handoff-*.md` — прочитать как source context и перенести все поля Handoff Contract (Симптом, Корневая причина с маркером, Что менять, Файлы, Приёмка, Связь с архивом, Architect/verify, Тема маркера, Срезы (черновик), Открытые решения) в `proposal`, `design`, `specs`, `tasks`, Metadata Gate и Design Gate. Legacy-файлы — только по явной ссылке пользователя (шаг 1.b, «Legacy-источники»).
 - Create ALL artifacts needed for implementation (as defined by schema's `apply.requires`)
 - Always read dependency artifacts before creating a new one
 - If context is critically unclear, ask the user - but prefer making reasonable decisions to keep momentum

@@ -5,7 +5,7 @@ license: MIT
 compatibility: Requires openspec CLI when change context is used.
 metadata:
   author: openspec
-  version: "1.3"
+  version: "1.4"
 ---
 
 # `/opsx:explain` — пошаговый разбор кода
@@ -14,11 +14,12 @@ metadata:
 
 **Не делает:** правки BSL, правки `openspec/changes/` (без явной `/opsx:new` / `/opsx:extend`), обзор 3+ модулей «из интереса» (это explore + explorer).
 
-**Эталоны голоса:** [`fixtures/voice-good-brief.md`](fixtures/voice-good-brief.md), [`fixtures/voice-good-point.md`](fixtures/voice-good-point.md), [`fixtures/voice-good-exit.md`](fixtures/voice-good-exit.md), [`fixtures/voice-bad-dump.md`](fixtures/voice-bad-dump.md), [`fixtures/voice-bad-jargon.md`](fixtures/voice-bad-jargon.md)  
+**Эталоны голоса:** [`fixtures/voice-good-brief.md`](fixtures/voice-good-brief.md), [`fixtures/voice-good-point.md`](fixtures/voice-good-point.md), [`fixtures/voice-good-exit.md`](fixtures/voice-good-exit.md), [`fixtures/voice-good-report-snippet.md`](fixtures/voice-good-report-snippet.md), [`fixtures/voice-bad-dump.md`](fixtures/voice-bad-dump.md), [`fixtures/voice-bad-jargon.md`](fixtures/voice-bad-jargon.md)  
 **Entry-бриф:** [`templates/entry-brief.md`](templates/entry-brief.md) (уровень B-explain)  
 **Карта:** [`templates/inventory-card.md`](templates/inventory-card.md)  
 **Карточка точки:** [`templates/point-card.md`](templates/point-card.md)  
-**Выход:** [`templates/exit-card.md`](templates/exit-card.md)
+**Выход:** [`templates/exit-card.md`](templates/exit-card.md)  
+**Журнал файла:** [`templates/explain-report.md`](templates/explain-report.md)
 
 ---
 
@@ -124,9 +125,18 @@ metadata:
 2. При «да» — **сводка заметок** (≤5 пунктов) с вариантами одной строкой «Можно:» и предложением зафиксировать.
 3. При «нет» / после сводки — «достаточно» | `/opsx:new` / `/opsx:extend` | вернуться в `/opsx:explore`.
 
-При фиксации в постановку — блок `## Постановка ЗНИ` по [`openspec-explore/templates/handoff-block.md`](../openspec-explore/templates/handoff-block.md) при необходимости.
+**Обязательный артефакт журнала** — `Write` файла по [`templates/explain-report.md`](templates/explain-report.md) на этом шаге (после шага A; при шаге B — перезаписать с секцией «Заметки»). Без файла выход **не завершён**.
 
-Handoff-файл — только по словесной просьбе («сохрани», «зафиксируй в файл») → `temp/explain-handoff-YYYY-MM-DD-<slug>.md`.
+| Контекст | Путь |
+|----------|------|
+| Change не назван / нет привязки к ЗНИ | `temp/reports/explain-YYYY-MM-DD-<slug>.md` |
+| Change назван в брифе/контексте или explain внутри ЗНИ | `openspec/changes/<name>/reports/explain-YYYY-MM-DD-<slug>.md` |
+
+Корневой `reports/` репозитория и отдельный `temp/explain-handoff-*.md` **не создавать**.
+
+В чат — одна строка с путём к журналу (не дамп файла). Эталон: [`fixtures/voice-good-exit.md`](fixtures/voice-good-exit.md).
+
+При фиксации в постановку — блок `## Постановка ЗНИ` по [`openspec-explore/templates/handoff-block.md`](../openspec-explore/templates/handoff-block.md) **дописать в тот же** `explain-*.md` (и показать в чате при необходимости). Отдельный handoff-файл не нужен.
 
 ---
 
@@ -136,6 +146,7 @@ Handoff-файл — только по словесной просьбе («со
 - Не править `proposal`/`design`/`tasks` из explain — только предложить new/extend.
 - Persistence: каждый ход сессии `/opsx:explain` проверяется по этому skill.
 - Chat Surface: русский, без жаргона движка; идентификаторы 1С в backticks с пояснением; HALT голоса выше.
+- Журнал прохода: обязательный `Write` `explain-*.md` на выходе (§4); маршрутизация temp vs change — выше.
 
 ---
 
@@ -173,3 +184,7 @@ Handoff-файл — только по словесной просьбе («со
 2. Вопрос анализа — только при кандидатах (или явной просьбе пользователя)?
 3. Сводка — заметки, не повтор карточек; ≤5 пунктов; тон «риск/заметка»?
 4. Эталон — `fixtures/voice-good-exit.md`?
+5. Записан `explain-*.md` по `templates/explain-report.md` на правильный путь (temp vs change)?
+6. В чате есть строка с путём к журналу (без дампа файла)?
+7. Citation в файле: hybrid nav-link + fence (не только fence)?
+8. При фиксации постановки — секция `## Постановка ЗНИ` в том же `explain-*.md` (не отдельный handoff)?
