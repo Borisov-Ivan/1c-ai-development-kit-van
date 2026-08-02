@@ -19,11 +19,14 @@ alwaysApply: true
 | Старт explore | Бриф B3 ≤6 слотов; **Подтвердить?** текстом |
 | Explore после Task | Превью 8–15 строк + **Итог / Вердикт / Дальше** |
 | Explore финал bug | Блок `## Постановка ЗНИ` в чате |
+| Explain entry-бриф | B-explain ≤6 слотов; SSOT `openspec-explain/templates/entry-brief.md` |
+| Explain — карта точек | ≤12 строк; без кода и без A/B |
+| Explain — карточка точки | 15–35 строк; одна точка; код + указатель обязательны |
 | Entry-бриф extend/new | Карточка B0–B2 по `brief-card.md` |
 | Handoff | Тонкий чат; полная версия в `reports/handoff-*.md` |
 | Финал без оговорок | 1 строка |
 | Финал с оговорками / ждём | До 3 строк |
-| Развилка / блокер | Компактная карточка ≤8 (verify decision ≤12) |
+| Развилка / блокер | Компактная карточка ≤8 (verify decision ≤12); **кроме** карточки `/opsx:explain` |
 
 Иерархия: лимит строк > шаблон > эталон. **Исключение:** тест понятности развилки важнее лимита.
 
@@ -63,3 +66,4 @@ alwaysApply: true
 - Бриф → `.cursor/docs/templates/brief-card.md`
 - Стиль / Chat Surface → `.cursor/docs/opsx-output-style.md`
 - Verify-логика → `.cursor/skills/openspec-verify-change/SKILL.md`
+- Explain (карта / карточка точки) → `.cursor/skills/openspec-explain/SKILL.md`
