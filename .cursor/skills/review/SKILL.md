@@ -114,7 +114,7 @@ Glob `src/*/cfe/<extension>/**/*.bsl`. При `full-extension` — Tier 1 и Tie
 
 ## Шаг 1.4. Light-review триаж (S15)
 
-Выполнять ПОСЛЕ шага 1 и ДО шага 1.5 для `diff-focused` сценариев. Цель — не гонять Phase 0 / Phase 2.5 / AP-пасс на тривиальных правках.
+Выполнять ПОСЛЕ шага 1 и ДО шага 1.5 для `diff-focused` сценариев. Цель — не гонять Phase 0 / Phase 2.5 / Phase 2.6 Identity / Hardcode Audit / AP-пасс на тривиальных правках.
 
 ### Алгоритм
 
@@ -475,7 +475,7 @@ Focus: full (new file)
 
 1. **Что отрецензировано** — UX-формулировка scope (модуль / файлы / расширение / ЗНИ).
 2. **Итог** — топ-3 находки в пользовательском языке + общее число (без severity-меток в заголовках).
-3. **Что важно** (Risk Surfacing) — «не покрыто этим ревью»: при `diff-focused` — неизменённый код, при `light review` — Phase 0 / AP-пасс, при mismatch контракта ревьювера — затронутые findings.
+3. **Что важно** (Risk Surfacing) — «не покрыто этим ревью»: при `diff-focused` — неизменённый код, при `light review` — Phase 0 / Phase 2.5 / Phase 2.6 / AP-пасс, при mismatch контракта ревьювера — затронутые findings.
 4. **Куда дальше** — одна команда (устранение / extend / archive). При **`release_mode`:** если есть ARCH-findings или MUST_FIX scope/design — `/opsx:extend <change> --from-review <main-report-path>`; иначе устранение через writer или «только отчёт».
 
 Полный отчёт (счётчики CRITICAL/HIGH/MEDIUM/LOW, разделение CODE/ARCHITECTURE) остаётся в `reports/review-<scope-slug>-YYYY-MM-DD.md` и appendix.

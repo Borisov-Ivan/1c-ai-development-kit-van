@@ -414,6 +414,16 @@ Search:
    - Business checks (ЗначениеЗаполнено as "is linked?", not as "does field exist?") are always OK.
    - Self-check: no "defensive cake" (stacked checks on same value where one is subsumed by another — any contract type, fixed or dynamic).
    - Reference: writer G14 / Data Contract Gate (AP-004 in `bsl-antipatterns.md`; router `1c-coding-standards.md`).
+
+8. Identity Filter Gate (when Chosen includes allow-list of form/metadata names in an extension hook):
+   - HALT before Chosen «&После / &Перед / &Вместо + список имён форм/метаданных» (or `ИмяФормы = "…"`, literal `ОткрытьФорму("…")`, array of metadata names as scope filter).
+   - Answer all three questions in design section `## Hardcode Justification` (SSOT template: `.cursor/rules/existing-mechanism-priority.mdc`):
+     1. Does the callee / API / setting already filter scope?
+     2. Is the name set closed forever (not «temporary for first release»)?
+     3. What is the plan when N+1 appears?
+   - Without answers / without the section — «thin allow-list of names» is NOT Chosen. Prefer Preference Hierarchy (delegate filter) or document Level-4 justification.
+   - Bypass forbidden: wording «временный список на первый релиз» does NOT close question 2; plan for N+1 remains mandatory.
+   - Reference: AP-055 Hardcoded Identity Filter; smell Scope-as-literals in `existing-mechanism-priority.mdc`; writer G21.
 ```
 
 ### Phase 3: Create Implementation Plan
@@ -460,6 +470,9 @@ Before outputting the plan, verify:
    - Does every decision in Components rely on Existing Mechanisms?
 3. Data Contract Gate:
    - Is every guard check (Свойство/ТипЗнч) justified by an unknown contract?
+3b. Identity Filter Gate:
+   - If Chosen uses allow-list / form-name literals in a hook — is `## Hardcode Justification` filled (callee filter? closed forever? N+1 plan?)?
+   - Is «temporary list for first release» used as a substitute for closed-forever + N+1 plan? (If yes → HALT, not Chosen.)
 4. Magic objects:
    - Are there any metadata objects or procedures used in the plan that were not listed in Found Patterns? (If yes → HALT, add to patterns or verify).
 5. Simplicity:
@@ -902,6 +915,7 @@ Guards NOT needed:
 9. **Document trade-offs** - Explain why this approach
 10. **Consider all aspects** - Error handling, performance, security, testing
 11. **Data Contract Gate** — before prescribing Свойство/ТипЗнч/ЗначениеЗаполнено guard in design: HALT, verify source contract. Fixed contract → no guard; unknown → guard + justification. No "defensive cake". See writer G14 / AP-004 (router `1c-coding-standards.md`).
+12. **Identity Filter Gate** — before Chosen allow-list of form/metadata names in a hook: HALT until `## Hardcode Justification` answers (callee filter? closed forever? N+1 plan?). «Temporary list for first release» is not an answer. Without the section — not Chosen. See AP-055 / Scope-as-literals / writer G21.
 
 ---
 
