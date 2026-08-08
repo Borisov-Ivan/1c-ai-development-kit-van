@@ -692,7 +692,7 @@ Completeness gate: 7 строк в таблице. Меньше — Phase 0 не
 
 ### Phase 2.5: Попытка & Contract Audit (MANDATORY, выполнять ДО Phase 3)
 
-Выделенный проход **только** для блоков Попытка/Исключение и оборонительных проверок (Свойство/ТипЗнч к внешним данным). Консолидирует логику из шагов 4.5 и 4.7. К Phase 3 не переходить, пока Phase 2.5 не завершена.
+Выделенный проход **только** для блоков Попытка/Исключение и оборонительных проверок (Свойство/ТипЗнч к внешним данным). Консолидирует логику из шагов 4.5 и 4.7. К Phase 3 не переходить, пока Phase 2.5 не завершена. После Phase 2.5 — обязателен **Phase 2.6 Identity / Hardcode Audit** (до Phase 3).
 
 **SKEPTIC'S STANCE (принцип скептика):** Каждая защитная проверка (guard) виновна, пока не доказана обратная. Наличие guard в коде — НЕ доказательство того, что guard нужен. Контракт источника определять ТОЛЬКО из внешних источников (Form.xml, метаданные, текст запроса, документация, Resolved Contracts, код вызываемой функции). Если единственное основание считать контракт нефиксированным — сам guard → Contract verified? = **needs-verification** (не OK, не optional).
 
@@ -814,6 +814,30 @@ D. Investigation Request (резолв контрактов по запросу 
    **Fallback при отсутствии блока в промпте.** Если оркестратор не передал блок ## Resolved Contracts, но ревью выполняется в контексте change — проверить Glob `reports/resolved-contract-*.md` в директории change. Если файл найден и scope совпадает — прочитать и использовать для Phase 2.5.
 ```
 
+### Phase 2.6: Identity / Hardcode Audit (MANDATORY, выполнять после Phase 2.5 и ДО Phase 3)
+
+Выделенный проход для литералов-фильтров identity-filter (AP-055). Канон имени фазы: **Phase 2.6 Identity / Hardcode Audit**. Не растворять только в Contract Map. К Phase 3 не переходить, пока Phase 2.6 не завершена. Зеркало агента — `.cursor/agents/onec-code-reviewer.md`.
+
+```yaml
+A. Enumerate identity-filter literals (детекторы AP-055):
+   1. сравнение ИмяФормы / полного имени формы со строковым литералом как guard охвата хука
+   2. литерал ОткрытьФорму("…") / аналог как фильтр «только эти формы»
+   3. allow-list / массив / условие по строковым именам объектов метаданных в хуке расширения
+   Out of class по умолчанию: коды отказа / ключи протокола / закрытые enum / фикстуры /
+   Non-Goals «не identity-filter».
+
+B. Identity / Hardcode Audit Table — одна строка на каждый литерал-фильтр из A:
+   #, Procedure, Line, Literal, Detector, Hardcode Justification?, Contradiction «без хардкода»?,
+   Verdict, Evidence
+   Default: нет Hardcode Justification и нет API-ban → AP-055 MUST_FIX (HIGH из каталога)
+   Contradiction Why/Non-Goals «без хардкода» → AP-055 MUST_FIX (CRITICAL, blocking)
+   Evidence override: documented-protocol-key | closed-vendor-enum |
+     spec-explicit-non-identity-filter | design-hardcode-justification
+
+Completeness gate: число строк таблицы = число литералов-фильтров из A (N = N).
+Меньше — Phase 2.6 не завершена.
+```
+
 ### Phase 3: Context Analysis
 ```yaml
 1. Get similar code:
@@ -846,15 +870,22 @@ D. Investigation Request (резолв контрактов по запросу 
    - Defensive Checks Table (every non-DIRECT source from Contract Map)
    - Findings from Phase 2.5 that are NOT already covered as Phase 0 Supporting
 
+2.6. Identity / Hardcode Audit (Phase 2.6):
+   - Identity / Hardcode Audit Table (every identity-filter literal from detectors AP-055)
+   - Completeness: N литералов-фильтров → N строк таблицы
+   - Contradiction Why/Non-Goals «без хардкода» → MUST_FIX AP-055 (blocking)
+   - Findings from Phase 2.6 that are NOT already covered as Phase 0 Supporting
+
 3. Summary:
    - Status: PASS | FAIL | NEEDS_WORK
-   - Phase 0: N findings (РїРѕ severity)
+   - Phase 0: N findings (по severity)
    - Linter Signals (Phase 1b): K confirmed MUST_FIX, D dismissed, U unavailable
    - Identifier Hygiene (Phase 1c): T новых символов в domain-test, K confirmed AP-031, D dismissed (evidence — подсказка, не вердикт; «scan clean» ≠ «именование OK»)
    - Comment Hygiene Signals (Phase 1d): K confirmed, D dismissed, S skipped
-   - Standards: M findings (РїРѕ severity)
+   - Identity / Hardcode Audit (Phase 2.6): N literals, M findings; completeness N=N; contradiction → MUST_FIX AP-055
+   - Standards: M findings (по severity)
    - Overall: итоговая формулировка
-   - PASS запрещён при unresolved MUST_FIX из Phase 1b (in-scope linter warnings без fix/dismiss), Phase 1c (кандидат evidence без AP-031 finding/dismiss **либо** пустая таблица `## New identifiers (domain test)` на непустом diff с новыми символами) или Phase 1d (Comment Hygiene evidence match без AP-054 finding/dismiss)
+   - PASS запрещён при unresolved MUST_FIX из Phase 1b (in-scope linter warnings без fix/dismiss), Phase 1c (кандидат evidence без AP-031 finding/dismiss **либо** пустая таблица `## New identifiers (domain test)` на непустом diff с новыми символами) или Phase 1d (Comment Hygiene evidence match без AP-054 finding/dismiss) или Phase 2.6 (identity-filter без Hardcode Justification / contradiction «без хардкода»)
 ```
 
 Required Improvements (вместо секции "Рекомендации"):

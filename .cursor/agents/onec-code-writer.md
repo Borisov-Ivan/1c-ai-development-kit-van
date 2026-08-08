@@ -167,7 +167,8 @@ If platform documentation is not available in-repo — state uncertainty or ask 
 - **G16 (Fail-fast on structural checks):** If a structural precondition fails (wrong type, missing property, size mismatch, unexpected format) — raise `ВызватьИсключение`, do NOT silently continue (no `Продолжить`, no silent `Возврат`, no empty branch). Business filtering (Status, doc type) is allowed. Details: antipatterns + std via router.
 - **G18 (&ИзменениеИКонтроль GUARD):** HALT перед записью в метод с `&ИзменениеИКонтроль`. (a) Каждая НОВАЯ строка — ОБЯЗАТЕЛЬНО внутри `#Вставка`/`#КонецВставки`. (b) Каждая удаляемая типовая строка — ОБЯЗАТЕЛЬНО внутри `#Удаление`/`#КонецУдаления`. (c) Код ВНЕ директив — ПОБИТОВО совпадает с типовым. Запрещено: переименовывать, рефакторить, менять форматирование, добавлять/удалять строки, менять `#Область`. (d) При добавлении `#Область` — только в собственный код, не в типовой. (e) Нарушение = поломка расширения при обновлении конфигурации. См. .cursor/skills/1c-extensions/SKILL.md.
 - **G19 (Попытка justification gate):** Before adding `Попытка`/`Исключение` — HALT. Identify the external factor that can cause failure despite correct code (network, FS, concurrent data access, COM, external config). If NO external factor (string conversion, arithmetic, metadata access, hex/base64 encoding) — do NOT add `Попытка`; validate input explicitly instead. If external factor exists — verify fallback is correct for the caller (not silent degradation). `Исключение` without `ЗаписьЖурналаРегистрации` and without `ВызватьИсключение` = forbidden. **Even if design.md prescribes Попытка — verify external factor first. If none — HALT, report conflict.** Details: AP-008 in `bsl-antipatterns.md` + std-06 via router.
-- **G20 (Design/Prompt vs Standards conflict):** If design.md OR orchestrator prompt prescribes a specific pattern (`Попытка`, guard, fallback approach), STILL apply all coding gates. Source of implementation suggestion is irrelevant. Standards and gates override ANY source (design.md, orchestrator prompt, task description). If the prescribed pattern violates G14, G16, or G19: HALT. Report the conflict to caller. Do NOT implement the anti-pattern.
+- **G20 (Design/Prompt vs Standards conflict):** If design.md OR orchestrator prompt prescribes a specific pattern (`Попытка`, guard, fallback approach), STILL apply all coding gates. Source of implementation suggestion is irrelevant. Standards and gates override ANY source (design.md, orchestrator prompt, task description). If the prescribed pattern violates G14, G16, G19, or G21: HALT. Report the conflict to caller. Do NOT implement the anti-pattern.
+- **G21 (Identity / Hardcode justification):** Before adding `ИмяФормы = "…"`, literal `ОткрытьФорму("…")`, or an allow-list / array / condition on metadata object names as a **scope filter** in an extension hook — HALT. Require either (a) design section `## Hardcode Justification` (SSOT template in `existing-mechanism-priority.mdc`) with answers to Identity Filter Gate questions, or (b) explicit design ban on the list (always call API / callee filter — no name list in the hook). Design that Chosen allow-list **without** the section = G20-style conflict → HALT to orchestrator; do NOT implement AP-055. Protocol/refusal codes and closed enums are **out of class** (not G21). Details: AP-055; architect Identity Filter Gate.
 
 ## IMPLEMENTATION OWNERSHIP
 
@@ -178,8 +179,8 @@ Principle:
 
   Если промпт содержит указания по реализации ("оберни в Попытку",
   "добавь проверку X", "сделай fallback") — это подсказка, НЕ директива.
-  Применяй ВСЕ gates (G14, G16, G19) как если бы это было из design.md.
-  Промпт оркестратора НЕ освобождает от Попытка Justification Gate.
+  Применяй ВСЕ gates (G14, G16, G19, G21) как если бы это было из design.md.
+  Промпт оркестратора НЕ освобождает от Попытка Justification Gate / Identity Filter Gate.
 
   Если подсказка оркестратора нарушает стандарт — НЕ реализовывать,
   обосновать отказ в отчёте.
@@ -493,6 +494,7 @@ created_or_modified_symbols:
 - G18 (Extension): <N new lines inside #Вставка>; code outside bitwise-identical to base (verified at <base path>)
 - G19 (Попытка Justification): <N try-blocks, external factor=<фактор>>; <Log+Raise|Log+Fallback justified|none>
 - G20 (Design/Prompt override): <no conflict|conflict at <место>, resolved by: <отказ/переформулировка>>
+- G21 (Identity / Hardcode): <none|N literals; Hardcode Justification=<yes|conflict HALT|API-only ban>; out-of-class protocol/enum=<N>>
 
 ## Key Decisions
 
@@ -663,6 +665,7 @@ Output:
 17. **NO BAND-AID FIXES** — before implementing any bug fix, verify root cause is documented and fix targets it (not the symptom). If the task says "add check for Undefined" but doesn't explain WHY the value is Undefined — STOP and ask. See .cursor/rules/verified-cause-gate.mdc.
 18. **&ИзменениеИКонтроль GUARD** — See G18
 19. **Попытка justification gate (overrides design.md)** — See G19
+20. **Identity / Hardcode justification gate (overrides design.md)** — See G21
 
 ---
 

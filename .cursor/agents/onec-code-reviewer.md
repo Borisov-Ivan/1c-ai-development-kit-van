@@ -109,7 +109,7 @@ Writer и оркестратор сортируют findings по `risk_score` d
 1. **Чтение для контекста разрешено.** Файл можно прочитать целиком для понимания; замечания — только в границах.
 2. **Границы ревью обязательны.** Замечания допускаются только внутри перечисленных процедур/функций и `[module-level]` диапазонов.
 3. **Запрет на «полировку» неизменённого кода.** Рефакторинг, улучшения именования/комментариев/структуры вне границ — запрещены.
-4. **Все категории (AP-каталог, release-hygiene, empty-methods, unused/obsolete, Phase 0, Phase 2.5) ограничены границами.**
+4. **Все категории (AP-каталог, release-hygiene, empty-methods, unused/obsolete, Phase 0, Phase 2.5, Phase 2.6) ограничены границами.**
 5. **BOUNDARY_EXCEPTION — единственное исключение.** Если изменение в границах меняет контракт (например, экспортная функция изменила тип/ключи структуры), finding вне границ допустим только как `[BOUNDARY_EXCEPTION]` с причиной, риском и минимальным действием.
 6. **Формат отчёта сохраняется** (Procedure, Anchor, Action, File:Line, risk axes).
 
@@ -352,6 +352,40 @@ status: NOT_CONNECTED
 
 При повторном вызове с Resolved Contracts: обновить таблицы B и C (`resolved-fixed` / `resolved-dynamic`), пересмотреть findings; секцию Investigation Request НЕ включать.
 
+### Phase 2.6: Identity / Hardcode Audit
+
+Выделенный проход для **литералов-фильтров** identity-filter (AP-055). Не растворять только в Contract Map. К Phase 3 не переходить до завершения.
+
+**SKEPTIC'S STANCE:** каждый runtime-фильтр охвата хука по строковым именам форм/метаданных виновен, пока нет делегирования callee/API/настройке или заполненной `## Hardcode Justification` в design. Наличие allow-list в коде — НЕ доказательство необходимости.
+
+#### A. Enumerate identity-filter literals
+
+Составить нумерованный список кандидатов по детекторам AP-055 (хотя бы одно):
+
+1. сравнение `ИмяФормы` / полного имени формы со строковым литералом как guard охвата хука;
+2. литерал `ОткрытьФорму("…")` / аналог открытия по полному имени как фильтр «только эти формы»;
+3. allow-list / массив / условие по строковым именам объектов метаданных в точке расширения (хук), ограничивающий охват.
+
+**Out of class по умолчанию** (не строка таблицы без Evidence): коды отказа и ключи протокола API, закрытые вендорские enum, тестовые фикстуры, имена с явной пометкой Non-Goals «не identity-filter».
+
+#### B. Audit each literal-filter (одна строка таблицы на литерал)
+
+Поля: `#`, `Procedure`, `Line`, `Literal`, `Detector` (1|2|3), `Hardcode Justification in design?` (yes/no/n-a API-ban), `Contradiction with Why/Non-Goals «без хардкода»?` (yes/no), `Verdict`, `Evidence` (опционально).
+
+**Default Verdict:**
+
+- литерал-фильтр + нет `## Hardcode Justification` и нет явного запрета списка (API-only) → `AP-055`, severity HIGH (из каталога), Action MUST_FIX;
+- литерал-фильтр + Why / Non-Goals / proposal явно «без хардкода» / «без списков имён» → `AP-055`, severity **CRITICAL**, Action **MUST_FIX** (contradiction blocking);
+- литерал-фильтр + заполненная Hardcode Justification с ответами Identity Filter Gate → `OK` или `VERIFIED_OK` при Evidence.
+
+**Evidence override** (легитимные литералы протокола/enum): типы `documented-protocol-key` | `closed-vendor-enum` | `spec-explicit-non-identity-filter` | `design-hardcode-justification`. Без Evidence default стоит.
+
+**Completeness gate:** число строк таблицы B = число литералов-фильтров из A (N = N). Меньше — Phase 2.6 не завершена.
+
+#### C. Summary line (для Main report)
+
+`Identity / Hardcode Audit: N literals, M findings (AP-055…); completeness N=N`
+
 ### Phase 3: Context Analysis
 
 ```yaml
@@ -380,8 +414,9 @@ status: NOT_CONNECTED
    - Нет пары, где один finding — AP-004 (fixed contract), другой — AP-029 (phantom field) на том же источнике с Evidence-противоречием.
 3. Evidence-completeness:
    - Каждое VERIFIED_OK имеет Evidence-блок с source.
-   - Каждый override default verdict (в Phase 2.5) имеет Evidence-блок.
+   - Каждый override default verdict (в Phase 2.5 / Phase 2.6) имеет Evidence-блок.
    - «Compensating-try OK без Evidence» — запрещено.
+   - Completeness Phase 2.6: строк таблицы = литералов-фильтров из A.
 4. Boundary coverage:
    - Для каждой процедуры/функции в Review Boundaries: либо есть finding, либо явное acknowledgement «no issues» в Reasoning Appendix.
 5. Counterfactual implementable:
@@ -399,7 +434,7 @@ status: NOT_CONNECTED
 Отчёт состоит из двух артефактов (оркестратор сохраняет их отдельно — см. `.cursor/skills/review/SKILL.md`):
 
 1. **Main report** (`review-<scope>-<date>.md`): Summary + Findings (actionable).
-2. **Reasoning appendix** (`review-<scope>-<date>-reasoning.md`): Intent Map, Contract Map, Knowledge Assessment, Evaluation Checklist, Попытка Audit Table, Defensive Checks Table.
+2. **Reasoning appendix** (`review-<scope>-<date>-reasoning.md`): Intent Map, Contract Map, Knowledge Assessment, Evaluation Checklist, Попытка Audit Table, Defensive Checks Table, Identity / Hardcode Audit Table (Phase 2.6).
 
 Ревьювер возвращает оркестратору **оба** артефакта в одном ответе с явными маркерами: `## === MAIN REPORT ===` и `## === REASONING APPENDIX ===`. Оркестратор разделяет на файлы.
 
@@ -416,6 +451,7 @@ File(s): <пути>
 Status: PASS | FAIL | NEEDS_WORK
 Phase 0: N findings (X HIGH, Y MEDIUM)   # если Phase 0 выполнялась
 Попытка Audit: P blocks checked, Q findings   # Phase 2.5
+Identity / Hardcode Audit: N literals, M findings   # Phase 2.6; completeness N=N
 AP Registry: M findings (CRITICAL: ..., HIGH: ..., MEDIUM: ..., LOW: ...)
 Release-hygiene: K findings (AP-040..AP-045, AP-051, AP-053, AP-054)
 Top-risk items: <топ-3 по risk_score с AP-ID и Procedure>

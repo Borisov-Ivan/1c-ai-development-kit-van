@@ -59,7 +59,7 @@ Task(
          В финальном ответе обязательны блоки (полный формат — onec-code-writer.md § OUTPUT FORMAT):
          - ## Changes (с полными code fences или diff)
          - ## Code-Truth Symbols (mandatory, YAML по формату агента)
-         - ## Gate Results (G14, G16, G18, G19, G20)
+         - ## Gate Results (G14, G16, G18, G19, G20, G21)
          - ## Key Decisions
          - ## Acceptance Criteria
          - ## Next Steps",
@@ -132,7 +132,7 @@ Task(
          В финальном ответе обязательны блоки (полный формат — onec-code-writer.md § OUTPUT FORMAT):
          - ## Changes (с полными code fences или diff)
          - ## Code-Truth Symbols (mandatory, YAML по формату агента)
-         - ## Gate Results (G14, G16, G18, G19, G20)
+         - ## Gate Results (G14, G16, G18, G19, G20, G21)
          - ## Key Decisions
          - ## Acceptance Criteria
          - ## Next Steps",
@@ -224,7 +224,7 @@ Task(
          В финальном ответе обязательны блоки (полный формат — onec-code-writer.md § OUTPUT FORMAT):
          - ## Changes (с полными code fences или diff)
          - ## Code-Truth Symbols (mandatory, YAML по формату агента)
-         - ## Gate Results (G14, G16, G18, G19, G20)
+         - ## Gate Results (G14, G16, G18, G19, G20, G21)
          - ## Key Decisions
          - ## Acceptance Criteria
          - ## Next Steps",
