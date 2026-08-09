@@ -468,6 +468,21 @@ Focus: full (new file)
   - `<тот же каталог>/review-<scope-slug>-YYYY-MM-DD-reasoning.md`.
 - В Summary main report — ссылка на appendix.
 - Если выполнялся Investigation Loop — путь к `resolved-contract-*.md` в Summary.
+- **`## Explain scope` (обязательно в конце main report):** machine-readable охват обработанного `.bsl` для `/opsx:explain`. Формат:
+
+  ```markdown
+  ## Explain scope (handoff)
+
+  - source: review
+  - change: <name|none>
+  - focus: diff-focused | full
+  - files:
+    - path: src/.../Module.bsl
+      procedures: [Имя1, Имя2]   # опц., желательно
+  - report: <path этого main report>
+  ```
+
+  Список `files` — из фактического scope ревью (шаг 1). Отдельный `temp/explain-handoff-*.md` **не** создавать.
 
 ### 4.4 Сводка пользователю (4-слотная карточка)
 
@@ -476,7 +491,13 @@ Focus: full (new file)
 1. **Что отрецензировано** — UX-формулировка scope (модуль / файлы / расширение / ЗНИ).
 2. **Итог** — топ-3 находки в пользовательском языке + общее число (без severity-меток в заголовках).
 3. **Что важно** (Risk Surfacing) — «не покрыто этим ревью»: при `diff-focused` — неизменённый код, при `light review` — Phase 0 / Phase 2.5 / Phase 2.6 / AP-пасс, при mismatch контракта ревьювера — затронутые findings.
-4. **Куда дальше** — одна команда (устранение / extend / archive). При **`release_mode`:** если есть ARCH-findings или MUST_FIX scope/design — `/opsx:extend <change> --from-review <main-report-path>`; иначе устранение через writer или «только отчёт».
+4. **Куда дальше** — одна команда по приоритету:
+   - открытый MUST_FIX ask или нужен `/opsx:extend` → **только** устранение / extend (explain **не** занимает этот слот);
+   - иначе при подходящем scope (несколько `.bsl` / ≥2 логических точек / после fix-цикла; **`release_mode`** — почти всегда, с намёком на рамку) → MAY предложить `/opsx:explain @<main-report-path>`;
+   - trivial light-review одного файла без findings → propose explain **не** обязателен (мягкий hint допустим);
+   - иначе: archive / «только отчёт».
+   - При **`release_mode`:** если есть ARCH-findings или MUST_FIX scope/design — `/opsx:extend <change> --from-review <main-report-path>`; иначе устранение через writer или «только отчёт» (+ explain по правилу выше, если слот свободен).
+   - Вторичная строка «также можно `/opsx:explain @…`» — **только** после выбора/отказа от primary (fix/extend), не вместо него.
 
 Полный отчёт (счётчики CRITICAL/HIGH/MEDIUM/LOW, разделение CODE/ARCHITECTURE) остаётся в `reports/review-<scope-slug>-YYYY-MM-DD.md` и appendix.
 
@@ -583,6 +604,14 @@ Focus: full (new file)
 
 Если есть секция `## Remaining Unresolved Contracts` — вывести её в сводку пользователю с пометкой: «Требуют ручной верификации контракта; writer получил их как точки с пониженным confidence».
 
+### 7.4 Propose `/opsx:explain` (после закрытия primary)
+
+Если слот «Куда дальше» / AskQuestion шага 5 уже отработал (пользователь отказался от fix, либо findings только VERIFIED_OK/OPTIONAL/ARCHITECTURE без обязательного ask) **и** нет нерешённого MUST_FIX ask / обязательного extend:
+
+- при подходящем scope (см. §4.4 п.4) — в финале предложить `/opsx:explain @<main-report-path>` (опираясь на `## Explain scope` в отчёте);
+- при **`release_mode`** с очень широким scope — в предложении намекнуть, что бриф даст **Варианты** рамки (не весь cfe сразу);
+- trivial light-review 0 findings — не требовать propose.
+
 ---
 
 ## Интеграция
@@ -619,3 +648,5 @@ Focus: full (new file)
 4. **Honest Subagent:** сбои агентов названы честно (`failed` / `interrupted-by-user`), без выдуманных причин.
 5. **HALT-жаргон:** в чате нет CRITICAL/HIGH/MEDIUM/LOW, нет внутренних ID.
 6. **Полный отчёт:** счётчики и технические детали сохранены в файл `reports/review-*.md`.
+7. **Explain scope:** в main report есть секция `## Explain scope` с `source: review` и списком `files` (шаг 4.3).
+8. **Propose explain:** если слот «Куда дальше» свободен от MUST_FIX/extend и scope подходит — рассмотрен `/opsx:explain` (§4.4 / §7.4); explain не вытеснил primary fix/extend.

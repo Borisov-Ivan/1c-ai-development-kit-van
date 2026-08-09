@@ -22,3 +22,5 @@ description: Предрелизное ревью расширения или cha
 **Памятка заказчика:** [`.cursor/docs/review-guide.md`](../docs/review-guide.md) — когда `/review` vs `/release-review`, отличия от apply-reviewer.
 
 **Первое действие:** прочитать `.cursor/skills/review/SKILL.md` с пометкой «вызов `/release-review` → `release_mode=true`» и далее идти по шагам skill. До прочтения скилла — никаких чтений артефактов, трасс, модулей.
+
+После предрелиза (ниже приоритета fix/extend) финал MAY предложить `/opsx:explain` с **Вариантами** рамки по отчёту — см. [review-guide.md](../docs/review-guide.md).
