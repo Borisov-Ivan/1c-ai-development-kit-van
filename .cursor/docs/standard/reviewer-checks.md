@@ -577,7 +577,7 @@ Completeness gate: 7 строк в таблице. Меньше — Phase 0 не
    - Analyze parameter count
    - Fail-fast: scan for silent skips on structural checks (Продолжить, silent Возврат, empty branch when precondition fails on type/property/size/format) — AP-021. See anti-pattern registry
    - Data contract: в†' see AP-004, AP-005, AP-006 in anti-pattern registry (category 16)
-   - Design authority: design.md decisions do NOT exempt code from anti-pattern checks. Tag: "design-prescribed anti-pattern".
+   - Design authority: design.md decisions do NOT exempt code from anti-pattern checks. Tag: "design-prescribed anti-pattern". Finding остаётся для disposition оркестратора (`QualityFlag=weak` / `Disposition=needs-confirm`); соответствие design ≠ auto-PASS качества. AP-042 «есть в постановке» — agreement-override (не silent close). Silent VERIFIED_OK — только Evidence из runtime-SSOT whitelist (`.cursor/agents/onec-code-reviewer.md` § DESIGN AUTHORITY).
    - Detect stub/placeholder code: empty Thumbprint, hardcoded "TODO" return values, always-false conditions — HIGH — AP-024 (always, not prerelease-only). See anti-pattern registry
    - Parameter integrity: в†' see AP-007 in anti-pattern registry (category 16)
    - Magic constants: detect same numeric (not 0/1/-1) or string literal appearing 2+ times in module (критерии — category 4, Duplicated magic constant)
@@ -831,8 +831,11 @@ B. Identity / Hardcode Audit Table — одна строка на каждый �
    Verdict, Evidence
    Default: нет Hardcode Justification и нет API-ban → AP-055 MUST_FIX (HIGH из каталога)
    Contradiction Why/Non-Goals «без хардкода» → AP-055 MUST_FIX (CRITICAL, blocking)
-   Evidence override: documented-protocol-key | closed-vendor-enum |
-     spec-explicit-non-identity-filter | design-hardcode-justification
+   Evidence override silent OK (без weak): documented-protocol-key | closed-vendor-enum |
+     spec-explicit-non-identity-filter (runtime-SSOT whitelist, agent § DESIGN AUTHORITY)
+   design-hardcode-justification / заполненная Hardcode Justification без иных whitelist Evidence →
+     QualityFlag=weak + Disposition=needs-confirm (Justification ≠ auto-PASS качества)
+   Phase 2.5: spec-explicit-tolerance → тот же путь weak/needs-confirm, не silent close
 
 Completeness gate: число строк таблицы = число литералов-фильтров из A (N = N).
 Меньше — Phase 2.6 не завершена.

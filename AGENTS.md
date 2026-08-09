@@ -54,6 +54,6 @@
 - Пути cf/cfe → `openspec/project.md` + `.cursor/rules/project-paths.mdc`.
 - Запрет ROI → `.cursor/rules/no-roi-estimates.mdc`; инфраструктура → `.cursor/docs/onec-infrastructure.md`.
 
-**Ревью:** [`.cursor/docs/review-guide.md`](.cursor/docs/review-guide.md); `/review`, `/release-review`; протокол → `.cursor/skills/review/SKILL.md`.
+**Ревью:** [`.cursor/docs/review-guide.md`](.cursor/docs/review-guide.md); `/review`, `/release-review`; протокол → `.cursor/skills/review/SKILL.md`. Disposition / независимое качество — [`openspec/specs/review-quality-disposition/spec.md`](openspec/specs/review-quality-disposition/spec.md), [`openspec/adrs/ADR-0003-review-quality-disposition.md`](openspec/adrs/ADR-0003-review-quality-disposition.md).
 
 **Доменные навыки 1С:** `1c-bsp`, `1c-extensions`, `1c-forms`, `1c-mxl`, `1c-roles`, `1c-query-optimization` — через `available_skills` и `.cursor/skills/*/SKILL.md`. Справочники: `.cursor/docs/platform/`, `.cursor/docs/standard/`.

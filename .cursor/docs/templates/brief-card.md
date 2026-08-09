@@ -167,7 +167,7 @@
 
 ## B-explain — `/opsx:explain`
 
-SSOT формы и полные эталоны: [`.cursor/skills/openspec-explain/templates/entry-brief.md`](../../skills/openspec-explain/templates/entry-brief.md).
+SSOT формы и полные эталоны: [`.cursor/skills/openspec-explain/templates/entry-brief.md`](../../skills/openspec-explain/templates/entry-brief.md) (эталоны A/B — замер; **эталон C** — post-review/apply с prefill из `## Explain scope`).
 
 | Слот | Обяз. |
 |------|-------|
@@ -178,6 +178,8 @@ SSOT формы и полные эталоны: [`.cursor/skills/openspec-explai
 | **Подтвердить?** | да |
 
 **Не использовать:** Цель, Источник, Решено когда. Бриф ≠ карта точек (карта — после «да»; **без** классов `решение` / `наблюдение` / `типовое` в чат — см. `openspec-explain/templates/inventory-card.md`).
+
+**Post-review/apply:** в **Охват** — UX-абзац; полный список `path` — только в **Контекст** (см. эталон C).
 
 ---
 

@@ -29,7 +29,7 @@ priority: 999
 1. **СТОП.** Не вызывать writer/reviewer, не править .bsl.
 2. Предложить: «Артефакты готовы. Для начала реализации: `/opsx:apply <name>`»
 
-Исключения: Light Mode и Mechanical Mode — работают без артефактов OpenSpec (**Read** `.cursor/rules/1c-halt-triggers.mdc` § LIGHT MODE / § MECHANICAL MODE). **Команда `/review`** — ревью кода + устранение замечаний по отчёту: reviewer разрешён без ограничений; writer — только после подтверждения пользователя и только для устранения замечаний из отчёта reviewer (см. `.cursor/skills/review/SKILL.md`).
+Исключения: Light Mode и Mechanical Mode — работают без артефактов OpenSpec (**Read** `.cursor/rules/1c-halt-triggers.mdc` § LIGHT MODE / § MECHANICAL MODE). **Команды `/review` и `/release-review`** — ревью кода + устранение замечаний по отчёту (один протокол `.cursor/skills/review/SKILL.md`, флаг `release_mode`): reviewer разрешён без ограничений; writer — только после подтверждения пользователя / `queue-fix` и только для устранения замечаний из отчёта reviewer.
 
 ## ПОЛНОМОЧИЯ АГЕНТОВ (BSL-ONLY)
 
@@ -93,14 +93,16 @@ Architect может рекомендовать новые объекты в des
 
 ## АВТО-ИСПРАВЛЕНИЕ РЕВЬЮ
 
-Все кодовые замечания (critical/high/medium/low) → автоматически writer с замечаниями → повторный reviewer. Макс. 2 итерации — согласовано с Phase 7 агента writer.
+Все кодовые замечания (critical/high/medium/low) **кроме carve-out weak / design-prescribed / agreement-override (см. ниже)** → автоматически writer с замечаниями → повторный reviewer. Макс. 2 итерации — согласовано с Phase 7 агента writer.
 Архитектурные замечания (новый объект, API, структура хранения, RLS) → СТОП, к пользователю.
+
+**Carve-out QualityFlag weak / design-prescribed (apply-reviewer):** без AskQuestion disposition (скорость apply). Авто-fix — **только** functional MUST_FIX **без** `QualityFlag=weak`, tag `design-prescribed` и agreement-override. Weak / design-prescribed / agreement-override → **только** оставить open + одна строка-след в отчёте задачи («на `/review` потребуется подтверждение качества»); **не** авто-waive как as-designed и **не** авто-fix. Финальный выбор as-designed / queue-fix — только в `/review` / `/release-review` (шаг 4.5 skill).
 
 **Поверхность (DISPROPORTIONATE_SURFACE / REFACTOR по шуму):** при полном ревью нового/переписанного модуля с REFACTOR по поверхности — **не закрывать** задачу apply/`/review` без `onec-code-simplifier` или **явного waive** пользователя. Sidecar-шаблоны (`1c-agent-patterns/sidecar.md`) этот MUST **не** содержат — политика только здесь + `review/SKILL.md` + `1c-utility-agents.mdc`.
 
 **Без прямого StrReplace.** Все кодовые замечания — через writer. Оркестратор НЕ исправляет замечания ревью напрямую (StrReplace), даже если правка кажется «однострочной». Spot-check corrections после writer — тоже через writer.
 
-Принцип: каждое замечание ревьювера = обязательное к исправлению. Если замечание не стоит исправления, ревьювер не должен его выдавать.
+Принцип: каждое замечание ревьювера = обязательное к исправлению **или** к явному open на disposition / as-designed после `/review` / `/release-review`. Если замечание не стоит ни фикса, ни disposition — ревьювер не должен его выдавать.
 
 **После получения отчёта аналитического агента** (architect/explorer/trace-analyst) — сохранить полный отчёт: см. `preserve-subagent-reports.mdc`.
 

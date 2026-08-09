@@ -334,9 +334,22 @@ Implement tasks from an OpenSpec change.
      ```markdown
      - **S<N>.<M>** · <модуль/объект> · <процедура/функция> (<created|modified>) — <суть из tasks.md>. [`src/.../Module.bsl`](src/.../Module.bsl):<start>-<end>
      ```
+   - **`## Explain scope` (SSOT при BSL в срезе):** в конце секции среза (или отдельным блоком в конце `code-map.md` для среза) — обязательная секция для `/opsx:explain`. Канон apply-источника для `@` = **этот** `code-map.md` (не отдельный `temp/explain-handoff-*.md`).
+     ```markdown
+     ## Explain scope (handoff)
+
+     - source: apply
+     - change: <name>
+     - focus: slice-S<N>
+     - files:
+       - path: src/.../Module.bsl
+         procedures: [Имя1, Имя2]   # из Code-Truth / строк карты; опц.
+     - report: openspec/changes/<name>/reports/code-map.md
+     ```
+   - **handoff-acceptance-S\<N\>-\*.md:** при наличии BSL — либо **полная копия** секции `## Explain scope` текущего среза из code-map, либо одна ссылка на code-map + `focus: slice-S<N>` (без «и/или» без канона: секция обязательна в code-map; handoff — копия или ссылка).
    - **Чат (acceptance-handoff):** блок `### Карта правок (перед тестом)` — до **5** нумерованных пунктов: **одно предложение прозой**, затем один code-citation [`start:end:path`](...). Строка «Полная карта: `openspec/changes/<name>/reports/code-map.md`». **Не** дублировать §1 «Что реализовано» телеграммой путей.
    - **HALT в блоке карты (чат):** подстроки из `chat-output-budget.mdc` §7; `created_or_modified_symbols`, `spot-check`, имена агентов, «источник: writer», YAML, internal Review Boundaries.
-   - **Self-check apply (карта):** каждый пункт карты в чате понятен без открытия `debug.md`; в блоке карты нет HALT-подстрок.
+   - **Self-check apply (карта):** каждый пункт карты в чате понятен без открытия `debug.md`; в блоке карты нет HALT-подстрок; при BSL — в code-map есть `## Explain scope`.
 
    **Investigation Loop при apply.** Если reviewer в отчёте включил секцию `## Investigation Request`:
    1. Вызвать explorer (contract resolution deep) по таблице из Investigation Request. Шаблон: «Explorer — contract resolution (deep)» из `1c-agent-patterns/explorer.md`.
@@ -382,7 +395,7 @@ Implement tasks from an OpenSpec change.
      ```
 
      Параллельно:
-     1. **Карта правок:** собрать символы среза из journal + `tasks.md`; **Write/append** `reports/code-map.md` (секция `# Срез S<N> — …`).
+     1. **Карта правок:** собрать символы среза из journal + `tasks.md`; **Write/append** `reports/code-map.md` (секция `# Срез S<N> — …`); при BSL — включить `## Explain scope` (SSOT выше).
      2. Append в `debug.md` `## Slice Gate Decisions`:
         ```markdown
         ### Slice S<N> — <имя> (YYYY-MM-DD)
@@ -392,8 +405,8 @@ Implement tasks from an OpenSpec change.
         Изменения tasks: нет (S<N>.accept остаётся [ ])
         Связанный отчёт: reports/handoff-acceptance-S<N>-YYYY-MM-DD.md
         ```
-     3. **Write** полный handoff в `reports/handoff-acceptance-S<N>-YYYY-MM-DD.md` (T-HANDOFF §5.2; все слоты варианта `acceptance`, включая «Карта правок» между «Что реализовано» и «Что проверить СЕЙЧАС»). **Обязательно** — не только тонкий чат.
-     4. T-HANDOFF вариант `acceptance` в **чат** по шаблону шага 7 (заголовок — `## Срез S<N> — передача на приёмку: <change-name>`). Секция «Что проверить СЕЙЧАС» — чеклист из `S<N>.accept` (или legacy `S<N>.T<M>`). Блок «Карта правок» — компактно (до 5 пунктов).
+     3. **Write** полный handoff в `reports/handoff-acceptance-S<N>-YYYY-MM-DD.md` (T-HANDOFF §5.2; все слоты варианта `acceptance`, включая «Карта правок» между «Что реализовано» и «Что проверить СЕЙЧАС»; при BSL — копия `## Explain scope` среза или ссылка на code-map + `focus: slice-S<N>`). **Обязательно** — не только тонкий чат. Отдельный `temp/explain-handoff-*.md` **запрещён**.
+     4. T-HANDOFF вариант `acceptance` в **чат** по шаблону шага 7 (заголовок — `## Срез S<N> — передача на приёмку: <change-name>`). Секция «Что проверить СЕЙЧАС» — чеклист из `S<N>.accept` (или legacy `S<N>.T<M>`). Блок «Карта правок» — компактно (до 5 пунктов). При BSL и отсутствии блокеров verify/extend — опциональная строка next-step: `/opsx:explain @…/code-map.md` (приоритет ниже verify/extend; см. §5.2 `opsx-output-style.md`).
      5. Завершить сессию.
    - **Manual acceptance shortcut:**
      Если пользователь в любой момент сессии обычной фразой подтверждает приёмку («принято», «срез S<N> принят», «проверил, работает») — для среза, у которого все рабочие задачи [x] и приёмка [ ]; при неоднозначности (несколько срезов в ожидании) — одно уточнение, какой срез:
@@ -426,6 +439,7 @@ Implement tasks from an OpenSpec change.
    - **Delegate** to the designated executor (agent or skill)
    - Orchestrator role: prepare prompt with context, delegate, spot-check result
    - **Spot-check (post-verification):** After the agent reports completion, verify the change: Grep for a pattern that confirms the fix (e.g. after "replace ТекущаяДата with ТекущаяДатаСеанса" → Grep for `ТекущаяДата()` in that file must return 0 matches). For batch tasks (5+ files), spot-check at least 3 files (first, middle, last in the list). If the result does not match expectations → STOP, report to user, do NOT mark task complete. **LINT GATE** — см. [`.cursor/rules/1c-agent-delegation.mdc`](../../rules/1c-agent-delegation.mdc) § LINT GATE + [`.cursor/rules/1c-writer-pipeline.mdc`](../../rules/1c-writer-pipeline.mdc). **Чат (non-events, §3a `chat-output-budget.mdc`):** при успешном writer + spot-check + reviewer PASS без MUST_FIX — **не** выводить строки «Авто-проверка: OK», «Линтер чист», «reviewer PASS», «Spot-check: OK»; между задачами (без пошагового режима) достаточно одной строки «Задача `S<N>.<M>` («…») реализована.».
+   - **Carve-out QualityFlag weak / design-prescribed (после apply-reviewer):** `QualityFlag=weak` / tag `design-prescribed` / agreement-override — **не** авто-waive и **не** AskQuestion disposition. Functional MUST_FIX **без** weak/design-prescribed/agreement-override → авто-fix как прежде. Weak → оставить open + одна строка-след в отчёте задачи («на `/review` потребуется подтверждение качества»). **`[x]`:** при open weak — только если след записан; non-weak MUST_FIX блокируют `[x]`. SSOT: `1c-agent-delegation.mdc` § АВТО-ИСПРАВЛЕНИЕ; финальный выбор — `review/SKILL.md` шаг 4.5.
    - Mark task complete in the tasks file: `- [ ]` → `- [x]`
    - **Вывод после задачи** — по режиму из §5.6 (тихий успех / шаблон A / slice-gate B):
 
@@ -568,7 +582,8 @@ Implement tasks from an OpenSpec change.
 8. **Англицизмы** (`Step-by-step`, `checkpoint`, `Tier`, `Standard/Lite/Full` как метки) и имена движка (`Architect Gate`, `Slice Gate`, `Implementation Impact Gate`) — в пользовательский вывод не попадают; внутренние ID триггеров (`slice-size-threshold`, `awaiting-acceptance`) — только в `debug.md` / в скрытом контексте модели.
 
 **Guardrails**
-- **Output style:** T-HANDOFF §5.2 + **Chat Surface Contract** §2.6 `opsx-output-style.md`: handoff среза на языке эффекта; next step — только user-action команды (`/opsx:verify`, `/opsx:apply`, `/opsx:archive`); thin handoff `acceptance` **включает** строку «после проверки: обычная фраза „принято“ или `/opsx:apply <name>`»; без internal-команд и перечней файлов. Self-check §2.6 перед отправкой.
+- **Output style:** T-HANDOFF §5.2 + **Chat Surface Contract** §2.6 `opsx-output-style.md`: handoff среза на языке эффекта; next step — user-action команды (`/opsx:verify`, `/opsx:apply`, `/opsx:archive`, опц. `/opsx:explain` после BSL — ниже verify/extend); thin handoff `acceptance` **включает** строку «после проверки: обычная фраза „принято“ или `/opsx:apply <name>`»; без internal-команд и перечней файлов. Self-check §2.6 перед отправкой.
+- **Explain after BSL:** при acceptance/final с правками `.bsl` — MAY предложить `/opsx:explain` по `code-map.md` (секция `## Explain scope`); не предлагать по умолчанию на pause / только ARCH; не вытеснять primary verify/extend.
 - Keep going through tasks until done or blocked
 - Always read context files before starting (from the apply instructions output)
 - **Spot-check after each task:** Grep (or Read) to confirm the change; for 5+ files, check at least 3. Do not mark task complete if verification fails.
