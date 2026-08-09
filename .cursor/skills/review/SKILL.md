@@ -2,11 +2,11 @@
 name: review
 description: Full code review by request context (module, files, extension) with optional fix via writer and reviewer. APPLY GATE exception — см. .cursor/rules/1c-agent-delegation.mdc (секция APPLY GATE).
 license: MIT
-compatibility: Delegates to onec-code-reviewer (prompt_contract_version=3), onec-code-writer, onec-code-simplifier, onec-code-explorer, onec-code-architect. Requires Task tool.
+compatibility: Delegates to onec-code-reviewer (prompt_contract_version=4), onec-code-writer, onec-code-simplifier, onec-code-explorer, onec-code-architect. Requires Task tool.
 metadata:
   author: project
-  version: "2.2"
-  expected_reviewer_prompt_contract_version: 3
+  version: "2.3"
+  expected_reviewer_prompt_contract_version: 4
 ---
 
 Провести полное подробное ревью кода в объёме по контексту запроса пользователя, делегировать ревью **onec-code-reviewer**, сохранить отчёт, затем по подтверждению пользователя передать замечания **onec-code-writer** для устранения с обязательным повторным ревью (макс. 2 итерации).
@@ -21,7 +21,7 @@ metadata:
 
 **Review Focus Level:** `full` — ревью всего указанного кода в файлах; `diff-focused` — замечания только в изменённых процедурах/функциях и `[module-level]` участках (см. шаг 1.5 и `onec-code-reviewer.md`, Review Boundaries).
 
-**Ключевая архитектурная идея v2.0:** оркестратор собирает **evidence** (scope, границы, линтер, история, whitelist проекта, architectural context). Ревьювер — **единственный владелец вердиктов** (severity/kind/action/risk). AP-каталог — единственный источник истины для AP-правил (см. `.cursor/rules/bsl-antipatterns.mdc`).
+**Ключевая архитектурная идея v2.0:** оркестратор собирает **evidence** (scope, границы, линтер, история, whitelist проекта, architectural context). Ревьювер — владелец вердиктов **severity/kind/action/risk** (и эмит `QualityFlag` / `Disposition=needs-confirm|open`). Финальные `as-designed` / `queue-fix` / `deferred` пишет **оркестратор** после шага 4.5. AP-каталог — единственный источник истины для AP-правил (см. `.cursor/rules/bsl-antipatterns.mdc`).
 
 ---
 
@@ -319,7 +319,7 @@ Focus: full (new file)
 
 Сформировать бриф:
 
-- **Version contract (S13):** в начало промпта вставить `expected_reviewer_prompt_contract_version: 3` (значение из frontmatter скилла). Ревьювер сверяет с `prompt_contract_version` в своём frontmatter; несовпадение → warning в отчёт.
+- **Version contract (S13):** в начало промпта вставить `expected_reviewer_prompt_contract_version: 4` (значение из frontmatter скилла). Ревьювер сверяет с `prompt_contract_version` в своём frontmatter; несовпадение → warning в отчёт.
 - Список файлов.
 - Стандарты: `.cursor/docs/1c-coding-standards.md`.
 - Задача:
@@ -366,6 +366,7 @@ Focus: full (new file)
 ### 2.2 Architectural Context
 
 - Если ревью в рамках ЗНИ (`openspec/changes/<name>`): прочитать `design.md` и `reports/architecture-*.md`. Передать в промпт как `## Architectural Context` (сокращённо или целевой раздел).
+- **Framing (обязательно в промпте):** контекст намерения для Intent/Contract Map и поиска design-prescribed / contradiction; **соответствие design ≠ PASS по качеству**; skeptic stance к цитатам постановки.
 - Если ЗНИ нет — блок пропустить.
 
 ---
@@ -384,7 +385,7 @@ Focus: full (new file)
 Вызвать **Task**(`subagent_type="onec-code-reviewer"`) с промптом по выбранному шаблону:
 
 - Файлы: список из шага 1 (для батча — подмножество).
-- `expected_reviewer_prompt_contract_version`: 3.
+- `expected_reviewer_prompt_contract_version`: 4.
 - **`release_mode = true`:** явно **`mode=prerelease`** в промпте; Category 12; release-hygiene focus.
 - **`release_mode = false`:** **не** передавать `mode=prerelease`.
 - Диагностики линтера: блок **`## Linter Signals (evidence)`** из шага 1.8 (все severity, включая warning; не сокращать до «линтер чист»).
@@ -503,30 +504,79 @@ Focus: full (new file)
 
 ---
 
-## Шаг 5. Предложение устранить
+## Шаг 4.5. Disposition (корзины A/B/C) — общий слой для `release_mode` true/false
 
-Если есть findings с `Action = MUST_FIX | REFACTOR`:
+После сохранения main report и **до** шага 5 классифицировать findings. Один протокол для `/review` и `/release-review` (команды только выставляют `release_mode`).
 
-**AskQuestion** (в чат — без slug субагентов; имена `onec-code-*` только во внутреннем контексте Task):
-1. Есть **MUST_FIX CODE** → «Устранить дефекты через агента? (Да / Нет, только отчёт)».
-2. Есть **REFACTOR** (и нет MUST_FIX, или после их исправления) → «Код работает, но ревьюер нашёл N запахов. Упростить код? (Да / Нет)».
-   - **Поверхность:** если среди REFACTOR есть `DISPROPORTIONATE_SURFACE` (или формулировка «шум поверхности») на новом/переписанном модуле — задача **не** считается закрытой без упрощения **или** явного отказа (waive) пользователя. Не закрывать «молча» после только advisory Elegance Score.
+### Корзины (предикат D2)
 
-Действия:
-- **Нет** — к шагу 7.
-- **Да** — к шагу 6.
+| Корзина | Содержимое | Вопрос заказчику |
+|---------|------------|------------------|
+| **A** | MUST_FIX CODE **без** weak / design-prescribed / agreement-override | Устранить? (как прежде) |
+| **B** | `agreement-override` ∪ `design-prescribed` ∪ design-endorsed weak (в т.ч. VERIFIED_OK-via-agreement); **не** каждый HIGH+ | as-designed / queue-fix / defer (пакетно + точечно) |
+| **C** | REFACTOR / SURFACE | Упростить? / waive |
 
-Если только `VERIFIED_OK` / `OPTIONAL` / `ARCHITECTURE` — к шагу 7.
+**Классификатор agreement-override → корзина B** (даже при `Action=VERIFIED_OK`):
+
+- Evidence-type / признак из «Не в whitelist» design D9: `spec-explicit-tolerance`, `design-hardcode-justification`, HIDDEN_PARTIAL «по design», формальная Hardcode Justification; либо tag `design-prescribed` / `design-endorsed: true` / `QualityFlag=weak` с endorse.
+- **HIDDEN_PARTIAL «по design»:** tag `hidden-partial-by-design`; Evidence.type = `hidden-partial-by-design`; **или** подстроки `HIDDEN_PARTIAL` **и** (`по design`|`по постановке`|`by design`). Bare tag `HIDDEN_PARTIAL` **недостаточен**.
+- **Формальная Hardcode Justification:** Evidence.type = `design-hardcode-justification` **или** заголовок/поле `Hardcode Justification` **и** нет иного Evidence-type из whitelist D9.
+- Evidence из whitelist D9 → silent OK, в B **не** класть.
+- Unknown Evidence-type вне whitelist **и** вне «Не в whitelist» → **fail-closed в B**.
+- Смесь whitelist + non-whitelist в одном finding → B (non-whitelist побеждает).
+
+**SSOT whitelist silent Evidence** — runtime: `.cursor/agents/onec-code-reviewer.md` § DESIGN AUTHORITY; исторический D9 — `openspec/changes/archive/2026-08-10-independent-review-disposition/design.md` § D9. Каталог здесь не дублировать.
+
+### AskQuestion корзины B
+
+В чат (без имён агентов): «Совпадает с постановкой, но спорно по качеству. Оставить как задумано / поставить в очередь на исправление / отложить?»
+
+Записать ответ в main report — секция `## Disposition` (см. ниже). Опционально очередь: `openspec/changes/<id>/reports/review-queue-<slug>-YYYY-MM-DD.md` или `temp/reports/review-queue-*.md` без change.
+
+### Нормализация при as-designed
+
+- **Disposition приоритетнее Action** для gate шага 5/6 и writer: `Action (effective)=waived` (в секции Disposition или annotate у finding). Исходный Action можно сохранить для аудита.
+- Finding с as-designed: **не** в writer, **не** блокирует итог шага 5 / PASS отчёта.
+- **Prerelease:** as-designed на quality weak **не** снимает Category 12 / release-hygiene без отдельного waive (D4).
+
+### Формат `## Disposition` в main report
+
+```markdown
+## Disposition
+
+| Finding | QualityFlag | Disposition | Action (effective) | Design ref | Who/When |
+|---------|-------------|-------------|--------------------|------------|----------|
+| … | weak | as-designed \| queue-fix \| deferred | waived \| MUST_FIX | design.md#… | user / YYYY-MM-DD |
+```
+
+**Владение полями (D2):** агент эмитит `QualityFlag` / `Disposition=needs-confirm|open`; финальные `as-designed` / `queue-fix` / `deferred` пишет **только** оркестратор после ответа.
 
 ---
 
-## Шаг 6. Устранение (при «Да»)
+## Шаг 5. Предложение устранить
+
+Слой disposition (шаг 4.5) **общий** для `release_mode` true/false.
+
+1. **Корзина B:** disposition уже выполнен в шаге 4.5; здесь только учитывать результат (as-designed → вне блокирующих MUST_FIX; queue-fix → к шагу 6). Повторный AskQuestion disposition **не** задавать.
+2. **Корзина A** (MUST_FIX CODE без weak/agreement): AskQuestion «Устранить дефекты через агента? (Да / Нет, только отчёт)».
+3. **Корзина C** (REFACTOR): «Код работает, но ревьюер нашёл N запахов. Упростить код? (Да / Нет)».
+   - **Поверхность:** если среди REFACTOR есть `DISPROPORTIONATE_SURFACE` (или «шум поверхности») на новом/переписанном модуле — задача **не** закрыта без упрощения **или** явного waive.
+
+Действия:
+- **Нет** (A/C) — к шагу 7.
+- **Да** (A/C) или **queue-fix** (B) — к шагу 6.
+- Только silent VERIFIED_OK (whitelist D9) / OPTIONAL / ARCHITECTURE без B — к шагу 7 (ARCH — шаг 7.2).
+
+---
+
+## Шаг 6. Устранение (при «Да» / queue-fix)
 
 ### 6.1 Фильтрация findings
 
-- **Architecture (Type: ARCHITECTURE)** — списком пользователю (шаг 7, architect trigger S10).
-- **MUST_FIX CODE** — передать writer.
-- **REFACTOR** — передать simplifier.
+- **Architecture (Type: ARCHITECTURE)** — списком пользователю (шаг 7, architect trigger S10); при queue-fix + ARCH / contradiction design → предложить `/opsx:extend --from-review`.
+- **MUST_FIX CODE** с `Disposition=queue-fix` или корзина A (согласие устранить) — передать writer.
+- Findings с `Disposition=as-designed` / `Action (effective)=waived` — **не** передавать writer.
+- **REFACTOR** — передать simplifier (корзина C, если согласие).
 - Сортировка внутри каждой группы — **по `risk_score` desc** (S2), не по severity.
 
 ### 6.2 Порядок
@@ -594,7 +644,7 @@ Focus: full (new file)
 - finding указывает, что постановка стимулирует плохой код (например, локальная копия типового поведения, альтернативная точка расширения, несогласованность `proposal`/`design`/`tasks`);
 - reviewer просит изменить scope, контракт или подход, а не только код;
 
-не передавать это writer как обычный CODE fix. В Summary добавить **Review disposition required** и предложить:
+не передавать это writer как обычный CODE fix. В Summary добавить **Design contradiction — extend required** и предложить:
 
 `/opsx:extend <change-name> --from-review <main-report-path>`
 
@@ -619,9 +669,9 @@ Focus: full (new file)
 - **session-discipline.mdc:** первый инструмент в первом батче — Read этого скилла; протокол действует весь `/review`.
 - **1c-agent-delegation:** правки `.bsl` только через writer/simplifier; после правок — обязательный reviewer; LINT GATE (SSOT: `1c-agent-delegation.mdc` + `1c-writer-pipeline.mdc`) и API EXISTENCE CHECK; EXTENSION GATE и EXTENSION VERIFICATION при `&ИзменениеИКонтроль`. **Investigation Loop** (шаг 3.5) — multi-iteration (max 3). Формат — `1c-writer-pipeline.mdc` § CONTRACT RESOLUTION.
 - **Review Focus Boundaries:** при `diff-focused` оркестратор формирует `## Review Boundaries`; reviewer следует Review Boundaries Protocol.
-- **Evidence separation:** все механические проверки (linter, whitelist, mandatory controls, prior history) — **evidence**; вердикты (severity/kind/action/risk) — **reviewer**.
+- **Evidence separation:** все механические проверки (linter, whitelist, mandatory controls, prior history) — **evidence**; вердикты severity/kind/action/risk — **reviewer**; финальный Disposition (as-designed / queue-fix / deferred) — **оркестратор** (шаг 4.5).
 - **Release-hygiene:** AP-040..AP-045 каталога (не grep оркестратора); reviewer использует Intent Map / Contract Map.
-- **APPLY GATE:** writer и reviewer в `/review` разрешён без `/opsx:apply` — исключение в `.cursor/rules/1c-agent-delegation.mdc` (секция APPLY GATE).
+- **APPLY GATE:** writer и reviewer в `/review` и `/release-review` разрешены без `/opsx:apply` — исключение в `.cursor/rules/1c-agent-delegation.mdc` (секция APPLY GATE).
 
 ---
 
@@ -646,7 +696,7 @@ Focus: full (new file)
 2. **Карточка 4 слота:** сводка выведена строго в 4 слота (Что отрецензировано / Итог / Что важно / Куда дальше).
 3. **Risk Surfacing:** слот «Что важно» заполнен (неизменённый код, AP-пасс, unresolved contracts).
 4. **Honest Subagent:** сбои агентов названы честно (`failed` / `interrupted-by-user`), без выдуманных причин.
-5. **HALT-жаргон:** в чате нет CRITICAL/HIGH/MEDIUM/LOW, нет внутренних ID.
+5. **HALT-жаргон:** в чате нет CRITICAL/HIGH/MEDIUM/LOW, нет внутренних ID; сырые `QualityFlag` / `as-designed` / `queue-fix` — только с русским пояснением рядом (как в review-guide: «оставить как задумано» / «поставить в очередь»).
 6. **Полный отчёт:** счётчики и технические детали сохранены в файл `reports/review-*.md`.
 7. **Explain scope:** в main report есть секция `## Explain scope` с `source: review` и списком `files` (шаг 4.3).
 8. **Propose explain:** если слот «Куда дальше» свободен от MUST_FIX/extend и scope подходит — рассмотрен `/opsx:explain` (§4.4 / §7.4); explain не вытеснил primary fix/extend.

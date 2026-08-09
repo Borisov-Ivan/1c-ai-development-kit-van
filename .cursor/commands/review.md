@@ -18,4 +18,4 @@ description: Полное ревью кода по контексту запро
 
 **Первое действие:** прочитать `.cursor/skills/review/SKILL.md` с пометкой «вызов `/review` → `release_mode=false`» и далее идти по шагам skill. До прочтения скилла — никаких чтений артефактов, трасс, модулей.
 
-После ревью с подходящим охватом (и без открытого MUST_FIX/extend) финал MAY предложить `/opsx:explain` по отчёту с секцией `## Explain scope` — см. [review-guide.md](../docs/review-guide.md).
+После отчёта: слой disposition (as-designed / queue-fix) для спорного качества при endorse design — см. шаг 4.5 в skill; затем устранение MUST_FIX. С подходящим охватом (и без открытого MUST_FIX/extend) финал MAY предложить `/opsx:explain` по отчёту с секцией `## Explain scope` — см. [review-guide.md](../docs/review-guide.md).

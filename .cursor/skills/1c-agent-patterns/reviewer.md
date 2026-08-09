@@ -2,7 +2,22 @@
 
 Шаблоны для делегирования `Task(subagent_type="onec-code-reviewer")`. Общие правила, выбор модели, обработка ошибок — `SKILL.md` (навигатор).
 
-**Контракт v3:** reviewer агент v3.0 (`.cursor/agents/onec-code-reviewer.md`) сам читает AP-каталог `.cursor/rules/bsl-antipatterns.mdc`, применяет prerelease-эскалацию и risk-модель. Оркестратор передаёт **evidence-блоки** (linter signals, whitelist, prior history, architectural context, boundaries, resolved contracts), а не готовые findings. См. шаги 1.6–2.2 в `.cursor/skills/review/SKILL.md`.
+**Контракт v4:** reviewer агент v4.0 (`.cursor/agents/onec-code-reviewer.md`) сам читает AP-каталог `.cursor/rules/bsl-antipatterns.mdc`, применяет prerelease-эскалацию, risk-модель и QualityFlag/Disposition. Оркестратор передаёт **evidence-блоки** (linter signals, whitelist, prior history, architectural context, boundaries, resolved contracts), а не готовые findings. См. шаги 1.6–2.2 в `.cursor/skills/review/SKILL.md`. Silent VERIFIED_OK — только runtime-SSOT whitelist в агенте § DESIGN AUTHORITY.
+
+### Shared: Architectural Context / weak (вставлять в промпт)
+
+```
+## Architectural Context
+[Опционально — из design.md / architecture-*.md активного change.
+ Контекст намерения для Intent/Contract Map и поиска design-prescribed / contradiction.
+ Соответствие design ≠ PASS по качеству. Skeptic stance: цитата постановки не снимает антипаттерн-проверку.
+ Agreement-override (spec-explicit-tolerance, design-hardcode-justification, HIDDEN_PARTIAL по design, формальная Hardcode Justification)
+ → эмитить QualityFlag=weak и Disposition=needs-confirm, не silent VERIFIED_OK.
+ Tag design-prescribed при антипаттерне по постановке.
+ Whitelist silent Evidence — runtime-SSOT `.cursor/agents/onec-code-reviewer.md` § DESIGN AUTHORITY.]
+```
+
+Prerelease-добавка (только `/release-review`): `as-designed` на quality weak **не** снимает Category 12 / release-hygiene без отдельного waive.
 
 ---
 
@@ -13,7 +28,7 @@ Task(
   description="Ревью кода [feature]",
   prompt="Проверь качество кода для [feature].
 
-         expected_reviewer_prompt_contract_version: 3
+         expected_reviewer_prompt_contract_version: 4
 
          Файлы: [список изменённых .bsl]
          Стандарты: .cursor/docs/1c-coding-standards.md
@@ -40,8 +55,7 @@ Task(
          ## Prior Findings History
          [Опционально — из шага 2.1: глоб предыдущих review-<scope-slug>-*.md ≤ 90 дней. Таблица по отчётам. Reviewer для совпадающих findings ставит tag 'recurrent' и повышает риск.]
 
-         ## Architectural Context
-         [Опционально — из design.md / architecture-*.md активного change. Оценивать решения в коде на соответствие контексту.]
+         [Вставить Shared: Architectural Context / weak — см. выше.]
 
          [Если оркестратор передал блок ## Resolved Contracts — включить его сюда. Использовать для Phase 2.5 Defensive Checks Audit: resolved-fixed + guard → AP-004; resolved-dynamic + минимальная проверка → OK.]
 
@@ -141,10 +155,12 @@ Task(
          при интеграции — HIGH: missing mechanism analysis.
 
          ## Формат замечаний
-         Строго по REPORT FORMAT v3 из onec-code-reviewer.md (системный промпт агента):
+         Строго по REPORT FORMAT v4 из onec-code-reviewer.md (системный промпт агента):
          обязательные поля Procedure, Anchor, Action (MUST_FIX / REFACTOR / VERIFIED_OK / OPTIONAL),
          Type (CODE / ARCHITECTURE — ARCHITECTURE при изменении метаданных, контрактов API,
-         структуры хранения, прав/RLS или смене точки расширения).
+         структуры хранения, прав/RLS или смене точки расширения),
+         QualityFlag (при agreement-override / design-prescribed / weak),
+         Disposition=needs-confirm|open (финальные as-designed / queue-fix / deferred — только оркестратор).
 
          ### Оценка эстетики кода (Elegance Score)
          В конце отчета выведи блок:
@@ -166,7 +182,7 @@ Task(
   description="Предрелизное ревью [extension/change]",
   prompt="Проверь качество кода для предрелиза [feature/extension].
 
-         expected_reviewer_prompt_contract_version: 3
+         expected_reviewer_prompt_contract_version: 4
          mode=prerelease
 
          Файлы: [список .bsl батча]
@@ -195,8 +211,7 @@ Task(
          ## Prior Findings History
          [Опционально — шаг 2.1]
 
-         ## Architectural Context
-         [Опционально — design.md / architecture-*.md]
+         [Вставить Shared: Architectural Context / weak — см. выше; + prerelease-добавка про Category 12.]
 
          ## Reference Files (read-only)
          [При change-scoped: список reference_files — контекст только, findings запрещены]
@@ -235,8 +250,7 @@ Task(
 
          [Если оркестратор собрал diff-focused scope — вставить блок ## Review Boundaries (как в шаблоне «Reviewer (ревью кода)»). При focus=full для всех файлов — секцию не вставлять.]
 
-         ## Architectural Context
-         [Если оркестратор передал контекст из design.md и/или architecture-*.md — вставить его сюда. Оценивать решения в коде на соответствие этому контексту.]
+         [Вставить Shared: Architectural Context / weak — см. выше.]
 
          ## Root Cause Context
          Симптом: [что наблюдалось]
@@ -326,10 +340,12 @@ Task(
          при интеграции — HIGH: missing mechanism analysis.
 
          ## Формат замечаний
-         Строго по REPORT FORMAT v3 из onec-code-reviewer.md (системный промпт агента):
+         Строго по REPORT FORMAT v4 из onec-code-reviewer.md (системный промпт агента):
          обязательные поля Procedure, Anchor, Action (MUST_FIX / REFACTOR / VERIFIED_OK / OPTIONAL),
          Type (CODE / ARCHITECTURE — ARCHITECTURE при изменении метаданных, контрактов API,
-         структуры хранения, прав/RLS или смене точки расширения).
+         структуры хранения, прав/RLS или смене точки расширения),
+         QualityFlag (при agreement-override / design-prescribed / weak),
+         Disposition=needs-confirm|open (финальные as-designed / queue-fix / deferred — только оркестратор).
 
          ### Оценка эстетики кода (Elegance Score)
          В конце отчета выведи блок:

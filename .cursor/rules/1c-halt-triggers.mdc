@@ -63,4 +63,4 @@ Find-replace без смены логики; без writer. Примеры: `#О
 - «без агентов» / «без ревью» от пользователя
 - Mechanical Mode
 
-**Не действуют** в `/opsx:apply` и `/review` (кроме Mechanical + reviewer).
+**Не действуют** в `/opsx:apply`, `/review` и `/release-review` (кроме Mechanical + reviewer).

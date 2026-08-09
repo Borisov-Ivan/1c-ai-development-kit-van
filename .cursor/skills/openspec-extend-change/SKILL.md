@@ -212,6 +212,7 @@ Self-check перед выводом: уровень B1/B2 по классифи
 - менять существующий `Requirement` или добавить новый;
 - inside-slice, fix-срез или новый срез;
 - принимать рекомендацию review/architecture или оставить как rejected/deferred;
+  - при `--from-review`: маппинг disposition отчёта — `queue-fix` ↔ `accepted` (очередь на артефакты/код), `as-designed` ↔ `rejected` **с записью причины** (не silent dismiss); не смешивать семантики в одном поле без явного маппинга;
 - требуются ли изменения specs;
 - считать source finding дефектом кода, постановки или ложным срабатыванием.
 
@@ -324,7 +325,7 @@ Architect обязателен, если:
 5. `debug.md` — секция `## Extend — YYYY-MM-DD`:
    - источник (`--from-review`, `--from-debug`, ...);
    - что добавлено/изменено;
-   - disposition по findings: `accepted`, `rejected`, `deferred`;
+   - disposition по findings: `accepted`, `rejected`, `deferred` (из `--from-review`: `queue-fix`→accepted, `as-designed`→rejected+причина);
    - **`Architect Gate:`** — **обязательное** поле в каждой секции `## Extend —`. Значение: либо ссылка на отчёт (`reports/architecture-extend-*.md` / `architecture-extend-coherence-*.md` / `architecture-loop-redesign-*.md`), либо одно из `не вызывался` / `не требовался` / `declined` / `—`. Поле — детерминированный вход счётчика **M** Триггера 2 (§5a); без него M недосчитывает раунды без архитектора.
    - ссылки на отчёты architect/explorer;
    - следующий шаг.
