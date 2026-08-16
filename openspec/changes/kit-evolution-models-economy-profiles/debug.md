@@ -92,4 +92,11 @@ open_known_questions: []
 Изменения tasks: нет (S2.accept–S6.accept остаются [ ])
 Связанный отчёт: reports/handoff-acceptance-S2-S6-2026-08-16.md
 
+### Slice S2–S6 — вердикт (2026-08-16)
+Срез: S2–S6
+Решение: принят (manual shortcut)
+Обоснование: пользователь: «принято»
+Изменения tasks: S2.accept–S6.accept [x]
+Связанный отчёт: reports/slice-acceptance-S2-2026-08-16.md … S6-2026-08-16.md
+
 
