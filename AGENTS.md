@@ -2,6 +2,7 @@
 
 **Главный диспетчер:** `.cursor/rules/1c-agent-delegation.mdc` — HALT-условия, делегирование агентам, BSL/XML write guard.
 **Диспетчер on-demand гейтов:** `.cursor/rules/gate-dispatcher.mdc` — подгружает архитектурные и верификационные гейты по триггерам.
+**Адаптация под модель чата:** `.cursor/rules/model-adaptation.mdc` — роутер профилей. Рекомендуемый чат оркестратора — Grok 4; Fable / GPT-5.6 / Opus 5 — Primary субагентов, не требование к чату команд.
 **Поставка шаблона в проект:** [`.cursor/docs/kit-template-workflow.md`](.cursor/docs/kit-template-workflow.md) — копирование `.cursor`+`AGENTS.md`; ЗНИ эволюции kit на ветке; change-папку не мержить в main.
 **Памятка (обзор):** [`README.md`](README.md) · **Быстрый старт:** [`.cursor/docs/quick-start.md`](.cursor/docs/quick-start.md) · FAQ: [`.cursor/docs/faq-kit.md`](.cursor/docs/faq-kit.md) · Целостность поставки: [`.cursor/docs/delivery-integrity.md`](.cursor/docs/delivery-integrity.md).
 
@@ -20,6 +21,7 @@
 ## Карта SSOT (один якорь на тему)
 
 **Чат и стиль:**
+- Профили модели чата → `.cursor/rules/model-adaptation.mdc` (роутер) и `model-grok4.mdc` / `model-fable5.mdc` / `model-gpt56.mdc` / `model-opus5.mdc`.
 - Лимиты, non-events, HALT-жаргон, 5 принципов диалога, роль навигатора → `.cursor/rules/chat-output-budget.mdc` (полное тело — `chat-output-budget-full.mdc` по Read).
 - Бриф = Sync Card (слоты B0–B3) → `.cursor/docs/templates/brief-card.md`; классификатор → `.cursor/docs/opsx-output-style.md` §5.1.
 - Язык, тон, шаблоны вывода, Chat Surface Contract (§2.6) → `.cursor/docs/opsx-output-style.md`.
