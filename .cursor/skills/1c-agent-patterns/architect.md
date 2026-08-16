@@ -99,7 +99,8 @@ Task(
          openspec/changes/<name>/reports/deep-analysis-YYYY-MM-DD.md
          при активном change или
          temp/reports/deep-analysis-YYYY-MM-DD.md вне change.",
-  subagent_type="onec-code-architect"
+  subagent_type="onec-code-architect",
+  model="<Opus 5; Fable только при тяжёлом триггере и слага в enum — model-selection.mdc>"
 )
 ```
 
@@ -182,7 +183,7 @@ Used by `/opsx:verify` Layer 4 — независимый адверсариал
 
 Подробный протокол (адверсариальная установка, Three-Question Challenge, формат отчёта, маппинг вердикта) — см. `.cursor/agents/onec-code-architect.md` секция «Режим `design-challenge`».
 
-**Модель.** По цепочке для архитектора из `.cursor/rules/model-selection.mdc`. **Режим запуска: `run_in_background=true`** (см. SKILL.md verify, секция «Запуск агентов verify»).
+**Модель.** Закрытая эскалация Fable из `.cursor/rules/model-selection.mdc`: если слаг есть в описании `Task` — Fable; иначе Opus 5 + одна строка, что дорогая эскалация недоступна. Не передавать отсутствующий слаг. **Режим запуска: `run_in_background=true`** (см. SKILL.md verify, секция «Запуск агентов verify»).
 
 ```
 Task(
@@ -246,7 +247,7 @@ Task(
          Use plain language: «первый ручной шаг», «приёмочный тест единственного
          шаблона», «выбранный вариант реализации».",
   subagent_type="onec-code-architect",
-  model="<по цепочке для архитектора из model-selection.mdc>",
+  model="<закрытая эскалация Fable / иначе Opus 5 — model-selection.mdc>",
   run_in_background=true
 )
 ```
