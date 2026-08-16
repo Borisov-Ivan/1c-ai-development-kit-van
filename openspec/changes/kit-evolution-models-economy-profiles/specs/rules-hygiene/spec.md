@@ -1,0 +1,31 @@
+# Delta Spec: rules-hygiene
+
+## ADDED Requirements
+
+### Requirement: Самоописание триггера on-demand правил
+Каждое из топ-10 on-demand правил (по размеру/частоте использования) SHALL начинаться шапкой «Когда загружать» первой содержательной строкой. SSOT триггера — frontmatter `description` самого файла; строки индексов (`gate-dispatcher.mdc`, `AGENTS.md`) — routing cue, не авторитетный источник.
+
+#### Scenario: Правило читается изолированно
+- **WHEN** on-demand правило открыто без контекста индекса
+- **THEN** первая содержательная строка отвечает, когда файл должен быть загружен
+
+### Requirement: Decision shortcut в triage
+`task-triage.mdc` SHALL начинаться коротким классификатором (до 4 строк), маршрутизирующим типовые задачи; полный справочник остаётся для спорных случаев.
+
+#### Scenario: Типовая задача
+- **WHEN** оркестратор выбирает маршрут для очевидной задачи
+- **THEN** классификатор даёт маршрут без чтения полного справочника
+
+### Requirement: Safety floor и promotion triggers
+`1c-halt-triggers.mdc` SHALL содержать секцию safety floor — перечень проверок, которые не ослабляет ни один режим (reviewer обязателен даже в исключениях, ReadLints после каждой правки, syntax-контроль) — и формализованные promotion triggers: транзакционные пути, изменение контракта публичной `Экспорт`-процедуры, RLS, adopted-объекты расширений, подписки/регламентные задания. Формула: quick-fix снижает накладные расходы, не глубину проверки.
+
+#### Scenario: Правка контракта Экспорт-процедуры в Light Mode
+- **WHEN** запрошен quick-fix, меняющий контракт публичной `Экспорт`-процедуры
+- **THEN** задача маршрутизируется в полный цикл независимо от Light Mode
+
+### Requirement: Удаление рудиментов
+Из поставки SHALL быть убраны: `CHANGELOG.md` из `.cursor/agents/` (перенос в `.cursor/docs/`), alias-стабы `opsx-ff.md` и `opsx-continue.md`, `openspec-sessions.mdc` (с упоминанием в `session-discipline.mdc`). Legacy read-only fallback `openspec/sessions/` в skills/commands остаётся (вне always-apply) — его отрезание вне scope.
+
+#### Scenario: Ссылки после удаления
+- **WHEN** после удаления рудиментов выполняется проверка ссылок
+- **THEN** нет ссылок на удалённые в этом change пути; список команд в `AGENTS.md` актуален
