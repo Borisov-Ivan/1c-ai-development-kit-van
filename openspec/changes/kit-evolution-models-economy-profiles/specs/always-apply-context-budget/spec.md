@@ -24,6 +24,14 @@
 - **WHEN** в новой сессии (после Reload) выполняются сценарии-триггеры: команда из `.cursor/commands/`, запрос правки XML в `src/`, запрос анализа 3+ файлов, запрос правки `.bsl`
 - **THEN** срабатывают соответственно: первый tool call — Read скилла; стоп с блокером; загрузка context-strategy; делегирование writer
 
+#### Scenario: Якорь apply-reviewer после выноса процедуры
+- **WHEN** полная процедура авто-исправления ревью переезжает в `review/SKILL.md`
+- **THEN** в always-apply `1c-agent-delegation.mdc` остаётся дословный минимум: авто-fix только functional MUST_FIX без weak / design-prescribed / agreement-override; weak не авто-fix и не авто-waive; AskQuestion disposition в apply не запускается
+
+#### Scenario: Якорь поверхности после выноса процедуры
+- **WHEN** полная процедура авто-исправления ревью (включая разбор поверхности) переезжает в `review/SKILL.md`
+- **THEN** в always-apply `1c-agent-delegation.mdc` остаётся дословный MUST: полное ревью нового/переписанного модуля с REFACTOR по поверхности не закрывает apply/`/review` без simplifier или явного waive; on-demand `1c-utility-agents.mdc` и sidecar этот якорь не заменяют
+
 ### Requirement: Передача SSOT writer pipeline
 При выносе таблицы шагов § WRITER PIPELINE из `1c-agent-delegation.mdc` статус «единственный эталон сквозного потока» SHALL перейти к `1c-writer-pipeline.mdc`; обратные ссылки в `1c-writer-pipeline.mdc`, `review/SKILL.md`, `openspec-apply-change/SKILL.md` SHALL быть обновлены. В always-apply delegation SHALL остаться однострочный поток `writer → ReadLints → … → reviewer`.
 
