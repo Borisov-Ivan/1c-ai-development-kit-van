@@ -26,7 +26,7 @@ priority: 180
 
 **TodoWrite checkpoint.** Если TodoWrite используется — на каждом ходе перед действием: есть ли задача `in_progress`? Если да — завершить или обработать отказ прежде чем начинать новое.
 
-`/opsx:explore` Ultra-Lite: без `openspec/sessions/`; якорь **Вопрос** / `user-goal` в чате (промпты агентов).
+`/opsx:explore` Ultra-Lite: якорь **Вопрос** / `user-goal` в чате (промпты агентов).
 
 ## Context Strategy
 

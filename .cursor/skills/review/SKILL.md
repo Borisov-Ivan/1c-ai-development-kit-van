@@ -702,6 +702,7 @@ Focus: full (new file)
 - **Нет изменений `.bsl` в git и scope не задан:** smart default не срабатывает → AskQuestion.
 - **Не удалось определить baseline:** fallback на `full` или выбор пользователя.
 - **Linter недоступен (S9):** `## Linter Signals (evidence)` = `Linter unavailable: <reason>`; warning в Summary.
+- **Нет строки `Checklists read:`** в отчёте reviewer — дефект того же класса, что отсутствие блока `## Linter Signals (evidence)`: не принимать отчёт, вернуть ревьювера дописать перечень прочитанных чек-листов.
 - **Light review triggered (S15):** линтер + whitelist only; если найдены проблемы — эскалировать.
 - **Prompt contract version mismatch:** warning в Summary; продолжить (fail-open).
 - **Investigation loop превышен (S11):** `## Remaining Unresolved Contracts` в отчёт; writer работает с пониженным confidence.

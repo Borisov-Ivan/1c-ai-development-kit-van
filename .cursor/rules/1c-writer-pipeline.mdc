@@ -7,6 +7,8 @@ priority: 800
 
 # 1C Writer Pipeline (on-demand)
 
+**Когда загружать:** правка `.bsl` (globs) или якорь always-apply `writer → ReadLints → … → reviewer` до появления `.bsl` в контексте.
+
 Подключается при редактировании/чтении `.bsl`. Always-apply якорь в `1c-agent-delegation.mdc`: `writer → ReadLints → … → reviewer` (нужен до `globs` `.bsl`).
 
 **Единственный эталон сквозного потока.** Все другие файлы (`1c-agent-delegation.mdc`, `review/SKILL.md`, `openspec-apply-change/SKILL.md`) ссылаются сюда и не приводят собственные варианты порядка.

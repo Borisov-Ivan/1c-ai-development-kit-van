@@ -1,3 +1,7 @@
+# Reviewer checklists (on-demand)
+
+Агент `onec-code-reviewer` читает разделы этого файла по типу задачи. Ядро протокола (роль, DESIGN AUTHORITY, формат отчёта) остаётся в `.cursor/agents/onec-code-reviewer.md`.
+
 ### 1. Standards Compliance
 ```yaml
 Check against:

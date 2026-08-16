@@ -6,6 +6,8 @@ priority: 200
 
 # Architect Gate — единые триггеры
 
+**Когда загружать:** explore / verify / apply / extend, если сработал триггер архитектурного ревью (перехват, новый объект, >1 файл, ADR/прецедент, петля приёмки).
+
 Единый источник истины для определения необходимости архитектурного ревью (onec-code-architect). Ссылаются: explore, verify, apply, 1c-agent-delegation, verified-cause-gate, precedent-regression-gate.
 
 ## ТРИГГЕРЫ

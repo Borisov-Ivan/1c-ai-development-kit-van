@@ -4,7 +4,7 @@
 
          Критерии оценки (Slice Coherence: Scenario Coverage, Slice Independence, Slice Completeness, Slice Dependency Graph, Slice Gate Integrity, Acceptance Checklist 5b, Rework Risk, criteria 8, **8b self-achievable acceptance**, 9–11) — `.cursor/rules/vertical-slices.mdc`.
 
-Общие правила, обработка ошибок — `SKILL.md` (навигатор).
+Общие правила, обработка ошибок — `SKILL.md` (навигатор). **Intent-бриф:** цель / ограничения / scope / критерий готовности. Запрещено просить пересказать рассуждения и писать «не думай долго».
 
 ---
 

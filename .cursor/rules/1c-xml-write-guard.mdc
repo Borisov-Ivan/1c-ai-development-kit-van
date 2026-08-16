@@ -6,6 +6,8 @@ globs: "src/**/*.xml"
 
 # XML Write Guard
 
+**Когда загружать:** задача касается XML метаданных в `src/` (Form.xml, Template.xml, Rights.xml, Configuration.xml) — полный шаблон инструкции Конфигуратора и запрет сырой правки.
+
 ## АБСОЛЮТНЫЙ ЗАПРЕТ
 
 **Оркестратор НЕ использует Write, StrReplace, Delete для XML-файлов 1С** в `src/` (Form.xml, Template.xml, Rights.xml, Configuration.xml, любые *.xml метаданных).

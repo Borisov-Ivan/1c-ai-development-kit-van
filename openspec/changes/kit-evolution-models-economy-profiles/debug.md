@@ -77,4 +77,19 @@ open_known_questions: []
 Изменения tasks: нет
 Связанный отчёт: будет reports/handoff-acceptance-S2-S6-2026-08-16.md
 
+### Apply session — S3–S6 working tasks (2026-08-16)
+
+Срез: S3–S6 (без приёмок)
+Решение: in-progress (S3.1)
+Обоснование: рабочие задачи S3.2–S3.7, S5.1–S5.8, S6.1–S6.10 закрыты на диске. S3.1 сохранён: reports/reviewer-diet-baseline-2026-08-16.md (Checklists read есть). Повторный прогон после диеты ещё идёт. Приёмки S2.accept–S6.accept остаются [ ] до сводной передачи.
+Изменения tasks: S3.1–S3.7, S5.*, S6.* → [x]; все accept → [ ]
+Связанные отчёты: reports/reviewer-diet-baseline-2026-08-16.md, reports/reviewer-diet-inventory-2026-08-16.md, reports/always-apply-budget-S5-2026-08-16.md, reports/remnant-links-S6-2026-08-16.md, reports/code-map.md
+
+### Slice S2–S6 — сводная передача (2026-08-16)
+Срез: S2–S6
+Решение: awaiting-acceptance
+Обоснование: все рабочие задачи S2–S6 реализованы; приёмки переданы одним handoff по continue-to-end. Пост-диет прогон ревьювера сохранён; сверка классов — reports/reviewer-diet-compare-2026-08-16.md. Внутренний slice-boundary: reports/verification-2026-08-16-5.md.
+Изменения tasks: нет (S2.accept–S6.accept остаются [ ])
+Связанный отчёт: reports/handoff-acceptance-S2-S6-2026-08-16.md
+
 

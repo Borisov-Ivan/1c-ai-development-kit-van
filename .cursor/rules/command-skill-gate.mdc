@@ -6,6 +6,8 @@ priority: 997
 
 # Command → Skill Read Gate
 
+**Когда загружать:** сессия начата командой из `.cursor/commands/`, которая указывает прочитать `SKILL.md` до любых других файлов.
+
 ## TRIGGER
 
 Команда (`.cursor/commands/*.md`) инструктирует прочитать скилл-файл:

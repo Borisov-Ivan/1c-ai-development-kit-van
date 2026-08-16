@@ -18,3 +18,43 @@
 - **S2.17** · целостность поставки · порог ≤ 34 КБ (modified). [`.cursor/docs/delivery-integrity.md`](../../../../.cursor/docs/delivery-integrity.md):13
 - **S2.18–S2.19** · отчёты замера и обязательства. [`reports/obligation-diff-S2-2026-08-16.md`](obligation-diff-S2-2026-08-16.md) · [`reports/always-apply-budget-S2-2026-08-16.md`](always-apply-budget-S2-2026-08-16.md)
 
+# Срез S3 — Диета промпта reviewer (2026-08-16)
+
+Документы kit, без `.bsl` в репозитории. Explain scope не требуется.
+
+- **S3.1** · базовый прогон ревьювера (saved). [`reports/reviewer-diet-baseline-2026-08-16.md`](reviewer-diet-baseline-2026-08-16.md)
+- **S3.accept-prep** · пост-диет прогон и сверка классов. [`reports/reviewer-diet-after-2026-08-16.md`](reviewer-diet-after-2026-08-16.md) · [`reports/reviewer-diet-compare-2026-08-16.md`](reviewer-diet-compare-2026-08-16.md)
+- **S3.2 / S3.7** · инвентарь до/после диеты (modified). [`reports/reviewer-diet-inventory-2026-08-16.md`](reviewer-diet-inventory-2026-08-16.md)
+- **S3.3–S3.5** · ядро промпта + on-demand чек-листы + строка `Checklists read:` (modified). [`.cursor/agents/onec-code-reviewer.md`](../../../../.cursor/agents/onec-code-reviewer.md):65-79 · [`.cursor/docs/standard/reviewer-checks.md`](../../../../.cursor/docs/standard/reviewer-checks.md):1-3
+- **S3.6** · граничный случай отчёта (modified). [`.cursor/skills/review/SKILL.md`](../../../../.cursor/skills/review/SKILL.md):705
+
+# Срез S4 — Профили моделей (2026-08-16)
+
+Документы kit, без `.bsl`. Explain scope не требуется.
+
+- **S4.1–S4.4** · роутер профилей (created). [`.cursor/rules/model-adaptation.mdc`](../../../../.cursor/rules/model-adaptation.mdc):8-60
+- **S4.5–S4.10** · профили Grok / Fable / GPT / Opus, MAY и MUST NOT (created). [`.cursor/rules/model-grok4.mdc`](../../../../.cursor/rules/model-grok4.mdc):8-12
+- **S4.11** · строка в индексе поставки (modified). [`AGENTS.md`](../../../../AGENTS.md):5
+- **S4.12** · снимок статуса (modified). [`.cursor/skills/openspec-status/SKILL.md`](../../../../.cursor/skills/openspec-status/SKILL.md)
+
+# Срез S5 — Усиление делегирования (2026-08-16)
+
+Документы kit, без `.bsl`. Explain scope не требуется.
+
+- **S5.1 / S5.6 / S5.7** · запрет встроенного explore для 1С, две неудачи, профиль (modified). [`.cursor/rules/1c-agent-delegation.mdc`](../../../../.cursor/rules/1c-agent-delegation.mdc):22-22 · [`.cursor/rules/1c-agent-delegation.mdc`](../../../../.cursor/rules/1c-agent-delegation.mdc):119
+- **S5.2** · маршрутизация стратегии контекста (modified). [`.cursor/skills/context-strategy/SKILL.md`](../../../../.cursor/skills/context-strategy/SKILL.md):47-53
+- **S5.3–S5.5** · intent-бриф и coverage-first (modified). [`.cursor/skills/1c-agent-patterns/SKILL.md`](../../../../.cursor/skills/1c-agent-patterns/SKILL.md):12-25 · [`.cursor/skills/1c-agent-patterns/writer.md`](../../../../.cursor/skills/1c-agent-patterns/writer.md):7-28 · [`.cursor/skills/1c-agent-patterns/reviewer.md`](../../../../.cursor/skills/1c-agent-patterns/reviewer.md):7
+- **S5.8** · контрольный замер always-apply 34662 байт. [`reports/always-apply-budget-S5-2026-08-16.md`](always-apply-budget-S5-2026-08-16.md)
+
+# Срез S6 — Гигиена свода (2026-08-16)
+
+Документы kit, без `.bsl`. Explain scope не требуется.
+
+- **S6.1** · шапка «Когда загружать» в топ-10 on-demand и профилях (modified). [`.cursor/rules/1c-halt-triggers.mdc`](../../../../.cursor/rules/1c-halt-triggers.mdc):10 · [`.cursor/rules/model-adaptation.mdc`](../../../../.cursor/rules/model-adaptation.mdc):8
+- **S6.2** · индекс = cue (modified). [`.cursor/rules/gate-dispatcher.mdc`](../../../../.cursor/rules/gate-dispatcher.mdc):11 · [`AGENTS.md`](../../../../AGENTS.md):4
+- **S6.3** · shortcut triage (modified). [`.cursor/rules/task-triage.mdc`](../../../../.cursor/rules/task-triage.mdc):9-11
+- **S6.4–S6.5** · safety floor и promotion triggers (modified). [`.cursor/rules/1c-halt-triggers.mdc`](../../../../.cursor/rules/1c-halt-triggers.mdc):12-28
+- **S6.6** · журнал агентов перенесён. [`.cursor/docs/agents-CHANGELOG.md`](../../../../.cursor/docs/agents-CHANGELOG.md)
+- **S6.7–S6.9** · alias-стабы и `openspec-sessions.mdc` удалены; отчёт ссылок. [`reports/remnant-links-S6-2026-08-16.md`](remnant-links-S6-2026-08-16.md)
+- **S6.10** · итоговый список команд и карта SSOT. [`AGENTS.md`](../../../../AGENTS.md):14-35
+
