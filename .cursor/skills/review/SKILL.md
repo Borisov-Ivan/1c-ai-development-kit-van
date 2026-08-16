@@ -504,6 +504,25 @@ Focus: full (new file)
 
 ---
 
+## Apply-контур: авто-исправление ревью (полная процедура)
+
+Носитель полной процедуры. Always-apply якорь минимума — `1c-agent-delegation.mdc` § АВТО-ИСПРАВЛЕНИЕ РЕВЬЮ (лимит 2 итерации; apply-reviewer; поверхность). Этот скилл — не входной протокол `/opsx:apply`; apply читает якорь в delegation. Финальный disposition as-designed / queue-fix — шаг 4.5.
+
+Все кодовые замечания (critical/high/medium/low) **кроме carve-out weak / design-prescribed / agreement-override** → автоматически writer с замечаниями → повторный reviewer. Макс. 2 итерации — согласовано с Phase 7 агента writer.
+Архитектурные замечания (новый объект, API, структура хранения, RLS) → СТОП, к пользователю.
+
+**Carve-out QualityFlag weak / design-prescribed (apply-reviewer):** без AskQuestion disposition (скорость apply). Авто-fix — **только** functional MUST_FIX **без** `QualityFlag=weak`, tag `design-prescribed` и agreement-override. Weak / design-prescribed / agreement-override → **только** оставить open + одна строка-след в отчёте задачи («на `/review` потребуется подтверждение качества»); **не** авто-waive как as-designed и **не** авто-fix. Финальный выбор as-designed / queue-fix — только в `/review` / `/release-review` (шаг 4.5).
+
+**Поверхность (DISPROPORTIONATE_SURFACE / REFACTOR по шуму):** при полном ревью нового/переписанного модуля с REFACTOR по поверхности — **не закрывать** задачу apply/`/review` без `onec-code-simplifier` или **явного waive** пользователя. Sidecar-шаблоны (`1c-agent-patterns/sidecar.md`) и `1c-utility-agents.mdc` этот MUST **не** содержат и якорь в delegation не заменяют.
+
+**Без прямого StrReplace.** Все кодовые замечания — через writer. Оркестратор НЕ исправляет замечания ревью напрямую (StrReplace), даже если правка кажется «однострочной». Spot-check corrections после writer — тоже через writer.
+
+Принцип: каждое замечание ревьювера = обязательное к исправлению **или** к явному open на disposition / as-designed после `/review` / `/release-review`. Если замечание не стоит ни фикса, ни disposition — ревьювер не должен его выдавать.
+
+**`[x]` в apply:** при open weak — только если след записан; non-weak MUST_FIX блокируют `[x]`.
+
+---
+
 ## Шаг 4.5. Disposition (корзины A/B/C) — общий слой для `release_mode` true/false
 
 После сохранения main report и **до** шага 5 классифицировать findings. Один протокол для `/review` и `/release-review` (команды только выставляют `release_mode`).
@@ -597,7 +616,7 @@ Focus: full (new file)
 4. **IDENTIFIER HYGIENE CHECK** (шаг 1.9) — evidence `## Naming Signals` обязателен; алгоритм — `1c-writer-pipeline.mdc` § IDENTIFIER HYGIENE CHECK.
 5. **COMMENT HYGIENE CHECK** (шаг 1.10) — evidence `## Comment Hygiene Signals` обязателен; алгоритм — `1c-writer-pipeline.mdc` § COMMENT HYGIENE CHECK.
 6. **API EXISTENCE CHECK (smart default S12):**
-   - По правилам из `1c-writer-pipeline.mdc` § API EXISTENCE CHECK проверить новые вызовы `МодульИмя.МетодИмя(` в diff (порядок шага — `1c-agent-delegation.mdc` § WRITER PIPELINE).
+   - По правилам из `1c-writer-pipeline.mdc` § API EXISTENCE CHECK проверить новые вызовы `МодульИмя.МетодИмя(` в diff (порядок шага — `1c-writer-pipeline.mdc`).
    - **Auto-pass правило:** если каждый WARN-вызов имеет **≥ 3 hits в extension scope** (Grep по `МодульИмя\.МетодИмя\(`) — auto-pass с записью INFO в отчёт, без AskQuestion.
    - Если < 3 hits — AskQuestion как обычно.
 7. При `&ИзменениеИКонтроль` — EXTENSION VERIFICATION (base vs код вне #Вставка/#Удаление).

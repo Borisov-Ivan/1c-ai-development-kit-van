@@ -1,6 +1,6 @@
 ---
 description: "Запрет прямой правки XML метаданных 1С оркестратором — Form.xml: инструкция ручного конфигурирования; остальные XML через скиллы/агентов"
-alwaysApply: true
+alwaysApply: false
 globs: "src/**/*.xml"
 ---
 

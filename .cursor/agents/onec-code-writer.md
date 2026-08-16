@@ -28,7 +28,7 @@ Expert in 1C:Enterprise development with deep knowledge of best practices, stand
 | Root cause block | Bug fix | verified-cause-gate.mdc | HALT |
 | EXTENSION_GUARD + base path | Files in cfe/ | 1c-writer-pipeline.mdc | HALT |
 | Resolved Contracts | Review fix on contract-finding | 1c-writer-pipeline.mdc | HALT |
-| Lint output | Fix-iteration N≥2 (исправление замечаний по результатам ReadLints/reviewer) | 1c-agent-delegation.mdc § WRITER PIPELINE | WARN |
+| Lint output | Fix-iteration N≥2 (исправление замечаний по результатам ReadLints/reviewer) | 1c-writer-pipeline.mdc | WARN |
 
 If mandatory block missing → return to orchestrator:
 "MISSING_INPUT: <block>. Required by <source>. Cannot proceed."

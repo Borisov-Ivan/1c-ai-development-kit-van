@@ -1,4 +1,4 @@
-# Срез S1: Живой мэппинг моделей
+﻿# Срез S1: Живой мэппинг моделей
 
 **Сценарий:** оркестратор делегирует работу субагентам на моделях, которые реально существуют в текущей сборке Cursor, и не начинает вызов с ошибки выбора модели; при будущем обновлении списка моделей самосверка не даёт таблице тихо устареть.
 **Primary acceptance:** в сессии Cursor запустить архитектора по новой таблице ролей (`Task(subagent_type="onec-code-architect", model="claude-opus-5-thinking-high")`) → вызов проходит без ошибки выбора модели и без молчаливого перехода на запасную модель; в правилах независимый разбор постановки указывает Fable только при наличии слага в enum, иначе Opus 5.
@@ -28,7 +28,7 @@
 
 ## 4. Приёмка
 
-- [ ] S1.accept Принять срез S1 — делегирование идёт на живые модели без ошибки выбора, Fable не сжигает бюджет на обычных вызовах:
+- [x] S1.accept Принять срез S1 — делегирование идёт на живые модели без ошибки выбора, Fable не сжигает бюджет на обычных вызовах:
   - **Primary (обязательно):** запустить обычного архитектора по таблице (`model="claude-opus-5-thinking-high"`) → вызов проходит без ошибки enum; в правилах записано, что декомпозиция срезов идёт на Opus, а независимый разбор постановки — на Fable при наличии слага в enum, иначе на Opus 5
   - Scenario «Декомпозиция срезов не идёт на Fable» (опционально): по тексту `model-selection.mdc` / `architect-gate.mdc` режим декомпозиции срезов не содержит Fable как Primary
   - Scenario «Независимый разбор постановки идёт на Fable» (опционально): по тексту правил независимый разбор указывает Fable и одну строку в чат; если слага нет в enum — Opus 5 + предупреждение, без вызова с отсутствующим слагом
@@ -49,37 +49,37 @@
 
 ## 1. Перенос обязательств в якоря
 
-- [ ] S2.1 Перенести в `.cursor/rules/session-discipline.mdc` дословно переносимый минимум трёх разжалуемых правил: первый tool call командной сессии — только Read `SKILL.md`; запрет читать файлы пользователя до Entry Protocol; страховка при обрезке большого `SKILL.md` (дочитать `templates/*.md`); TodoWrite checkpoint; persistence «протокол команды на каждом ходе»; на каждом ходе — проверка активной команды, ограничений скилла и СТОП при нарушении (Gate check из persistence); TRIGGER/ACTION/BYPASS стратегии контекста (3+ файлов / XML|CSV|JSON / код 500+ строк / «береги контекст»); таблица антипаттернов follow-up (explore → «создай ЗНИ», explore → самостоятельный Grep по `.bsl`, apply → «а может лучше») (D6)
-- [ ] S2.2 Принять в `.cursor/rules/1c-agent-delegation.mdc` содержание `bsl-write-guard.mdc`: абсолютный запрет прямой правки `.bsl` оркестратором, минимальный поток и три carve-out (JSDoc / шапка метода, контекст apply/review, Mechanical Mode), чтобы слияние не потеряло исключений (D6)
-- [ ] S2.3 Принять в `.cursor/rules/chat-output-budget.mdc` содержание стабов `conversational-discipline.mdc` и `orchestrator-as-navigator.mdc` (роль навигатора, правило тишины, пять принципов диалога), чтобы контракт чата остался в одном always-apply файле (D6)
+- [x] S2.1 Перенести в `.cursor/rules/session-discipline.mdc` дословно переносимый минимум трёх разжалуемых правил: первый tool call командной сессии — только Read `SKILL.md`; запрет читать файлы пользователя до Entry Protocol; страховка при обрезке большого `SKILL.md` (дочитать `templates/*.md`); TodoWrite checkpoint; persistence «протокол команды на каждом ходе»; на каждом ходе — проверка активной команды, ограничений скилла и СТОП при нарушении (Gate check из persistence); TRIGGER/ACTION/BYPASS стратегии контекста (3+ файлов / XML|CSV|JSON / код 500+ строк / «береги контекст»); таблица антипаттернов follow-up (explore → «создай ЗНИ», explore → самостоятельный Grep по `.bsl`, apply → «а может лучше») (D6)
+- [x] S2.2 Принять в `.cursor/rules/1c-agent-delegation.mdc` содержание `bsl-write-guard.mdc`: абсолютный запрет прямой правки `.bsl` оркестратором, минимальный поток и три carve-out (JSDoc / шапка метода, контекст apply/review, Mechanical Mode), чтобы слияние не потеряло исключений (D6)
+- [x] S2.3 Принять в `.cursor/rules/chat-output-budget.mdc` содержание стабов `conversational-discipline.mdc` и `orchestrator-as-navigator.mdc` (роль навигатора, правило тишины, пять принципов диалога), чтобы контракт чата остался в одном always-apply файле (D6)
 
 ## 2. Разжалование и удаление
 
-- [ ] S2.4 Перевести `.cursor/rules/1c-xml-write-guard.mdc` в on-demand (`alwaysApply: false` + триггер в `description`), оставив сам запрет правки XML в always-apply секции delegation, чтобы стоп срабатывал до чтения файла (D6)
-- [ ] S2.5 Перевести `.cursor/rules/command-skill-gate.mdc`, `.cursor/rules/command-session-persistence.mdc`, `.cursor/rules/context-strategy-gate.mdc` в on-demand (`alwaysApply: false`), сохранив триггер загрузки в frontmatter каждого файла (D6)
-- [ ] S2.6 Удалить `.cursor/rules/conversational-discipline.mdc` и `.cursor/rules/orchestrator-as-navigator.mdc` после переноса содержания в `chat-output-budget.mdc`, чтобы дубли не тратили постоянный контекст (D6)
-- [ ] S2.7 Удалить `.cursor/rules/bsl-write-guard.mdc` после переноса запрета и carve-out в delegation, чтобы у запрета остался один владелец (D6)
-- [ ] S2.8 Заменить в `.cursor/rules/command-skill-gate.mdc` висячую ссылку на `conversational-discipline.mdc` (принцип Compact Brief) ссылкой на `chat-output-budget.mdc`, чтобы правило не указывало на удалённый файл
+- [x] S2.4 Перевести `.cursor/rules/1c-xml-write-guard.mdc` в on-demand (`alwaysApply: false` + триггер в `description`), оставив сам запрет правки XML в always-apply секции delegation, чтобы стоп срабатывал до чтения файла (D6)
+- [x] S2.5 Перевести `.cursor/rules/command-skill-gate.mdc`, `.cursor/rules/command-session-persistence.mdc`, `.cursor/rules/context-strategy-gate.mdc` в on-demand (`alwaysApply: false`), сохранив триггер загрузки в frontmatter каждого файла (D6)
+- [x] S2.6 Удалить `.cursor/rules/conversational-discipline.mdc` и `.cursor/rules/orchestrator-as-navigator.mdc` после переноса содержания в `chat-output-budget.mdc`, чтобы дубли не тратили постоянный контекст (D6)
+- [x] S2.7 Удалить `.cursor/rules/bsl-write-guard.mdc` после переноса запрета и carve-out в delegation, чтобы у запрета остался один владелец (D6)
+- [x] S2.8 Заменить в `.cursor/rules/command-skill-gate.mdc` висячую ссылку на `conversational-discipline.mdc` (принцип Compact Brief) ссылкой на `chat-output-budget.mdc`, чтобы правило не указывало на удалённый файл
 
 ## 3. Сжатие delegation и передача SSOT
 
-- [ ] S2.9 Вынести подробности секции § KB CONTEXT из `.cursor/rules/1c-agent-delegation.mdc` в `.cursor/rules/knowledge-format.mdc`, оставив в delegation однострочный якорь: при делегировании explorer / architect / trace — блок `## Existing Knowledge` по правилу в `knowledge-format.mdc` (D6)
-- [ ] S2.10 Вынести полную процедуру § АВТО-ИСПРАВЛЕНИЕ РЕВЬЮ (включая DISPROPORTIONATE_SURFACE и disposition `/review`) из `1c-agent-delegation.mdc` в `.cursor/skills/review/SKILL.md`, оставив в delegation: (1) лимит итераций writer↔reviewer = 2; (2) дословный минимум D6(в): авто-fix только functional MUST_FIX без QualityFlag=weak, tag design-prescribed и agreement-override; weak / design-prescribed / agreement-override — не авто-fix, не авто-waive, не AskQuestion в apply, одна строка-след «на `/review` потребуется подтверждение качества»; (3) дословный MUST поверхности: полное ревью нового/переписанного модуля с REFACTOR по поверхности → не закрывать apply/`/review` без simplifier или явного waive. Вынос не удаляет три carve-out слияния `bsl-write-guard` из S2.2 (JSDoc/шапка метода, контекст apply/review, Mechanical Mode) и правило «post-reviewer fixes только через writer». `1c-utility-agents.mdc` и sidecar не заменяют якорь (D6)
-- [ ] S2.11 Вынести таблицу шагов § WRITER PIPELINE из `1c-agent-delegation.mdc` в `.cursor/rules/1c-writer-pipeline.mdc`, оставив в delegation однострочный поток `writer → ReadLints → … → reviewer`, который нужен до появления `.bsl` в контексте (D6)
-- [ ] S2.12 Передать статус «единственный эталон сквозного потока» файлу `.cursor/rules/1c-writer-pipeline.mdc` и обновить обратные ссылки в `1c-writer-pipeline.mdc`, `.cursor/skills/review/SKILL.md`, `.cursor/skills/openspec-apply-change/SKILL.md` (указатель «SSOT: 1c-agent-delegation.mdc § АВТО-ИСПРАВЛЕНИЕ» заменить на «якорь минимума — 1c-agent-delegation.mdc; полная процедура — review/SKILL.md шаг 4.5»; apply-скилл ссылается на якорь, но не является единственным носителем), чтобы двух конкурирующих описаний порядка не было (Scenario «Потребители ссылаются на нового владельца», D6)
+- [x] S2.9 Вынести подробности секции § KB CONTEXT из `.cursor/rules/1c-agent-delegation.mdc` в `.cursor/rules/knowledge-format.mdc`, оставив в delegation однострочный якорь: при делегировании explorer / architect / trace — блок `## Existing Knowledge` по правилу в `knowledge-format.mdc` (D6)
+- [x] S2.10 Вынести полную процедуру § АВТО-ИСПРАВЛЕНИЕ РЕВЬЮ (включая DISPROPORTIONATE_SURFACE и disposition `/review`) из `1c-agent-delegation.mdc` в `.cursor/skills/review/SKILL.md`, оставив в delegation: (1) лимит итераций writer↔reviewer = 2; (2) дословный минимум D6(в): авто-fix только functional MUST_FIX без QualityFlag=weak, tag design-prescribed и agreement-override; weak / design-prescribed / agreement-override — не авто-fix, не авто-waive, не AskQuestion в apply, одна строка-след «на `/review` потребуется подтверждение качества»; (3) дословный MUST поверхности: полное ревью нового/переписанного модуля с REFACTOR по поверхности → не закрывать apply/`/review` без simplifier или явного waive. Вынос не удаляет три carve-out слияния `bsl-write-guard` из S2.2 (JSDoc/шапка метода, контекст apply/review, Mechanical Mode) и правило «post-reviewer fixes только через writer». `1c-utility-agents.mdc` и sidecar не заменяют якорь (D6)
+- [x] S2.11 Вынести таблицу шагов § WRITER PIPELINE из `1c-agent-delegation.mdc` в `.cursor/rules/1c-writer-pipeline.mdc`, оставив в delegation однострочный поток `writer → ReadLints → … → reviewer`, который нужен до появления `.bsl` в контексте (D6)
+- [x] S2.12 Передать статус «единственный эталон сквозного потока» файлу `.cursor/rules/1c-writer-pipeline.mdc` и обновить обратные ссылки в `1c-writer-pipeline.mdc`, `.cursor/skills/review/SKILL.md`, `.cursor/skills/openspec-apply-change/SKILL.md` (указатель «SSOT: 1c-agent-delegation.mdc § АВТО-ИСПРАВЛЕНИЕ» заменить на «якорь минимума — 1c-agent-delegation.mdc; полная процедура — review/SKILL.md шаг 4.5»; apply-скилл ссылается на якорь, но не является единственным носителем), чтобы двух конкурирующих описаний порядка не было (Scenario «Потребители ссылаются на нового владельца», D6)
 
 ## 4. Индексы, ссылки и потребители порога
 
-- [ ] S2.13 Добавить в `.cursor/rules/gate-dispatcher.mdc` строки-cue для разжалованных правил (`1c-xml-write-guard`, `command-skill-gate`, `command-session-persistence`, `context-strategy-gate`), чтобы оркестратор знал об их существовании и триггере
-- [ ] S2.14 Обновить карту SSOT в `AGENTS.md` под новый состав правил (удалённые стабы, разжалованные гейты, новый владелец writer pipeline), чтобы навигация не вела на несуществующие якоря
-- [ ] S2.15 Перевести в `AGENTS.md` ссылку на термины workflow с отсутствующего `openspec/project.md` на существующий `openspec/glossary.md`, чтобы ссылка перестала быть битой (D12)
-- [ ] S2.16 Сопроводить в `AGENTS.md` и `1c-agent-delegation.mdc` § PROJECT PATHS ссылки на `openspec/project.md` пометкой «создаётся `/init-project`; в kit-репозитории отсутствует — блок путей в промптах агентов опускается», чтобы правило было выполнимым в самом kit (D12)
-- [ ] S2.17 Заменить в `.cursor/docs/delivery-integrity.md` §7 устаревший ориентир «< ~50 KB» на порог ≤ 34 КБ, чтобы проверка целостности поставки ловила деградацию бюджета (Scenario «Порог целостности поставки актуален»)
+- [x] S2.13 Добавить в `.cursor/rules/gate-dispatcher.mdc` строки-cue для разжалованных правил (`1c-xml-write-guard`, `command-skill-gate`, `command-session-persistence`, `context-strategy-gate`), чтобы оркестратор знал об их существовании и триггере
+- [x] S2.14 Обновить карту SSOT в `AGENTS.md` под новый состав правил (удалённые стабы, разжалованные гейты, новый владелец writer pipeline), чтобы навигация не вела на несуществующие якоря
+- [x] S2.15 Перевести в `AGENTS.md` ссылку на термины workflow с отсутствующего `openspec/project.md` на существующий `openspec/glossary.md`, чтобы ссылка перестала быть битой (D12)
+- [x] S2.16 Сопроводить в `AGENTS.md` и `1c-agent-delegation.mdc` § PROJECT PATHS ссылки на `openspec/project.md` пометкой «создаётся `/init-project`; в kit-репозитории отсутствует — блок путей в промптах агентов опускается», чтобы правило было выполнимым в самом kit (D12)
+- [x] S2.17 Заменить в `.cursor/docs/delivery-integrity.md` §7 устаревший ориентир «< ~50 KB» на порог ≤ 34 КБ, чтобы проверка целостности поставки ловила деградацию бюджета (Scenario «Порог целостности поставки актуален»)
 
 ## 5. Контроль результата
 
-- [ ] S2.18 Составить в `reports/` таблицу «обязательство разжалованного файла → якорь в always-apply» по каждому разжалованному и удалённому правилу и убедиться, что непокрытых строк нет (Scenario «Обязательство-diff без непокрытых строк», D6)
-- [ ] S2.19 Замерить фактический бюджет — сумму байт файлов `.cursor/rules/*.mdc` с `alwaysApply: true` плюс `AGENTS.md` — после всех правок среза, зафиксировать результат в `reports/`; заявленные дельты мер не суммировать (Scenario «Замер после диеты», методика замера D6)
+- [x] S2.18 Составить в `reports/` таблицу «обязательство разжалованного файла → якорь в always-apply» по каждому разжалованному и удалённому правилу и убедиться, что непокрытых строк нет (Scenario «Обязательство-diff без непокрытых строк», D6)
+- [x] S2.19 Замерить фактический бюджет — сумму байт файлов `.cursor/rules/*.mdc` с `alwaysApply: true` плюс `AGENTS.md` — после всех правок среза, зафиксировать результат в `reports/`; заявленные дельты мер не суммировать (Scenario «Замер после диеты», методика замера D6)
 
 ## 6. Приёмка
 

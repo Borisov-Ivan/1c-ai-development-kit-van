@@ -15,7 +15,7 @@
 
 Устаревшие алиасы: `/opsx:ff` и `/opsx:continue` → `/opsx:new <name>` (stub-redirect).
 
-Справочник сценариев — в [`README.md`](README.md). Термины workflow — в [`openspec/project.md`](openspec/project.md).
+Справочник сценариев — в [`README.md`](README.md). Термины workflow — в [`openspec/glossary.md`](openspec/glossary.md).
 
 ## Карта SSOT (один якорь на тему)
 
@@ -26,16 +26,17 @@
 - Словарь запретов → `.cursor/docs/chat-lexicon.md`; AI-tells → `.cursor/skills/stop-slop/SKILL.md`.
 
 **Делегирование и код 1С:**
-- HALT (always-apply stub), делегирование, APPLY/XML write guard → `.cursor/rules/1c-agent-delegation.mdc`.
+- HALT (always-apply stub), делегирование, BSL/XML write guard → `.cursor/rules/1c-agent-delegation.mdc`.
 - HALT-таблица, Light/Mechanical → `.cursor/rules/1c-halt-triggers.mdc` (on-demand, globs `**/*.bsl`).
-- LINT GATE, writer pipeline → `.cursor/rules/1c-writer-pipeline.mdc` (globs `**/*.bsl`).
+- LINT GATE и эталон writer pipeline → `.cursor/rules/1c-writer-pipeline.mdc`; якорь потока — `1c-agent-delegation.mdc`.
+- XML-guard (полный шаблон) → `.cursor/rules/1c-xml-write-guard.mdc` (on-demand).
 - Запрет создания метаданных → `.cursor/rules/1c-no-metadata-creation.mdc`; валидация имён → `.cursor/rules/1c-metadata-validation.mdc`.
 - Task → `.cursor/rules/tool-name-guard.mdc`; модели → `.cursor/rules/model-selection.mdc`.
 - Трасса → `.cursor/rules/1c-error-analysis.mdc`; формы → `.cursor/rules/1c-utility-agents.mdc`, `.cursor/skills/1c-forms/SKILL.md`.
 - Паттерны промптов → `.cursor/skills/1c-agent-patterns/SKILL.md`; агенты → `.cursor/agents/*.md`.
 
 **Сессии и стратегия:**
-- Skill-first, persistence, context-strategy → `.cursor/rules/session-discipline.mdc`.
+- Skill-first, persistence, context-strategy → `.cursor/rules/session-discipline.mdc`; полные гейты (on-demand): `command-skill-gate.mdc`, `command-session-persistence.mdc`, `context-strategy-gate.mdc`.
 - Прямое чтение vs субагенты → `.cursor/skills/context-strategy/SKILL.md`.
 - Отчёты субагентов → `.cursor/rules/preserve-subagent-reports.mdc`.
 
@@ -50,8 +51,8 @@
 **Знания и решения:**
 - ADR → `openspec/adrs/` + `.cursor/rules/adr-format.mdc`.
 - Knowledge Base → `openspec/knowledge/` + `.cursor/rules/knowledge-format.mdc`.
-- Маркеры → [`.cursor/docs/marker-canon.md`](.cursor/docs/marker-canon.md); overlay → [`openspec/project.md`](openspec/project.md); capture → [`.cursor/rules/capture-to-project.mdc`](.cursor/rules/capture-to-project.mdc).
-- Пути cf/cfe → `openspec/project.md` + `.cursor/rules/project-paths.mdc`.
+- Маркеры → [`.cursor/docs/marker-canon.md`](.cursor/docs/marker-canon.md); overlay → [`openspec/project.md`](openspec/project.md) (создаётся `/init-project`; в kit-репозитории отсутствует); capture → [`.cursor/rules/capture-to-project.mdc`](.cursor/rules/capture-to-project.mdc).
+- Пути cf/cfe → `openspec/project.md` (создаётся `/init-project`; в kit-репозитории отсутствует — блок путей в промптах агентов опускается) + `.cursor/rules/project-paths.mdc`.
 - Запрет ROI → `.cursor/rules/no-roi-estimates.mdc`; инфраструктура → `.cursor/docs/onec-infrastructure.md`.
 
 **Ревью:** [`.cursor/docs/review-guide.md`](.cursor/docs/review-guide.md); `/review`, `/release-review`; протокол → `.cursor/skills/review/SKILL.md`. Disposition / независимое качество — [`openspec/specs/review-quality-disposition/spec.md`](openspec/specs/review-quality-disposition/spec.md), [`openspec/adrs/ADR-0003-review-quality-disposition.md`](openspec/adrs/ADR-0003-review-quality-disposition.md).

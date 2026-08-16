@@ -56,3 +56,18 @@ open_known_questions: []
 Изменения tasks: нет (S1.accept остаётся [ ])
 Связанный отчёт: reports/handoff-acceptance-S1-2026-08-16.md
 
+### Slice S1 — Живой мэппинг моделей (2026-08-16) — вердикт
+Срез: S1 — Живой мэппинг моделей
+Решение: принят
+Обоснование: без замечаний
+Изменения tasks: S1.accept [x]
+Связанный отчёт: reports/slice-acceptance-S1-2026-08-16.md
+
+### Slice S2 — Диета always-apply (2026-08-16)
+Срез: S2 — Диета always-apply
+Решение: awaiting-acceptance
+Обоснование: все рабочие задачи реализованы; приёмочная задача передана на ручной прогон Primary.
+Изменения tasks: нет (S2.accept остаётся [ ])
+Связанный отчёт: reports/handoff-acceptance-S2-2026-08-16.md
+
+

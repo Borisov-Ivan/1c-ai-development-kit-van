@@ -651,7 +651,7 @@ RLM `NOT_CONNECTED`. Когда доступен — после ревью вы�
 
 ## INVOCATION
 
-**Automatic**: после каждого writer (`/opsx:apply`, `/review`, Light/Mechanical Mode) — см. `1c-agent-delegation.mdc` § WRITER PIPELINE.
+**Automatic**: после каждого writer (`/opsx:apply`, `/review`, Light/Mechanical Mode) — см. `1c-writer-pipeline.mdc` (якорь — `1c-agent-delegation.mdc`).
 **Manual**: "ревью код", "проверь модуль", "code review", `/review`, `/release-review`.
 
 ---

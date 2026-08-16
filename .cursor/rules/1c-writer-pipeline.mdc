@@ -7,9 +7,58 @@ priority: 800
 
 # 1C Writer Pipeline (on-demand)
 
-Подключается при редактировании/чтении `.bsl`. Дополняет `1c-agent-delegation.mdc` — детали пайплайна писателя, которые **не** нужны всегда (только в момент работы с кодом 1С).
+Подключается при редактировании/чтении `.bsl`. Always-apply якорь в `1c-agent-delegation.mdc`: `writer → ReadLints → … → reviewer` (нужен до `globs` `.bsl`).
 
-**Эталон сквозного потока и таблица «шаг → исполнитель» — `1c-agent-delegation.mdc` § WRITER PIPELINE (эталонный порядок).** Здесь — только детали отдельных шагов; порядок не дублируется.
+**Единственный эталон сквозного потока.** Все другие файлы (`1c-agent-delegation.mdc`, `review/SKILL.md`, `openspec-apply-change/SKILL.md`) ссылаются сюда и не приводят собственные варианты порядка.
+
+```
+writer → ReadLints → [fix if errors] → IDENTIFIER HYGIENE CHECK →
+  COMMENT HYGIENE CHECK →
+  API EXISTENCE CHECK + METADATA CHECK →
+  [AskQuestion при WARNING по API/метаданным] →
+  EXTENSION VERIFICATION (если &ИзменениеИКонтроль) →
+  reviewer (+ Linter Signals + Naming Signals + Comment Hygiene Signals evidence + API check results + base path + verification result)
+```
+
+| Шаг | Исполнитель | Детали |
+|-----|-------------|--------|
+| writer | `onec-code-writer` (Task) | INPUT CONTRACT — `.cursor/agents/onec-code-writer.md` |
+| ReadLints + fix errors | оркестратор (fix — снова writer) | этот файл § LINT GATE |
+| IDENTIFIER HYGIENE CHECK (Naming Provenance) | оркестратор (Grep) | этот файл § IDENTIFIER HYGIENE CHECK; evidence — `review/SKILL.md` шаг 1.9 |
+| COMMENT HYGIENE CHECK | оркестратор (Grep) | этот файл § COMMENT HYGIENE CHECK; evidence — `review/SKILL.md` шаг 1.10 |
+| API EXISTENCE CHECK | оркестратор (Grep) | этот файл § API EXISTENCE CHECK |
+| METADATA CHECK | оркестратор (Grep по src/) | `1c-metadata-validation.mdc` |
+| EXTENSION VERIFICATION | оркестратор (Read base + сравнение) | этот файл § EXTENSION GATE |
+| reviewer | `onec-code-reviewer` (Task) | evidence-блоки обязательны |
+| Investigation loop (по запросу reviewer) | `onec-code-explorer` (Task) | этот файл § CONTRACT RESOLUTION; `review/SKILL.md` шаг 3.5 |
+
+Детали шагов — ниже. Сводная таблица лимитов итераций — `1c-agent-delegation.mdc` § WRITER PIPELINE.
+
+## ПРОМПТ WRITER: ГРАНИЦА ОТВЕТСТВЕННОСТИ
+
+Always-apply якорь — `1c-agent-delegation.mdc`: оркестратор описывает **ЧТО**, не **КАК**.
+
+Оркестратор в промпте writer описывает:
+
+```yaml
+ДОПУСТИМО (ЧТО):
+  - Описание задачи и критерии приёмки
+  - Контракты: сигнатуры функций, типы параметров, ключи структур
+  - Пути к файлам, указание на конкретные процедуры
+  - Бизнес-логика: при каких условиях какое поведение
+  - Ссылки на design.md, specs, архитектурный отчёт
+
+ЗАПРЕЩЕНО (КАК):
+  - Паттерны обработки ошибок ("оберни в Попытку", "сделай fallback")
+  - Конкретные проверки ("добавь ТипЗнч()", "проверь Свойство()")
+  - Структура кода ("сначала проверь X, потом вызови Y")
+  - Обоснование Попытки ("обоснована внешним фактором ХР")
+
+Если оркестратор хочет выразить ожидание поведения при ошибке:
+  ПЛОХО: "в Попытку — вызов ядра, при исключении — fallback"
+  ХОРОШО: "при недоступности ядра проверка должна выполниться
+           стандартным путём (fallback), а не заблокироваться"
+```
 
 **Метаданные:** имена объектов, типов и значений перечислений — см. `.cursor/rules/1c-metadata-validation.mdc`. Несуществующее имя → STOP (`1c-no-metadata-creation.mdc`).
 
@@ -216,7 +265,7 @@ AskQuestion:
 
 ### Триггер
 
-Ревьювер после Phase 0–2.5 включает в отчёт секцию `## Investigation Request` с таблицей источников, требующих резолва контракта. Оркестратор парсит эту секцию и запускает investigation loop (шаг 3.5 в `review/SKILL.md`). **Лимит — 3 итерации** (сводная таблица лимитов — `1c-agent-delegation.mdc` § WRITER PIPELINE).
+Ревьювер после Phase 0–2.5 включает в отчёт секцию `## Investigation Request` с таблицей источников, требующих резолва контракта. Оркестратор парсит эту секцию и запускает investigation loop (шаг 3.5 в `review/SKILL.md`). **Лимит — 3 итерации** (сводная таблица лимитов — `1c-agent-delegation.mdc`).
 
 Без секции Investigation Request — CONTRACT RESOLUTION не выполняется.
 
@@ -276,7 +325,7 @@ writer'а (HALT с MISSING_INPUT при получении).
 4. Сравнить код вне директив с base. При расхождении — **СТОП**, вернуть writer на исправление.
 5. Путь к base-файлу и результат проверки («verified: совпадает» или «расхождение в строках N-M») передать в промпт reviewer.
 
-Место шага в потоке — после LINT GATE, IDENTIFIER HYGIENE CHECK, COMMENT HYGIENE CHECK и API/METADATA CHECK, до reviewer (эталон — `1c-agent-delegation.mdc` § WRITER PIPELINE). При обнаружении `&ИзменениеИКонтроль` дополнительно: enrich writer prompt блоком EXTENSION_GUARD **до** вызова writer (см. EXTENSION GATE выше).
+Место шага в потоке — после LINT GATE, IDENTIFIER HYGIENE CHECK, COMMENT HYGIENE CHECK и API/METADATA CHECK, до reviewer (эталон — этот файл, таблица шагов выше). При обнаружении `&ИзменениеИКонтроль` дополнительно: enrich writer prompt блоком EXTENSION_GUARD **до** вызова writer (см. EXTENSION GATE выше).
 
 ---
 
