@@ -1,10 +1,12 @@
 ---
 description: "GATE: протокол команды действует на каждом ходе сессии, не только на первом"
-alwaysApply: true
+alwaysApply: false
 priority: 996
 ---
 
 # Command Session Persistence
+
+**Когда загружать:** сессия начата явной командой (`/opsx:*` или другая из `.cursor/commands/`) — протокол скилла действует на каждом ходе, не только на первом.
 
 ## TRIGGER
 

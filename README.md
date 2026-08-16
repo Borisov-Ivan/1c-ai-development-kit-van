@@ -74,6 +74,4 @@
 | Перенести требования в общие specs без закрытия ЗНИ | `/opsx:sync` |
 | Закрыть несколько ЗНИ пакетом | `/opsx:bulk-archive` |
 
-Устаревшие команды `/opsx:ff` и `/opsx:continue` ведут на `/opsx:new`.
-
 Индекс якорей — в [`AGENTS.md`](AGENTS.md). Как копировать kit в другой проект — [`.cursor/docs/kit-template-workflow.md`](.cursor/docs/kit-template-workflow.md).

@@ -10,7 +10,7 @@
 4. **Mode Gate / XML guard:** согласованы; Form assisted только через skill.
 5. **Кейсбуки** отдельно от `std-*`.
 6. **session-restore** не авто-запускает apply.
-7. **Бюджет always-apply:** сумма `.cursor/rules/*.mdc` с `alwaysApply: true` ориентир **< ~50 KB**; полный бюджет чата — on-demand `chat-output-budget-full.mdc`.
+7. **Бюджет always-apply:** сумма `.cursor/rules/*.mdc` с `alwaysApply: true` плюс `AGENTS.md` **≤ 34 КБ**; полный бюджет чата — on-demand `chat-output-budget-full.mdc`.
 8. **Тонкий AGENTS:** нет Decision tree; ссылка на `README.md`; вход исследования — `/opsx:explore`.
 9. **README без лишнего:** нет `/opsx:intake`, `/opsx:debug`, пользовательских ключей команд (в т.ч. `--lite`).
 10. **Отсутствие intake/debug:** нет `.cursor/commands/opsx-intake.md`, `opsx-debug.md`; нет каталогов `.cursor/skills/openspec-intake/`, `openspec-debug/`.

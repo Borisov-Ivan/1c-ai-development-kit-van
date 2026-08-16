@@ -1,8 +1,10 @@
 ---
 description: "Загрузить скилл context-strategy при анализе файлов — планирование: прямое чтение vs субагенты"
-alwaysApply: true
+alwaysApply: false
 ---
 # Context Strategy Gate
+
+**Когда загружать:** анализ 3+ файлов, файл данных (XML/HTML/CSV/JSON), код 500+ строк, либо просьба «береги контекст» / «разными субагентами».
 
 ## TRIGGER
 

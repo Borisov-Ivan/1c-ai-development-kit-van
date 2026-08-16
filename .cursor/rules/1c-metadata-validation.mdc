@@ -18,4 +18,4 @@ alwaysApply: false
 
 ## SOURCE OF TRUTH
 
-Проверка метаданных — часть пайплайна writer: идёт вместе с **API EXISTENCE CHECK** (порядок — `1c-agent-delegation.mdc` § WRITER PIPELINE; детали шага — `1c-writer-pipeline.mdc` § API EXISTENCE CHECK) до вызова reviewer. Reviewer валидирует невыдуманность имён по тому же принципу (Unverified API — информационная секция отчёта). Несуществующее имя метаданных в принятом коде ловится `code-truth-gate.mdc` (phantom-symbol).
+Проверка метаданных — часть пайплайна writer: идёт вместе с **API EXISTENCE CHECK** (порядок — `1c-writer-pipeline.mdc`; детали шага — тот же файл § API EXISTENCE CHECK) до вызова reviewer. Reviewer валидирует невыдуманность имён по тому же принципу (Unverified API — информационная секция отчёта). Несуществующее имя метаданных в принятом коде ловится `code-truth-gate.mdc` (phantom-symbol).

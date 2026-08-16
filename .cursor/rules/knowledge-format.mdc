@@ -375,6 +375,25 @@ facts:
 
 Формат строки в блоке `## Existing Knowledge` для инварианта: префикс `ИНВАРИАНТ` перед `KB-NNNN`.
 
+## Existing Knowledge в промпте агента
+
+При делегировании `onec-code-explorer`, `onec-code-architect`, `onec-trace-analyst` включать в промпт блок `## Existing Knowledge` со списком фактов из Discovery:
+
+- explore — Entry Protocol шаг 1.6 (KB Discovery) в `.cursor/skills/openspec-explore/SKILL.md`;
+- Architect Gate — секция `KNOWLEDGE DISCOVERY` в `.cursor/rules/architect-gate.mdc`.
+
+Формат записи факта:
+
+```markdown
+- KB-NNNN [active|stale ⚠ TTL истёк]: <title>
+  Якорь: <anchor.path>:<anchor.name>
+  Выжимка: <одна строка>
+```
+
+Если Discovery вернул пустой список — секция всё равно включается с пометкой: «Discovery выполнен, совпадений нет». Это фиксирует, что шаг выполнен, а не пропущен.
+
+`stale` факты передаются с пометкой `⚠ TTL истёк`. `deprecated` и `superseded` не передаются. Бюджет — до 10 KB-фактов на Discovery (см. §БЮДЖЕТ VERIFY). Always-apply якорь в `1c-agent-delegation.mdc` § KB CONTEXT.
+
 ## GOVERNANCE
 
 ### Writer contract

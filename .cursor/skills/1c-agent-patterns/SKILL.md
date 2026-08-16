@@ -9,6 +9,21 @@ description: Reference guide for 1C agent delegation patterns - complexity asses
 
 Шаблоны промптов разнесены по ролевым файлам. Этот файл — навигатор: оценка сложности, маршрутизация по ролям, выбор модели, общие блоки инструкций (Shared instruction blocks), batch-операции, обработка ошибок и пороги делегирования.
 
+## Intent-бриф (обязателен в каждом промпте Task)
+
+Промпт субагенту описывает **цель / ограничения / scope / критерий готовности**, а не перечень микрошагов реализации.
+
+| Поле | Содержание |
+|---|---|
+| **Цель** | какой исход нужен |
+| **Ограничения** | guard, чего нельзя |
+| **Scope** | пути и границы |
+| **Критерий готовности** | когда работа сделана |
+
+**Запрещено в промпте:** просить субагента пересказать ход внутренних рассуждений; указания «не думай долго», «думай быстрее», «skip thinking».
+
+**Coverage-first (reviewer):** бриф требует полного покрытия проверок; приоритизация — в отчёте, не сужением охвата («только critical» в брифе запрещено).
+
 **Доменные кейсбуки (on-demand):** при проектировании блокировок/регистров/СКД/async/журнала/ловушек платформы — Read `.cursor/docs/casebooks/` (индекс `README.md`). Не путать с вендорским `std-*`.
 
 **Sidecar-промпты Task:** [sidecar.md](sidecar.md) — explorer-impact / explorer-patterns / worker-bounded-edit / reviewer-diff-first (без MUST плотности — S8).
@@ -91,15 +106,15 @@ description: Reference guide for 1C agent delegation patterns - complexity asses
 
 Вызов субагентов — через инструмент **Task** (формат, допустимые `subagent_type`, поведение при `Invalid enum value` — `.cursor/rules/tool-name-guard.mdc`). Подробностей здесь не дублируем.
 
-**Fallback для архитектора (модель):** один агент `onec-code-architect`; цепочка `Task.model` и финальный вызов без `model=` — в `.cursor/rules/model-selection.mdc` (раздел «Цепочка для архитектора»).
+**Цепочка для архитектора (модель):** один агент `onec-code-architect`; два шага `Task.model` (Primary → без `model=`) и закрытая эскалация Fable — в `.cursor/rules/model-selection.mdc`.
 
 ---
 
 ## ВЫБОР МОДЕЛИ (все 1С-агенты)
 
-**Единый SSOT:** [`.cursor/rules/model-selection.mdc`](../../rules/model-selection.mdc) — таблица ролей, `Task.model` для Primary и Fallback, ограничение enum, запрет `Task(model="inherit")`.
+**Единый SSOT:** [`.cursor/rules/model-selection.mdc`](../../rules/model-selection.mdc) — таблица ролей, `Task.model` для Primary, самосверка enum, двухшаговая цепочка, закрытая эскалация Fable. Inherit — отсутствием `model=`, не передачей `model="inherit"` как retry.
 
-**Кратко:** во frontmatter всех кастомных агентов **`model: inherit`**. Оркестратор **передаёт** `model=<slug>` из таблицы при каждом вызове (кроме `onec-trace-analyst`, `openspec-quality-controller` и финального шага fallback — без `model=`). Переопределение вне таблицы — только по явному запросу пользователя.
+**Кратко:** во frontmatter всех кастомных агентов **`model: inherit`**. Оркестратор **передаёт** `model=<slug>` из таблицы при каждом вызове (кроме ролей без Primary и второго шага цепочки — без `model=`). Независимый разбор постановки — Fable при наличии слага в enum, иначе Opus 5. Переопределение вне таблицы — только по явному запросу пользователя.
 
 **Не дублировать** полную таблицу здесь без пометки «синхронизировать с `model-selection.mdc`».
 

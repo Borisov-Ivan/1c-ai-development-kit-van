@@ -2,7 +2,9 @@
 
 Шаблоны для делегирования `Task(subagent_type="onec-code-reviewer")`. Общие правила, выбор модели, обработка ошибок — `SKILL.md` (навигатор).
 
-**Контракт v4:** reviewer агент v4.0 (`.cursor/agents/onec-code-reviewer.md`) сам читает AP-каталог `.cursor/rules/bsl-antipatterns.mdc`, применяет prerelease-эскалацию, risk-модель и QualityFlag/Disposition. Оркестратор передаёт **evidence-блоки** (linter signals, whitelist, prior history, architectural context, boundaries, resolved contracts), а не готовые findings. См. шаги 1.6–2.2 в `.cursor/skills/review/SKILL.md`. Silent VERIFIED_OK — только runtime-SSOT whitelist в агенте § DESIGN AUTHORITY.
+**Контракт v4:** reviewer агент v4.1 (`.cursor/agents/onec-code-reviewer.md`) сам читает AP-каталог `.cursor/rules/bsl-antipatterns.mdc` и on-demand `.cursor/docs/standard/reviewer-checks.md`, применяет prerelease-эскалацию, risk-модель и QualityFlag/Disposition. Оркестратор передаёт **evidence-блоки** (linter signals, whitelist, prior history, architectural context, boundaries, resolved contracts), а не готовые findings. См. шаги 1.6–2.2 в `.cursor/skills/review/SKILL.md`. Silent VERIFIED_OK — только runtime-SSOT whitelist в агенте § DESIGN AUTHORITY.
+
+**Intent-бриф:** цель / ограничения / scope / критерий готовности. **Coverage-first:** полное покрытие проверок; приоритизация в отчёте, не сужением охвата («только critical» в брифе запрещено). Запрещено просить пересказать рассуждения и писать «не думай долго».
 
 ### Shared: Architectural Context / weak (вставлять в промпт)
 
@@ -26,7 +28,14 @@ Prerelease-добавка (только `/release-review`): `as-designed` на q
 ```
 Task(
   description="Ревью кода [feature]",
-  prompt="Проверь качество кода для [feature].
+  prompt="## Цель
+         Полное ревью качества кода для [feature].
+         ## Ограничения
+         Не сужать охват; приоритизация — в отчёте. Не пересказывать рассуждения. Не «не думай долго».
+         ## Scope
+         Файлы: [список изменённых .bsl]
+         ## Критерий готовности
+         Main report + Reasoning appendix по REPORT FORMAT v4; полное покрытие категорий.
 
          expected_reviewer_prompt_contract_version: 4
 

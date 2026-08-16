@@ -1,10 +1,12 @@
 ---
 description: "Запрет прямой правки XML метаданных 1С оркестратором — Form.xml: инструкция ручного конфигурирования; остальные XML через скиллы/агентов"
-alwaysApply: true
+alwaysApply: false
 globs: "src/**/*.xml"
 ---
 
 # XML Write Guard
+
+**Когда загружать:** задача касается XML метаданных в `src/` (Form.xml, Template.xml, Rights.xml, Configuration.xml) — полный шаблон инструкции Конфигуратора и запрет сырой правки.
 
 ## АБСОЛЮТНЫЙ ЗАПРЕТ
 

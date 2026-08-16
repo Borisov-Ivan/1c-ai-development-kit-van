@@ -26,6 +26,8 @@ Read-only skill. Не вызывает субагентов, не правит �
    - `openspec status --change "<name>" --json` → `schemaName`, перечень артефактов (`proposal`, `design`, `specs`, `tasks`, `debug`).
    - Отметить: какие `done`, какие отсутствуют.
 
+2a. **Профиль модели чата.** По self-knowledge модели этой сессии и `.cursor/rules/model-adaptation.mdc` определить активный профиль (`grok4` / `fable5` / `gpt56` / `opus5`) либо «базовый свод» (модель не распознана). В снимок — одна строка, без вопроса пользователю. Override из `openspec/project.md` (если файл есть) побеждает профиль.
+
 2b. **Маркеры (comment markers snapshot).**
 
    Read `proposal.md` § `## Metadata (comment markers)` + `openspec/project.md` (`defaultDeveloper`, `cfMarkerPrefix`) + baseline `.cursor/docs/marker-canon.md` (запреты domain_label).
@@ -76,6 +78,7 @@ Read-only skill. Не вызывает субагентов, не правит �
 
    ЗНИ со срезами (или: без срезов). Прогресс: K/M задач; принятых срезов: X/Y.
    Сейчас: до apply / после apply (есть ли открытые задачи).
+   Профиль модели чата: grok4 | fable5 | gpt56 | opus5 | базовый свод.
 
    Срезы:
    - S1 «<имя>» — 3/3, принят

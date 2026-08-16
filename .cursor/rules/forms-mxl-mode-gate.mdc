@@ -5,7 +5,7 @@ alwaysApply: false
 
 # Forms Mode Gate
 
-**When to Read:** `/opsx:new` (этап design), `/opsx:apply`, `/opsx:verify`, если постановка или задачи затрагивают управляемую форму (`Form.xml`, форма, UI формы) **или** табличный макет (`Template.xml`, MXL) — для политики макета на apply. Триггер также в `gate-dispatcher.mdc` и `1c-halt-triggers.mdc`.
+**Когда загружать:** `/opsx:new` (этап design), `/opsx:apply`, `/opsx:verify`, если постановка или задачи затрагивают управляемую форму (`Form.xml`) или табличный макет (`Template.xml`, MXL).
 
 ## Режимы формы (`form_mode`)
 
