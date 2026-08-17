@@ -27,7 +27,11 @@ globs: "src/**/*.xml"
 
 ## ФОРМАТ ИНСТРУКЦИИ РУЧНОГО КОНФИГУРИРОВАНИЯ
 
-При необходимости изменить Form.xml — не править XML. Сформировать инструкцию по шаблону:
+При необходимости изменить Form.xml — не править XML.
+
+**Чат** (`/opsx:apply`): карточка pause-wait — `.cursor/skills/openspec-apply-change/templates/pause-wait-chat.md` (что создать на форме одним-двумя пунктами списка + раздел файла). Не выкладывать весь рецепт XML в чат и не заменять его одной ссылкой.
+
+**Файл паузы / инструкция:** шаблон ниже (тот же смысл, что раздел «Что создать в Конфигураторе»).
 
 ```markdown
 ## Ручное конфигурирование: <Имя формы>
@@ -47,7 +51,7 @@ globs: "src/**/*.xml"
 Ожидаемые изменения в Form.xml: <краткое описание>
 ```
 
-Принцип: аналогичен `1c-no-metadata-creation.mdc` — не делать, а инструктировать.
+Принцип: аналогичен `1c-no-metadata-creation.mdc` — не делать, а инструктировать. Чат vs файл — pause-wait: список в чате, рецепт в файле.
 
 ## ИСКЛЮЧЕНИЯ
 
@@ -58,7 +62,7 @@ globs: "src/**/*.xml"
 
 ## СВЯЗЬ
 
-Ref: `forms-mxl-mode-gate.mdc`, `1c-agent-delegation.mdc` (ПРИНЦИП), `1c-utility-agents.mdc`, `openspec-apply-change/SKILL.md` (Task Dispatch, Form tasks).
+Ref: `forms-mxl-mode-gate.mdc`, `1c-agent-delegation.mdc` (ПРИНЦИП), `1c-utility-agents.mdc`, `openspec-apply-change/SKILL.md` (Task Dispatch, Form tasks, pause-wait).
 
 ---
 

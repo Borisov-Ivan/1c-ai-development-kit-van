@@ -64,8 +64,8 @@ Architect может рекомендовать новые объекты в des
 
 | Файл | Действие (кратко) |
 |------|-------------------|
-| Form.xml | `manual`/`bsl-only`: инструкция или BSL модуля; `assisted`: только `1c-forms/compile`\|`edit` |
-| Template.xml | `assisted`: `1c-mxl/compile`; иначе инструкция / WAIT |
+| Form.xml | `manual`/`bsl-only`: pause-wait в чате + инструкция в файле, или BSL модуля; `assisted`: только `1c-forms/compile`\|`edit` |
+| Template.xml | `assisted`: `1c-mxl/compile`; иначе pause-wait / WAIT |
 | Rights.xml | `1c-roles/compile` |
 | Прочие XML в src/ | СТОП → `1c-no-metadata-creation.mdc` |
 

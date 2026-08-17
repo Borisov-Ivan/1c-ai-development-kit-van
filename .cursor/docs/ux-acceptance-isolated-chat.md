@@ -25,6 +25,7 @@ SSOT контракта: `.cursor/docs/opsx-output-style.md` §2.6.
 | **E** | `/opsx:apply <name>` | завершённый срез | handoff: **Primary acceptance** одной строкой; user-action next step; без meta pipeline |
 | **E2** | `/opsx:apply <name>` | кодовая задача без критерия приёмки (mechanical slice) | одна строка «реализована»; нет «пошаговая пауза»; нет diff-чеклиста; нет «автопроверки пройдены» |
 | **E3** | `/opsx:apply <name>` | slice-gate handoff | Primary acceptance; ≤7 строк в «Что проверить СЕЙЧАС»; T-HANDOFF §2 без перечня всех задач |
+| **E4** | `/opsx:apply <name>` | нет объектов метаданных в выгрузке (WAIT Конфигуратор) | первая строка — где мы; нумерованный список «что создать»; путь **и имя раздела** файла («Что создать в Конфигураторе»); нет «0/N задач» и списка отсутствующих XML как тела; не одна ссылка на `handoff-pause-*.md`; не A/B «чеклист / имена другие» в заголовке |
 | **F** | `/opsx:explore` | симптом | бриф **B3** карточка (`brief-card.md`: **Симптом**, **Маршрут** или **Варианты**, **Вопрос**, Подтвердить?); финал — блок `## Постановка ЗНИ` или один вопрос |
 | **F2** | `/opsx:extend <change>` | чёткое уточнение scope | бриф **B1**: слот **Изменение**; нет `Как буду искать`/`Что понял`; END TURN на «Подтвердить?» |
 | **F3** | `/opsx:extend <change>` | расширение с drift-warning | бриф **B2**: **Варианты** нумерованно; `Drift-check` не в чате |
@@ -48,7 +49,8 @@ SSOT контракта: `.cursor/docs/opsx-output-style.md` §2.6.
 - «Ничего не требуется» + «Подтвердить?»
 - GO verify без `**Следующий шаг:**` + user-action команды
 - «Что нужно от вас: ничего» на GO без `/opsx:apply` или `/opsx:archive`
-- Перегруз bold/backticks; решение требует открыть файл
+- Перегруз bold/backticks; чтобы **узнать задачу** нужно открыть файл
+- pause-wait: только ссылка на `handoff-pause-*.md` / «Сессия приостановлена: slug» как единственная суть
 - «пошаговая пауза» / «Ваш шаг (» в заголовках apply
 - Meta-статус pipeline: «автопроверки пройдены», «diff не обязателен», «reviewer PASS»
 
@@ -61,6 +63,7 @@ SSOT контракта: `.cursor/docs/opsx-output-style.md` §2.6.
 | D | любой новый запуск new из explore-блока |
 | E, E3 | любой change с готовым срезом к приёмке (Primary в metadata) |
 | E2 | mechanical slice (`**Режим apply:** mechanical`) или change без `**Приёмка:**` в рабочих задачах |
+| E4 | change с задачами Конфигуратора и отсутствующими объектами в `src/` (как `do2-pavlik-knopki-file-actions` до выгрузки) |
 | F | произвольный симптом ДО2 |
 | F2 | `signing-contract-sign-verify-bytes` + уточнение «только облачные УНЭП» |
 | F3 | тот же change + запрос локального УНЭП (drift-warning) |
@@ -78,6 +81,7 @@ SSOT контракта: `.cursor/docs/opsx-output-style.md` §2.6.
 - [ ] E — apply handoff (Primary)
 - [ ] E2 — apply mechanical task (тихий успех)
 - [ ] E3 — apply slice-gate handoff
+- [ ] E4 — apply pause-wait (нет метаданных в выгрузке)
 - [ ] F — explore бриф B3 / финал
 - [ ] F2 — extend B1 в новом чате
 - [ ] F3 — extend B2 drift в новом чате

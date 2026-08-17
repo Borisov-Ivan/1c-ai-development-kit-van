@@ -30,16 +30,16 @@ Entry-бриф — §5.1 `opsx-output-style.md`; отчёты — в `reports/`.
 | Explain — карточка точки | 15–35 строк; одна точка; код + «На что смотреть»; хвост «дальше» |
 | Explain — выход | Журнал + вопрос анализа ≤6; сводка заметок ≤25 / ≤5 пунктов; строка пути к `explain-*.md` (файл обязателен) |
 | Entry-бриф extend/new | Карточка B0–B2 по `brief-card.md` |
-| Handoff | Тонкий чат; полная версия в `reports/handoff-*.md` |
+| Handoff | `acceptance` / `final`: тонкий чат; полная версия в `reports/handoff-*.md`. **pause-wait** (Конфигуратор / нет объектов в выгрузке): инвентарь «что создать» до 7 пунктов **вне** лимита 4–8 + якорь **имени раздела** файла; не ссылка без списка. **pause-decision:** decision-block |
 | Финал без оговорок | 1 строка |
 | Финал с оговорками / ждём | До 3 строк |
-| Развилка / блокер | Компактная карточка ≤8 (verify decision ≤12); **кроме** карточки `/opsx:explain` |
+| Развилка / блокер | Компактная карточка ≤8 (verify decision ≤12); **кроме** карточки `/opsx:explain` и инвентаря pause-wait |
 
-Иерархия: лимит строк > шаблон > эталон. **Исключение:** тест понятности развилки важнее лимита.
+Иерархия: лимит строк > шаблон > эталон. **Исключение:** тест понятности развилки **и** паузы-ожидания (pause-wait) важнее лимита.
 
 ### Разделение чат / файл
 
-Полные отчёты и таблицы — в `reports/*.md`. В чат: суть + путь + одна команда. **Блокеры/развилки** — всегда в чат по `.cursor/docs/templates/decision-block.md` (суть inline).
+Полные отчёты и таблицы — в `reports/*.md`. В чат: суть + путь + одна команда. **Блокеры/развилки** — всегда в чат по `.cursor/docs/templates/decision-block.md` (суть inline). **Пауза-ожидание (работа в Конфигураторе):** список объектов в чате + имя раздела файла; ссылка без списка — провал. Рецепт типов и флажков — в файле.
 
 ### Non-events (§3a)
 
@@ -65,12 +65,13 @@ Entry-бриф — §5.1 `opsx-output-style.md`; отчёты — в `reports/`.
 
 ### Pre-send self-check (§1b)
 
-1. HALT-подстроки  2. Non-events  3. Один «Следующий шаг»  4. Лимит  5. Навигатор (ответ текстом)  6. AskQuestion только где разрешено  7. Anti-slop  8. Decision-block inline
+1. HALT-подстроки  2. Non-events  3. Один «Следующий шаг»  4. Лимит  5. Навигатор (ответ текстом; pause-wait — список «что создать»)  6. AskQuestion только где разрешено  7. Anti-slop  8. Decision-block inline (выбор A/B); pause-wait — не A/B
 
 ## SSOT
 
 - Лимиты / HALT / принципы → этот stub; детали → `chat-output-budget-full.mdc`
 - Бриф → `.cursor/docs/templates/brief-card.md`
 - Стиль / Chat Surface → `.cursor/docs/opsx-output-style.md`
+- pause-wait (чат apply, Конфигуратор) → `.cursor/skills/openspec-apply-change/templates/pause-wait-chat.md`
 - Verify-логика → `.cursor/skills/openspec-verify-change/SKILL.md`
 - Explain (карта / карточка точки) → `.cursor/skills/openspec-explain/SKILL.md`

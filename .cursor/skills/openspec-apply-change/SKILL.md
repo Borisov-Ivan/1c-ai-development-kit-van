@@ -306,9 +306,9 @@ Implement tasks from an OpenSpec change.
    | Форма / Form.xml / Конфигуратор | «Form.xml», «реквизиты формы», «добавить форму», «колонки в Конфигураторе», создание/изменение XML формы | **Read** `forms-mxl-mode-gate.mdc`. Режим **этой** формы: `form_mode` / map `forms:` (+ fallback lone `artifact_mode`). Пустой/`n/a` без legacy → STOP/extend. `manual`: инструкция Конфигуратор + WAIT. `assisted`: только skill `1c-forms/compile`\|`edit` (без `-FromObject`/form-add/ChildObjects); нет skill → HALT→manual. `bsl-only`: не трогать Form.xml — только Module.bsl. Сырой Write Form.xml запрещён |
    | Верификация метаданных | «проверить соответствие», «проверить наличие» | Оркестратор (Glob/Grep/Read — только проверка, не реализация) |
    | Приёмочная задача (`S<N>.accept` или legacy `S<N>.T<M>`) | «ручной тест», «убедиться», `S<N>.accept`, `S<N>.T<M>` | **Режимы по срезам / пошаговый** (внутренние коды `step-by-slice` / `step-by-step`): trigger Slice Gate (см. шаг 6). **Legacy batch:** пропустить с предупреждением; включить в Session Summary секцию «Отложенные ручные тесты» |
-   | Создание метаданных | «создать регистр», «создать справочник», «создать форму» | **СТОП** — блокер пользователю (`1c-no-metadata-creation.mdc`) |
+   | Создание метаданных | «создать регистр», «создать справочник», «создать форму» | **СТОП** — блокер **pause-wait**: чат по `templates/pause-wait-chat.md`, рецепт в файле по `1c-no-metadata-creation.mdc` |
 
-   **HALT:** Оркестратор НЕ реализует задачи типов BSL-код и модули формы самостоятельно. Оркестратор готовит промпт и делегирует. Прямое использование Write/StrReplace для .bsl и **сырая** правка Form.xml/Template.xml — запрещены. Form/Template при `assisted` — только через skill (см. Mode Gate). Для `Form.xml`/Конфигуратора при `manual`: СТОП — инструкция ручного конфигурирования и WAIT до выгрузки/приёмки пользователя. Для программного создания элементов в `Form/Module.bsl`: обычный BSL pipeline — полный эталонный порядок в `.cursor/rules/1c-writer-pipeline.mdc` (writer → ReadLints → IDENTIFIER HYGIENE CHECK → COMMENT HYGIENE CHECK → API/METADATA CHECK → EXTENSION VERIFICATION → reviewer). Always-apply якорь — `1c-agent-delegation.mdc`. Ref: `forms-mxl-mode-gate.mdc`, `1c-agent-delegation.mdc` (§ XML WRITE GUARD), `1c-utility-agents.mdc`.
+   **HALT:** Оркестратор НЕ реализует задачи типов BSL-код и модули формы самостоятельно. Оркестратор готовит промпт и делегирует. Прямое использование Write/StrReplace для .bsl и **сырая** правка Form.xml/Template.xml — запрещены. Form/Template при `assisted` — только через skill (см. Mode Gate). Для `Form.xml`/Конфигуратора при `manual`: СТОП — **pause-wait** (чат `templates/pause-wait-chat.md`, рецепт в файле; полный шаблон Form.xml — `1c-xml-write-guard.mdc`) и WAIT до выгрузки/приёмки пользователя. Для программного создания элементов в `Form/Module.bsl`: обычный BSL pipeline — полный эталонный порядок в `.cursor/rules/1c-writer-pipeline.mdc` (writer → ReadLints → IDENTIFIER HYGIENE CHECK → COMMENT HYGIENE CHECK → API/METADATA CHECK → EXTENSION VERIFICATION → reviewer). Always-apply якорь — `1c-agent-delegation.mdc`. Ref: `forms-mxl-mode-gate.mdc`, `1c-agent-delegation.mdc` (§ XML WRITE GUARD), `1c-utility-agents.mdc`.
 
    **Naming evidence (apply, обязательно):** IDENTIFIER HYGIENE CHECK включает шаг 2b **touched-procedure scope** (`1c-writer-pipeline.mdc`). В промпт reviewer передавать полную таблицу `## Naming Signals (evidence)` с колонкой `Scope`. **Запрещено** помечать legacy-идентификаторы в изменённых процедурах как «pre-existing — skip» / «новых символов нет → naming OK». Reviewer обязан заполнить `Touched-scope identifiers (domain test)` при изменённых процедурах.
 
@@ -482,17 +482,30 @@ Implement tasks from an OpenSpec change.
 
 7. **On completion or pause — T-HANDOFF (единый шаблон)**
 
-   Формат — **T-HANDOFF** из `.cursor/docs/opsx-output-style.md` §5.2. Заголовок выбирается по варианту:
+   Формат — **T-HANDOFF** из `.cursor/docs/opsx-output-style.md` §5.2.
+
+   **Классификация паузы** (до текста в чат):
+
+   | Вид | Когда | Чат |
+   |-----|-------|-----|
+   | **pause-wait** | Нет объектов в выгрузке; Form.xml `manual`; макет manual без разрешения compile; задача типа «Конфигуратор» невыполнима без выгрузки | [templates/pause-wait-chat.md](templates/pause-wait-chat.md). Файл — [templates/pause-wait-file.md](templates/pause-wait-file.md). **Не** decision-block. **Не** «прогресс + ничего в коде». |
+   | **pause-decision** | Неясное требование, scope, выбор A/B | [decision-block.md](../../docs/templates/decision-block.md) |
+   | Пользователь «стоп» | Явный прерыв | Где остановились + `/opsx:apply`; не pause-wait |
+
+   Заголовок **файла** `handoff-pause-*.md` может остаться «Сессия приостановлена»; в **чат** для pause-wait первая строка — «где мы», не slug.
+
+   Формат заголовка файла по варианту:
    - `acceptance` → `## Срез S<N> — передача на приёмку: <change-name>` (handoff в конце среза, default)
-   - `pause` → `## Сессия приостановлена: <change-name>` (issue / пользовательский стоп)
+   - `pause` → `## Сессия приостановлена: <change-name>` (wait / decision / пользовательский стоп)
    - `final` → `## Реализация завершена: <change-name>` (все срезы приняты)
 
    **Имена секций одинаковы во всех трёх вариантах** (см. раздел «Output — T-HANDOFF» ниже):
 
    - `### 1. Что реализовано` — за каждую задачу этого сеанса: `[x] N.M — описание`, файл `path` со строками, «что изменено» одним предложением; строка про автопроверку — **только** при расхождении или замечании ревью (без «OK» в успешном пути — §3a `chat-output-budget.mdc`). Для нетривиальных срезов в чате допускается **2–3 предложения прозой** (что именно сделано в коде, какие файлы затронуты) вместо списка-телеграммы.
    - `### Карта правок (перед тестом)` — **только вариант `acceptance`**: до 5 пунктов (проза + citation); в файле handoff — полный список секции среза из `code-map.md`. Язык — §5.2 «Язык карты».
-   - `### 2. Что проверить СЕЙЧАС` — **три режима** (согласовано с §5.6):
+   - `### 2. Что проверить СЕЙЧАС` — **четыре режима** (согласовано с §5.6):
      - **Slice-gate / acceptance handoff:** только **Primary acceptance** из metadata + optional одной строкой.
+     - **pause-wait:** «сценарий не гонять — сначала объекты в Конфигураторе»; не «чеклист в §6».
      - **Тихий успех между задачами:** «Ручная проверка не требуется» или пропустить секцию.
      - **Explicit step-by-step:** только шаги из явного критерия задачи в tasks — не diff, не pipeline.
      **Запрещено:** перечислять критерии **каждой** закрытой задачи в handoff.
@@ -505,10 +518,10 @@ Implement tasks from an OpenSpec change.
      - **Статус** — `[x]` / `[ ]`.
    - `### 4. Как вернуться` — `/opsx:apply <change-name>`, одна строка. Если выявлен scope/design mismatch, добавить вторую строку: `Обновить scope: /opsx:extend <change-name>` (затем снова `/opsx:apply <change-name>`).
    - `### 5. Blockers` — нумерованный список задач, которые не могут продолжаться, и почему.
-   - `### 6. Issue` — **только в варианте `pause`**: развилка собирается **строго** по единому контракту `.cursor/docs/templates/decision-block.md` — блок «**Что решить:** <заголовок прозой>» + триада «В чём проблема / На что влияет / Если A·B» + варианты A/B с «но/зато», **суть inline**, формулировки **синтезированы по §1c**, не скопированы из артефакта. **Запрещено** заменять суть ссылкой-указателем («см. отчёт»), голым кодом решения (`OQ1`, `S1.1a`, `interim`, `default для apply`) или непереведённой англ-меткой варианта (§1b.8 / §1c / §7 `chat-output-budget.mdc`). Полное Issue и таблицы — в файле `reports/handoff-*.md`, см. §5.2 выше.
+   - `### 6. Issue` — **только `pause-decision`**: развилка по `.cursor/docs/templates/decision-block.md` — блок «**Что решить:**» + триада + варианты A/B, **суть inline**. **Запрещено** заменять суть ссылкой-указателем. Для **pause-wait** секции Issue нет: чат — инвентарь объектов; расхождение имён в ИБ — одна фраза в конце, не A/B в заголовке. Полные таблицы — в файле `reports/handoff-*.md`.
    - `### 7. Short-cut` — **только в варианте `acceptance`**: строка про подтверждение обычной фразой («принято», «срез принят»).
 
-   Если все срезы приняты (`final`) — добавить строку «All tasks complete. Ready to archive: `/opsx:archive <change-name>`». Если `pause` из-за design/scope mismatch — предложить `Follow-up: /opsx:extend <change-name>` рядом с вариантами решения. Если `pause` — ждать ответа пользователя. Если `acceptance` — end turn.
+   Если все срезы приняты (`final`) — добавить строку «All tasks complete. Ready to archive: `/opsx:archive <change-name>`». Если `pause-decision` из-за design/scope mismatch — предложить `Follow-up: /opsx:extend <change-name>` рядом с вариантами решения. Если `pause-wait` — ждать выгрузки / сообщения в чате. Если `pause-decision` — ждать ответа. Если `acceptance` — end turn.
 
    **Self-check** (см. §7 стайл-гайда) перед выводом: слои разделены, нумерованные списки, одинаковые имена секций, длина в пределах лимитов.
 
@@ -522,14 +535,14 @@ Implement tasks from an OpenSpec change.
 
 **Output — T-HANDOFF (единый шаблон, см. `.cursor/docs/opsx-output-style.md` §5.2)**
 
-**Чат vs файл:** в **чат** — тонкий handoff по §5.2 (проза, без `**Schema:**`, без markdown-таблиц срезов/следующих задач). Полная структура ниже (Schema, таблицы, слоты 1–7) — **только** в `reports/handoff-*.md`.
+**Чат vs файл:** в **чат** — по §5.2: `acceptance`/`final`/`pause-decision` тонкие; **pause-wait** — инвентарь «что создать» (`templates/pause-wait-chat.md`), не «прогресс + ничего в коде». Без `**Schema:**`, без markdown-таблиц срезов/следующих задач. Полная структура (Schema, таблицы, рецепт) — в `reports/handoff-*.md`.
 
 Три варианта заголовка при одинаковых именах секций — выбирается по состоянию:
 
 | Вариант | Заголовок | Когда |
 |---------|-----------|-------|
 | `acceptance` | `## Срез S<N> — передача на приёмку: <change-name>` | все рабочие задачи `[x]`, `S<N>.accept` (или legacy `S<N>.T<M>`) ждёт ручной приёмки |
-| `pause` | `## Сессия приостановлена: <change-name>` | Issue / неясное требование / пользователь «стоп» |
+| `pause` | `## Сессия приостановлена: <change-name>` | pause-wait (Конфигуратор) / pause-decision / пользователь «стоп» |
 | `final` | `## Реализация завершена: <change-name>` | Все задачи `[x]`, включая `S<N>.accept` (или все legacy `S<N>.T<M>`) |
 
 **Структура полной версии — только файл `reports/handoff-*.md` (секции 1–5; 6–7 — по варианту):**
@@ -539,16 +552,19 @@ Implement tasks from an OpenSpec change.
 
 **Change:** <change-name>
 **Schema:** <schema-name>   ← только в файле; в чат не копировать
-**Прогресс:** N/M задач [x] (приёмка среза S<N>.accept: <статус>)
+**Прогресс:** N/M задач [x] (приёмка среза S<N>.accept: <статус>)  ← в чат pause-wait не копировать
+
+## Что создать в Конфигураторе
+← только pause-wait; первый человеческий раздел; на него ссылается чат
 
 ### 1. Что реализовано
-…
+← pause-wait: «код ещё не писали», без XML-дампа
 
 ### Карта правок (перед тестом)
 …
 
 ### 2. Что проверить СЕЙЧАС
-…
+← pause-wait: сценарий не гонять
 
 ### 3. Следующие задачи
 | Задача | Действие | Тип | Исполнитель | Зависит от | Статус |
@@ -562,14 +578,17 @@ Implement tasks from an OpenSpec change.
 ### 5. Blockers (если есть)
 …
 
-<!-- pause: ### 6. Issue — decision-block -->
+## Приложение: чего нет в выгрузке сейчас
+← только pause-wait; не копировать в чат как тело
+
+<!-- pause-decision: ### 6. Issue — decision-block -->
 <!-- acceptance: ### 7. Short-cut -->
 <!-- final: Ready to archive -->
 ```
 
-**Чат (тонкий, §5.2):** заголовок варианта + прогресс одной строкой + «Что реализовано» прозой + (acceptance) «Карта правок» ≤5 + «Что проверить» + «Как вернуться» + Short-cut. Без Schema и без таблиц.
+**Чат:** `acceptance` — заголовок среза + «что сделано» + «Карта правок» ≤5 + «Что проверить» + «Как вернуться». **pause-wait** — `templates/pause-wait-chat.md` (не прогресс, не «ничего в коде»). **pause-decision** — decision-block. Без Schema и без таблиц.
 
-**Имена секций** (`### 1. Что реализовано`, `### 2. Что проверить СЕЙЧАС`, `### 3. Следующие задачи`, `### 4. Как вернуться`, `### 5. Blockers`) — **одинаковы во всех трёх вариантах**; это же именование используется в `debug.md` `## Slice Gate Decisions` → «Связанный отчёт».
+**Имена секций** `### 1`…`### 5` совпадают для `acceptance` / `pause-decision` / `final`. Для **pause-wait** дополнительно раздел **«Что создать в Конфигураторе»** (первый) и приложение выгрузки. Связь в `debug.md` `## Slice Gate Decisions` → «Связанный отчёт» без изменения.
 
 **Self-check перед выводом** (§7 стайл-гайда):
 1. В «Что проверить СЕЙЧАС» нет внутренних ID (`R<N>/SC<N>/D<N>`) в тексте пункта — только в скобках в конце.
@@ -580,9 +599,10 @@ Implement tasks from an OpenSpec change.
 6. **Первое упоминание `S<N>.<M>` / `S<N>.accept` (или legacy `S<N>.T<M>`)** в заголовке секции / карточки / handoff-сообщения — с коротким описанием задачи в «ёлочках» (например «Что проверить у себя — задача `S1.2` («перенос флага из шаблона в БП»)»). Голый ID без описания в заголовке (например «к `S1.2`», «`S1.2` закрыта с моей стороны») — провал self-check. Срез — по §10 `opsx-output-style.md`.
 7. **Колонка «Действие»** в таблице «Следующие задачи» — обязательна; «Тип» и «Исполнитель» — только из русских наборов значений (см. описание шага 7); имена `onec-code-*` в чат не выводятся.
 8. **Англицизмы** (`Step-by-step`, `checkpoint`, `Tier`, `Standard/Lite/Full` как метки) и имена движка (`Architect Gate`, `Slice Gate`, `Implementation Impact Gate`) — в пользовательский вывод не попадают; внутренние ID триггеров (`slice-size-threshold`, `awaiting-acceptance`) — только в `debug.md` / в скрытом контексте модели.
+9. **pause-wait:** в чате есть нумерованный список «что создать» и имя раздела файла; нет «0/N» и XML-дампа как тела; не decision-block A/B в заголовке.
 
 **Guardrails**
-- **Output style:** T-HANDOFF §5.2 + **Chat Surface Contract** §2.6 `opsx-output-style.md`: handoff среза на языке эффекта; next step — user-action команды (`/opsx:verify`, `/opsx:apply`, `/opsx:archive`, опц. `/opsx:explain` после BSL — ниже verify/extend); thin handoff `acceptance` **включает** строку «после проверки: обычная фраза „принято“ или `/opsx:apply <name>`»; без internal-команд и перечней файлов. Self-check §2.6 перед отправкой.
+- **Output style:** T-HANDOFF §5.2 + **Chat Surface Contract** §2.6 `opsx-output-style.md`: handoff среза на языке эффекта; pause-wait — инвентарь объектов, не ссылка без списка; next step — user-action команды (`/opsx:verify`, `/opsx:apply`, `/opsx:archive`, опц. `/opsx:explain` после BSL — ниже verify/extend); thin handoff `acceptance` **включает** строку «после проверки: обычная фраза „принято“ или `/opsx:apply <name>`»; без internal-команд и перечней файлов. Self-check §2.6 перед отправкой.
 - **Explain after BSL:** при acceptance/final с правками `.bsl` — MAY предложить `/opsx:explain` по `code-map.md` (секция `## Explain scope`); не предлагать по умолчанию на pause / только ARCH; не вытеснять primary verify/extend.
 - Keep going through tasks until done or blocked
 - Always read context files before starting (from the apply instructions output)
@@ -596,8 +616,8 @@ Implement tasks from an OpenSpec change.
 - Pause on errors, blockers, or unclear requirements - don't guess
 - Use contextFiles from CLI output, don't assume specific file names
 - **Task Dispatch:** classify each task before implementation; delegate to the correct executor per dispatch table. Orchestrator MUST NOT implement BSL or form-module tasks directly — only prepare context and delegate.
-- **Form XML / Configurator tasks:** Read Mode Gate (`forms-mxl-mode-gate.mdc`). Resolve per-form `form_mode` / `forms:` (+ legacy `artifact_mode`). Empty/`n/a` for in-scope form without legacy → STOP/extend. `manual` — Configurator instructions (`1c-agent-delegation.mdc` § XML WRITE GUARD); do not raw-edit `Form.xml`. `assisted` — only via `1c-forms/compile|edit` skill; no skill → HALT→manual. Do not continue past WAIT until user re-exported (manual path).
-- **Template.xml / MXL tasks:** Default manual (WAIT/instruction). Non-manual/`assisted` → only with recorded apply permission (`debug.md` § Apply permissions or `[mxl:…]`); then `1c-mxl/compile`+validate; no raw Write. Do not resurrect Mode Gate layout question in new.
+- **Form XML / Configurator tasks:** Read Mode Gate (`forms-mxl-mode-gate.mdc`). Resolve per-form `form_mode` / `forms:` (+ legacy `artifact_mode`). Empty/`n/a` for in-scope form without legacy → STOP/extend. `manual` — **pause-wait** (чат `templates/pause-wait-chat.md`; рецепт Form.xml — `1c-xml-write-guard.mdc`); do not raw-edit `Form.xml`. `assisted` — only via `1c-forms/compile|edit` skill; no skill → HALT→manual. Do not continue past WAIT until user re-exported (manual path).
+- **Template.xml / MXL tasks:** Default manual (**pause-wait** / рецепт в файле). Non-manual/`assisted` → only with recorded apply permission (`debug.md` § Apply permissions or `[mxl:…]`); then `1c-mxl/compile`+validate; no raw Write. Do not resurrect Mode Gate layout question in new.
 - **Form module BSL tasks:** if the task changes `Forms/.../Ext/Form/Module.bsl` only (for example `Элементы.Добавить`, visibility, event handlers), run the standard BSL writer/reviewer pipeline; this is not a `Form.xml` task.
 - Reference: `1c-agent-delegation.mdc` (BSL gate), `1c-utility-agents.mdc` (forms, queries, tests).
 - **vertical-slices.mdc:** вердикт Slice Gate **[3]** и любое добавление `# Срез` — только по **ИНВАРИАНТ: Defect placement** (не создавать fix-срез при приёмочной задаче среза `S<K>.accept` (или legacy `S<K>.T<M>`) = `[ ]` без cross-slice).
