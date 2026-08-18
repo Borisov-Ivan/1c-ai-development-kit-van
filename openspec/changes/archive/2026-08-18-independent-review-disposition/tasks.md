@@ -27,7 +27,7 @@
 - [ ] S1.10 В `openspec-extend-change/SKILL.md` маппинг as-designed ↔ rejected(with reason), queue-fix ↔ accepted для `--from-review` без смешения семантик
 - [ ] S1.11 Верифицировать по коду kit покрытие scenarios spec (grep Disposition/QualityFlag/design-prescribed в изменённых файлах; whitelist silent VERIFIED_OK из D9 перечислен в skill или agent)
 
-- [ ] S1.accept Принять срез S1 «Disposition качества в review» — независимый флаг качества и выбор as-designed / queue-fix на `/review`:
+- [x] S1.accept Принять срез S1 «Disposition качества в review» — независимый флаг качества и выбор as-designed / queue-fix на `/review`:
   - **Primary (обязательно):** на change с design-endorse слабого паттерна выполнить `/review` → увидеть weak/needs-confirm и выбор as-designed / queue-fix; при as-designed writer для этого finding не запускается; запись disposition есть в отчёте
   - Scenario «Prerelease same protocol» (опционально): убедиться по skill, что `/release-review` ссылается на тот же протокол (отдельный прогон не обязателен)
   - Scenario «Guide updated» (опционально): в `review-guide.md` читается смысл двух кнопок без имён агентов
