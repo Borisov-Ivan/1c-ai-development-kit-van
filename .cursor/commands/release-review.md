@@ -7,6 +7,8 @@ description: Предрелизное ревью расширения или cha
 
 Предрелизный контроль перед выкладкой: все `.bsl` расширения или change-scoped Tier 1 + архитектурный обзор всего расширения (Tier 2). Делегирование **onec-code-reviewer** с `mode=prerelease`.
 
+Ключ `-noapi` / `-api` пишется в любом сообщении чата и не является флагом этой команды.
+
 **Режим (фиксированно):** `release_mode = true` — см. шаг 0 в [`.cursor/skills/review/SKILL.md`](../skills/review/SKILL.md).
 
 **Input** (обязателен хотя бы один аргумент — расширение и/или change):

@@ -7,6 +7,8 @@ description: Реализация задач OpenSpec change по срезам (
 
 Implement tasks from an OpenSpec change. По умолчанию работает в режиме **step-by-slice**: реализация одного среза → карточка приёмки → следующий срез. См. `.cursor/rules/vertical-slices.mdc`.
 
+Ключ `-noapi` / `-api` пишется в любом сообщении чата и не является флагом этой команды.
+
 **Первое действие:** прочитать `.cursor/skills/openspec-apply-change/SKILL.md` и далее идти по его шагам. До прочтения скилла — никаких чтений артефактов, трасс, модулей.
 
 **Input:**
