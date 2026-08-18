@@ -20,10 +20,12 @@
 
 ## Эволюция kit (метапроект)
 
-1. ЗНИ эволюции (например Mode Gate, forms DX) ведётся **на ветке** репозитория kit.
-2. В PR в `main` шаблона: изменения `.cursor/**` и `AGENTS.md`.
-3. **Папку change** `openspec/changes/<kit-evolution-…>/` в `main` **не мержить** (или удалять при merge) — иначе consumer получает чужой WIP постановки.
-4. Приёмка срезов эволюции — в **sandbox**: копия `.cursor`+`AGENTS.md` с ветки → Reload → учебный сценарий из Primary среза.
+Это правило **репозитория шаблона kit**, не цикл ЗНИ в проекте 1С. В конфигурации заказчика ветки `develop`/`main` kit не заводить.
+
+1. **`develop`** — линия разработки kit: открытые ЗНИ эволюции и их архивы (`openspec/changes/`, `openspec/changes/archive/`). Короткую фича-ветку сразу сливать в `develop`, не оставлять домом архива.
+2. **`main`** — поставка шаблона: `.cursor/**`, `AGENTS.md`, `README.md`, `openspec/specs/`, `openspec/adrs/`, `openspec/changes/_template`. Без рабочих папок `openspec/changes/<имя>` и без `openspec/changes/archive/`.
+3. Обновление поставки: слить в `main` с `develop` и убрать с `main` архивы/WIP ЗНИ. В consumer-проект по-прежнему копируют только `.cursor/` + `AGENTS.md`.
+4. Приёмка срезов эволюции — в **sandbox**: копия `.cursor`+`AGENTS.md` с `develop` (или с фича-ветки до слияния) → Reload → учебный сценарий из Primary среза.
 
 ## Forms / MXL
 

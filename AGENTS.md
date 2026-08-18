@@ -3,7 +3,7 @@
 **Главный диспетчер:** `.cursor/rules/1c-agent-delegation.mdc` — HALT-условия, делегирование агентам, BSL/XML write guard.
 **Диспетчер on-demand гейтов:** `.cursor/rules/gate-dispatcher.mdc` — cue; триггер в frontmatter файла.
 **Адаптация под модель чата:** `.cursor/rules/model-adaptation.mdc` — роутер профилей. Рекомендуемый чат оркестратора — Grok 4; Fable / GPT-5.6 / Opus 5 — Primary субагентов, не требование к чату команд.
-**Поставка:** [`.cursor/docs/kit-template-workflow.md`](.cursor/docs/kit-template-workflow.md). **Памятка:** [`README.md`](README.md) · [быстрый старт](.cursor/docs/quick-start.md) · [FAQ](.cursor/docs/faq-kit.md) · [целостность](.cursor/docs/delivery-integrity.md).
+**Поставка:** [`.cursor/docs/kit-template-workflow.md`](.cursor/docs/kit-template-workflow.md) — в репозитории kit работа на `develop`, `main` только поставка (не цикл ЗНИ проекта 1С). **Памятка:** [`README.md`](README.md) · [быстрый старт](.cursor/docs/quick-start.md) · [FAQ](.cursor/docs/faq-kit.md) · [целостность](.cursor/docs/delivery-integrity.md).
 
 ## OpenSpec Workflow
 
