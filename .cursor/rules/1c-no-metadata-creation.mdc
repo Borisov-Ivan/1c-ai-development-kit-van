@@ -41,7 +41,7 @@ alwaysApply: false
 
 ## Узкое исключение (не создание объекта)
 
-Правка **уже существующего** в выгрузке `Form.xml` / `Template.xml` допускается **только** при `artifact_mode: assisted` и через skill (`1c-forms/compile|edit`, `1c-mxl/compile`) — см. `forms-mxl-mode-gate.mdc` и `1c-xml-write-guard.mdc`. Это **не** разрешение создавать объекты, регистрировать форму в ChildObjects, form-add или заимствовать в расширение.
+Правка **уже существующего** в выгрузке `Form.xml` / `Template.xml` допускается **только** при `form_mode: assisted` (или map `forms:`; legacy fallback — lone `artifact_mode: assisted`) и через skill (`1c-forms/compile|edit`, `1c-mxl/compile`) — см. `forms-mxl-mode-gate.mdc` и `1c-xml-write-guard.mdc`. Это **не** разрешение создавать объекты, регистрировать форму в ChildObjects, form-add или заимствовать в расширение. Для макета — ещё записанное разрешение apply (Mode Gate: default manual).
 
 ## Заимствование — всегда блокер
 

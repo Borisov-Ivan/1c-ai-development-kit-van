@@ -3,9 +3,9 @@
 Целевой тон — **лаконичное описание проекта** для согласования с ФА / заказчиком: связная проза, нумерованные списки, без обучения читателя. Не карточка OpenSpec, не выжимка `design.md`, не письмо-туториал.
 
 **Эталоны:**
-- структура / тема ЭДО: `fixtures/golden-88781-overview.md`
-- голос этапа (ситуация, не механизм; без tutor): `fixtures/voice-good-stage.md`
-- стиль HALT: `templates/style-checklist.md`
+- структура / тема ЭДО: `../fixtures/golden-88781-overview.md`
+- голос этапа (ситуация, не механизм; без tutor): `../fixtures/voice-good-stage.md`
+- стиль HALT: `style-checklist.md`
 
 ---
 

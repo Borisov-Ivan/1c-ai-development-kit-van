@@ -24,14 +24,12 @@ Always-apply **только триггеры**. Тела гейтов — on-dem
 | Форма / Form.xml / макет / Template.xml / MXL в new·apply·verify | `.cursor/rules/forms-mxl-mode-gate.mdc` |
 | Выбор маршрута docs-fix / quick-fix / full-cycle | `.cursor/rules/task-triage.mdc` |
 | XML метаданных в `src/` (полный шаблон инструкции Конфигуратора) | `.cursor/rules/1c-xml-write-guard.mdc` |
-| Команда-обёртка: сначала Read скилла | `.cursor/rules/command-skill-gate.mdc` |
-| Протокол команды на каждом ходе сессии | `.cursor/rules/command-session-persistence.mdc` |
-| Анализ 3+ файлов / XML|CSV|JSON / код 500+ строк | `.cursor/rules/context-strategy-gate.mdc` |
+| Команда-обёртка / протокол хода / context-strategy | тело в `session-discipline.mdc` — **Read не требуется**; детали обрезки — `command-skill-gate.mdc` |
 
 ## Алгоритм
 
 1. Определить контекст: explore / new / verify / apply / extend / правка BSL.
-2. Пройти триггеры из таблицы; при **любом** совпадении — **Read** файл гейта до действия.
+2. Пройти триггеры из таблицы; при **любом** совпадении — **Read** файл гейта до действия. Три гейта сессии (`command-skill-gate`, `command-session-persistence`, `context-strategy-gate`) **не** читать: тело уже в always-apply `session-discipline.mdc`.
 3. Не дублировать тела гейтов в чат — только результат для заказчика.
 
 ## On-demand кейсбуки (не gate-файлы)

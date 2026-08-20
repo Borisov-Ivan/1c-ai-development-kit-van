@@ -18,7 +18,7 @@ priority: 200
 
 - В сессии вызывался trace-analyst (Glob `reports/trace-analysis-*.md` в change dir или `temp/reports/`)
 - В сессии вызывался explorer (`reports/exploration-*.md`)
-- Bug fix — маркеры см. `1c-agent-delegation.mdc`
+- Bug fix — маркеры см. `verified-cause-gate.mdc` / `1c-halt-triggers.mdc`
 - Перехват/компенсация базовой платформенной процедуры (Grep design.md)
 - Новый объект метаданных в design (Grep design.md)
 - В `debug.md` change: **M ≥ 3** строк с `Architect Gate:\s*(не вызывался|не требовался|declined|—)` (см. `.cursor/skills/openspec-extend-change/SKILL.md`, п. 5a, Триггер 2) **и** (нет `reports/architecture-extend-coherence-*.md` **или** дата последней секции `## Extend — YYYY-MM-DD` в `debug.md` новее даты в имени новейшего `architecture-extend-coherence-*.md`)
@@ -76,7 +76,7 @@ priority: 200
    - `active` факты → как верифицированные утверждения о системе
    - `stale` факты → с пометкой "⚠ TTL истёк DD дней назад / drift detected, проверить"
    - `deprecated`/`superseded` → не передаются
-5b. Передача в промпт архитектора — через блок `## Existing Knowledge` по правилам `KB CONTEXT` из `.cursor/rules/1c-agent-delegation.mdc`. Если Discovery пустой — в промпте фиксируется «Discovery выполнен, совпадений нет».
+5b. Передача в промпт архитектора — через блок `## Existing Knowledge` (`knowledge-format.mdc`; якорь — `1c-agent-delegation.mdc`). Если Discovery пустой — в промпте фиксируется «Discovery выполнен, совпадений нет».
 6. Если архитектор в своём report противоречит `active` факту — добавить
    в architecture-report секцию "## Knowledge conflicts" с указанием KB-ID
 
@@ -136,7 +136,7 @@ priority: 200
 
 ## ИСКЛЮЧЕНИЯ (Gate НЕ срабатывает)
 
-- Light Mode (см. 1c-agent-delegation.mdc) без семантических триггеров и без изменения UX-сценария
+- Light Mode (см. `1c-halt-triggers.mdc` § LIGHT MODE) без семантических триггеров и без изменения UX-сценария
 - Mechanical Mode (find-replace, #Область, удаление комментариев)
 - Пользователь явно отклонил архитектора через легальный путь (флаг `--skip-architect` в new)
 - Архитектор уже вызывался по этой теме (файл `architecture-*.md` существует в reports/) — **не распространяется** на триггеры **scope-drift** из `/opsx:extend`; для них закрытие только по `architecture-extend-coherence-*.md` (см. ЗАКРЫТИЕ GATE п. 5)
@@ -179,7 +179,7 @@ Architect Gate из new/explore (`design`-режим) и Independent Challenge �
 
 Триггеры (ANY → мягкая рекомендация через AskQuestion, не блокирующая):
 
-- Bug fix (маркеры из `1c-agent-delegation.mdc`)
+- Bug fix (маркеры из `verified-cause-gate.mdc`)
 - 2+ аналитических отчёта (trace-analysis + exploration суммарно ≥2)
 - `&ИзменениеИКонтроль` в proposal/design
 - Условные задачи в tasks.md (`При отрицательн`, `Если в п.`, `Альтернатив`, `workaround`, `Иначе`)

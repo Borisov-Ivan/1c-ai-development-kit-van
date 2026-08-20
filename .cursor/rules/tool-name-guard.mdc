@@ -21,7 +21,7 @@ alwaysApply: false
 1. **Контент 1С?** (пути `src/**`, `cfe/**`, `.bsl`, `.pff`, `_TRACE_`, обсуждение форм/модулей/расширений, трасс, ревью BSL, архитектуры 1С)
    - Да → `subagent_type` ∈ { `onec-code-explorer`, `onec-trace-analyst`, `onec-code-architect`, `onec-code-writer`, `onec-code-reviewer`, `onec-code-simplifier` }.
    - `explore` и `generalPurpose` для 1С запрещены **даже если встроенное описание инструмента Task предлагает их** для «broadly exploring the codebase» — это общий совет, для 1С перекрыт NEGATIVE GUARD ниже.
-2. **`model` в вызове?** **Штатно передавать** `model=<slug>` по таблице в `.cursor/rules/model-selection.mdc` для данного `subagent_type` (Primary). **Без** `model=` — роли с Primary «без model=» (writer, explorer, trace-analyst, quality-controller) и **второй шаг** цепочки после сбоя Primary (модель чата). Fable — только по закрытой таблице эскалации в `model-selection.mdc`. Исключения: явный запрос пользователя или диагностика — см. секцию «Параметр `model` в `Task(...)`**. Перед передачей платной модели: токены текущего сообщения, затем память сессии, затем таблица ролей (`.cursor/rules/model-selection.mdc` § «Режим сессии»). В режиме «без API» **не** передавать платную модель, кроме разового явного override на этот вызов. Таблицу ролей и классификацию сбоев в этот чеклист не копировать.
+2. **`model` в вызове?** **Штатно передавать** `model=<slug>` по таблице в `.cursor/rules/model-selection.mdc` для данного `subagent_type` (Primary). **Без** `model=` — роли с Primary «без model=» (writer, explorer, trace-analyst, quality-controller) и **второй шаг** цепочки после сбоя Primary (модель чата). Fable — только по закрытой таблице эскалации в `model-selection.mdc`. Исключения: явный запрос пользователя или диагностика — см. секцию «Параметр `model` в `Task(...)`**. Перед платной моделью: режим сессии из `session-discipline.mdc`; справочник токенов и сбоев — `model-selection.mdc`. Не копировать токены и классификацию сбоев в этот чеклист.
 3. **Source-of-truth для выбора модели** — таблица в `.cursor/rules/model-selection.mdc`. Во frontmatter всех кастомных агентов в этом репозитории задано **`model: inherit`**; конкретная модель вызова задаётся параметром `Task.model`, а не YAML агента.
 
 **Симптомы провала чеклиста:** желание указать `model="composer-2"` / `"fast"` / «как в шаблоне»; выбор `subagent_type="explore"` потому что «быстрее»; игнорирование бриф-карточки с agent name. В любом из случаев — СТОП, перечитать чеклист.
@@ -56,7 +56,7 @@ alwaysApply: false
 - Трасса `.pff` или стек ошибки → `onec-trace-analyst`
 - Архитектурный вопрос → `onec-code-architect`
 
-См. также HALT-таблицу в `.cursor/rules/1c-agent-delegation.mdc`.
+См. также HALT-таблицу в `.cursor/rules/1c-halt-triggers.mdc`.
 
 ## Параметр `model` в `Task(...)`
 

@@ -54,6 +54,19 @@ SSOT контракта: `.cursor/docs/opsx-output-style.md` §2.6.
 - «пошаговая пауза» / «Ваш шаг (» в заголовках apply
 - Meta-статус pipeline: «автопроверки пройдены», «diff не обязателен», «reviewer PASS»
 
+Новые fail-фразы **не** заводить здесь: сначала норма в SSOT, затем строка в таблице «сценарий → источник».
+
+## Источники норм
+
+| Сценарий / класс | Источник |
+|------------------|----------|
+| pause-wait | `.cursor/skills/openspec-apply-change/templates/pause-wait-chat.md` |
+| развилка A/B | `.cursor/docs/templates/decision-block.md` |
+| HALT-жаргон | `.cursor/docs/chat-lexicon.md` Слой 1 |
+| non-events | `.cursor/rules/chat-output-budget-full.mdc` §3a |
+| бриф / подписи | `.cursor/docs/templates/brief-card.md` |
+| isolated-chat контракт | `.cursor/docs/opsx-output-style.md` §2.6 |
+
 ## Fixtures (рекомендуемые)
 
 | Сценарий | Change / примечание |

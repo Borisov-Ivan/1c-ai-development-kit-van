@@ -1,58 +1,22 @@
 # AGENTS.md — навигационный индекс
 
-**Главный диспетчер:** `.cursor/rules/1c-agent-delegation.mdc` — HALT-условия, делегирование агентам, BSL/XML write guard.
-**Диспетчер on-demand гейтов:** `.cursor/rules/gate-dispatcher.mdc` — cue; триггер в frontmatter файла.
-**Адаптация под модель чата:** `.cursor/rules/model-adaptation.mdc` — роутер профилей. Рекомендуемый чат оркестратора — Grok 4; Fable / GPT-5.6 / Opus 5 — Primary субагентов, не требование к чату команд.
-**Поставка:** [`.cursor/docs/kit-template-workflow.md`](.cursor/docs/kit-template-workflow.md) — в репозитории kit работа на `develop`, `main` только поставка (не цикл ЗНИ проекта 1С). **Памятка:** [`README.md`](README.md) · [быстрый старт](.cursor/docs/quick-start.md) · [FAQ](.cursor/docs/faq-kit.md) · [целостность](.cursor/docs/delivery-integrity.md).
+**Диспетчер 1С:** `.cursor/rules/1c-agent-delegation.mdc`. **Гейты:** `.cursor/rules/gate-dispatcher.mdc`. **Чат:** `.cursor/rules/chat-output-budget.mdc` + `.cursor/docs/chat-lexicon.md`. Рекомендуемый чат — Grok 4; модели субагентов — только `.cursor/rules/model-selection.mdc` (архитектор Opus 5, ревьюер Gemini, упрощение Composer).
 
-## OpenSpec Workflow
+**Поставка:** `.cursor/docs/kit-template-workflow.md` (kit на `develop`). Памятка: `README.md` · `.cursor/docs/quick-start.md` · `.cursor/docs/faq-kit.md` · `.cursor/docs/delivery-integrity.md`.
 
-`.cursor/rules/sdd-workflow.mdc` — explore → new → verify → apply → verify → archive.
+## Команды
 
-**Единый вход исследования:** `/opsx:explore` (вопрос, дефект, сырой текст заказчика, идея). Дальше по сценарию: `/opsx:new` → `/opsx:verify` → `/opsx:apply` → `/opsx:archive`.
+`.cursor/rules/sdd-workflow.mdc` — explore → new → verify → apply → verify → archive. Вход исследования: `/opsx:explore`.
 
-Команды: `/opsx:explore`, `/opsx:new`, `/opsx:verify`, `/opsx:apply`, `/opsx:archive`, `/opsx:extend`, `/opsx:status`, `/opsx:knowledge-add`, `/opsx:knowledge-init`, `/opsx:knowledge-audit`, `/opsx:sync`, `/opsx:bulk-archive`, `/review`, `/release-review`, `/init-project`, `/session-save`, `/session-restore`, `/session-retro`.
+`/opsx:explore`, `/opsx:new`, `/opsx:verify`, `/opsx:apply`, `/opsx:archive`, `/opsx:extend`, `/opsx:status`, `/opsx:explain`, `/opsx:overview`, `/opsx:knowledge-add`, `/opsx:knowledge-init`, `/opsx:knowledge-audit`, `/opsx:sync`, `/opsx:bulk-archive`, `/review`, `/release-review`, `/init-project`, `/session-save`, `/session-restore`, `/session-retro`.
 
-Справочник сценариев — в [`README.md`](README.md). Термины workflow — в [`openspec/glossary.md`](openspec/glossary.md).
+Сценарии — `README.md`. Термины — `openspec/glossary.md`. Init — `.cursor/docs/init-project-protocol.md`. Схема отчёта архитектора — `.cursor/docs/architect-report-schema.md`. Слои маркеров — `.cursor/docs/marker-layers-guide.md`.
 
-## Карта SSOT (один якорь на тему)
+## Карта SSOT
 
-**Чат и стиль:**
-- Профили модели чата → `.cursor/rules/model-adaptation.mdc` (роутер) и `model-grok4.mdc` / `model-fable5.mdc` / `model-gpt56.mdc` / `model-opus5.mdc`.
-- Лимиты, non-events, HALT-жаргон, 5 принципов диалога, роль навигатора → `.cursor/rules/chat-output-budget.mdc` (полное тело — `chat-output-budget-full.mdc` по Read).
-- Бриф = Sync Card (слоты B0–B3) → `.cursor/docs/templates/brief-card.md`; классификатор → `.cursor/docs/opsx-output-style.md` §5.1.
-- Язык, тон, шаблоны вывода, Chat Surface Contract (§2.6) → `.cursor/docs/opsx-output-style.md`.
-- Словарь запретов → `.cursor/docs/chat-lexicon.md`; AI-tells → `.cursor/skills/stop-slop/SKILL.md`.
-
-**Делегирование и код 1С:**
-- HALT (always-apply stub), делегирование, BSL/XML write guard → `.cursor/rules/1c-agent-delegation.mdc`.
-- HALT-таблица, Light/Mechanical → `.cursor/rules/1c-halt-triggers.mdc` (on-demand, globs `**/*.bsl`).
-- LINT GATE и эталон writer pipeline → `.cursor/rules/1c-writer-pipeline.mdc`; якорь потока — `1c-agent-delegation.mdc`.
-- XML-guard (полный шаблон) → `.cursor/rules/1c-xml-write-guard.mdc` (on-demand).
-- Запрет создания метаданных → `.cursor/rules/1c-no-metadata-creation.mdc`; валидация имён → `.cursor/rules/1c-metadata-validation.mdc`.
-- Task → `.cursor/rules/tool-name-guard.mdc`; модели → `.cursor/rules/model-selection.mdc`.
-- Трасса → `.cursor/rules/1c-error-analysis.mdc`; формы → `.cursor/rules/1c-utility-agents.mdc`, `.cursor/skills/1c-forms/SKILL.md`.
-- Паттерны промптов → `.cursor/skills/1c-agent-patterns/SKILL.md`; агенты → `.cursor/agents/*.md`; журнал → `.cursor/docs/agents-CHANGELOG.md`.
-
-**Сессии и стратегия:**
-- Skill-first, persistence, context-strategy → `.cursor/rules/session-discipline.mdc`; полные гейты (on-demand): `command-skill-gate.mdc`, `command-session-persistence.mdc`, `context-strategy-gate.mdc`.
-- Прямое чтение vs субагенты → `.cursor/skills/context-strategy/SKILL.md`.
-- Отчёты субагентов → `.cursor/rules/preserve-subagent-reports.mdc`.
-
-**Гейты качества:**
-- Forms/mxl Mode Gate → `.cursor/rules/forms-mxl-mode-gate.mdc`.
-- Архитектура → `.cursor/rules/architect-gate.mdc`; root cause → `.cursor/rules/verified-cause-gate.mdc`.
-- Existing mechanisms → `.cursor/rules/existing-mechanism-priority.mdc`.
-- Code-Truth → `.cursor/rules/code-truth-gate.mdc`; precedent → `.cursor/rules/precedent-regression-gate.mdc`.
-- Delta specs → `.cursor/rules/openspec-specs-gate.mdc`; срезы → `.cursor/rules/vertical-slices.mdc`.
-- Антипаттерны BSL (reviewer-only) → `.cursor/rules/bsl-antipatterns.mdc`; стандарты → `.cursor/docs/1c-coding-standards.md`, `.cursor/skills/1c-vendor-standards/SKILL.md`.
-
-**Знания и решения:**
-- ADR → `openspec/adrs/` + `.cursor/rules/adr-format.mdc`.
-- Knowledge Base → `openspec/knowledge/` + `.cursor/rules/knowledge-format.mdc`.
-- Маркеры → [`.cursor/docs/marker-canon.md`](.cursor/docs/marker-canon.md); overlay и пути cf/cfe → [`openspec/project.md`](openspec/project.md) (создаётся `/init-project`; в kit отсутствует — блок путей опускается) + [`.cursor/rules/capture-to-project.mdc`](.cursor/rules/capture-to-project.mdc) + `.cursor/rules/project-paths.mdc`.
-- Запрет ROI → `.cursor/rules/no-roi-estimates.mdc`; инфраструктура → `.cursor/docs/onec-infrastructure.md`.
-
-**Ревью:** [`.cursor/docs/review-guide.md`](.cursor/docs/review-guide.md); `/review`, `/release-review`; протокол → `.cursor/skills/review/SKILL.md`. Disposition / независимое качество — [`openspec/specs/review-quality-disposition/spec.md`](openspec/specs/review-quality-disposition/spec.md), [`openspec/adrs/ADR-0003-review-quality-disposition.md`](openspec/adrs/ADR-0003-review-quality-disposition.md).
-
-**Доменные навыки 1С:** `1c-bsp`, `1c-extensions`, `1c-forms`, `1c-mxl`, `1c-roles`, `1c-query-optimization` — через `available_skills` и `.cursor/skills/*/SKILL.md`. Справочники: `.cursor/docs/platform/`, `.cursor/docs/standard/`.
+- Профили чата → `model-adaptation.mdc` + `model-*.mdc`. HALT-жаргон → `chat-lexicon.md`. Бриф → `.cursor/docs/templates/brief-card.md`. Стиль авторов скиллов → `opsx-output-style.md`.
+- HALT BSL → `1c-halt-triggers.mdc`. Pipeline → `1c-writer-pipeline.mdc`. XML → `1c-xml-write-guard.mdc`. Task/модели → `tool-name-guard.mdc` / `model-selection.mdc`. Агенты → `.cursor/agents/*.md`. Журнал → `.cursor/docs/agents-CHANGELOG.md`.
+- Сессия → `session-discipline.mdc`. Context-strategy → `.cursor/skills/context-strategy/SKILL.md`. Отчёты субагентов → `preserve-subagent-reports.mdc`.
+- Forms → `forms-mxl-mode-gate.mdc`. Архитектура / RCA → `architect-gate.mdc` / `verified-cause-gate.mdc`. Specs/срезы → `openspec-specs-gate.mdc` / `vertical-slices.mdc`. AP → `bsl-antipatterns.mdc`.
+- ADR → `openspec/adrs/` + `adr-format.mdc`. KB → `openspec/knowledge/` + `knowledge-format.mdc`. Маркеры → `marker-canon.md`. Пути cf/cfe → `openspec/project.md` (после `/init-project`; в kit нет) + `capture-to-project.mdc` + `project-paths.mdc`.
+- Ревью: `.cursor/docs/review-guide.md`; `/review`; `.cursor/skills/review/SKILL.md`. Disposition — `openspec/specs/review-quality-disposition/spec.md`, ADR-0003.

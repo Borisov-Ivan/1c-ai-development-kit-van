@@ -14,7 +14,7 @@ alwaysApply: false
 **Классификация блокеров (детерминированная, из отчёта):**
 
 - **Decision** — продуктовый/архитектурный выбор (A/B, `scope-violation`, Why ↔ plan). В чате — **максимум один** блок. **END TURN.**
-- **Repair** — технические пробелы постановки (orphan scenario, drift, metadata, «Конфигуратор», контракт в design). Verify **чинит сам** через internal Repair Loop — **без** user-facing extend, **без** «Подтвердить?», **0** промежуточных сообщений в чат.
+- **Repair** — технические пробелы постановки (orphan scenario, drift, metadata, «Конфигуратор», контракт в design). Verify **чинит сам** через internal Repair Loop — **без** user-facing extend, **без** «Подтвердить?», **0** промежуточных сообщений в чат. **Исключение:** канон лимита «дорогие модели недоступны — дальше на модели чата» и «Модель архитектора: Opus 5» не ждут карточки вердикта.
 
 Главный вопрос: «**могу ли я безопасно запустить `/opsx:apply`?**». Первая строка — `.cursor/skills/openspec-verify-change/templates/verdict-card.md`:
 
@@ -59,20 +59,20 @@ alwaysApply: false
 
 5. **silent_ok:** только snapshot + mtime + последний отчёт — **не** prior turns чата. 1a / 1b-decision / 1b-repair (internal loop).
 
-6. **Промежуточные карточки Task** — игнорируются (`chat-output-budget.mdc` §5a).
+6. **Промежуточные карточки Task** — игнорируются (`chat-output-budget-full.mdc` §5a).
 
 7. **Без мета-абзацев** про «режим verify», «шаблон», «формат вывода».
 
 ## Pre-send self-check
 
-1. Одно финальное сообщение на `/opsx:verify`?
+1. Одно финальное сообщение на `/opsx:verify`? **Исключение:** канон лимита и «Модель архитектора: Opus 5» могут уйти раньше карточки; «Дописываю постановку…» — progress repair.
 2. Нет internal-команд (`/opsx:extend --from-verify`, «Запускаю extend»)?
 3. Один сигнал ответственности = слот **`**Следующий шаг:**`**?
 4. Можно ответить/действовать без открытия файла (кроме terminal fail)? **Тест понятности §1c:** reader test пройден; англ-метки/коды переведены; текст развилки **синтезирован**, а не скопирован из своего же `verification-*.md` (no-copy).
-5. HALT §7 пройден?
+5. HALT: lexicon Слой 1 + тест понятности §1c?
 6. Handoff на языке эффекта, не лог файлов?
 7. **Изолированный чат:** ответ не ссылается на «как в прошлой сессии» / «вы уже подтвердили»?
-8. **Agent-keys HALT:** нет `D0`–`Dn`, `closed_decisions`, `decision_round`, `decision_id`, `verify_depth`, `GO-with-assumptions`, `reopen-blocked`, `supersedes`, `CHALLENGE-saturated`, `SKIPPED-lite` в чате?
+8. **Agent-keys:** нет ключей движка в чате (словарь — lexicon Слой 1: `decision_id`, `GO-with-assumptions`, `SKIPPED-*`, `D0`–`Dn` и др.)?
 9. **Decision context:** при `decision_round >= 1` есть блок «Уже зафиксировано» прозой (без ID)?
 10. **GO next step:** pre-apply содержит `/opsx:apply`? post-apply — `/opsx:archive`?
 

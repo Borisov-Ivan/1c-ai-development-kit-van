@@ -1,5 +1,16 @@
 # Changelog — 1C Agent Ecosystem
 
+## [4.12] - 2026-08-20
+
+### Changed (санация фреймворка по пяти ревью)
+
+- **HALT-жаргон:** единственный словарь — `.cursor/docs/chat-lexicon.md` Слой 1; stub/full бюджета — короткий детектор; новые токены не плодить в N файлах.
+- **Лимиты чата:** таблица — `chat-output-budget-full.mdc` §1; развилка **≤12**; канон лимита дословно только в stub §5.
+- **Always-apply диета:** `1c-agent-delegation.mdc`, `chat-output-budget.mdc`, `AGENTS.md` сжаты до стабов; APPLY GATE / JSDoc → `1c-halt-triggers.mdc`; pipeline без glob `**/*.bsl`; precedence и режим API — `session-discipline.mdc`. Сумма always-apply + `AGENTS.md` ≤ 34 КБ.
+- **Антипаттерны:** карточки AP-034…038 восстановлены; bulletin = одно предложение; orchestration-blocklist убран из writer-pipeline.
+- **Имена и ссылки:** `onec-trace-analyst`; `AskQuestion`; `/opsx:explain` и `/opsx:overview` в индексах; `form_mode` + legacy `artifact_mode`; двухшаговая цепочка моделей вместо «Retry once / упрощённый вариант сам».
+- **Writer INPUT CONTRACT:** в kit без `project.md` — блок путей или omit, не безусловный HALT.
+
 ## [4.11] - 2026-07-29
 
 ### Fixed (framework review coherence)

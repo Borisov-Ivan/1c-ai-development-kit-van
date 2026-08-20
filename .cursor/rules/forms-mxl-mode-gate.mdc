@@ -125,6 +125,6 @@ Resume: валидные режимы уже записанных форм **н�
 
 ## Связь
 
-- Guards: `1c-xml-write-guard.mdc`, `1c-no-metadata-creation.mdc`, `1c-agent-delegation.mdc` § XML WRITE GUARD
+- Guards: `1c-xml-write-guard.mdc`, `1c-no-metadata-creation.mdc`
 - Skills: `1c-forms/SKILL.md`, `1c-mxl/SKILL.md`
 - Workflow: `openspec-new-change` (design-stage цикл), `openspec-apply-change`, `openspec-verify-change`, handoff explore

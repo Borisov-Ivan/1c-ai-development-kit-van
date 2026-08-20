@@ -6,136 +6,30 @@ priority: 999
 
 # 1C Code Gate — Dispatch & Delegation
 
-## HALT CONDITIONS (компактно)
+При правке `.bsl` или делегировании — **Read** `.cursor/rules/1c-halt-triggers.mdc` (таблица, Light/Mechanical, APPLY GATE, исключения). XML — `.cursor/rules/1c-xml-write-guard.mdc` (Template.xml: compile только при разрешении apply). Task — `tool-name-guard.mdc`. Эталон потока — `1c-writer-pipeline.mdc`.
 
-При правке `.bsl` или делегировании — **Read** [`.cursor/rules/1c-halt-triggers.mdc`](1c-halt-triggers.mdc) (полная таблица, Light/Mechanical, исключения).
+**BSL:** оркестратор не Write/StrReplace `.bsl`. Нетривиальная правка — `onec-code-writer` → `ReadLints` → `onec-code-reviewer`. Исключения — halt-triggers § LIGHT / MECHANICAL / ИСКЛЮЧЕНИЯ. Даже в исключениях reviewer обязателен (кроме явного отказа).
 
-| Триггер (кратко) | Действие |
-|---|---|
-| apply gate / explore без change / metadata / трасса | СТОП → halt-triggers |
-| Light / Mechanical / правка .bsl / 3+ модулей / bug fix | Делегирование → halt-triggers |
+**Apply-gate:** writer/reviewer и прямая правка `.bsl` — только `/opsx:apply` (плюс Light/Mechanical и `/review` по halt-triggers). Иначе СТОП: «Артефакты готовы. Дальше: `/opsx:apply <name>`».
 
-**ПРИНЦИП:** BSL → § BSL WRITE GUARD + halt-triggers (Light/Mechanical/исключения); XML → § XML WRITE GUARD; гейты → `gate-dispatcher.mdc`; Task → `tool-name-guard.mdc`; пути → `project-paths.mdc`.
+**XML:** сырой Write/StrReplace/Delete `src/**/*.xml` запрещён. Чтение — да. `openspec/` / `.cursor/` — да. Нет объекта → pause-wait (`1c-no-metadata-creation.mdc`).
 
-**Explore-mode guard:** `/opsx:explore` без active change — writer/reviewer запрещены → `/opsx:new`.
-
-**1С-обследование:** `src/**`, `cfe/**`, `.bsl`, XML метаданных — только `onec-code-explorer`; `explore`/`generalPurpose` запрещены. Молчаливый fallback — дефект, сообщить.
-
-## BSL WRITE GUARD
-
-Оркестратор НЕ использует Write, StrReplace для `.bsl` файлов. Если начал — СТОП, отмени, делегируй.
-
-Любая нетривиальная правка `.bsl` — только через `onec-code-writer` (Task). После writer — обязательный `onec-code-reviewer`. Задача НЕ завершена до ревью.
-
-**Минимальный поток:** `writer → ReadLints → reviewer`. Полный эталон — `1c-writer-pipeline.mdc`.
-
-**Исключения (writer не нужен):** SSOT — **Read** `1c-halt-triggers.mdc` § LIGHT MODE, § MECHANICAL MODE, § ИСКЛЮЧЕНИЯ.
-
-- **Mechanical Mode:** допускается `StrReplace` / `replace_all` оркестратора по halt-triggers + обязательный reviewer (не через writer).
-- **JSDoc / шапка метода:** исключение «только комментарии» **не** распространяется на добавление или изменение **многострочной** шапки процедуры/функции перед `Процедура`/`Функция` (описание назначения, блоки «Параметры:», «Возвращаемое значение:», контракты). Такие правки — **нетривиальные** → только **onec-code-writer**.
-- **Контекст apply/review:** исключения (однострочная правка, только комментарии) НЕ действуют в `/opsx:apply`, `/review` и `/release-review` (**кроме Mechanical + reviewer** по halt-triggers). Иначе ВСЕ правки `.bsl` → writer. Post-reviewer fixes, spot-check corrections, пропущенные строки — всегда через writer.
-
-Даже в исключениях reviewer обязателен (кроме явного отказа пользователя).
-
-## APPLY GATE
-
-Реализация (onec-code-writer, onec-code-reviewer, прямая правка .bsl) разрешена **только** в контексте активной команды `/opsx:apply`.
-
-Создание и правка артефактов OpenSpec (proposal.md, design.md, tasks.md, specs/) — разрешено без /opsx:apply. Это планирование, не реализация.
-
-Если change существует, но /opsx:apply не был вызван:
-1. **СТОП.** Не вызывать writer/reviewer, не править .bsl.
-2. Предложить: «Артефакты готовы. Для начала реализации: `/opsx:apply <name>`»
-
-Исключения: Light Mode и Mechanical Mode — работают без артефактов OpenSpec (**Read** `.cursor/rules/1c-halt-triggers.mdc` § LIGHT MODE / § MECHANICAL MODE). **Команды `/review` и `/release-review`** — ревью кода + устранение замечаний по отчёту (один протокол `.cursor/skills/review/SKILL.md`, флаг `release_mode`): reviewer разрешён без ограничений; writer — только после подтверждения пользователя / `queue-fix` и только для устранения замечаний из отчёта reviewer.
-
-## ПОЛНОМОЧИЯ АГЕНТОВ (BSL-ONLY)
-
-Агенты-исполнители (writer): **только правка .bsl в существующих файлах**. Утилитарные агенты (simplifier и др.) — см. `1c-utility-agents.mdc`.
-**ЗАПРЕЩЕНО** создавать, копировать или модифицировать XML-файлы метаданных, создавать директории метаданных, создавать новые .bsl в несуществующих директориях.
-Нет нужного объекта → СТОП, блокер пользователю в формате из 1c-no-metadata-creation.mdc.
-Architect может рекомендовать новые объекты в design.md.
-
-## XML WRITE GUARD
-
-**Оркестратор НЕ использует сырой Write/StrReplace/Delete для XML-файлов 1С в `src/`** (Form.xml, Template.xml, Rights.xml, Configuration.xml, любые `*.xml` метаданных). Чтение (Read) — разрешено. Правки в `openspec/`, `.cursor/` — разрешены.
-
-Перед Form.xml / Template.xml — **Read** `.cursor/rules/forms-mxl-mode-gate.mdc`. Полное тело guard + шаблон инструкции Конфигуратора — **Read** `.cursor/rules/1c-xml-write-guard.mdc`.
-
-| Файл | Действие (кратко) |
-|------|-------------------|
-| Form.xml | `manual`/`bsl-only`: pause-wait в чате + инструкция в файле, или BSL модуля; `assisted`: только `1c-forms/compile`\|`edit` |
-| Template.xml | `assisted`: `1c-mxl/compile`; иначе pause-wait / WAIT |
-| Rights.xml | `1c-roles/compile` |
-| Прочие XML в src/ | СТОП → `1c-no-metadata-creation.mdc` |
-
-## SKILLS-FIRST
-
-Перед правкой BSL проверить `.cursor/skills/1c-*/SKILL.md` — covers task?
-
-## ТАБЛИЦА ДЕЛЕГИРОВАНИЯ
+**Explore без change:** writer/reviewer запрещены → `/opsx:new`. **1С-обследование** (`src/**`, `.bsl`, XML метаданных): только `onec-code-explorer`; `explore`/`generalPurpose` запрещены. Порог обследования — **0** чтений `.bsl`. Иначе до агента допустимо ≤3 точечных. Две неудачи на ясной постановке → третьего делегирования нет.
 
 | Тип задачи | Агент | Обязательно |
-|------------|-------|-------------|
-| Написание/правка BSL | **onec-code-writer** | Да (Требования к промпту writer — `.cursor/agents/onec-code-writer.md → INPUT CONTRACT`) |
-| Ревью после правок | **onec-code-reviewer** | Да, задача НЕ завершена до ревью |
-| Архитектура (не точечная правка) | **onec-code-architect** | Да, до реализации. Триггеры — `architect-gate.mdc` |
-| Исследование 3+ модулей | **onec-code-explorer** | Рекомендуется |
-| Ошибка с трассой/стеком | **onec-code-trace-analyst** | Да, см. `1c-error-analysis.mdc` |
-| REFACTOR-замечания из ревью (запахи кода, читаемость) | **onec-code-simplifier** | Да в `/review` (шаг 6.4); поведение не меняется — см. `1c-utility-agents.mdc` |
-| Slice Coherence review (verify Layer 2) | **openspec-quality-controller** | Да в pre-apply `/opsx:verify` (MANDATORY); readonly, domain-agnostic |
-
-Шаблоны промптов, оценка сложности, интеграция со скиллами: `.cursor/skills/1c-agent-patterns/SKILL.md`.
-
-## PROJECT PATHS
-
-Перед вызовом 1С-агентов включать в их промпт блок путей из `openspec/project.md` (секция «Структура репозитория»). Протокол извлечения и формат блока — в `.cursor/rules/project-paths.mdc`. Файл создаётся `/init-project`; в kit-репозитории отсутствует — блок путей в промптах агентов опускается.
-
-## KB CONTEXT
-
-При делегировании explorer / architect / trace — блок `## Existing Knowledge` по правилу в `.cursor/rules/knowledge-format.mdc`.
-
-## АВТО-ИСПРАВЛЕНИЕ РЕВЬЮ
-
-Лимит итераций writer↔reviewer = **2**. Полная процедура — `.cursor/skills/review/SKILL.md` шаг 4.5.
+|---|---|---|
+| Правка BSL | **onec-code-writer** | Да (`INPUT CONTRACT`) |
+| Ревью после правок | **onec-code-reviewer** | Да |
+| Архитектура | **onec-code-architect** | Да до реализации (`architect-gate.mdc`) |
+| Обследование 3+ модулей / любое обследование кода | **onec-code-explorer** | Да |
+| Трасса/стек | **onec-trace-analyst** | Да (`1c-error-analysis.mdc`) |
+| REFACTOR поверхности | **onec-code-simplifier** | Да в `/review` шаг 6.4 |
+| Когерентность срезов | **openspec-quality-controller** | Да в pre-apply verify |
 
 **Якорь apply-reviewer:** авто-fix — **только** functional MUST_FIX **без** `QualityFlag=weak`, tag `design-prescribed` и agreement-override. Weak / design-prescribed / agreement-override → **не** авто-fix, **не** авто-waive, **не** AskQuestion в apply; одна строка-след в отчёте задачи («на `/review` потребуется подтверждение качества»). Финальный выбор as-designed / queue-fix — только в `/review` / `/release-review` (шаг 4.5 skill).
 
 **Якорь поверхности:** при полном ревью нового/переписанного модуля с REFACTOR по поверхности — **не закрывать** задачу apply/`/review` без `onec-code-simplifier` или **явного waive** пользователя. `1c-utility-agents.mdc` и sidecar-шаблоны (`1c-agent-patterns/sidecar.md`) этот MUST **не** содержат и якорь не заменяют.
 
-Архитектурные замечания (новый объект, API, структура хранения, RLS) → СТОП, к пользователю.
+Кодовые замечания — через writer, не прямой StrReplace. Промпт writer: **ЧТО**, не **КАК** (`1c-writer-pipeline.mdc` § ПРОМПТ WRITER). При делегировании explorer / architect / trace — блок `## Existing Knowledge` (`knowledge-format.mdc`). Отчёты architect/explorer/trace — целиком в `reports/` (`preserve-subagent-reports.mdc`). Пути `openspec/project.md` — в промпт агента; в kit файла нет, блок опускается. Профиль MAY параллелить независимые треки; не запускает субагента «проверить оркестратора»; запрет built-in Explore не снимает.
 
-**Без прямого StrReplace.** Все кодовые замечания — через writer. Оркестратор НЕ исправляет замечания ревью напрямую (StrReplace), даже если правка кажется «однострочной». Spot-check corrections после writer — тоже через writer.
-
-**После получения отчёта аналитического агента** (architect/explorer/trace-analyst) — сохранить полный отчёт: см. `preserve-subagent-reports.mdc`.
-
-## DELEGATION GATE
-
-**До вызова агента допустимо:** артефакты OpenSpec + до 3 точечных обращений к .bsl (для обогащения промпта агенту, НЕ для самостоятельного анализа).
-**>3 обращений к .bsl** → СТОП, вызвать агента.
-**Задача = обследование** (трассировка вызовов, поиск зависимостей, анализ сценариев, верификация гипотез по коду) → порог **0 обращений к .bsl**. Делегировать сразу, не начинать самостоятельно.
-Чтение тел процедур, поиск вызовов/зависимостей, анализ модулей — **работа агента**, не твоя.
-
-**Две неудачи / профиль:** два подряд непригодных результата на ясной постановке (не сбой вызова) → третьего делегирования нет; оркестратор решает сам в пределах guard или спрашивает. Лимиты итераций те же. Профиль MAY параллелить независимые треки; не запускает субагента «проверить оркестратора»; запрет built-in Explore не снимает.
-
-## ПРОМПТ WRITER: ГРАНИЦА ОТВЕТСТВЕННОСТИ
-
-Оркестратор описывает **ЧТО** (задача, контракты, пути, бизнес-логика), не **КАК** (паттерны ошибок, структура кода, обоснование Попытки). Полный контракт — `1c-writer-pipeline.mdc` § ПРОМПТ WRITER.
-
-## LINT GATE
-
-После каждой правки `.bsl` — **до reviewer**: `ReadLints` → fix errors → блок `## Linter Signals (evidence)` для reviewer.
-
-**SSOT деталей:** [`.cursor/rules/1c-writer-pipeline.mdc`](1c-writer-pipeline.mdc) § LINT GATE; формат evidence — `review/SKILL.md` шаг 1.8. § IDENTIFIER HYGIENE CHECK — шаг 1.9. Место шага в потоке — эталон в `1c-writer-pipeline.mdc`.
-
-## WRITER PIPELINE
-
-Always-apply якорь (до появления `.bsl` в контексте): `writer → ReadLints → … → reviewer`. **Единственный эталон сквозного потока** — `.cursor/rules/1c-writer-pipeline.mdc`.
-
-### Лимиты итераций (сводно — три разных цикла, не путать)
-
-| Цикл | Лимит | Где определён |
-|------|-------|----------------|
-| writer ↔ reviewer (исправление замечаний) | **2** итерации | этот файл § АВТО-ИСПРАВЛЕНИЕ РЕВЬЮ; writer Phase 7 |
-| Investigation loop (reviewer → explorer → reviewer) | **3** итерации | `review/SKILL.md` шаг 3.5 |
-| Self-review агента writer (внутренний) | **2** прохода | `onec-code-writer.md` |
+Лимиты циклов: writer↔reviewer = **2** (`review/SKILL.md` 4.5); investigation = **3** (шаг 3.5); self-review writer = **2** (`onec-code-writer.md` Phase 7 — не путать с циклом reviewer).

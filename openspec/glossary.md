@@ -6,12 +6,14 @@
 
 - **ЗНИ** — Запрос на изменение. Каталог в `openspec/changes/<name>/` с артефактами (proposal, design, tasks, specs). В коде/командах — «change».
 - **Артефакты ЗНИ** — `proposal.md` (зачем и что), `design.md` (как: поведение и реализация), `tasks.md` (план работ), `specs/**` (delta-спецификации требований).
-- **Workflow** — explore → new/ff → verify → apply → verify → archive. Карта: `.cursor/rules/sdd-workflow.mdc`.
+- **Workflow** — explore → new → verify → apply → verify → archive. Карта: `.cursor/rules/sdd-workflow.mdc`. Дополнительно: `/opsx:explain`, `/opsx:overview`, `/opsx:status`.
 - **explore** — исследование задачи/дефекта/идеи до создания ЗНИ; итог — блок `## Постановка ЗНИ` в чате.
-- **ff (fast-forward)** — создание всех артефактов ЗНИ разом, когда задача понятна.
-- **new + continue** — пошаговое создание артефактов по одному.
+- **new** — создание или resume артефактов ЗНИ (единственный вход постановки).
 - **apply** — реализация задач: делегирование `onec-code-writer` → `onec-code-reviewer`.
 - **archive** — финализация завершённой ЗНИ: синхронизация specs, извлечение ADR/KB.
+- **explain** — пошаговый разбор значимого кода (`/opsx:explain`).
+- **overview** — лаконичное описание проекта для ФА/заказчика (`/opsx:overview`).
+- **status** — read-only снимок состояния ЗНИ (`/opsx:status`).
 
 ## Срезы и приёмка
 
@@ -19,8 +21,14 @@
 - **`S<N>`** — идентификатор среза (в сообщениях пользователю всегда с названием среза, не голый код).
 - **`S<N>.accept`** — единый приёмочный чеклист среза: список сценариев, подтверждающих ценность среза.
 - **`S<N>.T<M>` (legacy)** — старый формат приёмки (отдельная задача-сценарий на срез). Поддерживается для обратной совместимости; объединяется в один `S<N>.accept` вручную.
-- **slice-gate** — маркер `<!-- slice-gate -->`: пауза apply на приёмке среза до подтверждения пользователем.
+- **slice-gate** — маркер `<!-- slice-gate -->`: пауза apply на приёмке среза до подтверждения пользователем (имя гейта — agent-only, в чат не выводить).
 - **acceptance handoff** — передача пользователю приёмочного чеклиста среза для ручной проверки.
+- **pause-wait** — пауза apply: следующий шаг — ручное конфигурирование / выгрузка (чат: список объектов; внутренний halt XML-guard = тот же случай, что WAIT).
+- **pause-decision** — пауза apply с выбором A/B (не Конфигуратор).
+- **Бриф B0–B3 / B-explain** — уровни Sync Card (`.cursor/docs/templates/brief-card.md`).
+- **kit-only** — ЗНИ без прикладного `.bsl`; маркеры `developer: n/a`.
+- **`developer: n/a`** — маркеры автора не применяются (нет BSL в scope).
+- **`marker_scope`** — cf / cfe / mixed / не определён.
 
 ## Проверка (verify)
 
@@ -28,12 +36,14 @@
 - **Слои verify** — гигиена артефактов → внутренняя согласованность → Problem-Solution Trace → независимый challenge → готовность к реализации.
 - **Repair Loop** — внутренняя авто-починка мелких дефектов формы (без вопросов пользователю, max 2 итерации).
 - **Объём проверки** — глубина прогона verify (вместо англ. «tier»).
+- **QualityFlag / Disposition** — независимое качество замечания ревью (`weak`, `design-prescribed`) и выбор `as-designed` / `queue-fix` (ADR-0003; якорь apply-reviewer).
+- **Режим сессии «с API» / «без API»** — выбор модели субагента: токены `-noapi` / `-api` в сообщении, затем память сессии, затем таблица ролей. Канон лимита: «дорогие модели недоступны — дальше на модели чата» (always-apply бюджет чата §5).
 
 ## Гейты и роли
 
 - **Гейт** — обязательная проверка-страховка на этапе (архитектурный, code-truth, verified-cause, precedent-regression и др.).
 - **Оркестратор** — ведущий диалог агент-навигатор: планирует, делегирует, общается с пользователем. Не пишет BSL сам.
-- **Агенты 1С** — `onec-code-writer` (правка BSL), `onec-code-reviewer` (ревью), `onec-code-architect` (архитектура), `onec-code-explorer` (обследование), `onec-trace-analyst` (трассы).
+- **Агенты 1С** — `onec-code-writer` (правка BSL), `onec-code-reviewer` (ревью), `onec-code-architect` (архитектура), `onec-code-explorer` (обследование), `onec-trace-analyst` (трассы), `onec-code-simplifier` (упрощение поверхности), `openspec-quality-controller` (когерентность срезов).
 - **ADR** — Architecture Decision Record, `openspec/adrs/`.
 - **KB (Knowledge Base)** — база verified-фактов проекта, `openspec/knowledge/`.
 

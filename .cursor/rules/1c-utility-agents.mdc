@@ -11,7 +11,7 @@ alwaysApply: false
 
 | Триггер | Действие | Детали |
 |---------|----------|--------|
-| Работа с формами 1С (Form.xml) | СТОП. Инструкция ручного конфигурирования. Ref: 1c-agent-delegation.mdc (§ XML WRITE GUARD) | — |
+| Работа с формами 1С (Form.xml) | СТОП. Инструкция ручного конфигурирования. Ref: `1c-xml-write-guard.mdc` | — |
 | Упрощение BSL-кода | Делегировать **onec-code-simplifier** | Обязателен при REFACTOR по поверхности (`DISPROPORTIONATE_SURFACE`) в apply/`/review`, пока нет waive пользователя |
 
 ## ПОЛНОМОЧИЯ (BSL-ONLY)

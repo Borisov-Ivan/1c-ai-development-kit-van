@@ -24,9 +24,9 @@ This is an **agent-driven** operation - you will read delta specs and directly e
    If a name is provided, use it. Otherwise:
    - Infer from conversation context if the user mentioned a change
    - Auto-select if only one active change exists
-   - If multiple active changes: run `openspec list --json`, show changes that have delta specs (under `specs/` directory), and use **AskUserQuestion tool** to let user select
+   - If multiple active changes: run `openspec list --json`, show changes that have delta specs (under `specs/` directory), and use **AskQuestion tool** to let user select
 
-   Always announce: "Using change: <name>" and how to override.
+   Имя change — в первом русском снимке (не отдельным английским ping).
 
 2. **Find delta specs**
 

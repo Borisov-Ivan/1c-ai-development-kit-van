@@ -1,6 +1,6 @@
 ---
 name: review
-description: Full code review by request context (module, files, extension) with optional fix via writer and reviewer. APPLY GATE exception — см. .cursor/rules/1c-agent-delegation.mdc (секция APPLY GATE).
+description: Full code review by request context (module, files, extension) with optional fix via writer and reviewer. APPLY GATE exception — см. .cursor/rules/1c-halt-triggers.mdc (секция APPLY GATE).
 license: MIT
 compatibility: Delegates to onec-code-reviewer (prompt_contract_version=4), onec-code-writer, onec-code-simplifier, onec-code-explorer, onec-code-architect. Requires Task tool.
 metadata:
@@ -224,6 +224,36 @@ Focus: full (new file)
 
 ---
 
+## Шаг 1.8. Linter / LSP pass (evidence, не findings) — S9
+
+Выполнить ДО вызова ревьювера. Собрать статические диагностики как **сигналы** (reviewer решает, что с ними делать).
+
+### Инструменты (порядок предпочтения)
+
+1. `user-1c-syntax-checker-syntaxcheck(code)` для каждого `.bsl` в scope (с учётом Review Boundaries — можно передавать усечённый фрагмент или весь файл).
+2. `user-1c-code-checker-check_1c_code(code, check_type)` для logic checks.
+3. `bsl_lsp_diagnostics` (если BSL LSP доступен в сессии) — платформенная диагностика.
+4. Fallback: `ReadLints` по изменённым файлам (Cursor-native).
+
+### Обработка
+
+- Если инструменты недоступны (LSP офлайн, linter не найден) — gracefully degrade: в промпт ревьювера вставить `## Linter Signals (evidence)` с комментарием `Linter unavailable: <reason>`. В Summary отчёта — warning.
+- Если инструмент выдал диагностики — агрегировать в единый блок:
+
+```markdown
+## Linter Signals (evidence)
+
+| # | Tool | File:Line | Severity (tool) | Message | Suggested AP/Category |
+|---|------|-----------|-----------------|---------|-----------------------|
+| 1 | syntax-checker | X.bsl:45 | error | Unclosed НачатьТранзакцию | AP-015 |
+```
+
+- Блок передаётся ревьюверу. Ревьювер в **Phase 1b** (`.cursor/docs/standard/reviewer-checks.md` § Phase 1b: BSL Linter Signals Gate) обязан обработать каждую in-scope диагностику: по умолчанию **confirm → MUST_FIX**; dismiss только с явной причиной (`out-of-scope`, `false-positive`, `pre-existing-unchanged`). **Запрещено** откладывать in-scope warning на prerelease («погасим техдолг позже»).
+
+**Важно:** оркестратор НЕ переводит сигналы в findings и не выставляет Action — это работа ревьювера (единый источник вердиктов — S3 принцип). Оркестратор **обязан** передать warnings в блоке evidence, не отфильтровывая их.
+
+---
+
 ## Шаг 1.9. Identifier Hygiene pass (Naming Provenance — evidence, не findings)
 
 Выполнить **после** шага 1.8, **до** вызова ревьювера. Алгоритм — **SSOT:** `.cursor/rules/1c-writer-pipeline.mdc` § IDENTIFIER HYGIENE CHECK. Детектор **латиницы в идентификаторе** (AP-031, семейство Export Language вместе с AP-054) — не словарь стоп-слов; allow-list закрыт по построению.
@@ -285,36 +315,6 @@ Focus: full (new file)
 
 ---
 
-## Шаг 1.8. Linter / LSP pass (evidence, не findings) — S9
-
-Выполнить ДО вызова ревьювера. Собрать статические диагностики как **сигналы** (reviewer решает, что с ними делать).
-
-### Инструменты (порядок предпочтения)
-
-1. `user-1c-syntax-checker-syntaxcheck(code)` для каждого `.bsl` в scope (с учётом Review Boundaries — можно передавать усечённый фрагмент или весь файл).
-2. `user-1c-code-checker-check_1c_code(code, check_type)` для logic checks.
-3. `bsl_lsp_diagnostics` (если BSL LSP доступен в сессии) — платформенная диагностика.
-4. Fallback: `ReadLints` по изменённым файлам (Cursor-native).
-
-### Обработка
-
-- Если инструменты недоступны (LSP офлайн, linter не найден) — gracefully degrade: в промпт ревьювера вставить `## Linter Signals (evidence)` с комментарием `Linter unavailable: <reason>`. В Summary отчёта — warning.
-- Если инструмент выдал диагностики — агрегировать в единый блок:
-
-```markdown
-## Linter Signals (evidence)
-
-| # | Tool | File:Line | Severity (tool) | Message | Suggested AP/Category |
-|---|------|-----------|-----------------|---------|-----------------------|
-| 1 | syntax-checker | X.bsl:45 | error | Unclosed НачатьТранзакцию | AP-015 |
-```
-
-- Блок передаётся ревьюверу. Ревьювер в **Phase 1b** (`.cursor/docs/standard/reviewer-checks.md` § Phase 1b: BSL Linter Signals Gate) обязан обработать каждую in-scope диагностику: по умолчанию **confirm → MUST_FIX**; dismiss только с явной причиной (`out-of-scope`, `false-positive`, `pre-existing-unchanged`). **Запрещено** откладывать in-scope warning на prerelease («погасим техдолг позже»).
-
-**Важно:** оркестратор НЕ переводит сигналы в findings и не выставляет Action — это работа ревьювера (единый источник вердиктов — S3 принцип). Оркестратор **обязан** передать warnings в блоке evidence, не отфильтровывая их.
-
----
-
 ## Шаг 2. Контекст для ревьювера
 
 Сформировать бриф:
@@ -334,7 +334,7 @@ Focus: full (new file)
 - **Architectural Context** — см. блок ниже.
 - **Review Boundaries** — при `diff-focused` (шаг 1.5), только для файлов батча.
 - **Resolved Contracts** — при повторном прогоне после Investigation Loop (шаг 3.5).
-- **Base-файл для &ИзменениеИКонтроль:** если в scope есть файлы с этой аннотацией, прочитать `openspec/project.md` (секция «Структура репозитория»), подставить cf-путь в пару к cfe-пути. Передать в промпт: «Base-файл: <путь>» для каждого такого файла (EXTENSION GATE из `1c-agent-delegation.mdc`).
+- **Base-файл для &ИзменениеИКонтроль:** если в scope есть файлы с этой аннотацией, прочитать `openspec/project.md` (секция «Структура репозитория»), подставить cf-путь в пару к cfe-пути. Передать в промпт: «Base-файл: <путь>» для каждого такого файла (EXTENSION GATE из `1c-writer-pipeline.mdc`).
 
 ### 2.1 Prior Findings History (S8)
 
@@ -506,7 +506,7 @@ Focus: full (new file)
 
 ## Apply-контур: авто-исправление ревью (полная процедура)
 
-Носитель полной процедуры. Always-apply якорь минимума — `1c-agent-delegation.mdc` § АВТО-ИСПРАВЛЕНИЕ РЕВЬЮ (лимит 2 итерации; apply-reviewer; поверхность). Этот скилл — не входной протокол `/opsx:apply`; apply читает якорь в delegation. Финальный disposition as-designed / queue-fix — шаг 4.5.
+Носитель полной процедуры. Always-apply якорь минимума — `1c-agent-delegation.mdc` (лимит 2 итерации; apply-reviewer; поверхность). Этот скилл — не входной протокол `/opsx:apply`; apply читает якорь в delegation. Финальный disposition as-designed / queue-fix — шаг 4.5.
 
 Все кодовые замечания (critical/high/medium/low) **кроме carve-out weak / design-prescribed / agreement-override** → автоматически writer с замечаниями → повторный reviewer. Макс. 2 итерации — согласовано с Phase 7 агента writer.
 Архитектурные замечания (новый объект, API, структура хранения, RLS) → СТОП, к пользователю.
@@ -612,7 +612,7 @@ Focus: full (new file)
 
 1. **MUST_FIX:** Task `onec-code-writer` по шаблону «Writer — review fix». В промпте findings отсортированы по `risk_score` desc.
 2. **REFACTOR:** Task `onec-code-simplifier` (шаблон: `.cursor/skills/1c-agent-patterns/simplifier.md`).
-3. **LINT GATE** — см. [`.cursor/rules/1c-agent-delegation.mdc`](../../rules/1c-agent-delegation.mdc) § LINT GATE + [`.cursor/rules/1c-writer-pipeline.mdc`](../../rules/1c-writer-pipeline.mdc).
+3. **LINT GATE** — см. [`.cursor/rules/1c-writer-pipeline.mdc`](../../rules/1c-writer-pipeline.mdc) § LINT GATE.
 4. **IDENTIFIER HYGIENE CHECK** (шаг 1.9) — evidence `## Naming Signals` обязателен; алгоритм — `1c-writer-pipeline.mdc` § IDENTIFIER HYGIENE CHECK.
 5. **COMMENT HYGIENE CHECK** (шаг 1.10) — evidence `## Comment Hygiene Signals` обязателен; алгоритм — `1c-writer-pipeline.mdc` § COMMENT HYGIENE CHECK.
 6. **API EXISTENCE CHECK (smart default S12):**
@@ -686,11 +686,11 @@ Focus: full (new file)
 ## Интеграция
 
 - **session-discipline.mdc:** первый инструмент в первом батче — Read этого скилла; протокол действует весь `/review`.
-- **1c-agent-delegation:** правки `.bsl` только через writer/simplifier; после правок — обязательный reviewer; LINT GATE (SSOT: `1c-agent-delegation.mdc` + `1c-writer-pipeline.mdc`) и API EXISTENCE CHECK; EXTENSION GATE и EXTENSION VERIFICATION при `&ИзменениеИКонтроль`. **Investigation Loop** (шаг 3.5) — multi-iteration (max 3). Формат — `1c-writer-pipeline.mdc` § CONTRACT RESOLUTION.
+- **1c-agent-delegation:** правки `.bsl` только через writer/simplifier; после правок — обязательный reviewer; LINT GATE и API EXISTENCE CHECK — `1c-writer-pipeline.mdc`; EXTENSION GATE и EXTENSION VERIFICATION при `&ИзменениеИКонтроль`. **Investigation Loop** (шаг 3.5) — multi-iteration (max 3). Формат — `1c-writer-pipeline.mdc` § CONTRACT RESOLUTION.
 - **Review Focus Boundaries:** при `diff-focused` оркестратор формирует `## Review Boundaries`; reviewer следует Review Boundaries Protocol.
 - **Evidence separation:** все механические проверки (linter, whitelist, mandatory controls, prior history) — **evidence**; вердикты severity/kind/action/risk — **reviewer**; финальный Disposition (as-designed / queue-fix / deferred) — **оркестратор** (шаг 4.5).
 - **Release-hygiene:** AP-040..AP-045 каталога (не grep оркестратора); reviewer использует Intent Map / Contract Map.
-- **APPLY GATE:** writer и reviewer в `/review` и `/release-review` разрешены без `/opsx:apply` — исключение в `.cursor/rules/1c-agent-delegation.mdc` (секция APPLY GATE).
+- **APPLY GATE:** writer и reviewer в `/review` и `/release-review` разрешены без `/opsx:apply` — исключение в `.cursor/rules/1c-halt-triggers.mdc` (секция APPLY GATE).
 
 ---
 

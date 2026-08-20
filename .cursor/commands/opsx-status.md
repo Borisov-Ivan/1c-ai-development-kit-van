@@ -15,7 +15,7 @@ description: Снимок текущего состояния OpenSpec change �
 **Первое действие:** прочитать `.cursor/skills/openspec-status/SKILL.md` и далее идти по шагам скилла. До прочтения — никаких других чтений.
 
 **Input:**
-- `<change-name>` — опционально. Если не указано — AskUserQuestion по списку активных changes (`openspec list --json`).
+- `<change-name>` — опционально. Если не указано — AskQuestion по списку активных changes (`openspec list --json`).
 
 **Флаги:**
 - `--short` — только заголовок: имя, фаза (pre-apply / post-apply), структура (срезы / legacy), прогресс по срезам одной строкой, рекомендация.
