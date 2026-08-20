@@ -26,11 +26,13 @@
 
 ---
 
-## Слой 1 — коды и имена движка (примеры для детектора; бан в чате)
+## Слой 1 — коды и имена движка (единственный словарь HALT; полнота — Слой 0)
+
+Новый жаргон движка добавлять **только сюда** или покрывать Слоем 0. Запрещено дублировать токен в stub/full бюджета, скиллах и ux-acceptance «на всякий случай».
 
 Запрещены в чате (регистронезависимо, вне `` `имя-файла` `` и вне строки «Источники: …»). Список **иллюстративный** — не исчерпывающий; полноту даёт Слой 0:
 
-`CRITICAL`, `WARNING`, `SUGGESTION`, `Severity`, `GO`, `NO-GO`, `PASS`, `FAIL`, `GAP`, `APPROVE`, `CHALLENGE`, `REJECT`, `Layer 1`…`Layer 5`, `verify_mode`, `verdict:`, `snapshot`, `last_challenge_at`, `novelty`, `SKIPPED-novelty`, `SKIPPED-lite`, `CHALLENGE-saturated`, `phantom-symbol`, `design-challenge`, `task-readiness`, `quality-controller`, `slice coherence`, `code-truth`, `Promotion Test`, `Determinism Test`, `Three-Question Challenge`, `Simplicity Check`, `Acceptance Checklist Coverage`, `Problem-Solution Trace`, `Independent Challenge`, `Implementation Readiness`, `Blast Radius`, `precedent-regression`, `invariant-drift`, `artifact-hygiene`, `slice-pre`, `slice-post`, `slice-transition`, `Tier`, `low-confidence`, `checkpoint`, `closed_decisions`, `decision_round`, `decision_id`, `open_decision_id`, `verify_depth`, `incremental`, `GO-with-assumptions`, `reopen-blocked`, `supersedes`, `implementation_invariant`, `D0`, `D1`, `D2`, `D3`, `D4`, `D5`, `OQ1`…`OQ\d`, `interim`, `default для apply`, `mount_context`, `context_cleanup`, имена агентов `onec-code-*` / `openspec-*`, имена гейтов (`Architect Gate`, `Code-Truth Gate`, `Slice Gate`, `Precedent Regression Gate`), **`пошаговая пауза`**, **`Ваш шаг (`**, **`автопроверки пройдены`**, **`diff не обязателен`**, **`reviewer PASS`**, **`линтер чист`**.
+`CRITICAL`, `WARNING`, `SUGGESTION`, `Severity`, `GO`, `NO-GO`, `PASS`, `FAIL`, `GAP`, `APPROVE`, `CHALLENGE`, `REJECT`, `Layer 1`…`Layer 5`, `verify_mode`, `verdict:`, `snapshot`, `last_challenge_at`, `novelty`, `SKIPPED-*` (`SKIPPED-novelty`, `SKIPPED-lite`), `CHALLENGE-saturated`, `phantom-symbol`, `design-challenge`, `task-readiness`, `quality-controller`, `slice coherence`, `code-truth`, `Promotion Test`, `Determinism Test`, `Three-Question Challenge`, `Simplicity Check`, `Acceptance Checklist Coverage`, `Problem-Solution Trace`, `Independent Challenge`, `Implementation Readiness`, `Blast Radius`, `precedent-regression`, `invariant-drift`, `artifact-hygiene`, `slice-pre`, `slice-post`, `slice-transition`, `Tier`, `low-confidence`, `checkpoint`, `closed_decisions`, `decision_round`, `decision_id`, `open_decision_id`, `verify_depth`, `incremental`, `GO-with-assumptions`, `reopen-blocked`, `supersedes`, `implementation_invariant`, `D0`–`Dn`, `OQ1`…`OQ\d`, `interim`, `default для apply`, `mount_context`, `context_cleanup`, имена агентов `onec-code-*` / `openspec-*`, имена гейтов и внутренних проверок (`* Gate`, Symptom Relevance, Cross-Archive, KB Discovery и аналоги), **`пошаговая пауза`**, **`Ваш шаг (`**, **`автопроверки пройдены`**, **`diff не обязателен`**, **`reviewer PASS`**, **`линтер чист`**.
 
 | Код движка | Замена в чате |
 |------------|----------------|
@@ -68,7 +70,7 @@
 - **«постановка»**, **«приёмка»**, **«область задачи» / scope**, **«план в tasks.md/design.md»** — допустимы как есть.
 - Голый идентификатор `S<N>` без названия среза — провал self-check (название обязательно). `S<N>.accept`, номера задач `12.9`, `D<N>`, `R<N>` — только в полях «План» / «Ссылки», не в прозе для заказчика.
 
-Workflow-подстроки verify, которые **запрещены** (вводят в заблуждение про безопасность): `apply сейчас`, `apply на свой риск`, `defer apply`, `workaround сейчас` — формулировать через последствия выбора.
+Workflow-подстроки, которые **запрещены** (ложный apply / обход гейта): принцип — вариант = разница в **коде или наблюдаемом поведении**, не обход проверки. Примеры: `apply сейчас`, `apply на свой риск`, `defer apply`, `workaround сейчас`. Не плодить отдельный HARD-список в агентах.
 
 ---
 
@@ -92,4 +94,4 @@ Workflow-подстроки verify, которые **запрещены** (вв�
 - Профессиональная лексика 1С-разработки (см. Слой 2).
 - Право назвать конкретную процедуру и сказать «что сломается».
 
-**Last updated:** 2026-08-02
+**Last updated:** 2026-08-20

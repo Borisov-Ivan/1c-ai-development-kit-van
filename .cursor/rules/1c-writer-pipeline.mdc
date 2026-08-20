@@ -1,15 +1,12 @@
 ---
-description: "Writer pipeline — API Existence Check, Extension Gate, Contract Resolution. Подгружается при правке .bsl (on-demand)"
+description: "Writer pipeline — API Existence Check, Extension Gate, Contract Resolution. On-demand при фактической правке .bsl"
 alwaysApply: false
-globs: "**/*.bsl"
 priority: 800
 ---
 
 # 1C Writer Pipeline (on-demand)
 
-**Когда загружать:** правка `.bsl` (globs) или якорь always-apply `writer → ReadLints → … → reviewer` до появления `.bsl` в контексте.
-
-Подключается при редактировании/чтении `.bsl`. Always-apply якорь в `1c-agent-delegation.mdc`: `writer → ReadLints → … → reviewer` (нужен до `globs` `.bsl`).
+**Когда загружать:** фактическая правка `.bsl` (после halt-triggers) или якорь always-apply `writer → ReadLints → … → reviewer`. Не подмешивать через glob на любое чтение модуля.
 
 **Единственный эталон сквозного потока.** Все другие файлы (`1c-agent-delegation.mdc`, `review/SKILL.md`, `openspec-apply-change/SKILL.md`) ссылаются сюда и не приводят собственные варианты порядка.
 
@@ -34,7 +31,7 @@ writer → ReadLints → [fix if errors] → IDENTIFIER HYGIENE CHECK →
 | reviewer | `onec-code-reviewer` (Task) | evidence-блоки обязательны |
 | Investigation loop (по запросу reviewer) | `onec-code-explorer` (Task) | этот файл § CONTRACT RESOLUTION; `review/SKILL.md` шаг 3.5 |
 
-Детали шагов — ниже. Сводная таблица лимитов итераций — `1c-agent-delegation.mdc` § WRITER PIPELINE.
+Детали шагов — ниже. Лимиты циклов — однострочный якорь `1c-agent-delegation.mdc` (writer↔reviewer = 2; investigation = 3; self-review writer = 2).
 
 ## ПРОМПТ WRITER: ГРАНИЦА ОТВЕТСТВЕННОСТИ
 
@@ -80,7 +77,7 @@ Always-apply якорь — `1c-agent-delegation.mdc`: оркестратор о
 
 **Принцип — детектор латиницы в идентификаторе, НЕ словарь стоп-слов.** allow-list закрыт по построению (как AP-054); что содержит латиницу и не входит в allow-list — кандидат. Любое будущее английское слово (`PreMatrix`, `PostMatrix`, …) закрывается автоматически, без правки списка. Это **подсказка** ревьюверу, **не** ворота: «кандидатов не найдено» НЕ заменяет доменный тест ревьювера (Phase 1c / Phase 0 Q6 — `.cursor/docs/standard/reviewer-checks.md`).
 
-> **Зачем отказались от blocklist.** Конечный список запрещённых токенов (`PreWrite`, `Guard`, …) пропускает всё, чего в нём нет — `PreMatrix` так и проскочил. Закрытый allow-list + детектор латиницы покрывают класс целиком. Blocklist остаётся лишь **необязательным усилением** (см. ниже), не основой.
+> **Зачем отказались от blocklist.** Конечный список запрещённых токенов пропускает всё, чего в нём нет. Закрытый allow-list + детектор латиницы покрывают класс целиком. Словарь orchestration-токенов **не** держать.
 
 ### Шаг 1. Scope
 
@@ -110,7 +107,7 @@ Always-apply якорь — `1c-agent-delegation.mdc`: оркестратор о
 
 1. Найти латинские подстроки `[A-Za-z]{2,}` внутри имени (в т.ч. внутри кириллического: `БылиPreMatrixОтмены` → `PreMatrix`).
 2. Отфильтровать allow-list (Шаг 4). Остаток с латиницей — кандидат AP-031.
-3. **Необязательное усиление (опционально):** если имя содержит токен из orchestration-blocklist (`Fallback`, `PostWrite`, `PreWrite`, `Guard`, `Mechanics`/`Механика`, `Gate`/`Гейт`, `Temp`/`Tmp`, `Wrapper`, `Orchestrat`), номер тикета `\d{4,}` или kebab-токен slug change-name — пометить как кандидат **даже если кириллический** (доменную непрозрачность чисто кириллических имён ловит ревьювер семантически).
+3. **Необязательное усиление (опционально):** номер тикета `\d{4,}` или kebab-токен slug change-name — пометить как кандидат **даже если кириллический** (доменную непрозрачность чисто кириллических имён ловит ревьювер семантически). Не использовать словарь английских токенов (`PreWrite`, `Guard`, …) — основа шага 1–2.
 
 ### Шаг 4. Allow-list (закрыт по построению — не включать в evidence)
 
@@ -118,7 +115,7 @@ Always-apply якорь — `1c-agent-delegation.mdc`: оркестратор о
 |-------|-----------------|---------|
 | Префикс расширения / разработчика | `code-prefix` | `pav_`, `lvv_`, `пр_` как префикс перед доменным русским именем |
 | Имя метаданного/типа/метода/параметра, существующее в `src/` | `metadata-name` | проверка Grep по `src/` на точное имя |
-| Протокол/формат/аббревиатура | `protocol` | `HTTP`, `JSON`, `XML`, `XDTO`, `GUID`, `UUID`, `SQL`, `URL`, `RLS`, `TLS`, `API`, `RMQ`, `UI`, `БСП` |
+| Протокол/формат/аббревиатура | `protocol` | классы как в `.cursor/docs/marker-canon.md` (в т.ч. `HTTP`, `HTTPS`, `JSON`, …) |
 | Имя веб-сервиса/метода/поля внешней системы (std-06 §1) | `web-service-name` | `TestConnection`, `EnterpriseDataExchange` |
 | Имя продукта/компании (std-02 §1.3) | `product-name` | `Microsoft Excel` |
 
@@ -177,7 +174,7 @@ Identifier scan: латинских кандидатов не найдено (N 
 | Класс | dismiss-причина | Примеры |
 |-------|-----------------|---------|
 | Идентификатор кода 1С в backticks | `code-identifier` | `` `ПродолжитьВызов` ``, `` `XMLСтрока` `` |
-| Протокол/формат/аббревиатура | `protocol` | `HTTP`, `HTTPS`, `JSON`, `XML`, `XDTO`, `GUID`, `UUID`, `SQL`, `URL`, `RLS`, `TLS`, `API`, `RMQ`, `UI`, `БСП` |
+| Протокол/формат/аббревиатура | `protocol` | классы как в `.cursor/docs/marker-canon.md` (в т.ч. `HTTP`, `HTTPS`, `JSON`, …) |
 | Имя веб-сервиса/метода/поля внешней системы (std-06 §1) | `web-service-name` | `TestConnection`, `EnterpriseDataExchange` |
 | Имя продукта/компании (std-02 §1.3) | `product-name` | `Microsoft Excel` |
 | Служебный маркер | — | `TODO`, `FIXME` |
@@ -267,7 +264,7 @@ AskQuestion:
 
 ### Триггер
 
-Ревьювер после Phase 0–2.5 включает в отчёт секцию `## Investigation Request` с таблицей источников, требующих резолва контракта. Оркестратор парсит эту секцию и запускает investigation loop (шаг 3.5 в `review/SKILL.md`). **Лимит — 3 итерации** (сводная таблица лимитов — `1c-agent-delegation.mdc`).
+Ревьювер после Phase 0–2.5 включает в отчёт секцию `## Investigation Request` с таблицей источников, требующих резолва контракта. Оркестратор парсит эту секцию и запускает investigation loop (шаг 3.5 в `review/SKILL.md`). **Лимит — 3 итерации** (якорь лимитов — `1c-agent-delegation.mdc`).
 
 Без секции Investigation Request — CONTRACT RESOLUTION не выполняется.
 

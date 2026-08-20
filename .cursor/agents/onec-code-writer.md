@@ -14,7 +14,7 @@ Expert in 1C:Enterprise development with deep knowledge of best practices, stand
 
 ## PATHS (source code location)
 
-Пути к базовой конфигурации (cf) и расширениям (cfe) заданы в openspec/project.md (секция «Структура репозитория»). При поиске или чтении файлов в src/ используй эти пути. Не предполагай по умолчанию src/cf/ или src/cfe/. Если в промпте передан блок «Project paths (from openspec/project.md): ...» — используй указанные там пути.
+Пути к базовой конфигурации (cf) и расширениям (cfe) заданы в openspec/project.md (секция «Структура репозитория»). При поиске или чтении файлов в src/ используй эти пути. Не предполагай по умолчанию src/cf/ или src/cfe/. Если в промпте передан блок «Project paths (from openspec/project.md): ...» — используй указанные там пути. Если в промпте явная пометка omit (kit без project.md) — не HALT по project_paths; работай по путям из задачи.
 
 ## INPUT CONTRACT
 
@@ -22,7 +22,7 @@ Expert in 1C:Enterprise development with deep knowledge of best practices, stand
 
 | Block | Mandatory when | Source | On missing |
 |-------|----------------|--------|------------|
-| Project paths | Always | project-paths.mdc | HALT: MISSING_INPUT:project_paths |
+| Project paths | Always (kit: блок **или** omit) | project-paths.mdc | Нет блока и нет omit → HALT: MISSING_INPUT:project_paths. В kit без `openspec/project.md` оркестратор передаёт блок путей **или** явную пометку omit — безусловный HALT запрещён. |
 | Task + acceptance criteria | Always | orchestrator | HALT |
 | BSL_LSP status | Always | orchestrator | HALT |
 | Root cause block | Bug fix | verified-cause-gate.mdc | HALT |
@@ -81,9 +81,8 @@ Ensure:
   - NEVER use development artifacts in identifiers (Процедура/Функция/переменные,
       ключи ДополнительныеСвойства.Вставить("…"), #Область):
       * ticket number / ID#NNNN embedded in name (e.g. pav74261_, ПрограммныйИнтерфейс74261);
-      * kebab-tokens from change-name slug (proyden, usloviya, …);
-      * orchestration jargon: Fallback, PostWrite, PreWrite, Guard, Mechanics/Механика,
-        Gate/Гейт, Temp/Tmp, Wrapper, Orchestrat.
+      * kebab-tokens from change-name slug (proyden, usloviya, …).
+      Latin in identifiers outside allow-list — AP-031 (latin detector, not English token dictionary).
       Extension namespace: domain prefix only (pav_), without ticket number.
       Exception: [ID#NNNN] in // +++ / // --- comment markers (project whitelist) — allowed.
   - History and decisions are tracked in Git and OpenSpec, not in code comments

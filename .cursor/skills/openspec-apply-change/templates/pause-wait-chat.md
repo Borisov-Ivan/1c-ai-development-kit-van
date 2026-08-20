@@ -2,7 +2,7 @@
 
 Когда `/opsx:apply` останавливается, потому что **следующий шаг человека** — создать или поправить объекты в Конфигураторе, выгрузить расширение или завести доп.реквизиты в ИБ. Не развилка A/B.
 
-Файл рецепта: [pause-wait-file.md](pause-wait-file.md). Бюджет: `chat-output-budget.mdc` §1d. Стиль: `opsx-output-style.md` §5.2.
+Файл рецепта: [pause-wait-file.md](pause-wait-file.md). Бюджет: `chat-output-budget-full.mdc` §1d. Стиль: `opsx-output-style.md` §5.2.
 
 ## Слоты (все обязательны)
 

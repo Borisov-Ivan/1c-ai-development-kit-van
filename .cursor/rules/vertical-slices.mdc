@@ -6,6 +6,8 @@ priority: 150
 
 # Vertical Slices — вертикальные пользовательские срезы
 
+**Когда загружать:** декомпозиция ЗНИ, slice-gate, размещение дефекта, apply/verify/archive срезов.
+
 Единственный источник истины для декомпозиции ЗНИ OpenSpec. Ссылаются: `openspec-new-change`, `openspec-apply-change`, `openspec-verify-change`, `openspec-explore`, `openspec-archive-change`, `sdd-workflow.mdc`, `1c-agent-patterns`, `openspec-quality-controller`.
 
 ## ПРОБЛЕМА

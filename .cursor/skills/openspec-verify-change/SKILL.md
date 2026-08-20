@@ -239,7 +239,7 @@ QC оценивает критерии 1–6, 8, **8b**, 9–11 из `vertical-s
 
 **Запуск:**
 
-1. Делегировать `onec-code-architect` с `mode=design-challenge` по закрытой эскалации в `model-selection.mdc`: Fable, если слаг есть в описании `Task`; иначе Primary обычного архитектора (Opus 5) + одна строка, что дорогая эскалация недоступна. Не передавать отсутствующий слаг. Не использовать Fable как запас после сбоя Opus.
+1. Делегировать `onec-code-architect` с `mode=design-challenge` по закрытой эскалации в `model-selection.mdc`: Fable, если слаг есть в описании `Task`; иначе Primary обычного архитектора (Opus 5) + одна строка в чат: «Модель архитектора: Opus 5». Не передавать отсутствующий слаг. Не использовать Fable как запас после сбоя Opus.
 2. **Режим запуска:** `run_in_background: true` (параллельно с sync-агентами Layer 2/5). Самый длинный шаг verify; параллелизм нужен, иначе verify становится в 2.5x длиннее. В чате остаётся **одна короткая карточка** (одна строка пути к файлу) — это допустимо как фоновый прогресс-маркер и не нагружает внимание. В промпт обязательно включить блок **Final message constraint** (секция «Запуск агентов verify» ниже).
 3. Промпт включает:
    - `proposal.md`, `design.md`, `specs/**/spec.md` — как первичные источники.
@@ -366,7 +366,7 @@ Layer 4 `CHALLENGE` или `REJECT` → NO-GO **кроме** CHALLENGE-saturated
 
 Self-check: «можно действовать без файла» = пользователь видит **конкретную команду** или явное приглашение ответить в чате.
 
-**Одна команда `/opsx:verify` → одно финальное сообщение в чат** (допустим progress marker при длинном Repair Loop).
+**Одна команда `/opsx:verify` → одно финальное сообщение в чат** (допустим progress marker при длинном Repair Loop). **Исключение:** канон лимита «дорогие модели недоступны — дальше на модели чата» и «Модель архитектора: Opus 5» не ждут карточки вердикта. Английский progress не изобретать. Допустимые русские строки — из бюджета чата и `model-selection.mdc` (канон лимита, «Модель архитектора: Opus 5», «Дописываю постановку…»).
 
 ### Repair Loop (internal, max 2 attempts)
 
@@ -378,7 +378,7 @@ Self-check: «можно действовать без файла» = польз
 2. **Repair only** (включая `implementation_invariant` от classifier) + `repair_attempt < 2`:
    - Вызвать `apply_repairs_from_report()` — internal `/opsx:extend <name> --from-verify <отчёт>` в режиме **repair-from-verify** (без брифа, без сообщений в чат; порядок правок — extend §6).
    - **Не END TURN** → полный re-verify (слои 1–5) с `repair_attempt + 1`.
-   - **0 промежуточных сообщений** в чат; допустима одна строка progress marker (§6 `chat-output-budget.mdc`): «Дописываю постановку…».
+   - **0 промежуточных сообщений** в чат; допустима одна строка progress marker (§6 `chat-output-budget.mdc`): «Дописываю постановку…». **Исключение:** канон лимита и «Модель архитектора: Opus 5» не ждут финальной карточки.
 3. **Decision всплыл на attempt 2** (repair открыл скрытую развилку) → chat **3a-decision**, **END TURN**. **Не** считать terminal fail.
 4. **Repair всё ещё нужен после attempt 2** → terminal: «не удалось дочинить автоматически за 2 итерации» + краткая суть на языке эффекта + ссылка на отчёт. **Не** молчать и **не** ping-pong extend→verify в чате.
 5. **GO** на любой итерации → один chat-summary (вариант 2).
@@ -447,7 +447,7 @@ the file and synthesizes a single message for the user. Anything you put
 
 В отчёт попадает то, что меняет вердикт или требует решения. Внутренние интерфейсные понятия (`Promotion Test`, `Implementation Impact`, `determinism`, `card-consolidation`) **остаются в логике скилла**, но **не появляются** в чате и не выводятся пользователю как ярлыки — все обсуждения идут на пользовательском языке.
 
-Запрещено в чат: «PASS / FAIL / verdict: GO / Layer N / design-challenge / task-readiness / phantom-symbol / CRITICAL / WARNING / SUGGESTION». Эти технические коды — только в YAML отчёта и в строке `Источники: …` файла. Полный список запрещённых подстрок — `.cursor/rules/chat-output-budget.mdc` §7.
+Технические коды движка в чат не выводить (YAML отчёта и строка `Источники: …` файла). Словарь — `.cursor/docs/chat-lexicon.md` Слой 1; полнота — тест понятности (`chat-output-budget-full.mdc` §1c).
 
 ## Что НЕ делает verify
 

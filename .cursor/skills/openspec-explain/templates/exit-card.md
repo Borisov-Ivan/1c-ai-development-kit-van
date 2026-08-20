@@ -1,6 +1,6 @@
 # Выход прохода (SSOT) — `/opsx:explain`
 
-После последней точки карты, «хватит» или «собери итог». Эталон голоса: `fixtures/voice-good-exit.md`.  
+После последней точки карты, «хватит» или «собери итог». Эталон голоса: `../fixtures/voice-good-exit.md`.  
 Журнал файла: [`explain-report.md`](explain-report.md).
 
 ---

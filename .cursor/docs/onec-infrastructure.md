@@ -24,7 +24,7 @@
 - **Образ:** `onec-local/onec-client:8.3.24.1808-ready`
 - **Расположение:** /opt/onec-dev-container/ на Docker LXC (CT 100)
 - **Workflow:** Скопировать DT в `\\YOUR_SERVER\onec-inbox`, создать базу через ibcmd
-- **Документация:** `docs/onec-dev-container.md`
+- **Документация:** локальный runbook контейнера (в kit отдельного `docs/onec-dev-container.md` нет)
 
 ## Известные проблемы
 

@@ -5,6 +5,8 @@ alwaysApply: false
 
 # Knowledge Base — формат и lifecycle
 
+**Когда загружать:** создание/правка KB-факта, Discovery в промпт агента, audit TTL/якорей, блок `## Existing Knowledge`.
+
 Атомарные верифицированные факты о системе, на которые опираются будущие ЗНИ. KB-факты переживают archive changes и подтягиваются через Discovery в `/opsx:explore` и `Architect Gate`. В отличие от ADR (решение с trade-off) и spec (требование), KB — это **как есть**: контракт, поведение, цепочка вызовов, имя события ЖР.
 
 ## РАСПОЛОЖЕНИЕ
@@ -392,7 +394,7 @@ facts:
 
 Если Discovery вернул пустой список — секция всё равно включается с пометкой: «Discovery выполнен, совпадений нет». Это фиксирует, что шаг выполнен, а не пропущен.
 
-`stale` факты передаются с пометкой `⚠ TTL истёк`. `deprecated` и `superseded` не передаются. Бюджет — до 10 KB-фактов на Discovery (см. §БЮДЖЕТ VERIFY). Always-apply якорь в `1c-agent-delegation.mdc` § KB CONTEXT.
+`stale` факты передаются с пометкой `⚠ TTL истёк`. `deprecated` и `superseded` не передаются. Бюджет — до 10 KB-фактов на Discovery (см. §БЮДЖЕТ VERIFY). Always-apply якорь в `1c-agent-delegation.mdc` (блок `## Existing Knowledge`).
 
 ## GOVERNANCE
 

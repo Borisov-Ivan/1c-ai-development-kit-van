@@ -16,7 +16,7 @@ alwaysApply: false
 1. **Read или каркас**
    - Если **`openspec/project.md` есть** — прочитать файл: секции, формат таблиц, стиль формулировок.
    - Если **файла нет** (или каталога `openspec/` нет):
-     - При необходимости создать скелет OpenSpec по **Phase 0** `.cursor/commands/init-project.md` (`openspec/`, `openspec/changes/`, `openspec/changes/_template/`, `openspec/specs/`, `openspec/docs/`, `openspec/adrs/`, `openspec/config.yaml` — как в команде; `project.md` можно сразу заполнить черновиком ниже).
+     - При необходимости создать скелет OpenSpec по **Phase 0** `.cursor/commands/init-project.md` (`openspec/`, `openspec/changes/`, `openspec/changes/_template/`, `openspec/specs/`, `openspec/docs/`, `openspec/adrs/`, `openspec/config.yaml` — как в команде; `project.md` можно сразу заполнить черновиком ниже). В **kit** этих файлов нет — они появляются после `/init-project` в целевом проекте.
      - Взять **полный шаблон структуры** `project.md` из **Phase 4** того же файла `init-project.md` (блок markdown с `# OpenSpec:` … overlay-таблицы BSL).
      - MECHANISM (MARKER-MERGE, PLACEMENT, baseline запреты domain_label) **не дублировать** — только ссылка на `.cursor/docs/marker-canon.md`.
      - В шаблон встроить только то, что **явно согласовано** в диалоге; прочие секции — нейтральные заглушки (без выдуманного домена), таблицы комментариев BSL — пустые строки-заглушки или пометка «уточнить», **без** примера EX-001 без подтверждения пользователя (как в init-project).

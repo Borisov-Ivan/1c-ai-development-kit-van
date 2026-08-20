@@ -27,7 +27,7 @@ review/explore → extend (user) → verify → apply
 | **Ревью кода** | `/review` | Ревью по контексту (файл, diff, change); light-review на тривиальном diff. Памятка: `.cursor/docs/review-guide.md` | onec-code-reviewer |
 | **Предрелиз** | `/release-review` | Предрелизный gate: Category 12, Tier 2 explorer, `mode=prerelease`. См. `review-guide.md` | onec-code-reviewer, onec-code-explorer |
 
-Дополнительные действия: `extend` (расширить существующий change), `sync` (дельта-спеки → main), `bulk-archive` (пакетная архивация).
+Дополнительные действия: `extend` (расширить существующий change), `sync` (дельта-спеки → main), `bulk-archive` (пакетная архивация), `/opsx:explain` (пошаговый разбор кода), `/opsx:overview` (описание проекта для ФА/заказчика).
 
 ## АЛИАСЫ КОМАНД
 
@@ -42,7 +42,7 @@ review/explore → extend (user) → verify → apply
 - **design.md** содержит секцию `## Slices` с описанием каждого среза (Сценарий, Primary acceptance, Приёмка, Связь со spec, Зависимости).
 - **tasks.md** структурирован по срезам: `# Срез S<N>: ...` → метаданные → задачи `S<N>.<M>` → приёмочный `S<N>.accept` → `<!-- slice-gate: ... -->`.
 - **apply** по умолчанию — step-by-slice: реализовали → пользователь принимает → следующий.
-- **verify** оценивает когерентность срезов (Quality Controller, 6 критериев), а не фазовую структуру.
+- **verify** оценивает когерентность срезов (Quality Controller: критерии 1–6, 8, 8b, 9–11 из `vertical-slices.mdc`), а не фазовую структуру.
 - **archive** возможен со всеми `S<N>.accept` = `[x]` (в т.ч. после варианта **A** при архивации → `принят (archive)` в `debug.md`) либо с **`--force-legacy`** (осознанный обход контракта срезов).
 
 ## ДОБАВЛЕНИЕ ЗАДАЧ К СУЩЕСТВУЮЩЕМУ CHANGE

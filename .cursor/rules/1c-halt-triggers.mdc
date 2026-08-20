@@ -7,7 +7,7 @@ priority: 998
 
 # 1C HALT Triggers (on-demand)
 
-**Когда загружать:** правка `.bsl`, делегирование writer/reviewer, срабатывание триггеров из always-apply `.cursor/rules/1c-agent-delegation.mdc`.
+**Когда загружать:** правка `.bsl`, делегирование writer/reviewer, срабатывание триггеров из always-apply `.cursor/rules/1c-agent-delegation.mdc`. При **фактической** правке `.bsl` дополнительно Read `.cursor/rules/1c-writer-pipeline.mdc` (не полагаться на glob).
 
 ## Safety floor
 
@@ -33,7 +33,7 @@ Quick-fix снижает накладные расходы, не глубину 
 
 | Триггер | Действие | Детали |
 |---------|----------|--------|
-| Реализация ЗНИ без /opsx:apply | **СТОП.** writer/reviewer запрещены. Исключение: Light/Mechanical | APPLY GATE в `1c-agent-delegation.mdc` |
+| Реализация ЗНИ без /opsx:apply | **СТОП.** writer/reviewer запрещены. Исключение: Light/Mechanical; `/review`/`/release-review` — reviewer всегда, writer только после queue-fix | APPLY GATE ниже |
 | explore без active change | **СТОП.** writer/reviewer → `/opsx:new` | `openspec-explore/SKILL.md` |
 | Новый объект метаданных | **СТОП.** Никогда не создавать | `1c-no-metadata-creation.mdc` |
 | Form.xml / Template.xml / «заимствовать» / form-add / template-add / ChildObjects | Mode Gate + XML guard; заимствование и form-add — **всегда** блокер человеку | `forms-mxl-mode-gate.mdc`, `1c-xml-write-guard.mdc` |
@@ -45,8 +45,12 @@ Quick-fix снижает накладные расходы, не глубину 
 | Light Mode: 2–10 строк, 1 файл | **onec-code-writer** + **onec-code-reviewer** | см. LIGHT MODE |
 | Mechanical Mode: find-replace | StrReplace + Grep + **reviewer** | см. MECHANICAL MODE |
 | Правка `.bsl` (общий) | architect-gate → architect → writer → reviewer | `architect-gate.mdc` |
-| Исследование 3+ модулей | **onec-code-explorer** | DELEGATION GATE |
+| Исследование 3+ модулей | **onec-code-explorer** | порог 0, `1c-agent-delegation.mdc` |
 | Bug fix (маркеры ошибки) | verified-cause-gate → architect при масштабе | `verified-cause-gate.mdc` |
+
+## APPLY GATE
+
+Реализация (writer/reviewer, прямая правка `.bsl`) — **только** в `/opsx:apply`. Артефакты OpenSpec — без apply. Change есть, apply не вызван → СТОП, предложить `/opsx:apply <name>`. Light/Mechanical — без артефактов. `/review` и `/release-review`: reviewer без ограничений; writer — только после подтверждения / `queue-fix` и только по замечаниям отчёта.
 
 ## LIGHT MODE (точечная правка)
 
@@ -77,7 +81,7 @@ Find-replace без смены логики; без writer. Примеры: `#О
 
 ## ИСКЛЮЧЕНИЯ (прямая правка .bsl)
 
-- Однострочные правки; только комментарии (не JSDoc шапки процедур)
+- Однострочные правки; только комментарии (**не** многострочная JSDoc-шапка перед `Процедура`/`Функция` — это writer)
 - «без агентов» / «без ревью» от пользователя
 - Mechanical Mode
 

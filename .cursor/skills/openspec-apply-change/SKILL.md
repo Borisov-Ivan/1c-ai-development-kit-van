@@ -20,9 +20,9 @@ Implement tasks from an OpenSpec change.
    If a name is provided, use it. Otherwise:
    - Infer from conversation context if the user mentioned a change
    - Auto-select if only one active change exists
-   - If ambiguous, run `openspec list --json` to get available changes and use the **AskUserQuestion tool** to let the user select
+   - If ambiguous, run `openspec list --json` to get available changes and use the **AskQuestion tool** to let the user select
 
-   Always announce: "Using change: <name>" and how to override (e.g., `/opsx:apply <other>`).
+   Имя change — в первом русском снимке статуса (не отдельным английским ping). Override: `/opsx:apply <other>`.
 
 1b. **Parse флаги команды** (см. `.cursor/commands/opsx-apply.md`):
 
@@ -48,6 +48,7 @@ Implement tasks from an OpenSpec change.
    - Read or Grep `openspec/changes/<name>/proposal.md` for `<developer>`, `<ФИО>`, «Уточнить до `/opsx:apply`» or «Уточнить».
    - If `developer` placeholder and `defaultDeveloper` empty — STOP, один вопрос в чат: только ФИО (Фамилия И.О.).
    - If `comment_suffix` placeholder or empty without `marker_style: minimal` — STOP, один вопрос: только **описание** для маркера (`comment_suffix`; можно пусто → `marker_style: minimal`).
+   - Значение `developer: n/a` — плейсхолдер автора, не имя для маркера кода. Если `marker_scope` не пуст: взять `defaultDeveloper` из карточки проекта без вопроса; если пусто — один вопрос про ФИО **до** правки BSL. В маркер кода `n/a` не писать.
    - Не монолит «ФИО + domain_label» в одном сообщении.
    - Replace placeholders in `proposal.md`; mark F1 follow-up `[x]` if present.
 
@@ -115,12 +116,15 @@ Implement tasks from an OpenSpec change.
    - Если match baseline запретам из `marker-canon.md` (и project overlay) → **STOP**, один вопрос: «перепишите domain_label для маркера» (как при плейсхолдере developer).
    - Пустой `comment_suffix` без `marker_style: minimal` → STOP с предложением заполнить или пометить mechanical.
 
-   - Если `developer` пустой/плейсхолдер — взять `defaultDeveloper` из project.md; если и там пусто — один вопрос в чат: **только ФИО** (не смешивать с описанием).
+   - Если `developer` пустой/плейсхолдер (`<ФИО>`, `<developer>`, «Уточнить») — взять `defaultDeveloper` из project.md; если и там пусто — один вопрос в чат: **только ФИО** (не смешивать с описанием).
 
    **marker_scope** (Grep `tasks.md` и при необходимости `design.md` на пути `src/.../*.bsl`):
    - только `src/ЭДО и ЭА/cf/` → **cf-ea**
    - только cfe (`src/ЭДО ПАО/cfe/`, `src/ДО3 Демо/cfe/`) → **cfe**
    - оба → **mixed** (writer получает оба шаблона + таблицу «путь → шаблон»)
+
+   - Если `developer: n/a` и `marker_scope` не пуст — сначала `defaultDeveloper` из карточки проекта без вопроса; если пусто — один вопрос про ФИО **до** правки BSL. В маркер кода `n/a` **не** писать.
+   - Если `developer: n/a` и `marker_scope` пуст — маркеры не применяются; `n/a` в код не писать.
 
    Сформировать (date = текущая `dd.MM.yyyy`):
    - **cfe:** `open_marker` = `// +++ {developer} {date}` или `// +++ {developer} {date} {comment_suffix}`; `close_marker` = `// --- {developer}`
@@ -249,7 +253,7 @@ Implement tasks from an OpenSpec change.
    | **Explicit step-by-step** | step-by-step + явный критерий в tasks | Шаблон A |
    | **Slice-gate** | Все рабочие `[x]`, accept `[ ]` | Шаблон B |
 
-   **Запрет meta-статуса pipeline в чате:** не сообщать «автопроверки пройдены», «линтер чист», «reviewer PASS», «diff не обязателен» — non-events (§3a `chat-output-budget.mdc`).
+   **Запрет meta-статуса pipeline в чате:** non-events (`chat-output-budget-full.mdc` §3a) — не выводить служебный шум прогона.
 
    **Batch mode** — только legacy без срезов + явный запрос пользователя.
 
@@ -308,7 +312,7 @@ Implement tasks from an OpenSpec change.
    | Приёмочная задача (`S<N>.accept` или legacy `S<N>.T<M>`) | «ручной тест», «убедиться», `S<N>.accept`, `S<N>.T<M>` | **Режимы по срезам / пошаговый** (внутренние коды `step-by-slice` / `step-by-step`): trigger Slice Gate (см. шаг 6). **Legacy batch:** пропустить с предупреждением; включить в Session Summary секцию «Отложенные ручные тесты» |
    | Создание метаданных | «создать регистр», «создать справочник», «создать форму» | **СТОП** — блокер **pause-wait**: чат по `templates/pause-wait-chat.md`, рецепт в файле по `1c-no-metadata-creation.mdc` |
 
-   **HALT:** Оркестратор НЕ реализует задачи типов BSL-код и модули формы самостоятельно. Оркестратор готовит промпт и делегирует. Прямое использование Write/StrReplace для .bsl и **сырая** правка Form.xml/Template.xml — запрещены. Form/Template при `assisted` — только через skill (см. Mode Gate). Для `Form.xml`/Конфигуратора при `manual`: СТОП — **pause-wait** (чат `templates/pause-wait-chat.md`, рецепт в файле; полный шаблон Form.xml — `1c-xml-write-guard.mdc`) и WAIT до выгрузки/приёмки пользователя. Для программного создания элементов в `Form/Module.bsl`: обычный BSL pipeline — полный эталонный порядок в `.cursor/rules/1c-writer-pipeline.mdc` (writer → ReadLints → IDENTIFIER HYGIENE CHECK → COMMENT HYGIENE CHECK → API/METADATA CHECK → EXTENSION VERIFICATION → reviewer). Always-apply якорь — `1c-agent-delegation.mdc`. Ref: `forms-mxl-mode-gate.mdc`, `1c-agent-delegation.mdc` (§ XML WRITE GUARD), `1c-utility-agents.mdc`.
+   **HALT:** Оркестратор НЕ реализует задачи типов BSL-код и модули формы самостоятельно. Оркестратор готовит промпт и делегирует. Прямое использование Write/StrReplace для .bsl и **сырая** правка Form.xml/Template.xml — запрещены. Form/Template при `assisted` — только через skill (см. Mode Gate). Для `Form.xml`/Конфигуратора при `manual`: СТОП — **pause-wait** (чат `templates/pause-wait-chat.md`, рецепт в файле; полный шаблон Form.xml — `1c-xml-write-guard.mdc`) и WAIT до выгрузки/приёмки пользователя. Для программного создания элементов в `Form/Module.bsl`: обычный BSL pipeline — полный эталонный порядок в `.cursor/rules/1c-writer-pipeline.mdc` (writer → ReadLints → IDENTIFIER HYGIENE CHECK → COMMENT HYGIENE CHECK → API/METADATA CHECK → EXTENSION VERIFICATION → reviewer). Always-apply якорь — `1c-agent-delegation.mdc`. Ref: `forms-mxl-mode-gate.mdc`, `1c-xml-write-guard.mdc`, `1c-utility-agents.mdc`.
 
    **Naming evidence (apply, обязательно):** IDENTIFIER HYGIENE CHECK включает шаг 2b **touched-procedure scope** (`1c-writer-pipeline.mdc`). В промпт reviewer передавать полную таблицу `## Naming Signals (evidence)` с колонкой `Scope`. **Запрещено** помечать legacy-идентификаторы в изменённых процедурах как «pre-existing — skip» / «новых символов нет → naming OK». Reviewer обязан заполнить `Touched-scope identifiers (domain test)` при изменённых процедурах.
 
@@ -356,7 +360,7 @@ Implement tasks from an OpenSpec change.
    2. Сохранить вывод в `reports/resolved-contract-<slug>-YYYY-MM-DD.md` (артифакт ЗНИ).
    3. Повторно вызвать reviewer с Resolved Contracts в промпте.
    4. При последующем устранении замечаний — передать Resolved Contracts в промпт writer.
-   Протокол: см. `1c-agent-delegation.mdc`, секция CONTRACT RESOLUTION; шаблоны: `1c-agent-patterns/explorer.md` (Explorer — contract resolution), `1c-agent-patterns/writer.md` (Writer — review fix), `1c-agent-patterns/reviewer.md` (Reviewer — ревью кода).
+   Протокол: см. `1c-writer-pipeline.mdc` § CONTRACT RESOLUTION; шаблоны: `1c-agent-patterns/explorer.md` (Explorer — contract resolution), `1c-agent-patterns/writer.md` (Writer — review fix), `1c-agent-patterns/reviewer.md` (Reviewer — ревью кода).
 
    **Task loop:**
 
@@ -438,7 +442,7 @@ Implement tasks from an OpenSpec change.
    - **Classify** (Task Dispatch table above) — announce type and executor
    - **Delegate** to the designated executor (agent or skill)
    - Orchestrator role: prepare prompt with context, delegate, spot-check result
-   - **Spot-check (post-verification):** After the agent reports completion, verify the change: Grep for a pattern that confirms the fix (e.g. after "replace ТекущаяДата with ТекущаяДатаСеанса" → Grep for `ТекущаяДата()` in that file must return 0 matches). For batch tasks (5+ files), spot-check at least 3 files (first, middle, last in the list). If the result does not match expectations → STOP, report to user, do NOT mark task complete. **LINT GATE** — см. [`.cursor/rules/1c-agent-delegation.mdc`](../../rules/1c-agent-delegation.mdc) § LINT GATE + [`.cursor/rules/1c-writer-pipeline.mdc`](../../rules/1c-writer-pipeline.mdc). **Чат (non-events, §3a `chat-output-budget.mdc`):** при успешном writer + spot-check + reviewer PASS без MUST_FIX — **не** выводить строки «Авто-проверка: OK», «Линтер чист», «reviewer PASS», «Spot-check: OK»; между задачами (без пошагового режима) достаточно одной строки «Задача `S<N>.<M>` («…») реализована.».
+   - **Spot-check (post-verification):** After the agent reports completion, verify the change: Grep for a pattern that confirms the fix (e.g. after "replace ТекущаяДата with ТекущаяДатаСеанса" → Grep for `ТекущаяДата()` in that file must return 0 matches). For batch tasks (5+ files), spot-check at least 3 files (first, middle, last in the list). If the result does not match expectations → STOP, report to user, do NOT mark task complete. **LINT GATE** — см. [`.cursor/rules/1c-writer-pipeline.mdc`](../../rules/1c-writer-pipeline.mdc) § LINT GATE. **Чат (non-events, `chat-output-budget-full.mdc` §3a):** при успешном writer + spot-check + reviewer без MUST_FIX — не выводить служебный шум прогона; между задачами (без пошагового режима) достаточно одной строки «Задача `S<N>.<M>` («…») реализована.».
    - **Carve-out QualityFlag weak / design-prescribed (после apply-reviewer):** `QualityFlag=weak` / tag `design-prescribed` / agreement-override — **не** авто-waive и **не** AskQuestion disposition. Functional MUST_FIX **без** weak/design-prescribed/agreement-override → авто-fix как прежде. Weak → оставить open + одна строка-след в отчёте задачи («на `/review` потребуется подтверждение качества»). **`[x]`:** при open weak — только если след записан; non-weak MUST_FIX блокируют `[x]`. якорь минимума — `1c-agent-delegation.mdc`; полная процедура — `review/SKILL.md` шаг 4.5.
    - Mark task complete in the tasks file: `- [ ]` → `- [x]`
    - **Вывод после задачи** — по режиму из §5.6 (тихий успех / шаблон A / slice-gate B):

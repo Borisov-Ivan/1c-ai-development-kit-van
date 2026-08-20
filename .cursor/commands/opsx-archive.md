@@ -7,6 +7,8 @@ description: Архивация завершённого change
 
 Archive a completed change in the experimental workflow.
 
+Ключ `-noapi` / `-api` пишется в любом сообщении чата и не является флагом этой команды (внутренний прогон verify зовёт дорогие модели).
+
 **Первое действие:** прочитать `.cursor/skills/openspec-archive-change/SKILL.md` и далее идти по его шагам. До прочтения скилла — никаких чтений артефактов, трасс, модулей.
 
 **Output style:** T-CONFIRM (`.cursor/docs/opsx-output-style.md` §5.5).

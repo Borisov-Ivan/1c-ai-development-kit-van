@@ -185,7 +185,7 @@ Used by `/opsx:verify` Layer 4 — независимый адверсариал
 
 Подробный протокол (адверсариальная установка, Three-Question Challenge, формат отчёта, маппинг вердикта) — см. `.cursor/agents/onec-code-architect.md` секция «Режим `design-challenge`».
 
-**Модель.** Закрытая эскалация Fable из `.cursor/rules/model-selection.mdc`: если слаг есть в описании `Task` — Fable; иначе Opus 5 + одна строка, что дорогая эскалация недоступна. Не передавать отсутствующий слаг. **Режим запуска: `run_in_background=true`** (см. SKILL.md verify, секция «Запуск агентов verify»).
+**Модель.** Закрытая эскалация Fable из `.cursor/rules/model-selection.mdc`: если слаг есть в описании `Task` — Fable; иначе Opus 5 + одна строка в чат: «Модель архитектора: Opus 5». Не передавать отсутствующий слаг. **Режим запуска: `run_in_background=true`** (см. SKILL.md verify, секция «Запуск агентов verify»).
 
 ```
 Task(

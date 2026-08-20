@@ -15,7 +15,7 @@ metadata:
 
 **Output style:**
 - Сводка в чате («что создано», следующий шаг) — шаблон **T-CONFIRM** §5.5 + **Chat Surface Contract** §2.6: handoff на языке эффекта, **без** перечня файлов; **один** next step — `/opsx:verify <name>` (не «verify или apply», без auto-chain).
-- **Подтверждение постановки перед scaffold:** бриф по `templates/brief-card.md` (§5.1 Sync Card). **B0** при свежем `## Постановка ЗНИ` в чате / журнале explain / explore-handoff — **одна информирующая строка без согласования имени** (slug — техническая деталь; END TURN не делается). **B1** при свободном тексте — слот **Изменение** (+ опц. **Затронутое**) + `Подтвердить?`; план работ в чат **запрещён**. KB-discovery — internal, в чат не выводится. `temp/briefs/*.md` не создаются.
+- **Подтверждение постановки перед scaffold:** бриф по `.cursor/docs/templates/brief-card.md` (§5.1 Sync Card). **B0** при свежем `## Постановка ЗНИ` в чате / журнале explain / explore-handoff — **одна информирующая строка без согласования имени** (slug — техническая деталь; END TURN не делается). **B1** при свободном тексте — слот **Изменение** (+ опц. **Затронутое**) + `Подтвердить?`; план работ в чат **запрещён**. KB-discovery — internal, в чат не выводится. `temp/briefs/*.md` не создаются.
 - **Генерируемые артефакты** `proposal.md`, `design.md`, `tasks.md`, spec deltas — подчиняются §1 «Три слоя» и §3 «Запрет внутренних ID в пользовательских полях»: секции для заказчика/приёмки (`Why`, `What Changes`, `Scope`, `Scenarios`, `Requirements`) — UX-слой; внутренние ID (`S<N>.<M>`, `S<N>.accept`, `D<N>`, `R<N>`, `I<N>`, номера задач `12.9`) — только в `## Slices`, `## Decisions`, `## Tasks`, `## Risks`. Перечисления — нумерованные списки. Перед записью — self-check-5 (§7).
 
 **Steps**
@@ -60,9 +60,15 @@ metadata:
    Read `openspec/project.md` → секция **«Разработчик по умолчанию»** → `defaultDeveloper` (ФИО с пробелами, trim), `cfMarkerPrefix`. Baseline запреты domain_label — `.cursor/docs/marker-canon.md` ⊕ project overlay.
 
    **Resume (каталог `openspec/changes/<name>/` уже существует):**
-   - Если `proposal.md` есть и `developer` заполнен (не `<ФИО>` / `<developer>`) — **не спрашивать** Metadata Gate; использовать metadata из proposal.
+   - Если `proposal.md` есть и `developer` заполнен (не `<ФИО>` / `<developer>`) — **не спрашивать** Metadata Gate; использовать metadata из proposal. Значение `n/a` (kit-only) — заполненный закрытый гейт, не переспрашивать.
    - Если `developer` — плейсхолдер, а `defaultDeveloper` в project.md задан — один проход как ниже (только `comment_suffix`; шаги 2b–2c/3).
    - Если оба плейсхолдера и нет `defaultDeveloper` — полный проход 2a → 2b → 2c/3.
+
+   **Пропуск vs вопрос (kit-only / BSL) — до 2a, не по Impact** (его ещё нет). Смотреть постановку, блок «Постановка ЗНИ», текст запроса и поля «Что менять» / «Файлы»:
+   - **Спросить** (проход 2a–2c), если есть `.bsl` или модули в `src/` / расширении.
+   - **Спросить**, если постановка на деловом языке без литерала `.bsl` и kit-only не доказан (сомнение, не молчаливый `n/a`).
+   - **Пропустить вопрос только при доказанном kit-only:** охват исключительно `.cursor/**`, `openspec/**` и документы kit; нет `.bsl`, нет `src/`, нет модулей расширения. Записать `developer: n/a`, пустой `comment_suffix`, `marker_style: minimal` **без** карточки выбора; **не** END TURN на ответ маркера; гейт **закрыт**. `n/a` не плейсхолдер «пропущен молча» и не даёт WARNING плейсхолдера в сводке.
+   Молчаливый пропуск при `.bsl` / `src/` в постановке **по-прежнему запрещён**.
 
    **Новый change — агент собирает черновик описания (`comment_suffix`) и предлагает принять** (выбор, а не сочинение):
 
@@ -108,7 +114,7 @@ metadata:
 
    **STOP / END TURN:** дождаться ответа (кроме resume с валидным proposal metadata). После сообщения с вопросом Metadata — завершить ход; Mode Gate и прочие выборы — только в последующих сообщениях.
 
-   **Guardrail:** `openspec new change` до завершения Metadata Gate для **нового** change запрещён.
+   **Guardrail:** `openspec new change` до закрытия Metadata Gate для **нового** change запрещён. Закрытие = ответ на вопрос маркера **или** запись kit-only (`developer: n/a`, `marker_style: minimal`).
 
    Запись в `proposal.md` (шаг 5) — **канонический формат** (не list с `zni_id` / `zni_name` / `generate_tz`):
    ```markdown
@@ -172,7 +178,7 @@ metadata:
    **Error handling (MANDATORY for all Task delegations in new):**
    Strictly follow the Subagent result protocol from `.cursor/rules/chat-output-budget.mdc` §5:
    - For `interrupted-by-user`: PAUSE and ask the user how to proceed.
-   - For `failed`: Retry once. If retry fails, inform the user "Агент недоступен, делаю упрощённый вариант сам / откладываю" and wait for decision or create minimal scaffold.
+   - For `failed`: двухшаговая цепочка `model-selection.mdc` (шаг 2 = тот же агент **без** `model=`). После исчерпания — СТОП + канон бюджета §5; **не** подменять отчёт субагента текстом оркестратора и **не** «делать упрощённый вариант сам».
    - **NEVER silently skip** an artifact and **NEVER invent error causes** (like "timeout") without evidence. Every `applyRequires` artifact MUST be written to disk before the new session ends.
 
    Loop through artifacts in dependency order (artifacts with no pending dependencies first):
@@ -222,7 +228,7 @@ metadata:
 
         Architect reads files independently and returns tasks.md content.
         Save the result to `outputPath`.
-        If architect Task fails — apply error handling above (retry once, then create yourself).
+        If architect Task fails — двухшаговая цепочка `model-selection.mdc`; после исчерпания — СТОП + канон, не писать tasks.md текстом оркестратора.
 
         **Post-tasks self-check (Primary + Acceptance Coverage):**
         После сохранения `tasks.md` — mechanical self-check:
@@ -246,7 +252,7 @@ metadata:
       - Stop when all `applyRequires` artifacts are done
 
    c. **If an artifact requires user input** (unclear context):
-      - Use **AskUserQuestion tool** to clarify
+      - Use **AskQuestion tool** to clarify
       - Then continue with creation
 
    d. **ADR Discovery (before/during design artifact)**:
@@ -388,7 +394,7 @@ After completing all artifacts, summarize in chat (T-CONFIRM, Chat Surface Contr
 
 **Guardrails**
 - **HALT — dual selection questions (self-check перед отправкой):** если черновик ответа содержит **два или более** вопроса выбора (`AskQuestion`, нумерованные взаимоисключающие варианты, две карточки выбора) — **не отправлять**; пересобрать сообщение с ровно одним вопросом выбора. Metadata Gate и Mode Gate в одном сообщении — запрещены.
-- **Metadata Gate MUST NOT be silently skipped** (новый change): не вызывать `openspec new change` без ответа на Metadata Gate. Перед финальной сводкой проверить `proposal.md` на `<ФИО>`, `<developer>`, «Уточнить до». Если плейсхолдеры и пользователь не выбирал «пропустить» — WARNING в сводке.
+- **Metadata Gate MUST NOT be silently skipped** (новый change): не вызывать `openspec new change` без закрытого Metadata Gate. Гейт закрывается ответом пользователя **или** обоснованным пропуском kit-only (`developer: n/a`, `marker_style: minimal`). Молчаливый пропуск при BSL/`src/` в постановке запрещён. Перед финальной сводкой проверить `proposal.md` на `<ФИО>`, `<developer>`, «Уточнить до». Значение `n/a` при kit-only — не плейсхолдер и не WARNING. Если плейсхолдеры (`<ФИО>` и т.п.) и пользователь не выбирал «пропустить» — WARNING в сводке.
 - **Explore context MUST NOT be used only for naming**: Если в последних сообщениях чата найден свежий блок `## Постановка ЗНИ`, или свежий `temp/reports/explain-*.md` с секцией `## Постановка ЗНИ`, или свежий `temp/explore-handoff-*.md` — прочитать как source context и перенести все поля Handoff Contract (Симптом, Корневая причина с маркером, Что менять, Файлы, Приёмка, Связь с архивом, Architect/verify, Тема маркера, Срезы (черновик), Открытые решения) в `proposal`, `design`, `specs`, `tasks`, Metadata Gate и Design Gate. Legacy-файлы — только по явной ссылке пользователя (шаг 1.b, «Legacy-источники»).
 - Create ALL artifacts needed for implementation (as defined by schema's `apply.requires`)
 - Always read dependency artifacts before creating a new one
