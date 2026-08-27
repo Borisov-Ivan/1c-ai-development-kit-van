@@ -17,7 +17,7 @@
 
 Вручную то же самое: `pwsh tools/publish-dist.ps1 -DryRun`, затем без `-DryRun`. На Linux/macOS — `tools/publish-dist.sh`.
 
-Состав поставки (allow-list, SSOT — спека `kit-distribution` в `openspec/specs/` репозитория kit):
+Состав поставки (allow-list, SSOT — `openspec/specs/kit-distribution/spec.md`):
 
 | Что | Откуда |
 |-----|--------|

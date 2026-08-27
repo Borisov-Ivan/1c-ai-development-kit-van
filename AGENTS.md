@@ -19,4 +19,4 @@
 - Сессия → `session-discipline.mdc`. Context-strategy → `.cursor/skills/context-strategy/SKILL.md`. Отчёты субагентов → `preserve-subagent-reports.mdc`.
 - Forms → `forms-mxl-mode-gate.mdc`. Архитектура / RCA → `architect-gate.mdc` / `verified-cause-gate.mdc`. Specs/срезы → `openspec-specs-gate.mdc` / `vertical-slices.mdc`. AP → `bsl-antipatterns.mdc`.
 - ADR → `openspec/adrs/` + `adr-format.mdc`. KB → `openspec/knowledge/` + `knowledge-format.mdc`. Маркеры → `marker-canon.md`. Пути cf/cfe → `openspec/project.md` (после `/init-project`; в kit нет) + `capture-to-project.mdc` + `project-paths.mdc`.
-- Ревью: `.cursor/docs/review-guide.md`; `/review`; `.cursor/skills/review/SKILL.md`. Disposition — спека `review-quality-disposition` и ADR-0003 (репозиторий kit).
+- Ревью: `.cursor/docs/review-guide.md`; `/review`; `.cursor/skills/review/SKILL.md`. Disposition — `openspec/specs/review-quality-disposition/spec.md`, ADR-0003.
