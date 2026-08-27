@@ -14,6 +14,6 @@ description: Bootstrap или re-sync таксономии Knowledge Base (_taxo
 **Input:** без аргументов и флагов.
 
 **Поведение:**
-- Файла `_taxonomy.yaml` нет → построить draft (по домену на каждую конфигурацию и расширение, блок `cross` из `openspec/knowledge/_taxonomy.template.yaml`), показать summary, записать после подтверждения.
+- Файла `_taxonomy.yaml` нет → построить draft (по домену на каждую конфигурацию и расширение, блок `cross` из `.cursor/templates/seed/knowledge/_taxonomy.template.yaml`), показать summary, записать после подтверждения.
 - Файл есть → diff текущей таксономии с draft; существующие subdomains не удаляются, только добавляются отсутствующие.
 - `_index.yaml` и файлы фактов (KB-*.md) команда не трогает.
