@@ -536,7 +536,7 @@ T-коды (T-BRIEF, T-HANDOFF, T-REPORT, T-STATUS, T-CONFIRM, T-OVERVIEW) — *
 
 Используется в: `/opsx:overview`.
 
-**Файл** `openspec/changes/<name>/overview-YYYY-MM-DD.md` (корень каталога первой ЗНИ, не `temp/`, не `reports/`) — полный связный текст по шаблону `.cursor/skills/openspec-overview/templates/customer-overview.md` (стиль — `style-checklist.md`, структура — `fixtures/golden-88781-overview.md`, голос этапа — `fixtures/voice-good-stage.md`). Аудитория: ФА / аналитик / заказчик; жанр — **лаконичное описание проекта** (`chat-lexicon.md`).
+**Файл** `temp/overview-YYYY-MM-DD-<slug>.md` — полный связный текст по шаблону `.cursor/skills/openspec-overview/templates/customer-overview.md` (стиль — `style-checklist.md`, структура — `fixtures/golden-88781-overview.md`, голос этапа — `fixtures/voice-good-stage.md`). Аудитория: ФА / аналитик / заказчик; жанр — **лаконичное описание проекта** (`chat-lexicon.md`).
 
 **Чат** (тонкий, ≤ ~8 строк):
 

@@ -29,7 +29,7 @@ description: Первичный bootstrap или re-sync таксономии б
       Примеры: `src/ДО2/cf` → `DO2_cf`; `src/ДО2 Подрядчик/cf` → `DO2_Podryadchik_cf`; `src/ДО3/cf` → `DO3_cf`.
    - Для базовых конфигураций использовать минимальные `subdomains`: `approval`, `tasks`, `common`, `ui`. При re-sync существующие subdomains не удалять, только добавлять отсутствующие.
    - Для расширений `subdomains` — из подсистем / ключевых общих модулей (эвристика на основе архитектуры).
-   - Обязательно добавить блок `cross` из шаблона `openspec/knowledge/_taxonomy.template.yaml`.
+   - Обязательно добавить блок `cross` из шаблона `.cursor/templates/seed/knowledge/_taxonomy.template.yaml` (fallback — копия проекта `openspec/knowledge/_taxonomy.template.yaml`).
    - В `cross.scope-rules` должен быть принцип: факты с anchor в `<base>_cf` описывают типовое поведение с владельцем «вендор»; перехваты и расширение этого поведения описываются в доменах расширений через `related.kb`.
 
 3. **Сравнение (Diff):**

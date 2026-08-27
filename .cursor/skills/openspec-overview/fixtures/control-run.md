@@ -44,7 +44,7 @@
 
 ## Output path
 
-`openspec/changes/nastroyka-knopok-processov/overview-control-88781.md`
+`temp/overview-control-88781.md`
 
 ## Brief override (как будто пользователь подтвердил)
 

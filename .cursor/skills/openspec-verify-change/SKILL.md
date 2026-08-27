@@ -196,7 +196,7 @@ QC оценивает критерии 1–6, 8, **8b**, 9–11 из `vertical-s
 3. Порог достигнут для среза `S<N>`:
    - **Override:** в корне change есть `.gate-override.yaml` с `gate: acceptance-loop` — прочитать `timestamp`: ≤7 дней → `SKIPPED-override` (одна строка в чат: «Разбор петли приёмки отложен по вашему решению от <дата>; отсрочка истекает через <N> дней»), идти на Layer 3; >7 дней → override истёк (`gate-override-expired` в info), продолжить как срабатывание.
    - **Закрытие:** существует `reports/architecture-loop-redesign-*.md`, датированный **позже** последней `awaiting-acceptance` среза `S<N>` → петля уже разобрана архитектором → `layer_2_5_loop_detection: PASS`, идти на Layer 3.
-   - Иначе — **запустить редизайн-аудит:** `Task(onec-code-architect, mode=deep-analysis)` по закрытой эскалации в `model-selection.mdc` (петля приёмки = тяжёлый триггер: Fable + «Разбор постановки (Fable)», если слаг есть в описании `Task`; иначе Opus 5 + «Разбор постановки (Opus 5)», без передачи отсутствующего слага) с loop-контекстом: история раундов `S<N>` (записи Slice Gate Decisions + Extend —), ссылки на трассы/отчёты/`debug.md`, явный вопрос «корень один или это N независимых дефектов; предложить consolidation vs минимум». Запуск — `run_in_background: true`, блок **Final message constraint** (как Layer 4). Сохранить `reports/architecture-loop-redesign-YYYY-MM-DD.md`. Append `debug.md` § Loop Detection (формат — `vertical-slices.mdc`).
+   - Иначе — **запустить редизайн-аудит:** `Task(onec-code-architect, mode=deep-analysis)` по закрытой эскалации в `model-selection.mdc` (петля приёмки = тяжёлый триггер: Fable, если слаг есть в описании `Task`; иначе Opus 5 + одна строка, без передачи отсутствующего слага) с loop-контекстом: история раундов `S<N>` (записи Slice Gate Decisions + Extend —), ссылки на трассы/отчёты/`debug.md`, явный вопрос «корень один или это N независимых дефектов; предложить consolidation vs минимум». Запуск — `run_in_background: true`, блок **Final message constraint** (как Layer 4). Сохранить `reports/architecture-loop-redesign-YYYY-MM-DD.md`. Append `debug.md` § Loop Detection (формат — `vertical-slices.mdc`).
    - Статус слоя `acceptance-loop-detected` → **FAIL → NO-GO**. Decision-card в чат (по `.cursor/docs/templates/decision-block.md`): суть петли (срез, сколько раз вернулся без приёмки) + рекомендация архитектора (consolidation / минимум) прозой; **Следующий шаг:** `/opsx:extend <name> --from-architecture <redesign-report>`.
 
 **Порядок и cap.** Layer 2.5 идёт **до** Layer 4; его FAIL — всегда NO-GO. Decision-fatigue cap (GO-saturated) гасит только остаточный Layer 4 challenge и петлю подавить **не может**.
@@ -239,7 +239,7 @@ QC оценивает критерии 1–6, 8, **8b**, 9–11 из `vertical-s
 
 **Запуск:**
 
-1. Делегировать `onec-code-architect` с `mode=design-challenge` по закрытой эскалации в `model-selection.mdc`: Fable + «Разбор постановки (Fable)», если слаг есть в описании `Task`; иначе Primary обычного архитектора (Opus 5) + «Разбор постановки (Opus 5)». Не передавать отсутствующий слаг. Не использовать Fable как запас после сбоя Opus.
+1. Делегировать `onec-code-architect` с `mode=design-challenge` по закрытой эскалации в `model-selection.mdc`: Fable, если слаг есть в описании `Task`; иначе Primary обычного архитектора (Opus 5) + одна строка в чат: «Модель архитектора: Opus 5». Не передавать отсутствующий слаг. Не использовать Fable как запас после сбоя Opus.
 2. **Режим запуска:** `run_in_background: true` (параллельно с sync-агентами Layer 2/5). Самый длинный шаг verify; параллелизм нужен, иначе verify становится в 2.5x длиннее. В чате остаётся **одна короткая карточка** (одна строка пути к файлу) — это допустимо как фоновый прогресс-маркер и не нагружает внимание. В промпт обязательно включить блок **Final message constraint** (секция «Запуск агентов verify» ниже).
 3. Промпт включает:
    - `proposal.md`, `design.md`, `specs/**/spec.md` — как первичные источники.
@@ -366,7 +366,7 @@ Layer 4 `CHALLENGE` или `REJECT` → NO-GO **кроме** CHALLENGE-saturated
 
 Self-check: «можно действовать без файла» = пользователь видит **конкретную команду** или явное приглашение ответить в чате.
 
-**Одна команда `/opsx:verify` → одно финальное сообщение в чат** (допустим progress marker при длинном Repair Loop). **Исключение:** канон лимита «дорогие модели недоступны — дальше на модели чата» и «Разбор постановки (Fable)» / «Разбор постановки (Opus 5)» не ждут карточки вердикта. Английский progress не изобретать. Допустимые русские строки — из бюджета чата и `model-selection.mdc` (канон лимита, «Разбор постановки (Fable)», «Разбор постановки (Opus 5)», «Дописываю постановку…»).
+**Одна команда `/opsx:verify` → одно финальное сообщение в чат** (допустим progress marker при длинном Repair Loop). **Исключение:** канон лимита «дорогие модели недоступны — дальше на модели чата» и «Модель архитектора: Opus 5» не ждут карточки вердикта. Английский progress не изобретать. Допустимые русские строки — из бюджета чата и `model-selection.mdc` (канон лимита, «Модель архитектора: Opus 5», «Дописываю постановку…»).
 
 ### Repair Loop (internal, max 2 attempts)
 
@@ -378,7 +378,7 @@ Self-check: «можно действовать без файла» = польз
 2. **Repair only** (включая `implementation_invariant` от classifier) + `repair_attempt < 2`:
    - Вызвать `apply_repairs_from_report()` — internal `/opsx:extend <name> --from-verify <отчёт>` в режиме **repair-from-verify** (без брифа, без сообщений в чат; порядок правок — extend §6).
    - **Не END TURN** → полный re-verify (слои 1–5) с `repair_attempt + 1`.
-   - **0 промежуточных сообщений** в чат; допустима одна строка progress marker (§6 `chat-output-budget.mdc`): «Дописываю постановку…». **Исключение:** канон лимита и «Разбор постановки (Fable)» / «Разбор постановки (Opus 5)» не ждут финальной карточки.
+   - **0 промежуточных сообщений** в чат; допустима одна строка progress marker (§6 `chat-output-budget.mdc`): «Дописываю постановку…». **Исключение:** канон лимита и «Модель архитектора: Opus 5» не ждут финальной карточки.
 3. **Decision всплыл на attempt 2** (repair открыл скрытую развилку) → chat **3a-decision**, **END TURN**. **Не** считать terminal fail.
 4. **Repair всё ещё нужен после attempt 2** → terminal: «не удалось дочинить автоматически за 2 итерации» + краткая суть на языке эффекта + ссылка на отчёт. **Не** молчать и **не** ping-pong extend→verify в чате.
 5. **GO** на любой итерации → один chat-summary (вариант 2).

@@ -16,7 +16,7 @@ alwaysApply: false
 - **Индекс:** `openspec/knowledge/README.md` — описание модели + (опционально) таблица всех KB
 - **Машиночитаемый индекс:** `openspec/knowledge/_index.yaml` — для быстрого Discovery
 - **Таксономия:** `openspec/knowledge/_taxonomy.yaml` — словарь доменов/субдоменов
-- **Шаблон таксономии:** `openspec/knowledge/_taxonomy.template.yaml` — заготовка для `/opsx:knowledge-init`
+- **Шаблон таксономии:** `.cursor/templates/seed/knowledge/_taxonomy.template.yaml` — заготовка поставки для `/opsx:knowledge-init`; копия в проекте (`openspec/knowledge/_taxonomy.template.yaml`) допустима
 - **Архив:** `openspec/knowledge/_archive/` — deprecated/superseded KB
 - **Стабильные первоисточники standalone-capture:** `openspec/knowledge/_sources/knowledge-add/<YYYY-MM-DD-slug>/sources/` — копии reports/заметок, из которых `/opsx:knowledge-add` создал KB.
 

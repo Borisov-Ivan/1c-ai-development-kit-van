@@ -62,7 +62,7 @@ KB состояние:
 | Чего нет | Действие |
 |---|---|
 | `src/` пуст или нет `Configuration.xml` | **СТОП.** Подсказать: «Выгрузите конфигурацию через Конфигуратор: Конфигурация → Выгрузить конфигурацию в файлы. Путь: `src/<ИмяКонфигурации>/cf/`. Для расширений: Конфигурация → Расширения → <Имя> → Выгрузить в файлы. Путь: `src/<ИмяКонфигурации>/cfe/<ИмяРасширения>/`.» Ждать, пока пользователь выгрузит |
-| `openspec/` | Агент создаёт сам: `openspec/`, `openspec/changes/`, `openspec/changes/_template/`, `openspec/specs/`, `openspec/docs/`, `openspec/adrs/`, `openspec/knowledge/` (+ `_archive/` с `.gitkeep`, стартовый `README.md` из шаблона `.cursor/skills/openspec-knowledge-init/templates/README-template.md`, пустой `_index.yaml` с `version: 1`, `facts: []`, актуальный `updated-at`), пустой `openspec/project.md`, `openspec/config.yaml`. `openspec/knowledge/_taxonomy.yaml` создаётся в Phase 5 (после разведки архитектуры) |
+| `openspec/` | Агент создаёт сам: `openspec/`, `openspec/changes/`, `openspec/changes/_template/` (копия `.cursor/templates/seed/changes/_template/`), `openspec/specs/`, `openspec/docs/`, `openspec/adrs/`, `openspec/knowledge/` (+ `_archive/` с `.gitkeep`, стартовый `README.md` из шаблона `.cursor/skills/openspec-knowledge-init/templates/README-template.md`, пустой `_index.yaml` с `version: 1`, `facts: []`, актуальный `updated-at`), пустой `openspec/project.md`, `openspec/config.yaml`. `openspec/knowledge/_taxonomy.yaml` создаётся в Phase 5 (после разведки архитектуры) |
 | `.cursor/agents/` | Подсказать: «Скопируйте промпты агентов из шаблонного проекта в `.cursor/agents/`» |
 | `AGENTS.md` | Агент создаёт |
 
@@ -441,7 +441,7 @@ framework_contract_version: 2026-06
    - Сравнить набор расширений в `src/*/cfe/*` с `domains[*].source` в текущем `_taxonomy.yaml`.
    - **Если совпадает** — пропустить с сообщением «taxonomy актуальна, расширения совпадают, sync не требуется».
    - **Если расширения добавлены/удалены** — предложить sync через `/opsx:knowledge-init` (diff + merge), не перезаписывать вслепую.
-3. **Если файла нет — автогенерация draft `_taxonomy.yaml`:** по одному `domain` на каждое расширение из `src/*/cfe/*` с корректным `source`; `subdomains` — из подсистем / ключевых общих модулей (эвристика + ручная правка в draft); обязательный блок `cross` из шаблона `openspec/knowledge/_taxonomy.template.yaml`.
+3. **Если файла нет — автогенерация draft `_taxonomy.yaml`:** по одному `domain` на каждое расширение из `src/*/cfe/*` с корректным `source`; `subdomains` — из подсистем / ключевых общих модулей (эвристика + ручная правка в draft); обязательный блок `cross` из шаблона `.cursor/templates/seed/knowledge/_taxonomy.template.yaml`.
 4. **Confirm пользователя** перед записью (показ diff или краткого summary).
 
 **При повторном запуске /init-project:** если `openspec/specs/architecture.md` уже существует — Phase 5 **предложить** обновить (если project.md изменился) или пропустить. Не пересоздавать автоматически без согласия. Шаг 6 (taxonomy) выполняется отдельно от пересоздания `architecture.md` — таксономия идемпотентна и проверяется всегда, даже если `architecture.md` не обновлялся.

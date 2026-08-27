@@ -4,16 +4,16 @@ description: Собрать лаконичное описание проекта
 license: MIT
 metadata:
   author: openspec
-  version: "1.2"
+  version: "1.1"
 ---
 
 # `/opsx:overview` — лаконичное описание проекта
 
-Компилятор: из артефактов одной или нескольких ЗНИ собирает **связный md** «как сейчас → зачем → этапы поставки → что согласовать» для функционального архитектора / заказчика. Пишет только `overview-*.md` в каталог change; `proposal`/`design`/`tasks`/`specs` не трогает.
+Read-only компилятор: из артефактов одной или нескольких ЗНИ собирает **связный md** «как сейчас → зачем → этапы поставки → что согласовать» для функционального архитектора / заказчика.
 
 **Жанр:** краткая постановка проекта (факты поставки). Не туториал, не защита решения, не письмо с разжёвыванием.
 
-**Не делает:** правки `proposal`/`design`/`tasks`/`specs`, вызов writer/explorer/architect, обследование `.bsl`.
+**Не делает:** правки `proposal`/`design`/`tasks`, вызов writer/explorer/architect, обследование `.bsl`.
 
 **Эталон структуры:** [`fixtures/golden-88781-overview.md`](fixtures/golden-88781-overview.md)  
 **Эталон голоса этапа:** [`fixtures/voice-good-stage.md`](fixtures/voice-good-stage.md)  
@@ -122,10 +122,9 @@ metadata:
 
 ### 6. Write + чат
 
-- Файл: `openspec/changes/<name>/overview-YYYY-MM-DD.md` (корень каталога change, не `temp/`, не `reports/`).  
-  - `<name>` — resolved-каталог **первой** ЗНИ из списка (active или archive); мульти-ЗНИ — один файл, без копий.  
-  - Повтор в тот же день — перезапись того же имени.  
-  - control: путь из `control-run.md` (`openspec/changes/nastroyka-knopok-processov/overview-control-88781.md`).
+- Файл: `temp/overview-YYYY-MM-DD-<slug>.md`  
+  - slug — из темы (kebab) или первого change;  
+  - control: путь из `control-run.md` (`temp/overview-control-88781.md`).
 - Чат (T-OVERVIEW): путь к файлу + 3–5 пунктов из «Что требуется согласовать». **Не** печатать весь документ в чат.
 
 ---
@@ -134,7 +133,7 @@ metadata:
 
 - BSL / XML write guard — не применять (нет правок кода).
 - Не вызывать `Task` к 1С-агентам из этой команды.
-- Не править `proposal`/`design`/`tasks`/`specs`. **Write** `overview-*.md` в корень каталога change — разрешён.
+- Не править артефакты OpenSpec.
 - Имена субагентов и T-коды — не в чат пользователю.
 
 ---
@@ -144,6 +143,6 @@ metadata:
 1. Ось этапов — ситуация/эффект, не имена change и не механизмы («автомат», «алгоритм»…)?
 2. Style-checklist пройден: англицизмы + ситуация≠механизм + Laconic / anti-tutor?
 3. Нет мета/резюме-для-тугого/уговоров/советов стенда в теле этапов?
-4. Файл записан в корень каталога первой ЗНИ (`overview-YYYY-MM-DD.md`), не в `temp/` и не в `reports/`?
+4. Файл записан в `temp/`?
 5. Чат тонкий (путь + согласовать), без пересказа design?
 6. При `--tz` — есть стык с исходным направлением (и мета не продублирована внутри этапов)?
