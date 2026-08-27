@@ -4,7 +4,8 @@
 
 ## Системный чеклист
 
-1. **Copy-smoke:** копируются только `.cursor/` + `AGENTS.md`; нет обязательных npm/Python deps.
+1. **Манифест поставки:** на ветке поставки только `.cursor/**`, `AGENTS.md`, витринный `README.md`; нет `openspec/`, `doc/`, `tools/`; нет обязательных npm/Python deps. SSOT состава — `openspec/specs/kit-distribution/spec.md`.
+1a. **Самодостаточность:** ссылки из `.cursor/**` не ведут за пределы `.cursor/` — исключение только файлы, которые создаёт `/init-project` в проекте (`openspec/project.md`, `openspec/specs/architecture.md`, `openspec/config.yaml`) и рабочие пути ЗНИ проекта (`openspec/changes/**`, `openspec/knowledge/**`, `openspec/adrs/**`). Заготовки — `.cursor/templates/seed/`.
 2. **Связи:** commands ↔ skills ↔ rules ↔ `AGENTS.md` — нет осиротевших ссылок на удалённые пути.
 3. **Язык чата:** учебные сценарии / handoff не требуют жаргона движка как единственного языка.
 4. **Mode Gate / XML guard:** согласованы; Form assisted только через skill.
@@ -17,4 +18,4 @@
 11. **Ориентиры commands/skills:** `init-project` — тонкий вход + SSOT `.cursor/docs/init-project-protocol.md`; топ-skills (verify/new/…) при обрезке — страховка `templates/` (см. `command-skill-gate.mdc`).
 12. **Grep-критерий scrub:** в поставке `.cursor/` + корневые `AGENTS.md`/`README.md` — **0** рабочих рекомендаций `/opsx:intake`|`/opsx:debug` как входа (исторические CHANGELOG / change-отчёты — исключение).
 
-См. также: [kit-template-workflow.md](./kit-template-workflow.md), [quick-start.md](./quick-start.md), [faq-kit.md](./faq-kit.md). Опциональные smoke-docs: [mxl-roundtrip-fixture.md](./mxl-roundtrip-fixture.md), [proportional-surface.md](./proportional-surface.md). Каталог `temp/fixtures/` создаётся локально при проверке (не часть поставки kit).
+См. также: [kit-template-workflow.md](./kit-template-workflow.md), [kit-as-submodule.md](./kit-as-submodule.md), [quick-start.md](./quick-start.md), [faq-kit.md](./faq-kit.md). Опциональные smoke-docs: [mxl-roundtrip-fixture.md](./mxl-roundtrip-fixture.md), [proportional-surface.md](./proportional-surface.md). Каталог `temp/fixtures/` создаётся локально при проверке (не часть поставки kit).
