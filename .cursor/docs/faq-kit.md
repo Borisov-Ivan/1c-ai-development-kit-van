@@ -33,11 +33,7 @@
 
 ## Поставка шаблона
 
-В проект приходят `.cursor/` + `AGENTS.md` с ветки поставки (`main`) — модулем git в `vendor/kit-van` и синхронизацией скриптом, реже ручным копированием. Установка — [kit-as-submodule.md](./kit-as-submodule.md).
-
-Ветка поставки обновляется только публикацией из kit (`/opsx:publish` или «опубликуй» в чате репозитория kit), не слиянием ветвей. ЗНИ эволюции kit, `openspec/`, `doc/` и `tools/` в поставку не входят. См. [kit-template-workflow.md](./kit-template-workflow.md).
-
-Локальные правила проекта держите в `kit-local/`: при обновлении содержимое `.cursor` перезаписывается из поставки.
+Копируются `.cursor` + `AGENTS.md`. ЗНИ эволюции kit ведутся на ветке шаблонного репо; папку `openspec/changes/` в main потребителей не мержат. См. [kit-template-workflow.md](./kit-template-workflow.md).
 
 ## session-save / restore / retro
 
