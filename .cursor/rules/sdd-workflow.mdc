@@ -27,13 +27,14 @@ review/explore → extend (user) → verify → apply
 | **Ревью кода** | `/review` | Ревью по контексту (файл, diff, change); light-review на тривиальном diff. Памятка: `.cursor/docs/review-guide.md` | onec-code-reviewer |
 | **Предрелиз** | `/release-review` | Предрелизный gate: Category 12, Tier 2 explorer, `mode=prerelease`. См. `review-guide.md` | onec-code-reviewer, onec-code-explorer |
 
-Дополнительные действия: `extend` (расширить существующий change), `sync` (дельта-спеки → main), `bulk-archive` (пакетная архивация), `/opsx:explain` (пошаговый разбор кода), `/opsx:overview` (описание проекта для ФА/заказчика).
+Дополнительные действия: `extend` (расширить существующий change), `sync` (дельта-спеки → main), `bulk-archive` (пакетная архивация), `/opsx:explain` (пошаговый разбор кода), `/opsx:overview` (описание проекта для ФА/заказчика), `/opsx:publish` (публикация поставки kit — только в репозитории kit).
 
 ## АЛИАСЫ КОМАНД
 
 | Фраза пользователя | Что выполнять |
 |---------------------|---------------|
 | «создай ЗНИ», «заведи ЗНИ», «новый change» | **СТОП.** Если активна сессия explore — Change Creation Gate (блок `## Постановка ЗНИ` + redirect). Иначе — `/opsx:new` (scaffold + все артефакты с делегированием, slice decomposition и gates). **Запрещено** создавать артефакты change вручную в обход `/opsx:new`. |
+| «опубликуй», «опубликовать поставку», «выложи поставку» | `/opsx:publish` (не explore). Только в репозитории kit; в проекте 1С — стоп по kit-only guard скилла `openspec-publish-kit`. |
 
 ## ВЕРТИКАЛЬНЫЕ СРЕЗЫ (модель работы)
 
