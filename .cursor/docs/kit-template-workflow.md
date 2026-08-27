@@ -1,50 +1,43 @@
 # Поставка kit-шаблона в проект 1С
 
-Как публиковать и развивать Cursor-kit (**van**). Этот документ — для того, кто **развивает** kit. Как поставить kit в проект 1С — [kit-as-submodule.md](./kit-as-submodule.md).
+Как копировать и развивать Cursor-kit (**van**): поставка в sandbox/проект заказчика и эволюция самого шаблона.
 
-## Две ветки
+## Что копировать
 
-| Ветка | Что в ней | Кто пользуется |
-|-------|-----------|----------------|
-| `develop` | Разработка kit: `.cursor/`, `AGENTS.md`, `openspec/` (спеки, ADR, ЗНИ эволюции), `doc/`, `tools/` | вы, когда правите kit |
-| `main` | Поставка: `.cursor/**`, `AGENTS.md`, `README.md` витрины. Больше ничего | модуль git в проектах 1С |
+Обязательная поставка в проект 1С:
 
-Ветки **не сливаются**: деревья разные. `main` обновляется только публикацией. `push --force` по `main` запрещён.
+| Артефакт | Назначение |
+|----------|------------|
+| `.cursor/` | rules, skills, agents, docs, commands, заготовки `templates/seed/` |
+| `AGENTS.md` | навигационный индекс в корне проекта |
 
-## Публикация: «опубликуй»
+После копирования — **Reload Window** в Cursor. Внешние runtime (npm, Python) для базового контура `/opsx:*` **не** требуются. Скрипты обязательного контура — PowerShell 5.1.
 
-В чате репозитория kit — `/opsx:publish` или просто «опубликуй». Скилл проверяет, что это репозиторий kit, показывает состав поставки, ждёт подтверждения и обновляет `main` одним коммитом.
+Не копировать в consumer-проект как «часть поставки»:
 
-Вручную то же самое: `pwsh tools/publish-dist.ps1 -DryRun`, затем без `-DryRun`. На Linux/macOS — `tools/publish-dist.sh`.
+- `README.md` репозитория kit (устройство веток; сценарии живут в `.cursor/docs/quick-start.md`);
+- `openspec/` репозитория kit (specs/ADR/архивы эволюции шаблона);
+- `tools/`;
+- локальные `temp/`, отчёты исследования вне `.cursor`.
 
-Состав поставки (allow-list, SSOT — спека `kit-distribution` в `openspec/specs/` репозитория kit):
-
-| Что | Откуда |
-|-----|--------|
-| `.cursor/**` | `.cursor/` ветки `develop` |
-| `AGENTS.md` | корень `develop` |
-| `README.md` | шаблон `tools/dist-readme.md` + дата и исходный коммит |
-
-Не публикуется: `openspec/`, `doc/`, `tools/`, `temp/`, `.bsl-language-server.json.example`.
-
-## Самодостаточность поставки
-
-На `main` нет каталога `openspec/`, поэтому всё, к чему обращаются команды и скиллы, лежит внутри `.cursor/`:
-
-- глоссарий — `.cursor/docs/glossary.md`;
-- заготовки для целевого проекта — `.cursor/templates/seed/` (таксономия базы знаний, шаблон каталога ЗНИ);
-- `openspec/project.md`, `openspec/specs/architecture.md`, `openspec/config.yaml` — создаёт `/init-project` **в проекте**, в kit их нет по дизайну.
-
-Новая ссылка из `.cursor/**` на путь вне `.cursor/` — дефект поставки (кроме файлов, которые создаёт `/init-project`). Проверка — [delivery-integrity.md](./delivery-integrity.md).
+В проекте 1С каталог `openspec/` создаёт `/init-project` из заготовок `.cursor/templates/seed/`.
 
 ## Эволюция kit (метапроект)
 
 Это правило **репозитория шаблона kit**, не цикл ЗНИ в проекте 1С. В конфигурации заказчика ветки `develop`/`main` kit не заводить.
 
-1. Правки kit — на `develop` (короткую фича-ветку сразу сливать в `develop`).
-2. ЗНИ эволюции и их архивы живут в `openspec/changes/` на `develop` и в поставку не попадают.
-3. Приёмка срезов эволюции — в **sandbox**: поставка с `develop` (или с фича-ветки) → Reload Window → учебный сценарий из Primary среза.
-4. Публикация — после мержа в `develop`, командой (см. выше). Тег `vX.Y.Z` ставится на коммит `main`, не `develop`.
+1. **`develop`** — линия разработки kit: открытые ЗНИ эволюции и их архивы (`openspec/changes/`, `openspec/changes/archive/`), утилиты `tools/`. Короткую фича-ветку сразу сливать в `develop`, не оставлять домом архива.
+2. **`main`** — поставка шаблона: `.cursor/**`, `AGENTS.md`, `README.md`, `openspec/specs/`, `openspec/adrs/`. Без рабочих папок `openspec/changes/<имя>`, без `openspec/changes/archive/`, без `tools/`. Заготовка шаблона ЗНИ — `.cursor/templates/seed/changes/_template/`.
+3. **Обновление поставки** (только из репозитория kit):
+   - рабочее дерево чистое, нужные правки уже на `develop`;
+   - `git checkout main`;
+   - `git merge develop`;
+   - удалить с `main`: `openspec/changes/archive/`, рабочие `openspec/changes/<имя>` (если влились), каталог `tools/`;
+   - коммит снятия архивов и утилит;
+   - `git push origin main` (обычный push, без `--force`);
+   - в consumer-проект снова скопировать только `.cursor/` + `AGENTS.md`.
+4. На `main` содержательные коммиты не делать: только merge из `develop` и cleanup-коммит снятия архивов/утилит.
+5. Приёмка срезов эволюции — в **sandbox**: копия `.cursor`+`AGENTS.md` с `develop` (или с фича-ветки до слияния) → Reload → учебный сценарий из Primary среза.
 
 ## Forms / MXL
 
@@ -52,9 +45,9 @@
 
 ## Связь
 
-- Установка в проект: [kit-as-submodule.md](./kit-as-submodule.md)
-- Обзор / памятка: `README.md` (в корне репо kit; в рабочий проект 1С не копируется)
+- Устройство репозитория и веток: `README.md` (в корне репо kit; в рабочий проект 1С не копируется)
+- Сценарии и команды: `.cursor/docs/quick-start.md` (едет в поставку)
 - Индекс команд и SSOT: `AGENTS.md`
 - Mode Gate: `.cursor/rules/forms-mxl-mode-gate.mdc`
-- Целостность поставки (перед version-cut): [delivery-integrity.md](./delivery-integrity.md)
-- Quick start / FAQ: [quick-start.md](./quick-start.md), [faq-kit.md](./faq-kit.md)
+- Целостность поставки (перед version-cut): `.cursor/docs/delivery-integrity.md`
+- FAQ: `.cursor/docs/faq-kit.md`

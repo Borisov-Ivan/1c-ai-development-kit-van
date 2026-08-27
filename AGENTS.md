@@ -2,15 +2,15 @@
 
 **Диспетчер 1С:** `.cursor/rules/1c-agent-delegation.mdc`. **Гейты:** `.cursor/rules/gate-dispatcher.mdc`. **Чат:** `.cursor/rules/chat-output-budget.mdc` + `.cursor/docs/chat-lexicon.md`. Рекомендуемый чат — Grok 4; модели субагентов — только `.cursor/rules/model-selection.mdc` (архитектор Opus 5, ревьюер Gemini, упрощение Composer).
 
-**Поставка:** установка — `.cursor/docs/kit-as-submodule.md`; публикация (`/opsx:publish`) — `.cursor/docs/kit-template-workflow.md`. Памятка: `README.md` · `.cursor/docs/quick-start.md` · `.cursor/docs/faq-kit.md` · `.cursor/docs/delivery-integrity.md`.
+**Поставка:** `.cursor/docs/kit-template-workflow.md` (kit на `develop`). Сценарии: `.cursor/docs/quick-start.md`. FAQ: `.cursor/docs/faq-kit.md`. Целостность: `.cursor/docs/delivery-integrity.md`. Устройство репо: `README.md` (в проект 1С не копируется).
 
 ## Команды
 
 `.cursor/rules/sdd-workflow.mdc` — explore → new → verify → apply → verify → archive. Вход исследования: `/opsx:explore`.
 
-`/opsx:explore`, `/opsx:new`, `/opsx:verify`, `/opsx:apply`, `/opsx:archive`, `/opsx:extend`, `/opsx:status`, `/opsx:explain`, `/opsx:overview`, `/opsx:knowledge-add`, `/opsx:knowledge-init`, `/opsx:knowledge-audit`, `/opsx:sync`, `/opsx:bulk-archive`, `/review`, `/release-review`, `/init-project`, `/session-save`, `/session-restore`, `/session-retro`, `/opsx:publish` (только репо kit).
+`/opsx:explore`, `/opsx:new`, `/opsx:verify`, `/opsx:apply`, `/opsx:archive`, `/opsx:extend`, `/opsx:status`, `/opsx:explain`, `/opsx:overview`, `/opsx:knowledge-add`, `/opsx:knowledge-init`, `/opsx:knowledge-audit`, `/opsx:sync`, `/opsx:bulk-archive`, `/review`, `/release-review`, `/init-project`, `/session-save`, `/session-restore`, `/session-retro`.
 
-Сценарии — `README.md`. Термины — `.cursor/docs/glossary.md`. Init — `.cursor/docs/init-project-protocol.md`. Схема отчёта архитектора — `.cursor/docs/architect-report-schema.md`. Слои маркеров — `.cursor/docs/marker-layers-guide.md`.
+Сценарии — `.cursor/docs/quick-start.md`. Термины — `.cursor/docs/glossary.md`. Init — `.cursor/docs/init-project-protocol.md`. Схема отчёта архитектора — `.cursor/docs/architect-report-schema.md`. Слои маркеров — `.cursor/docs/marker-layers-guide.md`.
 
 ## Карта SSOT
 
@@ -19,4 +19,4 @@
 - Сессия → `session-discipline.mdc`. Context-strategy → `.cursor/skills/context-strategy/SKILL.md`. Отчёты субагентов → `preserve-subagent-reports.mdc`.
 - Forms → `forms-mxl-mode-gate.mdc`. Архитектура / RCA → `architect-gate.mdc` / `verified-cause-gate.mdc`. Specs/срезы → `openspec-specs-gate.mdc` / `vertical-slices.mdc`. AP → `bsl-antipatterns.mdc`.
 - ADR → `openspec/adrs/` + `adr-format.mdc`. KB → `openspec/knowledge/` + `knowledge-format.mdc`. Маркеры → `marker-canon.md`. Пути cf/cfe → `openspec/project.md` (после `/init-project`; в kit нет) + `capture-to-project.mdc` + `project-paths.mdc`.
-- Ревью: `.cursor/docs/review-guide.md`; `/review`; `.cursor/skills/review/SKILL.md`. Disposition — спека `review-quality-disposition` и ADR-0003 (репозиторий kit).
+- Ревью: `.cursor/docs/review-guide.md`; `/review`; `.cursor/skills/review/SKILL.md`. Disposition — `openspec/specs/review-quality-disposition/spec.md`, ADR-0003.
