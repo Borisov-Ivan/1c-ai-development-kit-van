@@ -55,11 +55,25 @@ DATE="$(date +%Y-%m-%d)"
 
 # --- Состав поставки ----------------------------------------------------------
 mapfile -t DIST_FILES < <(git -c core.quotepath=false ls-tree -r --name-only HEAD -- .cursor AGENTS.md | sort)
-CURSOR_COUNT="$(printf '%s\n' "${DIST_FILES[@]}" | grep -c '^\.cursor/' || true)"
+
+# Считаем без конвейеров: под pipefail ранний выход grep гасит printf сигналом
+# и превращает исправную проверку в ложную ошибку.
+CURSOR_COUNT=0
+AGENTS_PRESENT=0
+for f in "${DIST_FILES[@]}"; do
+  case "$f" in
+    .cursor/*) CURSOR_COUNT=$((CURSOR_COUNT + 1)) ;;
+    AGENTS.md) AGENTS_PRESENT=1 ;;
+  esac
+done
 
 echo "Состав поставки с ${SOURCE_BRANCH} (${SOURCE_SHA7}):"
 echo "  .cursor/**  — ${CURSOR_COUNT} файлов"
-printf '%s\n' "${DIST_FILES[@]}" | grep -qx 'AGENTS.md' && echo "  AGENTS.md   — да" || { echo "AGENTS.md отсутствует в дереве" >&2; exit 1; }
+if [[ "$AGENTS_PRESENT" == "1" ]]; then
+  echo "  AGENTS.md   — да"
+else
+  echo "AGENTS.md отсутствует в дереве" >&2; exit 1
+fi
 echo "  README.md   — из tools/dist-readme.md"
 echo "  не входят: openspec/, doc/, tools/, temp/"
 
