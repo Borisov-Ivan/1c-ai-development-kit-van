@@ -6,14 +6,15 @@
 
 ## Что это
 
-В проект 1С копируют каталог `.cursor/` и файл `AGENTS.md`, затем в Cursor делают Reload Window. Внешние среды вроде npm для обычной работы не нужны.
+В проект 1С приходят каталог `.cursor/` и файл `AGENTS.md` с ветки поставки `main` — модулем git в `vendor/kit-van` (основной путь) или копированием (запасной). После установки — Reload Window в Cursor. Внешние среды вроде npm для обычной работы не нужны.
 
 В чате ассистент ведёт по шагам и командам. Модули `.bsl` пишет специализированный агент. Разметку формы агент сам «сырым» XML-файлом не правит: либо вы правите в Конфигураторе по инструкции, либо явно выбираете режим со скриптом.
 
 Дальше по деталям:
 
 - полный индекс якорей — [`AGENTS.md`](AGENTS.md)
-- быстрый старт после копирования — [`.cursor/docs/quick-start.md`](.cursor/docs/quick-start.md)
+- установка kit в проект — [`.cursor/docs/kit-as-submodule.md`](.cursor/docs/kit-as-submodule.md)
+- быстрый старт после установки — [`.cursor/docs/quick-start.md`](.cursor/docs/quick-start.md)
 - частые вопросы — [`.cursor/docs/faq-kit.md`](.cursor/docs/faq-kit.md)
 
 ## Как идём
@@ -75,5 +76,6 @@
 | База знаний вне ЗНИ | `/opsx:knowledge-add`, `/opsx:knowledge-init`, `/opsx:knowledge-audit` |
 | Перенести требования в общие specs без закрытия ЗНИ | `/opsx:sync` |
 | Закрыть несколько ЗНИ пакетом | `/opsx:bulk-archive` |
+| Опубликовать поставку kit (только в репозитории kit) | `/opsx:publish` |
 
-Индекс якорей — в [`AGENTS.md`](AGENTS.md). Как копировать kit в другой проект — [`.cursor/docs/kit-template-workflow.md`](.cursor/docs/kit-template-workflow.md).
+Индекс якорей — в [`AGENTS.md`](AGENTS.md). Как поставить kit в другой проект — [`.cursor/docs/kit-as-submodule.md`](.cursor/docs/kit-as-submodule.md); как публиковать поставку — [`.cursor/docs/kit-template-workflow.md`](.cursor/docs/kit-template-workflow.md).
