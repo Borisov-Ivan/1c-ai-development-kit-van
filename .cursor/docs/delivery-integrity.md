@@ -4,7 +4,7 @@
 
 ## Системный чеклист
 
-1. **Манифест поставки:** на ветке поставки только `.cursor/**`, `AGENTS.md`, витринный `README.md`; нет `openspec/`, `doc/`, `tools/`; нет обязательных npm/Python deps. SSOT состава — `openspec/specs/kit-distribution/spec.md`.
+1. **Манифест поставки:** на ветке поставки только `.cursor/**`, `AGENTS.md`, витринный `README.md`; нет `openspec/`, `doc/`, `tools/`; нет обязательных npm/Python deps. SSOT состава — спека `kit-distribution` (`openspec/specs/kit-distribution/spec.md` в репозитории kit).
 1a. **Самодостаточность:** ссылки из `.cursor/**` не ведут за пределы `.cursor/` — исключение только файлы, которые создаёт `/init-project` в проекте (`openspec/project.md`, `openspec/specs/architecture.md`, `openspec/config.yaml`) и рабочие пути ЗНИ проекта (`openspec/changes/**`, `openspec/knowledge/**`, `openspec/adrs/**`). Заготовки — `.cursor/templates/seed/`.
 2. **Связи:** commands ↔ skills ↔ rules ↔ `AGENTS.md` — нет осиротевших ссылок на удалённые пути.
 3. **Язык чата:** учебные сценарии / handoff не требуют жаргона движка как единственного языка.

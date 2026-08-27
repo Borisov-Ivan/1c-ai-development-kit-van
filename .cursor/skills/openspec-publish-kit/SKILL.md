@@ -13,7 +13,7 @@ metadata:
 
 **Не делает:** правки `.bsl` и XML, создание ЗНИ, публикацию из проекта 1С, `push --force`, публикацию без подтверждения пользователя.
 
-SSOT состава и запретов — `openspec/specs/kit-distribution/spec.md`. Канон веток — `.cursor/docs/kit-template-workflow.md`.
+SSOT состава и запретов — спека `kit-distribution` (`openspec/specs/kit-distribution/spec.md`; существует только в репозитории kit). Канон веток — `.cursor/docs/kit-template-workflow.md`.
 
 ---
 
