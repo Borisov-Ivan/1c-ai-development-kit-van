@@ -2,7 +2,7 @@
 
 **Диспетчер 1С:** `.cursor/rules/1c-agent-delegation.mdc`. **Гейты:** `.cursor/rules/gate-dispatcher.mdc`. **Чат:** `.cursor/rules/chat-output-budget.mdc` + `.cursor/docs/chat-lexicon.md`. Рекомендуемый чат — Grok 4; модели субагентов — только `.cursor/rules/model-selection.mdc` (архитектор Opus 5, ревьюер Gemini, упрощение Composer).
 
-**Поставка:** `.cursor/docs/kit-template-workflow.md` (kit на `develop`). Памятка: `README.md` · `.cursor/docs/quick-start.md` · `.cursor/docs/faq-kit.md` · `.cursor/docs/delivery-integrity.md`.
+**Поставка:** `.cursor/docs/kit-template-workflow.md` (kit на `develop`). Сценарии: `.cursor/docs/quick-start.md`. FAQ: `.cursor/docs/faq-kit.md`. Целостность: `.cursor/docs/delivery-integrity.md`. Устройство репо: `README.md` (в проект 1С не копируется).
 
 ## Команды
 
@@ -10,7 +10,7 @@
 
 `/opsx:explore`, `/opsx:new`, `/opsx:verify`, `/opsx:apply`, `/opsx:archive`, `/opsx:extend`, `/opsx:status`, `/opsx:explain`, `/opsx:overview`, `/opsx:knowledge-add`, `/opsx:knowledge-init`, `/opsx:knowledge-audit`, `/opsx:sync`, `/opsx:bulk-archive`, `/review`, `/release-review`, `/init-project`, `/session-save`, `/session-restore`, `/session-retro`.
 
-Сценарии — `README.md`. Термины — `openspec/glossary.md`. Init — `.cursor/docs/init-project-protocol.md`. Схема отчёта архитектора — `.cursor/docs/architect-report-schema.md`. Слои маркеров — `.cursor/docs/marker-layers-guide.md`.
+Сценарии — `.cursor/docs/quick-start.md`. Термины — `.cursor/docs/glossary.md`. Init — `.cursor/docs/init-project-protocol.md`. Схема отчёта архитектора — `.cursor/docs/architect-report-schema.md`. Слои маркеров — `.cursor/docs/marker-layers-guide.md`.
 
 ## Карта SSOT
 
