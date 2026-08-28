@@ -1,4 +1,39 @@
 reports:
+  - file: verification-2026-08-28-4.md
+    type: verification
+    status: active
+    legacy: false
+  - file: quality-control-2026-08-28-7.md
+    type: quality-control
+    status: active
+    legacy: false
+  - file: design-challenge-2026-08-28-7.md
+    type: architecture
+    mode: design-challenge
+    status: active
+    legacy: false
+  - file: architecture-task-readiness-2026-08-28-7.md
+    type: architecture
+    mode: task-readiness
+    status: active
+    legacy: false
+  - file: architecture-extend-coherence-2026-08-28-2.md
+    type: architecture
+    mode: scope-coherence-audit
+    status: active
+    legacy: false
+  - file: slice-acceptance-S1-2026-08-28.md
+    type: acceptance
+    status: active
+    legacy: false
+  - file: slice-acceptance-S2-2026-08-28.md
+    type: acceptance
+    status: active
+    legacy: false
+  - file: slice-acceptance-S3-2026-08-28.md
+    type: acceptance
+    status: active
+    legacy: false
   - file: verification-2026-08-28-3.md
     type: verification
     status: active

@@ -43,6 +43,7 @@ alwaysApply: false
 
 - `generalPurpose`, `explore`, `shell` — общие задачи, инфраструктура, неспецифичный поиск
 - `openspec-quality-controller` — OpenSpec-артефакты (не BSL)
+- `onec-scenario-map-designer` — макет панели карты сценария (не 1С-роль; `src/**` / `.bsl` не отдавать)
 
 ## NEGATIVE GUARD (обязательно)
 
