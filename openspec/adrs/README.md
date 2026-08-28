@@ -9,3 +9,4 @@
 | [ADR-0005](ADR-0005-noapi-visibility-canon-same-turn.md) | Видимость режима без API — канон в том же ходе | Accepted | 2026-08-20 | kit / chat surface · выбор моделей |
 | [ADR-0006](ADR-0006-opsx-progress-russian.md) | Язык команд /opsx:* — русский, профиль не сильнее бюджета | Accepted | 2026-08-20 | kit / chat surface |
 | [ADR-0007](ADR-0007-author-marker-only-if-bsl.md) | Вопрос маркера автора только если будет BSL | Accepted | 2026-08-20 | kit / metadata gate |
+| [ADR-0008](ADR-0008-scenario-map-native-parent-registration.md) | Карта сценария — нативная регистрация панели родителем | Load-Bearing | 2026-08-28 | kit / scenario map canvas |

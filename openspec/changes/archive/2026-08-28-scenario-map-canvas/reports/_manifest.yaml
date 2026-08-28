@@ -1,0 +1,191 @@
+reports:
+  - file: verification-2026-08-28-4.md
+    type: verification
+    status: active
+    legacy: false
+  - file: quality-control-2026-08-28-7.md
+    type: quality-control
+    status: active
+    legacy: false
+  - file: design-challenge-2026-08-28-7.md
+    type: architecture
+    mode: design-challenge
+    status: active
+    legacy: false
+  - file: architecture-task-readiness-2026-08-28-7.md
+    type: architecture
+    mode: task-readiness
+    status: active
+    legacy: false
+  - file: architecture-extend-coherence-2026-08-28-2.md
+    type: architecture
+    mode: scope-coherence-audit
+    status: active
+    legacy: false
+  - file: slice-acceptance-S1-2026-08-28.md
+    type: acceptance
+    status: active
+    legacy: false
+  - file: slice-acceptance-S2-2026-08-28.md
+    type: acceptance
+    status: active
+    legacy: false
+  - file: slice-acceptance-S3-2026-08-28.md
+    type: acceptance
+    status: active
+    legacy: false
+  - file: verification-2026-08-28-3.md
+    type: verification
+    status: active
+    legacy: false
+  - file: quality-control-2026-08-28-6.md
+    type: quality-control
+    status: active
+    legacy: false
+  - file: design-challenge-2026-08-28-6.md
+    type: architecture
+    mode: design-challenge
+    scope:
+      files:
+        - openspec/changes/scenario-map-canvas/proposal.md
+        - openspec/changes/scenario-map-canvas/design.md
+        - openspec/changes/scenario-map-canvas/specs/scenario-map-canvas/spec.md
+    status: active
+    legacy: false
+  - file: architecture-task-readiness-2026-08-28-6.md
+    type: architecture
+    mode: task-readiness
+    scope:
+      files:
+        - .cursor/skills/scenario-map-canvas/SKILL.md
+        - .cursor/skills/openspec-explain/SKILL.md
+        - .cursor/skills/openspec-explore/SKILL.md
+        - .cursor/rules/model-selection.mdc
+    status: active
+    legacy: false
+  - file: verification-2026-08-28-2.md
+    type: verification
+    status: active
+    legacy: false
+  - file: quality-control-2026-08-28-4.md
+    type: quality-control
+    status: active
+    legacy: false
+  - file: design-challenge-2026-08-28-4.md
+    type: architecture
+    mode: design-challenge
+    scope:
+      files:
+        - openspec/changes/scenario-map-canvas/proposal.md
+        - openspec/changes/scenario-map-canvas/design.md
+        - openspec/changes/scenario-map-canvas/specs/scenario-map-canvas/spec.md
+    status: active
+    legacy: false
+  - file: architecture-task-readiness-2026-08-28-4.md
+    type: architecture
+    mode: task-readiness
+    scope:
+      files:
+        - .cursor/skills/scenario-map-canvas/SKILL.md
+        - .cursor/skills/openspec-explain/SKILL.md
+        - .cursor/skills/openspec-explore/SKILL.md
+        - .cursor/rules/model-selection.mdc
+    status: active
+    legacy: false
+  - file: verification-2026-08-28.md
+    type: verification
+    status: active
+    legacy: false
+  - file: quality-control-2026-08-28.md
+    type: quality-control
+    status: active
+    legacy: false
+  - file: design-challenge-2026-08-28.md
+    type: architecture
+    mode: design-challenge
+    scope:
+      files:
+        - openspec/changes/scenario-map-canvas/proposal.md
+        - openspec/changes/scenario-map-canvas/design.md
+        - openspec/changes/scenario-map-canvas/specs/scenario-map-canvas/spec.md
+    status: active
+    legacy: false
+  - file: architecture-task-readiness-2026-08-28.md
+    type: architecture
+    mode: task-readiness
+    scope:
+      files:
+        - .cursor/skills/scenario-map-canvas/SKILL.md
+        - .cursor/skills/openspec-explain/SKILL.md
+        - .cursor/rules/model-selection.mdc
+    status: active
+    legacy: false
+  - file: architecture-extend-coherence-2026-08-28.md
+    type: architecture
+    mode: scope-coherence-audit
+    scope:
+      files:
+        - openspec/changes/scenario-map-canvas/proposal.md
+        - openspec/changes/scenario-map-canvas/design.md
+        - openspec/changes/scenario-map-canvas/tasks.md
+    status: active
+    legacy: false
+  - file: architecture-2026-08-28-scenario-map-redesign.md
+    type: architecture
+    mode: design
+    scope:
+      files:
+        - .cursor/skills/scenario-map-canvas/SKILL.md
+        - .cursor/skills/openspec-explore/SKILL.md
+        - .cursor/skills/openspec-explain/SKILL.md
+        - .cursor/rules/model-selection.mdc
+        - .cursor/agents/onec-scenario-map-designer.md
+    status: active
+    legacy: false
+  - file: architecture-new-2026-08-27.md
+    type: architecture
+    mode: plan-review
+    scope:
+      files:
+        - .cursor/skills/scenario-map-canvas/SKILL.md
+        - .cursor/rules/gate-dispatcher.mdc
+        - .cursor/skills/openspec-explain/templates/exit-card.md
+        - .cursor/skills/openspec-explore/SKILL.md
+        - AGENTS.md
+        - openspec/glossary.md
+        - .cursor/docs/chat-lexicon.md
+    status: active
+    legacy: false
+  - file: design-challenge-2026-08-27-3.md
+    type: architecture
+    mode: design-challenge
+    scope:
+      files:
+        - .cursor/skills/scenario-map-canvas/SKILL.md
+        - .cursor/rules/gate-dispatcher.mdc
+        - .cursor/skills/openspec-explain/templates/explain-report.md
+    status: active
+    legacy: false
+  - file: architecture-task-readiness-2026-08-27-3.md
+    type: architecture
+    mode: task-readiness
+    scope:
+      files:
+        - .cursor/skills/scenario-map-canvas/SKILL.md
+        - .cursor/rules/gate-dispatcher.mdc
+        - .cursor/skills/openspec-explain/SKILL.md
+        - .cursor/skills/openspec-explain/templates/exit-card.md
+        - .cursor/skills/openspec-explain/templates/explain-report.md
+        - .cursor/docs/chat-lexicon.md
+        - openspec/glossary.md
+        - AGENTS.md
+    status: active
+    legacy: false
+  - file: quality-control-2026-08-27-3.md
+    type: quality-control
+    status: active
+    legacy: false
+  - file: verification-2026-08-27.md
+    type: verification
+    status: active
+    legacy: false

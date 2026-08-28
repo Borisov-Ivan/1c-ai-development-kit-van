@@ -1,5 +1,13 @@
 # Changelog — 1C Agent Ecosystem
 
+## [4.13] - 2026-08-28
+
+### Added (картограф карты сценария)
+
+- **`onec-scenario-map-designer`:** `.cursor/agents/onec-scenario-map-designer.md` — манифест панели карты сценария из переданного источника и диапазонов; файл панели не пишет; `model: inherit`; не правит `src/**` и `openspec/**`; не выдумывает рёбра.
+- **Таблица ролей:** строка в `model-selection.mdc` — Primary без параметра модели (как writer / explorer / quality-controller). Отказ строить карту из-за модели запрещён.
+- **Маршрутизация:** группа Generic/OpenSpec в `tool-name-guard.mdc`; указатель в `1c-agent-delegation.mdc` и `1c-agent-patterns/SKILL.md`; шаблон `1c-agent-patterns/scenario-map-designer.md`. Не входит в список 1С-ролей.
+
 ## [4.12] - 2026-08-20
 
 ### Changed (санация фреймворка по пяти ревью)
