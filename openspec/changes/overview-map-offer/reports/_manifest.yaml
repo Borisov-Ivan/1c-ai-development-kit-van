@@ -1,0 +1,17 @@
+reports:
+  - file: architecture-new-2026-08-29.md
+    type: architecture
+    scope:
+      files:
+        - .cursor/skills/openspec-overview/SKILL.md
+        - .cursor/skills/scenario-map-canvas/SKILL.md
+        - .cursor/docs/opsx-output-style.md
+        - openspec/changes/overview-map-offer/specs/scenario-map-canvas/spec.md
+    status: active
+    legacy: false
+  - file: quality-control-2026-08-29.md
+    type: quality-control
+    scope:
+      capabilities: [scenario-map-canvas]
+    status: active
+    legacy: false
