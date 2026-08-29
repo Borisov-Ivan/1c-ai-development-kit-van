@@ -64,4 +64,28 @@ reports:
       capabilities: [scenario-map-canvas]
     status: active
     legacy: false
+  - file: quality-control-2026-08-29-4.md
+    type: quality-control
+    scope:
+      capabilities: [scenario-map-canvas]
+    status: active
+    legacy: false
+  - file: design-challenge-2026-08-29-3.md
+    type: design-challenge
+    scope:
+      capabilities: [scenario-map-canvas]
+    status: active
+    legacy: false
+  - file: architecture-task-readiness-2026-08-29-3.md
+    type: architecture
+    scope:
+      capabilities: [scenario-map-canvas]
+    status: active
+    legacy: false
+  - file: verification-2026-08-29-3.md
+    type: verification
+    scope:
+      capabilities: [scenario-map-canvas]
+    status: active
+    legacy: false
 

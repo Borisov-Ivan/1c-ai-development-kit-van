@@ -11,6 +11,7 @@ header:
   sources:
     - "temp/reports/exploration-example-vizualizaciya-shtampa.md"
   view_primary: "causal-flow"
+  focus_node: "cache-stamp-png"
 
 nodes:
   - id: "signed-original"
@@ -80,37 +81,37 @@ edges:
   - from: "signed-original"
     to: "overlay"
     relation: "reads"
-    label: "копия делается из оригинала, подпись не портится"
+    label: "копия из оригинала"
     evidence_ref: "src/Example/cf/CommonModules/РаботаСФайламиВызовСервера/Ext/Module.bsl:3831-3936"
   - from: "cache-stamp-png"
     to: "overlay"
     relation: "feeds"
-    label: "берётся уже готовая PNG"
+    label: "берётся готовая картинка"
     evidence_ref: "src/Example/cf/CommonModules/РаботаСФайламиВызовСервера/Ext/Module.bsl:9540-9565"
   - from: "overlay"
     to: "cache-visual-copy"
     relation: "writes"
-    label: "результат сохраняется как служебный файл"
+    label: "пишется служебный файл"
     evidence_ref: "src/Example/cf/InformationRegisters/СлужебныеФайлыДокументов/Ext/ManagerModule.bsl:43-73"
   - from: "cache-visual-copy"
     to: "user-sees"
     relation: "feeds"
-    label: "подмена данных при открытии"
+    label: "подмена при открытии"
     evidence_ref: "src/Example/cf/CommonModules/РаботаСФайламиВызовСервера/Ext/Module.bsl:3437-3441"
   - from: "cache-visual-copy"
     to: "overlay"
     relation: "reuses"
-    label: "копии нет → сборка повторяется со старой картинкой"
+    label: "сборка со старой картинкой"
     evidence_ref: "temp/reports/exploration-example-vizualizaciya-shtampa.md"
   - from: "invalidate-on-sign"
     to: "cache-visual-copy"
     relation: "invalidates"
-    label: "смена состава подписей сносит копию"
+    label: "подписи сносят копию"
     evidence_ref: "src/Example/cf/CommonModules/РаботаСЭП/Ext/Module.bsl:1445-1476"
   - from: "signed-original"
     to: "user-sees"
     relation: "protects"
-    label: "оригинал удалять нельзя"
+    label: "оригинал не трогать"
     evidence_ref: "src/Example/cf/CommonModules/РаботаСФайламиВызовСервера/Ext/Module.bsl:3848-3864"
 
 views:
@@ -118,4 +119,10 @@ views:
     focus: "Почему удаления только копии недостаточно при смене формата"
   - type: "layers"
     focus: "Оригинал, картинка, копия, результат"
+
+annotations:
+  - text: "Смена макета копию не сбрасывает"
+    evidence_ref: "src/Example/cf/CommonModules/РаботаСЭП/Ext/Module.bsl:1445-1476"
+    anchor:
+      node: "invalidate-on-sign"
 ```

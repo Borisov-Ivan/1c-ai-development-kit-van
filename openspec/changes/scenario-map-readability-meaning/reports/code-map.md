@@ -1,0 +1,24 @@
+# Срез S1 — Читаемая карта со смыслом (2026-08-29)
+
+- **S1.1** · шаблон панели · `computeLayerBands` (created) — полосы собираются из поля слоя узлов, а не из ранга раскладки. [`.cursor/skills/scenario-map-canvas/fixtures/canvas-shell.md`](.cursor/skills/scenario-map-canvas/fixtures/canvas-shell.md):157-185
+- **S1.2** · шаблон панели · стрелки и легенда (modified) — маркер направления, цвет и пунктир по типу связи, легенда использованных типов, обратное ребро изгибом. [`.cursor/skills/scenario-map-canvas/fixtures/canvas-shell.md`](.cursor/skills/scenario-map-canvas/fixtures/canvas-shell.md):408-460
+- **S1.3** · шаблон панели · выбор узла (modified) — клик только выделяет узел; файл открывается кнопкой «Открыть доказательство». [`.cursor/skills/scenario-map-canvas/fixtures/canvas-shell.md`](.cursor/skills/scenario-map-canvas/fixtures/canvas-shell.md):468-478
+- **S1.4** · шаблон панели · обязательные пункты (modified) — лимиты заголовка и подписи ребра, запрет кавычек кода и нового чата. [`.cursor/skills/scenario-map-canvas/fixtures/canvas-shell.md`](.cursor/skills/scenario-map-canvas/fixtures/canvas-shell.md):5-23
+- **S1.5** · скилл карты · шаг «Макет» (modified) — проверка смысла по манифесту до записи файла. [`.cursor/skills/scenario-map-canvas/SKILL.md`](.cursor/skills/scenario-map-canvas/SKILL.md):47-49
+- **S1.6** · скилл карты · шаг «Регистрация» (modified) — чек-лист читаемости по записанному файлу. [`.cursor/skills/scenario-map-canvas/SKILL.md`](.cursor/skills/scenario-map-canvas/SKILL.md):50-52
+- **S1.7** · скилл карты · контракт клика (modified) — выбор показывает эффект, файл открывается кнопкой. [`.cursor/skills/scenario-map-canvas/SKILL.md`](.cursor/skills/scenario-map-canvas/SKILL.md):50-50
+- **S1.8** · скилл карты · текстовый резерв (modified) — провал смысла не уходит в резерв. [`.cursor/skills/scenario-map-canvas/SKILL.md`](.cursor/skills/scenario-map-canvas/SKILL.md):215-221
+- **S1.9** · скилл карты · self-check `6a`/`6b`/`8a` (created). [`.cursor/skills/scenario-map-canvas/SKILL.md`](.cursor/skills/scenario-map-canvas/SKILL.md):270-289
+- **S1.10** · скилл карты · `focus_node` и `modes` (created). [`.cursor/skills/scenario-map-canvas/SKILL.md`](.cursor/skills/scenario-map-canvas/SKILL.md):64-116
+- **S1.11** · роль сборщика · несколько источников (modified). [`.cursor/agents/onec-scenario-map-designer.md`](.cursor/agents/onec-scenario-map-designer.md):18-26
+- **S1.12** · роль сборщика · расхождения как кандидаты (modified). [`.cursor/agents/onec-scenario-map-designer.md`](.cursor/agents/onec-scenario-map-designer.md):48-62
+- **S1.13** · эталон «граф без смысла» (created). [`.cursor/skills/scenario-map-canvas/fixtures/map-bad-no-insight.md`](.cursor/skills/scenario-map-canvas/fixtures/map-bad-no-insight.md):1-20
+- **S1.14** · скилл карты · три эталона в связанных артефактах и разделе эталонов (modified). [`.cursor/skills/scenario-map-canvas/SKILL.md`](.cursor/skills/scenario-map-canvas/SKILL.md):19-19
+- **S1.15** · шаблон панели · аннотации у якоря (created). [`.cursor/skills/scenario-map-canvas/fixtures/canvas-shell.md`](.cursor/skills/scenario-map-canvas/fixtures/canvas-shell.md):522-564
+- **S1.16** · скилл карты · контракт `annotations` (created). [`.cursor/skills/scenario-map-canvas/SKILL.md`](.cursor/skills/scenario-map-canvas/SKILL.md):118-128
+- **S1.17** · скилл карты · self-check `6c`/`6d` (created). [`.cursor/skills/scenario-map-canvas/SKILL.md`](.cursor/skills/scenario-map-canvas/SKILL.md):282-283
+- **S1.18** · роль сборщика · возврат аннотаций (modified). [`.cursor/agents/onec-scenario-map-designer.md`](.cursor/agents/onec-scenario-map-designer.md):39-62
+- **S1.19** · хороший эталон · короткий label, `focus_node`, аннотация ловушки (modified). [`.cursor/skills/scenario-map-canvas/fixtures/map-good-causal.md`](.cursor/skills/scenario-map-canvas/fixtures/map-good-causal.md):14-128
+- **S1.20** · сверка контрактов (modified) — словари и запреты сохранены; соседняя дельта клика выровнена. [`openspec/changes/overview-map-offer/specs/scenario-map-canvas/spec.md`](openspec/changes/overview-map-offer/specs/scenario-map-canvas/spec.md):61-64
+- **S1.21** · шаблон панели · проверка типов носителя (modified) — якорь аннотации сужается локально, `key` только на нативных обёртках. [`.cursor/skills/scenario-map-canvas/fixtures/canvas-shell.md`](.cursor/skills/scenario-map-canvas/fixtures/canvas-shell.md):22-22
+- **S1.22** · скилл карты · регистрация (modified) — прямая запись с чистой проверкой типов; дамп оболочки не регистрирует кнопку. [`.cursor/skills/scenario-map-canvas/SKILL.md`](.cursor/skills/scenario-map-canvas/SKILL.md):50-50
