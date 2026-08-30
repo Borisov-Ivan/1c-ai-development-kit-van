@@ -1,0 +1,37 @@
+---
+description: "On-demand triage маршрута задачи 1С: docs-fix / quick-fix / full-cycle; стык с Light Mode; promotion-триггеры"
+globs:
+alwaysApply: false
+---
+
+# Task Triage (on-demand)
+
+**Когда загружать:** выбор маршрута docs-fix / quick-fix / полный цикл до старта работы.
+
+**Shortcut:** опечатка в docs/rules без `src/` → docs-fix. Один `.bsl`, 2–10 строк, без нового/меняющегося `Экспорт`, метаданных, межмодульных вызовов, транзакций, RLS, подписок и регламентов → quick-fix (Light). Иначе → полный цикл. Смена контракта публичной `Экспорт`-процедуры, транзакции, RLS, adopted-объекты, подписки/регламенты → полный цикл независимо от Light.
+
+Загружать при выборе маршрута: «малый фикс» vs полный OpenSpec-цикл. Не заменяет Mode Gate и XML write guard.
+
+## Маршруты
+
+| Маршрут | Когда | Что делать |
+|---------|-------|------------|
+| **docs-fix** | Опечатка в docs/rules/skills, без BSL/XML `src/` | Правка напрямую; без ЗНИ |
+| **quick-fix** (Light Mode) | **1 файл** `.bsl`, очевидный фикс, нет архитектуры | Light Mode по `1c-halt-triggers.mdc`; без полного explore→new при явном согласии |
+| **full-cycle** | Новая фича, форма/макет, >2 модулей, неочевидный дефект | `/opsx:explore` → `/opsx:new` → verify → apply |
+
+## Promotion-триггеры (quick → full)
+
+Safety floor и базовые promotion — `1c-halt-triggers.mdc` (транзакции, контракт `Экспорт`, RLS, adopted, подписки/регламенты). Ниже — **сверх safety floor**:
+
+- wired metadata (новые реквизиты/ТЧ/формы как объекты);
+- Mode Gate форма/макет;
+- неочевидный root cause.
+
+## Запрет эскалации «ок → meta/form-add»
+
+Triage **никогда** не предлагает: заимствование в расширение, form-add, template-add, правку ChildObjects, meta-compile. Это всегда блокер человеку (`1c-no-metadata-creation.mdc`).
+
+## Clarification frontload
+
+Материальные вопросы (режим формы, scope, инварианты) — **до** `/opsx:apply`. В apply — один preflight (metadata/маркеры/открытая развилка), без серии mid-apply уточнений.

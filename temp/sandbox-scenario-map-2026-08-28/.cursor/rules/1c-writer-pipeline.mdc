@@ -1,0 +1,330 @@
+---
+description: "Writer pipeline — API Existence Check, Extension Gate, Contract Resolution. On-demand при фактической правке .bsl"
+alwaysApply: false
+priority: 800
+---
+
+# 1C Writer Pipeline (on-demand)
+
+**Когда загружать:** фактическая правка `.bsl` (после halt-triggers) или якорь always-apply `writer → ReadLints → … → reviewer`. Не подмешивать через glob на любое чтение модуля.
+
+**Единственный эталон сквозного потока.** Все другие файлы (`1c-agent-delegation.mdc`, `review/SKILL.md`, `openspec-apply-change/SKILL.md`) ссылаются сюда и не приводят собственные варианты порядка.
+
+```
+writer → ReadLints → [fix if errors] → IDENTIFIER HYGIENE CHECK →
+  COMMENT HYGIENE CHECK →
+  API EXISTENCE CHECK + METADATA CHECK →
+  [AskQuestion при WARNING по API/метаданным] →
+  EXTENSION VERIFICATION (если &ИзменениеИКонтроль) →
+  reviewer (+ Linter Signals + Naming Signals + Comment Hygiene Signals evidence + API check results + base path + verification result)
+```
+
+| Шаг | Исполнитель | Детали |
+|-----|-------------|--------|
+| writer | `onec-code-writer` (Task) | INPUT CONTRACT — `.cursor/agents/onec-code-writer.md` |
+| ReadLints + fix errors | оркестратор (fix — снова writer) | этот файл § LINT GATE |
+| IDENTIFIER HYGIENE CHECK (Naming Provenance) | оркестратор (Grep) | этот файл § IDENTIFIER HYGIENE CHECK; evidence — `review/SKILL.md` шаг 1.9 |
+| COMMENT HYGIENE CHECK | оркестратор (Grep) | этот файл § COMMENT HYGIENE CHECK; evidence — `review/SKILL.md` шаг 1.10 |
+| API EXISTENCE CHECK | оркестратор (Grep) | этот файл § API EXISTENCE CHECK |
+| METADATA CHECK | оркестратор (Grep по src/) | `1c-metadata-validation.mdc` |
+| EXTENSION VERIFICATION | оркестратор (Read base + сравнение) | этот файл § EXTENSION GATE |
+| reviewer | `onec-code-reviewer` (Task) | evidence-блоки обязательны |
+| Investigation loop (по запросу reviewer) | `onec-code-explorer` (Task) | этот файл § CONTRACT RESOLUTION; `review/SKILL.md` шаг 3.5 |
+
+Детали шагов — ниже. Лимиты циклов — однострочный якорь `1c-agent-delegation.mdc` (writer↔reviewer = 2; investigation = 3; self-review writer = 2).
+
+## ПРОМПТ WRITER: ГРАНИЦА ОТВЕТСТВЕННОСТИ
+
+Always-apply якорь — `1c-agent-delegation.mdc`: оркестратор описывает **ЧТО**, не **КАК**.
+
+Оркестратор в промпте writer описывает:
+
+```yaml
+ДОПУСТИМО (ЧТО):
+  - Описание задачи и критерии приёмки
+  - Контракты: сигнатуры функций, типы параметров, ключи структур
+  - Пути к файлам, указание на конкретные процедуры
+  - Бизнес-логика: при каких условиях какое поведение
+  - Ссылки на design.md, specs, архитектурный отчёт
+
+ЗАПРЕЩЕНО (КАК):
+  - Паттерны обработки ошибок ("оберни в Попытку", "сделай fallback")
+  - Конкретные проверки ("добавь ТипЗнч()", "проверь Свойство()")
+  - Структура кода ("сначала проверь X, потом вызови Y")
+  - Обоснование Попытки ("обоснована внешним фактором ХР")
+
+Если оркестратор хочет выразить ожидание поведения при ошибке:
+  ПЛОХО: "в Попытку — вызов ядра, при исключении — fallback"
+  ХОРОШО: "при недоступности ядра проверка должна выполниться
+           стандартным путём (fallback), а не заблокироваться"
+```
+
+**Метаданные:** имена объектов, типов и значений перечислений — см. `.cursor/rules/1c-metadata-validation.mdc`. Несуществующее имя → STOP (`1c-no-metadata-creation.mdc`).
+
+## LINT GATE
+
+**После каждой правки .bsl** (writer, Mechanical Mode, прямая правка) — **до вызова reviewer**:
+
+1. Вызвать `ReadLints` на изменённых `.bsl` файлах.
+2. Ошибки уровня **error** — исправить до reviewer (writer повторно; в apply/review — только writer).
+3. Блок **`## Linter Signals (evidence)`** для reviewer (`review/SKILL.md` шаг 1.8): **все** диагностики, включая **warning**.
+4. **Reviewer (Phase 1b — Linter Signals Gate):** in-scope warning/error → **MUST_FIX**; отложить на prerelease **запрещено** (`.cursor/docs/standard/reviewer-checks.md` § Phase 1b).
+5. Линтер недоступен — `Linter unavailable: <reason>`; reviewer проверяет документацию вручную.
+
+## IDENTIFIER HYGIENE CHECK (Naming Provenance)
+
+**После LINT GATE, до API EXISTENCE CHECK.** Семейство **Export Language** вместе с COMMENT HYGIENE (AP-031 для идентификаторов = тот же принцип, что AP-054 для комментариев). Код — экспортный артефакт для читателя без ЗНИ; идентификаторы — на русском доменном языке.
+
+**Принцип — детектор латиницы в идентификаторе, НЕ словарь стоп-слов.** allow-list закрыт по построению (как AP-054); что содержит латиницу и не входит в allow-list — кандидат. Любое будущее английское слово (`PreMatrix`, `PostMatrix`, …) закрывается автоматически, без правки списка. Это **подсказка** ревьюверу, **не** ворота: «кандидатов не найдено» НЕ заменяет доменный тест ревьювера (Phase 1c / Phase 0 Q6 — `.cursor/docs/standard/reviewer-checks.md`).
+
+> **Зачем отказались от blocklist.** Конечный список запрещённых токенов пропускает всё, чего в нём нет. Закрытый allow-list + детектор латиницы покрывают класс целиком. Словарь orchestration-токенов **не** держать.
+
+### Шаг 1. Scope
+
+- **apply/review с diff:** только изменённые `.bsl` из writer-diff (как API EXISTENCE CHECK).
+- **Без diff** (Mechanical Mode / full-file review): in-scope файлы из `## Review Boundaries`.
+- Нет scope → `Identifier scan skipped: no diff`.
+
+### Шаг 2. Цели — идентификаторы на новых строках
+
+Для каждой **новой `+`-строки diff** (или каждой in-scope строки при full-review) собрать идентификаторы из 4 классов:
+
+1. **Объявления процедур/функций:** `(Процедура|Функция)\s+(\w+)` → имя метода.
+2. **Области:** `#Область\s+(\w+)`.
+3. **Переменные и параметры:** имена слева от `=` (`(\w+)\s*=`), переменные `Перем\s+(\w+)`, имена параметров в списке `(Процедура|Функция)\s+\w+\((.*)\)`.
+4. **Ключи ДопСвойств:** строковый литерал в `Вставить\s*\(\s*"([^"]+)"` и `Свойство\s*\(\s*"([^"]+)"`.
+
+### Шаг 2b. Touched-procedure scope (обязательно при apply/review с diff)
+
+Если writer-diff изменил **≥1 строку** внутри тела процедуры/функции — для **каждой такой** процедуры/функции (от `Процедура`/`Функция` до `КонецПроцедуры`/`КонецФункции`) собрать **все** идентификаторы тела — те же 4 класса и тот же детектор латиницы (шаг 3).
+
+- Объединить с результатами шага 2; дедупликация по `File:Line` + `Match`.
+- Колонка **`Scope`:** `new-line` (строка в diff) | `touched-procedure` (legacy в изменённой процедуре).
+- **Запрещено** в evidence: «pre-existing — skip», «вне scope», «не новый символ» для кандидатов `touched-procedure`.
+- Legacy-идентификатор с латиницей в изменённой процедуре **обязан** попасть в таблицу — ревьювер решает confirm/dismiss (см. Phase 1c `reviewer-checks.md`).
+
+### Шаг 3. Детектор (для каждого собранного идентификатора/ключа)
+
+1. Найти латинские подстроки `[A-Za-z]{2,}` внутри имени (в т.ч. внутри кириллического: `БылиPreMatrixОтмены` → `PreMatrix`).
+2. Отфильтровать allow-list (Шаг 4). Остаток с латиницей — кандидат AP-031.
+3. **Необязательное усиление (опционально):** номер тикета `\d{4,}` или kebab-токен slug change-name — пометить как кандидат **даже если кириллический** (доменную непрозрачность чисто кириллических имён ловит ревьювер семантически). Не использовать словарь английских токенов (`PreWrite`, `Guard`, …) — основа шага 1–2.
+
+### Шаг 4. Allow-list (закрыт по построению — не включать в evidence)
+
+| Класс | dismiss-причина | Примеры |
+|-------|-----------------|---------|
+| Префикс расширения / разработчика | `code-prefix` | `pav_`, `lvv_`, `пр_` как префикс перед доменным русским именем |
+| Имя метаданного/типа/метода/параметра, существующее в `src/` | `metadata-name` | проверка Grep по `src/` на точное имя |
+| Протокол/формат/аббревиатура | `protocol` | классы как в `.cursor/docs/marker-canon.md` (в т.ч. `HTTP`, `HTTPS`, `JSON`, …) |
+| Имя веб-сервиса/метода/поля внешней системы (std-06 §1) | `web-service-name` | `TestConnection`, `EnterpriseDataExchange` |
+| Имя продукта/компании (std-02 §1.3) | `product-name` | `Microsoft Excel` |
+
+Allow-list baseline — `.cursor/docs/marker-canon.md`; project.md только **расширяет**. **`design.md`/`tasks.md` НЕ источник имён** — терминология ЗНИ не легитимизирует латиницу в идентификаторе.
+
+### Шаг 5. Выход — блок для reviewer
+
+Если кандидатов нет:
+
+```markdown
+## Naming Signals (evidence)
+
+Identifier scan: латинских кандидатов не найдено (N файлов). НЕ заменяет доменный тест ревьювера (Phase 1c / Phase 0 Q6).
+```
+
+Если есть кандидаты:
+
+```markdown
+## Naming Signals (evidence)
+
+| # | File:Line | Match | Class | Scope | Suggested |
+|---|-----------|-------|-------|-------|-----------|
+| 1 | Module.bsl:824 | БылиPreMatrixОтмены | variable | touched-procedure | AP-031 MUST_FIX |
+| 2 | Module.bsl:287 | pav74261_Применить… | procedure | new-line | AP-031 MUST_FIX |
+```
+
+- **Class:** `procedure` | `function` | `#Область` | `variable` | `parameter` | `property-key`.
+- **Suggested:** колонка содержит **буквально** токен `AP-031 MUST_FIX` и **ничего больше** — без `confirm/dismiss`, без ссылок на `design.md`/`tasks.md`, без имён символов, без обоснований, без «design D<N> называет X», без «терминология ЗНИ», без «design contract name». Severity (HIGH/MEDIUM) определяет reviewer, не оркестратор.
+
+**Анти-паттерн (HALT):** оркестратор поставляет в evidence **факт** (`File:Line`, `Match`, `Class`, `Scope`), не вердикт и не подсказку к dismiss. Запрещено писать в колонке `Suggested` или в соседних полях: «design D<N> называет X», «design contract name», «терминология ЗНИ», «confirm/dismiss», «design explicitly names …» — это подсказывает ревьюверу запрещённое основание для dismiss (см. Phase 1c `reviewer-checks.md`).
+
+**Self-check перед передачей reviewer:** если в колонке `Suggested` любой строки таблицы есть что-либо кроме точного `AP-031 MUST_FIX` — переписать блок evidence до соответствия.
+
+Оркестратор **не** создаёт findings — только evidence (`review/SKILL.md` шаг 1.9). Блок передаётся ревьюверу **всегда** (кандидаты / «не найдено» / skipped); «не найдено» обязывает ревьювера выполнить доменный тест по новым символам.
+
+## COMMENT HYGIENE CHECK
+
+**После IDENTIFIER HYGIENE CHECK, до API EXISTENCE CHECK.** Семейство **Export Language** вместе с IDENTIFIER HYGIENE (AP-054 для комментариев = тот же принцип, что AP-031 для идентификаторов). Механический grep по изменённым `.bsl` на **англицизмы в тексте комментариев и JSDoc** (AP-054). Принцип — **детектор латиницы в прозе**, не словарь стоп-слов: что не русское и не входит в allow-list (полон по построению) — кандидат. Оркестратор собирает evidence; reviewer обрабатывает в Phase 1d (`.cursor/docs/standard/reviewer-checks.md` § Phase 1d). Работает **без** `openspec/project.md`: встроенный allow-list — дефолт, project.md только **расширяет**.
+
+### Шаг 1. Scope
+
+- **apply/review с diff:** изменённые `.bsl` из writer-diff.
+- **Без diff** (Mechanical Mode / full-file review): in-scope файлы из `## Review Boundaries`.
+- Нет scope → `Comment Hygiene scan skipped: no diff`.
+
+### Шаг 2. Цели — строки комментариев
+
+Для каждой строки `//` in-scope (включая JSDoc-шапки над `Процедура`/`Функция` и **тело** блоков `// +++` / `// ---`):
+
+1. Удалить backtick-фрагменты (`` `...` `` — идентификаторы кода).
+2. Снять синтаксис whitelist-маркера: префикс `+++`/`---`, ФИО автора, дата, `[ID#NNNN]` (содержимое open-`domain_label` — это AP-053, не AP-054).
+3. Найти латинские слова `[A-Za-z]{2,}`.
+
+### Шаг 3. Allow-list (не включать в evidence)
+
+| Класс | dismiss-причина | Примеры |
+|-------|-----------------|---------|
+| Идентификатор кода 1С в backticks | `code-identifier` | `` `ПродолжитьВызов` ``, `` `XMLСтрока` `` |
+| Протокол/формат/аббревиатура | `protocol` | классы как в `.cursor/docs/marker-canon.md` (в т.ч. `HTTP`, `HTTPS`, `JSON`, …) |
+| Имя веб-сервиса/метода/поля внешней системы (std-06 §1) | `web-service-name` | `TestConnection`, `EnterpriseDataExchange` |
+| Имя продукта/компании (std-02 §1.3) | `product-name` | `Microsoft Excel` |
+| Служебный маркер | — | `TODO`, `FIXME` |
+
+Allow-list baseline — `.cursor/docs/marker-canon.md`; расширяется project.md (секция «Расширения allow-list AP-054» или эквивалент). При отсутствии project overlay — только baseline kit.
+
+### Шаг 4. Выход — блок для reviewer
+
+Если совпадений нет:
+
+```markdown
+## Comment Hygiene Signals (evidence)
+
+Comment Hygiene Signals: clean (N files scanned)
+```
+
+Если есть совпадения:
+
+```markdown
+## Comment Hygiene Signals (evidence)
+
+| # | File:Line | Match | Context | Suggested |
+|---|-----------|-------|---------|-----------|
+| 1 | Module.bsl:407 | eligibility | JSDoc | AP-054 MUST_FIX |
+| 2 | Module.bsl:749 | re-fetch | // body | AP-054 MUST_FIX |
+```
+
+- **Suggested:** всегда `AP-054 MUST_FIX`.
+- Оркестратор **не** создаёт findings — только evidence. Reviewer в Phase 1d даёт confirm/dismiss (dismiss-причины: `code-identifier`, `protocol`, `web-service-name`, `product-name`).
+- Транслит-слэнг (`коммит`, `таска`, `флоу`) и непрозрачный термин кириллицей — **семантический** слой ревьювера, не grep.
+
+## API EXISTENCE CHECK
+
+**После COMMENT HYGIENE CHECK, до вызова reviewer.** Проверяет, что вызовы `МодульИмя.МетодИмя()`, появившиеся в **новых строках diff** после writer, реально определены в коде репозитория. Поиск ведётся по **всему src/** (cf + все cfe).
+
+### Шаг 1. Извлечь новые вызовы
+
+Из изменённых строк (diff writer) regex-ом собрать уникальные пары `МодульИмя.МетодИмя(`. Дедупликация по паре.
+
+**Пропускать:**
+- Вызовы менеджеров платформы: `Справочники.X.`, `Документы.X.`, `Перечисления.X.`, `РегистрыСведений.X.`, `Обработки.X.Создать()`
+- Вызовы `Элементы.X.` (элементы формы)
+- Вызовы `ЭтотОбъект.X`, `ЭтаФорма.X`
+
+### Шаг 2. Для каждой пары — поиск определения
+
+Область поиска — **весь src/** (все подкаталоги, содержащие cf и cfe). Фактические пути к cf/cfe могут отличаться от `src/cf/` и `src/cfe/`; см. `openspec/project.md` и `project-paths.mdc`.
+
+- Общий модуль: Grep `Функция МетодИмя|Процедура МетодИмя` в `src/**/CommonModules/МодульИмя*/Ext/Module.bsl`
+- Объект (обработка, документ и т.д.): Grep `Функция МетодИмя|Процедура МетодИмя` в `src/**/МодульИмя/**/Module.bsl` и `src/**/МодульИмя/**/ObjectModule.bsl`
+
+### Шаг 3. Вердикт
+
+| Результат | Категория | Действие |
+|-----------|-----------|----------|
+| Метод найден в src/ | VERIFIED | Тихо; передать reviewer: `API_VERIFIED: МодульИмя.МетодИмя` |
+| Модуль найден, метод НЕ найден | WARNING | AskQuestion пользователю (шаг 4) |
+| Модуль НЕ найден в src/ | WARNING | AskQuestion пользователю (шаг 4) |
+
+### Шаг 4. Эскалация к пользователю (при WARNING)
+
+AskQuestion:
+
+«Метод `МодульИмя.МетодИмя()` не найден в репозитории (src/).
+
+Варианты:
+1. Метод существует — указать путь к файлу (модуль/конфигурация)
+2. Метод не существует — вернуть writer на исправление
+3. Пропустить проверку (метод в другом репозитории / подключаемой библиотеке)»
+
+- **Вариант 1:** пользователь указывает путь; оркестратор grep-ит для подтверждения, передаёт reviewer как VERIFIED.
+- **Вариант 2:** **СТОП**, возврат writer с замечанием «метод не существует, исправить вызов».
+- **Вариант 3:** передать reviewer как `UNCHECKED_API` (info, не warning).
+
+### Ограничения
+
+- Только **новые строки** из diff (не весь файл).
+- Только **точечная нотация** `Модуль.Метод(` (платформенные built-in без точки не попадают).
+- Дедупликация по паре (типичный diff: 1–5 уникальных вызовов).
+- При отсутствии diff (Mechanical Mode) — пропустить шаг.
+
+## CONTRACT RESOLUTION (формат и investigation loop)
+
+**Назначение:** описывает формат блока Resolved Contracts и протокол reviewer-driven investigation loop. Это **не шаг** перед writer/reviewer — резолв запускается **по запросу ревьювера** (секция Investigation Request в отчёте).
+
+**Цель:** определить, фиксирован ли контракт возврата внешних вызовов (fixed — конструируется в коде; dynamic — десериализация, внешний API), чтобы reviewer мог квалифицировать defensive checks (AP-004 при fixed) и Попытка-блоки (contract-compensating-try при unknown).
+
+### Триггер
+
+Ревьювер после Phase 0–2.5 включает в отчёт секцию `## Investigation Request` с таблицей источников, требующих резолва контракта. Оркестратор парсит эту секцию и запускает investigation loop (шаг 3.5 в `review/SKILL.md`). **Лимит — 3 итерации** (якорь лимитов — `1c-agent-delegation.mdc`).
+
+Без секции Investigation Request — CONTRACT RESOLUTION не выполняется.
+
+### Формат Resolved Contracts
+
+Блок для вставки в промпт повторного ревью:
+
+```markdown
+## Resolved Contracts
+
+### МетодИмя (ИмяМодуляИлиОбъекта)
+- Returns: тип (Структура | Соответствие | Массив | примитив | Произвольный)
+- Values/Keys: при структуре — перечень ключей, при вложенности — кратко (например Доверитель(Структура: ИНН, ...))
+- Contract: fixed | dynamic
+- Evidence: файл, строки (источник: explorer)
+```
+
+Если контракт не удалось определить — запись: `Contract: unknown`; reviewer трактует как динамический (допустима минимальная проверка).
+
+### Резолв контракта (только explorer)
+
+Оркестратор **не** резолвит контракты сам. Для всех точек из таблицы Investigation Request — один вызов **onec-code-explorer** по глубокому шаблону «Explorer — contract resolution (deep)» из `1c-agent-patterns/explorer.md`.
+
+### Передача результата
+
+- **Reviewer (повторный прогон):** секция `## Resolved Contracts` в промпте. Блок при наличии берётся из сохранённого отчёта в reports/ (см. review/SKILL.md шаг 3.5) или из вывода explorer. Использовать для Phase 2.5 Defensive Checks Audit: колонка Contract verified? = resolved-fixed или resolved-dynamic.
+- **Writer (при устранении замечаний):** при устранении замечаний ревью после Investigation Loop оркестратор **обязательно** передаёт writer полный блок `## Resolved Contracts` из файла `reports/resolved-contract-<scope-slug>-YYYY-MM-DD.md`. Без блока writer не вызывать для замечаний, затрагивающих resolved-контракты.
+
+**Сохранение.** Resolved Contracts после investigation loop сохраняются оркестратором в `openspec/changes/<id>/reports/resolved-contract-<scope-slug>-YYYY-MM-DD.md` (или `temp/reports/` без change) как артифакт ЗНИ. Reviewer и writer при всех последующих вызовах по этому scope получают блок из файла. См. также `preserve-subagent-reports.mdc`.
+
+Поток `/review`: `resolve scope → контекст → reviewer → [Investigation Request?] → explorer → reviewer (+ Resolved Contracts) → отчёт`.
+Поток `/opsx:apply`: `writer → ... → reviewer → [Investigation Request?] → explorer → reviewer (+ Resolved Contracts) → отчёт`.
+
+## INPUT CONTRACT (writer)
+
+Оркестратор обязан передать writer'у полный набор блоков по таблице 
+`.cursor/agents/onec-code-writer.md → ## INPUT CONTRACT`. 
+Валидация — на стороне оркестратора (при сборке промпта) и на стороне 
+writer'а (HALT с MISSING_INPUT при получении).
+
+Конкретные блоки и триггеры — см. таблицу в агенте.
+
+## EXTENSION GATE
+
+При делегировании writer для файла в cfe/ (расширение):
+1. Grep файл на наличие &ИзменениеИКонтроль.
+2. Если найдено — в промпт writer ОБЯЗАТЕЛЬНО включить блок EXTENSION_GUARD из `1c-agent-patterns/SKILL.md` (навигатор, секция SHARED INSTRUCTION BLOCKS).
+3. В промпт reviewer ОБЯЗАТЕЛЬНО включить: путь к base-файлу в cf/ для верификации (заменить cfe/<ExtName>/ на cf/ в пути к файлу).
+
+### EXTENSION VERIFICATION (после writer, до reviewer)
+
+Если файл содержит &ИзменениеИКонтроль — **до вызова reviewer** выполнить верификацию:
+
+1. Определить base-путь: заменить `cfe/<ExtName>/` на `cf/` в пути к файлу.
+2. Прочитать base-файл (Read), найти тело перехваченной процедуры/функции.
+3. В файле расширения: визуально выделить код ВНЕ директив `#Вставка`/`#Удаление`/`#КонецВставки`/`#КонецУдаления`.
+4. Сравнить код вне директив с base. При расхождении — **СТОП**, вернуть writer на исправление.
+5. Путь к base-файлу и результат проверки («verified: совпадает» или «расхождение в строках N-M») передать в промпт reviewer.
+
+Место шага в потоке — после LINT GATE, IDENTIFIER HYGIENE CHECK, COMMENT HYGIENE CHECK и API/METADATA CHECK, до reviewer (эталон — этот файл, таблица шагов выше). При обнаружении `&ИзменениеИКонтроль` дополнительно: enrich writer prompt блоком EXTENSION_GUARD **до** вызова writer (см. EXTENSION GATE выше).
+
+---
+

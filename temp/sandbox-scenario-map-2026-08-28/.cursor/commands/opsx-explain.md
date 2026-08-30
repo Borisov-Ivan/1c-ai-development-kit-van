@@ -1,0 +1,21 @@
+---
+name: /opsx:explain
+id: opsx-explain
+category: Workflow
+description: "Пошаговый разбор значимого кода с подтверждением: карта точек → одна карточка за ход"
+---
+
+**Первое действие:** прочитать `.cursor/skills/openspec-explain/SKILL.md` и следовать Entry Protocol.
+
+Пошаговый совместный разбор механизма: сначала короткая **карта точек** (имена эффектов, без классов в чат), затем **одна точка за ход** (зачем / что-как / фрагмент кода / на что смотреть / «дальше»). Анализ проблем и рисков — **в конце по запросу**, не на каждом шаге. Без свалок таблиц и без телеграфа.
+
+На выходе прохода журнал сохраняется в `temp/reports/explain-YYYY-MM-DD-<slug>.md` или в `openspec/changes/<name>/reports/` при привязке к ЗНИ (кликабельные ссылки на код в файле).
+
+**Ввод:** трасса, отчёт `temp/reports/…`, review/code-map с `## Explain scope`, change, путь модуля, или «как работает X» после explore.
+
+**Примеры:**
+
+- `/opsx:explain @temp/reports/trace-analysis-2026-08-02-napravlenie-na-podpisanie.md`
+- `/opsx:explain кнопка Направить на подписание — по точкам из замера`
+- `/opsx:explain @openspec/changes/<name>/reports/review-<scope>-YYYY-MM-DD.md`
+- `/opsx:explain @openspec/changes/<name>/reports/code-map.md`

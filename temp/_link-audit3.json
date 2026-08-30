@@ -1,0 +1,2696 @@
+{
+  "source_count": 162,
+  "always_apply": [
+    "1c-agent-delegation.mdc",
+    "chat-output-budget.mdc",
+    "gate-dispatcher.mdc",
+    "session-discipline.mdc"
+  ],
+  "broken": [
+    {
+      "src": ".cursor/agents/onec-code-reviewer.md",
+      "line": 52,
+      "raw": "project.md",
+      "kind": "backtick",
+      "status": "broken",
+      "snippet": "Пути cf/cfe — из `openspec/project.md` (секция «Структура репозитория») или блока в промпте. Не предполагай `src/cf/` по умолчанию. В kit-репозитории `project.md` отсутствует — блок путей опускается."
+    },
+    {
+      "src": ".cursor/agents/onec-trace-analyst.md",
+      "line": 321,
+      "raw": "profiles/bug.md",
+      "kind": "backtick",
+      "status": "broken",
+      "snippet": "(Обязательно при вызове из `/opsx:explore` profile `explore-bug` — **4 строки** по `profiles/bug.md`; язык заказчика, без цепочек вызовов.)"
+    },
+    {
+      "src": ".cursor/commands/init-project.md",
+      "line": 10,
+      "raw": "project.md",
+      "kind": "backtick",
+      "status": "broken",
+      "snippet": "**Первое действие:** прочитать [`.cursor/docs/init-project-protocol.md`](../docs/init-project-protocol.md) и выполнить протокол целиком (Phase 0…). До чтения протокола — не создавать каталоги и не писать `project.md`."
+    },
+    {
+      "src": ".cursor/commands/opsx-knowledge-add.md",
+      "line": 16,
+      "raw": "SKILL.md",
+      "kind": "backtick",
+      "status": "broken",
+      "snippet": "- Без аргументов выполняется Session Context Fallback (см. `SKILL.md`): команда подбирает кандидата из recently viewed / упомянутых в текущей сессии отчётов и спрашивает подтверждение через AskQuestion. Если кандидатов н"
+    },
+    {
+      "src": ".cursor/docs/1c-coding-standards.md",
+      "line": 46,
+      "raw": "project.md",
+      "kind": "backtick",
+      "status": "broken",
+      "snippet": "**SSOT правила AP-054** — карточка в [.cursor/docs/antipatterns/bsl-antipatterns.md](antipatterns/bsl-antipatterns.md) (не `project.md`); **SSOT AP-031** — там же. `openspec/project.md` лишь **опционально расширяет** all"
+    },
+    {
+      "src": ".cursor/docs/agents-CHANGELOG.md",
+      "line": 10,
+      "raw": "estimate.md",
+      "kind": "backtick",
+      "status": "broken",
+      "snippet": "- **`_template`:** Why/Slices/slice-gate; удалены orphan `estimate.md` / `ТЗ.md`."
+    },
+    {
+      "src": ".cursor/docs/agents-CHANGELOG.md",
+      "line": 38,
+      "raw": "reports/code-map.md",
+      "kind": "backtick",
+      "status": "broken",
+      "snippet": "- **Восстановлено (cherry-pick из `747b336`/`fb7991e`):** спецификация **Карта правок** (`reports/code-map.md`) — `openspec-apply-change`, `opsx-output-style` §5.2, `chat-output-budget` §1c, `openspec-archive-change`."
+    },
+    {
+      "src": ".cursor/docs/agents-CHANGELOG.md",
+      "line": 59,
+      "raw": "tz-lexicon-dictionary.md",
+      "kind": "backtick",
+      "status": "broken",
+      "snippet": "- Агенты/доки: `onec-code-architect-2nd`, `openspec-doc-writer`, `tz-lexicon-dictionary.md`."
+    },
+    {
+      "src": ".cursor/docs/architect-report-schema.md",
+      "line": 3,
+      "raw": "_manifest.yaml",
+      "kind": "backtick",
+      "status": "broken",
+      "snippet": "Single source of truth для YAML front-matter отчётов архитектора и `_manifest.yaml`."
+    },
+    {
+      "src": ".cursor/docs/architect-report-schema.md",
+      "line": 30,
+      "raw": "reports/_manifest.yaml",
+      "kind": "backtick",
+      "status": "broken",
+      "snippet": "## `reports/_manifest.yaml` (в каждом change)"
+    },
+    {
+      "src": ".cursor/docs/delivery-integrity.md",
+      "line": 16,
+      "raw": ".cursor/commands/opsx-intake.md",
+      "kind": "backtick",
+      "status": "broken",
+      "snippet": "10. **Отсутствие intake/debug:** нет `.cursor/commands/opsx-intake.md`, `opsx-debug.md`; нет каталогов `.cursor/skills/openspec-intake/`, `openspec-debug/`."
+    },
+    {
+      "src": ".cursor/docs/delivery-integrity.md",
+      "line": 16,
+      "raw": "opsx-debug.md",
+      "kind": "backtick",
+      "status": "broken",
+      "snippet": "10. **Отсутствие intake/debug:** нет `.cursor/commands/opsx-intake.md`, `opsx-debug.md`; нет каталогов `.cursor/skills/openspec-intake/`, `openspec-debug/`."
+    },
+    {
+      "src": ".cursor/docs/init-project-protocol.md",
+      "line": 34,
+      "raw": "_taxonomy.template.yaml",
+      "kind": "backtick",
+      "status": "broken",
+      "snippet": "| Whitelist соблюдён | Glob по `openspec/knowledge/` | Только `<domain>/`, `_archive/`, служебные `_index.yaml` / `_taxonomy.yaml` / `_taxonomy.template.yaml` / `README.md` (см. `.cursor/rules/knowledge-format.mdc` секци"
+    },
+    {
+      "src": ".cursor/docs/init-project-protocol.md",
+      "line": 77,
+      "raw": "architecture.md",
+      "kind": "backtick",
+      "status": "broken",
+      "snippet": "| Нет `_taxonomy.yaml` | Если Phase 5 будет выполнена — оставить (сгенерируется в Phase 5 шаг 6). Если Phase 5 пропускается (по решению пользователя или при повторном запуске с уже существующей `architecture.md` без обно"
+    },
+    {
+      "src": ".cursor/docs/init-project-protocol.md",
+      "line": 128,
+      "raw": "project.md",
+      "kind": "backtick",
+      "status": "broken",
+      "snippet": "2. Оценить секции `project.md`. Для **типовых** секций (Продукт, Назначение, Область и т.д.) — по критериям:"
+    },
+    {
+      "src": ".cursor/docs/init-project-protocol.md",
+      "line": 375,
+      "raw": "project.md",
+      "kind": "backtick",
+      "status": "broken",
+      "snippet": "Секцию «Соглашения» адаптировать под технологию проекта (1С, TypeScript и т.п.). Секцию «Форматы и соглашения по комментариям BSL» заполнять из ответов **Блока 7** (только overlay-таблицы; MECHANISM — в `marker-canon.md`"
+    },
+    {
+      "src": ".cursor/docs/init-project-protocol.md",
+      "line": 392,
+      "raw": "project.md",
+      "kind": "backtick",
+      "status": "broken",
+      "snippet": "1. Read `.cursor/templates/project-overlay.template.md` и текущий `project.md`."
+    },
+    {
+      "src": ".cursor/docs/init-project-protocol.md",
+      "line": 439,
+      "raw": "project.md",
+      "kind": "backtick",
+      "status": "broken",
+      "snippet": "1. **Вход:** карта расширений и границ доменов из выхода `onec-code-architect` (и при необходимости `openspec/specs/architecture.md`, `project.md`)."
+    },
+    {
+      "src": ".cursor/docs/init-project-protocol.md",
+      "line": 447,
+      "raw": "architecture.md",
+      "kind": "backtick",
+      "status": "broken",
+      "snippet": "**При повторном запуске /init-project:** если `openspec/specs/architecture.md` уже существует — Phase 5 **предложить** обновить (если project.md изменился) или пропустить. Не пересоздавать автоматически без согласия. Шаг"
+    },
+    {
+      "src": ".cursor/docs/onec-infrastructure.md",
+      "line": 27,
+      "raw": "docs/onec-dev-container.md",
+      "kind": "backtick",
+      "status": "broken",
+      "snippet": "- **Документация:** `docs/onec-dev-container.md`"
+    },
+    {
+      "src": ".cursor/docs/opsx-output-style.md",
+      "line": 242,
+      "raw": "brief.md",
+      "kind": "backtick",
+      "status": "broken",
+      "snippet": "| Метаданные маршрута (`target:`, `prev:`, `Шаг 1 — детали для агента`) | **Полный запрет в чате.** Эти данные живут только в `brief.md`. |"
+    },
+    {
+      "src": ".cursor/docs/opsx-output-style.md",
+      "line": 388,
+      "raw": "code-map.md",
+      "kind": "backtick",
+      "status": "broken",
+      "snippet": "| `final` | Одна строка: работы завершены; **следующий шаг** `/opsx:archive <name>` (без цепочки «сначала verify»); при BSL за change — опционально `/opsx:explain` по `code-map.md` (ниже archive/verify/extend). |"
+    },
+    {
+      "src": ".cursor/docs/opsx-output-style.md",
+      "line": 414,
+      "raw": "reports/code-map.md",
+      "kind": "backtick",
+      "status": "broken",
+      "snippet": "`openspec/changes/<name>/reports/handoff-<variant>-S<N>-YYYY-MM-DD.md` (для `acceptance` / `pause` с указанием среза; для `final` — `handoff-final-YYYY-MM-DD.md`). Для `acceptance` имя файла: `handoff-acceptance-S<N>-YYY"
+    },
+    {
+      "src": ".cursor/docs/opsx-output-style.md",
+      "line": 425,
+      "raw": "code-map.md",
+      "kind": "backtick",
+      "status": "broken",
+      "snippet": "| **Файл** `code-map.md` | заказчик, ревьювер, архив | **сначала** русское предложение «что изменилось и зачем», **потом** markdown-link + `:строки`; ID задачи `S<N>.<M>` обязателен |"
+    },
+    {
+      "src": ".cursor/docs/opsx-output-style.md",
+      "line": 432,
+      "raw": "path",
+      "kind": "md-link",
+      "status": "broken",
+      "snippet": "| **Файл `code-map.md`** | компактно: markdown-link `` [`path`](path):start-end `` |"
+    },
+    {
+      "src": ".cursor/docs/opsx-output-style.md",
+      "line": 432,
+      "raw": "code-map.md",
+      "kind": "backtick",
+      "status": "broken",
+      "snippet": "| **Файл `code-map.md`** | компактно: markdown-link `` [`path`](path):start-end `` |"
+    },
+    {
+      "src": ".cursor/docs/opsx-output-style.md",
+      "line": 441,
+      "raw": "pause-wait-file.md",
+      "kind": "backtick",
+      "status": "broken",
+      "snippet": "0. **Что создать в Конфигураторе** (только `pause-wait`). Полный рецепт: имена объектов, типы, значения заполнения, флаги модуля, поля формы, строки макета, доп.реквизиты в ИБ. Заголовок раздела **фиксированный** — на не"
+    },
+    {
+      "src": ".cursor/docs/opsx-output-style.md",
+      "line": 445,
+      "raw": "reports/code-map.md",
+      "kind": "backtick",
+      "status": "broken",
+      "snippet": "3a. **Карта правок** (только вариант `acceptance`). Секция среза из `reports/code-map.md` (полный список пунктов с ID задачи, модулем, процедурой, ссылкой на файл:строки). В чат — компактный блок до 5 пунктов (см. «Язык "
+    },
+    {
+      "src": ".cursor/docs/opsx-output-style.md",
+      "line": 537,
+      "raw": "style-checklist.md",
+      "kind": "backtick",
+      "status": "broken",
+      "snippet": "**Файл** `temp/overview-YYYY-MM-DD-<slug>.md` — полный связный текст по шаблону `.cursor/skills/openspec-overview/templates/customer-overview.md` (стиль — `style-checklist.md`, структура — `fixtures/golden-88781-overview"
+    },
+    {
+      "src": ".cursor/docs/opsx-output-style.md",
+      "line": 537,
+      "raw": "fixtures/golden-88781-overview.md",
+      "kind": "backtick",
+      "status": "broken",
+      "snippet": "**Файл** `temp/overview-YYYY-MM-DD-<slug>.md` — полный связный текст по шаблону `.cursor/skills/openspec-overview/templates/customer-overview.md` (стиль — `style-checklist.md`, структура — `fixtures/golden-88781-overview"
+    },
+    {
+      "src": ".cursor/docs/opsx-output-style.md",
+      "line": 537,
+      "raw": "fixtures/voice-good-stage.md",
+      "kind": "backtick",
+      "status": "broken",
+      "snippet": "**Файл** `temp/overview-YYYY-MM-DD-<slug>.md` — полный связный текст по шаблону `.cursor/skills/openspec-overview/templates/customer-overview.md` (стиль — `style-checklist.md`, структура — `fixtures/golden-88781-overview"
+    },
+    {
+      "src": ".cursor/docs/opsx-output-style.md",
+      "line": 638,
+      "raw": "templates/executive-summary.md",
+      "kind": "backtick",
+      "status": "broken",
+      "snippet": "11. **Verify — «Суть» и режим.** В **файле** отчёта `/opsx:verify` тело `## Executive Summary` — только **`templates/executive-summary.md`** («Суть», опционально «Что в работе»). Режим и вердикт — только в YAML frontmatt"
+    },
+    {
+      "src": ".cursor/docs/opsx-output-style.md",
+      "line": 638,
+      "raw": "chat-summary.md",
+      "kind": "backtick",
+      "status": "broken",
+      "snippet": "11. **Verify — «Суть» и режим.** В **файле** отчёта `/opsx:verify` тело `## Executive Summary` — только **`templates/executive-summary.md`** («Суть», опционально «Что в работе»). Режим и вердикт — только в YAML frontmatt"
+    },
+    {
+      "src": ".cursor/docs/review-guide.md",
+      "line": 68,
+      "raw": "project.md",
+      "kind": "backtick",
+      "status": "broken",
+      "snippet": "Whitelist и mandatory control из `project.md` проверяются в обоих режимах и в apply-reviewer."
+    },
+    {
+      "src": ".cursor/docs/templates/decision-block.md",
+      "line": 115,
+      "raw": "chat-summary.md",
+      "kind": "backtick",
+      "status": "broken",
+      "snippet": "- **verify** — детализация и режимы: `.cursor/skills/openspec-verify-change/templates/card-decision.md` (ссылается сюда), `chat-summary.md` 3a-decision, `verify-user-communication.mdc`."
+    },
+    {
+      "src": ".cursor/rules/architect-gate.mdc",
+      "line": 150,
+      "raw": "reports/_manifest.yaml",
+      "kind": "backtick",
+      "status": "broken",
+      "snippet": "2. Отчёт зарегистрирован в `reports/_manifest.yaml` со статусом `active` и подходящим `scope`."
+    },
+    {
+      "src": ".cursor/rules/capture-to-project.mdc",
+      "line": 12,
+      "raw": "project.md",
+      "kind": "backtick",
+      "status": "broken",
+      "snippet": "При **первом указании ФИО** в `/opsx:new` (когда в `project.md` секция «Разработчик по умолчанию» пуста или с плейсхолдером) — предложить записать ФИО в `project.md` по протоколу ниже (зеркало → подтверждение → Write)."
+    },
+    {
+      "src": ".cursor/rules/capture-to-project.mdc",
+      "line": 19,
+      "raw": "project.md",
+      "kind": "backtick",
+      "status": "broken",
+      "snippet": "- При необходимости создать скелет OpenSpec по **Phase 0** `.cursor/commands/init-project.md` (`openspec/`, `openspec/changes/`, `openspec/changes/_template/`, `openspec/specs/`, `openspec/docs/`, `openspec/adrs/`, `open"
+    },
+    {
+      "src": ".cursor/rules/capture-to-project.mdc",
+      "line": 20,
+      "raw": "project.md",
+      "kind": "backtick",
+      "status": "broken",
+      "snippet": "- Взять **полный шаблон структуры** `project.md` из **Phase 4** того же файла `init-project.md` (блок markdown с `# OpenSpec:` … overlay-таблицы BSL)."
+    },
+    {
+      "src": ".cursor/rules/capture-to-project.mdc",
+      "line": 27,
+      "raw": "project.md",
+      "kind": "backtick",
+      "status": "broken",
+      "snippet": "- при создании с нуля: **полный черновик** `project.md` (каркас Phase 4 + договорённость), чтобы было видно целый файл."
+    },
+    {
+      "src": ".cursor/rules/capture-to-project.mdc",
+      "line": 34,
+      "raw": "project.md",
+      "kind": "backtick",
+      "status": "broken",
+      "snippet": "- Не дублировать содержимое, уже присутствующее в `project.md`."
+    },
+    {
+      "src": ".cursor/rules/chat-output-budget-full.mdc",
+      "line": 31,
+      "raw": "templates/explain-report.md",
+      "kind": "backtick",
+      "status": "broken",
+      "snippet": "| **Explain — выход** | Журнал + вопрос анализа: **≤6 строк** (вопрос — если есть кандидаты). Сводка заметок после «да»: **≤25 строк**, ≤5 пунктов. Обязателен `Write` `explain-YYYY-MM-DD-<slug>.md` (`temp/reports/` или `"
+    },
+    {
+      "src": ".cursor/rules/chat-output-budget-full.mdc",
+      "line": 75,
+      "raw": "pause-wait-file.md",
+      "kind": "backtick",
+      "status": "broken",
+      "snippet": "- **pause-wait (apply, Конфигуратор)** → `.cursor/skills/openspec-apply-change/templates/pause-wait-chat.md` (чат) и `pause-wait-file.md` (файл); слот бюджета — §1d."
+    },
+    {
+      "src": ".cursor/rules/chat-output-budget-full.mdc",
+      "line": 89,
+      "raw": "pause-wait-chat.md",
+      "kind": "backtick",
+      "status": "broken",
+      "snippet": "8. **Decision-block (любая команда, HARD).** Если в сообщении есть развилка/блокер **с выбором A/B** — она собрана по `.cursor/docs/templates/decision-block.md`: блок «Что решить» + триада **inline**, варианты прозой. **"
+    },
+    {
+      "src": ".cursor/rules/command-session-persistence.mdc",
+      "line": 49,
+      "raw": "SKILL.md",
+      "kind": "read",
+      "status": "broken",
+      "snippet": "Модель теряет контекст активной команды на follow-up сообщениях. `command-skill-gate.mdc` покрывает только вход (первый Read SKILL.md). На последующих ходах агент переключается в свободный режим: пропускает gates, авто-п"
+    },
+    {
+      "src": ".cursor/rules/command-skill-gate.mdc",
+      "line": 9,
+      "raw": "SKILL.md",
+      "kind": "backtick",
+      "status": "broken",
+      "snippet": "**Когда загружать:** сессия начата командой из `.cursor/commands/`, которая указывает прочитать `SKILL.md` до любых других файлов."
+    },
+    {
+      "src": ".cursor/rules/command-skill-gate.mdc",
+      "line": 9,
+      "raw": "SKILL.md",
+      "kind": "read",
+      "status": "broken",
+      "snippet": "**Когда загружать:** сессия начата командой из `.cursor/commands/`, которая указывает прочитать `SKILL.md` до любых других файлов."
+    },
+    {
+      "src": ".cursor/rules/command-skill-gate.mdc",
+      "line": 20,
+      "raw": "SKILL.md",
+      "kind": "backtick",
+      "status": "broken",
+      "snippet": "1. **FIRST AND ONLY tool call** в первом батче — `Read` указанного `SKILL.md`. Никаких других Read, Grep, Shell, SemanticSearch, Task в том же батче."
+    },
+    {
+      "src": ".cursor/rules/command-skill-gate.mdc",
+      "line": 29,
+      "raw": "templates/card-decision.md",
+      "kind": "backtick",
+      "status": "broken",
+      "snippet": "- Для `openspec-verify-change/SKILL.md`: если файл обрезан, обязательно прочитать файлы `templates/*.md` (например, `templates/card-decision.md`, `templates/card-hygiene.md`, `templates/report-header.md`, `templates/exec"
+    },
+    {
+      "src": ".cursor/rules/command-skill-gate.mdc",
+      "line": 29,
+      "raw": "templates/card-hygiene.md",
+      "kind": "backtick",
+      "status": "broken",
+      "snippet": "- Для `openspec-verify-change/SKILL.md`: если файл обрезан, обязательно прочитать файлы `templates/*.md` (например, `templates/card-decision.md`, `templates/card-hygiene.md`, `templates/report-header.md`, `templates/exec"
+    },
+    {
+      "src": ".cursor/rules/command-skill-gate.mdc",
+      "line": 29,
+      "raw": "templates/report-header.md",
+      "kind": "backtick",
+      "status": "broken",
+      "snippet": "- Для `openspec-verify-change/SKILL.md`: если файл обрезан, обязательно прочитать файлы `templates/*.md` (например, `templates/card-decision.md`, `templates/card-hygiene.md`, `templates/report-header.md`, `templates/exec"
+    },
+    {
+      "src": ".cursor/rules/command-skill-gate.mdc",
+      "line": 29,
+      "raw": "templates/executive-summary.md",
+      "kind": "backtick",
+      "status": "broken",
+      "snippet": "- Для `openspec-verify-change/SKILL.md`: если файл обрезан, обязательно прочитать файлы `templates/*.md` (например, `templates/card-decision.md`, `templates/card-hygiene.md`, `templates/report-header.md`, `templates/exec"
+    },
+    {
+      "src": ".cursor/rules/command-skill-gate.mdc",
+      "line": 29,
+      "raw": "templates/info-section.md",
+      "kind": "backtick",
+      "status": "broken",
+      "snippet": "- Для `openspec-verify-change/SKILL.md`: если файл обрезан, обязательно прочитать файлы `templates/*.md` (например, `templates/card-decision.md`, `templates/card-hygiene.md`, `templates/report-header.md`, `templates/exec"
+    },
+    {
+      "src": ".cursor/rules/command-skill-gate.mdc",
+      "line": 29,
+      "raw": "templates/layer-1-hygiene-table.md",
+      "kind": "backtick",
+      "status": "broken",
+      "snippet": "- Для `openspec-verify-change/SKILL.md`: если файл обрезан, обязательно прочитать файлы `templates/*.md` (например, `templates/card-decision.md`, `templates/card-hygiene.md`, `templates/report-header.md`, `templates/exec"
+    },
+    {
+      "src": ".cursor/rules/command-skill-gate.mdc",
+      "line": 30,
+      "raw": "templates/handoff-contract.md",
+      "kind": "backtick",
+      "status": "broken",
+      "snippet": "- Для `openspec-new-change/SKILL.md`: если файл обрезан — Read `templates/handoff-contract.md` (и другие `templates/*.md` при появлении)."
+    },
+    {
+      "src": ".cursor/rules/command-skill-gate.mdc",
+      "line": 30,
+      "raw": "templates/handoff-contract.md",
+      "kind": "read",
+      "status": "broken",
+      "snippet": "- Для `openspec-new-change/SKILL.md`: если файл обрезан — Read `templates/handoff-contract.md` (и другие `templates/*.md` при появлении)."
+    },
+    {
+      "src": ".cursor/rules/knowledge-format.mdc",
+      "line": 41,
+      "raw": "_taxonomy.template.yaml",
+      "kind": "backtick",
+      "status": "broken",
+      "snippet": "- `_taxonomy.template.yaml`"
+    },
+    {
+      "src": ".cursor/rules/model-gpt56.mdc",
+      "line": 19,
+      "raw": "SKILL.md",
+      "kind": "backtick",
+      "status": "broken",
+      "snippet": "- командный вход → `templates/*.md` при обрезке `SKILL.md`."
+    },
+    {
+      "src": ".cursor/rules/session-discipline.mdc",
+      "line": 13,
+      "raw": "SKILL.md",
+      "kind": "backtick",
+      "status": "broken",
+      "snippet": "Команда из `.cursor/commands/*.md` инструктирует Read `SKILL.md`."
+    },
+    {
+      "src": ".cursor/rules/session-discipline.mdc",
+      "line": 13,
+      "raw": "SKILL.md",
+      "kind": "read",
+      "status": "broken",
+      "snippet": "Команда из `.cursor/commands/*.md` инструктирует Read `SKILL.md`."
+    },
+    {
+      "src": ".cursor/rules/session-discipline.mdc",
+      "line": 15,
+      "raw": "SKILL.md",
+      "kind": "backtick",
+      "status": "broken",
+      "snippet": "1. **FIRST AND ONLY tool call** в первом батче — `Read` указанного `SKILL.md`. Никаких других Read, Grep, Shell, SemanticSearch, Task в том же батче."
+    },
+    {
+      "src": ".cursor/rules/session-discipline.mdc",
+      "line": 19,
+      "raw": "SKILL.md",
+      "kind": "backtick",
+      "status": "broken",
+      "snippet": "**Страховка от обрезки:** если `Read` обрезает `SKILL.md` — во втором батче Read `templates/*.md` скилла. Если шаблоны недоступны — `Read offset/limit` завершающих шагов. Формат вывода — Compact Brief из `chat-output-bud"
+    },
+    {
+      "src": ".cursor/rules/task-readability.mdc",
+      "line": 97,
+      "raw": "architect.md",
+      "kind": "backtick",
+      "status": "broken",
+      "snippet": "- Шаблоны промптов: `.cursor/skills/1c-agent-patterns/SKILL.md` (навигатор) + ролевые файлы (`architect.md`, `writer.md`, ...)"
+    },
+    {
+      "src": ".cursor/rules/task-readability.mdc",
+      "line": 97,
+      "raw": "writer.md",
+      "kind": "backtick",
+      "status": "broken",
+      "snippet": "- Шаблоны промптов: `.cursor/skills/1c-agent-patterns/SKILL.md` (навигатор) + ролевые файлы (`architect.md`, `writer.md`, ...)"
+    },
+    {
+      "src": ".cursor/rules/verify-user-communication.mdc",
+      "line": 39,
+      "raw": "verdict-card.md",
+      "kind": "backtick",
+      "status": "broken",
+      "snippet": "- **Чат** — `.cursor/skills/openspec-verify-change/templates/chat-summary.md` + `verdict-card.md` (тот же каталог)."
+    },
+    {
+      "src": ".cursor/rules/verify-user-communication.mdc",
+      "line": 50,
+      "raw": "chat-summary.md",
+      "kind": "backtick",
+      "status": "broken",
+      "snippet": "- Repair после attempt 2 → вариант 4 `chat-summary.md`."
+    },
+    {
+      "src": ".cursor/skills/openspec-apply-change/SKILL.md",
+      "line": 333,
+      "raw": "reports/code-map.md",
+      "kind": "backtick",
+      "status": "broken",
+      "snippet": "**Карта правок (`reports/code-map.md`, mandatory at Slice Gate):**"
+    },
+    {
+      "src": ".cursor/skills/openspec-apply-change/SKILL.md",
+      "line": 339,
+      "raw": "src/.../Module.bsl",
+      "kind": "md-link",
+      "status": "broken",
+      "snippet": "- **S<N>.<M>** · <модуль/объект> · <процедура/функция> (<created|modified>) — <суть из tasks.md>. [`src/.../Module.bsl`](src/.../Module.bsl):<start>-<end>"
+    },
+    {
+      "src": ".cursor/skills/openspec-apply-change/SKILL.md",
+      "line": 341,
+      "raw": "code-map.md",
+      "kind": "backtick",
+      "status": "broken",
+      "snippet": "- **`## Explain scope` (SSOT при BSL в срезе):** в конце секции среза (или отдельным блоком в конце `code-map.md` для среза) — обязательная секция для `/opsx:explain`. Канон apply-источника для `@` = **этот** `code-map.m"
+    },
+    {
+      "src": ".cursor/skills/openspec-apply-change/SKILL.md",
+      "line": 389,
+      "raw": "reports/code-map.md",
+      "kind": "backtick",
+      "status": "broken",
+      "snippet": "<до 5 пунктов: проза + [`start:end:path`](...); полная карта — в `reports/code-map.md`>"
+    },
+    {
+      "src": ".cursor/skills/openspec-apply-change/SKILL.md",
+      "line": 402,
+      "raw": "reports/code-map.md",
+      "kind": "backtick",
+      "status": "broken",
+      "snippet": "1. **Карта правок:** собрать символы среза из journal + `tasks.md`; **Write/append** `reports/code-map.md` (секция `# Срез S<N> — …`); при BSL — включить `## Explain scope` (SSOT выше)."
+    },
+    {
+      "src": ".cursor/skills/openspec-apply-change/SKILL.md",
+      "line": 509,
+      "raw": "code-map.md",
+      "kind": "backtick",
+      "status": "broken",
+      "snippet": "- `### Карта правок (перед тестом)` — **только вариант `acceptance`**: до 5 пунктов (проза + citation); в файле handoff — полный список секции среза из `code-map.md`. Язык — §5.2 «Язык карты»."
+    },
+    {
+      "src": ".cursor/skills/openspec-apply-change/SKILL.md",
+      "line": 610,
+      "raw": "code-map.md",
+      "kind": "backtick",
+      "status": "broken",
+      "snippet": "- **Explain after BSL:** при acceptance/final с правками `.bsl` — MAY предложить `/opsx:explain` по `code-map.md` (секция `## Explain scope`); не предлагать по умолчанию на pause / только ARCH; не вытеснять primary verif"
+    },
+    {
+      "src": ".cursor/skills/openspec-apply-change/SKILL.md",
+      "line": 619,
+      "raw": "reports/code-map.md",
+      "kind": "backtick",
+      "status": "broken",
+      "snippet": "- **Code Map:** at Slice Gate (acceptance), append `reports/code-map.md` and mandatory `reports/handoff-acceptance-S<N>-YYYY-MM-DD.md`; chat block «Карта правок» — human prose first, anchors second (≤5 items)."
+    },
+    {
+      "src": ".cursor/skills/openspec-archive-change/SKILL.md",
+      "line": 283,
+      "raw": "reports/code-map.md",
+      "kind": "backtick",
+      "status": "broken",
+      "snippet": "**`reports/code-map.md`:** при архивации переезжает вместе с каталогом change в `openspec/changes/archive/YYYY-MM-DD-<name>/reports/` как **история правок для человека** (non-event в чат — не дублировать путь отдельной с"
+    },
+    {
+      "src": ".cursor/skills/openspec-explain/SKILL.md",
+      "line": 36,
+      "raw": "exit-card.md",
+      "kind": "backtick",
+      "status": "broken",
+      "snippet": "| «не хочу решать на каждом шаге» | По умолчанию хвост карточки — только «дальше». **Не** спрашивать A/B, пока пользователь сам не попросил выбирать по ходу. Анализ проблем — на выходе по вопросу (`exit-card.md`). |"
+    },
+    {
+      "src": ".cursor/skills/openspec-explain/SKILL.md",
+      "line": 74,
+      "raw": "entry-brief.md",
+      "kind": "backtick",
+      "status": "broken",
+      "snippet": "**HALT в брифе:** слоты Цель / Источник / Решено когда; чеклист протокола skill; сырой dump модулей / коды точек (`pav…`, Mxx) **как замена Сценарию**; «соберу карту» в хвосте. Полный маркированный список `path` — только"
+    },
+    {
+      "src": ".cursor/skills/openspec-explain/SKILL.md",
+      "line": 78,
+      "raw": "code-map.md",
+      "kind": "backtick",
+      "status": "broken",
+      "snippet": "Когда пользователь вызывает explain с `@` на `review-*.md` / `code-map.md` / `handoff-acceptance-*` (или явно «по ревью» / «по срезу»):"
+    },
+    {
+      "src": ".cursor/skills/openspec-explain/SKILL.md",
+      "line": 122,
+      "raw": "point-card.md",
+      "kind": "backtick",
+      "status": "broken",
+      "snippet": "- «давай выбирать на каждой точке» (и аналоги) → режим по ходу до конца прохода: для класса **решение** допускается A/B (см. `point-card.md`)."
+    },
+    {
+      "src": ".cursor/skills/openspec-explain/templates/exit-card.md",
+      "line": 3,
+      "raw": "fixtures/voice-good-exit.md",
+      "kind": "backtick",
+      "status": "broken",
+      "snippet": "После последней точки карты, «хватит» или «собери итог». Эталон голоса: `fixtures/voice-good-exit.md`."
+    },
+    {
+      "src": ".cursor/skills/openspec-explain/templates/explain-report.md",
+      "line": 28,
+      "raw": "../../src/ДО2/cf/CommonModules/pavУсловияМашрутизации/Ext/Module.bsl",
+      "kind": "md-link",
+      "status": "broken",
+      "snippet": "[`613:624:src/ДО2/cf/CommonModules/pavУсловияМашрутизации/Ext/Module.bsl`](../../src/ДО2/cf/CommonModules/pavУсловияМашрутизации/Ext/Module.bsl)"
+    },
+    {
+      "src": ".cursor/skills/openspec-explain/templates/point-card.md",
+      "line": 3,
+      "raw": "fixtures/voice-good-point.md",
+      "kind": "backtick",
+      "status": "broken",
+      "snippet": "Один ход = одна точка. Бюджет чата: **15–35 строк**. Эталон голоса: `fixtures/voice-good-point.md`. Класс точки — **agent-only** (кандидат в сводку анализа / пропуск типового); в заголовок чата не писать."
+    },
+    {
+      "src": ".cursor/skills/openspec-explore/SKILL.md",
+      "line": 39,
+      "raw": "brief.md",
+      "kind": "read",
+      "status": "broken",
+      "snippet": "**Запрещено:** bootstrap `openspec/sessions/`, `Read brief.md` старых сессий, авто-резюм без текстового подтверждения. Legacy `openspec/sessions/*` читается **только** по явной ссылке пользователя в чате — как обычный фа"
+    },
+    {
+      "src": ".cursor/skills/openspec-explore/SKILL.md",
+      "line": 122,
+      "raw": "brief.md",
+      "kind": "backtick",
+      "status": "broken",
+      "snippet": "После текстового подтверждения пользователя — **никаких файлов состояния** (`brief.md`, `todo.md`, `step-*.md`). Якорь «Решено, когда» живёт в сообщениях чата; при уточнении — пересогласуй вслух."
+    },
+    {
+      "src": ".cursor/skills/openspec-explore/SKILL.md",
+      "line": 122,
+      "raw": "todo.md",
+      "kind": "backtick",
+      "status": "broken",
+      "snippet": "После текстового подтверждения пользователя — **никаких файлов состояния** (`brief.md`, `todo.md`, `step-*.md`). Якорь «Решено, когда» живёт в сообщениях чата; при уточнении — пересогласуй вслух."
+    },
+    {
+      "src": ".cursor/skills/openspec-extend-change/SKILL.md",
+      "line": 72,
+      "raw": "project.md",
+      "kind": "backtick",
+      "status": "broken",
+      "snippet": "Разрешённые действия до брифа: чтение этого скилла, `openspec list --json`, `openspec instructions apply --json`, чтение `project.md`, чтение артефактов change, чтение явно переданных markdown/text/source-report файлов, "
+    },
+    {
+      "src": ".cursor/skills/openspec-knowledge-add/SKILL.md",
+      "line": 363,
+      "raw": "knowledge-add-report.md",
+      "kind": "backtick",
+      "status": "broken",
+      "snippet": "7. Создать `knowledge-add-report.md` в bundle (если bundle был создан) со списком:"
+    },
+    {
+      "src": ".cursor/skills/openspec-knowledge-add/SKILL.md",
+      "line": 428,
+      "raw": "knowledge-add-report.md",
+      "kind": "backtick",
+      "status": "broken",
+      "snippet": "- Не скрывать причины отказа: каждый skipped/blocked candidate должен быть отражён в summary или `knowledge-add-report.md` (если bundle создан)."
+    },
+    {
+      "src": ".cursor/skills/openspec-knowledge-audit/SKILL.md",
+      "line": 39,
+      "raw": "_taxonomy.template.yaml",
+      "kind": "backtick",
+      "status": "broken",
+      "snippet": "*   Разрешённые файлы в корне: `_index.yaml`, `_taxonomy.yaml`, `_taxonomy.template.yaml`, `README.md`."
+    },
+    {
+      "src": ".cursor/skills/openspec-overview/SKILL.md",
+      "line": 127,
+      "raw": "control-run.md",
+      "kind": "backtick",
+      "status": "broken",
+      "snippet": "- control: путь из `control-run.md` (`temp/overview-control-88781.md`)."
+    },
+    {
+      "src": ".cursor/skills/openspec-overview/templates/customer-overview.md",
+      "line": 6,
+      "raw": "fixtures/golden-88781-overview.md",
+      "kind": "backtick",
+      "status": "broken",
+      "snippet": "- структура / тема ЭДО: `fixtures/golden-88781-overview.md`"
+    },
+    {
+      "src": ".cursor/skills/openspec-overview/templates/customer-overview.md",
+      "line": 7,
+      "raw": "fixtures/voice-good-stage.md",
+      "kind": "backtick",
+      "status": "broken",
+      "snippet": "- голос этапа (ситуация, не механизм; без tutor): `fixtures/voice-good-stage.md`"
+    },
+    {
+      "src": ".cursor/skills/openspec-overview/templates/style-checklist.md",
+      "line": 66,
+      "raw": "fixtures/voice-good-stage.md",
+      "kind": "backtick",
+      "status": "broken",
+      "snippet": "Эталон тона этапа: [`fixtures/voice-good-stage.md`](../fixtures/voice-good-stage.md)."
+    },
+    {
+      "src": ".cursor/skills/openspec-verify-change/templates/card-decision.md",
+      "line": 119,
+      "raw": "reports/design-challenge-2026-05-24.md",
+      "kind": "backtick",
+      "status": "broken",
+      "snippet": "**Источники** *(техническое):* `reports/design-challenge-2026-05-24.md` Q2."
+    },
+    {
+      "src": ".cursor/skills/review/SKILL.md",
+      "line": 211,
+      "raw": "project.md",
+      "kind": "backtick",
+      "status": "broken",
+      "snippet": "Если в п.1.6.1 таблица **«Обязательный контроль»** содержит строки с непустым **Regex допустимой строки** — оркестратор может выполнить проверку как evidence (не заменять ревьювера). Алгоритм mandatory control: regex из "
+    }
+  ],
+  "broken_count": 95,
+  "expected": [
+    {
+      "src": ".cursor/agents/onec-code-reviewer.md",
+      "line": 52,
+      "raw": "openspec/project.md",
+      "kind": "backtick",
+      "status": "expected-kit-absent",
+      "snippet": "Пути cf/cfe — из `openspec/project.md` (секция «Структура репозитория») или блока в промпте. Не предполагай `src/cf/` по умолчанию. В kit-репозитории `project.md` отсутствует — блок путей опускается."
+    },
+    {
+      "src": ".cursor/agents/onec-trace-analyst.md",
+      "line": 127,
+      "raw": "temp/reports/trace-analysis-2026-05-19-sign-verify-perf-double-binary.md",
+      "kind": "backtick",
+      "status": "runtime",
+      "snippet": "Full report example: `temp/reports/trace-analysis-2026-05-19-sign-verify-perf-double-binary.md` — coverage, FLOW chain, repetition table (PERF + TRACE pairing)."
+    },
+    {
+      "src": ".cursor/commands/init-project.md",
+      "line": 8,
+      "raw": "openspec/project.md",
+      "kind": "backtick",
+      "status": "expected-kit-absent",
+      "snippet": "Проверь готовность проекта (выгрузка, OpenSpec, агенты), подскажи недостающее, затем собери информацию через интервью → `openspec/project.md` → `openspec/specs/architecture.md`."
+    },
+    {
+      "src": ".cursor/commands/init-project.md",
+      "line": 8,
+      "raw": "openspec/specs/architecture.md",
+      "kind": "backtick",
+      "status": "expected-kit-absent",
+      "snippet": "Проверь готовность проекта (выгрузка, OpenSpec, агенты), подскажи недостающее, затем собери информацию через интервью → `openspec/project.md` → `openspec/specs/architecture.md`."
+    },
+    {
+      "src": ".cursor/commands/opsx-knowledge-audit.md",
+      "line": 19,
+      "raw": "_index.yaml",
+      "kind": "backtick",
+      "status": "expected-kit-absent",
+      "snippet": "- `--reindex` — пересобрать `_index.yaml` из `.md`-файлов;"
+    },
+    {
+      "src": ".cursor/commands/opsx-knowledge-audit.md",
+      "line": 21,
+      "raw": "_taxonomy.yaml",
+      "kind": "backtick",
+      "status": "expected-kit-absent",
+      "snippet": "- `--taxonomy-sync` — отчёт о расхождениях `_taxonomy.yaml` ↔ `src/*/cfe/*`;"
+    },
+    {
+      "src": ".cursor/commands/opsx-knowledge-init.md",
+      "line": 8,
+      "raw": "openspec/knowledge/_taxonomy.yaml",
+      "kind": "backtick",
+      "status": "expected-kit-absent",
+      "snippet": "Первичный bootstrap таксономии базы знаний (`openspec/knowledge/_taxonomy.yaml`) для существующего проекта без полного `/init-project`, либо идемпотентный re-sync после добавления/удаления базовых конфигураций `src/*/cf`"
+    },
+    {
+      "src": ".cursor/commands/opsx-knowledge-init.md",
+      "line": 17,
+      "raw": "_taxonomy.yaml",
+      "kind": "backtick",
+      "status": "expected-kit-absent",
+      "snippet": "- Файла `_taxonomy.yaml` нет → построить draft (по домену на каждую конфигурацию и расширение, блок `cross` из `openspec/knowledge/_taxonomy.template.yaml`), показать summary, записать после подтверждения."
+    },
+    {
+      "src": ".cursor/commands/opsx-knowledge-init.md",
+      "line": 19,
+      "raw": "_index.yaml",
+      "kind": "backtick",
+      "status": "expected-kit-absent",
+      "snippet": "- `_index.yaml` и файлы фактов (KB-*.md) команда не трогает."
+    },
+    {
+      "src": ".cursor/commands/opsx-new.md",
+      "line": 16,
+      "raw": "openspec/project.md",
+      "kind": "backtick",
+      "status": "expected-kit-absent",
+      "snippet": "**Второе действие (только новый change):** Metadata Gate. Read `openspec/project.md` (`defaultDeveloper`, `cfMarkerPrefix`); baseline запреты `domain_label` — `.cursor/docs/marker-canon.md` ⊕ project overlay. Агент собир"
+    },
+    {
+      "src": ".cursor/commands/opsx-new.md",
+      "line": 16,
+      "raw": "openspec/project.md",
+      "kind": "read",
+      "status": "expected-kit-absent",
+      "snippet": "**Второе действие (только новый change):** Metadata Gate. Read `openspec/project.md` (`defaultDeveloper`, `cfMarkerPrefix`); baseline запреты `domain_label` — `.cursor/docs/marker-canon.md` ⊕ project overlay. Агент собир"
+    },
+    {
+      "src": ".cursor/commands/release-review.md",
+      "line": 22,
+      "raw": "../../openspec/project.md",
+      "kind": "md-link",
+      "status": "expected-kit-absent",
+      "snippet": "Имя расширения — папка в `src/*/cfe/<имя>/` (см. [`openspec/project.md`](../../openspec/project.md))."
+    },
+    {
+      "src": ".cursor/commands/release-review.md",
+      "line": 22,
+      "raw": "openspec/project.md",
+      "kind": "backtick",
+      "status": "expected-kit-absent",
+      "snippet": "Имя расширения — папка в `src/*/cfe/<имя>/` (см. [`openspec/project.md`](../../openspec/project.md))."
+    },
+    {
+      "src": ".cursor/commands/session-restore.md",
+      "line": 8,
+      "raw": "temp/session-notes.md",
+      "kind": "backtick",
+      "status": "runtime",
+      "snippet": "Восстановить контекст из `temp/session-notes.md` и предложить следующую команду."
+    },
+    {
+      "src": ".cursor/commands/session-save.md",
+      "line": 8,
+      "raw": "temp/session-notes.md",
+      "kind": "backtick",
+      "status": "runtime",
+      "snippet": "Сохранить компактный контекст текущей сессии в `temp/session-notes.md`."
+    },
+    {
+      "src": ".cursor/docs/1c-coding-standards.md",
+      "line": 36,
+      "raw": "../../openspec/project.md",
+      "kind": "md-link",
+      "status": "expected-kit-absent",
+      "snippet": "Комментарии, попадающие под **Whitelist предрелиза** (baseline `.cursor/docs/marker-canon.md` + строки в [openspec/project.md](../../openspec/project.md), секция «Форматы и соглашения по комментариям BSL») в рамках scope"
+    },
+    {
+      "src": ".cursor/docs/1c-coding-standards.md",
+      "line": 46,
+      "raw": "openspec/project.md",
+      "kind": "backtick",
+      "status": "expected-kit-absent",
+      "snippet": "**SSOT правила AP-054** — карточка в [.cursor/docs/antipatterns/bsl-antipatterns.md](antipatterns/bsl-antipatterns.md) (не `project.md`); **SSOT AP-031** — там же. `openspec/project.md` лишь **опционально расширяет** all"
+    },
+    {
+      "src": ".cursor/docs/agents-CHANGELOG.md",
+      "line": 60,
+      "raw": "openspec/project.md",
+      "kind": "backtick",
+      "status": "expected-kit-absent",
+      "snippet": "- Маркеры: канон `// +++ <ФИО> <дата> [comment_suffix]` / `// --- <ФИО>`; SSOT — `openspec/project.md`; предрелиз — `/release-review`."
+    },
+    {
+      "src": ".cursor/docs/agents-CHANGELOG.md",
+      "line": 74,
+      "raw": "../../openspec/project.md",
+      "kind": "md-link",
+      "status": "expected-kit-absent",
+      "snippet": "- Синхронизированы [`.cursor/rules/architect-gate.mdc`](../rules/architect-gate.mdc), [`.cursor/skills/1c-agent-patterns/SKILL.md`](../skills/1c-agent-patterns/SKILL.md), [`openspec/project.md`](../../openspec/project.md"
+    },
+    {
+      "src": ".cursor/docs/agents-CHANGELOG.md",
+      "line": 74,
+      "raw": "openspec/project.md",
+      "kind": "backtick",
+      "status": "expected-kit-absent",
+      "snippet": "- Синхронизированы [`.cursor/rules/architect-gate.mdc`](../rules/architect-gate.mdc), [`.cursor/skills/1c-agent-patterns/SKILL.md`](../skills/1c-agent-patterns/SKILL.md), [`openspec/project.md`](../../openspec/project.md"
+    },
+    {
+      "src": ".cursor/docs/agents-CHANGELOG.md",
+      "line": 92,
+      "raw": "openspec/project.md",
+      "kind": "backtick",
+      "status": "expected-kit-absent",
+      "snippet": "- `openspec/project.md`: активированы три строки обязательного контроля комментариев."
+    },
+    {
+      "src": ".cursor/docs/bsl-comment-formats-project.md",
+      "line": 5,
+      "raw": "../../openspec/project.md",
+      "kind": "md-link",
+      "status": "expected-kit-absent",
+      "snippet": "**SSOT значений (project):** [openspec/project.md](../../openspec/project.md) — `defaultDeveloper`, `cfMarkerPrefix`, строки **Whitelist предрелиза** и **Обязательный контроль**."
+    },
+    {
+      "src": ".cursor/docs/faq-kit.md",
+      "line": 40,
+      "raw": "temp/session-notes.md",
+      "kind": "backtick",
+      "status": "runtime",
+      "snippet": "- **`/session-save`** — заметки в `temp/session-notes.md` для продолжения в другом чате."
+    },
+    {
+      "src": ".cursor/docs/init-project-protocol.md",
+      "line": 30,
+      "raw": "openspec/knowledge/_index.yaml",
+      "kind": "backtick",
+      "status": "expected-kit-absent",
+      "snippet": "| `openspec/knowledge/_index.yaml` | Read + parse YAML | Парсится; есть `version: 1`; есть поле `facts:` (даже если пустое) | `[V]` / `[X]` |"
+    },
+    {
+      "src": ".cursor/docs/init-project-protocol.md",
+      "line": 31,
+      "raw": "openspec/knowledge/_taxonomy.yaml",
+      "kind": "backtick",
+      "status": "expected-kit-absent",
+      "snippet": "| `openspec/knowledge/_taxonomy.yaml` | Read + parse YAML | Парсится; есть `version`; `domains:` непустой | `[V]` / `[X]` |"
+    },
+    {
+      "src": ".cursor/docs/init-project-protocol.md",
+      "line": 34,
+      "raw": "_index.yaml",
+      "kind": "backtick",
+      "status": "expected-kit-absent",
+      "snippet": "| Whitelist соблюдён | Glob по `openspec/knowledge/` | Только `<domain>/`, `_archive/`, служебные `_index.yaml` / `_taxonomy.yaml` / `_taxonomy.template.yaml` / `README.md` (см. `.cursor/rules/knowledge-format.mdc` секци"
+    },
+    {
+      "src": ".cursor/docs/init-project-protocol.md",
+      "line": 34,
+      "raw": "_taxonomy.yaml",
+      "kind": "backtick",
+      "status": "expected-kit-absent",
+      "snippet": "| Whitelist соблюдён | Glob по `openspec/knowledge/` | Только `<domain>/`, `_archive/`, служебные `_index.yaml` / `_taxonomy.yaml` / `_taxonomy.template.yaml` / `README.md` (см. `.cursor/rules/knowledge-format.mdc` секци"
+    },
+    {
+      "src": ".cursor/docs/init-project-protocol.md",
+      "line": 65,
+      "raw": "_index.yaml",
+      "kind": "backtick",
+      "status": "expected-kit-absent",
+      "snippet": "| `openspec/` | Агент создаёт сам: `openspec/`, `openspec/changes/`, `openspec/changes/_template/`, `openspec/specs/`, `openspec/docs/`, `openspec/adrs/`, `openspec/knowledge/` (+ `_archive/` с `.gitkeep`, стартовый `REA"
+    },
+    {
+      "src": ".cursor/docs/init-project-protocol.md",
+      "line": 65,
+      "raw": "openspec/project.md",
+      "kind": "backtick",
+      "status": "expected-kit-absent",
+      "snippet": "| `openspec/` | Агент создаёт сам: `openspec/`, `openspec/changes/`, `openspec/changes/_template/`, `openspec/specs/`, `openspec/docs/`, `openspec/adrs/`, `openspec/knowledge/` (+ `_archive/` с `.gitkeep`, стартовый `REA"
+    },
+    {
+      "src": ".cursor/docs/init-project-protocol.md",
+      "line": 65,
+      "raw": "openspec/config.yaml",
+      "kind": "backtick",
+      "status": "expected-kit-absent",
+      "snippet": "| `openspec/` | Агент создаёт сам: `openspec/`, `openspec/changes/`, `openspec/changes/_template/`, `openspec/specs/`, `openspec/docs/`, `openspec/adrs/`, `openspec/knowledge/` (+ `_archive/` с `.gitkeep`, стартовый `REA"
+    },
+    {
+      "src": ".cursor/docs/init-project-protocol.md",
+      "line": 65,
+      "raw": "openspec/knowledge/_taxonomy.yaml",
+      "kind": "backtick",
+      "status": "expected-kit-absent",
+      "snippet": "| `openspec/` | Агент создаёт сам: `openspec/`, `openspec/changes/`, `openspec/changes/_template/`, `openspec/specs/`, `openspec/docs/`, `openspec/adrs/`, `openspec/knowledge/` (+ `_archive/` с `.gitkeep`, стартовый `REA"
+    },
+    {
+      "src": ".cursor/docs/init-project-protocol.md",
+      "line": 74,
+      "raw": "_index.yaml",
+      "kind": "backtick",
+      "status": "expected-kit-absent",
+      "snippet": "| Нет `_index.yaml` или невалиден (не парсится / нет `version: 1` / нет `facts:`) | Если файл есть, но невалиден — сделать backup в `temp/backups/_index-<timestamp>.yaml`. Затем создать/перезаписать минимальный: `version"
+    },
+    {
+      "src": ".cursor/docs/init-project-protocol.md",
+      "line": 77,
+      "raw": "_taxonomy.yaml",
+      "kind": "backtick",
+      "status": "expected-kit-absent",
+      "snippet": "| Нет `_taxonomy.yaml` | Если Phase 5 будет выполнена — оставить (сгенерируется в Phase 5 шаг 6). Если Phase 5 пропускается (по решению пользователя или при повторном запуске с уже существующей `architecture.md` без обно"
+    },
+    {
+      "src": ".cursor/docs/init-project-protocol.md",
+      "line": 125,
+      "raw": "openspec/project.md",
+      "kind": "backtick",
+      "status": "expected-kit-absent",
+      "snippet": "Если `openspec/project.md` уже существует:"
+    },
+    {
+      "src": ".cursor/docs/init-project-protocol.md",
+      "line": 285,
+      "raw": "openspec/project.md",
+      "kind": "backtick",
+      "status": "expected-kit-absent",
+      "snippet": "После сбора и подтверждения всех блоков сформировать (или обновить) `openspec/project.md` по структуре:"
+    },
+    {
+      "src": ".cursor/docs/init-project-protocol.md",
+      "line": 381,
+      "raw": "openspec/project.md",
+      "kind": "backtick",
+      "status": "expected-kit-absent",
+      "snippet": "**Триггер:** `openspec/project.md` существует **и** (`framework_contract_version` отсутствует **или** ≠ версии kit из `.cursor/templates/project-overlay.template.md` / `.cursor/docs/marker-canon.md`)."
+    },
+    {
+      "src": ".cursor/docs/init-project-protocol.md",
+      "line": 416,
+      "raw": "openspec/specs/architecture.md",
+      "kind": "backtick",
+      "status": "expected-kit-absent",
+      "snippet": "**Шаг 5 — Записать `openspec/specs/architecture.md`.** Полный отчёт с диаграммами (по правилу preserve-subagent-reports — без сокращений). Структура:"
+    },
+    {
+      "src": ".cursor/docs/init-project-protocol.md",
+      "line": 437,
+      "raw": "openspec/knowledge/_taxonomy.yaml",
+      "kind": "backtick",
+      "status": "expected-kit-absent",
+      "snippet": "**Шаг 6 — Генерация таксономии (`openspec/knowledge/_taxonomy.yaml`).** Шаг идемпотентен: безопасно запускать повторно."
+    },
+    {
+      "src": ".cursor/docs/init-project-protocol.md",
+      "line": 439,
+      "raw": "openspec/specs/architecture.md",
+      "kind": "backtick",
+      "status": "expected-kit-absent",
+      "snippet": "1. **Вход:** карта расширений и границ доменов из выхода `onec-code-architect` (и при необходимости `openspec/specs/architecture.md`, `project.md`)."
+    },
+    {
+      "src": ".cursor/docs/init-project-protocol.md",
+      "line": 440,
+      "raw": "openspec/knowledge/_taxonomy.yaml",
+      "kind": "backtick",
+      "status": "expected-kit-absent",
+      "snippet": "2. **Проверка идемпотентности.** Если `openspec/knowledge/_taxonomy.yaml` уже существует:"
+    },
+    {
+      "src": ".cursor/docs/init-project-protocol.md",
+      "line": 441,
+      "raw": "_taxonomy.yaml",
+      "kind": "backtick",
+      "status": "expected-kit-absent",
+      "snippet": "- Сравнить набор расширений в `src/*/cfe/*` с `domains[*].source` в текущем `_taxonomy.yaml`."
+    },
+    {
+      "src": ".cursor/docs/init-project-protocol.md",
+      "line": 444,
+      "raw": "_taxonomy.yaml",
+      "kind": "backtick",
+      "status": "expected-kit-absent",
+      "snippet": "3. **Если файла нет — автогенерация draft `_taxonomy.yaml`:** по одному `domain` на каждое расширение из `src/*/cfe/*` с корректным `source`; `subdomains` — из подсистем / ключевых общих модулей (эвристика + ручная правк"
+    },
+    {
+      "src": ".cursor/docs/init-project-protocol.md",
+      "line": 447,
+      "raw": "openspec/specs/architecture.md",
+      "kind": "backtick",
+      "status": "expected-kit-absent",
+      "snippet": "**При повторном запуске /init-project:** если `openspec/specs/architecture.md` уже существует — Phase 5 **предложить** обновить (если project.md изменился) или пропустить. Не пересоздавать автоматически без согласия. Шаг"
+    },
+    {
+      "src": ".cursor/docs/init-project-protocol.md",
+      "line": 453,
+      "raw": "openspec/knowledge/_taxonomy.yaml",
+      "kind": "backtick",
+      "status": "expected-kit-absent",
+      "snippet": "**KB warning.** Перед предложением следующих шагов проверить `openspec/knowledge/_taxonomy.yaml`:"
+    },
+    {
+      "src": ".cursor/docs/init-project-protocol.md",
+      "line": 457,
+      "raw": "_taxonomy.yaml",
+      "kind": "backtick",
+      "status": "expected-kit-absent",
+      "snippet": "> KB не сможет принимать факты без таксономии. Запустите `/opsx:knowledge-init` отдельно, чтобы сгенерировать `_taxonomy.yaml`. До этого шаги archive 5.5 и `/opsx:knowledge-audit --from-archive` будут выдавать `Blocked —"
+    },
+    {
+      "src": ".cursor/docs/marker-canon.md",
+      "line": 7,
+      "raw": "../../openspec/project.md",
+      "kind": "md-link",
+      "status": "expected-kit-absent",
+      "snippet": "- **[openspec/project.md](../../openspec/project.md)** — VALUE (`defaultDeveloper`, `cfMarkerPrefix`, пути) и project overlay (строки Whitelist предрелиза, расширения списков)."
+    },
+    {
+      "src": ".cursor/docs/marker-canon.md",
+      "line": 27,
+      "raw": "openspec/project.md",
+      "kind": "backtick",
+      "status": "expected-kit-absent",
+      "snippet": "**Zero-config:** при отсутствии `openspec/project.md` или пустых overlay-секций потребители работают на kit baseline. Обязательны только VALUE, которые нельзя дефолтить: пути cf/cfe и `defaultDeveloper` (или ФИО из Metad"
+    },
+    {
+      "src": ".cursor/docs/marker-layers-guide.md",
+      "line": 6,
+      "raw": "../../openspec/project.md",
+      "kind": "md-link",
+      "status": "expected-kit-absent",
+      "snippet": "**SSOT значений проекта:** [openspec/project.md](../../openspec/project.md) (`defaultDeveloper`, `cfMarkerPrefix`, строки Whitelist)."
+    },
+    {
+      "src": ".cursor/docs/marker-layers-guide.md",
+      "line": 13,
+      "raw": "openspec/project.md",
+      "kind": "backtick",
+      "status": "expected-kit-absent",
+      "snippet": "| **2. SSOT values** | `openspec/project.md` | `defaultDeveloper`, `cfMarkerPrefix`, строки Whitelist / Обязательный контроль, project-расширения списков |"
+    },
+    {
+      "src": ".cursor/docs/marker-layers-guide.md",
+      "line": 34,
+      "raw": "../../openspec/project.md",
+      "kind": "md-link",
+      "status": "expected-kit-absent",
+      "snippet": "**Project (значения):** Read [openspec/project.md](../../openspec/project.md):"
+    },
+    {
+      "src": ".cursor/docs/mxl-roundtrip-fixture.md",
+      "line": 3,
+      "raw": "temp/fixtures/mxl-roundtrip-sample.json",
+      "kind": "backtick",
+      "status": "runtime",
+      "snippet": "**Optional smoke** (не обязательная поставка). Фикстура: `temp/fixtures/mxl-roundtrip-sample.json` — создать локально при проверке; см. [temp/fixtures/README.md](../../temp/fixtures/README.md)."
+    },
+    {
+      "src": ".cursor/docs/review-guide.md",
+      "line": 30,
+      "raw": "../../openspec/project.md",
+      "kind": "md-link",
+      "status": "expected-kit-absent",
+      "snippet": "Имя расширения — папка cfe в `src/` (см. [`openspec/project.md`](../../openspec/project.md))."
+    },
+    {
+      "src": ".cursor/docs/review-guide.md",
+      "line": 30,
+      "raw": "openspec/project.md",
+      "kind": "backtick",
+      "status": "expected-kit-absent",
+      "snippet": "Имя расширения — папка cfe в `src/` (см. [`openspec/project.md`](../../openspec/project.md))."
+    },
+    {
+      "src": ".cursor/docs/review-guide.md",
+      "line": 92,
+      "raw": "../../openspec/project.md",
+      "kind": "md-link",
+      "status": "expected-kit-absent",
+      "snippet": "- Маркеры BSL: [`openspec/project.md`](../../openspec/project.md), [bsl-comment-formats-project.md](bsl-comment-formats-project.md)"
+    },
+    {
+      "src": ".cursor/docs/review-guide.md",
+      "line": 92,
+      "raw": "openspec/project.md",
+      "kind": "backtick",
+      "status": "expected-kit-absent",
+      "snippet": "- Маркеры BSL: [`openspec/project.md`](../../openspec/project.md), [bsl-comment-formats-project.md](bsl-comment-formats-project.md)"
+    },
+    {
+      "src": ".cursor/rules/1c-agent-delegation.mdc",
+      "line": 92,
+      "raw": "openspec/project.md",
+      "kind": "backtick",
+      "status": "expected-kit-absent",
+      "snippet": "Перед вызовом 1С-агентов включать в их промпт блок путей из `openspec/project.md` (секция «Структура репозитория»). Протокол извлечения и формат блока — в `.cursor/rules/project-paths.mdc`. Файл создаётся `/init-project`"
+    },
+    {
+      "src": ".cursor/rules/1c-metadata-validation.mdc",
+      "line": 15,
+      "raw": "openspec/project.md",
+      "kind": "backtick",
+      "status": "expected-kit-absent",
+      "snippet": "- **Validate**: перед `Перечисления.X.Y`, `РегистрСведений.X`, `Тип(\"СправочникСсылка.X\")`, `Метаданные.<Kind>.<Name>` и т.п. найти соответствующий XML **по `src/` рекурсивно** (пути — `openspec/project.md`, секция «Стру"
+    },
+    {
+      "src": ".cursor/rules/1c-writer-pipeline.mdc",
+      "line": 159,
+      "raw": "openspec/project.md",
+      "kind": "backtick",
+      "status": "expected-kit-absent",
+      "snippet": "**После IDENTIFIER HYGIENE CHECK, до API EXISTENCE CHECK.** Семейство **Export Language** вместе с IDENTIFIER HYGIENE (AP-054 для комментариев = тот же принцип, что AP-031 для идентификаторов). Механический grep по измен"
+    },
+    {
+      "src": ".cursor/rules/1c-writer-pipeline.mdc",
+      "line": 227,
+      "raw": "openspec/project.md",
+      "kind": "backtick",
+      "status": "expected-kit-absent",
+      "snippet": "Область поиска — **весь src/** (все подкаталоги, содержащие cf и cfe). Фактические пути к cf/cfe могут отличаться от `src/cf/` и `src/cfe/`; см. `openspec/project.md` и `project-paths.mdc`."
+    },
+    {
+      "src": ".cursor/rules/architect-gate.mdc",
+      "line": 73,
+      "raw": "_taxonomy.yaml",
+      "kind": "backtick",
+      "status": "expected-kit-absent",
+      "snippet": "3. Fallback-фильтр: только если primary пусто — `domain` ∈ {scope domains, выведенные из путей через `_taxonomy.yaml`}; внутри domain ранжировать по совпадению токенов из файлов/запроса с `title` и `anchor-paths`, затем "
+    },
+    {
+      "src": ".cursor/rules/capture-to-project.mdc",
+      "line": 17,
+      "raw": "openspec/project.md",
+      "kind": "backtick",
+      "status": "expected-kit-absent",
+      "snippet": "- Если **`openspec/project.md` есть** — прочитать файл: секции, формат таблиц, стиль формулировок."
+    },
+    {
+      "src": ".cursor/rules/capture-to-project.mdc",
+      "line": 19,
+      "raw": "openspec/config.yaml",
+      "kind": "backtick",
+      "status": "expected-kit-absent",
+      "snippet": "- При необходимости создать скелет OpenSpec по **Phase 0** `.cursor/commands/init-project.md` (`openspec/`, `openspec/changes/`, `openspec/changes/_template/`, `openspec/specs/`, `openspec/docs/`, `openspec/adrs/`, `open"
+    },
+    {
+      "src": ".cursor/rules/capture-to-project.mdc",
+      "line": 29,
+      "raw": "openspec/project.md",
+      "kind": "backtick",
+      "status": "expected-kit-absent",
+      "snippet": "3. **Confirm + Write** — записать `openspec/project.md` только после явного подтверждения пользователя («ок», правка и «да», и т.п.)."
+    },
+    {
+      "src": ".cursor/rules/code-truth-gate.mdc",
+      "line": 26,
+      "raw": "openspec/project.md",
+      "kind": "backtick",
+      "status": "expected-kit-absent",
+      "snippet": "1. Определить change dir и прочитать `openspec/project.md` для путей `cf/cfe`."
+    },
+    {
+      "src": ".cursor/rules/code-truth-gate.mdc",
+      "line": 26,
+      "raw": "openspec/project.md",
+      "kind": "read",
+      "status": "expected-kit-absent",
+      "snippet": "1. Определить change dir и прочитать `openspec/project.md` для путей `cf/cfe`."
+    },
+    {
+      "src": ".cursor/rules/code-truth-gate.mdc",
+      "line": 34,
+      "raw": "openspec/project.md",
+      "kind": "backtick",
+      "status": "expected-kit-absent",
+      "snippet": "4. Для каждого технического якоря выполнить `Grep`/`rg` по путям из `openspec/project.md` и явно затронутым файлам change."
+    },
+    {
+      "src": ".cursor/rules/knowledge-format.mdc",
+      "line": 15,
+      "raw": "openspec/knowledge/_index.yaml",
+      "kind": "backtick",
+      "status": "expected-kit-absent",
+      "snippet": "- **Машиночитаемый индекс:** `openspec/knowledge/_index.yaml` — для быстрого Discovery"
+    },
+    {
+      "src": ".cursor/rules/knowledge-format.mdc",
+      "line": 16,
+      "raw": "openspec/knowledge/_taxonomy.yaml",
+      "kind": "backtick",
+      "status": "expected-kit-absent",
+      "snippet": "- **Таксономия:** `openspec/knowledge/_taxonomy.yaml` — словарь доменов/субдоменов"
+    },
+    {
+      "src": ".cursor/rules/knowledge-format.mdc",
+      "line": 34,
+      "raw": "_taxonomy.yaml",
+      "kind": "backtick",
+      "status": "expected-kit-absent",
+      "snippet": "- `<domain>/` — один подкаталог на каждый домен из `_taxonomy.yaml`. Внутри — `KB-NNNN-slug.md` или вложенные `<subdomain>/KB-NNNN-slug.md`."
+    },
+    {
+      "src": ".cursor/rules/knowledge-format.mdc",
+      "line": 39,
+      "raw": "_index.yaml",
+      "kind": "backtick",
+      "status": "expected-kit-absent",
+      "snippet": "- `_index.yaml`"
+    },
+    {
+      "src": ".cursor/rules/knowledge-format.mdc",
+      "line": 40,
+      "raw": "_taxonomy.yaml",
+      "kind": "backtick",
+      "status": "expected-kit-absent",
+      "snippet": "- `_taxonomy.yaml`"
+    },
+    {
+      "src": ".cursor/rules/knowledge-format.mdc",
+      "line": 271,
+      "raw": "_index.yaml",
+      "kind": "backtick",
+      "status": "expected-kit-absent",
+      "snippet": "4. При `auto-repairable` audit обновляет `fingerprint.body-head`, при необходимости минимально правит `## Факт`, выставляет `status: active`, обновляет `verified-at`, `verified-by: audit`, `_index.yaml` и фиксирует дейст"
+    },
+    {
+      "src": ".cursor/rules/knowledge-format.mdc",
+      "line": 282,
+      "raw": "_index.yaml",
+      "kind": "backtick",
+      "status": "expected-kit-absent",
+      "snippet": "| `_index.yaml` рассинхронизирован с `.md` | Warning + предложение `/opsx:knowledge-audit --reindex` |"
+    },
+    {
+      "src": ".cursor/rules/knowledge-format.mdc",
+      "line": 283,
+      "raw": "_index.yaml",
+      "kind": "backtick",
+      "status": "expected-kit-absent",
+      "snippet": "| Пустой `_index.yaml` | Discovery возвращает пустой список, не ошибка |"
+    },
+    {
+      "src": ".cursor/rules/knowledge-format.mdc",
+      "line": 337,
+      "raw": "_index.yaml",
+      "kind": "backtick",
+      "status": "expected-kit-absent",
+      "snippet": "## ИНДЕКС `_index.yaml`"
+    },
+    {
+      "src": ".cursor/rules/knowledge-format.mdc",
+      "line": 359,
+      "raw": "_index.yaml",
+      "kind": "backtick",
+      "status": "expected-kit-absent",
+      "snippet": "- Запись атомарная: сначала `.md`, затем полная перезапись `_index.yaml` из состояния каталога."
+    },
+    {
+      "src": ".cursor/rules/knowledge-format.mdc",
+      "line": 366,
+      "raw": "openspec/knowledge/_index.yaml",
+      "kind": "backtick",
+      "status": "expected-kit-absent",
+      "snippet": "1. Read `openspec/knowledge/_index.yaml` и при необходимости front-matter `.md` для поля `invariant`."
+    },
+    {
+      "src": ".cursor/rules/knowledge-format.mdc",
+      "line": 370,
+      "raw": "_taxonomy.yaml",
+      "kind": "backtick",
+      "status": "expected-kit-absent",
+      "snippet": "5. Secondary-фильтр (`domain`): выполнять только если primary пусто И в scope есть путь под зарегистрированным `domain.source` из `_taxonomy.yaml`. Выбрать факты этого domain, затем ранжировать по совпадению токенов из `"
+    },
+    {
+      "src": ".cursor/rules/knowledge-format.mdc",
+      "line": 401,
+      "raw": "_index.yaml",
+      "kind": "backtick",
+      "status": "expected-kit-absent",
+      "snippet": "**Пишут в KB и `_index.yaml`:**"
+    },
+    {
+      "src": ".cursor/rules/knowledge-format.mdc",
+      "line": 437,
+      "raw": "_index.yaml",
+      "kind": "backtick",
+      "status": "expected-kit-absent",
+      "snippet": "Счётчики в YAML front-matter KB + в `_index.yaml`:"
+    }
+  ],
+  "expected_count": 164,
+  "section_fail": [
+    {
+      "src": ".cursor/agents/onec-code-reviewer.md",
+      "line": 128,
+      "file": "reviewer-checks.md",
+      "section": "Phase 2.5. Silent VERIFIED_OK — только whitelist § DESIGN AUTHORITY.",
+      "file_ok": true,
+      "resolved": ".cursor/docs/standard/reviewer-checks.md",
+      "section_ok": false,
+      "snippet": "2.5. **Попытка & Contract Audit** — до Phase 3. Default verdicts и Evidence override — в `reviewer-checks.md` § Phase 2.5. Silent VERIFIED_OK — только whitelist § DESIGN AUTHORITY."
+    },
+    {
+      "src": ".cursor/docs/chat-lexicon.md",
+      "line": 9,
+      "file": ".cursor/skills/openspec-overview/templates/style-checklist.md",
+      "section": "Ситуация ≠ механизм и § Laconic / anti-tutor.",
+      "file_ok": true,
+      "resolved": ".cursor/skills/openspec-overview/templates/style-checklist.md",
+      "section_ok": false,
+      "snippet": "- **`/opsx:overview`** (файл `temp/overview-*.md`) — слой «лаконичное описание проекта» для ФА / заказчика: ситуация и эффект, не калька `design.md`, не названия механизмов («автомат», «ядро»), не туториал (мета-ТЗ, педа"
+    },
+    {
+      "src": ".cursor/rules/1c-agent-delegation.mdc",
+      "line": 50,
+      "file": ".cursor/rules/1c-halt-triggers.mdc",
+      "section": "LIGHT MODE / § MECHANICAL MODE",
+      "file_ok": true,
+      "resolved": ".cursor/rules/1c-halt-triggers.mdc",
+      "section_ok": false,
+      "snippet": "Исключения: Light Mode и Mechanical Mode — работают без артефактов OpenSpec (**Read** `.cursor/rules/1c-halt-triggers.mdc` § LIGHT MODE / § MECHANICAL MODE). **Команды `/review` и `/release-review`** — ревью кода + устра"
+    },
+    {
+      "src": ".cursor/rules/verify-user-communication.mdc",
+      "line": 62,
+      "file": "chat-output-budget.mdc",
+      "section": "5a",
+      "file_ok": true,
+      "resolved": ".cursor/rules/chat-output-budget.mdc",
+      "section_ok": false,
+      "snippet": "6. **Промежуточные карточки Task** — игнорируются (`chat-output-budget.mdc` §5a)."
+    },
+    {
+      "src": ".cursor/skills/1c-mxl/SKILL.md",
+      "line": 10,
+      "file": ".cursor/rules/forms-mxl-mode-gate.mdc",
+      "section": "Политика макетов. Mode Gate",
+      "file_ok": true,
+      "resolved": ".cursor/rules/forms-mxl-mode-gate.mdc",
+      "section_ok": false,
+      "snippet": "**Политика макета:** `.cursor/rules/forms-mxl-mode-gate.mdc` § Политика макетов. Mode Gate `/opsx:new` **не** спрашивает способ поставки макета. Default — **manual**. Non-manual — только с разрешением на apply."
+    },
+    {
+      "src": ".cursor/skills/openspec-apply-change/templates/pause-wait-chat.md",
+      "line": 5,
+      "file": "chat-output-budget.mdc",
+      "section": "1d. Стиль",
+      "file_ok": true,
+      "resolved": ".cursor/rules/chat-output-budget.mdc",
+      "section_ok": false,
+      "snippet": "Файл рецепта: [pause-wait-file.md](pause-wait-file.md). Бюджет: `chat-output-budget.mdc` §1d. Стиль: `opsx-output-style.md` §5.2."
+    },
+    {
+      "src": ".cursor/skills/openspec-verify-change/SKILL.md",
+      "line": 160,
+      "file": "vertical-slices.mdc",
+      "section": "User Task Contract. Дополнительно",
+      "file_ok": true,
+      "resolved": ".cursor/rules/vertical-slices.mdc",
+      "section_ok": false,
+      "snippet": "**2.1a. User Task Contract (mechanical pre-check)** — до QC: grep `tasks.md` по строкам `^- \\[[ x]\\] S\\d+\\.\\d+` (не accept, не Follow-up) с таблицей DENY/ALLOW из `vertical-slices.mdc` § User Task Contract. Дополнительно"
+    },
+    {
+      "src": ".cursor/skills/openspec-verify-change/templates/report-header.md",
+      "line": 96,
+      "file": ".cursor/rules/vertical-slices.mdc",
+      "section": "ДЕТЕКТОР ПЕТЛИ ПРИЁМКИ. Значение переносится из снапшота в снапшот",
+      "file_ok": true,
+      "resolved": ".cursor/rules/vertical-slices.mdc",
+      "section_ok": false,
+      "snippet": "Порог детектора петли приёмки (Layer 2.5), по умолчанию **3**. SSOT определения метрик `AcceptLoop` / `PatchRounds` и условий закрытия — `.cursor/rules/vertical-slices.mdc` § ДЕТЕКТОР ПЕТЛИ ПРИЁМКИ. Значение переносится "
+    },
+    {
+      "src": ".cursor/skills/review/SKILL.md",
+      "line": 229,
+      "file": ".cursor/rules/1c-writer-pipeline.mdc",
+      "section": "IDENTIFIER HYGIENE CHECK. Детектор **латиницы в идентификаторе** (AP-031",
+      "file_ok": true,
+      "resolved": ".cursor/rules/1c-writer-pipeline.mdc",
+      "section_ok": false,
+      "snippet": "Выполнить **после** шага 1.8, **до** вызова ревьювера. Алгоритм — **SSOT:** `.cursor/rules/1c-writer-pipeline.mdc` § IDENTIFIER HYGIENE CHECK. Детектор **латиницы в идентификаторе** (AP-031, семейство Export Language вме"
+    }
+  ],
+  "section_file_fail": [
+    {
+      "src": ".cursor/agents/onec-code-architect.md",
+      "line": 84,
+      "file": "debug.md",
+      "section": "Verify decision ledger + design § «Решения verify (зафиксировано",
+      "file_ok": false,
+      "resolved": null,
+      "section_ok": null,
+      "snippet": "- Оркестратор передаёт `closed_decisions` из `debug.md` § Verify decision ledger + design § «Решения verify (зафиксировано)»."
+    },
+    {
+      "src": ".cursor/agents/onec-code-reviewer.md",
+      "line": 35,
+      "file": "openspec/changes/archive/2026-08-10-independent-review-disposition/design.md",
+      "section": "D9. Тихий VERIFIED_OK «только цитата design» **запрещён**.",
+      "file_ok": false,
+      "resolved": null,
+      "section_ok": null,
+      "snippet": "- **Silent VERIFIED_OK/OK без weak/needs-confirm** — только Evidence-типы из whitelist ниже. **Runtime-SSOT полного списка = этот раздел** (`.cursor/agents/onec-code-reviewer.md` § DESIGN AUTHORITY). Исторический перечен"
+    },
+    {
+      "src": ".cursor/docs/init-project-protocol.md",
+      "line": 375,
+      "file": "project.md",
+      "section": "Канон domain_label / MARKER-MERGE / MARKER-PLACEMENT — они в kit. Не переносить",
+      "file_ok": false,
+      "resolved": null,
+      "section_ok": null,
+      "snippet": "Секцию «Соглашения» адаптировать под технологию проекта (1С, TypeScript и т.п.). Секцию «Форматы и соглашения по комментариям BSL» заполнять из ответов **Блока 7** (только overlay-таблицы; MECHANISM — в `marker-canon.md`"
+    },
+    {
+      "src": ".cursor/docs/marker-canon.md",
+      "line": 77,
+      "file": "project.md",
+      "section": "Разработчик по умолчанию | Значение префикса cf-маркера |",
+      "file_ok": false,
+      "resolved": null,
+      "section_ok": null,
+      "snippet": "| `cfMarkerPrefix` | project.md § Разработчик по умолчанию | Значение префикса cf-маркера |"
+    },
+    {
+      "src": ".cursor/docs/marker-canon.md",
+      "line": 79,
+      "file": "project.md",
+      "section": "Whitelist предрелиза | Дополнительные/legacy форматы **exempt от удаления** AP-0",
+      "file_ok": false,
+      "resolved": null,
+      "section_ok": null,
+      "snippet": "| Regex распознавания | project.md § Whitelist предрелиза | Дополнительные/legacy форматы **exempt от удаления** AP-040 |"
+    },
+    {
+      "src": ".cursor/docs/marker-canon.md",
+      "line": 144,
+      "file": "project.md",
+      "section": "Whitelist предрелиза",
+      "file_ok": false,
+      "resolved": null,
+      "section_ok": null,
+      "snippet": "**Whitelist** (строки в project.md § Whitelist предрелиза): комментарии, matching regex/prefix в scope glob, **exempt от удаления** AP-040..AP-045 — **кроме AP-053** (содержимое domain_label) и **AP-054** (язык текста/JS"
+    },
+    {
+      "src": ".cursor/docs/opsx-output-style.md",
+      "line": 15,
+      "file": "tasks.md",
+      "section": "12.9 | Backticks для ID",
+      "file_ok": false,
+      "resolved": null,
+      "section_ok": null,
+      "snippet": "| **Процесс OpenSpec** | S4.T1, D7, Фаза 8, R2, I3, tasks.md §12.9 | Backticks для ID, только в полях «План» / «Ссылки» |"
+    },
+    {
+      "src": ".cursor/docs/opsx-output-style.md",
+      "line": 30,
+      "file": "design.md",
+      "section": "«RCA…»",
+      "file_ok": false,
+      "resolved": null,
+      "section_ok": null,
+      "snippet": "Ссылки: инвариант D7 (см. design.md §«RCA…»); охват — `Срез S3: «Название из tasks.md»` (формат §10)."
+    },
+    {
+      "src": ".cursor/docs/opsx-output-style.md",
+      "line": 206,
+      "file": "design.md",
+      "section": "5.3",
+      "file_ok": false,
+      "resolved": null,
+      "section_ok": null,
+      "snippet": "**Внутренние ID:** `D<N>` (Decisions), `S<N>.T<M>` (Slices), `I<N>` (матрица перехватов), `R<N>` (регрессии), `SC<N>` (static checks), номера задач из `tasks.md` вида `12.9`, номера секций `design.md §5.3`."
+    },
+    {
+      "src": ".cursor/docs/ux-acceptance-isolated-chat.md",
+      "line": 41,
+      "file": "debug.md",
+      "section": "Verify decision ledger.",
+      "file_ok": false,
+      "resolved": null,
+      "section_ok": null,
+      "snippet": "**Hard gate:** G1+G3 (или G1 GO без G2). Fixture: `diadok-mchd-before-pack` с `debug.md` § Verify decision ledger."
+    },
+    {
+      "src": ".cursor/rules/1c-xml-write-guard.mdc",
+      "line": 24,
+      "file": "debug.md",
+      "section": "Apply permissions или",
+      "file_ok": false,
+      "resolved": null,
+      "section_ok": null,
+      "snippet": "| Template.xml (макет табличного документа) | Default **manual**: инструкция / WAIT. Non-manual / compile — только при разрешении apply (`debug.md` § Apply permissions или `[mxl:assisted]`) → скилл `1c-mxl/compile` → val"
+    },
+    {
+      "src": ".cursor/rules/forms-mxl-mode-gate.mdc",
+      "line": 102,
+      "file": "debug.md",
+      "section": "## Apply permissions",
+      "file_ok": false,
+      "resolved": null,
+      "section_ok": null,
+      "snippet": "**Форма разрешения (норма):** (a) одноразовый AskQuestion или однозначный утвердительный ответ в чате apply **или** (b) маркер задачи `[mxl:assisted]` / явная запись non-manual в tasks до apply. Факт зафиксировать в `deb"
+    },
+    {
+      "src": ".cursor/rules/verify-user-communication.mdc",
+      "line": 90,
+      "file": "debug.md",
+      "section": "Verify decision ledger + design § «Решения verify (зафиксировано",
+      "file_ok": false,
+      "resolved": null,
+      "section_ok": null,
+      "snippet": "3. Internal: user-extend `--from-verify` → **сразу** обновить `debug.md` § Verify decision ledger + design § «Решения verify (зафиксировано)» + закрыть темы в `open_known_questions`; lite confirm допустим после decision."
+    },
+    {
+      "src": ".cursor/rules/vertical-slices.mdc",
+      "line": 31,
+      "file": "design.md",
+      "section": "Assumptions / § Decisions",
+      "file_ok": false,
+      "resolved": null,
+      "section_ok": null,
+      "snippet": "**Неизвестное поведение внешнего API/ядра → агент:** статический разбор cf/cfe + `design.md` § Assumptions / § Decisions; при недостатке фактов — explorer в new/apply; наблюдаемый исход — Primary или optional в `S<N>.acc"
+    },
+    {
+      "src": ".cursor/rules/vertical-slices.mdc",
+      "line": 69,
+      "file": "design.md",
+      "section": "Assumptions + static/explorer **агентом**",
+      "file_ok": false,
+      "resolved": null,
+      "section_ok": null,
+      "snippet": "| Неизвестность runtime внешнего API/ядра | `design.md` § Assumptions + static/explorer **агентом**; наблюдаемый исход → optional/Primary в `S<N>.accept` | — |"
+    },
+    {
+      "src": ".cursor/skills/1c-mxl/SKILL.md",
+      "line": 22,
+      "file": "debug.md",
+      "section": "## Apply permissions",
+      "file_ok": false,
+      "resolved": null,
+      "section_ok": null,
+      "snippet": "**Разрешение non-manual (apply):** маркер `[mxl:assisted]` / явная запись в tasks **или** утвердительный ответ / AskQuestion в чате apply; факт — в `debug.md` § `## Apply permissions`. Без разрешения — только manual (WAI"
+    },
+    {
+      "src": ".cursor/skills/openspec-apply-change/SKILL.md",
+      "line": 102,
+      "file": "debug.md",
+      "section": "## Verify decision ledger",
+      "file_ok": false,
+      "resolved": null,
+      "section_ok": null,
+      "snippet": "- `debug.md` § `## Verify decision ledger` → `open_decision_id` не пуст, **или**"
+    },
+    {
+      "src": ".cursor/skills/openspec-apply-change/SKILL.md",
+      "line": 142,
+      "file": "debug.md",
+      "section": "## Apply permissions",
+      "file_ok": false,
+      "resolved": null,
+      "section_ok": null,
+      "snippet": "- **Template/MXL:** Mode-вопрос new не используется. Default — **manual** (инструкция / WAIT). Non-manual (`1c-mxl/compile`) — только при записанном разрешении: ответ в чате apply / AskQuestion / маркер `[mxl:…]` / явная"
+    },
+    {
+      "src": ".cursor/skills/openspec-apply-change/SKILL.md",
+      "line": 309,
+      "file": "debug.md",
+      "section": "Apply permissions или маркер",
+      "file_ok": false,
+      "resolved": null,
+      "section_ok": null,
+      "snippet": "| Макет / Template.xml | «Template.xml», «макет», «печатная форма», MXL, маркеры `[mxl:assisted]` / `[mxl:manual]` | **Read** Mode Gate § Политика макетов. Default **manual** (WAIT/инструкция). Non-manual / `assisted` → "
+    },
+    {
+      "src": ".cursor/skills/openspec-apply-change/SKILL.md",
+      "line": 624,
+      "file": "debug.md",
+      "section": "Apply permissions or",
+      "file_ok": false,
+      "resolved": null,
+      "section_ok": null,
+      "snippet": "- **Template.xml / MXL tasks:** Default manual (**pause-wait** / рецепт в файле). Non-manual/`assisted` → only with recorded apply permission (`debug.md` § Apply permissions or `[mxl:…]`); then `1c-mxl/compile`+validate;"
+    },
+    {
+      "src": ".cursor/skills/openspec-explore/SKILL.md",
+      "line": 244,
+      "file": "design.md",
+      "section": "Открытые вопросы",
+      "file_ok": false,
+      "resolved": null,
+      "section_ok": null,
+      "snippet": "**Блокирующая развилка (гибрид):** если осталось решение заказчика, меняющее «Что менять» или «Приёмку» (выбор A/B), — блок **не печатается**: сначала карточка по `.cursor/docs/templates/decision-block.md` («**Что решить"
+    },
+    {
+      "src": ".cursor/skills/openspec-explore/templates/handoff-block.md",
+      "line": 25,
+      "file": "design.md",
+      "section": "Открытые вопросы>",
+      "file_ok": false,
+      "resolved": null,
+      "section_ok": null,
+      "snippet": "**Открытые решения:** <опционально; только неблокирующие вопросы — new перенесёт в design.md § Открытые вопросы>"
+    },
+    {
+      "src": ".cursor/skills/openspec-extend-change/SKILL.md",
+      "line": 89,
+      "file": "debug.md",
+      "section": "Extend после подтверждения",
+      "file_ok": false,
+      "resolved": null,
+      "section_ok": null,
+      "snippet": "**Внутренние блоки (до брифа, в чат НЕ попадают — в `debug.md` § Extend после подтверждения):**"
+    },
+    {
+      "src": ".cursor/skills/openspec-extend-change/SKILL.md",
+      "line": 339,
+      "file": "debug.md",
+      "section": "**",
+      "file_ok": false,
+      "resolved": null,
+      "section_ok": null,
+      "snippet": "1. Добавить/обновить `debug.md` § **`## Verify decision ledger`** (YAML-блок, agent-only):"
+    },
+    {
+      "src": ".cursor/skills/openspec-extend-change/SKILL.md",
+      "line": 351,
+      "file": "design.md",
+      "section": "**",
+      "file_ok": false,
+      "resolved": null,
+      "section_ok": null,
+      "snippet": "2. **Обязательно** добавить зеркало в `design.md` § **`## Решения verify (зафиксировано)`** — 1–2 строки прозой **без** `id:` (не дублировать параграфы из `## Decisions`). Это **человекочитаемый источник**, из которого `"
+    },
+    {
+      "src": ".cursor/skills/openspec-extend-change/SKILL.md",
+      "line": 372,
+      "file": "debug.md",
+      "section": "## Verify repair — slice acceptance",
+      "file_ok": false,
+      "resolved": null,
+      "section_ok": null,
+      "snippet": "4. Append `debug.md` § `## Verify repair — slice acceptance` (дата, alerts, files touched)."
+    },
+    {
+      "src": ".cursor/skills/openspec-extend-change/SKILL.md",
+      "line": 380,
+      "file": "debug.md",
+      "section": "## Verify repair — slice merge",
+      "file_ok": false,
+      "resolved": null,
+      "section_ok": null,
+      "snippet": "5. Append `debug.md` § `## Verify repair — slice merge` (было S1+S2 → стало S1)."
+    },
+    {
+      "src": ".cursor/skills/openspec-extend-change/SKILL.md",
+      "line": 396,
+      "file": "debug.md",
+      "section": "## Verify repair — user task contract",
+      "file_ok": false,
+      "resolved": null,
+      "section_ok": null,
+      "snippet": "6. Append `debug.md` § `## Verify repair — user task contract` (дата, удалённые задачи, files touched)."
+    },
+    {
+      "src": ".cursor/skills/openspec-new-change/SKILL.md",
+      "line": 200,
+      "file": "design.md",
+      "section": "Открытые вопросы** (и карточка решения пользователю до apply",
+      "file_ok": false,
+      "resolved": null,
+      "section_ok": null,
+      "snippet": "- If `exploreContext` exists, use it as source context for `proposal`, `design`, `specs`, and `tasks`: для нового формата (`## Постановка ЗНИ`) — Симптом → `## Why`, Корневая причина / Что менять → `## What Changes` / sc"
+    },
+    {
+      "src": ".cursor/skills/openspec-new-change/SKILL.md",
+      "line": 217,
+      "file": "design.md",
+      "section": "Assumptions + кодовые задачи агента",
+      "file_ok": false,
+      "resolved": null,
+      "section_ok": null,
+      "snippet": "- **User Task Contract** (`.cursor/rules/vertical-slices.mdc` § User Task Contract): от пользователя — только ручное конфигурирование и `S<N>.accept`; unknown API/runtime → `design.md` § Assumptions + кодовые задачи аген"
+    },
+    {
+      "src": ".cursor/skills/openspec-new-change/templates/handoff-contract.md",
+      "line": 16,
+      "file": "design.md",
+      "section": "Открытые вопросы + карточка решения до apply |",
+      "file_ok": false,
+      "resolved": null,
+      "section_ok": null,
+      "snippet": "| Открытые решения | опционально | `design.md` § Открытые вопросы + карточка решения до apply |"
+    },
+    {
+      "src": ".cursor/skills/openspec-status/SKILL.md",
+      "line": 33,
+      "file": "proposal.md",
+      "section": "## Metadata (comment markers",
+      "file_ok": false,
+      "resolved": null,
+      "section_ok": null,
+      "snippet": "Read `proposal.md` § `## Metadata (comment markers)` + `openspec/project.md` (`defaultDeveloper`, `cfMarkerPrefix`) + baseline `.cursor/docs/marker-canon.md` (запреты domain_label)."
+    },
+    {
+      "src": ".cursor/skills/openspec-verify-change/SKILL.md",
+      "line": 188,
+      "file": "debug.md",
+      "section": "Slice Gate Decisions и § Extend —",
+      "file_ok": false,
+      "resolved": null,
+      "section_ok": null,
+      "snippet": "**Метрика и порог** — SSOT `.cursor/rules/vertical-slices.mdc` § ДЕТЕКТОР ПЕТЛИ ПРИЁМКИ (`AcceptLoop`, `PatchRounds`, `acceptance_loop_max` default 3). Считается grep по `debug.md` § Slice Gate Decisions и § Extend —; зд"
+    },
+    {
+      "src": ".cursor/skills/openspec-verify-change/SKILL.md",
+      "line": 199,
+      "file": "debug.md",
+      "section": "Loop Detection (формат —",
+      "file_ok": false,
+      "resolved": null,
+      "section_ok": null,
+      "snippet": "- Иначе — **запустить редизайн-аудит:** `Task(onec-code-architect, mode=deep-analysis)` по закрытой эскалации в `model-selection.mdc` (петля приёмки = тяжёлый триггер: Fable, если слаг есть в описании `Task`; иначе Opus "
+    },
+    {
+      "src": ".cursor/skills/openspec-verify-change/SKILL.md",
+      "line": 218,
+      "file": "proposal.md",
+      "section": "## Metadata (comment markers",
+      "file_ok": false,
+      "resolved": null,
+      "section_ok": null,
+      "snippet": "7. **Metadata domain_label (`process-only-marker-suffix`).** Read `proposal.md` § `## Metadata (comment markers)` (dual-parser: yaml или list). Baseline запреты — `.cursor/docs/marker-canon.md` ⊕ project overlay. Если `c"
+    },
+    {
+      "src": ".cursor/skills/openspec-verify-change/SKILL.md",
+      "line": 246,
+      "file": "debug.md",
+      "section": "Verify decision ledger + design § «Решения verify (зафиксировано",
+      "file_ok": false,
+      "resolved": null,
+      "section_ok": null,
+      "snippet": "- **Обязательный блок Closed decisions** (из `debug.md` § Verify decision ledger + design § «Решения verify (зафиксировано)»):"
+    },
+    {
+      "src": ".cursor/skills/openspec-verify-change/SKILL.md",
+      "line": 392,
+      "file": "debug.md",
+      "section": "Verify decision ledger",
+      "file_ok": false,
+      "resolved": null,
+      "section_ok": null,
+      "snippet": "После сохранения отчёта обновить YAML `snapshot` **и** синхронизировать `debug.md` § Verify decision ledger:"
+    },
+    {
+      "src": ".cursor/skills/openspec-verify-change/templates/report-header.md",
+      "line": 22,
+      "file": "SKILL.md",
+      "section": "Repair Loop",
+      "file_ok": false,
+      "resolved": null,
+      "section_ok": null,
+      "snippet": "# счётчик internal repair-from-verify в текущем цикле (см. SKILL.md § Repair Loop)"
+    },
+    {
+      "src": ".cursor/skills/openspec-verify-change/templates/report-header.md",
+      "line": 32,
+      "file": "SKILL.md",
+      "section": "verify depth",
+      "file_ok": false,
+      "resolved": null,
+      "section_ok": null,
+      "snippet": "# full | incremental | lite — см. SKILL.md § verify depth"
+    },
+    {
+      "src": ".cursor/skills/openspec-verify-change/templates/report-header.md",
+      "line": 100,
+      "file": "SKILL.md",
+      "section": "Repair Loop",
+      "file_ok": false,
+      "resolved": null,
+      "section_ok": null,
+      "snippet": "Счётчик проходов internal repair-from-verify в текущем цикле verify (см. SKILL.md § Repair Loop). Сохраняется в снапшоте, чтобы повторный verify знал номер попытки и не зациклил авторемонт. Сбрасывается в `0` при вердикт"
+    },
+    {
+      "src": ".cursor/skills/review/SKILL.md",
+      "line": 211,
+      "file": "project.md",
+      "section": "«Обязательный контроль» на первой значимой",
+      "file_ok": false,
+      "resolved": null,
+      "section_ok": null,
+      "snippet": "Если в п.1.6.1 таблица **«Обязательный контроль»** содержит строки с непустым **Regex допустимой строки** — оркестратор может выполнить проверку как evidence (не заменять ревьювера). Алгоритм mandatory control: regex из "
+    },
+    {
+      "src": ".cursor/skills/review/SKILL.md",
+      "line": 547,
+      "file": "openspec/changes/archive/2026-08-10-independent-review-disposition/design.md",
+      "section": "D9. Каталог здесь не дублировать.",
+      "file_ok": false,
+      "resolved": null,
+      "section_ok": null,
+      "snippet": "**SSOT whitelist silent Evidence** — runtime: `.cursor/agents/onec-code-reviewer.md` § DESIGN AUTHORITY; исторический D9 — `openspec/changes/archive/2026-08-10-independent-review-disposition/design.md` § D9. Каталог здес"
+    }
+  ],
+  "priority": [
+    {
+      "file": ".cursor/rules/1c-halt-triggers.mdc",
+      "exists": true,
+      "sections": [
+        {
+          "name": "LIGHT MODE",
+          "ok": true
+        },
+        {
+          "name": "MECHANICAL MODE",
+          "ok": true
+        },
+        {
+          "name": "ИСКЛЮЧЕНИЯ",
+          "ok": true
+        }
+      ],
+      "headings_sample": [
+        "1C HALT Triggers (on-demand)",
+        "Safety floor",
+        "Promotion triggers",
+        "HALT CONDITIONS (проверять ДО любого действия)",
+        "LIGHT MODE (точечная правка)",
+        "MECHANICAL MODE (шаблонная правка)",
+        "ИСКЛЮЧЕНИЯ (прямая правка .bsl)"
+      ]
+    },
+    {
+      "file": ".cursor/rules/1c-writer-pipeline.mdc",
+      "exists": true,
+      "sections": [
+        {
+          "name": "LINT GATE",
+          "ok": true
+        },
+        {
+          "name": "ПРОМПТ WRITER",
+          "ok": true
+        },
+        {
+          "name": "IDENTIFIER HYGIENE CHECK",
+          "ok": true
+        }
+      ],
+      "headings_sample": [
+        "1C Writer Pipeline (on-demand)",
+        "ПРОМПТ WRITER: ГРАНИЦА ОТВЕТСТВЕННОСТИ",
+        "LINT GATE",
+        "IDENTIFIER HYGIENE CHECK (Naming Provenance)",
+        "Шаг 1. Scope",
+        "Шаг 2. Цели — идентификаторы на новых строках",
+        "Шаг 2b. Touched-procedure scope (обязательно при apply/review с diff)",
+        "Шаг 3. Детектор (для каждого собранного идентификатора/ключа)",
+        "Шаг 4. Allow-list (закрыт по построению — не включать в evidence)",
+        "Шаг 5. Выход — блок для reviewer",
+        "Naming Signals (evidence)",
+        "Naming Signals (evidence)",
+        "COMMENT HYGIENE CHECK",
+        "Шаг 1. Scope",
+        "Шаг 2. Цели — строки комментариев",
+        "Шаг 3. Allow-list (не включать в evidence)",
+        "Шаг 4. Выход — блок для reviewer",
+        "Comment Hygiene Signals (evidence)",
+        "Comment Hygiene Signals (evidence)",
+        "API EXISTENCE CHECK",
+        "Шаг 1. Извлечь новые вызовы",
+        "Шаг 2. Для каждой пары — поиск определения",
+        "Шаг 3. Вердикт",
+        "Шаг 4. Эскалация к пользователю (при WARNING)",
+        "Ограничения"
+      ]
+    },
+    {
+      "file": ".cursor/skills/review/SKILL.md",
+      "exists": true,
+      "sections": [
+        {
+          "name": "1.8",
+          "ok": true
+        },
+        {
+          "name": "1.9",
+          "ok": true
+        },
+        {
+          "name": "1.10",
+          "ok": true
+        },
+        {
+          "name": "3.5",
+          "ok": true
+        },
+        {
+          "name": "4.5",
+          "ok": true
+        },
+        {
+          "name": "6.4",
+          "ok": true
+        }
+      ],
+      "headings_sample": [
+        "Шаг 0. Флаги и `release_mode`",
+        "Шаг 1. Resolve scope (со smart defaults)",
+        "1.0 Приоритет `/release-review` (`release_mode`, до таблицы 1.2)",
+        "1.1 Smart defaults (S12)",
+        "1.2 Таблица резолва",
+        "1.3a Change-scoped resolver (только `release_mode` + change)",
+        "1.3c `extension_all_bsl` (только `release_mode`)",
+        "Шаг 1.4. Light-review триаж (S15)",
+        "Алгоритм",
+        "Решение",
+        "Light review scope",
+        "Шаг 1.5. Diff extraction и procedure mapping (при `diff-focused`)",
+        "1.5.1 Baseline для `git diff`",
+        "1.5.2 Новый файл в diff",
+        "1.5.3 Извлечение номеров строк в текущей версии",
+        "1.5.4 Маппинг на процедуры BSL",
+        "1.5.5 Сборка секции `## Review Boundaries`",
+        "Review Boundaries",
+        "Шаг 1.6. Project constraints (evidence)",
+        "1.6.1 Whitelist и обязательный контроль",
+        "1.6.2 Обязательный контроль (regex-based rules)",
+        "Mandatory Control Signals (evidence)",
+        "Шаг 1.9. Identifier Hygiene pass (Naming Provenance — evidence, не findings)",
+        "Входные параметры",
+        "Обработка"
+      ]
+    },
+    {
+      "file": ".cursor/docs/opsx-output-style.md",
+      "exists": true,
+      "sections": [
+        {
+          "name": "5.1",
+          "ok": true
+        },
+        {
+          "name": "2.6",
+          "ok": true
+        },
+        {
+          "name": "5.1a",
+          "ok": true
+        },
+        {
+          "name": "5.2",
+          "ok": true
+        }
+      ],
+      "headings_sample": [
+        "Стиль пользовательских выводов opsx-команд",
+        "1. Три слоя (главное правило)",
+        "2. Типографика и языки",
+        "2.5. Человеческий слой: каноны разговорного вывода",
+        "2.6. Chat Surface Contract (сквозной слой для всех `/opsx:*`)",
+        "Принцип",
+        "Гейт: Тест понятности (механизм, не блок-лист)",
+        "Правило 1 — Самодостаточность",
+        "Правило 2 — Команды: internal vs user-action",
+        "Правило 3 — Один сигнал ответственности",
+        "Правило 4 — Типографика скан-читаемости",
+        "Правило 5 — Handoff на языке эффекта",
+        "Правило 6 — Бриф по адресу",
+        "Self-check (HARD, перед каждым финальным сообщением)",
+        "Terminal outcomes (сессия завершена для человека)",
+        "Карта repair vs decision (для verify; детерминированная)",
+        "Acceptance: isolated chat (регрессия UX)",
+        "3. Запрет внутренних ID и технических категорий в пользовательских полях",
+        "3.1. Технические категории (жаргон движка) → пользовательский язык",
+        "3.1b. HALT для чата (жёстче §3.1)",
+        "4. Правила оформления",
+        "5. Общие шаблоны (T-*)",
+        "5.1. Бриф (Sync Card) — точка синхронизации",
+        "Уровни глубины (B0–B3 и B-explain)",
+        "Классификатор (4 правила)"
+      ]
+    },
+    {
+      "file": ".cursor/rules/chat-output-budget-full.mdc",
+      "exists": true,
+      "sections": [
+        {
+          "name": "1",
+          "ok": true
+        },
+        {
+          "name": "1b",
+          "ok": true
+        },
+        {
+          "name": "1c",
+          "ok": true
+        },
+        {
+          "name": "3a",
+          "ok": true
+        },
+        {
+          "name": "4",
+          "ok": true
+        },
+        {
+          "name": "5",
+          "ok": true
+        },
+        {
+          "name": "6",
+          "ok": true
+        },
+        {
+          "name": "7",
+          "ok": true
+        }
+      ],
+      "headings_sample": [
+        "Chat output budget — FULL (on-demand)",
+        "Chat output budget (оркестратор → пользователь)",
+        "Назначение",
+        "Правила (обязательны)",
+        "1. Бюджет строк (Единая таблица лимитов)",
+        "1c. Блок «Карта правок» (apply acceptance-handoff)",
+        "1d. Инвентарь pause-wait (apply: работа человека в Конфигураторе)",
+        "1a. Карта SSOT (Single Source of Truth)",
+        "1b. Pre-send self-check (оркестратор → чат, 10 пунктов)",
+        "1c. Тест понятности (HARD, верхний приоритет)",
+        "2. Разделение «чат / файл»",
+        "3. Skip-on-empty",
+        "3a. Non-events не выводятся в чат",
+        "4. Без подтверждения (No Acknowledgement)",
+        "5. Subagent result protocol (Честная обработка субагентов)",
+        "5a. `/opsx:verify` — особый протокол (HARD)",
+        "6. Progress marker",
+        "7. HALT: жаргон движка в чате",
+        "8. Связь со стайл-гайдом",
+        "9. Роль навигатора"
+      ]
+    },
+    {
+      "file": ".cursor/skills/openspec-apply-change/templates/pause-wait-chat.md",
+      "exists": true,
+      "sections": [],
+      "headings_sample": [
+        "pause-wait — карточка чата (SSOT)",
+        "Слоты (все обязательны)",
+        "Запрещено",
+        "Эталон"
+      ]
+    },
+    {
+      "file": ".cursor/skills/openspec-explain/templates/entry-brief.md",
+      "exists": true,
+      "sections": [],
+      "headings_sample": [
+        "Entry-бриф (SSOT) — `/opsx:explain`",
+        "Слоты",
+        "HALT (не в чат-бриф)",
+        "Эталон A — замер с двумя операциями (рамка неочевидна)",
+        "Эталон B — рамка уже ясна из команды",
+        "Эталон C — после ревью / apply (prefill из `## Explain scope`)",
+        "Разбор ответа"
+      ]
+    },
+    {
+      "file": ".cursor/docs/templates/brief-card.md",
+      "exists": true,
+      "sections": [],
+      "headings_sample": [
+        "Brief Card (Sync Card) — SSOT формы entry-брифа",
+        "Бюджет содержания (вместо лимита строк)",
+        "Запрещённые подписи (HALT)",
+        "Metadata Gate (new, не бриф)",
+        "B0 — без карточки",
+        "B1 — new / extend без развилки",
+        "Эталон B1",
+        "B2 — extend с развилкой",
+        "Эталон B2",
+        "B3 — explore",
+        "Эталон B3 (дефект)",
+        "Эталон B3 (выбор маршрута)",
+        "B-explain — `/opsx:explain`",
+        "Разбор ответа пользователя",
+        "Развилки после брифа (extend §123)",
+        "Self-check перед отправкой брифа"
+      ]
+    },
+    {
+      "file": ".cursor/docs/templates/decision-block.md",
+      "exists": true,
+      "sections": [],
+      "headings_sample": [
+        "Decision Block — единый контракт развилки в чате (SSOT)",
+        "Тест понятности (главный гейт, прогнать первым)",
+        "Обязательная триада (простой язык)",
+        "Шаблон (чат) — «Что решить» + связный абзац + варианты",
+        "Internal-ID и англ-метки — перевести (примеры теста)",
+        "Запрещено в чате",
+        "Шаблон (файл отчёта, развёрнутый)",
+        "<N>. <Краткое название развилки на языке кода 1С>",
+        "Привязки команд",
+        "Каноны вопросов в rules / skills (тот же тест)",
+        "Анти-примеры"
+      ]
+    },
+    {
+      "file": ".cursor/docs/marker-canon.md",
+      "exists": true,
+      "sections": [],
+      "headings_sample": [
+        "Marker Canon — SSOT механики маркеров ЗНИ (kit)",
+        "Config Resolution Contract (CRC)",
+        "Грамматика маркера (MECHANISM)",
+        "Дефолтный формат (FORMAT — kit DEFAULT)",
+        "cfe (расширения)",
+        "cf (базовая конфигурация)",
+        "Поверхность override проекта (Вариант A)",
+        "MARKER-MERGE-001 (MECHANISM)",
+        "MARKER-PLACEMENT-001 (MECHANISM)",
+        "Канон domain_label — baseline запреты (LIST, kit)",
+        "Требования (GOOD)",
+        "Baseline-запреты process-лексики (без доменного смысла)",
+        "Whitelist и «нет whitelist → строгая гигиена» (MECHANISM)",
+        "Allow-list AP-054 (baseline LIST, kit)",
+        "Связь с AP (гигиена)",
+        "Версия контракта"
+      ]
+    },
+    {
+      "file": ".cursor/docs/chat-lexicon.md",
+      "exists": true,
+      "sections": [],
+      "headings_sample": [
+        "Словарь чата (SSOT: жаргон → человеческая замена)",
+        "Две аудитории (важно)",
+        "Слой 0 — принцип понятности (механизм; над списками)",
+        "Слой 1 — коды и имена движка (примеры для детектора; бан в чате)",
+        "Слой 2 — workflow-слова (РАЗРЕШЕНЫ разработчику, расшифровка — для заказчика)",
+        "Слой 3 — лексика (англицизмы) — мягкое предпочтение",
+        "Разрешено в чате"
+      ]
+    },
+    {
+      "file": ".cursor/docs/kit-template-workflow.md",
+      "exists": true,
+      "sections": [],
+      "headings_sample": [
+        "Поставка kit-шаблона в проект 1С",
+        "Что копировать",
+        "Эволюция kit (метапроект)",
+        "Forms / MXL",
+        "Связь"
+      ]
+    },
+    {
+      "file": ".cursor/docs/delivery-integrity.md",
+      "exists": true,
+      "sections": [],
+      "headings_sample": [
+        "Целостность поставки kit-van",
+        "Системный чеклист"
+      ]
+    },
+    {
+      "file": ".cursor/docs/quick-start.md",
+      "exists": true,
+      "sections": [],
+      "headings_sample": [
+        "Quick start — kit-van",
+        "1. Поставка",
+        "2. Первый сценарий",
+        "3. Формы и макеты",
+        "4. Каталог skills (частое)"
+      ]
+    },
+    {
+      "file": ".cursor/docs/faq-kit.md",
+      "exists": true,
+      "sections": [],
+      "headings_sample": [
+        "FAQ — kit-van",
+        "explore vs new",
+        "Режим без API (`-noapi`)",
+        "Режим формы (на `/opsx:new`)",
+        "Поставка шаблона",
+        "session-save / restore / retro",
+        "«Замер → вывод» vs verify",
+        "Кейсбуки vs вендорские стандарты"
+      ]
+    }
+  ],
+  "review_step_tokens": [
+    "0.5",
+    "0.9",
+    "1.0",
+    "1.1",
+    "1.10",
+    "1.2",
+    "1.3",
+    "1.4",
+    "1.5",
+    "1.6",
+    "1.8",
+    "1.9",
+    "2.1",
+    "2.2",
+    "2.3",
+    "2.5",
+    "2.6",
+    "3.1",
+    "3.2",
+    "3.5",
+    "4.1",
+    "4.2",
+    "4.3",
+    "4.4",
+    "4.5",
+    "6.1",
+    "6.2",
+    "6.3",
+    "6.4",
+    "7.1",
+    "7.2",
+    "7.3",
+    "7.4",
+    "Шаг 0",
+    "Шаг 1",
+    "Шаг 1.10",
+    "Шаг 1.4",
+    "Шаг 1.5",
+    "Шаг 1.6",
+    "Шаг 1.8",
+    "Шаг 1.9",
+    "Шаг 2",
+    "Шаг 3",
+    "Шаг 3.5",
+    "Шаг 4",
+    "Шаг 4.5",
+    "Шаг 5",
+    "Шаг 6",
+    "Шаг 7"
+  ],
+  "agent_files": [
+    "onec-code-architect",
+    "onec-code-explorer",
+    "onec-code-reviewer",
+    "onec-code-simplifier",
+    "onec-code-writer",
+    "onec-trace-analyst",
+    "openspec-quality-controller"
+  ],
+  "agent_mentions_missing_file": {
+    "onec-code-architect-2nd": [
+      ".cursor/docs/agents-CHANGELOG.md:59",
+      ".cursor/docs/agents-CHANGELOG.md:66",
+      ".cursor/docs/agents-CHANGELOG.md:73",
+      ".cursor/docs/agents-CHANGELOG.md:80"
+    ],
+    "openspec-doc-writer": [
+      ".cursor/docs/agents-CHANGELOG.md:59",
+      ".cursor/docs/agents-CHANGELOG.md:72",
+      ".cursor/docs/agents-CHANGELOG.md:79"
+    ],
+    "onec-code-trace-analyst": [
+      ".cursor/rules/1c-agent-delegation.mdc:84"
+    ]
+  },
+  "commands": [
+    {
+      "file": "init-project.md",
+      "name": "/init-project",
+      "skill_refs": [],
+      "skill_ok": []
+    },
+    {
+      "file": "opsx-apply.md",
+      "name": "/opsx:apply",
+      "skill_refs": [
+        "openspec-apply-change/SKILL.md"
+      ],
+      "skill_ok": [
+        [
+          "openspec-apply-change/SKILL.md",
+          true
+        ]
+      ]
+    },
+    {
+      "file": "opsx-archive.md",
+      "name": "/opsx:archive",
+      "skill_refs": [
+        "openspec-archive-change/SKILL.md"
+      ],
+      "skill_ok": [
+        [
+          "openspec-archive-change/SKILL.md",
+          true
+        ]
+      ]
+    },
+    {
+      "file": "opsx-bulk-archive.md",
+      "name": "/opsx:bulk-archive",
+      "skill_refs": [
+        "openspec-bulk-archive-change/SKILL.md"
+      ],
+      "skill_ok": [
+        [
+          "openspec-bulk-archive-change/SKILL.md",
+          true
+        ]
+      ]
+    },
+    {
+      "file": "opsx-explain.md",
+      "name": "/opsx:explain",
+      "skill_refs": [
+        "openspec-explain/SKILL.md"
+      ],
+      "skill_ok": [
+        [
+          "openspec-explain/SKILL.md",
+          true
+        ]
+      ]
+    },
+    {
+      "file": "opsx-explore.md",
+      "name": "/opsx:explore",
+      "skill_refs": [
+        "openspec-explore/SKILL.md"
+      ],
+      "skill_ok": [
+        [
+          "openspec-explore/SKILL.md",
+          true
+        ]
+      ]
+    },
+    {
+      "file": "opsx-extend.md",
+      "name": "/opsx:extend",
+      "skill_refs": [
+        "openspec-extend-change/SKILL.md"
+      ],
+      "skill_ok": [
+        [
+          "openspec-extend-change/SKILL.md",
+          true
+        ]
+      ]
+    },
+    {
+      "file": "opsx-knowledge-add.md",
+      "name": "/opsx:knowledge-add",
+      "skill_refs": [
+        "openspec-knowledge-add/SKILL.md"
+      ],
+      "skill_ok": [
+        [
+          "openspec-knowledge-add/SKILL.md",
+          true
+        ]
+      ]
+    },
+    {
+      "file": "opsx-knowledge-audit.md",
+      "name": "/opsx:knowledge-audit",
+      "skill_refs": [
+        "openspec-knowledge-audit/SKILL.md"
+      ],
+      "skill_ok": [
+        [
+          "openspec-knowledge-audit/SKILL.md",
+          true
+        ]
+      ]
+    },
+    {
+      "file": "opsx-knowledge-init.md",
+      "name": "/opsx:knowledge-init",
+      "skill_refs": [
+        "openspec-knowledge-init/SKILL.md"
+      ],
+      "skill_ok": [
+        [
+          "openspec-knowledge-init/SKILL.md",
+          true
+        ]
+      ]
+    },
+    {
+      "file": "opsx-new.md",
+      "name": "/opsx:new",
+      "skill_refs": [
+        "openspec-new-change/SKILL.md"
+      ],
+      "skill_ok": [
+        [
+          "openspec-new-change/SKILL.md",
+          true
+        ]
+      ]
+    },
+    {
+      "file": "opsx-overview.md",
+      "name": "/opsx:overview",
+      "skill_refs": [
+        "openspec-overview/SKILL.md"
+      ],
+      "skill_ok": [
+        [
+          "openspec-overview/SKILL.md",
+          true
+        ]
+      ]
+    },
+    {
+      "file": "opsx-status.md",
+      "name": "/opsx:status",
+      "skill_refs": [
+        "openspec-status/SKILL.md"
+      ],
+      "skill_ok": [
+        [
+          "openspec-status/SKILL.md",
+          true
+        ]
+      ]
+    },
+    {
+      "file": "opsx-sync.md",
+      "name": "/opsx:sync",
+      "skill_refs": [
+        "openspec-sync-specs/SKILL.md"
+      ],
+      "skill_ok": [
+        [
+          "openspec-sync-specs/SKILL.md",
+          true
+        ]
+      ]
+    },
+    {
+      "file": "opsx-verify.md",
+      "name": "/opsx:verify",
+      "skill_refs": [
+        "openspec-verify-change/SKILL.md"
+      ],
+      "skill_ok": [
+        [
+          "openspec-verify-change/SKILL.md",
+          true
+        ]
+      ]
+    },
+    {
+      "file": "release-review.md",
+      "name": "/release-review",
+      "skill_refs": [
+        "review/SKILL.md",
+        "review/SKILL.md"
+      ],
+      "skill_ok": [
+        [
+          "review/SKILL.md",
+          true
+        ],
+        [
+          "review/SKILL.md",
+          true
+        ]
+      ]
+    },
+    {
+      "file": "review.md",
+      "name": "/review",
+      "skill_refs": [
+        "review/SKILL.md"
+      ],
+      "skill_ok": [
+        [
+          "review/SKILL.md",
+          true
+        ]
+      ]
+    },
+    {
+      "file": "session-restore.md",
+      "name": "/session-restore",
+      "skill_refs": [
+        "session-restore/SKILL.md"
+      ],
+      "skill_ok": [
+        [
+          "session-restore/SKILL.md",
+          true
+        ]
+      ]
+    },
+    {
+      "file": "session-retro.md",
+      "name": "/session-retro",
+      "skill_refs": [
+        "session-retro/SKILL.md"
+      ],
+      "skill_ok": [
+        [
+          "session-retro/SKILL.md",
+          true
+        ]
+      ]
+    },
+    {
+      "file": "session-save.md",
+      "name": "/session-save",
+      "skill_refs": [
+        "session-save/SKILL.md"
+      ],
+      "skill_ok": [
+        [
+          "session-save/SKILL.md",
+          true
+        ]
+      ]
+    }
+  ],
+  "agents_md_commands": [
+    "/opsx:explore",
+    "/opsx:new",
+    "/opsx:verify",
+    "/opsx:apply",
+    "/opsx:archive",
+    "/opsx:explore",
+    "/opsx:new",
+    "/opsx:verify",
+    "/opsx:apply",
+    "/opsx:archive",
+    "/opsx:extend",
+    "/opsx:status",
+    "/opsx:knowledge-add",
+    "/opsx:knowledge-init",
+    "/opsx:knowledge-audit",
+    "/opsx:sync",
+    "/opsx:bulk-archive",
+    "/review",
+    "/release-review",
+    "/init-project",
+    "/session-save",
+    "/session-restore",
+    "/session-retro",
+    "/init-project",
+    "/review",
+    "/release-review"
+  ],
+  "orphan_rules": [],
+  "orphan_docs": [],
+  "agents_md_broken_paths": [
+    {
+      "raw": "openspec/project.md",
+      "status": "expected-kit-absent"
+    },
+    {
+      "raw": "openspec/project.md",
+      "status": "expected-kit-absent"
+    }
+  ]
+}

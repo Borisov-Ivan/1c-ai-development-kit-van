@@ -1,0 +1,37 @@
+---
+description: "HALT+DELEGATION: диспетчер 1С — проверять ДО любого действия, делегировать по триггерам"
+alwaysApply: true
+priority: 999
+---
+
+# 1C Code Gate — Dispatch & Delegation
+
+При правке `.bsl` или делегировании — **Read** `.cursor/rules/1c-halt-triggers.mdc` (таблица, Light/Mechanical, APPLY GATE, исключения). XML — `.cursor/rules/1c-xml-write-guard.mdc` (Template.xml: compile только при разрешении apply). Task — `tool-name-guard.mdc`. Эталон потока — `1c-writer-pipeline.mdc`.
+
+**BSL:** оркестратор не Write/StrReplace `.bsl`. Нетривиальная правка — `onec-code-writer` → `ReadLints` → `onec-code-reviewer`. Исключения — halt-triggers § LIGHT / MECHANICAL / ИСКЛЮЧЕНИЯ. Даже в исключениях reviewer обязателен (кроме явного отказа).
+
+**Apply-gate:** writer/reviewer и прямая правка `.bsl` — только `/opsx:apply` (плюс Light/Mechanical и `/review` по halt-triggers). Иначе СТОП: «Артефакты готовы. Дальше: `/opsx:apply <name>`».
+
+**XML:** сырой Write/StrReplace/Delete `src/**/*.xml` запрещён. Чтение — да. `openspec/` / `.cursor/` — да. Нет объекта → pause-wait (`1c-no-metadata-creation.mdc`).
+
+**Explore без change:** writer/reviewer запрещены → `/opsx:new`. **1С-обследование** (`src/**`, `.bsl`, XML метаданных): только `onec-code-explorer`; `explore`/`generalPurpose` запрещены. Порог обследования — **0** чтений `.bsl`. Иначе до агента допустимо ≤3 точечных. Две неудачи на ясной постановке → третьего делегирования нет.
+
+| Тип задачи | Агент | Обязательно |
+|---|---|---|
+| Правка BSL | **onec-code-writer** | Да (`INPUT CONTRACT`) |
+| Ревью после правок | **onec-code-reviewer** | Да |
+| Архитектура | **onec-code-architect** | Да до реализации (`architect-gate.mdc`) |
+| Обследование 3+ модулей / любое обследование кода | **onec-code-explorer** | Да |
+| Трасса/стек | **onec-trace-analyst** | Да (`1c-error-analysis.mdc`) |
+| REFACTOR поверхности | **onec-code-simplifier** | Да в `/review` шаг 6.4 |
+| Когерентность срезов | **openspec-quality-controller** | Да в pre-apply verify |
+
+**Карта сценария (не 1С-роль):** манифест панели — `onec-scenario-map-designer` (группа Generic/OpenSpec, `Task` без `model=`). Файл регистрирует родительский агент сессии. 1С-контент (`src/**`, `.bsl`) этому агенту не отдавать; обследование кода — `onec-code-explorer`. Шаблон: `1c-agent-patterns/scenario-map-designer.md`.
+
+**Якорь apply-reviewer:** авто-fix — **только** functional MUST_FIX **без** `QualityFlag=weak`, tag `design-prescribed` и agreement-override. Weak / design-prescribed / agreement-override → **не** авто-fix, **не** авто-waive, **не** AskQuestion в apply; одна строка-след в отчёте задачи («на `/review` потребуется подтверждение качества»). Финальный выбор as-designed / queue-fix — только в `/review` / `/release-review` (шаг 4.5 skill).
+
+**Якорь поверхности:** при полном ревью нового/переписанного модуля с REFACTOR по поверхности — **не закрывать** задачу apply/`/review` без `onec-code-simplifier` или **явного waive** пользователя. `1c-utility-agents.mdc` и sidecar-шаблоны (`1c-agent-patterns/sidecar.md`) этот MUST **не** содержат и якорь не заменяют.
+
+Кодовые замечания — через writer, не прямой StrReplace. Промпт writer: **ЧТО**, не **КАК** (`1c-writer-pipeline.mdc` § ПРОМПТ WRITER). При делегировании explorer / architect / trace — блок `## Existing Knowledge` (`knowledge-format.mdc`). Отчёты architect/explorer/trace — целиком в `reports/` (`preserve-subagent-reports.mdc`). Пути `openspec/project.md` — в промпт агента; в kit файла нет, блок опускается. Профиль MAY параллелить независимые треки; не запускает субагента «проверить оркестратора»; запрет built-in Explore не снимает.
+
+Лимиты циклов: writer↔reviewer = **2** (`review/SKILL.md` 4.5); investigation = **3** (шаг 3.5); self-review writer = **2** (`onec-code-writer.md` Phase 7 — не путать с циклом reviewer).

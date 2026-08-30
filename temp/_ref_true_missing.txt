@@ -1,0 +1,1633 @@
+STATUS {'runtime-expected': 133, 'missing': 256, 'generic-name': 407, 'change-runtime': 12, 'temp': 3}
+
+===== missing n=256 =====
+.cursor/agents/onec-code-architect.md:191  [backtick] 1c-standards-navigator.md
+    - For vendor standards (metadata naming, data storage, event handlers, transactions): Read `.cursor/skills/1c-vendor-standards/SKILL.md`, apply checklist for relevant domain. If deeper detail needed: 
+.cursor/agents/onec-code-architect.md:416  [backtick] bsl-antipatterns.md
+    - Reference: writer G14 / Data Contract Gate (AP-004 in `bsl-antipatterns.md`; router `1c-coding-standards.md`).
+.cursor/agents/onec-code-reviewer.md:35  [backtick] openspec/changes/archive/2026-08-10-independent-review-disposition/design.md
+    - **Silent VERIFIED_OK/OK без weak/needs-confirm** — только Evidence-типы из whitelist ниже. **Runtime-SSOT полного списка = этот раздел** (`.cursor/agents/onec-code-reviewer.md` § DESIGN AUTHORITY). 
+.cursor/agents/onec-code-reviewer.md:52  [backtick] project.md
+    Пути cf/cfe — из `openspec/project.md` (секция «Структура репозитория») или блока в промпте. Не предполагай `src/cf/` по умолчанию. В kit-репозитории `project.md` отсутствует — блок путей опускается.
+.cursor/agents/onec-code-reviewer.md:69  [backtick] reviewer-checks.md
+    | Тип задачи | Разделы `reviewer-checks.md` |
+.cursor/agents/onec-code-reviewer.md:105  [backtick] reviewer-checks.md
+    Детали эвристик — `reviewer-checks.md` Phase 2.
+.cursor/agents/onec-code-reviewer.md:123  [backtick] reviewer-checks.md
+    Порядок фаз обязателен. **Детали шагов, таблиц аудита и чек-листов — в `reviewer-checks.md`** (прочитать по таблице CHECKLISTS).
+.cursor/agents/onec-code-reviewer.md:128  [backtick] reviewer-checks.md
+    2.5. **Попытка & Contract Audit** — до Phase 3. Default verdicts и Evidence override — в `reviewer-checks.md` § Phase 2.5. Silent VERIFIED_OK — только whitelist § DESIGN AUTHORITY.
+.cursor/agents/onec-code-reviewer.md:181  [backtick] reviewer-checks.md
+    При `mode=prerelease`: прочитать `reviewer-checks.md` §12 и PRE-RELEASE SEVERITY ESCALATION; эскалация из AP-каталога. Kind сохраняется. Все замечания обязательны; severity задаёт приоритет.
+.cursor/agents/onec-code-reviewer.md:205  [backtick] reviewer-checks.md
+    **Changes**: v4.1 — диета: чек-листы и детальные фазы в `reviewer-checks.md`; ядро протокола и DESIGN AUTHORITY здесь; обязательна строка `Checklists read:`.
+.cursor/agents/onec-code-writer.md:166  [backtick] bsl-antipatterns.md
+    - **G14 (Data contract verification):** Before adding ANY defensive check (`ТипЗнч() <> Тип(...)`, `Свойство`, `ЕстьРеквизитИлиСвойствоОбъекта`, `Колонки.Найти`, `ЗначениеЗаполнено()` as guard), HALT 
+.cursor/agents/onec-code-writer.md:169  [backtick] bsl-antipatterns.md
+    - **G19 (Попытка justification gate):** Before adding `Попытка`/`Исключение` — HALT. Identify the external factor that can cause failure despite correct code (network, FS, concurrent data access, COM,
+.cursor/agents/onec-trace-analyst.md:321  [backtick] profiles/bug.md
+    (Обязательно при вызове из `/opsx:explore` profile `explore-bug` — **4 строки** по `profiles/bug.md`; язык заказчика, без цепочек вызовов.)
+.cursor/commands/init-project.md:10  [backtick] project.md
+    **Первое действие:** прочитать [`.cursor/docs/init-project-protocol.md`](../docs/init-project-protocol.md) и выполнить протокол целиком (Phase 0…). До чтения протокола — не создавать каталоги и не пис
+.cursor/commands/opsx-extend.md:42  [backtick] brief-card.md
+    3. Показать бриф **B1/B2** (карточка `brief-card.md`, §5.1 Sync Card). «Соответствие исходному scope», `Drift-check`, план правки артефактов — **internal** (`debug.md`), не в чат. B2: **Варианты** нум
+.cursor/commands/opsx-knowledge-audit.md:19  [backtick] _index.yaml
+    - `--reindex` — пересобрать `_index.yaml` из `.md`-файлов;
+.cursor/commands/opsx-knowledge-audit.md:19  [backtick] .md
+    - `--reindex` — пересобрать `_index.yaml` из `.md`-файлов;
+.cursor/commands/opsx-knowledge-audit.md:21  [backtick] _taxonomy.yaml
+    - `--taxonomy-sync` — отчёт о расхождениях `_taxonomy.yaml` ↔ `src/*/cfe/*`;
+.cursor/commands/opsx-knowledge-init.md:17  [backtick] _taxonomy.yaml
+    - Файла `_taxonomy.yaml` нет → построить draft (по домену на каждую конфигурацию и расширение, блок `cross` из `openspec/knowledge/_taxonomy.template.yaml`), показать summary, записать после подтвержд
+.cursor/commands/opsx-knowledge-init.md:19  [backtick] _index.yaml
+    - `_index.yaml` и файлы фактов (KB-*.md) команда не трогает.
+.cursor/commands/release-review.md:22  [md-link] ../../openspec/project.md
+    Имя расширения — папка в `src/*/cfe/<имя>/` (см. [`openspec/project.md`](../../openspec/project.md)).
+.cursor/commands/review.md:17  [md-link] release-review.md
+    **Предрелиз перед выкладкой:** [`/release-review`](release-review.md) — отдельная команда (Category 12, Tier 2 explorer, без light-review).
+.cursor/docs/1c-coding-standards.md:36  [md-link] ../../openspec/project.md
+    Комментарии, попадающие под **Whitelist предрелиза** (baseline `.cursor/docs/marker-canon.md` + строки в [openspec/project.md](../../openspec/project.md), секция «Форматы и соглашения по комментариям 
+.cursor/docs/1c-coding-standards.md:46  [backtick] project.md
+    **SSOT правила AP-054** — карточка в [.cursor/docs/antipatterns/bsl-antipatterns.md](antipatterns/bsl-antipatterns.md) (не `project.md`); **SSOT AP-031** — там же. `openspec/project.md` лишь **опциона
+.cursor/docs/agents-CHANGELOG.md:10  [backtick] estimate.md
+    - **`_template`:** Why/Slices/slice-gate; удалены orphan `estimate.md` / `ТЗ.md`.
+.cursor/docs/agents-CHANGELOG.md:10  [backtick] ТЗ.md
+    - **`_template`:** Why/Slices/slice-gate; удалены orphan `estimate.md` / `ТЗ.md`.
+.cursor/docs/agents-CHANGELOG.md:59  [backtick] tz-lexicon-dictionary.md
+    - Агенты/доки: `onec-code-architect-2nd`, `openspec-doc-writer`, `tz-lexicon-dictionary.md`.
+.cursor/docs/agents-CHANGELOG.md:74  [md-link] ../../openspec/project.md
+    - Синхронизированы [`.cursor/rules/architect-gate.mdc`](../rules/architect-gate.mdc), [`.cursor/skills/1c-agent-patterns/SKILL.md`](../skills/1c-agent-patterns/SKILL.md), [`openspec/project.md`](../..
+.cursor/docs/agents-CHANGELOG.md:89  [bare] openspec/project
+    ### Changed (onec-code-reviewer, bsl-antipatterns, openspec/project)
+.cursor/docs/agents-CHANGELOG.md:99  [backtick] onec-code-reviewer.md
+    - `onec-code-reviewer.md`: чеклист из 3 пунктов у строки AP-001 в category 10
+.cursor/docs/architect-report-schema.md:3  [backtick] _manifest.yaml
+    Single source of truth для YAML front-matter отчётов архитектора и `_manifest.yaml`.
+.cursor/docs/bsl-comment-formats-project.md:5  [md-link] ../../openspec/project.md
+    **SSOT значений (project):** [openspec/project.md](../../openspec/project.md) — `defaultDeveloper`, `cfMarkerPrefix`, строки **Whitelist предрелиза** и **Обязательный контроль**.
+.cursor/docs/casebooks/README.md:5  [backtick] 1c-standards-navigator.md
+    **Не** смешивать с вендорским `.cursor/docs/standard/std-*` / `1c-standards-navigator.md` (D2). Без MCP как обязательного пути.
+.cursor/docs/casebooks/async-methods.md:11  [backtick] std-09-forms-ui.md
+    Authoritative reference: this casebook + router `.cursor/docs/1c-coding-standards.md` → `.cursor/docs/standard/std-07-client-server.md` / `std-09-forms-ui.md`. This file gives the practical patterns a
+.cursor/docs/casebooks/dcs-design.md:107  [backtick] logging-strategy.md
+    - Logging follows `logging-strategy.md §3-§5`: dotted event name (`Отчет.<Имя>.Ошибка`), structured `Данные = Структура`, `ПодробноеПредставлениеОшибки` (not `КраткоеПредставлениеОшибки`), and re-rais
+.cursor/docs/casebooks/form-module-notes.md:94  [backtick] module-structure.md
+    The 5-region template for form modules — `module-structure.md → Form Module`; all 5 regions are mandatory even when empty.
+.cursor/docs/casebooks/locks-and-transactions.md:64  [backtick] logging-strategy.md
+    The structured payload (`Данные = Структура`) and the dotted event name follow `logging-strategy.md §3-§5`; never log error context as a single concatenated string.
+.cursor/docs/casebooks/locks-and-transactions.md:69  [backtick] logging-strategy.md
+    - **Diagnose, do not swallow.** Log the error and `ВызватьИсключение` — see `logging-strategy.md §5 → "Error / exception logging"`.
+.cursor/docs/casebooks/locks-and-transactions.md:114  [backtick] memory.md
+    Establish a canonical ordering of locked tables and document it in `memory.md` as a project-wide rule. Example for a typical sales-and-warehouse configuration:
+.cursor/docs/casebooks/locks-and-transactions.md:208  [backtick] systematic-debugging.md
+    See `systematic-debugging.md` for the surrounding methodology — locks must be diagnosed in the Reproduce → Hypothesize → Experiment → Fix order, not by guess-and-retry.
+.cursor/docs/casebooks/locks-and-transactions.md:218  [backtick] systematic-debugging.md
+    | Systematic debugging of lock incidents | `systematic-debugging.md` |
+.cursor/docs/casebooks/logging-strategy.md:2  [backtick] std-06-code-modules.md
+    description: Positive logging strategy for 1C — when to write to the event log, which severity levels and category names to use, structured payload via `ДанныеЖурналаРегистрации`, secrets / PII bans. 
+.cursor/docs/casebooks/logging-strategy.md:20  [backtick] systematic-debugging.md
+    | Trace / debug output during development | **No** | Use the debugger / `ПоказатьЗначение`; remove before commit. See `systematic-debugging.md → Phase 4`. |
+.cursor/docs/casebooks/logging-strategy.md:54  [backtick] verification-delivery.md
+    Reserved prefix `Debug.*` — **only** during active debugging, must be removed before commit (`verification-delivery.md → Soft gate A`). Never ship `Debug.*` to production.
+.cursor/docs/casebooks/logging-strategy.md:127  [backtick] memory.md
+    `memory.md` is the canonical place to record project-specific PII classifications that affect logging — see `AGENTS.md → Project memory`.
+.cursor/docs/casebooks/logging-strategy.md:139  [backtick] bsl-antipatterns.md
+    | Ban on empty `Попытка / Исключение` | AP-008 in `bsl-antipatterns.md`; `std-06-code-modules.md` (исключения) |
+.cursor/docs/casebooks/logging-strategy.md:139  [backtick] std-06-code-modules.md
+    | Ban on empty `Попытка / Исключение` | AP-008 in `bsl-antipatterns.md`; `std-06-code-modules.md` (исключения) |
+.cursor/docs/casebooks/logging-strategy.md:140  [backtick] verification-delivery.md
+    | Removing `Debug.*` log entries before commit | `verification-delivery.md → "Soft gate A"`, `systematic-debugging.md → "Phase 4"` |
+.cursor/docs/casebooks/logging-strategy.md:140  [backtick] systematic-debugging.md
+    | Removing `Debug.*` log entries before commit | `verification-delivery.md → "Soft gate A"`, `systematic-debugging.md → "Phase 4"` |
+.cursor/docs/casebooks/logging-strategy.md:142  [backtick] integrations-add.md
+    | Integration request / response logging | `integrations-add.md` |
+.cursor/docs/delivery-integrity.md:16  [backtick] .cursor/commands/opsx-intake.md
+    10. **Отсутствие intake/debug:** нет `.cursor/commands/opsx-intake.md`, `opsx-debug.md`; нет каталогов `.cursor/skills/openspec-intake/`, `openspec-debug/`.
+.cursor/docs/delivery-integrity.md:16  [backtick] opsx-debug.md
+    10. **Отсутствие intake/debug:** нет `.cursor/commands/opsx-intake.md`, `opsx-debug.md`; нет каталогов `.cursor/skills/openspec-intake/`, `openspec-debug/`.
+.cursor/docs/faq-kit.md:16  [backtick] .gate-override.yaml
+    Это **не** пропуск архитектора: `-noapi` не заменяет `--skip-architect` и не создаёт `.gate-override.yaml`. Разбор постановки остаётся, только на модели чата.
+.cursor/docs/init-project-protocol.md:34  [backtick] _index.yaml
+    | Whitelist соблюдён | Glob по `openspec/knowledge/` | Только `<domain>/`, `_archive/`, служебные `_index.yaml` / `_taxonomy.yaml` / `_taxonomy.template.yaml` / `README.md` (см. `.cursor/rules/knowled
+.cursor/docs/init-project-protocol.md:34  [backtick] _taxonomy.yaml
+    | Whitelist соблюдён | Glob по `openspec/knowledge/` | Только `<domain>/`, `_archive/`, служебные `_index.yaml` / `_taxonomy.yaml` / `_taxonomy.template.yaml` / `README.md` (см. `.cursor/rules/knowled
+.cursor/docs/init-project-protocol.md:34  [backtick] _taxonomy.template.yaml
+    | Whitelist соблюдён | Glob по `openspec/knowledge/` | Только `<domain>/`, `_archive/`, служебные `_index.yaml` / `_taxonomy.yaml` / `_taxonomy.template.yaml` / `README.md` (см. `.cursor/rules/knowled
+.cursor/docs/init-project-protocol.md:65  [backtick] _index.yaml
+    | `openspec/` | Агент создаёт сам: `openspec/`, `openspec/changes/`, `openspec/changes/_template/`, `openspec/specs/`, `openspec/docs/`, `openspec/adrs/`, `openspec/knowledge/` (+ `_archive/` с `.gitk
+.cursor/docs/init-project-protocol.md:74  [backtick] _index.yaml
+    | Нет `_index.yaml` или невалиден (не парсится / нет `version: 1` / нет `facts:`) | Если файл есть, но невалиден — сделать backup в `temp/backups/_index-<timestamp>.yaml`. Затем создать/перезаписать м
+.cursor/docs/init-project-protocol.md:77  [backtick] _taxonomy.yaml
+    | Нет `_taxonomy.yaml` | Если Phase 5 будет выполнена — оставить (сгенерируется в Phase 5 шаг 6). Если Phase 5 пропускается (по решению пользователя или при повторном запуске с уже существующей `archi
+.cursor/docs/init-project-protocol.md:77  [backtick] architecture.md
+    | Нет `_taxonomy.yaml` | Если Phase 5 будет выполнена — оставить (сгенерируется в Phase 5 шаг 6). Если Phase 5 пропускается (по решению пользователя или при повторном запуске с уже существующей `archi
+.cursor/docs/init-project-protocol.md:103  [backtick] docs/<файл>
+    > Нашёл проектную документацию: `docs/<файл>`. Хотите использовать её как основу? Я извлеку информацию и предложу вам подтвердить/скорректировать.
+.cursor/docs/init-project-protocol.md:128  [backtick] project.md
+    2. Оценить секции `project.md`. Для **типовых** секций (Продукт, Назначение, Область и т.д.) — по критериям:
+.cursor/docs/init-project-protocol.md:375  [backtick] project.md
+    Секцию «Соглашения» адаптировать под технологию проекта (1С, TypeScript и т.п.). Секцию «Форматы и соглашения по комментариям BSL» заполнять из ответов **Блока 7** (только overlay-таблицы; MECHANISM —
+.cursor/docs/init-project-protocol.md:392  [backtick] project.md
+    1. Read `.cursor/templates/project-overlay.template.md` и текущий `project.md`.
+.cursor/docs/init-project-protocol.md:439  [backtick] project.md
+    1. **Вход:** карта расширений и границ доменов из выхода `onec-code-architect` (и при необходимости `openspec/specs/architecture.md`, `project.md`).
+.cursor/docs/init-project-protocol.md:441  [backtick] _taxonomy.yaml
+    - Сравнить набор расширений в `src/*/cfe/*` с `domains[*].source` в текущем `_taxonomy.yaml`.
+.cursor/docs/init-project-protocol.md:444  [backtick] _taxonomy.yaml
+    3. **Если файла нет — автогенерация draft `_taxonomy.yaml`:** по одному `domain` на каждое расширение из `src/*/cfe/*` с корректным `source`; `subdomains` — из подсистем / ключевых общих модулей (эври
+.cursor/docs/init-project-protocol.md:447  [backtick] architecture.md
+    **При повторном запуске /init-project:** если `openspec/specs/architecture.md` уже существует — Phase 5 **предложить** обновить (если project.md изменился) или пропустить. Не пересоздавать автоматичес
+.cursor/docs/init-project-protocol.md:457  [backtick] _taxonomy.yaml
+    > KB не сможет принимать факты без таксономии. Запустите `/opsx:knowledge-init` отдельно, чтобы сгенерировать `_taxonomy.yaml`. До этого шаги archive 5.5 и `/opsx:knowledge-audit --from-archive` будут
+.cursor/docs/kit-template-workflow.md:26  [backtick] openspec/changes/<имя>
+    2. **`main`** — поставка шаблона: `.cursor/**`, `AGENTS.md`, `README.md`, `openspec/specs/`, `openspec/adrs/`, `openspec/changes/_template`. Без рабочих папок `openspec/changes/<имя>` и без `openspec/
+.cursor/docs/marker-canon.md:7  [md-link] ../../openspec/project.md
+    - **[openspec/project.md](../../openspec/project.md)** — VALUE (`defaultDeveloper`, `cfMarkerPrefix`, пути) и project overlay (строки Whitelist предрелиза, расширения списков).
+.cursor/docs/marker-layers-guide.md:6  [md-link] ../../openspec/project.md
+    **SSOT значений проекта:** [openspec/project.md](../../openspec/project.md) (`defaultDeveloper`, `cfMarkerPrefix`, строки Whitelist).
+.cursor/docs/marker-layers-guide.md:34  [md-link] ../../openspec/project.md
+    **Project (значения):** Read [openspec/project.md](../../openspec/project.md):
+.cursor/docs/onec-infrastructure.md:27  [backtick] docs/onec-dev-container.md
+    - **Документация:** `docs/onec-dev-container.md`
+.cursor/docs/opsx-output-style.md:156  [backtick] decision-block.md
+    8. **Канон вопроса из rules/skills:** если оркестратор копирует «Формулировку вопроса (чат)» — варианты на русском (ярлыки); enum/`artifact_mode` только в mapping в артефакт. Англ-метка как заголовок 
+.cursor/docs/opsx-output-style.md:242  [backtick] brief.md
+    | Метаданные маршрута (`target:`, `prev:`, `Шаг 1 — детали для агента`) | **Полный запрет в чате.** Эти данные живут только в `brief.md`. |
+.cursor/docs/opsx-output-style.md:292  [backtick] brief-card.md
+    | **B3** | `/opsx:explore`; сырой вход после Readiness Check | карточка explore (см. `brief-card.md`) | **Вопрос** + «Подтвердить?» |
+.cursor/docs/opsx-output-style.md:316  [backtick] brief-card.md
+    Запрещённые подписи: `Что понял`, `Моё понимание`, `Как буду искать`, `Бриф для исследования` — см. `brief-card.md`.
+.cursor/docs/opsx-output-style.md:388  [backtick] code-map.md
+    | `final` | Одна строка: работы завершены; **следующий шаг** `/opsx:archive <name>` (без цепочки «сначала verify»); при BSL за change — опционально `/opsx:explain` по `code-map.md` (ниже archive/verif
+.cursor/docs/opsx-output-style.md:425  [backtick] code-map.md
+    | **Файл** `code-map.md` | заказчик, ревьювер, архив | **сначала** русское предложение «что изменилось и зачем», **потом** markdown-link + `:строки`; ID задачи `S<N>.<M>` обязателен |
+.cursor/docs/opsx-output-style.md:432  [backtick] code-map.md
+    | **Файл `code-map.md`** | компактно: markdown-link `` [`path`](path):start-end `` |
+.cursor/docs/opsx-output-style.md:441  [backtick] pause-wait-file.md
+    0. **Что создать в Конфигураторе** (только `pause-wait`). Полный рецепт: имена объектов, типы, значения заполнения, флаги модуля, поля формы, строки макета, доп.реквизиты в ИБ. Заголовок раздела **фик
+.cursor/docs/opsx-output-style.md:537  [backtick] style-checklist.md
+    **Файл** `temp/overview-YYYY-MM-DD-<slug>.md` — полный связный текст по шаблону `.cursor/skills/openspec-overview/templates/customer-overview.md` (стиль — `style-checklist.md`, структура — `fixtures/g
+.cursor/docs/opsx-output-style.md:634  [backtick] brief-card.md
+    7. **KB не в entry-брифе.** Список KB-фактов в чат-брифе explore/extend **запрещён** (как `brief-card.md`: KB-discovery — внутреннее, в промпты агентов после подтверждения). Не требовать слот «KB в sc
+.cursor/docs/opsx-output-style.md:638  [backtick] chat-summary.md
+    11. **Verify — «Суть» и режим.** В **файле** отчёта `/opsx:verify` тело `## Executive Summary` — только **`templates/executive-summary.md`** («Суть», опционально «Что в работе»). Режим и вердикт — тол
+.cursor/docs/opsx-output-style.md:642  [backtick] brief-card.md
+    15. **Adaptive-by-default (T-BRIEF).** Выбран **минимальный достаточный** уровень B0–B3 / B-explain (классификатор §5.1). Форма — карточка `brief-card.md`; для explore B3 — обязательны **Симптом**, **
+.cursor/docs/review-guide.md:30  [md-link] ../../openspec/project.md
+    Имя расширения — папка cfe в `src/` (см. [`openspec/project.md`](../../openspec/project.md)).
+.cursor/docs/review-guide.md:68  [backtick] project.md
+    Whitelist и mandatory control из `project.md` проверяются в обоих режимах и в apply-reviewer.
+.cursor/docs/review-guide.md:92  [md-link] ../../openspec/project.md
+    - Маркеры BSL: [`openspec/project.md`](../../openspec/project.md), [bsl-comment-formats-project.md](bsl-comment-formats-project.md)
+.cursor/docs/templates/decision-block.md:115  [backtick] chat-summary.md
+    - **verify** — детализация и режимы: `.cursor/skills/openspec-verify-change/templates/card-decision.md` (ссылается сюда), `chat-summary.md` 3a-decision, `verify-user-communication.mdc`.
+.cursor/docs/ux-acceptance-isolated-chat.md:29  [backtick] brief-card.md
+    | **F** | `/opsx:explore` | симптом | бриф **B3** карточка (`brief-card.md`: **Симптом**, **Маршрут** или **Варианты**, **Вопрос**, Подтвердить?); финал — блок `## Постановка ЗНИ` или один вопрос |
+.cursor/rules/1c-agent-delegation.mdc:141  [backtick] onec-code-writer.md
+    | Self-review агента writer (внутренний) | **2** прохода | `onec-code-writer.md` |
+.cursor/rules/1c-no-metadata-creation.mdc:44  [backtick] 1c-forms/compile|edit
+    Правка **уже существующего** в выгрузке `Form.xml` / `Template.xml` допускается **только** при `artifact_mode: assisted` и через skill (`1c-forms/compile|edit`, `1c-mxl/compile`) — см. `forms-mxl-mode
+.cursor/rules/1c-writer-pipeline.mdc:107  [backtick] reviewer-checks.md
+    - Legacy-идентификатор с латиницей в изменённой процедуре **обязан** попасть в таблицу — ревьювер решает confirm/dismiss (см. Phase 1c `reviewer-checks.md`).
+.cursor/rules/1c-writer-pipeline.mdc:151  [backtick] reviewer-checks.md
+    **Анти-паттерн (HALT):** оркестратор поставляет в evidence **факт** (`File:Line`, `Match`, `Class`, `Scope`), не вердикт и не подсказку к dismiss. Запрещено писать в колонке `Suggested` или в соседних
+.cursor/rules/adr-format.mdc:13  [backtick] ADR-NNNN-short-title.md
+    - **Файл:** `ADR-NNNN-short-title.md` (NNNN — четырёхзначный номер, short-title — kebab-case)
+.cursor/rules/architect-gate.mdc:25  [backtick] .gate-override.yaml
+    - **Петля приёмки (acceptance loop):** для среза `S<N>` с `S<N>.accept = [ ]` метрика `max(AcceptLoop, PatchRounds) >= acceptance_loop_max` (SSOT — `.cursor/rules/vertical-slices.mdc` § ДЕТЕКТОР ПЕТЛИ
+.cursor/rules/architect-gate.mdc:73  [backtick] _taxonomy.yaml
+    3. Fallback-фильтр: только если primary пусто — `domain` ∈ {scope domains, выведенные из путей через `_taxonomy.yaml`}; внутри domain ранжировать по совпадению токенов из файлов/запроса с `title` и `a
+.cursor/rules/architect-gate.mdc:114  [backtick] .gate-override.yaml
+    | **new** (Design Gate) | blocking | Без опции пропуска. Escape только через флаг `--skip-architect <причина>`, оставляющий явный аудит-след `.gate-override.yaml`. |
+.cursor/rules/architect-gate.mdc:151  [backtick] .gate-override.yaml
+    3. Пользователь явно отклонил архитектора через флаг `--skip-architect` (задокументировано в `.gate-override.yaml`) или через `Architect Gate: declined: <reason>` в поле «Architect / verify» блока «По
+.cursor/rules/bsl-antipatterns.mdc:58  [backtick] .md
+    - AP-040: НЕ ссылаться в `//` на артефакты OpenSpec (kebab-case имена change, `reports/…`, `openspec/…`, `.md` в JSDoc); whitelist-маркеры (baseline + project overlay) — не AP-040 delete; process-only
+.cursor/rules/capture-to-project.mdc:12  [backtick] project.md
+    При **первом указании ФИО** в `/opsx:new` (когда в `project.md` секция «Разработчик по умолчанию» пуста или с плейсхолдером) — предложить записать ФИО в `project.md` по протоколу ниже (зеркало → подтв
+.cursor/rules/capture-to-project.mdc:19  [backtick] project.md
+    - При необходимости создать скелет OpenSpec по **Phase 0** `.cursor/commands/init-project.md` (`openspec/`, `openspec/changes/`, `openspec/changes/_template/`, `openspec/specs/`, `openspec/docs/`, `op
+.cursor/rules/capture-to-project.mdc:20  [backtick] project.md
+    - Взять **полный шаблон структуры** `project.md` из **Phase 4** того же файла `init-project.md` (блок markdown с `# OpenSpec:` … overlay-таблицы BSL).
+.cursor/rules/capture-to-project.mdc:20  [backtick] init-project.md
+    - Взять **полный шаблон структуры** `project.md` из **Phase 4** того же файла `init-project.md` (блок markdown с `# OpenSpec:` … overlay-таблицы BSL).
+.cursor/rules/capture-to-project.mdc:27  [backtick] project.md
+    - при создании с нуля: **полный черновик** `project.md` (каркас Phase 4 + договорённость), чтобы было видно целый файл.
+.cursor/rules/capture-to-project.mdc:34  [backtick] project.md
+    - Не дублировать содержимое, уже присутствующее в `project.md`.
+.cursor/rules/chat-output-budget-full.mdc:32  [backtick] brief-card.md
+    | **Entry-бриф extend** | **B1:** **Изменение** (+ опц. **Затронутое**) + `Подтвердить?`; **B2:** + **Почему выбор** + **Варианты** нумерованно + ответ по номеру (голый «да» на B2 не принимается). Бюд
+.cursor/rules/chat-output-budget-full.mdc:75  [backtick] pause-wait-file.md
+    - **pause-wait (apply, Конфигуратор)** → `.cursor/skills/openspec-apply-change/templates/pause-wait-chat.md` (чат) и `pause-wait-file.md` (файл); слот бюджета — §1d.
+.cursor/rules/chat-output-budget-full.mdc:85  [backtick] brief-card.md
+    4. **Лимит и иерархия (§1).** Лимит строк сценария соблюдён; для **entry-брифов** — бюджет содержания `brief-card.md` (слоты, не счёт строк); при конфликте с шаблоном/примером побеждает лимит — **кром
+.cursor/rules/chat-output-budget-full.mdc:89  [backtick] pause-wait-chat.md
+    8. **Decision-block (любая команда, HARD).** Если в сообщении есть развилка/блокер **с выбором A/B** — она собрана по `.cursor/docs/templates/decision-block.md`: блок «Что решить» + триада **inline**,
+.cursor/rules/chat-output-budget.mdc:32  [backtick] brief-card.md
+    | Entry-бриф extend/new | Карточка B0–B2 по `brief-card.md` |
+.cursor/rules/chat-output-budget.mdc:64  [backtick] decision-block.md
+    Голые коды `OQ\d`, `D\d`, `S\d.\d`, `interim` — только с расшифровкой в той же строке. Развилка — по `decision-block.md`. Словарь: `.cursor/docs/chat-lexicon.md`. Полнота — тест понятности (§1c full),
+.cursor/rules/command-skill-gate.mdc:30  [backtick] templates/handoff-contract.md
+    - Для `openspec-new-change/SKILL.md`: если файл обрезан — Read `templates/handoff-contract.md` (и другие `templates/*.md` при появлении).
+.cursor/rules/knowledge-format.mdc:34  [backtick] _taxonomy.yaml
+    - `<domain>/` — один подкаталог на каждый домен из `_taxonomy.yaml`. Внутри — `KB-NNNN-slug.md` или вложенные `<subdomain>/KB-NNNN-slug.md`.
+.cursor/rules/knowledge-format.mdc:34  [backtick] KB-NNNN-slug.md
+    - `<domain>/` — один подкаталог на каждый домен из `_taxonomy.yaml`. Внутри — `KB-NNNN-slug.md` или вложенные `<subdomain>/KB-NNNN-slug.md`.
+.cursor/rules/knowledge-format.mdc:34  [backtick] <subdomain>/KB-NNNN-slug.md
+    - `<domain>/` — один подкаталог на каждый домен из `_taxonomy.yaml`. Внутри — `KB-NNNN-slug.md` или вложенные `<subdomain>/KB-NNNN-slug.md`.
+.cursor/rules/knowledge-format.mdc:39  [backtick] _index.yaml
+    - `_index.yaml`
+.cursor/rules/knowledge-format.mdc:40  [backtick] _taxonomy.yaml
+    - `_taxonomy.yaml`
+.cursor/rules/knowledge-format.mdc:41  [backtick] _taxonomy.template.yaml
+    - `_taxonomy.template.yaml`
+.cursor/rules/knowledge-format.mdc:46  [backtick] .md
+    - Произвольные `.md` в корне, кроме `README.md` (любые `audit-*.md`, `report-*.md`, `notes-*.md` и т. п.).
+.cursor/rules/knowledge-format.mdc:271  [backtick] _index.yaml
+    4. При `auto-repairable` audit обновляет `fingerprint.body-head`, при необходимости минимально правит `## Факт`, выставляет `status: active`, обновляет `verified-at`, `verified-by: audit`, `_index.yam
+.cursor/rules/knowledge-format.mdc:282  [backtick] _index.yaml
+    | `_index.yaml` рассинхронизирован с `.md` | Warning + предложение `/opsx:knowledge-audit --reindex` |
+.cursor/rules/knowledge-format.mdc:282  [backtick] .md
+    | `_index.yaml` рассинхронизирован с `.md` | Warning + предложение `/opsx:knowledge-audit --reindex` |
+.cursor/rules/knowledge-format.mdc:283  [backtick] _index.yaml
+    | Пустой `_index.yaml` | Discovery возвращает пустой список, не ошибка |
+.cursor/rules/knowledge-format.mdc:337  [backtick] _index.yaml
+    ## ИНДЕКС `_index.yaml`
+.cursor/rules/knowledge-format.mdc:359  [backtick] .md
+    - Запись атомарная: сначала `.md`, затем полная перезапись `_index.yaml` из состояния каталога.
+.cursor/rules/knowledge-format.mdc:359  [backtick] _index.yaml
+    - Запись атомарная: сначала `.md`, затем полная перезапись `_index.yaml` из состояния каталога.
+.cursor/rules/knowledge-format.mdc:360  [backtick] .md
+    - Fallback: `/opsx:knowledge-audit --reindex` пересобирает индекс из `.md`-файлов (файлы — источник истины).
+.cursor/rules/knowledge-format.mdc:366  [backtick] .md
+    1. Read `openspec/knowledge/_index.yaml` и при необходимости front-matter `.md` для поля `invariant`.
+.cursor/rules/knowledge-format.mdc:368  [backtick] .md
+    3. **Invariant-first:** все факты с `invariant: true` (в индексе или в `.md`), у которых `anchor-paths` пересекается с {scope files}, собрать в список **ИНВАРИАНТ** (макс. 5).
+.cursor/rules/knowledge-format.mdc:370  [backtick] _taxonomy.yaml
+    5. Secondary-фильтр (`domain`): выполнять только если primary пусто И в scope есть путь под зарегистрированным `domain.source` из `_taxonomy.yaml`. Выбрать факты этого domain, затем ранжировать по сов
+.cursor/rules/knowledge-format.mdc:373  [backtick] .md
+    8. Read выбранные `.md`-файлы.
+.cursor/rules/knowledge-format.mdc:401  [backtick] _index.yaml
+    **Пишут в KB и `_index.yaml`:**
+.cursor/rules/knowledge-format.mdc:437  [backtick] _index.yaml
+    Счётчики в YAML front-matter KB + в `_index.yaml`:
+.cursor/rules/model-selection.mdc:77  [backtick] .gate-override.yaml
+    `-noapi` не отменяет архитектурный разбор постановки и **не** создаёт `.gate-override.yaml`. Разбор остаётся в протоколе и идёт на модели чата. `--skip-architect` — отдельный флаг `/opsx:new`.
+.cursor/rules/precedent-regression-gate.mdc:72  [bare] openspec/adrs/ADR-
+    5. **Load-Bearing ADR:** `Glob openspec/adrs/ADR-*.md`; если текущий change/design упоминает `Supersedes` ADR со статусом Load-Bearing — проверить наличие `## Blast Radius`.
+.cursor/rules/sdd-workflow.mdc:21  [backtick] brief-card.md
+    | **Исследование** | `/opsx:explore` | Карточный бриф B3 (`brief-card.md`) → ≤3 `Task` (trace + explorer) → превью + **Итог / Вердикт / Дальше** в чате → финал bug: блок `## Постановка ЗНИ` **в чате**
+.cursor/rules/task-readability.mdc:97  [backtick] architect.md
+    - Шаблоны промптов: `.cursor/skills/1c-agent-patterns/SKILL.md` (навигатор) + ролевые файлы (`architect.md`, `writer.md`, ...)
+.cursor/rules/task-readability.mdc:97  [backtick] writer.md
+    - Шаблоны промптов: `.cursor/skills/1c-agent-patterns/SKILL.md` (навигатор) + ролевые файлы (`architect.md`, `writer.md`, ...)
+.cursor/rules/verify-user-communication.mdc:39  [backtick] verdict-card.md
+    - **Чат** — `.cursor/skills/openspec-verify-change/templates/chat-summary.md` + `verdict-card.md` (тот же каталог).
+.cursor/rules/verify-user-communication.mdc:50  [backtick] chat-summary.md
+    - Repair после attempt 2 → вариант 4 `chat-summary.md`.
+.cursor/rules/vertical-slices.mdc:324  [backtick] .gate-override.yaml
+    **Закрытие петли (общее для verify и extend — даёт де-дубль между ними):** существует `reports/architecture-loop-redesign-YYYY-MM-DD.md`, датированный **позже** последней записи `awaiting-acceptance` 
+.cursor/skills/1c-agent-patterns/SKILL.md:29  [md-link] sidecar.md
+    **Sidecar-промпты Task:** [sidecar.md](sidecar.md) — explorer-impact / explorer-patterns / worker-bounded-edit / reviewer-diff-first (без MUST плотности — S8).
+.cursor/skills/1c-agent-patterns/SKILL.md:37  [md-link] architect.md
+    | `onec-code-architect` | [architect.md](architect.md) | проектирование, ревью плана, глубокий анализ, scope-coherence audit, task readiness review (verify Layer 5), slice transition review (slice-gat
+.cursor/skills/1c-agent-patterns/SKILL.md:38  [md-link] writer.md
+    | `onec-code-writer` | [writer.md](writer.md) | реализация задачи, bug fix, review fix |
+.cursor/skills/1c-agent-patterns/SKILL.md:39  [md-link] reviewer.md
+    | `onec-code-reviewer` | [reviewer.md](reviewer.md) | ревью кода, ревью bug fix |
+.cursor/skills/1c-agent-patterns/SKILL.md:40  [md-link] explorer.md
+    | `onec-code-explorer` | [explorer.md](explorer.md) | исследование кода, верификация гипотез trace-analyst, contract resolution (deep) |
+.cursor/skills/1c-agent-patterns/SKILL.md:41  [md-link] quality-controller.md
+    | `openspec-quality-controller` | [quality-controller.md](quality-controller.md) | slice coherence review (verify Layer 2) |
+.cursor/skills/1c-agent-patterns/SKILL.md:42  [md-link] simplifier.md
+    | `onec-code-simplifier` | [simplifier.md](simplifier.md) | рефакторинг (REFACTOR-замечания) |
+.cursor/skills/1c-agent-patterns/SKILL.md:140  [backtick] onec-code-writer.md
+    при ЛЮБОМ контракте (fixed и dynamic). См. G14 в `onec-code-writer.md` / AP-004 в `bsl-antipatterns.md`.
+.cursor/skills/1c-agent-patterns/SKILL.md:140  [backtick] bsl-antipatterns.md
+    при ЛЮБОМ контракте (fixed и dynamic). См. G14 в `onec-code-writer.md` / AP-004 в `bsl-antipatterns.md`.
+.cursor/skills/1c-extensions/SKILL.md:10  [backtick] .cursor/docs/platform/Глава
+    Глубокий платформенный референс (терминология, заимствованные объекты, расширение данных): `.cursor/docs/platform/Глава 30. Расширение конфигурации.md`.
+.cursor/skills/1c-forms/SKILL.md:8  [backtick] .cursor/docs/platform/Глава
+    Платформенный референс: `.cursor/docs/platform/Глава 7. Формы.md` (Grep+Read, не целиком).
+.cursor/skills/1c-query-optimization/SKILL.md:12  [backtick] .cursor/docs/platform/Глава
+    Платформенный референс по запросам: `.cursor/docs/platform/Глава 8. Работа с запросами.md`.
+.cursor/skills/1c-vendor-standards/SKILL.md:3  [bare] .cursor/docs/standard/std-
+    description: "Конспект вендорских стандартов 1С (v8std) для ИИ-агентов. Чеклисты по доменам для architect и reviewer. Подробности — Read доменных файлов в .cursor/docs/standard/std-*.md."
+.cursor/skills/context-strategy/SKILL.md:21  [backtick] .md
+    3. Определить тип: код (`.bsl`), данные (`.xml`, `.json`, `.csv`), отчёт (`.htm`, `.html`), документ (`.md`).
+.cursor/skills/openspec-apply-change/SKILL.md:341  [backtick] code-map.md
+    - **`## Explain scope` (SSOT при BSL в срезе):** в конце секции среза (или отдельным блоком в конце `code-map.md` для среза) — обязательная секция для `/opsx:explain`. Канон apply-источника для `@` = 
+.cursor/skills/openspec-apply-change/SKILL.md:509  [backtick] code-map.md
+    - `### Карта правок (перед тестом)` — **только вариант `acceptance`**: до 5 пунктов (проза + citation); в файле handoff — полный список секции среза из `code-map.md`. Язык — §5.2 «Язык карты».
+.cursor/skills/openspec-apply-change/SKILL.md:610  [backtick] code-map.md
+    - **Explain after BSL:** при acceptance/final с правками `.bsl` — MAY предложить `/opsx:explain` по `code-map.md` (секция `## Explain scope`); не предлагать по умолчанию на pause / только ARCH; не выт
+.cursor/skills/openspec-apply-change/SKILL.md:623  [backtick] 1c-forms/compile|edit
+    - **Form XML / Configurator tasks:** Read Mode Gate (`forms-mxl-mode-gate.mdc`). Resolve per-form `form_mode` / `forms:` (+ legacy `artifact_mode`). Empty/`n/a` for in-scope form without legacy → STOP
+.cursor/skills/openspec-apply-change/templates/pause-wait-chat.md:5  [md-link] pause-wait-file.md
+    Файл рецепта: [pause-wait-file.md](pause-wait-file.md). Бюджет: `chat-output-budget.mdc` §1d. Стиль: `opsx-output-style.md` §5.2.
+.cursor/skills/openspec-apply-change/templates/pause-wait-file.md:3  [md-link] pause-wait-chat.md
+    Чат — [pause-wait-chat.md](pause-wait-chat.md). Этот файл — **рецепт** для Конфигуратора и возврата агента, не замена чата.
+.cursor/skills/openspec-archive-change/SKILL.md:240  [backtick] KB-NNNN-slug.md
+    - `yes` → сгенерировать `KB-NNNN-slug.md` + атомарно обновить `_index.yaml` → state = `Saved N (KB-NNNN, ...)`.
+.cursor/skills/openspec-archive-change/SKILL.md:240  [backtick] _index.yaml
+    - `yes` → сгенерировать `KB-NNNN-slug.md` + атомарно обновить `_index.yaml` → state = `Saved N (KB-NNNN, ...)`.
+.cursor/skills/openspec-archive-change/SKILL.md:260  [backtick] openspec/adrs/ADR-NNNN.md
+    **Делегирование:** вызвать `onec-code-architect` с `mode=invariant-extraction`. Архитектор классифицирует каждый кандидат: **Load-bearing ADR** (создать/обновить `openspec/adrs/ADR-NNNN.md` по `.curso
+.cursor/skills/openspec-archive-change/SKILL.md:262  [backtick] _index.yaml
+    **Запись:** новые ADR — по формату adr-format; KB — атомарное обновление `_index.yaml` + файл факта. Если пользователь отклонил сохранение — **silent** в чат (non-event); archive не блокировать.
+.cursor/skills/openspec-archive-change/SKILL.md:321  [backtick] .openspec.yaml
+    - Preserve `.openspec.yaml` when moving to archive (it moves with the directory)
+.cursor/skills/openspec-explain/SKILL.md:36  [backtick] exit-card.md
+    | «не хочу решать на каждом шаге» | По умолчанию хвост карточки — только «дальше». **Не** спрашивать A/B, пока пользователь сам не попросил выбирать по ходу. Анализ проблем — на выходе по вопросу (`ex
+.cursor/skills/openspec-explain/SKILL.md:74  [backtick] entry-brief.md
+    **HALT в брифе:** слоты Цель / Источник / Решено когда; чеклист протокола skill; сырой dump модулей / коды точек (`pav…`, Mxx) **как замена Сценарию**; «соберу карту» в хвосте. Полный маркированный сп
+.cursor/skills/openspec-explain/SKILL.md:78  [backtick] code-map.md
+    Когда пользователь вызывает explain с `@` на `review-*.md` / `code-map.md` / `handoff-acceptance-*` (или явно «по ревью» / «по срезу»):
+.cursor/skills/openspec-explain/SKILL.md:122  [backtick] point-card.md
+    - «давай выбирать на каждой точке» (и аналоги) → режим по ходу до конца прохода: для класса **решение** допускается A/B (см. `point-card.md`).
+.cursor/skills/openspec-explain/templates/entry-brief.md:34  [backtick] brief-card.md
+    | Имена агентов, жаргон движка | как в `brief-card.md` |
+.cursor/skills/openspec-explain/templates/exit-card.md:4  [md-link] explain-report.md
+    Журнал файла: [`explain-report.md`](explain-report.md).
+.cursor/skills/openspec-explain/templates/exit-card.md:10  [md-link] explain-report.md
+    На выходе (после шага A; при шаге B — перезаписать с «Заметки») — **`Write`** файла по [`explain-report.md`](explain-report.md):
+.cursor/skills/openspec-explore/SKILL.md:122  [backtick] brief.md
+    После текстового подтверждения пользователя — **никаких файлов состояния** (`brief.md`, `todo.md`, `step-*.md`). Якорь «Решено, когда» живёт в сообщениях чата; при уточнении — пересогласуй вслух.
+.cursor/skills/openspec-explore/SKILL.md:122  [backtick] todo.md
+    После текстового подтверждения пользователя — **никаких файлов состояния** (`brief.md`, `todo.md`, `step-*.md`). Якорь «Решено, когда» живёт в сообщениях чата; при уточнении — пересогласуй вслух.
+.cursor/skills/openspec-explore/SKILL.md:331  [backtick] brief-card.md
+    1. Тело брифа B3 **напечатано** в ответе; форма по `brief-card.md`?
+.cursor/skills/openspec-extend-change/SKILL.md:67  [backtick] _taxonomy.yaml
+    5a. **KB Discovery (internal):** прочитать `openspec/knowledge/_index.yaml` и при необходимости `_taxonomy.yaml` и выбранные KB `.md` — по алгоритму Entry Protocol шаг 1.6 (KB Discovery) `.cursor/skil
+.cursor/skills/openspec-extend-change/SKILL.md:67  [backtick] .md
+    5a. **KB Discovery (internal):** прочитать `openspec/knowledge/_index.yaml` и при необходимости `_taxonomy.yaml` и выбранные KB `.md` — по алгоритму Entry Protocol шаг 1.6 (KB Discovery) `.cursor/skil
+.cursor/skills/openspec-extend-change/SKILL.md:72  [backtick] project.md
+    Разрешённые действия до брифа: чтение этого скилла, `openspec list --json`, `openspec instructions apply --json`, чтение `project.md`, чтение артефактов change, чтение явно переданных markdown/text/so
+.cursor/skills/openspec-extend-change/SKILL.md:72  [backtick] _taxonomy.yaml
+    Разрешённые действия до брифа: чтение этого скилла, `openspec list --json`, `openspec instructions apply --json`, чтение `project.md`, чтение артефактов change, чтение явно переданных markdown/text/so
+.cursor/skills/openspec-extend-change/SKILL.md:72  [backtick] .md
+    Разрешённые действия до брифа: чтение этого скилла, `openspec list --json`, `openspec instructions apply --json`, чтение `project.md`, чтение артефактов change, чтение явно переданных markdown/text/so
+.cursor/skills/openspec-extend-change/SKILL.md:85  [backtick] brief-card.md
+    Бюджет содержания — `brief-card.md` (≤6 слотов, ~30 сек).
+.cursor/skills/openspec-extend-change/SKILL.md:123  [backtick] brief-card.md
+    Self-check перед выводом: уровень B1/B2 по классификатору; слоты по `brief-card.md`; UX-поля без `S<N>.T<M>` / `D<N>`; блок **«Соответствие исходному scope»** и **План после подтверждения** заполнены 
+.cursor/skills/openspec-extend-change/SKILL.md:250  [backtick] .gate-override.yaml
+    2. Триггер 3 срабатывает, если для какого-либо `S<N>`: `max(AcceptLoop, PatchRounds) >= acceptance_loop_max`, **и** нет `reports/architecture-loop-redesign-*.md` новее последней `awaiting-acceptance` 
+.cursor/skills/openspec-extend-change/SKILL.md:258  [backtick] .gate-override.yaml
+    5. Через decision-card (по `.cursor/docs/templates/decision-block.md`) предложить: (a) принять consolidation-редизайн архитектора, (b) минимальный фикс с фиксацией риска в `debug.md`, (c) отложить раз
+.cursor/skills/openspec-extend-change/SKILL.md:306  [backtick] _taxonomy.yaml
+    - выполнить KB Discovery по `openspec/knowledge/_index.yaml` / `_taxonomy.yaml`, если файлы есть;
+.cursor/skills/openspec-knowledge-add/SKILL.md:36  [bare] openspec/changes/archive/2026-04-25-name/reports/exploration-2026-04-25.md
+    /opsx:knowledge-add openspec/changes/archive/2026-04-25-name/reports/exploration-2026-04-25.md --no-bundle
+.cursor/skills/openspec-knowledge-add/SKILL.md:47  [backtick] .md
+    - пути к `.md`, упомянутые в сообщениях ассистента текущей командной сессии;
+.cursor/skills/openspec-knowledge-add/SKILL.md:175  [backtick] _taxonomy.yaml
+    1. Подобрать `domain` по `_taxonomy.yaml`: `anchor.path` должен попадать под `domain.source`.
+.cursor/skills/openspec-knowledge-add/SKILL.md:200  [backtick] _index.yaml
+    Проверить `_index.yaml` и файлы KB (включая `_archive/`):
+.cursor/skills/openspec-knowledge-add/SKILL.md:363  [backtick] knowledge-add-report.md
+    7. Создать `knowledge-add-report.md` в bundle (если bundle был создан) со списком:
+.cursor/skills/openspec-knowledge-add/SKILL.md:371  [backtick] _index.yaml
+    Если ошибка возникла до перезаписи `_index.yaml`:
+.cursor/skills/openspec-knowledge-add/SKILL.md:375  [backtick] _index.yaml
+    - оставить старый `_index.yaml`.
+.cursor/skills/openspec-knowledge-add/SKILL.md:377  [backtick] _index.yaml
+    Если ошибка возникла после перезаписи `_index.yaml`:
+.cursor/skills/openspec-knowledge-add/SKILL.md:403  [backtick] _index.yaml
+    - обновление `_index.yaml`;
+.cursor/skills/openspec-knowledge-add/SKILL.md:428  [backtick] knowledge-add-report.md
+    - Не скрывать причины отказа: каждый skipped/blocked candidate должен быть отражён в summary или `knowledge-add-report.md` (если bundle создан).
+.cursor/skills/openspec-knowledge-audit/SKILL.md:28  [backtick] .md
+    *   `--reindex` — пересобрать `openspec/knowledge/_index.yaml` на основе `.md` файлов (файлы — источник истины).
+.cursor/skills/openspec-knowledge-audit/SKILL.md:31  [backtick] .md
+    *   `--from-archive <name>` — легализованный ретро-пилот: повторно применить протокол `openspec-archive-change` шаг 5.5 к уже **архивированной** ЗНИ (`openspec/changes/archive/<YYYY-MM-DD-name>/`). См
+.cursor/skills/openspec-knowledge-audit/SKILL.md:38  [backtick] _taxonomy.yaml
+    *   Разрешённые подкаталоги: `<domain>/` (по `_taxonomy.yaml`), `_archive/`.
+.cursor/skills/openspec-knowledge-audit/SKILL.md:39  [backtick] _index.yaml
+    *   Разрешённые файлы в корне: `_index.yaml`, `_taxonomy.yaml`, `_taxonomy.template.yaml`, `README.md`.
+.cursor/skills/openspec-knowledge-audit/SKILL.md:39  [backtick] _taxonomy.yaml
+    *   Разрешённые файлы в корне: `_index.yaml`, `_taxonomy.yaml`, `_taxonomy.template.yaml`, `README.md`.
+.cursor/skills/openspec-knowledge-audit/SKILL.md:39  [backtick] _taxonomy.template.yaml
+    *   Разрешённые файлы в корне: `_index.yaml`, `_taxonomy.yaml`, `_taxonomy.template.yaml`, `README.md`.
+.cursor/skills/openspec-knowledge-audit/SKILL.md:53  [backtick] _index.yaml
+    *   возвращает `status: active`, обновляет `verified-at`, `verified-by: audit`, синхронизирует `_index.yaml`;
+.cursor/skills/openspec-knowledge-audit/SKILL.md:78  [backtick] .md
+    1.  Найти все `.md` файлы фактов в `openspec/knowledge/` (исключая `_archive/`).
+.cursor/skills/openspec-knowledge-audit/SKILL.md:114  [backtick] _taxonomy.yaml
+    *   Для каждого: автоподбор domain/subdomain по `_taxonomy.yaml`, извлечение anchors, verify по текущему `src/`, dedup относительно `_index.yaml`, Reuse Value Test, `reuse-scenario`, `why-knowledge`, 
+.cursor/skills/openspec-knowledge-audit/SKILL.md:114  [backtick] _index.yaml
+    *   Для каждого: автоподбор domain/subdomain по `_taxonomy.yaml`, извлечение anchors, verify по текущему `src/`, dedup относительно `_index.yaml`, Reuse Value Test, `reuse-scenario`, `why-knowledge`, 
+.cursor/skills/openspec-knowledge-audit/SKILL.md:119  [backtick] KB-NNNN-slug.md
+    *   `yes` → сгенерировать `KB-NNNN-slug.md` в соответствующих доменах + атомарно перезаписать `_index.yaml`. State = `Saved N`.
+.cursor/skills/openspec-knowledge-audit/SKILL.md:119  [backtick] _index.yaml
+    *   `yes` → сгенерировать `KB-NNNN-slug.md` в соответствующих доменах + атомарно перезаписать `_index.yaml`. State = `Saved N`.
+.cursor/skills/openspec-knowledge-audit/SKILL.md:125  [backtick] _index.yaml
+    - **Writer contract:** Скилл аудита имеет право обновлять KB-файлы и `_index.yaml`.
+.cursor/skills/openspec-knowledge-init/SKILL.md:45  [backtick] _index.yaml
+    - Файл `_index.yaml` и сами файлы фактов (KB-*.md) этот скилл **не трогает**.
+.cursor/skills/openspec-knowledge-init/templates/README-template.md:26  [backtick] .md
+    - Произвольные подкаталоги и произвольные `.md` в корне `openspec/knowledge/` (whitelist — в `.cursor/rules/knowledge-format.mdc`, секция РАСПОЛОЖЕНИЕ).
+.cursor/skills/openspec-new-change/SKILL.md:313  [backtick] .gate-override.yaml
+    - **If `--skip-architect <причина>` was provided:** Создать файл `.gate-override.yaml` в корне change с содержимым:
+.cursor/skills/openspec-new-change/SKILL.md:350  [backtick] openspec-quality-controller.md
+    - Delegate to **openspec-quality-controller** (quick check — criteria 1, 3, 5, 5b, 8, 8b, 9–11 from QC), see `openspec-quality-controller.md`. **Do NOT** grep keyword lists for criterion 8 — QC semant
+.cursor/skills/openspec-overview/SKILL.md:127  [backtick] control-run.md
+    - control: путь из `control-run.md` (`temp/overview-control-88781.md`).
+.cursor/skills/openspec-verify-change/SKILL.md:88  [backtick] mtime(design.md
+    **Ось архитектуры (лаконичность, D5):** полный независимый аудит (L4 full) обязателен при **смене оси** (новый архитектурный рычаг / REJECT security·correctness / явный redesign), а **не** при каждом 
+.cursor/skills/openspec-verify-change/SKILL.md:197  [backtick] .gate-override.yaml
+    - **Override:** в корне change есть `.gate-override.yaml` с `gate: acceptance-loop` — прочитать `timestamp`: ≤7 дней → `SKIPPED-override` (одна строка в чат: «Разбор петли приёмки отложен по вашему ре
+.cursor/skills/openspec-verify-change/SKILL.md:229  [backtick] mtime(design.md
+    - `mtime(design.md) > snapshot.last_challenge_at` (design менялся со времени последнего challenge — например, после `/opsx:extend`).
+.cursor/skills/openspec-verify-change/SKILL.md:235  [backtick] mtime(design.md
+    - Триггеры не сработали (`mtime(design.md) ≤ last_challenge_at`) **и** `verify_depth ≠ incremental` → `SKIPPED-novelty`.
+.cursor/skills/openspec-verify-change/SKILL.md:236  [backtick] .gate-override.yaml
+    - В корне change есть `.gate-override.yaml` с `gate: design-challenge` — прочитать поле `timestamp`:
+.cursor/skills/openspec-verify-change/SKILL.md:280  [backtick] .gate-override.yaml
+    **Важно:** Layer 4 нельзя «обойти» прогоном `--skip-architect`, переданным в new. Этот флаг закрывает только Architect Gate из new. Layer 4 verify имеет собственный override-механизм через `.gate-over
+.cursor/skills/openspec-verify-change/SKILL.md:444  [backtick] .gate-override.yaml
+    При сбое субагента — следовать **«Целостность цепочки Task»** в `.cursor/rules/model-selection.mdc`. Не подменять отчёт собственным текстом до исчерпания цепочки. Layer 4 при полностью исчерпанной цеп
+.cursor/skills/openspec-verify-change/templates/card-decision.md:3  [backtick] chat-summary.md
+    > **SSOT контракта развилки** — `.cursor/docs/templates/decision-block.md` (единый формат «Что решить» + триада + запрет голых internal-ID для всех команд). Этот файл — **verify-специфика**: связь с `
+.cursor/skills/openspec-verify-change/templates/chat-summary-example-hash-duplicate-check.md:4  [md-link] chat-summary.md
+    > **SSOT чата verify:** [`chat-summary.md`](chat-summary.md) (варианты quiet / informative / 3a-decision).
+.cursor/skills/openspec-verify-change/templates/chat-summary-example-hash-duplicate-check.md:5  [md-link] card-decision.md
+    > **SSOT развилки:** [`card-decision.md`](card-decision.md) + `.cursor/docs/templates/decision-block.md`.
+.cursor/skills/openspec-verify-change/templates/chat-summary-example-hash-duplicate-check.md:6  [backtick] chat-summary.md
+    > Не копировать этот файл в чат как эталон формы — CTA и структура могли устареть относительно `chat-summary.md`.
+.cursor/skills/openspec-verify-change/templates/report-header.md:68  [backtick] .gate-override.yaml
+    - **Layer 2.5 (Loop Detection):** `PASS` (петли нет / уже разобрана редизайном), `acceptance-loop-detected` (петля → NO-GO, запущен `deep-analysis`), `SKIPPED-override` (действующий `.gate-override.ya
+.cursor/skills/openspec-verify-change/templates/report-header.md:77  [backtick] mtime(design.md
+    - Если `mtime(design.md) > last_challenge_at` → Layer 4 запускается.
+.cursor/skills/openspec-verify-change/templates/report-header.md:78  [backtick] mtime(design.md
+    - Если `mtime(design.md) <= last_challenge_at` → Layer 4 пропускается (`layer_status.layer_4_independent_challenge: SKIPPED-novelty`).
+.cursor/skills/openspec-verify-change/templates/report-header.md:96  [backtick] .gate-override.yaml
+    Порог детектора петли приёмки (Layer 2.5), по умолчанию **3**. SSOT определения метрик `AcceptLoop` / `PatchRounds` и условий закрытия — `.cursor/rules/vertical-slices.mdc` § ДЕТЕКТОР ПЕТЛИ ПРИЁМКИ. З
+.cursor/skills/openspec-verify-change/templates/verdict-card.md:7  [backtick] chat-summary.md
+    **Важно:** первая строка — **вердикт**, не финал сообщения. При GO **обязателен** слот `**Следующий шаг:**` из `chat-summary.md` (GO **не завершает** сообщение).
+.cursor/skills/review/SKILL.md:22  [backtick] onec-code-reviewer.md
+    **Review Focus Level:** `full` — ревью всего указанного кода в файлах; `diff-focused` — замечания только в изменённых процедурах/функциях и `[module-level]` участках (см. шаг 1.5 и `onec-code-reviewer
+.cursor/skills/review/SKILL.md:203  [md-link] ../../../openspec/project.md
+    Прочитать `.cursor/docs/marker-canon.md` (baseline). Прочитать [openspec/project.md](../../../openspec/project.md), секция **«Форматы и соглашения по комментариям BSL»** — извлечь таблицы **Whitelist 
+.cursor/skills/review/SKILL.md:211  [backtick] project.md
+    Если в п.1.6.1 таблица **«Обязательный контроль»** содержит строки с непустым **Regex допустимой строки** — оркестратор может выполнить проверку как evidence (не заменять ревьювера). Алгоритм mandator
+.cursor/skills/review/SKILL.md:547  [backtick] openspec/changes/archive/2026-08-10-independent-review-disposition/design.md
+    **SSOT whitelist silent Evidence** — runtime: `.cursor/agents/onec-code-reviewer.md` § DESIGN AUTHORITY; исторический D9 — `openspec/changes/archive/2026-08-10-independent-review-disposition/design.md
+openspec/adrs/ADR-0002-explain-scope-handoff-from-review-apply.md:15  [backtick] code-map.md
+    1. Секция `## Explain scope` живёт **внутри** review-отчёта и `code-map.md` (SSOT для apply); в handoff-acceptance — копия или ссылка. Отдельный `temp/explain-handoff-*.md` не создавать.
+openspec/adrs/ADR-0003-review-quality-disposition.md:6  [bare] openspec/changes/archive/2026-08-10-independent-review-disposition/reports/architecture-new-2026-08-09.md
+    **Источник:** openspec/changes/archive/2026-08-10-independent-review-disposition/reports/architecture-new-2026-08-09.md
+openspec/adrs/README.md:5  [md-link] ADR-0001-chat-facing-vs-agent-facing.md
+    | [ADR-0001](ADR-0001-chat-facing-vs-agent-facing.md) | Граница chat-facing vs agent-facing и язык Mode Gate | Load-Bearing | 2026-08-01 | kit / chat surface |
+openspec/adrs/README.md:6  [md-link] ADR-0002-explain-scope-handoff-from-review-apply.md
+    | [ADR-0002](ADR-0002-explain-scope-handoff-from-review-apply.md) | Handoff охвата в `/opsx:explain` после review/apply | Accepted | 2026-08-09 | kit / explain · review · apply |
+openspec/adrs/README.md:7  [md-link] ADR-0003-review-quality-disposition.md
+    | [ADR-0003](ADR-0003-review-quality-disposition.md) | Ортогональный QualityFlag / Disposition в code-review | Accepted | 2026-08-10 | kit / code-review |
+openspec/adrs/README.md:8  [md-link] ADR-0004-session-api-mode.md
+    | [ADR-0004](ADR-0004-session-api-mode.md) | Сессионный режим с API / без API по ключу в чате | Load-Bearing | 2026-08-18 | kit / выбор моделей субагентов |
+openspec/adrs/README.md:9  [md-link] ADR-0005-noapi-visibility-canon-same-turn.md
+    | [ADR-0005](ADR-0005-noapi-visibility-canon-same-turn.md) | Видимость режима без API — канон в том же ходе | Accepted | 2026-08-20 | kit / chat surface · выбор моделей |
+openspec/adrs/README.md:10  [md-link] ADR-0006-opsx-progress-russian.md
+    | [ADR-0006](ADR-0006-opsx-progress-russian.md) | Язык команд /opsx:* — русский, профиль не сильнее бюджета | Accepted | 2026-08-20 | kit / chat surface |
+openspec/adrs/README.md:11  [md-link] ADR-0007-author-marker-only-if-bsl.md
+    | [ADR-0007](ADR-0007-author-marker-only-if-bsl.md) | Вопрос маркера автора только если будет BSL | Accepted | 2026-08-20 | kit / metadata gate |
+openspec/specs/always-apply-context-budget/spec.md:47  [backtick] onec-code-reviewer.md
+    Промпт `onec-code-reviewer.md` SHALL быть сокращён до ядра протокола; чек-листы и справочники SHALL быть вынесены в on-demand файлы, которые агент читает по типу задачи. Полнота чек-листов SHALL сохра
+openspec/specs/explain-post-implementation-scope/spec.md:11  [backtick] code-map.md
+    После `/review` / `/release-review` main report MUST содержать секцию `## Explain scope` со списком обработанных `.bsl` (и желательно процедур). После apply с изменением BSL секция MUST появляться в `
+openspec/specs/explain-post-implementation-scope/spec.md:21  [backtick] code-map.md
+    - **THEN** в `code-map.md` есть `## Explain scope` с `source: apply` и файлами среза/change; handoff-acceptance при наличии содержит ту же секцию или ссылку на code-map
+openspec/specs/review-quality-disposition/spec.md:11  [backtick] openspec/changes/archive/2026-08-10-independent-review-disposition/design.md
+    Ревьюер MUST сохранять finding по качеству, когда код слаб или рискован, даже если design/ТЗ/ADR явно допускает такое поведение. Тихий перевод в VERIFIED_OK/OK **только** из-за цитаты design MUST NOT 
+openspec/specs/rules-hygiene/spec.md:31  [backtick] CHANGELOG.md
+    Из поставки SHALL быть убраны: `CHANGELOG.md` из `.cursor/agents/` (перенос в `.cursor/docs/`), alias-стабы `opsx-ff.md` и `opsx-continue.md`, `openspec-sessions.mdc` (с упоминанием в `session-discipl
+openspec/specs/rules-hygiene/spec.md:31  [backtick] opsx-ff.md
+    Из поставки SHALL быть убраны: `CHANGELOG.md` из `.cursor/agents/` (перенос в `.cursor/docs/`), alias-стабы `opsx-ff.md` и `opsx-continue.md`, `openspec-sessions.mdc` (с упоминанием в `session-discipl
+openspec/specs/rules-hygiene/spec.md:31  [backtick] opsx-continue.md
+    Из поставки SHALL быть убраны: `CHANGELOG.md` из `.cursor/agents/` (перенос в `.cursor/docs/`), alias-стабы `opsx-ff.md` и `opsx-continue.md`, `openspec-sessions.mdc` (с упоминанием в `session-discipl
+openspec/specs/rules-hygiene/spec.md:31  [backtick] openspec-sessions.mdc
+    Из поставки SHALL быть убраны: `CHANGELOG.md` из `.cursor/agents/` (перенос в `.cursor/docs/`), alias-стабы `opsx-ff.md` и `opsx-continue.md`, `openspec-sessions.mdc` (с упоминанием в `session-discipl
+openspec/specs/session-api-mode/spec.md:10  [backtick] project.md
+    Оркестратор SHALL разбивать любое сообщение пользователя по пробельным символам и сравнивать каждый фрагмент без учёта регистра с литералами `-noapi`, `--noapi`, `-api`, `--api`. Совпадение фрагмента 
+openspec/specs/session-api-mode/spec.md:52  [backtick] .gate-override.yaml
+    `-noapi` MUST NOT отменять архитектурный разбор постановки и MUST NOT создавать обход гейта (файл `.gate-override.yaml`). Пока сессия в режиме без API, оркестратор MUST NOT звать Primary и самую дорог
+openspec/specs/subagent-model-mapping/spec.md:22  [backtick] CHANGELOG.md
+    - **THEN** слагов вне актуального enum нет, кроме: исторических записей `CHANGELOG.md`; анти-примеров `tool-name-guard.mdc`; цели закрытой эскалации Fable (`claude-fable-5-thinking-high`), явно связан
+
+===== runtime-expected n=133 =====
+.cursor/agents/onec-code-architect.md:17  [bare] openspec/project.md
+    Пути к базовой конфигурации (cf) и расширениям (cfe) заданы в openspec/project.md (секция «Структура репозитория»). При поиске или чтении файлов в src/ используй эти пути. Не предполагай по умолчанию 
+.cursor/agents/onec-code-explorer.md:21  [bare] openspec/project.md
+    Пути к базовой конфигурации (cf) и расширениям (cfe) заданы в openspec/project.md (секция «Структура репозитория»). При поиске или чтении файлов в src/ используй эти пути. Не предполагай по умолчанию 
+.cursor/agents/onec-code-reviewer.md:52  [backtick] openspec/project.md
+    Пути cf/cfe — из `openspec/project.md` (секция «Структура репозитория») или блока в промпте. Не предполагай `src/cf/` по умолчанию. В kit-репозитории `project.md` отсутствует — блок путей опускается.
+.cursor/agents/onec-code-writer.md:17  [bare] openspec/project.md
+    Пути к базовой конфигурации (cf) и расширениям (cfe) заданы в openspec/project.md (секция «Структура репозитория»). При поиске или чтении файлов в src/ используй эти пути. Не предполагай по умолчанию 
+.cursor/agents/onec-code-writer.md:156  [bare] openspec/project.md
+    - Search the repository: Grep, Glob, SemanticSearch on paths from openspec/project.md
+.cursor/agents/onec-trace-analyst.md:21  [bare] openspec/project.md
+    Пути к базовой конфигурации (cf) и расширениям (cfe) заданы в openspec/project.md (секция «Структура репозитория»). При поиске или чтении файлов в src/ используй эти пути. Не предполагай по умолчанию 
+.cursor/agents/onec-trace-analyst.md:127  [backtick] temp/reports/trace-analysis-2026-05-19-sign-verify-perf-double-binary.md
+    Full report example: `temp/reports/trace-analysis-2026-05-19-sign-verify-perf-double-binary.md` — coverage, FLOW chain, repetition table (PERF + TRACE pairing).
+.cursor/commands/init-project.md:5  [bare] openspec/project.md
+    description: "Диагностика проекта, бутстрап OpenSpec, интервью → openspec/project.md и architecture"
+.cursor/commands/init-project.md:8  [backtick] openspec/project.md
+    Проверь готовность проекта (выгрузка, OpenSpec, агенты), подскажи недостающее, затем собери информацию через интервью → `openspec/project.md` → `openspec/specs/architecture.md`.
+.cursor/commands/init-project.md:8  [backtick] openspec/specs/architecture.md
+    Проверь готовность проекта (выгрузка, OpenSpec, агенты), подскажи недостающее, затем собери информацию через интервью → `openspec/project.md` → `openspec/specs/architecture.md`.
+.cursor/commands/opsx-knowledge-init.md:8  [backtick] openspec/knowledge/_taxonomy.yaml
+    Первичный bootstrap таксономии базы знаний (`openspec/knowledge/_taxonomy.yaml`) для существующего проекта без полного `/init-project`, либо идемпотентный re-sync после добавления/удаления базовых кон
+.cursor/commands/opsx-new.md:16  [backtick] openspec/project.md
+    **Второе действие (только новый change):** Metadata Gate. Read `openspec/project.md` (`defaultDeveloper`, `cfMarkerPrefix`); baseline запреты `domain_label` — `.cursor/docs/marker-canon.md` ⊕ project 
+.cursor/commands/release-review.md:22  [backtick] openspec/project.md
+    Имя расширения — папка в `src/*/cfe/<имя>/` (см. [`openspec/project.md`](../../openspec/project.md)).
+.cursor/commands/session-restore.md:8  [backtick] temp/session-notes.md
+    Восстановить контекст из `temp/session-notes.md` и предложить следующую команду.
+.cursor/commands/session-save.md:8  [backtick] temp/session-notes.md
+    Сохранить компактный контекст текущей сессии в `temp/session-notes.md`.
+.cursor/docs/1c-coding-standards.md:36  [bare] openspec/project.md
+    Комментарии, попадающие под **Whitelist предрелиза** (baseline `.cursor/docs/marker-canon.md` + строки в [openspec/project.md](../../openspec/project.md), секция «Форматы и соглашения по комментариям 
+.cursor/docs/1c-coding-standards.md:46  [backtick] openspec/project.md
+    **SSOT правила AP-054** — карточка в [.cursor/docs/antipatterns/bsl-antipatterns.md](antipatterns/bsl-antipatterns.md) (не `project.md`); **SSOT AP-031** — там же. `openspec/project.md` лишь **опциона
+.cursor/docs/agents-CHANGELOG.md:60  [backtick] openspec/project.md
+    - Маркеры: канон `// +++ <ФИО> <дата> [comment_suffix]` / `// --- <ФИО>`; SSOT — `openspec/project.md`; предрелиз — `/release-review`.
+.cursor/docs/agents-CHANGELOG.md:74  [backtick] openspec/project.md
+    - Синхронизированы [`.cursor/rules/architect-gate.mdc`](../rules/architect-gate.mdc), [`.cursor/skills/1c-agent-patterns/SKILL.md`](../skills/1c-agent-patterns/SKILL.md), [`openspec/project.md`](../..
+.cursor/docs/agents-CHANGELOG.md:92  [backtick] openspec/project.md
+    - `openspec/project.md`: активированы три строки обязательного контроля комментариев.
+.cursor/docs/bsl-comment-formats-project.md:5  [bare] openspec/project.md
+    **SSOT значений (project):** [openspec/project.md](../../openspec/project.md) — `defaultDeveloper`, `cfMarkerPrefix`, строки **Whitelist предрелиза** и **Обязательный контроль**.
+.cursor/docs/faq-kit.md:40  [backtick] temp/session-notes.md
+    - **`/session-save`** — заметки в `temp/session-notes.md` для продолжения в другом чате.
+.cursor/docs/init-project-protocol.md:30  [backtick] openspec/knowledge/_index.yaml
+    | `openspec/knowledge/_index.yaml` | Read + parse YAML | Парсится; есть `version: 1`; есть поле `facts:` (даже если пустое) | `[V]` / `[X]` |
+.cursor/docs/init-project-protocol.md:31  [backtick] openspec/knowledge/_taxonomy.yaml
+    | `openspec/knowledge/_taxonomy.yaml` | Read + parse YAML | Парсится; есть `version`; `domains:` непустой | `[V]` / `[X]` |
+.cursor/docs/init-project-protocol.md:32  [backtick] openspec/knowledge/README.md
+    | `openspec/knowledge/README.md` | Read | Файл существует и непустой | `[V]` / `[X]` |
+.cursor/docs/init-project-protocol.md:51  [bare] openspec/knowledge/_index.yaml
+    [V] openspec/knowledge/_index.yaml     — индекс (valid, N фактов)
+.cursor/docs/init-project-protocol.md:52  [bare] openspec/knowledge/_taxonomy.yaml
+    [V] openspec/knowledge/_taxonomy.yaml  — таксономия (M доменов)
+.cursor/docs/init-project-protocol.md:53  [bare] openspec/knowledge/README.md
+    [V] openspec/knowledge/README.md       — описание модели
+.cursor/docs/init-project-protocol.md:65  [backtick] openspec/project.md
+    | `openspec/` | Агент создаёт сам: `openspec/`, `openspec/changes/`, `openspec/changes/_template/`, `openspec/specs/`, `openspec/docs/`, `openspec/adrs/`, `openspec/knowledge/` (+ `_archive/` с `.gitk
+.cursor/docs/init-project-protocol.md:65  [backtick] openspec/config.yaml
+    | `openspec/` | Агент создаёт сам: `openspec/`, `openspec/changes/`, `openspec/changes/_template/`, `openspec/specs/`, `openspec/docs/`, `openspec/adrs/`, `openspec/knowledge/` (+ `_archive/` с `.gitk
+.cursor/docs/init-project-protocol.md:65  [backtick] openspec/knowledge/_taxonomy.yaml
+    | `openspec/` | Агент создаёт сам: `openspec/`, `openspec/changes/`, `openspec/changes/_template/`, `openspec/specs/`, `openspec/docs/`, `openspec/adrs/`, `openspec/knowledge/` (+ `_archive/` с `.gitk
+.cursor/docs/init-project-protocol.md:74  [backtick] temp/backups/_index-<timestamp>.yaml
+    | Нет `_index.yaml` или невалиден (не парсится / нет `version: 1` / нет `facts:`) | Если файл есть, но невалиден — сделать backup в `temp/backups/_index-<timestamp>.yaml`. Затем создать/перезаписать м
+.cursor/docs/init-project-protocol.md:75  [backtick] openspec/knowledge/README.md
+    | Нет `README.md` или пустой | Создать из стандартного шаблона `.cursor/skills/openspec-knowledge-init/templates/README-template.md` (Read шаблона → Write в `openspec/knowledge/README.md`) |
+.cursor/docs/init-project-protocol.md:125  [backtick] openspec/project.md
+    Если `openspec/project.md` уже существует:
+.cursor/docs/init-project-protocol.md:285  [backtick] openspec/project.md
+    После сбора и подтверждения всех блоков сформировать (или обновить) `openspec/project.md` по структуре:
+.cursor/docs/init-project-protocol.md:381  [backtick] openspec/project.md
+    **Триггер:** `openspec/project.md` существует **и** (`framework_contract_version` отсутствует **или** ≠ версии kit из `.cursor/templates/project-overlay.template.md` / `.cursor/docs/marker-canon.md`).
+.cursor/docs/init-project-protocol.md:416  [backtick] openspec/specs/architecture.md
+    **Шаг 5 — Записать `openspec/specs/architecture.md`.** Полный отчёт с диаграммами (по правилу preserve-subagent-reports — без сокращений). Структура:
+.cursor/docs/init-project-protocol.md:437  [backtick] openspec/knowledge/_taxonomy.yaml
+    **Шаг 6 — Генерация таксономии (`openspec/knowledge/_taxonomy.yaml`).** Шаг идемпотентен: безопасно запускать повторно.
+.cursor/docs/init-project-protocol.md:439  [backtick] openspec/specs/architecture.md
+    1. **Вход:** карта расширений и границ доменов из выхода `onec-code-architect` (и при необходимости `openspec/specs/architecture.md`, `project.md`).
+.cursor/docs/init-project-protocol.md:440  [backtick] openspec/knowledge/_taxonomy.yaml
+    2. **Проверка идемпотентности.** Если `openspec/knowledge/_taxonomy.yaml` уже существует:
+.cursor/docs/init-project-protocol.md:447  [backtick] openspec/specs/architecture.md
+    **При повторном запуске /init-project:** если `openspec/specs/architecture.md` уже существует — Phase 5 **предложить** обновить (если project.md изменился) или пропустить. Не пересоздавать автоматичес
+.cursor/docs/init-project-protocol.md:453  [backtick] openspec/knowledge/_taxonomy.yaml
+    **KB warning.** Перед предложением следующих шагов проверить `openspec/knowledge/_taxonomy.yaml`:
+.cursor/docs/init-project-protocol.md:484  [bare] openspec/specs/architecture.md
+    - **Не пиши код** — только project.md и openspec/specs/architecture.md.
+.cursor/docs/marker-canon.md:7  [bare] openspec/project.md
+    - **[openspec/project.md](../../openspec/project.md)** — VALUE (`defaultDeveloper`, `cfMarkerPrefix`, пути) и project overlay (строки Whitelist предрелиза, расширения списков).
+.cursor/docs/marker-canon.md:27  [backtick] openspec/project.md
+    **Zero-config:** при отсутствии `openspec/project.md` или пустых overlay-секций потребители работают на kit baseline. Обязательны только VALUE, которые нельзя дефолтить: пути cf/cfe и `defaultDevelope
+.cursor/docs/marker-layers-guide.md:6  [bare] openspec/project.md
+    **SSOT значений проекта:** [openspec/project.md](../../openspec/project.md) (`defaultDeveloper`, `cfMarkerPrefix`, строки Whitelist).
+.cursor/docs/marker-layers-guide.md:13  [backtick] openspec/project.md
+    | **2. SSOT values** | `openspec/project.md` | `defaultDeveloper`, `cfMarkerPrefix`, строки Whitelist / Обязательный контроль, project-расширения списков |
+.cursor/docs/marker-layers-guide.md:34  [bare] openspec/project.md
+    **Project (значения):** Read [openspec/project.md](../../openspec/project.md):
+.cursor/docs/mxl-roundtrip-fixture.md:3  [backtick] temp/fixtures/mxl-roundtrip-sample.json
+    **Optional smoke** (не обязательная поставка). Фикстура: `temp/fixtures/mxl-roundtrip-sample.json` — создать локально при проверке; см. [temp/fixtures/README.md](../../temp/fixtures/README.md).
+.cursor/docs/proportional-surface.md:21  [backtick] temp/fixtures/proportional-surface-noisy-module.bsl
+    Фикстура (optional smoke): `temp/fixtures/proportional-surface-noisy-module.bsl` — см. [temp/fixtures/README.md](../../temp/fixtures/README.md).
+.cursor/docs/review-guide.md:30  [backtick] openspec/project.md
+    Имя расширения — папка cfe в `src/` (см. [`openspec/project.md`](../../openspec/project.md)).
+.cursor/docs/review-guide.md:92  [backtick] openspec/project.md
+    - Маркеры BSL: [`openspec/project.md`](../../openspec/project.md), [bsl-comment-formats-project.md](bsl-comment-formats-project.md)
+.cursor/docs/templates/brief-card.md:137  [backtick] temp/Проверка
+    - `temp/Проверка подписи_TRACE_FULL.txt`
+.cursor/docs/ux-acceptance-isolated-chat.md:73  [backtick] temp/ux-fixtures/README.md
+    Опционально: `temp/ux-fixtures/README.md` с git tag на commit «до repair».
+.cursor/rules/1c-agent-delegation.mdc:92  [backtick] openspec/project.md
+    Перед вызовом 1С-агентов включать в их промпт блок путей из `openspec/project.md` (секция «Структура репозитория»). Протокол извлечения и формат блока — в `.cursor/rules/project-paths.mdc`. Файл созда
+.cursor/rules/1c-metadata-validation.mdc:15  [backtick] openspec/project.md
+    - **Validate**: перед `Перечисления.X.Y`, `РегистрСведений.X`, `Тип("СправочникСсылка.X")`, `Метаданные.<Kind>.<Name>` и т.п. найти соответствующий XML **по `src/` рекурсивно** (пути — `openspec/proje
+.cursor/rules/1c-writer-pipeline.mdc:159  [backtick] openspec/project.md
+    **После IDENTIFIER HYGIENE CHECK, до API EXISTENCE CHECK.** Семейство **Export Language** вместе с IDENTIFIER HYGIENE (AP-054 для комментариев = тот же принцип, что AP-031 для идентификаторов). Механи
+.cursor/rules/1c-writer-pipeline.mdc:227  [backtick] openspec/project.md
+    Область поиска — **весь src/** (все подкаталоги, содержащие cf и cfe). Фактические пути к cf/cfe могут отличаться от `src/cf/` и `src/cfe/`; см. `openspec/project.md` и `project-paths.mdc`.
+.cursor/rules/architect-gate.mdc:68  [bare] openspec/knowledge/_taxonomy.yaml
+    0. Если нет openspec/knowledge/_taxonomy.yaml — не блокировать Gate; одна строка
+.cursor/rules/architect-gate.mdc:71  [bare] openspec/knowledge/_index.yaml
+    1. Read openspec/knowledge/_index.yaml
+.cursor/rules/capture-to-project.mdc:2  [bare] openspec/project.md
+    description: "Фиксация договорённостей из диалога в openspec/project.md"
+.cursor/rules/capture-to-project.mdc:17  [backtick] openspec/project.md
+    - Если **`openspec/project.md` есть** — прочитать файл: секции, формат таблиц, стиль формулировок.
+.cursor/rules/capture-to-project.mdc:19  [backtick] openspec/config.yaml
+    - При необходимости создать скелет OpenSpec по **Phase 0** `.cursor/commands/init-project.md` (`openspec/`, `openspec/changes/`, `openspec/changes/_template/`, `openspec/specs/`, `openspec/docs/`, `op
+.cursor/rules/capture-to-project.mdc:29  [backtick] openspec/project.md
+    3. **Confirm + Write** — записать `openspec/project.md` только после явного подтверждения пользователя («ок», правка и «да», и т.п.).
+.cursor/rules/code-truth-gate.mdc:26  [backtick] openspec/project.md
+    1. Определить change dir и прочитать `openspec/project.md` для путей `cf/cfe`.
+.cursor/rules/code-truth-gate.mdc:34  [backtick] openspec/project.md
+    4. Для каждого технического якоря выполнить `Grep`/`rg` по путям из `openspec/project.md` и явно затронутым файлам change.
+.cursor/rules/knowledge-format.mdc:14  [backtick] openspec/knowledge/README.md
+    - **Индекс:** `openspec/knowledge/README.md` — описание модели + (опционально) таблица всех KB
+.cursor/rules/knowledge-format.mdc:15  [backtick] openspec/knowledge/_index.yaml
+    - **Машиночитаемый индекс:** `openspec/knowledge/_index.yaml` — для быстрого Discovery
+.cursor/rules/knowledge-format.mdc:16  [backtick] openspec/knowledge/_taxonomy.yaml
+    - **Таксономия:** `openspec/knowledge/_taxonomy.yaml` — словарь доменов/субдоменов
+.cursor/rules/knowledge-format.mdc:366  [backtick] openspec/knowledge/_index.yaml
+    1. Read `openspec/knowledge/_index.yaml` и при необходимости front-matter `.md` для поля `invariant`.
+.cursor/rules/model-adaptation.mdc:16  [backtick] openspec/project.md
+    Опциональный override — строка в overlay `openspec/project.md` (создаётся `/init-project`; в kit-репозитории отсутствует).
+.cursor/rules/model-adaptation.mdc:40  [backtick] openspec/project.md
+    2. Project overlay (`openspec/project.md`).
+.cursor/rules/model-selection.mdc:20  [backtick] openspec/project.md
+    Новый чат начинается в режиме **«с API»** (действует таблица ролей). Признак в `openspec/project.md` и файл-состояние между чатами не используются.
+.cursor/rules/model-selection.mdc:195  [backtick] openspec/project.md
+    - `openspec/project.md` (создаётся `/init-project`; в kit-репозитории отсутствует), `AGENTS.md` — краткая отсылка сюда
+.cursor/rules/precedent-regression-gate.mdc:71  [bare] openspec/knowledge/_index.yaml
+    4. **Invariant KB:** `Read openspec/knowledge/_index.yaml`; для фактов с `invariant: true`, чьи anchor-paths пересекаются с путями текущего change, проверить противоречие тексту факта.
+.cursor/rules/preserve-subagent-reports.mdc:56  [backtick] temp/reports/resolved-contract-<scope-slug>-ГГГГ-ММ-ДД.md
+    - `resolved-contract` — результат резолва контрактов (investigation loop, onec-code-explorer). **Канонический путь:** `openspec/changes/<id>/reports/resolved-contract-<scope-slug>-ГГГГ-ММ-ДД.md`; fall
+.cursor/rules/project-paths.mdc:2  [bare] openspec/project.md
+    description: "Пути к базовой конфигурации и расширениям — единственный источник: openspec/project.md"
+.cursor/rules/project-paths.mdc:11  [backtick] openspec/project.md
+    Пути к **базовой конфигурации (cf)** и **расширениям (cfe)** заданы в `openspec/project.md`, секция **«Структура репозитория»** (таблица с колонкой «Путь»). Это единственный источник истины для распол
+.cursor/rules/project-paths.mdc:15  [backtick] openspec/project.md
+    1. **Перед поиском или чтением кода в `src/`** по путям к cf/cfe, а также перед проверкой «выгружена ли база» — прочитать `openspec/project.md` и извлечь фактические пути из таблицы секции «Структура 
+.cursor/rules/tool-name-guard.mdc:51  [backtick] openspec/project.md
+    Симптомы ошибки делегирования: вывод без BSL-цитат `file:line`, попытки писать shell-скрипты для обследования кода, игнорирование путей из `openspec/project.md`. Это маскирует причину и даёт скрипто-о
+.cursor/skills/1c-agent-patterns/architect.md:894  [bare] openspec/project.md
+    Project paths: base=[путь из openspec/project.md], extensions=[пути]",
+.cursor/skills/1c-agent-patterns/sidecar.md:44  [backtick] temp/session-notes.md
+    Поля handoff **Current / Next / Decisions** совпадают с шаблоном `/session-save` → `temp/session-notes.md`. При наличии S3: после длинной сессии предлагать `/session-save` перед сменой чата.
+.cursor/skills/openspec-apply-change/SKILL.md:74  [backtick] openspec/project.md
+    **Mandatory read:** tasks.md (navigation, progress, dependencies) + `openspec/project.md` (project-level constraints: allowed directories, editing rules).
+.cursor/skills/openspec-apply-change/SKILL.md:108  [backtick] openspec/project.md
+    Прочитать `proposal.md` и `openspec/project.md` (секция «Разработчик по умолчанию»: `defaultDeveloper`, `cfMarkerPrefix`). Baseline запреты domain_label — `.cursor/docs/marker-canon.md` ⊕ project over
+.cursor/skills/openspec-archive-change/SKILL.md:63  [backtick] openspec/knowledge/_index.yaml
+    Read `openspec/knowledge/_index.yaml`, фильтр по `anchor-paths` ∈ `diff.files`.
+.cursor/skills/openspec-archive-change/SKILL.md:81  [backtick] openspec/project.md
+    Read `proposal.md` and `openspec/project.md` (`cfMarkerPrefix`) and check for the `## Metadata (comment markers)` block.
+.cursor/skills/openspec-archive-change/SKILL.md:166  [backtick] openspec/project.md
+    - проверить их `Grep`/`rg` по путям из `openspec/project.md` и явно затронутым файлам;
+.cursor/skills/openspec-explain/templates/entry-brief.md:57  [backtick] temp/Замеры/Направление
+    - `temp/Замеры/Направление на подписание_TRACE_FULL.txt`
+.cursor/skills/openspec-explain/templates/entry-brief.md:76  [backtick] temp/Замеры/Направление
+    - `temp/Замеры/Направление на подписание_TRACE_FULL.txt`
+.cursor/skills/openspec-explore/SKILL.md:47  [backtick] openspec/project.md
+    **Допустимо до брифа:** Read этого SKILL, `openspec/project.md`, KB Discovery (`openspec/knowledge/_index.yaml`), `Glob` по **именам** из постановки (1–3 вызова), `openspec list --json`, `AskQuestion`
+.cursor/skills/openspec-explore/SKILL.md:47  [backtick] openspec/knowledge/_index.yaml
+    **Допустимо до брифа:** Read этого SKILL, `openspec/project.md`, KB Discovery (`openspec/knowledge/_index.yaml`), `Glob` по **именам** из постановки (1–3 вызова), `openspec list --json`, `AskQuestion`
+.cursor/skills/openspec-explore/SKILL.md:171  [backtick] openspec/project.md
+    - Пути cf/cfe из `openspec/project.md`.
+.cursor/skills/openspec-extend-change/SKILL.md:65  [backtick] openspec/project.md
+    4. Прочитать `openspec/project.md` и артефакты change из `contextFiles`: `proposal.md`, `design.md`, `tasks.md`, `specs/**` при наличии; для расширения scope также прочитать `debug.md` (если есть) — н
+.cursor/skills/openspec-extend-change/SKILL.md:67  [backtick] openspec/knowledge/_index.yaml
+    5a. **KB Discovery (internal):** прочитать `openspec/knowledge/_index.yaml` и при необходимости `_taxonomy.yaml` и выбранные KB `.md` — по алгоритму Entry Protocol шаг 1.6 (KB Discovery) `.cursor/skil
+.cursor/skills/openspec-extend-change/SKILL.md:72  [backtick] openspec/knowledge/_index.yaml
+    Разрешённые действия до брифа: чтение этого скилла, `openspec list --json`, `openspec instructions apply --json`, чтение `project.md`, чтение артефактов change, чтение явно переданных markdown/text/so
+.cursor/skills/openspec-extend-change/SKILL.md:191  [backtick] openspec/project.md
+    - Прочитать `openspec/project.md` и извлечь пути cf/cfe (для возможного architect/explorer).
+.cursor/skills/openspec-extend-change/SKILL.md:306  [backtick] openspec/knowledge/_index.yaml
+    - выполнить KB Discovery по `openspec/knowledge/_index.yaml` / `_taxonomy.yaml`, если файлы есть;
+.cursor/skills/openspec-knowledge-add/SKILL.md:106  [backtick] openspec/knowledge/_taxonomy.yaml
+    2. Прочитать `openspec/knowledge/_taxonomy.yaml`.
+.cursor/skills/openspec-knowledge-add/SKILL.md:108  [backtick] openspec/knowledge/_index.yaml
+    3. Прочитать `openspec/knowledge/_index.yaml`.
+.cursor/skills/openspec-knowledge-add/SKILL.md:362  [backtick] openspec/knowledge/_index.yaml
+    6. Пересобрать `openspec/knowledge/_index.yaml` из фактических KB-файлов на диске.
+.cursor/skills/openspec-knowledge-audit/SKILL.md:28  [backtick] openspec/knowledge/_index.yaml
+    *   `--reindex` — пересобрать `openspec/knowledge/_index.yaml` на основе `.md` файлов (файлы — источник истины).
+.cursor/skills/openspec-knowledge-audit/SKILL.md:30  [backtick] openspec/knowledge/_taxonomy.yaml
+    *   `--taxonomy-sync` — только отчёт: поиск несоответствий между `openspec/knowledge/_taxonomy.yaml` и структурой каталогов `src/*/cfe/*`.
+.cursor/skills/openspec-knowledge-audit/SKILL.md:42  [backtick] openspec/knowledge/_index.yaml
+    1.  **Чтение индекса:** Прочитать `openspec/knowledge/_index.yaml`.
+.cursor/skills/openspec-knowledge-audit/SKILL.md:80  [backtick] openspec/knowledge/_index.yaml
+    3.  Сформировать новый `openspec/knowledge/_index.yaml`.
+.cursor/skills/openspec-knowledge-audit/SKILL.md:85  [backtick] openspec/knowledge/_index.yaml
+    1.  Считать `openspec/knowledge/_index.yaml` и все KB-файлы (для полных данных).
+.cursor/skills/openspec-knowledge-audit/SKILL.md:94  [backtick] openspec/knowledge/_taxonomy.yaml
+    1.  Считать `openspec/knowledge/_taxonomy.yaml`.
+.cursor/skills/openspec-knowledge-audit/SKILL.md:110  [backtick] openspec/knowledge/_taxonomy.yaml
+    2.  **Preflight (taxonomy):** если `openspec/knowledge/_taxonomy.yaml` отсутствует — STOP, сообщить пользователю команду `/opsx:knowledge-init`. Это не auto-yes контекст, аудит подразумевает наличие т
+.cursor/skills/openspec-knowledge-init/SKILL.md:10  [backtick] openspec/knowledge/_taxonomy.yaml
+    Первичный bootstrap таксономии (`openspec/knowledge/_taxonomy.yaml`) для существующего проекта без полного `/init-project`, либо **идемпотентный re-sync** после добавления/удаления базовых конфигураци
+.cursor/skills/openspec-knowledge-init/SKILL.md:15  [backtick] openspec/project.md
+    - Прочитать `openspec/project.md` (если есть).
+.cursor/skills/openspec-knowledge-init/SKILL.md:16  [backtick] openspec/specs/architecture.md
+    - Прочитать `openspec/specs/architecture.md` (если есть).
+.cursor/skills/openspec-knowledge-init/SKILL.md:36  [backtick] openspec/knowledge/_taxonomy.yaml
+    - Если `openspec/knowledge/_taxonomy.yaml` уже существует, построить diff между текущим файлом и draft.
+.cursor/skills/openspec-knowledge-init/SKILL.md:44  [backtick] openspec/knowledge/_taxonomy.yaml
+    - После подтверждения пользователя сохранить результат в `openspec/knowledge/_taxonomy.yaml`.
+.cursor/skills/openspec-new-change/SKILL.md:60  [backtick] openspec/project.md
+    Read `openspec/project.md` → секция **«Разработчик по умолчанию»** → `defaultDeveloper` (ФИО с пробелами, trim), `cfMarkerPrefix`. Baseline запреты domain_label — `.cursor/docs/marker-canon.md` ⊕ proj
+.cursor/skills/openspec-new-change/SKILL.md:161  [backtick] openspec/project.md
+    Read `openspec/project.md` for project-level constraints (editing rules, allowed directories, conventions).
+.cursor/skills/openspec-overview/SKILL.md:127  [backtick] temp/overview-control-88781.md
+    - control: путь из `control-run.md` (`temp/overview-control-88781.md`).
+.cursor/skills/openspec-status/SKILL.md:29  [backtick] openspec/project.md
+    2a. **Профиль модели чата.** По self-knowledge модели этой сессии и `.cursor/rules/model-adaptation.mdc` определить активный профиль (`grok4` / `fable5` / `gpt56` / `opus5`) либо «базовый свод» (модел
+.cursor/skills/openspec-status/SKILL.md:33  [backtick] openspec/project.md
+    Read `proposal.md` § `## Metadata (comment markers)` + `openspec/project.md` (`defaultDeveloper`, `cfMarkerPrefix`) + baseline `.cursor/docs/marker-canon.md` (запреты domain_label).
+.cursor/skills/openspec-verify-change/SKILL.md:108  [backtick] openspec/project.md
+    - `openspec/project.md`
+.cursor/skills/openspec-verify-change/SKILL.md:168  [backtick] openspec/project.md
+    **2.2. Code-Truth (механический)** — для каждого технического имени в backticks из `design.md`/`tasks.md`/`debug.md`/`specs/**` запустить `Grep` по путям из `openspec/project.md`. См. `.cursor/rules/c
+.cursor/skills/review/SKILL.md:80  [backtick] openspec/project.md
+    | **Расширение** (имя папки cfe или «ревью расширения X») | `openspec/project.md` → пути cfe; Glob `*.bsl` в каталоге расширения. | `full` |
+.cursor/skills/review/SKILL.md:199  [backtick] openspec/project.md
+    **Чтение:** baseline `.cursor/docs/marker-canon.md` (CRC, zero-config) + `openspec/project.md` (whitelist overlay). Механические grep-проходы перенесены в агент (AP-040..AP-054, Phase 2 «Release-hygie
+.cursor/skills/review/SKILL.md:203  [bare] openspec/project.md
+    Прочитать `.cursor/docs/marker-canon.md` (baseline). Прочитать [openspec/project.md](../../../openspec/project.md), секция **«Форматы и соглашения по комментариям BSL»** — извлечь таблицы **Whitelist 
+.cursor/skills/review/SKILL.md:261  [backtick] openspec/project.md
+    Выполнить **после** шага 1.9, **до** вызова ревьювера. Алгоритм — **SSOT:** `.cursor/rules/1c-writer-pipeline.mdc` § COMMENT HYGIENE CHECK. Детектор **латиницы в прозе комментариев и JSDoc** (AP-054) 
+.cursor/skills/review/SKILL.md:337  [backtick] openspec/project.md
+    - **Base-файл для &ИзменениеИКонтроль:** если в scope есть файлы с этой аннотацией, прочитать `openspec/project.md` (секция «Структура репозитория»), подставить cf-путь в пару к cfe-пути. Передать в п
+.cursor/skills/session-restore/SKILL.md:8  [backtick] temp/session-notes.md
+    Восстановить контекст из `temp/session-notes.md` **без** автоматического apply.
+.cursor/skills/session-restore/SKILL.md:16  [backtick] temp/session-notes.md
+    1. Если `temp/session-notes.md` нет — сообщить и предложить `/session-save` или описать задачу заново. END.
+.cursor/skills/session-save/SKILL.md:8  [backtick] temp/session-notes.md
+    Сохранить контекст сессии в `temp/session-notes.md` (каталог `temp/` уже в `.gitignore`).
+.cursor/skills/session-save/SKILL.md:17  [backtick] temp/session-notes.md
+    2. Записать (перезаписать) `temp/session-notes.md`:
+AGENTS.md:53  [md-link] openspec/project.md
+    - Маркеры → [`.cursor/docs/marker-canon.md`](.cursor/docs/marker-canon.md); overlay и пути cf/cfe → [`openspec/project.md`](openspec/project.md) (создаётся `/init-project`; в kit отсутствует — блок пу
+openspec/glossary.md:42  [backtick] openspec/project.md
+    - **Выгрузка** — конфигурация 1С в формате файлов (`src/`); пути — в `openspec/project.md`.
+openspec/glossary.md:45  [backtick] openspec/project.md
+    - **Маркеры разработчика** — парные `// +++` / `// ---` вокруг изменений; whitelist — `openspec/project.md`.
+openspec/specs/always-apply-context-budget/spec.md:58  [backtick] openspec/project.md
+    Документ `.cursor/docs/delivery-integrity.md` SHALL ссылаться на новый порог бюджета (≤ 34 КБ) вместо устаревшего ориентира. Ссылки на `openspec/project.md` в always-apply файлах SHALL быть сопровожде
+openspec/specs/chat-model-profiles/spec.md:40  [backtick] openspec/project.md
+    Роутер SHALL фиксировать порядок приоритетов: указания пользователя → project overlay (`openspec/project.md`) → активный профиль → базовый свод; список MUST NOT SHALL выигрывать при любом порядке чтен
+
+===== temp n=3 =====
+.cursor/docs/delivery-integrity.md:20  [md-link] ../../temp/fixtures/README.md
+    См. также: [kit-template-workflow.md](./kit-template-workflow.md), [quick-start.md](./quick-start.md), [faq-kit.md](./faq-kit.md). Опциональные smoke-docs: [mxl-roundtrip-fixture.md](./mxl-roundtrip-f
+.cursor/docs/mxl-roundtrip-fixture.md:3  [md-link] ../../temp/fixtures/README.md
+    **Optional smoke** (не обязательная поставка). Фикстура: `temp/fixtures/mxl-roundtrip-sample.json` — создать локально при проверке; см. [temp/fixtures/README.md](../../temp/fixtures/README.md).
+.cursor/docs/proportional-surface.md:21  [md-link] ../../temp/fixtures/README.md
+    Фикстура (optional smoke): `temp/fixtures/proportional-surface-noisy-module.bsl` — см. [temp/fixtures/README.md](../../temp/fixtures/README.md).
+
+===== change-runtime n=12 =====
+.cursor/docs/agents-CHANGELOG.md:38  [backtick] reports/code-map.md
+    - **Восстановлено (cherry-pick из `747b336`/`fb7991e`):** спецификация **Карта правок** (`reports/code-map.md`) — `openspec-apply-change`, `opsx-output-style` §5.2, `chat-output-budget` §1c, `openspec
+.cursor/docs/architect-report-schema.md:30  [backtick] reports/_manifest.yaml
+    ## `reports/_manifest.yaml` (в каждом change)
+.cursor/docs/opsx-output-style.md:414  [backtick] reports/code-map.md
+    `openspec/changes/<name>/reports/handoff-<variant>-S<N>-YYYY-MM-DD.md` (для `acceptance` / `pause` с указанием среза; для `final` — `handoff-final-YYYY-MM-DD.md`). Для `acceptance` имя файла: `handoff
+.cursor/docs/opsx-output-style.md:445  [backtick] reports/code-map.md
+    3a. **Карта правок** (только вариант `acceptance`). Секция среза из `reports/code-map.md` (полный список пунктов с ID задачи, модулем, процедурой, ссылкой на файл:строки). В чат — компактный блок до 5
+.cursor/rules/architect-gate.mdc:150  [backtick] reports/_manifest.yaml
+    2. Отчёт зарегистрирован в `reports/_manifest.yaml` со статусом `active` и подходящим `scope`.
+.cursor/skills/openspec-apply-change/SKILL.md:333  [backtick] reports/code-map.md
+    **Карта правок (`reports/code-map.md`, mandatory at Slice Gate):**
+.cursor/skills/openspec-apply-change/SKILL.md:389  [backtick] reports/code-map.md
+    <до 5 пунктов: проза + [`start:end:path`](...); полная карта — в `reports/code-map.md`>
+.cursor/skills/openspec-apply-change/SKILL.md:402  [backtick] reports/code-map.md
+    1. **Карта правок:** собрать символы среза из journal + `tasks.md`; **Write/append** `reports/code-map.md` (секция `# Срез S<N> — …`); при BSL — включить `## Explain scope` (SSOT выше).
+.cursor/skills/openspec-apply-change/SKILL.md:619  [backtick] reports/code-map.md
+    - **Code Map:** at Slice Gate (acceptance), append `reports/code-map.md` and mandatory `reports/handoff-acceptance-S<N>-YYYY-MM-DD.md`; chat block «Карта правок» — human prose first, anchors second (≤
+.cursor/skills/openspec-archive-change/SKILL.md:283  [backtick] reports/code-map.md
+    **`reports/code-map.md`:** при архивации переезжает вместе с каталогом change в `openspec/changes/archive/YYYY-MM-DD-<name>/reports/` как **история правок для человека** (non-event в чат — не дублиров
+.cursor/skills/openspec-verify-change/templates/card-decision.md:119  [backtick] reports/design-challenge-2026-05-24.md
+    **Источники** *(техническое):* `reports/design-challenge-2026-05-24.md` Q2.
+.cursor/skills/openspec-verify-change/templates/info-section.md:5  [backtick] reports/<file>.md
+    Подробности — в `reports/<file>.md` (если нужен технический контекст)
+
+===== generic-name n=407 =====
+.cursor/agents/onec-code-architect.md:37  [backtick] design.md
+    ### Режим `design` — обязательная секция в целевом `design.md`
+.cursor/agents/onec-code-architect.md:39  [backtick] design.md
+    Если входной промпт или правило указывает на **precedent-regression** (блок `## Cross-Archive Context`, триггеры `precedent-regression-gate.mdc`): итоговые рекомендации для оркестратора SHALL включать
+.cursor/agents/onec-code-architect.md:54  [backtick] design.md
+    **Назначение.** Layer 4 в `/opsx:verify` — независимое подтверждение, что `design.md` действительно решает проблему из `proposal.md` и делает это оптимальным способом. **Это не плановое ревью качества
+.cursor/agents/onec-code-architect.md:54  [backtick] proposal.md
+    **Назначение.** Layer 4 в `/opsx:verify` — независимое подтверждение, что `design.md` действительно решает проблему из `proposal.md` и делает это оптимальным способом. **Это не плановое ревью качества
+.cursor/agents/onec-code-architect.md:58  [backtick] proposal.md
+    1. Прочитать `proposal.md` (`## Why`, `## What Changes`) — что именно болит у пользователя.
+.cursor/agents/onec-code-architect.md:59  [backtick] design.md
+    2. Прочитать `design.md` без отсылок к собственным прошлым отчётам — относиться к нему как к чужой работе.
+.cursor/agents/onec-code-architect.md:73  [backtick] design.md
+    - **CHALLENGE** — есть существенные сомнения, но решение имплементируемо; перечислить (a) **gaps** — что должно появиться в `design.md` / `spec` / `proposal.md` перед apply (список рекомендаций); (b) 
+.cursor/agents/onec-code-architect.md:73  [backtick] proposal.md
+    - **CHALLENGE** — есть существенные сомнения, но решение имплементируемо; перечислить (a) **gaps** — что должно появиться в `design.md` / `spec` / `proposal.md` перед apply (список рекомендаций); (b) 
+.cursor/agents/onec-code-architect.md:79  [backtick] design.md
+    - Запрещено молча соглашаться с `design.md`. Если не нашёл что атаковать — обязательно показать, какие 3+ альтернативы рассматривал и почему ни одна не лучше.
+.cursor/agents/onec-code-architect.md:80  [backtick] proposal.md
+    - Запрещено опираться на собственные прошлые отчёты (`reports/architecture-*.md`) как на источник истины — каждый аргумент должен опираться на `proposal.md`, `design.md`, `specs/`, файлы кода или венд
+.cursor/agents/onec-code-architect.md:80  [backtick] design.md
+    - Запрещено опираться на собственные прошлые отчёты (`reports/architecture-*.md`) как на источник истины — каждый аргумент должен опираться на `proposal.md`, `design.md`, `specs/`, файлы кода или венд
+.cursor/agents/onec-code-architect.md:84  [backtick] debug.md
+    - Оркестратор передаёт `closed_decisions` из `debug.md` § Verify decision ledger + design § «Решения verify (зафиксировано)».
+.cursor/agents/onec-code-architect.md:152  [backtick] design.md
+    **Когда вызывается.** Из `/opsx:verify` Layer 4 (см. `.cursor/skills/openspec-verify-change/SKILL.md`). Триггер: первый pre-apply прогон verify по этой ЗНИ или mtime `design.md` > `snapshot.last_chall
+.cursor/agents/onec-code-architect.md:152  [backtick] proposal.md
+    **Когда вызывается.** Из `/opsx:verify` Layer 4 (см. `.cursor/skills/openspec-verify-change/SKILL.md`). Триггер: первый pre-apply прогон verify по этой ЗНИ или mtime `design.md` > `snapshot.last_chall
+.cursor/agents/onec-code-architect.md:156  [backtick] design.md
+    8. **Precedent Coherence:** не противоречит ли `design.md` зафиксированным целям/контрактам архивных changes и KB для той же области? При конфликте — GAP до появления Blast Radius или отчёта precedent
+.cursor/agents/onec-code-explorer.md:457  [backtick] design.md
+    4. Любой вывод, который будет использован для `design.md`, `tasks.md`, `debug.md` или Code-Truth Gate, должен иметь verified citation.
+.cursor/agents/onec-code-explorer.md:457  [backtick] tasks.md
+    4. Любой вывод, который будет использован для `design.md`, `tasks.md`, `debug.md` или Code-Truth Gate, должен иметь verified citation.
+.cursor/agents/onec-code-explorer.md:457  [backtick] debug.md
+    4. Любой вывод, который будет использован для `design.md`, `tasks.md`, `debug.md` или Code-Truth Gate, должен иметь verified citation.
+.cursor/agents/onec-code-reviewer.md:31  [backtick] design.md
+    - **Design authority:** решения `design.md` / ADR **не** освобождают код от антипаттерн-проверок. Если код реализует антипаттерн по постановке — finding с tag `design-prescribed` (или `design-endorsed
+.cursor/agents/onec-code-writer.md:327  [backtick] design.md
+    **Не копировать** оркестрационный/процессный жаргон и англицизмы из `design.md`,
+.cursor/agents/onec-code-writer.md:328  [backtick] tasks.md
+    `tasks.md`, `reports/`, `debug.md`, handoff (eligibility, pre-matrix, re-fetch,
+.cursor/agents/onec-code-writer.md:328  [backtick] debug.md
+    `tasks.md`, `reports/`, `debug.md`, handoff (eligibility, pre-matrix, re-fetch,
+.cursor/agents/onec-code-writer.md:475  [backtick] debug.md
+    Заполни этот блок фактическими символами после записи кода. Оркестратор использует его для `debug.md` и Code-Truth Gate; не указывай плановые или вымышленные имена.
+.cursor/agents/openspec-quality-controller.md:13  [backtick] tasks.md
+    You are an OpenSpec Quality Controller. You evaluate whether `tasks.md` is a coherent, executable plan organised into vertical slices.
+.cursor/agents/openspec-quality-controller.md:35  [backtick] tasks.md
+    3. The prompt-provided `tasks.md`, `design.md`, `proposal.md`, and `specs/**/spec.md`.
+.cursor/agents/openspec-quality-controller.md:35  [backtick] design.md
+    3. The prompt-provided `tasks.md`, `design.md`, `proposal.md`, and `specs/**/spec.md`.
+.cursor/agents/openspec-quality-controller.md:35  [backtick] proposal.md
+    3. The prompt-provided `tasks.md`, `design.md`, `proposal.md`, and `specs/**/spec.md`.
+.cursor/agents/openspec-quality-controller.md:41  [backtick] tasks.md
+    1. If `tasks.md` contains `^# Срез S\d+`, evaluate in slice mode.
+.cursor/commands/opsx-archive.md:16  [backtick] tasks.md
+    - **`--force-legacy`:** пропуск slice-gate на шаге 3.5 при непринятых **`S<N>.accept`** (legacy `S<N>.T<M>`) — архив без отметки в `tasks.md`, warnings. Иначе при `[ ]` на приёмочных задачах — карточк
+.cursor/commands/opsx-extend.md:8  [backtick] proposal.md
+    Контролируемо расширить scope активного change: пользователь описывает **новое требование**, команда обновляет `proposal.md` / `design.md` / `specs/` / `tasks.md` (при необходимости — с привязкой к су
+.cursor/commands/opsx-extend.md:8  [backtick] design.md
+    Контролируемо расширить scope активного change: пользователь описывает **новое требование**, команда обновляет `proposal.md` / `design.md` / `specs/` / `tasks.md` (при необходимости — с привязкой к су
+.cursor/commands/opsx-extend.md:8  [backtick] tasks.md
+    Контролируемо расширить scope активного change: пользователь описывает **новое требование**, команда обновляет `proposal.md` / `design.md` / `specs/` / `tasks.md` (при необходимости — с привязкой к су
+.cursor/commands/opsx-extend.md:8  [backtick] debug.md
+    Контролируемо расширить scope активного change: пользователь описывает **новое требование**, команда обновляет `proposal.md` / `design.md` / `specs/` / `tasks.md` (при необходимости — с привязкой к су
+.cursor/commands/opsx-extend.md:27  [backtick] debug.md
+    - `--from-debug <path>` — устаревший alias: `debug.md` или RCA в change (предпочтительно `--from-report`)
+.cursor/commands/opsx-extend.md:42  [backtick] debug.md
+    3. Показать бриф **B1/B2** (карточка `brief-card.md`, §5.1 Sync Card). «Соответствие исходному scope», `Drift-check`, план правки артефактов — **internal** (`debug.md`), не в чат. B2: **Варианты** нум
+.cursor/commands/opsx-extend.md:49  [backtick] debug.md
+    6. Зафиксировать в `debug.md` секцию `## Extend — YYYY-MM-DD`: источник, что добавлено, disposition.
+.cursor/commands/opsx-knowledge-add.md:16  [backtick] SKILL.md
+    - Без аргументов выполняется Session Context Fallback (см. `SKILL.md`): команда подбирает кандидата из recently viewed / упомянутых в текущей сессии отчётов и спрашивает подтверждение через AskQuestio
+.cursor/commands/opsx-status.md:8  [backtick] debug.md
+    Прочитать и показать **текущее состояние** активного change: имя, schema, структура срезов и их статус приёмки, последние отчёты в `reports/`, открытые `awaiting-acceptance` решения в `debug.md`, реко
+.cursor/commands/opsx-verify.md:8  [backtick] tasks.md
+    Проверка постановки и плана изменения перед реализацией, между срезами и перед архивацией. Режим (до/после среза, один срез, миграция в срезы, без срезов) определяется по `tasks.md`, датам артефактов,
+.cursor/commands/opsx-verify.md:8  [backtick] debug.md
+    Проверка постановки и плана изменения перед реализацией, между срезами и перед архивацией. Режим (до/после среза, один срез, миграция в срезы, без срезов) определяется по `tasks.md`, датам артефактов,
+.cursor/docs/1c-coding-standards.md:44  [backtick] design.md
+    **Экспортный язык распространяется и на идентификаторы (AP-031).** Требование «русский доменный экспортный язык» относится не только к тексту комментариев (AP-054), но и к **именам** — процедур, функц
+.cursor/docs/1c-coding-standards.md:44  [backtick] tasks.md
+    **Экспортный язык распространяется и на идентификаторы (AP-031).** Требование «русский доменный экспортный язык» относится не только к тексту комментариев (AP-054), но и к **именам** — процедур, функц
+.cursor/docs/chat-lexicon.md:9  [backtick] design.md
+    - **`/opsx:overview`** (файл `temp/overview-*.md`) — слой «лаконичное описание проекта» для ФА / заказчика: ситуация и эффект, не калька `design.md`, не названия механизмов («автомат», «ядро»), не тут
+.cursor/docs/marker-canon.md:3  [backtick] proposal.md
+    Единое поле смысла: **`domain_label`** (= `comment_suffix` в `proposal.md`).
+.cursor/docs/marker-layers-guide.md:3  [backtick] proposal.md
+    Единое поле смысла: **`domain_label`** (= `comment_suffix` в `proposal.md`).
+.cursor/docs/opsx-output-style.md:90  [backtick] debug.md
+    Чат — **единственная** поверхность, по которой человек принимает решение **или начинает работу**. Файлы (`reports/**`, `debug.md`) — для агента, аудита, **рецепта** шагов и углублённых уточнений. Если
+.cursor/docs/opsx-output-style.md:135  [backtick] debug.md
+    Завершение команды описывает **что изменилось для дела** («постановка дополнена, можно проверять»), а не перечень файлов. Список артефактов — в `debug.md` / отчёт.
+.cursor/docs/opsx-output-style.md:196  [backtick] debug.md
+    | F3 | extend | бриф B2: **Варианты** нумерованно; `Drift-check` только в `debug.md` |
+.cursor/docs/opsx-output-style.md:206  [backtick] tasks.md
+    **Внутренние ID:** `D<N>` (Decisions), `S<N>.T<M>` (Slices), `I<N>` (матрица перехватов), `R<N>` (регрессии), `SC<N>` (static checks), номера задач из `tasks.md` вида `12.9`, номера секций `design.md 
+.cursor/docs/opsx-output-style.md:206  [backtick] design.md
+    **Внутренние ID:** `D<N>` (Decisions), `S<N>.T<M>` (Slices), `I<N>` (матрица перехватов), `R<N>` (регрессии), `SC<N>` (static checks), номера задач из `tasks.md` вида `12.9`, номера секций `design.md 
+.cursor/docs/opsx-output-style.md:212  [backtick] design.md
+    **SSOT запрещённых в чате кодов движка — `.cursor/docs/chat-lexicon.md` (Слой 1).** Таблица ниже — расширенная карта артефактного жаргона (имена секций `design.md`, классы дефектов), которой нет в сло
+.cursor/docs/opsx-output-style.md:222  [backtick] design.md
+    | `Decisions` (как имя секции `design.md`) | не цитировать в чате; «нужно зафиксировать решение по …» |
+.cursor/docs/opsx-output-style.md:250  [backtick] debug.md
+    Сообщения оркестратора **в чат** (не файлы `reports/`, не `debug.md`, не тело артефактов ЗНИ) проходят **обязательный** self-check по [`.cursor/rules/chat-output-budget.mdc`](../rules/chat-output-budg
+.cursor/docs/opsx-output-style.md:318  [backtick] debug.md
+    **Внутреннее (никогда в чат-бриф):** `Drift-check`, «Соответствие исходному scope», KB-discovery, нумерованный план правки proposal/design/tasks, Scope Coherence Audit — только `debug.md` / `reports/`
+.cursor/docs/opsx-output-style.md:320  [backtick] proposal.md
+    **HALT-строки для greppable self-check (extend/new B1/B2):** `proposal.md / design.md`, `1) уточнить`, `обновить артефакты`, `Drift-check:`.
+.cursor/docs/opsx-output-style.md:332  [backtick] debug.md
+    Нормализация — в слоты брифа explore (B3). При уже открытой ЗНИ и дефекте — RCA в артефакты change (`debug.md` / `reports/`), правки постановки — `/opsx:extend` (см. Decisions 8–9 в change kit-context
+.cursor/docs/opsx-output-style.md:435  [backtick] tasks.md
+    Суть карты правок берётся из формулировки задачи в `tasks.md`, не из ответа writer. ID задачи в чате опционален.
+.cursor/docs/opsx-output-style.md:449  [backtick] tasks.md
+    - **Действие** — короткое описание задачи из `tasks.md` (одна фраза, без имён процедур и кодов категорий).
+.cursor/docs/opsx-output-style.md:460  [backtick] debug.md
+    Имена секций в **файле** handoff совпадают между вариантами. Параллельно — запись в `debug.md` `## Slice Gate Decisions` по контракту skill-а apply.
+.cursor/docs/opsx-output-style.md:477  [backtick] design.md
+    - **Суть (UX + результат):** 1–2 предложения без имён файлов артефактов (`design.md`, `tasks.md`, `debug.md`), без имён секций движка (`## …`), без слов **PASS** / **FAIL** / **verdict**. Только: что 
+.cursor/docs/opsx-output-style.md:477  [backtick] tasks.md
+    - **Суть (UX + результат):** 1–2 предложения без имён файлов артефактов (`design.md`, `tasks.md`, `debug.md`), без имён секций движка (`## …`), без слов **PASS** / **FAIL** / **verdict**. Только: что 
+.cursor/docs/opsx-output-style.md:477  [backtick] debug.md
+    - **Суть (UX + результат):** 1–2 предложения без имён файлов артефактов (`design.md`, `tasks.md`, `debug.md`), без имён секций движка (`## …`), без слов **PASS** / **FAIL** / **verdict**. Только: что 
+.cursor/docs/opsx-output-style.md:506  [backtick] debug.md
+    4. **Открытые решения.** Нумерованный короткий список срезов, ждущих приёмки, без развёрнутых абзацев; детали — в `debug.md`.
+.cursor/docs/opsx-output-style.md:529  [backtick] tasks.md
+    Запрещено: «Обновлено: `tasks.md`, `design.md`, … Дальше: `/opsx:extend --from-verify …`»; перечень файлов как handoff.
+.cursor/docs/opsx-output-style.md:529  [backtick] design.md
+    Запрещено: «Обновлено: `tasks.md`, `design.md`, … Дальше: `/opsx:extend --from-verify …`»; перечень файлов как handoff.
+.cursor/docs/opsx-output-style.md:579  [backtick] debug.md
+    - good: бриф B1: слот **Изменение** + `Подтвердить?`; план правки артефактов — в `debug.md` после «да».
+.cursor/docs/opsx-output-style.md:616  [backtick] design.md
+    - bad: «В `design.md` нет `Implementation Options` для S2; противоречие `Spec` ↔ `Behavior Contract п.7`.»
+.cursor/docs/opsx-output-style.md:660  [backtick] proposal.md
+    | **decision** | код, поведение системы, приёмочные шаги, нарезку срезов, `Behavior Contract` | оркестратор через `/opsx:extend` | **Только** `/opsx:extend <name> --from-verify <report>` (или `--from-
+.cursor/docs/opsx-output-style.md:660  [backtick] design.md
+    | **decision** | код, поведение системы, приёмочные шаги, нарезку срезов, `Behavior Contract` | оркестратор через `/opsx:extend` | **Только** `/opsx:extend <name> --from-verify <report>` (или `--from-
+.cursor/docs/opsx-output-style.md:660  [backtick] tasks.md
+    | **decision** | код, поведение системы, приёмочные шаги, нарезку срезов, `Behavior Contract` | оркестратор через `/opsx:extend` | **Только** `/opsx:extend <name> --from-verify <report>` (или `--from-
+.cursor/docs/opsx-output-style.md:679  [backtick] design.md
+    | Имена секций `design.md` (`Blast Radius`, `Behavior Contract`, `Implementation Options`, `Simplicity Check`) | `architect-gate.mdc`, `precedent-regression-gate.mdc`, `openspec-new-change/SKILL.md` |
+.cursor/docs/opsx-output-style.md:691  [backtick] tasks.md
+    Название берётся из заголовка `# Срез S<N>: <название>` соответствующего блока в `tasks.md`. Если такого заголовка нет (legacy ЗНИ без срезов) — формулировка переходит в текст без `S<N>` («первый этап
+.cursor/docs/opsx-output-style.md:705  [backtick] tasks.md
+    Расширение правила §10 на **задачи** среза. В заголовке секции / карточки / handoff-сообщения первое упоминание `S<N>.<M>` или `S<N>.T<M>` идёт **с коротким описанием задачи в «ёлочках»** — берётся из
+.cursor/docs/templates/brief-card.md:32  [backtick] proposal.md
+    **HALT-строки (extend/new B1/B2):** `proposal.md / design.md`, `1) уточнить`, `обновить артефакты`, `Drift-check:`.
+.cursor/docs/templates/decision-block.md:17  [backtick] design.md
+    3. **No-copy.** Формулировки синтезируются из смысла, **не копируются** из `design.md` / `tasks.md` / `verification-*.md`. Артефакт даёт факты (что в коде, варианты, последствия), не готовые метки для
+.cursor/docs/templates/decision-block.md:17  [backtick] tasks.md
+    3. **No-copy.** Формулировки синтезируются из смысла, **не копируются** из `design.md` / `tasks.md` / `verification-*.md`. Артефакт даёт факты (что в коде, варианты, последствия), не готовые метки для
+.cursor/docs/templates/decision-block.md:99  [backtick] design.md
+    **Почему это развилка.** <1–2 предложения: что не закрыто в `design.md` / `tasks.md`. Без «Layer 4 вернул CHALLENGE».>
+.cursor/docs/templates/decision-block.md:99  [backtick] tasks.md
+    **Почему это развилка.** <1–2 предложения: что не закрыто в `design.md` / `tasks.md`. Без «Layer 4 вернул CHALLENGE».>
+.cursor/docs/templates/decision-block.md:106  [backtick] design.md
+    **Что изменится после выбора.** <правки в `design.md` / `tasks.md`, либо явное «принимаем как есть».>
+.cursor/docs/templates/decision-block.md:106  [backtick] tasks.md
+    **Что изменится после выбора.** <правки в `design.md` / `tasks.md`, либо явное «принимаем как есть».>
+.cursor/docs/ux-acceptance-isolated-chat.md:41  [backtick] debug.md
+    **Hard gate:** G1+G3 (или G1 GO без G2). Fixture: `diadok-mchd-before-pack` с `debug.md` § Verify decision ledger.
+.cursor/rules/1c-writer-pipeline.mdc:125  [backtick] design.md
+    Allow-list baseline — `.cursor/docs/marker-canon.md`; project.md только **расширяет**. **`design.md`/`tasks.md` НЕ источник имён** — терминология ЗНИ не легитимизирует латиницу в идентификаторе.
+.cursor/rules/1c-writer-pipeline.mdc:125  [backtick] tasks.md
+    Allow-list baseline — `.cursor/docs/marker-canon.md`; project.md только **расширяет**. **`design.md`/`tasks.md` НЕ источник имён** — терминология ЗНИ не легитимизирует латиницу в идентификаторе.
+.cursor/rules/1c-writer-pipeline.mdc:149  [backtick] design.md
+    - **Suggested:** колонка содержит **буквально** токен `AP-031 MUST_FIX` и **ничего больше** — без `confirm/dismiss`, без ссылок на `design.md`/`tasks.md`, без имён символов, без обоснований, без «desi
+.cursor/rules/1c-writer-pipeline.mdc:149  [backtick] tasks.md
+    - **Suggested:** колонка содержит **буквально** токен `AP-031 MUST_FIX` и **ничего больше** — без `confirm/dismiss`, без ссылок на `design.md`/`tasks.md`, без имён символов, без обоснований, без «desi
+.cursor/rules/1c-xml-write-guard.mdc:24  [backtick] debug.md
+    | Template.xml (макет табличного документа) | Default **manual**: инструкция / WAIT. Non-manual / compile — только при разрешении apply (`debug.md` § Apply permissions или `[mxl:assisted]`) → скилл `1
+.cursor/rules/architect-gate.mdc:24  [backtick] debug.md
+    - В `debug.md` change: **M ≥ 3** строк с `Architect Gate:\s*(не вызывался|не требовался|declined|—)` (см. `.cursor/skills/openspec-extend-change/SKILL.md`, п. 5a, Триггер 2) **и** (нет `reports/archit
+.cursor/rules/architect-gate.mdc:42  [backtick] debug.md
+    - Internal block extend (`debug.md`) фиксирует `Drift-check: drift-warning` или `scope-violation` при user-extend (триггер брифа **B2**, см. `openspec-extend-change/SKILL.md`); `Drift-check` **не в ча
+.cursor/rules/architect-gate.mdc:43  [backtick] design.md
+    - **Precedent regression** (см. `.cursor/rules/precedent-regression-gate.mdc`): дельта `specs/**` содержит `MODIFIED`/`REMOVED` для capability, у которой в архиве есть `ADDED`; или в `design.md`/`prop
+.cursor/rules/architect-gate.mdc:43  [backtick] proposal.md
+    - **Precedent regression** (см. `.cursor/rules/precedent-regression-gate.mdc`): дельта `specs/**` содержит `MODIFIED`/`REMOVED` для capability, у которой в архиве есть `ADDED`; или в `design.md`/`prop
+.cursor/rules/architect-gate.mdc:91  [backtick] proposal.md
+    3. Для каждого найденного архивного change прочитать только `proposal.md` (секции `## Why`, `## What Changes`), первые абзацы `design.md` (`## Goals / Non-Goals`, `## Behavior Contract`, `## Decisions
+.cursor/rules/architect-gate.mdc:91  [backtick] design.md
+    3. Для каждого найденного архивного change прочитать только `proposal.md` (секции `## Why`, `## What Changes`), первые абзацы `design.md` (`## Goals / Non-Goals`, `## Behavior Contract`, `## Decisions
+.cursor/rules/architect-gate.mdc:92  [backtick] tasks.md
+    4. Пересечение по файлам: `Grep` по `openspec/changes/archive/**/proposal.md` на пути из `tasks.md` / `design.md` текущего change (`src/...`) — до **3** наиболее релевантных архивных каталогов (совпад
+.cursor/rules/architect-gate.mdc:92  [backtick] design.md
+    4. Пересечение по файлам: `Grep` по `openspec/changes/archive/**/proposal.md` на пути из `tasks.md` / `design.md` текущего change (`src/...`) — до **3** наиболее релевантных архивных каталогов (совпад
+.cursor/rules/architect-gate.mdc:116  [backtick] proposal.md
+    | **verify** Layer 4 (Independent Challenge) | audit | Архитектор в режиме `design-challenge` — **независимый адверсариальный аудит** `proposal.md` ↔ `design.md`. Триггер: первый pre-apply прогон veri
+.cursor/rules/architect-gate.mdc:116  [backtick] design.md
+    | **verify** Layer 4 (Independent Challenge) | audit | Архитектор в режиме `design-challenge` — **независимый адверсариальный аудит** `proposal.md` ↔ `design.md`. Триггер: первый pre-apply прогон veri
+.cursor/rules/architect-gate.mdc:157  [backtick] design.md
+    6. Для **precedent-regression** триггеров (`.cursor/rules/precedent-regression-gate.mdc`): помимо п.1–5, Gate считается закрытым по архитектурной части только если выполняется **любое**: (a) в `design
+.cursor/rules/chat-output-budget-full.mdc:99  [backtick] design.md
+    1. **Тест читателя (reader test).** Разработчик 1С, **не открывавший** артефакты OpenSpec, может выбрать A или B **или понять, что создать/сделать дальше**, прочитав **только это сообщение**. Если что
+.cursor/rules/chat-output-budget-full.mdc:101  [backtick] design.md
+    3. **Правило происхождения (no-copy).** Текст развилки для пользователя **синтезируется из смысла**, а не копируется из `design.md` / `tasks.md` / `verification-*.md`. Артефакт — источник **фактов** (
+.cursor/rules/chat-output-budget-full.mdc:101  [backtick] tasks.md
+    3. **Правило происхождения (no-copy).** Текст развилки для пользователя **синтезируется из смысла**, а не копируется из `design.md` / `tasks.md` / `verification-*.md`. Артефакт — источник **фактов** (
+.cursor/rules/chat-output-budget-full.mdc:135  [backtick] tasks.md
+    | **archive** | Строка `Schema:`; `Slices: K/K приняты` в штатном случае (без `--force-legacy` и без варианта A при архивации); `Specs: Already up to date` / `No delta specs`; `ADR: No architecture re
+.cursor/rules/code-truth-gate.mdc:16  [backtick] design.md
+    - ручное упрощение/переписывание кода после уже созданных `design.md`, `tasks.md`, `debug.md`.
+.cursor/rules/code-truth-gate.mdc:16  [backtick] tasks.md
+    - ручное упрощение/переписывание кода после уже созданных `design.md`, `tasks.md`, `debug.md`.
+.cursor/rules/code-truth-gate.mdc:16  [backtick] debug.md
+    - ручное упрощение/переписывание кода после уже созданных `design.md`, `tasks.md`, `debug.md`.
+.cursor/rules/code-truth-gate.mdc:18  [backtick] debug.md
+    Light Mode и Mechanical Mode не блокируются этим правилом, если нет OpenSpec change и нет `debug.md`/`tasks.md`.
+.cursor/rules/code-truth-gate.mdc:18  [backtick] tasks.md
+    Light Mode и Mechanical Mode не блокируются этим правилом, если нет OpenSpec change и нет `debug.md`/`tasks.md`.
+.cursor/rules/code-truth-gate.mdc:27  [backtick] design.md
+    2. Извлечь из `design.md`, `tasks.md`, `debug.md`, `specs/**` только технические якоря:
+.cursor/rules/code-truth-gate.mdc:27  [backtick] tasks.md
+    2. Извлечь из `design.md`, `tasks.md`, `debug.md`, `specs/**` только технические якоря:
+.cursor/rules/code-truth-gate.mdc:27  [backtick] debug.md
+    2. Извлечь из `design.md`, `tasks.md`, `debug.md`, `specs/**` только технические якоря:
+.cursor/rules/command-skill-gate.mdc:9  [backtick] SKILL.md
+    **Когда загружать:** сессия начата командой из `.cursor/commands/`, которая указывает прочитать `SKILL.md` до любых других файлов.
+.cursor/rules/command-skill-gate.mdc:20  [backtick] SKILL.md
+    1. **FIRST AND ONLY tool call** в первом батче — `Read` указанного `SKILL.md`. Никаких других Read, Grep, Shell, SemanticSearch, Task в том же батче.
+.cursor/rules/existing-mechanism-priority.mdc:97  [backtick] design.md
+    Правильный путь — Preference Hierarchy + AP-055: делегировать фильтр владельцу поведения **или** заполнить секцию `## Hardcode Justification` (шаблон ниже — SSOT для копирования в `design.md` прикладн
+.cursor/rules/existing-mechanism-priority.mdc:101  [backtick] design.md
+    Копировать в `design.md` прикладной ЗНИ, если выбран identity-filter (allow-list имён форм/метаданных в хуке). Пустая секция или ответ «временный список на первый релиз» без плана N+1 — недостаточны.
+.cursor/rules/forms-mxl-mode-gate.mdc:102  [backtick] debug.md
+    **Форма разрешения (норма):** (a) одноразовый AskQuestion или однозначный утвердительный ответ в чате apply **или** (b) маркер задачи `[mxl:assisted]` / явная запись non-manual в tasks до apply. Факт 
+.cursor/rules/model-gpt56.mdc:19  [backtick] SKILL.md
+    - командный вход → `templates/*.md` при обрезке `SKILL.md`.
+.cursor/rules/model-selection.mdc:171  [backtick] debug.md
+    3. После **полного** исчерпания цепочки (оба шага вернули сбой): **СТОП** — сообщить пользователю; предложить повтор позже, смену модели чата или явное решение продолжить без агента. При явном согласи
+.cursor/rules/openspec-specs-gate.mdc:64  [backtick] design.md
+    **Requirement только с implementation-leak:** если все Scenario Requirement описывают контракт API/кода (implementation-leak), **не создавать отдельный Requirement** в spec. Перенести детали в `design
+.cursor/rules/openspec-specs-gate.mdc:69  [backtick] design.md
+    2. Детали реализации (имена функций, ключи структур) — в `design.md` (`## Behavior Contract`, `## Implementation Options`), не в spec Scenario.
+.cursor/rules/precedent-regression-gate.mdc:9  [backtick] design.md
+    Единый источник истины для обнаружения **регрессии прецедента**: когда текущий change, дельта spec, дизайн или код отменяют цель, поведение или требование, ранее зафиксированные в **архивном** change,
+.cursor/rules/precedent-regression-gate.mdc:16  [backtick] design.md
+    - **Blast Radius** — секция в `design.md` (и при Supersedes — в новом ADR) с полями: что отменяется, архивный источник, **бизнес-эффект** для конечного пользователя 1С, альтернативы без отмены, обосно
+.cursor/rules/precedent-regression-gate.mdc:26  [backtick] design.md
+    - В `design.md` или `proposal.md` есть формулировки отмены ранее принятой семантики: «не сохранять», «снять инвариант», «вернуть», «изменить требование так, чтобы не требовало», «убрал», «отменить кон
+.cursor/rules/precedent-regression-gate.mdc:26  [backtick] proposal.md
+    - В `design.md` или `proposal.md` есть формулировки отмены ранее принятой семантики: «не сохранять», «снять инвариант», «вернуть», «изменить требование так, чтобы не требовало», «убрал», «отменить кон
+.cursor/rules/precedent-regression-gate.mdc:58  [backtick] design.md
+    1. В `design.md` есть секция `## Blast Radius` с заполненными полями (контракт, источник archive/ADR/KB, бизнес-эффект, альтернативы, обоснование), и текущая дельта spec/design явно фиксирует осознанн
+.cursor/rules/preserve-subagent-reports.mdc:24  [backtick] design.md
+    4. Если оркестратор использует вывод аналитического агента для правки `design.md`, `tasks.md`, `debug.md`, `specs/**` или для Code-Truth Gate:
+.cursor/rules/preserve-subagent-reports.mdc:24  [backtick] tasks.md
+    4. Если оркестратор использует вывод аналитического агента для правки `design.md`, `tasks.md`, `debug.md`, `specs/**` или для Code-Truth Gate:
+.cursor/rules/preserve-subagent-reports.mdc:24  [backtick] debug.md
+    4. Если оркестратор использует вывод аналитического агента для правки `design.md`, `tasks.md`, `debug.md`, `specs/**` или для Code-Truth Gate:
+.cursor/rules/sdd-workflow.mdc:46  [backtick] debug.md
+    - **archive** возможен со всеми `S<N>.accept` = `[x]` (в т.ч. после варианта **A** при архивации → `принят (archive)` в `debug.md`) либо с **`--force-legacy`** (осознанный обход контракта срезов).
+.cursor/rules/session-discipline.mdc:13  [backtick] SKILL.md
+    Команда из `.cursor/commands/*.md` инструктирует Read `SKILL.md`.
+.cursor/rules/session-discipline.mdc:15  [backtick] SKILL.md
+    1. **FIRST AND ONLY tool call** в первом батче — `Read` указанного `SKILL.md`. Никаких других Read, Grep, Shell, SemanticSearch, Task в том же батче.
+.cursor/rules/session-discipline.mdc:19  [backtick] SKILL.md
+    **Страховка от обрезки:** если `Read` обрезает `SKILL.md` — во втором батче Read `templates/*.md` скилла. Если шаблоны недоступны — `Read offset/limit` завершающих шагов. Формат вывода — Compact Brief
+.cursor/rules/task-readability.mdc:46  [backtick] tasks.md
+    Правило: конкретное имя новой процедуры в `tasks.md` допустимо, если оно:
+.cursor/rules/task-readability.mdc:57  [backtick] design.md
+    - Отсутствие буллета по заявленному Scenario — **WARNING** `accept-bullets-missing-scenario`; пустое тело — **CRITICAL** `accept-checklist-empty`; буллет с Scenario, заявленным в `**Связь со spec:**` 
+.cursor/rules/task-readability.mdc:85  [backtick] design.md
+    - **Не применяется:** `design.md`, `proposal.md`, `specs/**/spec.md`, `reports/**` — там другие жанры документов.
+.cursor/rules/task-readability.mdc:85  [backtick] proposal.md
+    - **Не применяется:** `design.md`, `proposal.md`, `specs/**/spec.md`, `reports/**` — там другие жанры документов.
+.cursor/rules/verified-cause-gate.mdc:51  [backtick] proposal.md
+    1. **Glob** `openspec/changes/archive/**/specs/**/spec.md` и **прочитать** `proposal.md` архивных changes, чьи capabilities или пути пересекаются с текущим `tasks.md` / `design.md` (по подстрокам путе
+.cursor/rules/verified-cause-gate.mdc:51  [backtick] tasks.md
+    1. **Glob** `openspec/changes/archive/**/specs/**/spec.md` и **прочитать** `proposal.md` архивных changes, чьи capabilities или пути пересекаются с текущим `tasks.md` / `design.md` (по подстрокам путе
+.cursor/rules/verified-cause-gate.mdc:51  [backtick] design.md
+    1. **Glob** `openspec/changes/archive/**/specs/**/spec.md` и **прочитать** `proposal.md` архивных changes, чьи capabilities или пути пересекаются с текущим `tasks.md` / `design.md` (по подстрокам путе
+.cursor/rules/verified-cause-gate.mdc:52  [backtick] design.md
+    2. Если пересечение найдено **и** текущий `design.md` потенциально **отменяет** цель или требование архива (см. триггеры в `.cursor/rules/precedent-regression-gate.mdc`) — **СТОП** до одного из:
+.cursor/rules/verified-cause-gate.mdc:53  [backtick] design.md
+    - заполненной секции `## Blast Radius` в `design.md` (контракт / источник / бизнес-эффект для пользователя 1С / альтернативы / обоснование), **или**
+.cursor/rules/verify-user-communication.mdc:90  [backtick] debug.md
+    3. Internal: user-extend `--from-verify` → **сразу** обновить `debug.md` § Verify decision ledger + design § «Решения verify (зафиксировано)» + закрыть темы в `open_known_questions`; lite confirm допу
+.cursor/rules/vertical-slices.mdc:21  [backtick] tasks.md
+    **Исполнитель задачи важнее заголовка.** В `tasks.md` apply выполняет `S<N>.<M>` агент (writer/explorer); пользователь — только ручной конфиг и приёмка на границе среза.
+.cursor/rules/vertical-slices.mdc:31  [backtick] design.md
+    **Неизвестное поведение внешнего API/ядра → агент:** статический разбор cf/cfe + `design.md` § Assumptions / § Decisions; при недостатке фактов — explorer в new/apply; наблюдаемый исход — Primary или 
+.cursor/rules/vertical-slices.mdc:51  [backtick] debug.md
+    5. **Slice-gate между срезами.** После каждого среза — обязательная пауза apply: «принят / не принят / дефект в предыдущем / стоп». Решение фиксируется в `debug.md` секция `## Slice Gate Decisions`. Ф
+.cursor/rules/vertical-slices.mdc:59  [backtick] debug.md
+    | **Частичная приёмка** | `[x]` на accept = Primary пройден; optional-сценарии фиксируются в `debug.md` / повторной приёмке, не блокируют закрытие среза |
+.cursor/rules/vertical-slices.mdc:66  [backtick] design.md
+    | Инвариант модели данных / платформы | `design.md` секция `## Assumptions` | «Платформа гарантирует, что `RecordSetModule.ПередЗаписью` восстанавливает базовую строку» |
+.cursor/rules/vertical-slices.mdc:69  [backtick] design.md
+    | Неизвестность runtime внешнего API/ядра | `design.md` § Assumptions + static/explorer **агентом**; наблюдаемый исход → optional/Primary в `S<N>.accept` | — |
+.cursor/rules/vertical-slices.mdc:70  [backtick] tasks.md
+    | Архитектурный замер / релизная валидация | Блок `## Follow-up` в `tasks.md` **вне** срезов | — |
+.cursor/rules/vertical-slices.mdc:76  [backtick] tasks.md
+    ## ФОРМАТ `tasks.md` СО СРЕЗАМИ
+.cursor/rules/vertical-slices.mdc:110  [backtick] debug.md
+    - Optional не пройдены — фиксировать в `debug.md` `## Slice Gate Decisions`; не блокируют `[x]`, если Primary pass.
+.cursor/rules/vertical-slices.mdc:165  [backtick] design.md
+    - **При создании ЗНИ** (`/opsx:new`) — архитектор формирует секцию `## Slices` в `design.md` **до** генерации `tasks.md`. Затем `tasks.md` генерируется с `# Срез S<N>` по этой секции. См. шаблоны «Arc
+.cursor/rules/vertical-slices.mdc:165  [backtick] tasks.md
+    - **При создании ЗНИ** (`/opsx:new`) — архитектор формирует секцию `## Slices` в `design.md` **до** генерации `tasks.md`. Затем `tasks.md` генерируется с `# Срез S<N>` по этой секции. См. шаблоны «Arc
+.cursor/rules/vertical-slices.mdc:172  [backtick] tasks.md
+    - **Обнаружение срезов:** Grep `tasks.md` на `^# Срез S\d+`. Если найдены — step-by-slice режим (default).
+.cursor/rules/vertical-slices.mdc:175  [backtick] debug.md
+    1. Append в `debug.md` `## Slice Gate Decisions` запись `Решение: awaiting-acceptance`.
+.cursor/rules/vertical-slices.mdc:186  [backtick] debug.md
+    | Запись в debug | `debug.md` `## Slice Gate Decisions`, поле `Решение:` | этот файл, § ФИКСАЦИЯ РЕШЕНИЙ |
+.cursor/rules/vertical-slices.mdc:193  [backtick] tasks.md
+    - **Slice-gate (вердикт, при следующем /opsx:apply):** см. `.cursor/skills/openspec-apply-change/SKILL.md`, шаг 5 "Resume with pending verdict". Первым действием агент задаёт AskQuestion с 3 опциями —
+.cursor/rules/vertical-slices.mdc:202  [backtick] tasks.md
+    `/opsx:verify` использует два режима — **`pre-apply`** и **`post-apply`** — выводимые из состояния `tasks.md` (наличие `[ ]` хотя бы на одной задаче, включая `S<N>.accept`, → `pre-apply`; все `[x]` → 
+.cursor/rules/vertical-slices.mdc:202  [backtick] debug.md
+    `/opsx:verify` использует два режима — **`pre-apply`** и **`post-apply`** — выводимые из состояния `tasks.md` (наличие `[ ]` хотя бы на одной задаче, включая `S<N>.accept`, → `pre-apply`; все `[x]` → 
+.cursor/rules/vertical-slices.mdc:277  [backtick] tasks.md
+    1. Grep `tasks.md` на `^# Срез S\d+` — если срезы есть, определить подходящий срез.
+.cursor/rules/vertical-slices.mdc:285  [backtick] tasks.md
+    - Перед добавлением **любой** fix-задачи в `tasks.md` — выполнить **Checklist «Fix-срез разрешён?»** из раздела **«ИНВАРИАНТ: Defect placement»** (ниже). Если хотя бы один пункт чеклиста **не** выполн
+.cursor/rules/vertical-slices.mdc:295  [backtick] tasks.md
+    - Пока в `tasks.md` есть **`S<N>.accept`** (или legacy **`S<N>.T<M>`**) с **`[ ]`**, см. `.cursor/skills/openspec-archive-change/SKILL.md` шаг **3.5**: краткая карточка и **AskQuestion** (подтверждени
+.cursor/rules/vertical-slices.mdc:295  [backtick] debug.md
+    - Пока в `tasks.md` есть **`S<N>.accept`** (или legacy **`S<N>.T<M>`**) с **`[ ]`**, см. `.cursor/skills/openspec-archive-change/SKILL.md` шаг **3.5**: краткая карточка и **AskQuestion** (подтверждени
+.cursor/rules/vertical-slices.mdc:307  [backtick] debug.md
+    - **`debug.md#Slice Gate Decisions`** — append при каждом slice-gate (см. формат выше). Поле `Решение` принимает значения: `awaiting-acceptance` (handoff на приёмку), `принят`, `принят (manual shortcu
+.cursor/rules/vertical-slices.mdc:317  [backtick] debug.md
+    **Метрика (детерминированная, grep по структурным записям `debug.md`, без скрейпа прозы):**
+.cursor/rules/vertical-slices.mdc:319  [backtick] tasks.md
+    - `AcceptLoop(S<N>)` = число записей в `## Slice Gate Decisions`, где `Срез:` = `S<N>` и `Решение:` ∈ {`awaiting-acceptance`, `не принят`, `inside-slice rework`}, при условии что в `tasks.md` `S<N>.ac
+.cursor/rules/vertical-slices.mdc:326  [backtick] debug.md
+    **Запись в `debug.md` при срабатывании — секция `## Loop Detection — YYYY-MM-DD`:**
+.cursor/rules/vertical-slices.mdc:348  [backtick] debug.md
+    **Во всех остальных случаях** (включая `Решение: awaiting-acceptance` и `не принят` в `debug.md`) — **default:** вставить задачи **внутрь** `S<K>` **перед** `S<K>.accept`, без нового `# Срез`.
+.cursor/rules/vertical-slices.mdc:368  [backtick] tasks.md
+    2. В `tasks.md` будет отдельный `S<N+1>.accept` и маркер `<!-- slice-gate -->` для нового среза (если создаётся срез).
+.cursor/rules/vertical-slices.mdc:369  [backtick] debug.md
+    3. В `debug.md` зафиксировано обоснование исключения (cross-slice или frozen-slice).
+.cursor/rules/vertical-slices.mdc:375  [backtick] tasks.md
+    1. Grep `tasks.md` на `^# Срез S\d+` — есть ли срезы?
+.cursor/skills/1c-agent-patterns/SKILL.md:91  [backtick] design.md
+    В extend — обогащённый бриф из артефактов change (`design.md`, `debug.md`) или из `temp/reports/<тип>-*.md` / `temp/explore-handoff-*.md`.
+.cursor/skills/1c-agent-patterns/SKILL.md:91  [backtick] debug.md
+    В extend — обогащённый бриф из артефактов change (`design.md`, `debug.md`) или из `temp/reports/<тип>-*.md` / `temp/explore-handoff-*.md`.
+.cursor/skills/1c-agent-patterns/architect.md:184  [backtick] design.md
+    Used by `/opsx:verify` Layer 4 — независимый адверсариальный аудит, что `design.md` действительно решает проблему из `proposal.md` оптимальным способом. **Не** дублирует Architect Gate из `/opsx:new` 
+.cursor/skills/1c-agent-patterns/architect.md:184  [backtick] proposal.md
+    Used by `/opsx:verify` Layer 4 — независимый адверсариальный аудит, что `design.md` действительно решает проблему из `proposal.md` оптимальным способом. **Не** дублирует Architect Gate из `/opsx:new` 
+.cursor/skills/1c-agent-patterns/architect.md:197  [backtick] design.md
+    Независимый адверсариальный аудит `design.md` ЗНИ `<change-name>`.
+.cursor/skills/1c-agent-patterns/architect.md:485  [backtick] tasks.md
+    Вызывается при **перестройке** `tasks.md` в вертикальные срезы: когда verify обнаружил несовместимый с срезами формат (**нет** заголовков `# Срез` при slice-ориентированной ЗНИ) или маркеры `<!-- phas
+.cursor/skills/1c-agent-patterns/architect.md:557  [backtick] tasks.md
+    Если в `tasks.md` уже есть `# Срез S<N+1>` с признаками
+.cursor/skills/1c-agent-patterns/architect.md:565  [backtick] design.md
+    поправить `design.md` `## Slices` (убрать строку лишнего среза)
+.cursor/skills/1c-agent-patterns/architect.md:566  [backtick] debug.md
+    и при необходимости `debug.md` (`Решение: inside-slice rework`).
+.cursor/skills/1c-agent-patterns/architect.md:580  [backtick] design.md
+    `# Срез S<K>`; синхронизировать `design.md` `## Slices`.
+.cursor/skills/1c-agent-patterns/architect.md:593  [backtick] design.md
+    куда перенесены задачи, какие артефакты (`design.md`, `debug.md`)
+.cursor/skills/1c-agent-patterns/architect.md:593  [backtick] debug.md
+    куда перенесены задачи, какие артефакты (`design.md`, `debug.md`)
+.cursor/skills/1c-agent-patterns/architect.md:607  [backtick] design.md
+    Used BEFORE task decomposition: architect produces the `## Slices` section of `design.md`. Входит в Slice Generation Gate скилла `openspec-new-change`.
+.cursor/skills/1c-agent-patterns/architect.md:669  [backtick] design.md
+    - Инварианты/NFR — `design.md#Assumptions` или `S<N>.<M>`, не accept.
+.cursor/skills/1c-agent-patterns/architect.md:716  [backtick] design.md
+    они попадают либо в `design.md#Assumptions`, либо в обычные
+.cursor/skills/1c-agent-patterns/architect.md:727  [backtick] tasks.md
+    Used AFTER slice decomposition: architect produces `tasks.md` with H1 slice headers using the approved `## Slices` section from design.md.
+.cursor/skills/1c-mxl/SKILL.md:22  [backtick] debug.md
+    **Разрешение non-manual (apply):** маркер `[mxl:assisted]` / явная запись в tasks **или** утвердительный ответ / AskQuestion в чате apply; факт — в `debug.md` § `## Apply permissions`. Без разрешения 
+.cursor/skills/openspec-apply-change/SKILL.md:47  [backtick] proposal.md
+    **Metadata Prep (MANDATORY):** Before writing any code, check `proposal.md` for comment marker placeholders:
+.cursor/skills/openspec-apply-change/SKILL.md:53  [backtick] proposal.md
+    - Replace placeholders in `proposal.md`; mark F1 follow-up `[x]` if present.
+.cursor/skills/openspec-apply-change/SKILL.md:102  [backtick] debug.md
+    - `debug.md` § `## Verify decision ledger` → `open_decision_id` не пуст, **или**
+.cursor/skills/openspec-apply-change/SKILL.md:103  [backtick] design.md
+    - в `design.md` есть незакрытый вопрос (`## Open Questions`) / зеркало `## Решения verify (зафиксировано)` с пометкой open.
+.cursor/skills/openspec-apply-change/SKILL.md:108  [backtick] proposal.md
+    Прочитать `proposal.md` и `openspec/project.md` (секция «Разработчик по умолчанию»: `defaultDeveloper`, `cfMarkerPrefix`). Baseline запреты domain_label — `.cursor/docs/marker-canon.md` ⊕ project over
+.cursor/skills/openspec-apply-change/SKILL.md:121  [backtick] tasks.md
+    **marker_scope** (Grep `tasks.md` и при необходимости `design.md` на пути `src/.../*.bsl`):
+.cursor/skills/openspec-apply-change/SKILL.md:121  [backtick] design.md
+    **marker_scope** (Grep `tasks.md` и при необходимости `design.md` на пути `src/.../*.bsl`):
+.cursor/skills/openspec-apply-change/SKILL.md:142  [backtick] debug.md
+    - **Template/MXL:** Mode-вопрос new не используется. Default — **manual** (инструкция / WAIT). Non-manual (`1c-mxl/compile`) — только при записанном разрешении: ответ в чате apply / AskQuestion / марк
+.cursor/skills/openspec-apply-change/SKILL.md:148  [backtick] debug.md
+    1. Grep последнюю запись в `debug.md` `## Slice Gate Decisions` для каждого среза.
+.cursor/skills/openspec-apply-change/SKILL.md:167  [backtick] tasks.md
+    - [3] → запросить **S<K>** и описание дефекта; **Grep** в `tasks.md` приёмочную строку среза (`S<K>.accept` или legacy `S<K>.T<M>`):
+.cursor/skills/openspec-apply-change/SKILL.md:168  [backtick] debug.md
+    - Если приёмочная задача среза `S<K>` = **`[ ]`** (срез S<K> **не** принят) → **inside-slice rework** по `.cursor/rules/vertical-slices.mdc` (**ИНВАРИАНТ: Defect placement**): добавить fix-задачи **вн
+.cursor/skills/openspec-apply-change/SKILL.md:169  [backtick] debug.md
+    - Если приёмочная задача среза `S<K>` = **`[x]`** (срез S<K> принят, frozen) → создать **fix-срез** `# Срез S<N+1>: …` с отдельным `S<N+1>.accept` по `vertical-slices.mdc`; **снять** `[x]` с приёмки `
+.cursor/skills/openspec-apply-change/SKILL.md:186  [backtick] debug.md
+    - **Slice Gate Decisions (if debug.md contains them):** Show previous slice gate decisions from `debug.md` section `## Slice Gate Decisions` — helps orient after session breaks
+.cursor/skills/openspec-apply-change/SKILL.md:193  [backtick] tasks.md
+    1. Grep `tasks.md` for `^# Срез S\d+` — if found, ЗНИ is in **slice mode** (default).
+.cursor/skills/openspec-apply-change/SKILL.md:239  [backtick] debug.md
+    - `debug-session` — `debug.md` изменён сегодня
+.cursor/skills/openspec-apply-change/SKILL.md:272  [backtick] debug.md
+    | Режим **человеческим языком**: «пауза после каждой задачи — в срезе много шагов» / «вы просили пошагово» / «активная отладка по debug» | Обязательное цитирование внутренних id триггеров (`slice-size
+.cursor/skills/openspec-apply-change/SKILL.md:278  [backtick] debug.md
+    | Обозначение проверки на человеческом языке: «архитектурное ревью закрыто», «проверка прошла резервным агентом» | Имена гейтов (`Architect Gate`, `Slice Gate`, `Implementation Impact Gate`) и техкоды
+.cursor/skills/openspec-apply-change/SKILL.md:309  [backtick] debug.md
+    | Макет / Template.xml | «Template.xml», «макет», «печатная форма», MXL, маркеры `[mxl:assisted]` / `[mxl:manual]` | **Read** Mode Gate § Политика макетов. Default **manual** (WAIT/инструкция). Non-ma
+.cursor/skills/openspec-apply-change/SKILL.md:322  [backtick] debug.md
+    - В `debug.md` записывать только факты из кода, не план:
+.cursor/skills/openspec-apply-change/SKILL.md:331  [backtick] debug.md
+    - Запрещено писать в `debug.md` имена процедур/хелперов, которых нет в `created_or_modified_symbols` или spot-check.
+.cursor/skills/openspec-apply-change/SKILL.md:334  [backtick] tasks.md
+    - **Автор:** оркестратор (механическое сведение journal + `tasks.md`; без нового агента).
+.cursor/skills/openspec-apply-change/SKILL.md:335  [backtick] debug.md
+    - **Источник:** записи `### Code-Truth — <task-id>` текущего среза S<N> в `debug.md` + формулировка задачи из `tasks.md` (поле «суть» — одно предложение на русском; **не** из ответа writer).
+.cursor/skills/openspec-apply-change/SKILL.md:335  [backtick] tasks.md
+    - **Источник:** записи `### Code-Truth — <task-id>` текущего среза S<N> в `debug.md` + формулировка задачи из `tasks.md` (поле «суть» — одно предложение на русском; **не** из ответа writer).
+.cursor/skills/openspec-apply-change/SKILL.md:356  [backtick] debug.md
+    - **Self-check apply (карта):** каждый пункт карты в чате понятен без открытия `debug.md`; в блоке карты нет HALT-подстрок; при BSL — в code-map есть `## Explain scope`.
+.cursor/skills/openspec-apply-change/SKILL.md:402  [backtick] tasks.md
+    1. **Карта правок:** собрать символы среза из journal + `tasks.md`; **Write/append** `reports/code-map.md` (секция `# Срез S<N> — …`); при BSL — включить `## Explain scope` (SSOT выше).
+.cursor/skills/openspec-apply-change/SKILL.md:403  [backtick] debug.md
+    2. Append в `debug.md` `## Slice Gate Decisions`:
+.cursor/skills/openspec-apply-change/SKILL.md:420  [backtick] tasks.md
+    4. Определить, **последний ли** срез S<N> в `tasks.md`: нет следующего заголовка вида `# Срез S<K>:` с K > N.
+.cursor/skills/openspec-apply-change/SKILL.md:432  [backtick] debug.md
+    - **Slice Gate log (mandatory for all options):** After the user's decision at a slice gate, append a record to `debug.md` (create section `## Slice Gate Decisions` if absent):
+.cursor/skills/openspec-apply-change/SKILL.md:518  [backtick] tasks.md
+    - **Действие** — короткое описание задачи из `tasks.md` (одна фраза в «ёлочках» или без — глагол + что делается). Без имён процедур и кодов категорий.
+.cursor/skills/openspec-apply-change/SKILL.md:595  [backtick] debug.md
+    **Имена секций** `### 1`…`### 5` совпадают для `acceptance` / `pause-decision` / `final`. Для **pause-wait** дополнительно раздел **«Что создать в Конфигураторе»** (первый) и приложение выгрузки. Связ
+.cursor/skills/openspec-apply-change/SKILL.md:605  [backtick] debug.md
+    8. **Англицизмы** (`Step-by-step`, `checkpoint`, `Tier`, `Standard/Lite/Full` как метки) и имена движка (`Architect Gate`, `Slice Gate`, `Implementation Impact Gate`) — в пользовательский вывод не поп
+.cursor/skills/openspec-apply-change/SKILL.md:618  [backtick] debug.md
+    - **Code-Truth Journal:** for every writer-completed BSL/form task, append factual symbols from `created_or_modified_symbols` to `debug.md`; if code and artifacts diverge, pause and route to `/opsx:ex
+.cursor/skills/openspec-apply-change/SKILL.md:624  [backtick] debug.md
+    - **Template.xml / MXL tasks:** Default manual (**pause-wait** / рецепт в файле). Non-manual/`assisted` → only with recorded apply permission (`debug.md` § Apply permissions or `[mxl:…]`); then `1c-mx
+.cursor/skills/openspec-apply-change/templates/pause-wait-chat.md:20  [backtick] tasks.md
+    - Копирование абзаца из `tasks.md`.
+.cursor/skills/openspec-archive-change/SKILL.md:16  [backtick] tasks.md
+    **Auto-yes policy:** Invoking archive means the user accepts the recommended path: proceed despite incomplete artifacts/tasks, **sync delta specs to main** when a delta exists, and **extract all ADR-w
+.cursor/skills/openspec-archive-change/SKILL.md:46  [backtick] tasks.md
+    Glob в `openspec/changes/<name>/reports/verification-*.md`. Взять последний по дате, прочитать YAML `snapshot` / `verify_mode`. Свежий финальный отчёт — это прогон с `verify_mode: post-apply` после по
+.cursor/skills/openspec-archive-change/SKILL.md:69  [backtick] tasks.md
+    Read the tasks file (typically `tasks.md`) to check for incomplete tasks.
+.cursor/skills/openspec-archive-change/SKILL.md:74  [backtick] tasks.md
+    - **Не** добавлять в warnings и **не** выводить в чат (follow-up остаются в архивном `tasks.md` — non-event).
+.cursor/skills/openspec-archive-change/SKILL.md:81  [backtick] proposal.md
+    Read `proposal.md` and `openspec/project.md` (`cfMarkerPrefix`) and check for the `## Metadata (comment markers)` block.
+.cursor/skills/openspec-archive-change/SKILL.md:97  [backtick] tasks.md
+    Detect slice mode: grep `tasks.md` for `^# Срез S\d+`.
+.cursor/skills/openspec-archive-change/SKILL.md:101  [backtick] tasks.md
+    **Bypass `--force-legacy`:** Если в команде пользователя есть флаг **`--force-legacy`**, не показывать карточку и AskQuestion. Запомнить для шага 7 одну строку T-CONFIRM (не `### Warnings`): кратко «А
+.cursor/skills/openspec-archive-change/SKILL.md:105  [backtick] tasks.md
+    1. Парсинг `tasks.md` по блокам между заголовками `# Срез S<N>`.
+.cursor/skills/openspec-archive-change/SKILL.md:139  [backtick] tasks.md
+    - **D.** Принудительное продолжение **без** отметки в `tasks.md` (семантика **`--force-legacy`**) → шаги 4–7; в warnings: `Archived with --force-legacy: …` (перечислить непринятые приёмочные задачи).
+.cursor/skills/openspec-archive-change/SKILL.md:141  [backtick] tasks.md
+    6. Обработка ответов: **B** или **C** → завершить archive (**return**). **D** → для шага 7 строка T-CONFIRM (не Warnings): «Принудительное продолжение без отметки приёмочных задач; см. `tasks.md`.», п
+.cursor/skills/openspec-archive-change/SKILL.md:147  [backtick] debug.md
+    - **Append** в `debug.md` секцию **`## Slice Gate Decisions`** — по **каждому** затронутому срезу отдельный подблок или один сводный с перечнем приёмочных задач; формат:
+.cursor/skills/openspec-archive-change/SKILL.md:158  [backtick] tasks.md
+    8. После выполнения п.7 **повторить** парсинг п.1–2: каждый acceptance set должен быть полностью `[x]`. Если после правок остался `[ ]` — **STOP**, сообщить о несоответствии `tasks.md` (ошибка парсера
+.cursor/skills/openspec-archive-change/SKILL.md:164  [backtick] design.md
+    Выполнить `.cursor/rules/code-truth-gate.mdc` для `design.md`, `tasks.md`, `debug.md`, `specs/**`:
+.cursor/skills/openspec-archive-change/SKILL.md:164  [backtick] tasks.md
+    Выполнить `.cursor/rules/code-truth-gate.mdc` для `design.md`, `tasks.md`, `debug.md`, `specs/**`:
+.cursor/skills/openspec-archive-change/SKILL.md:164  [backtick] debug.md
+    Выполнить `.cursor/rules/code-truth-gate.mdc` для `design.md`, `tasks.md`, `debug.md`, `specs/**`:
+.cursor/skills/openspec-archive-change/SKILL.md:176  [backtick] design.md
+    Найдены технические имена в `design.md` / `tasks.md` / `debug.md` / `specs/**`, которых нет в выгрузке.
+.cursor/skills/openspec-archive-change/SKILL.md:176  [backtick] tasks.md
+    Найдены технические имена в `design.md` / `tasks.md` / `debug.md` / `specs/**`, которых нет в выгрузке.
+.cursor/skills/openspec-archive-change/SKILL.md:176  [backtick] debug.md
+    Найдены технические имена в `design.md` / `tasks.md` / `debug.md` / `specs/**`, которых нет в выгрузке.
+.cursor/skills/openspec-archive-change/SKILL.md:258  [backtick] design.md
+    **Эвристика кандидатов (до 5 на change):** прочитать `design.md` и архивный `proposal.md` до переноса; выделить строки в `## Goals`, `## Decisions`, `## Behavior Contract`, содержащие маркеры вроде «с
+.cursor/skills/openspec-archive-change/SKILL.md:258  [backtick] proposal.md
+    **Эвристика кандидатов (до 5 на change):** прочитать `design.md` и архивный `proposal.md` до переноса; выделить строки в `## Goals`, `## Decisions`, `## Behavior Contract`, содержащие маркеры вроде «с
+.cursor/skills/openspec-archive-change/SKILL.md:296  [backtick] tasks.md
+    - **Приёмка / force-legacy:** только если был вариант **A** при архивации — коротко: «Приёмочные тесты отмечены при архивации.»; если **`--force-legacy`** или **D** — одна строка: «Архив с принудитель
+.cursor/skills/openspec-explore/SKILL.md:149  [backtick] proposal.md
+    1. `Glob` `openspec/changes/archive/**/proposal.md` и при необходимости активных `openspec/changes/<name>/proposal.md` — не более **10** каталогов; при пересечении с постановкой — `Read` `proposal.md`
+.cursor/skills/openspec-explore/SKILL.md:149  [backtick] debug.md
+    1. `Glob` `openspec/changes/archive/**/proposal.md` и при необходимости активных `openspec/changes/<name>/proposal.md` — не более **10** каталогов; при пересечении с постановкой — `Read` `proposal.md`
+.cursor/skills/openspec-explore/SKILL.md:290  [backtick] proposal.md
+    **Не** Write `proposal.md` / `design.md` / `tasks.md` вручную.
+.cursor/skills/openspec-explore/SKILL.md:290  [backtick] design.md
+    **Не** Write `proposal.md` / `design.md` / `tasks.md` вручную.
+.cursor/skills/openspec-explore/SKILL.md:290  [backtick] tasks.md
+    **Не** Write `proposal.md` / `design.md` / `tasks.md` вручную.
+.cursor/skills/openspec-extend-change/SKILL.md:13  [backtick] proposal.md
+    **Extend правит только артефакты change**: `proposal.md`, `design.md`, `specs/**`, `tasks.md`, `debug.md`, `reports/**`. Код BSL, XML метаданных и реализация остаются за `/opsx:apply`.
+.cursor/skills/openspec-extend-change/SKILL.md:13  [backtick] design.md
+    **Extend правит только артефакты change**: `proposal.md`, `design.md`, `specs/**`, `tasks.md`, `debug.md`, `reports/**`. Код BSL, XML метаданных и реализация остаются за `/opsx:apply`.
+.cursor/skills/openspec-extend-change/SKILL.md:13  [backtick] tasks.md
+    **Extend правит только артефакты change**: `proposal.md`, `design.md`, `specs/**`, `tasks.md`, `debug.md`, `reports/**`. Код BSL, XML метаданных и реализация остаются за `/opsx:apply`.
+.cursor/skills/openspec-extend-change/SKILL.md:13  [backtick] debug.md
+    **Extend правит только артефакты change**: `proposal.md`, `design.md`, `specs/**`, `tasks.md`, `debug.md`, `reports/**`. Код BSL, XML метаданных и реализация остаются за `/opsx:apply`.
+.cursor/skills/openspec-extend-change/SKILL.md:22  [backtick] debug.md
+    **repair-from-verify:** без Entry Protocol, без lite-брифа, без «Подтвердить?»; сразу §6 Artifact update rules по remediation из отчёта verify; запись в `debug.md`; **0** строк в чат.
+.cursor/skills/openspec-extend-change/SKILL.md:40  [backtick] debug.md
+    - `--from-debug <path>` — `debug.md` или RCA-отчёт
+.cursor/skills/openspec-extend-change/SKILL.md:65  [backtick] proposal.md
+    4. Прочитать `openspec/project.md` и артефакты change из `contextFiles`: `proposal.md`, `design.md`, `tasks.md`, `specs/**` при наличии; для расширения scope также прочитать `debug.md` (если есть) — н
+.cursor/skills/openspec-extend-change/SKILL.md:65  [backtick] design.md
+    4. Прочитать `openspec/project.md` и артефакты change из `contextFiles`: `proposal.md`, `design.md`, `tasks.md`, `specs/**` при наличии; для расширения scope также прочитать `debug.md` (если есть) — н
+.cursor/skills/openspec-extend-change/SKILL.md:65  [backtick] tasks.md
+    4. Прочитать `openspec/project.md` и артефакты change из `contextFiles`: `proposal.md`, `design.md`, `tasks.md`, `specs/**` при наличии; для расширения scope также прочитать `debug.md` (если есть) — н
+.cursor/skills/openspec-extend-change/SKILL.md:65  [backtick] debug.md
+    4. Прочитать `openspec/project.md` и артефакты change из `contextFiles`: `proposal.md`, `design.md`, `tasks.md`, `specs/**` при наличии; для расширения scope также прочитать `debug.md` (если есть) — н
+.cursor/skills/openspec-extend-change/SKILL.md:66  [backtick] debug.md
+    5. Прочитать только явно переданные source-файлы (`--from-*`, `@path`, пути в запросе). Трассы — через `/opsx:explore` (профиль bug). `--from-report` принимает (приоритет): `temp/reports/<тип>-YYYY-MM
+.cursor/skills/openspec-extend-change/SKILL.md:87  [backtick] proposal.md
+    **Запрещено в чат-брифе extend:** `Что понял`; слот **План** с перечислением артефактов; `Как буду искать`; `Бриф для исследования`; `Drift-check:`; `proposal.md / design.md` как план шагов; варианты 
+.cursor/skills/openspec-extend-change/SKILL.md:89  [backtick] debug.md
+    **Внутренние блоки (до брифа, в чат НЕ попадают — в `debug.md` § Extend после подтверждения):**
+.cursor/skills/openspec-extend-change/SKILL.md:129  [backtick] proposal.md
+    Источник правды: текущие `proposal.md` (`## Why`, `## What Changes`) и `design.md` (`## Behavior Contract`, `## Goals / Non-Goals`).
+.cursor/skills/openspec-extend-change/SKILL.md:129  [backtick] design.md
+    Источник правды: текущие `proposal.md` (`## Why`, `## What Changes`) и `design.md` (`## Behavior Contract`, `## Goals / Non-Goals`).
+.cursor/skills/openspec-extend-change/SKILL.md:138  [backtick] design.md
+    - `scope-violation` — любое из: оркестратор не находит ни одного пункта Why, который усиливается предлагаемым изменением, **и** при этом хотя бы одно из полей Non-Goals / Behavior Contract = **yes**; 
+.cursor/skills/openspec-extend-change/SKILL.md:168  [backtick] debug.md
+    | `debug` | `debug.md`, `trace-analysis-*`, RCA, `Verified facts`, `Hypotheses`, `Root cause` | verified facts, hypotheses, root cause, target slice |
+.cursor/skills/openspec-extend-change/SKILL.md:172  [backtick] debug.md
+    | `report` | `temp/reports/<тип>-*.md` (trace-analyst / explorer / architect / **explain**), `openspec/changes/<name>/reports/explain-*.md`, `temp/explore-handoff-*.md` (блок `## Постановка ЗНИ`) | ro
+.cursor/skills/openspec-extend-change/SKILL.md:172  [backtick] tasks.md
+    | `report` | `temp/reports/<тип>-*.md` (trace-analyst / explorer / architect / **explain**), `openspec/changes/<name>/reports/explain-*.md`, `temp/explore-handoff-*.md` (блок `## Постановка ЗНИ`) | ro
+.cursor/skills/openspec-extend-change/SKILL.md:190  [backtick] proposal.md
+    - Прочитать `proposal.md`, `design.md`, `tasks.md`, `specs/**`, `debug.md` (если существует).
+.cursor/skills/openspec-extend-change/SKILL.md:190  [backtick] design.md
+    - Прочитать `proposal.md`, `design.md`, `tasks.md`, `specs/**`, `debug.md` (если существует).
+.cursor/skills/openspec-extend-change/SKILL.md:190  [backtick] tasks.md
+    - Прочитать `proposal.md`, `design.md`, `tasks.md`, `specs/**`, `debug.md` (если существует).
+.cursor/skills/openspec-extend-change/SKILL.md:190  [backtick] debug.md
+    - Прочитать `proposal.md`, `design.md`, `tasks.md`, `specs/**`, `debug.md` (если существует).
+.cursor/skills/openspec-extend-change/SKILL.md:204  [backtick] tasks.md
+    - Для `--code-sync`: перечислить потенциальные drift-точки без чтения BSL/XML: имена процедур из `tasks.md`/`debug.md`, отчёты writer/reviewer/explorer, файлы `src/**`, которые потребуется прочитать ч
+.cursor/skills/openspec-extend-change/SKILL.md:204  [backtick] debug.md
+    - Для `--code-sync`: перечислить потенциальные drift-точки без чтения BSL/XML: имена процедур из `tasks.md`/`debug.md`, отчёты writer/reviewer/explorer, файлы `src/**`, которые потребуется прочитать ч
+.cursor/skills/openspec-extend-change/SKILL.md:241  [backtick] debug.md
+    - **или** дата из заголовка последней секции `## Extend — YYYY-MM-DD` в `debug.md` (парсинг ГГГГ-ММ-ДД из строки заголовка) **строго новее** даты из имени новейшего файла `architecture-extend-coherenc
+.cursor/skills/openspec-extend-change/SKILL.md:243  [backtick] debug.md
+    Примечание: **M** — число строк в `debug.md`, где поле `Architect Gate:` совпадает с шаблоном «Extend без архитектора» (маркеры выше); это приближение к числу секций `## Extend —`, после которых архит
+.cursor/skills/openspec-extend-change/SKILL.md:249  [backtick] debug.md
+    1. Для каждого среза `S<N>` с `S<N>.accept = [ ]` вычислить `AcceptLoop(S<N>)` и `PatchRounds(S<N>)` по `debug.md` (§ Slice Gate Decisions + § Extend —).
+.cursor/skills/openspec-extend-change/SKILL.md:255  [backtick] debug.md
+    2. Вызвать `Task(subagent_type="onec-code-architect")` с `mode=deep-analysis` и loop-контекстом: история раундов `S<N>` (записи Slice Gate Decisions + Extend —), ссылки на трассы/отчёты/`debug.md`, во
+.cursor/skills/openspec-extend-change/SKILL.md:257  [backtick] debug.md
+    4. Добавить в `debug.md` секцию `## Loop Detection — YYYY-MM-DD` (формат — `vertical-slices.mdc`).
+.cursor/skills/openspec-extend-change/SKILL.md:258  [backtick] debug.md
+    5. Через decision-card (по `.cursor/docs/templates/decision-block.md`) предложить: (a) принять consolidation-редизайн архитектора, (b) минимальный фикс с фиксацией риска в `debug.md`, (c) отложить раз
+.cursor/skills/openspec-extend-change/SKILL.md:269  [backtick] proposal.md
+    2. Вызвать `Task(subagent_type="onec-code-architect")` с `mode=scope-coherence-audit` и шаблоном из `1c-agent-patterns/architect.md`. Оркестратор передаёт блок «Соответствие исходному scope» из брифа,
+.cursor/skills/openspec-extend-change/SKILL.md:271  [backtick] debug.md
+    4. Добавить в `debug.md` запись:
+.cursor/skills/openspec-extend-change/SKILL.md:283  [backtick] debug.md
+    **Если вердикт архитектора в отчёте — `scope-violation`:** до обновления остальных артефактов остановиться и через `AskQuestion` предложить: (a) принять рекомендации архитектора (например отделить час
+.cursor/skills/openspec-extend-change/SKILL.md:298  [backtick] design.md
+    - пересматривается уже зафиксированный `design.md` approach;
+.cursor/skills/openspec-extend-change/SKILL.md:311  [backtick] debug.md
+    Если пользователь явно отказался от architect — записать отказ в `debug.md` / `reports/extend-decision-*.md` и продолжать только если правила допускают отказ.
+.cursor/skills/openspec-extend-change/SKILL.md:317  [backtick] proposal.md
+    1. `proposal.md` — если меняется scope / Why / What Changes / Impact. При существенной смене доменной темы — **опционально** один вопрос: обновить `comment_suffix` (domain_label) в `## Metadata (comme
+.cursor/skills/openspec-extend-change/SKILL.md:319  [backtick] design.md
+    3. `design.md` — `Existing Mechanisms`, `Design Rationale`, `Decisions`, `Slices`, `Risks`, `Open Questions`.
+.cursor/skills/openspec-extend-change/SKILL.md:320  [backtick] tasks.md
+    4. `tasks.md` — slice-aware вставка:
+.cursor/skills/openspec-extend-change/SKILL.md:325  [backtick] debug.md
+    5. `debug.md` — секция `## Extend — YYYY-MM-DD`:
+.cursor/skills/openspec-extend-change/SKILL.md:339  [backtick] debug.md
+    1. Добавить/обновить `debug.md` § **`## Verify decision ledger`** (YAML-блок, agent-only):
+.cursor/skills/openspec-extend-change/SKILL.md:351  [backtick] design.md
+    2. **Обязательно** добавить зеркало в `design.md` § **`## Решения verify (зафиксировано)`** — 1–2 строки прозой **без** `id:` (не дублировать параграфы из `## Decisions`). Это **человекочитаемый источ
+.cursor/skills/openspec-extend-change/SKILL.md:366  [backtick] design.md
+    2. Порядок правок: `design.md` (`## Slices`, матрица, Primary column) → `tasks.md` (metadata, accept, merge) → sync `**Связь со spec:**`.
+.cursor/skills/openspec-extend-change/SKILL.md:366  [backtick] tasks.md
+    2. Порядок правок: `design.md` (`## Slices`, матрица, Primary column) → `tasks.md` (metadata, accept, merge) → sync `**Связь со spec:**`.
+.cursor/skills/openspec-extend-change/SKILL.md:372  [backtick] debug.md
+    4. Append `debug.md` § `## Verify repair — slice acceptance` (дата, alerts, files touched).
+.cursor/skills/openspec-extend-change/SKILL.md:380  [backtick] debug.md
+    5. Append `debug.md` § `## Verify repair — slice merge` (было S1+S2 → стало S1).
+.cursor/skills/openspec-extend-change/SKILL.md:392  [backtick] tasks.md
+    2. Grep `tasks.md` и снять условные зависимости: «При успешном verify S*.2», «после verify S*», «после стенда».
+.cursor/skills/openspec-extend-change/SKILL.md:394  [backtick] design.md
+    4. `design.md`: open question из spike → § Assumptions; § Risks — «runtime-подтверждение в Primary accept среза».
+.cursor/skills/openspec-extend-change/SKILL.md:396  [backtick] debug.md
+    6. Append `debug.md` § `## Verify repair — user task contract` (дата, удалённые задачи, files touched).
+.cursor/skills/openspec-extend-change/SKILL.md:402  [backtick] tasks.md
+    1. Делегировать `onec-code-explorer` с точным списком файлов из `tasks.md`/`debug.md`/reports; запросить:
+.cursor/skills/openspec-extend-change/SKILL.md:402  [backtick] debug.md
+    1. Делегировать `onec-code-explorer` с точным списком файлов из `tasks.md`/`debug.md`/reports; запросить:
+.cursor/skills/openspec-extend-change/SKILL.md:409  [backtick] proposal.md
+    4. Обновлять `proposal.md`, `design.md`, `specs/**`, `tasks.md`, `debug.md` так, чтобы они отражали код как source of truth.
+.cursor/skills/openspec-extend-change/SKILL.md:409  [backtick] design.md
+    4. Обновлять `proposal.md`, `design.md`, `specs/**`, `tasks.md`, `debug.md` так, чтобы они отражали код как source of truth.
+.cursor/skills/openspec-extend-change/SKILL.md:409  [backtick] tasks.md
+    4. Обновлять `proposal.md`, `design.md`, `specs/**`, `tasks.md`, `debug.md` так, чтобы они отражали код как source of truth.
+.cursor/skills/openspec-extend-change/SKILL.md:409  [backtick] debug.md
+    4. Обновлять `proposal.md`, `design.md`, `specs/**`, `tasks.md`, `debug.md` так, чтобы они отражали код как source of truth.
+.cursor/skills/openspec-extend-change/SKILL.md:431  [backtick] debug.md
+    Полный перечень правок — в `debug.md` (`## Extend — YYYY-MM-DD`) и при необходимости `reports/extend-summary-*.md`, **не** в чат.
+.cursor/skills/openspec-extend-change/SKILL.md:433  [backtick] tasks.md
+    **Запрещено:** «Обновлено: `tasks.md`, `design.md`, … Дальше: `/opsx:extend --from-verify …`».
+.cursor/skills/openspec-extend-change/SKILL.md:433  [backtick] design.md
+    **Запрещено:** «Обновлено: `tasks.md`, `design.md`, … Дальше: `/opsx:extend --from-verify …`».
+.cursor/skills/openspec-extend-change/SKILL.md:444  [backtick] tasks.md
+    - `vertical-slices.mdc`: все изменения `tasks.md` slice-aware.
+.cursor/skills/openspec-extend-change/SKILL.md:456  [backtick] design.md
+    - `/review`: `Architecture findings` или findings, противоречащие `design.md` → `/opsx:extend <name> --from-review <report-path>`.
+.cursor/skills/openspec-new-change/SKILL.md:19  [backtick] proposal.md
+    - **Генерируемые артефакты** `proposal.md`, `design.md`, `tasks.md`, spec deltas — подчиняются §1 «Три слоя» и §3 «Запрет внутренних ID в пользовательских полях»: секции для заказчика/приёмки (`Why`, 
+.cursor/skills/openspec-new-change/SKILL.md:19  [backtick] design.md
+    - **Генерируемые артефакты** `proposal.md`, `design.md`, `tasks.md`, spec deltas — подчиняются §1 «Три слоя» и §3 «Запрет внутренних ID в пользовательских полях»: секции для заказчика/приёмки (`Why`, 
+.cursor/skills/openspec-new-change/SKILL.md:19  [backtick] tasks.md
+    - **Генерируемые артефакты** `proposal.md`, `design.md`, `tasks.md`, spec deltas — подчиняются §1 «Три слоя» и §3 «Запрет внутренних ID в пользовательских полях»: секции для заказчика/приёмки (`Why`, 
+.cursor/skills/openspec-new-change/SKILL.md:63  [backtick] proposal.md
+    - Если `proposal.md` есть и `developer` заполнен (не `<ФИО>` / `<developer>`) — **не спрашивать** Metadata Gate; использовать metadata из proposal. Значение `n/a` (kit-only) — заполненный закрытый гей
+.cursor/skills/openspec-new-change/SKILL.md:119  [backtick] proposal.md
+    Запись в `proposal.md` (шаг 5) — **канонический формат** (не list с `zni_id` / `zni_name` / `generate_tz`):
+.cursor/skills/openspec-new-change/SKILL.md:137  [backtick] proposal.md
+    При создании `proposal.md` всегда добавлять секцию `## Forms mode` (см. шаг 5.a): без форм / kit → `form_mode: n/a`; при формах в постановке допустим черновик `form_mode: n/a` или пустой map до цикла 
+.cursor/skills/openspec-new-change/SKILL.md:200  [backtick] design.md
+    - If `exploreContext` exists, use it as source context for `proposal`, `design`, `specs`, and `tasks`: для нового формата (`## Постановка ЗНИ`) — Симптом → `## Why`, Корневая причина / Что менять → `#
+.cursor/skills/openspec-new-change/SKILL.md:217  [backtick] design.md
+    - **User Task Contract** (`.cursor/rules/vertical-slices.mdc` § User Task Contract): от пользователя — только ручное конфигурирование и `S<N>.accept`; unknown API/runtime → `design.md` § Assumptions +
+.cursor/skills/openspec-new-change/SKILL.md:234  [backtick] tasks.md
+    После сохранения `tasks.md` — mechanical self-check:
+.cursor/skills/openspec-new-change/SKILL.md:245  [backtick] proposal.md
+    - **Metadata block**: When creating `proposal.md`, ALWAYS add `## Metadata (comment markers)` (`developer`, `comment_suffix`, `marker_style`) immediately after `## Why`.
+.cursor/skills/openspec-new-change/SKILL.md:246  [backtick] proposal.md
+    - **Forms mode**: When creating `proposal.md`, ALWAYS add `## Forms mode` with `form_mode:` (`manual` | `assisted` | `bsl-only` | `n/a`) или map `forms:` — по `forms-mxl-mode-gate.mdc`. Без управляемы
+.cursor/skills/openspec-new-change/SKILL.md:327  [backtick] design.md
+    1. Read the just-created `design.md` and all `specs/**/spec.md`.
+.cursor/skills/openspec-new-change/SKILL.md:331  [backtick] design.md
+    3. Grep `design.md` for existing `## Slices` section.
+.cursor/skills/openspec-new-change/SKILL.md:336  [backtick] design.md
+    - Insert the returned block into `design.md` (append after existing sections, before "Risks" if present).
+.cursor/skills/openspec-new-change/SKILL.md:347  [backtick] design.md
+    - `Скорректировать` → принять пользовательский комментарий, повторно делегировать architect с этим комментарием, обновить `design.md`.
+.cursor/skills/openspec-new-change/SKILL.md:356  [backtick] design.md
+    3. If `scenario-implementation-leak` found on a Requirement that would become its own slice — remediation: move to `design.md` Behavior Contract before accepting slices (or user override explicitly).
+.cursor/skills/openspec-new-change/SKILL.md:362  [backtick] design.md
+    7. **Guardrail:** do NOT invoke the tasks architect template until `design.md` contains the `## Slices` section (or Lite tier was explicitly chosen).
+.cursor/skills/openspec-new-change/SKILL.md:392  [backtick] design.md
+    - **Blast Radius (for design artifact)**: если сработал `.cursor/rules/precedent-regression-gate.mdc` или во входном контексте есть блок `## Cross-Archive Context` / явное указание оркестратора на кон
+.cursor/skills/openspec-new-change/SKILL.md:392  [backtick] spec.md
+    - **Blast Radius (for design artifact)**: если сработал `.cursor/rules/precedent-regression-gate.mdc` или во входном контексте есть блок `## Cross-Archive Context` / явное указание оркестратора на кон
+.cursor/skills/openspec-new-change/SKILL.md:392  [backtick] proposal.md
+    - **Blast Radius (for design artifact)**: если сработал `.cursor/rules/precedent-regression-gate.mdc` или во входном контексте есть блок `## Cross-Archive Context` / явное указание оркестратора на кон
+.cursor/skills/openspec-new-change/SKILL.md:393  [backtick] tasks.md
+    - **Implementation Options (for design artifact)**: для UI, интеграций, перехватов и переносов поведения добавить секцию `## Implementation Options`. Минимум: `Option A / Option B`, выбранный вариант,
+.cursor/skills/openspec-new-change/SKILL.md:397  [backtick] proposal.md
+    - **Metadata Gate MUST NOT be silently skipped** (новый change): не вызывать `openspec new change` без закрытого Metadata Gate. Гейт закрывается ответом пользователя **или** обоснованным пропуском kit
+.cursor/skills/openspec-new-change/templates/handoff-contract.md:16  [backtick] design.md
+    | Открытые решения | опционально | `design.md` § Открытые вопросы + карточка решения до apply |
+.cursor/skills/openspec-overview/SKILL.md:50  [backtick] design.md
+    2. Названия срезов / колонка «пользовательский сценарий» из `design.md` **без** префиксов `S1`/`S2` — **пересказанные ситуацией** (что происходит для людей), не калька технического ярлыка.
+.cursor/skills/openspec-overview/SKILL.md:93  [backtick] proposal.md
+    - `proposal.md` — Why, What Changes, Metadata (ID ТЗ из suffix при наличии);
+.cursor/skills/openspec-overview/SKILL.md:94  [backtick] design.md
+    - `design.md` — Goals / Non-Goals, Behavior Contract (смысл прозой), Slices (имена сценариев), Open questions / Decisions → «согласовать» без кодов `D*`.
+.cursor/skills/openspec-overview/SKILL.md:98  [backtick] tasks.md
+    **Не читать как основу сюжета:** `tasks.md`, `reports/verification-*`, `.bsl`, Form.xml.
+.cursor/skills/openspec-overview/templates/customer-overview.md:3  [backtick] design.md
+    Целевой тон — **лаконичное описание проекта** для согласования с ФА / заказчиком: связная проза, нумерованные списки, без обучения читателя. Не карточка OpenSpec, не выжимка `design.md`, не письмо-тут
+.cursor/skills/openspec-overview/templates/style-checklist.md:6  [backtick] design.md
+    Жанр — **лаконичное описание проекта** (постановка поставки), не письмо-туториал и не краткий `design.md`.
+.cursor/skills/openspec-status/SKILL.md:33  [backtick] proposal.md
+    Read `proposal.md` § `## Metadata (comment markers)` + `openspec/project.md` (`defaultDeveloper`, `cfMarkerPrefix`) + baseline `.cursor/docs/marker-canon.md` (запреты domain_label).
+.cursor/skills/openspec-status/SKILL.md:49  [backtick] tasks.md
+    - Read `tasks.md`: Grep `^# Срез S\d+`. Если есть → **slice mode**, иначе **legacy**.
+.cursor/skills/openspec-status/SKILL.md:57  [backtick] debug.md
+    - Read `debug.md` (если есть), секция `## Slice Gate Decisions`.
+.cursor/skills/openspec-status/SKILL.md:110  [backtick] debug.md
+    - Если `debug.md` / `reports/` отсутствуют — показать секции с пометкой `—`.
+.cursor/skills/openspec-verify-change/SKILL.md:48  [backtick] tasks.md
+    - **`pre-apply`** — есть хотя бы одна `[ ]` в `tasks.md` (включая `S<N>.accept` и legacy `S<N>.T<M>`). Сюда же относятся «узкий verify одного среза» и «verify после принятого среза» — это контекстные 
+.cursor/skills/openspec-verify-change/SKILL.md:48  [backtick] debug.md
+    - **`pre-apply`** — есть хотя бы одна `[ ]` в `tasks.md` (включая `S<N>.accept` и legacy `S<N>.T<M>`). Сюда же относятся «узкий verify одного среза» и «verify после принятого среза» — это контекстные 
+.cursor/skills/openspec-verify-change/SKILL.md:92  [backtick] debug.md
+    **Контекст агентов verify:** в промпт — delta design + сводка `closed_decisions`, не полный `debug.md` каждый раз.
+.cursor/skills/openspec-verify-change/SKILL.md:110  [backtick] debug.md
+    **Decision ledger (agent-only):** если в `debug.md` есть `## Verify decision ledger`, прочитать YAML-блок (`closed_decisions`, `decision_round`, `open_decision_id`, `assumptions_accepted`). Если секци
+.cursor/skills/openspec-verify-change/SKILL.md:114  [backtick] tasks.md
+    Grep `tasks.md` на `^- \[[ ]\]` — если найдено хотя бы одно совпадение, `verify_mode = pre-apply`; иначе `post-apply`.
+.cursor/skills/openspec-verify-change/SKILL.md:120  [backtick] tasks.md
+    - `accepted_tasks` — список `[x]` в `tasks.md`. Если множество совпало → флаг `accepted_tasks: same`.
+.cursor/skills/openspec-verify-change/SKILL.md:143  [backtick] design.md
+    | Незакрытые backtick-блоки в `design.md`/`tasks.md` | Закрыть | `unbalanced-fences` (auto-fix) |
+.cursor/skills/openspec-verify-change/SKILL.md:143  [backtick] tasks.md
+    | Незакрытые backtick-блоки в `design.md`/`tasks.md` | Закрыть | `unbalanced-fences` (auto-fix) |
+.cursor/skills/openspec-verify-change/SKILL.md:160  [backtick] tasks.md
+    **2.1a. User Task Contract (mechanical pre-check)** — до QC: grep `tasks.md` по строкам `^- \[[ x]\] S\d+\.\d+` (не accept, не Follow-up) с таблицей DENY/ALLOW из `vertical-slices.mdc` § User Task Con
+.cursor/skills/openspec-verify-change/SKILL.md:168  [backtick] design.md
+    **2.2. Code-Truth (механический)** — для каждого технического имени в backticks из `design.md`/`tasks.md`/`debug.md`/`specs/**` запустить `Grep` по путям из `openspec/project.md`. См. `.cursor/rules/c
+.cursor/skills/openspec-verify-change/SKILL.md:168  [backtick] tasks.md
+    **2.2. Code-Truth (механический)** — для каждого технического имени в backticks из `design.md`/`tasks.md`/`debug.md`/`specs/**` запустить `Grep` по путям из `openspec/project.md`. См. `.cursor/rules/c
+.cursor/skills/openspec-verify-change/SKILL.md:168  [backtick] debug.md
+    **2.2. Code-Truth (механический)** — для каждого технического имени в backticks из `design.md`/`tasks.md`/`debug.md`/`specs/**` запустить `Grep` по путям из `openspec/project.md`. См. `.cursor/rules/c
+.cursor/skills/openspec-verify-change/SKILL.md:188  [backtick] debug.md
+    **Метрика и порог** — SSOT `.cursor/rules/vertical-slices.mdc` § ДЕТЕКТОР ПЕТЛИ ПРИЁМКИ (`AcceptLoop`, `PatchRounds`, `acceptance_loop_max` default 3). Считается grep по `debug.md` § Slice Gate Decisi
+.cursor/skills/openspec-verify-change/SKILL.md:190  [backtick] debug.md
+    **Выполняется во всех `verify_depth`** — детект дешёвый (grep по уже загруженному `debug.md`); запуск архитектора — **только** при фактическом срабатывании.
+.cursor/skills/openspec-verify-change/SKILL.md:199  [backtick] debug.md
+    - Иначе — **запустить редизайн-аудит:** `Task(onec-code-architect, mode=deep-analysis)` по закрытой эскалации в `model-selection.mdc` (петля приёмки = тяжёлый триггер: Fable, если слаг есть в описании
+.cursor/skills/openspec-verify-change/SKILL.md:212  [backtick] proposal.md
+    1. **Why → Requirements.** В `proposal.md` `## Why` есть пункты, не покрытые ни одним `### Requirement` в `specs/**/spec.md`? → `why-orphan-requirement` (FAIL).
+.cursor/skills/openspec-verify-change/SKILL.md:218  [backtick] proposal.md
+    7. **Metadata domain_label (`process-only-marker-suffix`).** Read `proposal.md` § `## Metadata (comment markers)` (dual-parser: yaml или list). Baseline запреты — `.cursor/docs/marker-canon.md` ⊕ proj
+.cursor/skills/openspec-verify-change/SKILL.md:245  [backtick] proposal.md
+    - `proposal.md`, `design.md`, `specs/**/spec.md` — как первичные источники.
+.cursor/skills/openspec-verify-change/SKILL.md:245  [backtick] design.md
+    - `proposal.md`, `design.md`, `specs/**/spec.md` — как первичные источники.
+.cursor/skills/openspec-verify-change/SKILL.md:246  [backtick] debug.md
+    - **Обязательный блок Closed decisions** (из `debug.md` § Verify decision ledger + design § «Решения verify (зафиксировано)»):
+.cursor/skills/openspec-verify-change/SKILL.md:295  [backtick] tasks.md
+    **5.1. Manual Configuration Sufficiency (механический, до архитектора).** Grep `tasks.md` (case-insensitive) на маркеры ручной конфигурации: «вручную», «в Конфигураторе», «создать реквизит», «добавить
+.cursor/skills/openspec-verify-change/SKILL.md:295  [backtick] design.md
+    **5.1. Manual Configuration Sufficiency (механический, до архитектора).** Grep `tasks.md` (case-insensitive) на маркеры ручной конфигурации: «вручную», «в Конфигураторе», «создать реквизит», «добавить
+.cursor/skills/openspec-verify-change/SKILL.md:377  [backtick] tasks.md
+    Для **`slice-accept-not-self-achievable`:** развилка на человеческом языке по `.cursor/docs/templates/decision-block.md` — **объединить срезы** (рекомендуется) **или** переписать Primary проблемного с
+.cursor/skills/openspec-verify-change/SKILL.md:377  [backtick] design.md
+    Для **`slice-accept-not-self-achievable`:** развилка на человеческом языке по `.cursor/docs/templates/decision-block.md` — **объединить срезы** (рекомендуется) **или** переписать Primary проблемного с
+.cursor/skills/openspec-verify-change/SKILL.md:392  [backtick] debug.md
+    После сохранения отчёта обновить YAML `snapshot` **и** синхронизировать `debug.md` § Verify decision ledger:
+.cursor/skills/openspec-verify-change/templates/card-decision.md:41  [backtick] design.md
+    **Почему это развилка.** <1–2 предложения: что именно не закрыто в текущем тексте `design.md` / `tasks.md` или что нашёл независимый аудит. Без слов «Layer 4 вернул CHALLENGE».>
+.cursor/skills/openspec-verify-change/templates/card-decision.md:41  [backtick] tasks.md
+    **Почему это развилка.** <1–2 предложения: что именно не закрыто в текущем тексте `design.md` / `tasks.md` или что нашёл независимый аудит. Без слов «Layer 4 вернул CHALLENGE».>
+.cursor/skills/openspec-verify-change/templates/card-decision.md:48  [backtick] design.md
+    **Что изменится после выбора.** <1–2 предложения: правки в `design.md` / `tasks.md` через `/opsx:extend <name> --from-verify <отчёт>`, либо явное «принимаем как есть» с фиксацией в Behavior Contract.>
+.cursor/skills/openspec-verify-change/templates/card-decision.md:48  [backtick] tasks.md
+    **Что изменится после выбора.** <1–2 предложения: правки в `design.md` / `tasks.md` через `/opsx:extend <name> --from-verify <отчёт>`, либо явное «принимаем как есть» с фиксацией в Behavior Contract.>
+.cursor/skills/openspec-verify-change/templates/card-decision.md:108  [backtick] design.md
+    **Почему это развилка.** Расширение модуля формы в `cfe/ДО21_Павлик` уже есть, и серверная функция формы `ПолучитьШаблоныНаСервере` вызывает ровно `Объект.ПолучитьШаблоны()`. Перехват `&Вместо("Получи
+.cursor/skills/openspec-verify-change/templates/card-decision.md:117  [backtick] design.md
+    **Что изменится после выбора.** Правки в `design.md` (`## Decisions`, `## Implementation Options`) и `tasks.md` (S1.0/S1.1) через `/opsx:extend do2-pavlik-vizy-shablony-soglasovaniya-podbor --from-ver
+.cursor/skills/openspec-verify-change/templates/card-decision.md:117  [backtick] tasks.md
+    **Что изменится после выбора.** Правки в `design.md` (`## Decisions`, `## Implementation Options`) и `tasks.md` (S1.0/S1.1) через `/opsx:extend do2-pavlik-vizy-shablony-soglasovaniya-podbor --from-ver
+.cursor/skills/openspec-verify-change/templates/card-decision.md:150  [backtick] design.md
+    **Хорошо:** два варианта; правка `design.md` — часть пути выбора, не отдельный вариант.
+.cursor/skills/openspec-verify-change/templates/card-decision.md:156  [backtick] design.md
+    **Хорошо:** «В тексте `design.md` нет обоснования, почему выбран именно объектный модуль; альтернатива на форме рассмотрена не была.»
+.cursor/skills/openspec-verify-change/templates/card-hygiene.md:9  [backtick] tasks.md
+    - Применить согласованную правку в `tasks.md` / `design.md` / spec — что меняется для автора постановки: <одна строка>.
+.cursor/skills/openspec-verify-change/templates/card-hygiene.md:9  [backtick] design.md
+    - Применить согласованную правку в `tasks.md` / `design.md` / spec — что меняется для автора постановки: <одна строка>.
+.cursor/skills/openspec-verify-change/templates/chat-summary.md:7  [backtick] tasks.md
+    **Обязательный слот (HARD):** перед ссылкой на отчёт — **`**Следующий шаг:**`** с одной user-action командой или приглашением ответить в чате. Команда по `verify_mode` из snapshot / grep `tasks.md`:
+.cursor/skills/openspec-verify-change/templates/chat-summary.md:132  [backtick] design.md
+    Без перечисления правок в `design.md` / `tasks.md`.
+.cursor/skills/openspec-verify-change/templates/chat-summary.md:132  [backtick] tasks.md
+    Без перечисления правок в `design.md` / `tasks.md`.
+.cursor/skills/openspec-verify-change/templates/conversation-shape.md:11  [backtick] design.md
+    Без отдельной служебной строки «Что нужно от вас» — ответственность несёт сам вердикт и блок «Что решить» (если он есть). Эта структура гарантирует, что разработчик сразу поймёт свой следующий шаг и п
+.cursor/skills/openspec-verify-change/templates/executive-summary.md:10  [backtick] design.md
+    4. **`## Что меняется в постановке`** — что план меняет в коде, какие модули / процедуры / директивы затрагиваются, ссылки на ADR / KB / архив (если есть). Это «карточка изменений» уровня архитектора 
+.cursor/skills/openspec-verify-change/templates/report-header.md:53  [backtick] tasks.md
+    Узкий охват одного среза, переход между срезами и смешанный режим — **частные случаи `pre-apply`**, выводятся из текста запроса пользователя и состояния `tasks.md`. Отдельных значений `slice-pre`, `sl
+.cursor/skills/openspec-verify-change/templates/report-header.md:75  [backtick] design.md
+    ISO-метка времени модификации `design.md` на момент последнего **успешного** прогона Layer 4 (вердикт APPROVE или CHALLENGE с принятым к работе через `--from-verify`). Используется на следующем verify
+.cursor/skills/openspec-verify-change/templates/report-header.md:86  [backtick] tasks.md
+    Полный упорядоченный список идентификаторов строк `tasks.md` с `- [x]`. Форматы:
+.cursor/skills/openspec-verify-change/templates/report-header.md:104  [backtick] proposal.md
+    ISO-8601 строка до секунды для `proposal.md`, `design.md`, `tasks.md` и каждого `openspec/changes/<name>/specs/**/*.md`. Используется фильтром новизны (`silent_ok` / `progress_only` / `full_run`) на с
+.cursor/skills/openspec-verify-change/templates/report-header.md:104  [backtick] design.md
+    ISO-8601 строка до секунды для `proposal.md`, `design.md`, `tasks.md` и каждого `openspec/changes/<name>/specs/**/*.md`. Используется фильтром новизны (`silent_ok` / `progress_only` / `full_run`) на с
+.cursor/skills/openspec-verify-change/templates/report-header.md:104  [backtick] tasks.md
+    ISO-8601 строка до секунды для `proposal.md`, `design.md`, `tasks.md` и каждого `openspec/changes/<name>/specs/**/*.md`. Используется фильтром новизны (`silent_ok` / `progress_only` / `full_run`) на с
+.cursor/skills/review/SKILL.md:81  [backtick] tasks.md
+    | **Имя ЗНИ / каталог change** (`openspec/changes/<name>`, `.../archive/<name>`, или явное имя в тексте) | Валидировать `tasks.md`. Список файлов: задачи `[x]`, пути из `` `src/...bsl` `` + наследован
+.cursor/skills/review/SKILL.md:99  [backtick] tasks.md
+    **Источники (приоритет):** `reports/architecture-*.md` (`scope.files`) → `tasks.md` (`[x]`, backticks) → `design.md` (backticks) → git fallback по slug change.
+.cursor/skills/review/SKILL.md:99  [backtick] design.md
+    **Источники (приоритет):** `reports/architecture-*.md` (`scope.files`) → `tasks.md` (`[x]`, backticks) → `design.md` (backticks) → git fallback по slug change.
+.cursor/skills/review/SKILL.md:368  [backtick] design.md
+    - Если ревью в рамках ЗНИ (`openspec/changes/<name>`): прочитать `design.md` и `reports/architecture-*.md`. Передать в промпт как `## Architectural Context` (сокращённо или целевой раздел).
+.cursor/skills/review/SKILL.md:642  [backtick] design.md
+    > Выявлено N архитектурных замечаний, которые нельзя закрыть правкой кода модуля (нужны метаданные / контракты / права / точка расширения). Запустить архитектурный разбор постановки (`design.md` / RCA
+.cursor/skills/review/SKILL.md:645  [backtick] design.md
+    - Вызвать **Task**(`subagent_type="onec-code-architect"`) по шаблону «Architect — глубокий анализ» или «Architect (ревью плана)» (в зависимости от контекста: есть `design.md` или нет).
+.cursor/skills/review/SKILL.md:648  [backtick] design.md
+    - Текущий `design.md` (если есть).
+.cursor/skills/review/SKILL.md:654  [backtick] design.md
+    - Уведомить пользователя о пути к отчёту архитектора; если архитектор рекомендует обновить `design.md` / `specs/` / `tasks.md` или finding оказался дефектом постановки, вывести handoff:
+.cursor/skills/review/SKILL.md:654  [backtick] tasks.md
+    - Уведомить пользователя о пути к отчёту архитектора; если архитектор рекомендует обновить `design.md` / `specs/` / `tasks.md` или finding оказался дефектом постановки, вывести handoff:
+.cursor/skills/review/SKILL.md:662  [backtick] design.md
+    - finding `MUST_FIX`, исправление которого противоречит `design.md`, ADR, `tasks.md` или проверенным метаданным;
+.cursor/skills/review/SKILL.md:662  [backtick] tasks.md
+    - finding `MUST_FIX`, исправление которого противоречит `design.md`, ADR, `tasks.md` или проверенным метаданным;
+.cursor/skills/review/SKILL.md:670  [backtick] proposal.md
+    Цель extend: показать обязательный бриф, классифицировать findings (accepted/rejected/deferred), при необходимости вызвать architect, обновить `proposal.md` / `design.md` / `specs/` / `tasks.md`, зате
+.cursor/skills/review/SKILL.md:670  [backtick] design.md
+    Цель extend: показать обязательный бриф, классифицировать findings (accepted/rejected/deferred), при необходимости вызвать architect, обновить `proposal.md` / `design.md` / `specs/` / `tasks.md`, зате
+.cursor/skills/review/SKILL.md:670  [backtick] tasks.md
+    Цель extend: показать обязательный бриф, классифицировать findings (accepted/rejected/deferred), при необходимости вызвать architect, обновить `proposal.md` / `design.md` / `specs/` / `tasks.md`, зате
+.cursor/skills/stop-slop/SKILL.md:40  [backtick] design.md
+    8. **Переводи, не копируй.** Формулировки для пользователя (особенно развилки) синтезируются из смысла, **не переносятся дословно** из артефактов/отчётов (`design.md`, `tasks.md`, `verification-*.md`)
+.cursor/skills/stop-slop/SKILL.md:40  [backtick] tasks.md
+    8. **Переводи, не копируй.** Формулировки для пользователя (особенно развилки) синтезируются из смысла, **не переносятся дословно** из артефактов/отчётов (`design.md`, `tasks.md`, `verification-*.md`)
+openspec/glossary.md:8  [backtick] proposal.md
+    - **Артефакты ЗНИ** — `proposal.md` (зачем и что), `design.md` (как: поведение и реализация), `tasks.md` (план работ), `specs/**` (delta-спецификации требований).
+openspec/glossary.md:8  [backtick] design.md
+    - **Артефакты ЗНИ** — `proposal.md` (зачем и что), `design.md` (как: поведение и реализация), `tasks.md` (план работ), `specs/**` (delta-спецификации требований).
+openspec/glossary.md:8  [backtick] tasks.md
+    - **Артефакты ЗНИ** — `proposal.md` (зачем и что), `design.md` (как: поведение и реализация), `tasks.md` (план работ), `specs/**` (delta-спецификации требований).
+openspec/specs/split-form-layout-modes/spec.md:11  [backtick] debug.md
+    Proposal ЗНИ с управляемыми формами SHALL хранить режим поставки формы: `form_mode` со значениями `manual`, `assisted`, `bsl-only` или `n/a` (при нескольких формах — YAML-map `forms:` с каноническим к
+openspec/specs/split-form-layout-modes/spec.md:51  [backtick] debug.md
+    - **THEN** путь допускается только при уже зафиксированном разрешении (ответ в чате apply, одноразовый AskQuestion или маркер `[mxl:…]` / явная запись в tasks) и записи в `debug.md` § Apply permission

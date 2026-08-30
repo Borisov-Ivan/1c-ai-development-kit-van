@@ -1,0 +1,68 @@
+---
+description: "Запрет прямой правки XML метаданных 1С оркестратором — Form.xml: инструкция ручного конфигурирования; остальные XML через скиллы/агентов"
+alwaysApply: false
+globs: "src/**/*.xml"
+---
+
+# XML Write Guard
+
+**Когда загружать:** задача касается XML метаданных в `src/` (Form.xml, Template.xml, Rights.xml, Configuration.xml) — полный шаблон инструкции Конфигуратора и запрет сырой правки.
+
+## АБСОЛЮТНЫЙ ЗАПРЕТ
+
+**Оркестратор НЕ использует Write, StrReplace, Delete для XML-файлов 1С** в `src/` (Form.xml, Template.xml, Rights.xml, Configuration.xml, любые *.xml метаданных).
+
+Если начал правку XML напрямую — **ОСТАНОВИСЬ.** Отмени. Делегируй или сформируй инструкцию (см. таблицу).
+
+## ДЕЛЕГИРОВАНИЕ
+
+Сырой Write/StrReplace/Delete оркестратора по `src/**/*.xml` — **запрещён всегда**. Узкое исключение Form.xml — только при `form_mode: assisted` (или legacy `artifact_mode: assisted`) **и** skill `1c-forms/compile`|`edit`. Template.xml — только при записанном разрешении apply + skill `1c-mxl/compile` (см. `.cursor/rules/forms-mxl-mode-gate.mdc`).
+
+| Файл / артефакт | Инструмент |
+|-----------------|------------|
+| Form.xml (управляемая форма) | Режим **этой** формы: `form_mode` / map `forms:` (+ fallback lone `artifact_mode`). `manual` / `bsl-only`: **СТОП** — инструкция ручного конфигурирования **или** программные элементы в модуле формы (BSL). **`assisted`:** только skill `1c-forms/compile` или `1c-forms/edit`; если skill отсутствует — **HALT → manual** (не ослаблять guard «заранее», не сырой Write и не произвольные скрипты). WAIT после ручной части до выгрузки. |
+| Template.xml (макет табличного документа) | Default **manual**: инструкция / WAIT. Non-manual / compile — только при разрешении apply (`debug.md` § Apply permissions или `[mxl:assisted]`) → скилл `1c-mxl/compile` → validate. Без сырого Write. |
+| Rights.xml (роль) | Скилл 1c-roles/compile через агента |
+| Остальные XML в src/ (метаданные, конфигурация) | **СТОП** — блокер пользователю по `1c-no-metadata-creation.mdc` |
+
+## ФОРМАТ ИНСТРУКЦИИ РУЧНОГО КОНФИГУРИРОВАНИЯ
+
+При необходимости изменить Form.xml — не править XML.
+
+**Чат** (`/opsx:apply`): карточка pause-wait — `.cursor/skills/openspec-apply-change/templates/pause-wait-chat.md` (что создать на форме одним-двумя пунктами списка + раздел файла). Не выкладывать весь рецепт XML в чат и не заменять его одной ссылкой.
+
+**Файл паузы / инструкция:** шаблон ниже (тот же смысл, что раздел «Что создать в Конфигураторе»).
+
+```markdown
+## Ручное конфигурирование: <Имя формы>
+
+**Форма:** <Полное имя формы>
+**Конфигурация/расширение:** <Имя>
+
+### Действия в Конфигураторе:
+
+1. <Шаг — например: Открыть форму ... в Конфигураторе>
+2. <Шаг — например: Добавить реквизит "ТипРазмещения" (Число, 1, 0)>
+   - Тип: ...
+   - Заголовок: ...
+3. ...
+
+### После выгрузки
+Ожидаемые изменения в Form.xml: <краткое описание>
+```
+
+Принцип: аналогичен `1c-no-metadata-creation.mdc` — не делать, а инструктировать. Чат vs файл — pause-wait: список в чате, рецепт в файле.
+
+## ИСКЛЮЧЕНИЯ
+
+- Правки файлов в `openspec/`, `.cursor/` (не XML метаданных 1С в src/) — разрешены.
+- Чтение (Read) XML для анализа — разрешено. Запрещены сырые Write, StrReplace, Delete оркестратора.
+- Form.xml при `form_mode: assisted` (или legacy `artifact_mode: assisted`) — **только** через skill из таблицы выше (не через произвольный скрипт/JSON вне skill).
+- Template.xml при non-manual — только при записанном разрешении apply + skill `1c-mxl/compile`.
+
+## СВЯЗЬ
+
+Ref: `forms-mxl-mode-gate.mdc`, `1c-agent-delegation.mdc` (ПРИНЦИП), `1c-utility-agents.mdc`, `openspec-apply-change/SKILL.md` (Task Dispatch, Form tasks, pause-wait).
+
+---
+

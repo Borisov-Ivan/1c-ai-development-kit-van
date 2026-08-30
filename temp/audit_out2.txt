@@ -1,0 +1,8 @@
+﻿python : C:\Program Files\Python312\python.exe: can't open file 'C:\\GitHub\\1c-ai-development-kit-van\\temp\\audit_fra
+mework2.py': [Errno 2] No such file or directory
+C:\Users\Kaava\AppData\Local\Temp\ps-script-88e0d4eb-77a2-42bf-b95d-cc9e9082891f.ps1:80 знак:1
++ python "C:\GitHub\1c-ai-development-kit-van\temp\audit_framework2.py" ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (C:\Program File...le or directory:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 

@@ -1,0 +1,549 @@
+{
+  "source_count": 162,
+  "always_apply": [
+    "1c-agent-delegation.mdc",
+    "chat-output-budget.mdc",
+    "gate-dispatcher.mdc",
+    "session-discipline.mdc"
+  ],
+  "broken_count": 16,
+  "expected_missing_count": 113,
+  "runtime_count": 3,
+  "broken": [
+    {
+      "src": ".cursor/commands/init-project.md",
+      "line": 8,
+      "raw": "openspec/specs/architecture.md",
+      "kind": "path-token",
+      "status": "broken",
+      "found": null,
+      "snippet": "Проверь готовность проекта (выгрузка, OpenSpec, агенты), подскажи недостающее, затем собери информацию через интервью → `openspec/project.md` → `openspec/specs/architecture.md`."
+    },
+    {
+      "src": ".cursor/commands/opsx-extend.md",
+      "line": 35,
+      "raw": "openspec/changes/do2-roli-avtopodstanovka-gate/reports/review-do2-roli-avtopodstanovka-gate-2026-04-29-subagent-raw.md",
+      "kind": "path-token",
+      "status": "broken",
+      "found": null,
+      "snippet": "- `/opsx:extend do2-roli-avtopodstanovka-gate --from-review openspec/changes/do2-roli-avtopodstanovka-gate/reports/review-do2-roli-avtopodstanovka-gate-2026-04-29-subagent-raw.md \"Пересмотреть решение"
+    },
+    {
+      "src": ".cursor/commands/opsx-knowledge-add.md",
+      "line": 27,
+      "raw": "openspec/changes/archive/2026-04-25-do2-pavlik-merge-roli-avtopodstanovka/reports/trace-analysis-2026-04-25.md",
+      "kind": "path-token",
+      "status": "broken",
+      "found": null,
+      "snippet": "/opsx:knowledge-add openspec/changes/archive/2026-04-25-do2-pavlik-merge-roli-avtopodstanovka/reports/trace-analysis-2026-04-25.md --no-bundle"
+    },
+    {
+      "src": ".cursor/docs/delivery-integrity.md",
+      "line": 16,
+      "raw": ".cursor/commands/opsx-intake.md",
+      "kind": "path-token",
+      "status": "broken",
+      "found": null,
+      "snippet": "10. **Отсутствие intake/debug:** нет `.cursor/commands/opsx-intake.md`, `opsx-debug.md`; нет каталогов `.cursor/skills/openspec-intake/`, `openspec-debug/`."
+    },
+    {
+      "src": ".cursor/docs/init-project-protocol.md",
+      "line": 65,
+      "raw": "openspec/config.yaml",
+      "kind": "path-token",
+      "status": "broken",
+      "found": null,
+      "snippet": "| `openspec/` | Агент создаёт сам: `openspec/`, `openspec/changes/`, `openspec/changes/_template/`, `openspec/specs/`, `openspec/docs/`, `openspec/adrs/`, `openspec/knowledge/` (+ `_archive/` с `.gitk"
+    },
+    {
+      "src": ".cursor/docs/init-project-protocol.md",
+      "line": 416,
+      "raw": "openspec/specs/architecture.md",
+      "kind": "path-token",
+      "status": "broken",
+      "found": null,
+      "snippet": "**Шаг 5 — Записать `openspec/specs/architecture.md`.** Полный отчёт с диаграммами (по правилу preserve-subagent-reports — без сокращений). Структура:"
+    },
+    {
+      "src": ".cursor/docs/init-project-protocol.md",
+      "line": 439,
+      "raw": "openspec/specs/architecture.md",
+      "kind": "path-token",
+      "status": "broken",
+      "found": null,
+      "snippet": "1. **Вход:** карта расширений и границ доменов из выхода `onec-code-architect` (и при необходимости `openspec/specs/architecture.md`, `project.md`)."
+    },
+    {
+      "src": ".cursor/docs/init-project-protocol.md",
+      "line": 447,
+      "raw": "openspec/specs/architecture.md",
+      "kind": "path-token",
+      "status": "broken",
+      "found": null,
+      "snippet": "**При повторном запуске /init-project:** если `openspec/specs/architecture.md` уже существует — Phase 5 **предложить** обновить (если project.md изменился) или пропустить. Не пересоздавать автоматичес"
+    },
+    {
+      "src": ".cursor/docs/init-project-protocol.md",
+      "line": 484,
+      "raw": "openspec/specs/architecture.md",
+      "kind": "path-token",
+      "status": "broken",
+      "found": null,
+      "snippet": "- **Не пиши код** — только project.md и openspec/specs/architecture.md."
+    },
+    {
+      "src": ".cursor/docs/opsx-output-style.md",
+      "line": 79,
+      "raw": "openspec/changes/.../verification-2026-05-28.md",
+      "kind": "path-token",
+      "status": "broken",
+      "found": null,
+      "snippet": "Полный отчёт: openspec/changes/.../verification-2026-05-28.md"
+    },
+    {
+      "src": ".cursor/rules/capture-to-project.mdc",
+      "line": 19,
+      "raw": "openspec/config.yaml",
+      "kind": "path-token",
+      "status": "broken",
+      "found": null,
+      "snippet": "- При необходимости создать скелет OpenSpec по **Phase 0** `.cursor/commands/init-project.md` (`openspec/`, `openspec/changes/`, `openspec/changes/_template/`, `openspec/specs/`, `openspec/docs/`, `op"
+    },
+    {
+      "src": ".cursor/skills/openspec-archive-change/SKILL.md",
+      "line": 260,
+      "raw": "openspec/adrs/ADR-NNNN.md",
+      "kind": "path-token",
+      "status": "broken",
+      "found": null,
+      "snippet": "**Делегирование:** вызвать `onec-code-architect` с `mode=invariant-extraction`. Архитектор классифицирует каждый кандидат: **Load-bearing ADR** (создать/обновить `openspec/adrs/ADR-NNNN.md` по `.curso"
+    },
+    {
+      "src": ".cursor/skills/openspec-explain/templates/entry-brief.md",
+      "line": 95,
+      "raw": "openspec/changes/my-change/reports/review-provedenie-2026-08-09.md",
+      "kind": "path-token",
+      "status": "broken",
+      "found": null,
+      "snippet": "- `openspec/changes/my-change/reports/review-provedenie-2026-08-09.md`"
+    },
+    {
+      "src": ".cursor/skills/openspec-knowledge-add/SKILL.md",
+      "line": 36,
+      "raw": "openspec/changes/archive/2026-04-25-name/reports/exploration-2026-04-25.md",
+      "kind": "path-token",
+      "status": "broken",
+      "found": null,
+      "snippet": "/opsx:knowledge-add openspec/changes/archive/2026-04-25-name/reports/exploration-2026-04-25.md --no-bundle"
+    },
+    {
+      "src": ".cursor/skills/openspec-knowledge-init/SKILL.md",
+      "line": 16,
+      "raw": "openspec/specs/architecture.md",
+      "kind": "path-token",
+      "status": "broken",
+      "found": null,
+      "snippet": "- Прочитать `openspec/specs/architecture.md` (если есть)."
+    },
+    {
+      "src": ".cursor/skills/openspec-verify-change/templates/card-decision.md",
+      "line": 136,
+      "raw": "openspec/changes/do2-pavlik-vizy-shablony-soglasovaniya-podbor/reports/verification-2026-05-24.md",
+      "kind": "path-token",
+      "status": "broken",
+      "found": null,
+      "snippet": "Полный отчёт: openspec/changes/do2-pavlik-vizy-shablony-soglasovaniya-podbor/reports/verification-2026-05-24.md#точка-перехвата"
+    }
+  ],
+  "expected_sample": [
+    {
+      "src": ".cursor/agents/onec-code-architect.md",
+      "line": 17,
+      "raw": "openspec/project.md",
+      "kind": "path-token",
+      "status": "expected-kit-absent",
+      "found": null,
+      "snippet": "Пути к базовой конфигурации (cf) и расширениям (cfe) заданы в openspec/project.md (секция «Структура репозитория»). При поиске или чтении файлов в src/ используй эти пути. Не предполагай по умолчанию "
+    },
+    {
+      "src": ".cursor/agents/onec-code-explorer.md",
+      "line": 21,
+      "raw": "openspec/project.md",
+      "kind": "path-token",
+      "status": "expected-kit-absent",
+      "found": null,
+      "snippet": "Пути к базовой конфигурации (cf) и расширениям (cfe) заданы в openspec/project.md (секция «Структура репозитория»). При поиске или чтении файлов в src/ используй эти пути. Не предполагай по умолчанию "
+    },
+    {
+      "src": ".cursor/agents/onec-code-reviewer.md",
+      "line": 52,
+      "raw": "openspec/project.md",
+      "kind": "path-token",
+      "status": "expected-kit-absent",
+      "found": null,
+      "snippet": "Пути cf/cfe — из `openspec/project.md` (секция «Структура репозитория») или блока в промпте. Не предполагай `src/cf/` по умолчанию. В kit-репозитории `project.md` отсутствует — блок путей опускается."
+    },
+    {
+      "src": ".cursor/agents/onec-code-writer.md",
+      "line": 17,
+      "raw": "openspec/project.md",
+      "kind": "path-token",
+      "status": "expected-kit-absent",
+      "found": null,
+      "snippet": "Пути к базовой конфигурации (cf) и расширениям (cfe) заданы в openspec/project.md (секция «Структура репозитория»). При поиске или чтении файлов в src/ используй эти пути. Не предполагай по умолчанию "
+    },
+    {
+      "src": ".cursor/agents/onec-code-writer.md",
+      "line": 156,
+      "raw": "openspec/project.md",
+      "kind": "path-token",
+      "status": "expected-kit-absent",
+      "found": null,
+      "snippet": "- Search the repository: Grep, Glob, SemanticSearch on paths from openspec/project.md"
+    },
+    {
+      "src": ".cursor/agents/onec-trace-analyst.md",
+      "line": 21,
+      "raw": "openspec/project.md",
+      "kind": "path-token",
+      "status": "expected-kit-absent",
+      "found": null,
+      "snippet": "Пути к базовой конфигурации (cf) и расширениям (cfe) заданы в openspec/project.md (секция «Структура репозитория»). При поиске или чтении файлов в src/ используй эти пути. Не предполагай по умолчанию "
+    },
+    {
+      "src": ".cursor/commands/init-project.md",
+      "line": 5,
+      "raw": "openspec/project.md",
+      "kind": "path-token",
+      "status": "expected-kit-absent",
+      "found": null,
+      "snippet": "description: \"Диагностика проекта, бутстрап OpenSpec, интервью → openspec/project.md и architecture\""
+    },
+    {
+      "src": ".cursor/commands/init-project.md",
+      "line": 8,
+      "raw": "openspec/project.md",
+      "kind": "path-token",
+      "status": "expected-kit-absent",
+      "found": null,
+      "snippet": "Проверь готовность проекта (выгрузка, OpenSpec, агенты), подскажи недостающее, затем собери информацию через интервью → `openspec/project.md` → `openspec/specs/architecture.md`."
+    },
+    {
+      "src": ".cursor/commands/opsx-knowledge-init.md",
+      "line": 8,
+      "raw": "openspec/knowledge/_taxonomy.yaml",
+      "kind": "path-token",
+      "status": "expected-kit-absent",
+      "found": null,
+      "snippet": "Первичный bootstrap таксономии базы знаний (`openspec/knowledge/_taxonomy.yaml`) для существующего проекта без полного `/init-project`, либо идемпотентный re-sync после добавления/удаления базовых кон"
+    },
+    {
+      "src": ".cursor/commands/opsx-new.md",
+      "line": 16,
+      "raw": "openspec/project.md",
+      "kind": "path-token",
+      "status": "expected-kit-absent",
+      "found": null,
+      "snippet": "**Второе действие (только новый change):** Metadata Gate. Read `openspec/project.md` (`defaultDeveloper`, `cfMarkerPrefix`); baseline запреты `domain_label` — `.cursor/docs/marker-canon.md` ⊕ project "
+    },
+    {
+      "src": ".cursor/commands/release-review.md",
+      "line": 22,
+      "raw": "../../openspec/project.md",
+      "kind": "md-link",
+      "status": "expected-kit-absent",
+      "found": null,
+      "snippet": "Имя расширения — папка в `src/*/cfe/<имя>/` (см. [`openspec/project.md`](../../openspec/project.md))."
+    },
+    {
+      "src": ".cursor/commands/release-review.md",
+      "line": 22,
+      "raw": "openspec/project.md",
+      "kind": "path-token",
+      "status": "expected-kit-absent",
+      "found": null,
+      "snippet": "Имя расширения — папка в `src/*/cfe/<имя>/` (см. [`openspec/project.md`](../../openspec/project.md))."
+    },
+    {
+      "src": ".cursor/docs/1c-coding-standards.md",
+      "line": 36,
+      "raw": "../../openspec/project.md",
+      "kind": "md-link",
+      "status": "expected-kit-absent",
+      "found": null,
+      "snippet": "Комментарии, попадающие под **Whitelist предрелиза** (baseline `.cursor/docs/marker-canon.md` + строки в [openspec/project.md](../../openspec/project.md), секция «Форматы и соглашения по комментариям "
+    },
+    {
+      "src": ".cursor/docs/1c-coding-standards.md",
+      "line": 36,
+      "raw": "openspec/project.md",
+      "kind": "path-token",
+      "status": "expected-kit-absent",
+      "found": null,
+      "snippet": "Комментарии, попадающие под **Whitelist предрелиза** (baseline `.cursor/docs/marker-canon.md` + строки в [openspec/project.md](../../openspec/project.md), секция «Форматы и соглашения по комментариям "
+    },
+    {
+      "src": ".cursor/docs/1c-coding-standards.md",
+      "line": 46,
+      "raw": "openspec/project.md",
+      "kind": "path-token",
+      "status": "expected-kit-absent",
+      "found": null,
+      "snippet": "**SSOT правила AP-054** — карточка в [.cursor/docs/antipatterns/bsl-antipatterns.md](antipatterns/bsl-antipatterns.md) (не `project.md`); **SSOT AP-031** — там же. `openspec/project.md` лишь **опциона"
+    },
+    {
+      "src": ".cursor/docs/agents-CHANGELOG.md",
+      "line": 60,
+      "raw": "openspec/project.md",
+      "kind": "path-token",
+      "status": "expected-kit-absent",
+      "found": null,
+      "snippet": "- Маркеры: канон `// +++ <ФИО> <дата> [comment_suffix]` / `// --- <ФИО>`; SSOT — `openspec/project.md`; предрелиз — `/release-review`."
+    },
+    {
+      "src": ".cursor/docs/agents-CHANGELOG.md",
+      "line": 74,
+      "raw": "../../openspec/project.md",
+      "kind": "md-link",
+      "status": "expected-kit-absent",
+      "found": null,
+      "snippet": "- Синхронизированы [`.cursor/rules/architect-gate.mdc`](../rules/architect-gate.mdc), [`.cursor/skills/1c-agent-patterns/SKILL.md`](../skills/1c-agent-patterns/SKILL.md), [`openspec/project.md`](../.."
+    },
+    {
+      "src": ".cursor/docs/agents-CHANGELOG.md",
+      "line": 74,
+      "raw": "openspec/project.md",
+      "kind": "path-token",
+      "status": "expected-kit-absent",
+      "found": null,
+      "snippet": "- Синхронизированы [`.cursor/rules/architect-gate.mdc`](../rules/architect-gate.mdc), [`.cursor/skills/1c-agent-patterns/SKILL.md`](../skills/1c-agent-patterns/SKILL.md), [`openspec/project.md`](../.."
+    },
+    {
+      "src": ".cursor/docs/agents-CHANGELOG.md",
+      "line": 92,
+      "raw": "openspec/project.md",
+      "kind": "path-token",
+      "status": "expected-kit-absent",
+      "found": null,
+      "snippet": "- `openspec/project.md`: активированы три строки обязательного контроля комментариев."
+    },
+    {
+      "src": ".cursor/docs/bsl-comment-formats-project.md",
+      "line": 5,
+      "raw": "../../openspec/project.md",
+      "kind": "md-link",
+      "status": "expected-kit-absent",
+      "found": null,
+      "snippet": "**SSOT значений (project):** [openspec/project.md](../../openspec/project.md) — `defaultDeveloper`, `cfMarkerPrefix`, строки **Whitelist предрелиза** и **Обязательный контроль**."
+    },
+    {
+      "src": ".cursor/docs/bsl-comment-formats-project.md",
+      "line": 5,
+      "raw": "openspec/project.md",
+      "kind": "path-token",
+      "status": "expected-kit-absent",
+      "found": null,
+      "snippet": "**SSOT значений (project):** [openspec/project.md](../../openspec/project.md) — `defaultDeveloper`, `cfMarkerPrefix`, строки **Whitelist предрелиза** и **Обязательный контроль**."
+    },
+    {
+      "src": ".cursor/docs/init-project-protocol.md",
+      "line": 30,
+      "raw": "openspec/knowledge/_index.yaml",
+      "kind": "path-token",
+      "status": "expected-kit-absent",
+      "found": null,
+      "snippet": "| `openspec/knowledge/_index.yaml` | Read + parse YAML | Парсится; есть `version: 1`; есть поле `facts:` (даже если пустое) | `[V]` / `[X]` |"
+    },
+    {
+      "src": ".cursor/docs/init-project-protocol.md",
+      "line": 31,
+      "raw": "openspec/knowledge/_taxonomy.yaml",
+      "kind": "path-token",
+      "status": "expected-kit-absent",
+      "found": null,
+      "snippet": "| `openspec/knowledge/_taxonomy.yaml` | Read + parse YAML | Парсится; есть `version`; `domains:` непустой | `[V]` / `[X]` |"
+    },
+    {
+      "src": ".cursor/docs/init-project-protocol.md",
+      "line": 32,
+      "raw": "openspec/knowledge/README.md",
+      "kind": "path-token",
+      "status": "expected-kit-absent",
+      "found": null,
+      "snippet": "| `openspec/knowledge/README.md` | Read | Файл существует и непустой | `[V]` / `[X]` |"
+    },
+    {
+      "src": ".cursor/docs/init-project-protocol.md",
+      "line": 51,
+      "raw": "openspec/knowledge/_index.yaml",
+      "kind": "path-token",
+      "status": "expected-kit-absent",
+      "found": null,
+      "snippet": "[V] openspec/knowledge/_index.yaml     — индекс (valid, N фактов)"
+    },
+    {
+      "src": ".cursor/docs/init-project-protocol.md",
+      "line": 52,
+      "raw": "openspec/knowledge/_taxonomy.yaml",
+      "kind": "path-token",
+      "status": "expected-kit-absent",
+      "found": null,
+      "snippet": "[V] openspec/knowledge/_taxonomy.yaml  — таксономия (M доменов)"
+    },
+    {
+      "src": ".cursor/docs/init-project-protocol.md",
+      "line": 53,
+      "raw": "openspec/knowledge/README.md",
+      "kind": "path-token",
+      "status": "expected-kit-absent",
+      "found": null,
+      "snippet": "[V] openspec/knowledge/README.md       — описание модели"
+    },
+    {
+      "src": ".cursor/docs/init-project-protocol.md",
+      "line": 65,
+      "raw": "openspec/project.md",
+      "kind": "path-token",
+      "status": "expected-kit-absent",
+      "found": null,
+      "snippet": "| `openspec/` | Агент создаёт сам: `openspec/`, `openspec/changes/`, `openspec/changes/_template/`, `openspec/specs/`, `openspec/docs/`, `openspec/adrs/`, `openspec/knowledge/` (+ `_archive/` с `.gitk"
+    },
+    {
+      "src": ".cursor/docs/init-project-protocol.md",
+      "line": 65,
+      "raw": "openspec/knowledge/_taxonomy.yaml",
+      "kind": "path-token",
+      "status": "expected-kit-absent",
+      "found": null,
+      "snippet": "| `openspec/` | Агент создаёт сам: `openspec/`, `openspec/changes/`, `openspec/changes/_template/`, `openspec/specs/`, `openspec/docs/`, `openspec/adrs/`, `openspec/knowledge/` (+ `_archive/` с `.gitk"
+    },
+    {
+      "src": ".cursor/docs/init-project-protocol.md",
+      "line": 75,
+      "raw": "openspec/knowledge/README.md",
+      "kind": "path-token",
+      "status": "expected-kit-absent",
+      "found": null,
+      "snippet": "| Нет `README.md` или пустой | Создать из стандартного шаблона `.cursor/skills/openspec-knowledge-init/templates/README-template.md` (Read шаблона → Write в `openspec/knowledge/README.md`) |"
+    },
+    {
+      "src": ".cursor/docs/init-project-protocol.md",
+      "line": 125,
+      "raw": "openspec/project.md",
+      "kind": "path-token",
+      "status": "expected-kit-absent",
+      "found": null,
+      "snippet": "Если `openspec/project.md` уже существует:"
+    },
+    {
+      "src": ".cursor/docs/init-project-protocol.md",
+      "line": 285,
+      "raw": "openspec/project.md",
+      "kind": "path-token",
+      "status": "expected-kit-absent",
+      "found": null,
+      "snippet": "После сбора и подтверждения всех блоков сформировать (или обновить) `openspec/project.md` по структуре:"
+    },
+    {
+      "src": ".cursor/docs/init-project-protocol.md",
+      "line": 381,
+      "raw": "openspec/project.md",
+      "kind": "path-token",
+      "status": "expected-kit-absent",
+      "found": null,
+      "snippet": "**Триггер:** `openspec/project.md` существует **и** (`framework_contract_version` отсутствует **или** ≠ версии kit из `.cursor/templates/project-overlay.template.md` / `.cursor/docs/marker-canon.md`)."
+    },
+    {
+      "src": ".cursor/docs/init-project-protocol.md",
+      "line": 437,
+      "raw": "openspec/knowledge/_taxonomy.yaml",
+      "kind": "path-token",
+      "status": "expected-kit-absent",
+      "found": null,
+      "snippet": "**Шаг 6 — Генерация таксономии (`openspec/knowledge/_taxonomy.yaml`).** Шаг идемпотентен: безопасно запускать повторно."
+    },
+    {
+      "src": ".cursor/docs/init-project-protocol.md",
+      "line": 440,
+      "raw": "openspec/knowledge/_taxonomy.yaml",
+      "kind": "path-token",
+      "status": "expected-kit-absent",
+      "found": null,
+      "snippet": "2. **Проверка идемпотентности.** Если `openspec/knowledge/_taxonomy.yaml` уже существует:"
+    },
+    {
+      "src": ".cursor/docs/init-project-protocol.md",
+      "line": 453,
+      "raw": "openspec/knowledge/_taxonomy.yaml",
+      "kind": "path-token",
+      "status": "expected-kit-absent",
+      "found": null,
+      "snippet": "**KB warning.** Перед предложением следующих шагов проверить `openspec/knowledge/_taxonomy.yaml`:"
+    },
+    {
+      "src": ".cursor/docs/marker-canon.md",
+      "line": 7,
+      "raw": "../../openspec/project.md",
+      "kind": "md-link",
+      "status": "expected-kit-absent",
+      "found": null,
+      "snippet": "- **[openspec/project.md](../../openspec/project.md)** — VALUE (`defaultDeveloper`, `cfMarkerPrefix`, пути) и project overlay (строки Whitelist предрелиза, расширения списков)."
+    },
+    {
+      "src": ".cursor/docs/marker-canon.md",
+      "line": 7,
+      "raw": "openspec/project.md",
+      "kind": "path-token",
+      "status": "expected-kit-absent",
+      "found": null,
+      "snippet": "- **[openspec/project.md](../../openspec/project.md)** — VALUE (`defaultDeveloper`, `cfMarkerPrefix`, пути) и project overlay (строки Whitelist предрелиза, расширения списков)."
+    },
+    {
+      "src": ".cursor/docs/marker-canon.md",
+      "line": 27,
+      "raw": "openspec/project.md",
+      "kind": "path-token",
+      "status": "expected-kit-absent",
+      "found": null,
+      "snippet": "**Zero-config:** при отсутствии `openspec/project.md` или пустых overlay-секций потребители работают на kit baseline. Обязательны только VALUE, которые нельзя дефолтить: пути cf/cfe и `defaultDevelope"
+    },
+    {
+      "src": ".cursor/docs/marker-layers-guide.md",
+      "line": 6,
+      "raw": "../../openspec/project.md",
+      "kind": "md-link",
+      "status": "expected-kit-absent",
+      "found": null,
+      "snippet": "**SSOT значений проекта:** [openspec/project.md](../../openspec/project.md) (`defaultDeveloper`, `cfMarkerPrefix`, строки Whitelist)."
+    }
+  ],
+  "runtime_sample": [
+    {
+      "src": ".cursor/docs/delivery-integrity.md",
+      "line": 20,
+      "raw": "../../temp/fixtures/README.md",
+      "kind": "md-link",
+      "status": "runtime-generated",
+      "found": null,
+      "snippet": "См. также: [kit-template-workflow.md](./kit-template-workflow.md), [quick-start.md](./quick-start.md), [faq-kit.md](./faq-kit.md). Опциональные smoke-docs: [mxl-roundtrip-fixture.md](./mxl-roundtrip-f"
+    },
+    {
+      "src": ".cursor/docs/mxl-roundtrip-fixture.md",
+      "line": 3,
+      "raw": "../../temp/fixtures/README.md",
+      "kind": "md-link",
+      "status": "runtime-generated",
+      "found": null,
+      "snippet": "**Optional smoke** (не обязательная поставка). Фикстура: `temp/fixtures/mxl-roundtrip-sample.json` — создать локально при проверке; см. [temp/fixtures/README.md](../../temp/fixtures/README.md)."
+    },
+    {
+      "src": ".cursor/docs/proportional-surface.md",
+      "line": 21,
+      "raw": "../../temp/fixtures/README.md",
+      "kind": "md-link",
+      "status": "runtime-generated",
+      "found": null,
+      "snippet": "Фикстура (optional smoke): `temp/fixtures/proportional-surface-noisy-module.bsl` — см. [temp/fixtures/README.md](../../temp/fixtures/README.md)."
+    }
+  ]
+}

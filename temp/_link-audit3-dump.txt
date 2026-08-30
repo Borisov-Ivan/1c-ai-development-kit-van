@@ -1,0 +1,129 @@
+keys=['source_count', 'always_apply', 'broken', 'broken_count', 'expected', 'expected_count', 'section_fail', 'section_file_fail', 'priority', 'review_step_tokens', 'agent_files', 'agent_mentions_missing_file', 'commands', 'agents_md_commands', 'orphan_rules', 'orphan_docs', 'agents_md_broken_paths']
+broken=95 expected=164
+ALWAYS ['1c-agent-delegation.mdc', 'chat-output-budget.mdc', 'gate-dispatcher.mdc', 'session-discipline.mdc']
+--- section_fail ---
+.cursor/agents/onec-code-reviewer.md:128 | reviewer-checks.md | Phase 2.5. Silent VERIFIED_OK — только whitelist § DESIGN AUTHORITY.
+.cursor/docs/chat-lexicon.md:9 | .cursor/skills/openspec-overview/templates/style-checklist.md | Ситуация ≠ механизм и § Laconic / anti-tutor.
+.cursor/rules/1c-agent-delegation.mdc:50 | .cursor/rules/1c-halt-triggers.mdc | LIGHT MODE / § MECHANICAL MODE
+.cursor/rules/verify-user-communication.mdc:62 | chat-output-budget.mdc | 5a
+.cursor/skills/1c-mxl/SKILL.md:10 | .cursor/rules/forms-mxl-mode-gate.mdc | Политика макетов. Mode Gate
+.cursor/skills/openspec-apply-change/templates/pause-wait-chat.md:5 | chat-output-budget.mdc | 1d. Стиль
+.cursor/skills/openspec-verify-change/SKILL.md:160 | vertical-slices.mdc | User Task Contract. Дополнительно
+.cursor/skills/openspec-verify-change/templates/report-header.md:96 | .cursor/rules/vertical-slices.mdc | ДЕТЕКТОР ПЕТЛИ ПРИЁМКИ. Значение переносится из снапшота в снапшот
+.cursor/skills/review/SKILL.md:229 | .cursor/rules/1c-writer-pipeline.mdc | IDENTIFIER HYGIENE CHECK. Детектор **латиницы в идентификаторе** (AP-031
+section_fail_n=9
+section_file_fail_n=42
+--- section_file_fail sample ---
+.cursor/agents/onec-code-architect.md:84 | debug.md | Verify decision ledger + design § «Решения verify (зафиксировано
+.cursor/agents/onec-code-reviewer.md:35 | openspec/changes/archive/2026-08-10-independent-review-disposition/design.md | D9. Тихий VERIFIED_OK «только цитата design» **запрещён**.
+.cursor/docs/init-project-protocol.md:375 | project.md | Канон domain_label / MARKER-MERGE / MARKER-PLACEMENT — они в kit. Не п
+.cursor/docs/marker-canon.md:77 | project.md | Разработчик по умолчанию | Значение префикса cf-маркера |
+.cursor/docs/marker-canon.md:79 | project.md | Whitelist предрелиза | Дополнительные/legacy форматы **exempt от удале
+.cursor/docs/marker-canon.md:144 | project.md | Whitelist предрелиза
+.cursor/docs/opsx-output-style.md:15 | tasks.md | 12.9 | Backticks для ID
+.cursor/docs/opsx-output-style.md:30 | design.md | «RCA…»
+.cursor/docs/opsx-output-style.md:206 | design.md | 5.3
+.cursor/docs/ux-acceptance-isolated-chat.md:41 | debug.md | Verify decision ledger.
+.cursor/rules/1c-xml-write-guard.mdc:24 | debug.md | Apply permissions или
+.cursor/rules/forms-mxl-mode-gate.mdc:102 | debug.md | ## Apply permissions
+.cursor/rules/verify-user-communication.mdc:90 | debug.md | Verify decision ledger + design § «Решения verify (зафиксировано
+.cursor/rules/vertical-slices.mdc:31 | design.md | Assumptions / § Decisions
+.cursor/rules/vertical-slices.mdc:69 | design.md | Assumptions + static/explorer **агентом**
+.cursor/skills/1c-mxl/SKILL.md:22 | debug.md | ## Apply permissions
+.cursor/skills/openspec-apply-change/SKILL.md:102 | debug.md | ## Verify decision ledger
+.cursor/skills/openspec-apply-change/SKILL.md:142 | debug.md | ## Apply permissions
+.cursor/skills/openspec-apply-change/SKILL.md:309 | debug.md | Apply permissions или маркер
+.cursor/skills/openspec-apply-change/SKILL.md:624 | debug.md | Apply permissions or
+.cursor/skills/openspec-explore/SKILL.md:244 | design.md | Открытые вопросы
+.cursor/skills/openspec-explore/templates/handoff-block.md:25 | design.md | Открытые вопросы>
+.cursor/skills/openspec-extend-change/SKILL.md:89 | debug.md | Extend после подтверждения
+.cursor/skills/openspec-extend-change/SKILL.md:339 | debug.md | **
+.cursor/skills/openspec-extend-change/SKILL.md:351 | design.md | **
+--- PRIORITY ---
+.cursor/rules/1c-halt-triggers.mdc exists=True
+  {'name': 'LIGHT MODE', 'ok': True}
+  {'name': 'MECHANICAL MODE', 'ok': True}
+  {'name': 'ИСКЛЮЧЕНИЯ', 'ok': True}
+  heads: 1C HALT Triggers (on-demand) | Safety floor | Promotion triggers | HALT CONDITIONS (проверять ДО любого действия) | LIGHT MODE (точечная правка) | MECHANICAL MODE (шаблонная правка) | ИСКЛЮЧЕНИЯ (прямая правка .bsl)
+.cursor/rules/1c-writer-pipeline.mdc exists=True
+  {'name': 'LINT GATE', 'ok': True}
+  {'name': 'ПРОМПТ WRITER', 'ok': True}
+  {'name': 'IDENTIFIER HYGIENE CHECK', 'ok': True}
+  heads: 1C Writer Pipeline (on-demand) | ПРОМПТ WRITER: ГРАНИЦА ОТВЕТСТВЕННОСТИ | LINT GATE | IDENTIFIER HYGIENE CHECK (Naming Provenance) | Шаг 1. Scope | Шаг 2. Цели — идентификаторы на новых строках | Шаг 2b. Touched-procedure scope (обязательно при apply/review с diff) | Шаг 3. Детектор (для каждого собранного идентификатора/ключа) | Шаг 4. Allow-list (закрыт по построению — не включать в evidence) | Шаг 5. Выход — блок для reviewer | Naming Signals (evidence) | Naming Signals (evidence) | COMMENT HYGIENE CHECK | Шаг 1. Scope | Шаг 2. Цели — строки комментариев
+.cursor/skills/review/SKILL.md exists=True
+  {'name': '1.8', 'ok': True}
+  {'name': '1.9', 'ok': True}
+  {'name': '1.10', 'ok': True}
+  {'name': '3.5', 'ok': True}
+  {'name': '4.5', 'ok': True}
+  {'name': '6.4', 'ok': True}
+  heads: Шаг 0. Флаги и `release_mode` | Шаг 1. Resolve scope (со smart defaults) | 1.0 Приоритет `/release-review` (`release_mode`, до таблицы 1.2) | 1.1 Smart defaults (S12) | 1.2 Таблица резолва | 1.3a Change-scoped resolver (только `release_mode` + change) | 1.3c `extension_all_bsl` (только `release_mode`) | Шаг 1.4. Light-review триаж (S15) | Алгоритм | Решение | Light review scope | Шаг 1.5. Diff extraction и procedure mapping (при `diff-focused`) | 1.5.1 Baseline для `git diff` | 1.5.2 Новый файл в diff | 1.5.3 Извлечение номеров строк в текущей версии
+.cursor/docs/opsx-output-style.md exists=True
+  {'name': '5.1', 'ok': True}
+  {'name': '2.6', 'ok': True}
+  {'name': '5.1a', 'ok': True}
+  {'name': '5.2', 'ok': True}
+  heads: Стиль пользовательских выводов opsx-команд | 1. Три слоя (главное правило) | 2. Типографика и языки | 2.5. Человеческий слой: каноны разговорного вывода | 2.6. Chat Surface Contract (сквозной слой для всех `/opsx:*`) | Принцип | Гейт: Тест понятности (механизм, не блок-лист) | Правило 1 — Самодостаточность | Правило 2 — Команды: internal vs user-action | Правило 3 — Один сигнал ответственности | Правило 4 — Типографика скан-читаемости | Правило 5 — Handoff на языке эффекта | Правило 6 — Бриф по адресу | Self-check (HARD, перед каждым финальным сообщением) | Terminal outcomes (сессия завершена для человека)
+.cursor/rules/chat-output-budget-full.mdc exists=True
+  {'name': '1', 'ok': True}
+  {'name': '1b', 'ok': True}
+  {'name': '1c', 'ok': True}
+  {'name': '3a', 'ok': True}
+  {'name': '4', 'ok': True}
+  {'name': '5', 'ok': True}
+  {'name': '6', 'ok': True}
+  {'name': '7', 'ok': True}
+  heads: Chat output budget — FULL (on-demand) | Chat output budget (оркестратор → пользователь) | Назначение | Правила (обязательны) | 1. Бюджет строк (Единая таблица лимитов) | 1c. Блок «Карта правок» (apply acceptance-handoff) | 1d. Инвентарь pause-wait (apply: работа человека в Конфигураторе) | 1a. Карта SSOT (Single Source of Truth) | 1b. Pre-send self-check (оркестратор → чат, 10 пунктов) | 1c. Тест понятности (HARD, верхний приоритет) | 2. Разделение «чат / файл» | 3. Skip-on-empty | 3a. Non-events не выводятся в чат | 4. Без подтверждения (No Acknowledgement) | 5. Subagent result protocol (Честная обработка субагентов)
+.cursor/skills/openspec-apply-change/templates/pause-wait-chat.md exists=True
+  heads: pause-wait — карточка чата (SSOT) | Слоты (все обязательны) | Запрещено | Эталон
+.cursor/skills/openspec-explain/templates/entry-brief.md exists=True
+  heads: Entry-бриф (SSOT) — `/opsx:explain` | Слоты | HALT (не в чат-бриф) | Эталон A — замер с двумя операциями (рамка неочевидна) | Эталон B — рамка уже ясна из команды | Эталон C — после ревью / apply (prefill из `## Explain scope`) | Разбор ответа
+.cursor/docs/templates/brief-card.md exists=True
+  heads: Brief Card (Sync Card) — SSOT формы entry-брифа | Бюджет содержания (вместо лимита строк) | Запрещённые подписи (HALT) | Metadata Gate (new, не бриф) | B0 — без карточки | B1 — new / extend без развилки | Эталон B1 | B2 — extend с развилкой | Эталон B2 | B3 — explore | Эталон B3 (дефект) | Эталон B3 (выбор маршрута) | B-explain — `/opsx:explain` | Разбор ответа пользователя | Развилки после брифа (extend §123)
+.cursor/docs/templates/decision-block.md exists=True
+  heads: Decision Block — единый контракт развилки в чате (SSOT) | Тест понятности (главный гейт, прогнать первым) | Обязательная триада (простой язык) | Шаблон (чат) — «Что решить» + связный абзац + варианты | Internal-ID и англ-метки — перевести (примеры теста) | Запрещено в чате | Шаблон (файл отчёта, развёрнутый) | <N>. <Краткое название развилки на языке кода 1С> | Привязки команд | Каноны вопросов в rules / skills (тот же тест) | Анти-примеры
+.cursor/docs/marker-canon.md exists=True
+  heads: Marker Canon — SSOT механики маркеров ЗНИ (kit) | Config Resolution Contract (CRC) | Грамматика маркера (MECHANISM) | Дефолтный формат (FORMAT — kit DEFAULT) | cfe (расширения) | cf (базовая конфигурация) | Поверхность override проекта (Вариант A) | MARKER-MERGE-001 (MECHANISM) | MARKER-PLACEMENT-001 (MECHANISM) | Канон domain_label — baseline запреты (LIST, kit) | Требования (GOOD) | Baseline-запреты process-лексики (без доменного смысла) | Whitelist и «нет whitelist → строгая гигиена» (MECHANISM) | Allow-list AP-054 (baseline LIST, kit) | Связь с AP (гигиена)
+.cursor/docs/chat-lexicon.md exists=True
+  heads: Словарь чата (SSOT: жаргон → человеческая замена) | Две аудитории (важно) | Слой 0 — принцип понятности (механизм; над списками) | Слой 1 — коды и имена движка (примеры для детектора; бан в чате) | Слой 2 — workflow-слова (РАЗРЕШЕНЫ разработчику, расшифровка — для заказчика) | Слой 3 — лексика (англицизмы) — мягкое предпочтение | Разрешено в чате
+.cursor/docs/kit-template-workflow.md exists=True
+  heads: Поставка kit-шаблона в проект 1С | Что копировать | Эволюция kit (метапроект) | Forms / MXL | Связь
+.cursor/docs/delivery-integrity.md exists=True
+  heads: Целостность поставки kit-van | Системный чеклист
+.cursor/docs/quick-start.md exists=True
+  heads: Quick start — kit-van | 1. Поставка | 2. Первый сценарий | 3. Формы и макеты | 4. Каталог skills (частое)
+.cursor/docs/faq-kit.md exists=True
+  heads: FAQ — kit-van | explore vs new | Режим без API (`-noapi`) | Режим формы (на `/opsx:new`) | Поставка шаблона | session-save / restore / retro | «Замер → вывод» vs verify | Кейсбуки vs вендорские стандарты
+--- ORPHAN RULES ---
+[]
+--- ORPHAN DOCS ---
+[]
+--- AGENTS.md broken ---
+[{'raw': 'openspec/project.md', 'status': 'expected-kit-absent'}, {'raw': 'openspec/project.md', 'status': 'expected-kit-absent'}]
+--- missing agents ---
+['onec-code-architect-2nd', 'openspec-doc-writer', 'onec-code-trace-analyst']
+--- commands ---
+{'file': 'init-project.md', 'name': '/init-project', 'skill_refs': [], 'skill_ok': []}
+{'file': 'opsx-apply.md', 'name': '/opsx:apply', 'skill_refs': ['openspec-apply-change/SKILL.md'], 'skill_ok': [['openspec-apply-change/SKILL.md', True]]}
+{'file': 'opsx-archive.md', 'name': '/opsx:archive', 'skill_refs': ['openspec-archive-change/SKILL.md'], 'skill_ok': [['openspec-archive-change/SKILL.md', True]]}
+{'file': 'opsx-bulk-archive.md', 'name': '/opsx:bulk-archive', 'skill_refs': ['openspec-bulk-archive-change/SKILL.md'], 'skill_ok': [['openspec-bulk-archive-change/SKILL.md', True]]}
+{'file': 'opsx-explain.md', 'name': '/opsx:explain', 'skill_refs': ['openspec-explain/SKILL.md'], 'skill_ok': [['openspec-explain/SKILL.md', True]]}
+{'file': 'opsx-explore.md', 'name': '/opsx:explore', 'skill_refs': ['openspec-explore/SKILL.md'], 'skill_ok': [['openspec-explore/SKILL.md', True]]}
+{'file': 'opsx-extend.md', 'name': '/opsx:extend', 'skill_refs': ['openspec-extend-change/SKILL.md'], 'skill_ok': [['openspec-extend-change/SKILL.md', True]]}
+{'file': 'opsx-knowledge-add.md', 'name': '/opsx:knowledge-add', 'skill_refs': ['openspec-knowledge-add/SKILL.md'], 'skill_ok': [['openspec-knowledge-add/SKILL.md', True]]}
+{'file': 'opsx-knowledge-audit.md', 'name': '/opsx:knowledge-audit', 'skill_refs': ['openspec-knowledge-audit/SKILL.md'], 'skill_ok': [['openspec-knowledge-audit/SKILL.md', True]]}
+{'file': 'opsx-knowledge-init.md', 'name': '/opsx:knowledge-init', 'skill_refs': ['openspec-knowledge-init/SKILL.md'], 'skill_ok': [['openspec-knowledge-init/SKILL.md', True]]}
+{'file': 'opsx-new.md', 'name': '/opsx:new', 'skill_refs': ['openspec-new-change/SKILL.md'], 'skill_ok': [['openspec-new-change/SKILL.md', True]]}
+{'file': 'opsx-overview.md', 'name': '/opsx:overview', 'skill_refs': ['openspec-overview/SKILL.md'], 'skill_ok': [['openspec-overview/SKILL.md', True]]}
+{'file': 'opsx-status.md', 'name': '/opsx:status', 'skill_refs': ['openspec-status/SKILL.md'], 'skill_ok': [['openspec-status/SKILL.md', True]]}
+{'file': 'opsx-sync.md', 'name': '/opsx:sync', 'skill_refs': ['openspec-sync-specs/SKILL.md'], 'skill_ok': [['openspec-sync-specs/SKILL.md', True]]}
+{'file': 'opsx-verify.md', 'name': '/opsx:verify', 'skill_refs': ['openspec-verify-change/SKILL.md'], 'skill_ok': [['openspec-verify-change/SKILL.md', True]]}
+{'file': 'release-review.md', 'name': '/release-review', 'skill_refs': ['review/SKILL.md', 'review/SKILL.md'], 'skill_ok': [['review/SKILL.md', True], ['review/SKILL.md', True]]}
+{'file': 'review.md', 'name': '/review', 'skill_refs': ['review/SKILL.md'], 'skill_ok': [['review/SKILL.md', True]]}
+{'file': 'session-restore.md', 'name': '/session-restore', 'skill_refs': ['session-restore/SKILL.md'], 'skill_ok': [['session-restore/SKILL.md', True]]}
+{'file': 'session-retro.md', 'name': '/session-retro', 'skill_refs': ['session-retro/SKILL.md'], 'skill_ok': [['session-retro/SKILL.md', True]]}
+{'file': 'session-save.md', 'name': '/session-save', 'skill_refs': ['session-save/SKILL.md'], 'skill_ok': [['session-save/SKILL.md', True]]}
+--- agents_md_commands ---
+['/opsx:explore', '/opsx:new', '/opsx:verify', '/opsx:apply', '/opsx:archive', '/opsx:explore', '/opsx:new', '/opsx:verify', '/opsx:apply', '/opsx:archive', '/opsx:extend', '/opsx:status', '/opsx:knowledge-add', '/opsx:knowledge-init', '/opsx:knowledge-audit', '/opsx:sync', '/opsx:bulk-archive', '/review', '/release-review', '/init-project', '/session-save', '/session-restore', '/session-retro', '/init-project', '/review', '/release-review']
+--- review tokens ---
+['0.5', '0.9', '1.0', '1.1', '1.10', '1.2', '1.3', '1.4', '1.5', '1.6', '1.8', '1.9', '2.1', '2.2', '2.3', '2.5', '2.6', '3.1', '3.2', '3.5', '4.1', '4.2', '4.3', '4.4', '4.5', '6.1', '6.2', '6.3', '6.4', '7.1', '7.2', '7.3', '7.4', 'Шаг 0', 'Шаг 1', 'Шаг 1.10', 'Шаг 1.4', 'Шаг 1.5', 'Шаг 1.6', 'Шаг 1.8', 'Шаг 1.9', 'Шаг 2', 'Шаг 3', 'Шаг 3.5', 'Шаг 4', 'Шаг 4.5', 'Шаг 5', 'Шаг 6', 'Шаг 7']

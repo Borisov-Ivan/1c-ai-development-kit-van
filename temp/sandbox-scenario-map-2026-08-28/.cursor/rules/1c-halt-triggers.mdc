@@ -1,0 +1,88 @@
+---
+description: "On-demand: полная HALT-таблица, Light/Mechanical Mode, исключения BSL write guard"
+alwaysApply: false
+globs: "**/*.bsl"
+priority: 998
+---
+
+# 1C HALT Triggers (on-demand)
+
+**Когда загружать:** правка `.bsl`, делегирование writer/reviewer, срабатывание триггеров из always-apply `.cursor/rules/1c-agent-delegation.mdc`. При **фактической** правке `.bsl` дополнительно Read `.cursor/rules/1c-writer-pipeline.mdc` (не полагаться на glob).
+
+## Safety floor
+
+Ни один режим (Light / Mechanical / quick-fix / профиль модели) не ослабляет:
+
+- обязательный reviewer даже в исключениях (кроме явного отказа пользователя);
+- ReadLints после каждой правки `.bsl`;
+- синтаксический контроль (LINT GATE).
+
+## Promotion triggers
+
+Quick-fix снижает накладные расходы, не глубину проверки. В полный цикл независимо от Light Mode, если правка затрагивает:
+
+- транзакционные пути / управляемые блокировки;
+- контракт публичной `Экспорт`-процедуры (сигнатура, параметры, гарантии возврата);
+- RLS / права / роли;
+- заимствованные объекты расширений;
+- подписки и регламентные задания.
+
+## HALT CONDITIONS (проверять ДО любого действия)
+
+Триггеры **сверху вниз**; Light / Mechanical имеют приоритет над общим «Правка .bsl».
+
+| Триггер | Действие | Детали |
+|---------|----------|--------|
+| Реализация ЗНИ без /opsx:apply | **СТОП.** writer/reviewer запрещены. Исключение: Light/Mechanical; `/review`/`/release-review` — reviewer всегда, writer только после queue-fix | APPLY GATE ниже |
+| explore без active change | **СТОП.** writer/reviewer → `/opsx:new` | `openspec-explore/SKILL.md` |
+| Новый объект метаданных | **СТОП.** Никогда не создавать | `1c-no-metadata-creation.mdc` |
+| Form.xml / Template.xml / «заимствовать» / form-add / template-add / ChildObjects | Mode Gate + XML guard; заимствование и form-add — **всегда** блокер человеку | `forms-mxl-mode-gate.mdc`, `1c-xml-write-guard.mdc` |
+| `assisted` + Form.xml без skill compile/edit | **HALT → manual** (не сырой Write) | `forms-mxl-mode-gate.mdc` |
+| `-FromObject` / borrow / регистрация формы в ChildObjects объекта | **СТОП** (запрещено в kit-van v1) | `1c-forms/compile`, `1c-forms/edit` |
+| Выбор маршрута docs-fix / quick-fix / full-cycle | Read `task-triage.mdc`; promotion-триггеры; запрет «ок → meta/form-add» | `.cursor/rules/task-triage.mdc` |
+| Трасса `.pff` / TRACE / стек 1С | СТОП → **onec-trace-analyst** | `1c-error-analysis.mdc` |
+| Task explore/generalPurpose для 1С | **СТОП.** Повтор с 1С-агентом | `tool-name-guard.mdc`, `model-selection.mdc` |
+| Light Mode: 2–10 строк, 1 файл | **onec-code-writer** + **onec-code-reviewer** | см. LIGHT MODE |
+| Mechanical Mode: find-replace | StrReplace + Grep + **reviewer** | см. MECHANICAL MODE |
+| Правка `.bsl` (общий) | architect-gate → architect → writer → reviewer | `architect-gate.mdc` |
+| Исследование 3+ модулей | **onec-code-explorer** | порог 0, `1c-agent-delegation.mdc` |
+| Bug fix (маркеры ошибки) | verified-cause-gate → architect при масштабе | `verified-cause-gate.mdc` |
+
+## APPLY GATE
+
+Реализация (writer/reviewer, прямая правка `.bsl`) — **только** в `/opsx:apply`. Артефакты OpenSpec — без apply. Change есть, apply не вызван → СТОП, предложить `/opsx:apply <name>`. Light/Mechanical — без артефактов. `/review` и `/release-review`: reviewer без ограничений; writer — только после подтверждения / `queue-fix` и только по замечаниям отчёта.
+
+## LIGHT MODE (точечная правка)
+
+**Decision tree (все ответы «да» → Light Mode; любое «нет» → полный workflow):**
+
+1. Правка в **1 файле** и укладывается в **2–10 строк**?
+2. **Нет новых экспортных символов** и **нет изменения контракта** существующей публичной `Экспорт`-процедуры?
+3. **Нет новых ссылок на метаданные** (объекты, реквизиты, перечисления, которых не было в файле)?
+4. **Нет новых межмодульных вызовов** (`МодульИмя.Метод(` к модулю, который файл раньше не вызывал)?
+5. Нет архитектурных триггеров (`architect-gate.mdc`)?
+
+Light Mode = writer + reviewer, без OpenSpec.
+
+**Bug fix:** verified-cause-gate (HALT 1, 1b, 2); root cause блок в промпте writer (`1c-agent-patterns/writer.md`); brief в `temp/reports/bugfix-lightmode-*.md`.
+
+## MECHANICAL MODE (шаблонная правка)
+
+Find-replace без смены логики; без writer. Примеры: `#Область`, rename через replace_all, удаление закомментированного кода.
+
+**Чеклист (все пункты обязательны):**
+
+- [ ] Паттерн замены задокументирован (в чате или промпте): что ищем → на что меняем.
+- [ ] Grep **до** правки — зафиксировано число вхождений.
+- [ ] Правка StrReplace/replace_all.
+- [ ] Grep **после** — число замен совпадает с ожиданием; старый паттерн = 0 вхождений (или объяснённый остаток).
+- [ ] ReadLints по изменённым файлам — нет новых ошибок.
+- [ ] **Reviewer** (diff-focused) — обязателен.
+
+## ИСКЛЮЧЕНИЯ (прямая правка .bsl)
+
+- Однострочные правки; только комментарии (**не** многострочная JSDoc-шапка перед `Процедура`/`Функция` — это writer)
+- «без агентов» / «без ревью» от пользователя
+- Mechanical Mode
+
+**Не действуют** в `/opsx:apply`, `/review` и `/release-review` (кроме Mechanical + reviewer).
