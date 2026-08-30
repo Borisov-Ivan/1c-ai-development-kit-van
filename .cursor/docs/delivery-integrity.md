@@ -17,7 +17,7 @@
 11. **Ориентиры commands/skills:** `init-project` — тонкий вход + SSOT `.cursor/docs/init-project-protocol.md`; топ-skills (verify/new/…) при обрезке — страховка `templates/` (см. `command-skill-gate.mdc`).
 12. **Grep-критерий scrub:** в поставке `.cursor/` + корневые `AGENTS.md`/`README.md` — **0** рабочих рекомендаций `/opsx:intake`|`/opsx:debug` как входа (исторические CHANGELOG / change-отчёты — исключение).
 13. **Дисциплина веток:** `git log develop..main` содержит только merge-коммиты публикации и cleanup-коммиты снятия архивов/утилит; содержательных прямых коммитов на `main` нет.
-14. **Состав `main`:** нет `openspec/changes/archive/`, нет рабочих `openspec/changes/<имя>`, нет `tools/`; заготовка шаблона ЗНИ — `.cursor/templates/seed/`.
+14. **Состав `main`:** нет каталога `openspec/` (specs/ADR/архивы живут на `develop`), нет `tools/`; заготовка шаблона ЗНИ — `.cursor/templates/seed/`.
 15. **Фильтр охвата маркеров:** в скилле реализации нет путей конкретной выгрузки как классификатора; класс — сегменты `cf`/`cfe` в путях этой ЗНИ.
 
 См. также: [kit-template-workflow.md](./kit-template-workflow.md), [quick-start.md](./quick-start.md), [faq-kit.md](./faq-kit.md). Опциональные smoke-docs: [mxl-roundtrip-fixture.md](./mxl-roundtrip-fixture.md), [proportional-surface.md](./proportional-surface.md). Каталог `temp/fixtures/` создаётся локально при проверке (не часть поставки kit).

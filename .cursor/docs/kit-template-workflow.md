@@ -26,17 +26,17 @@
 
 Это правило **репозитория шаблона kit**, не цикл ЗНИ в проекте 1С. В конфигурации заказчика ветки `develop`/`main` kit не заводить.
 
-1. **`develop`** — линия разработки kit: открытые ЗНИ эволюции и их архивы (`openspec/changes/`, `openspec/changes/archive/`), утилиты `tools/`. Короткую фича-ветку сразу сливать в `develop`, не оставлять домом архива.
-2. **`main`** — поставка шаблона: `.cursor/**`, `AGENTS.md`, `README.md`, `openspec/specs/`, `openspec/adrs/`. Без рабочих папок `openspec/changes/<имя>`, без `openspec/changes/archive/`, без `tools/`. Заготовка шаблона ЗНИ — `.cursor/templates/seed/changes/_template/`.
+1. **`develop`** — линия разработки kit: specs/ADR эволюции, открытые ЗНИ и их архивы (`openspec/changes/`, `openspec/changes/archive/`), утилиты `tools/`. Короткую фича-ветку сразу сливать в `develop`, не оставлять домом архива.
+2. **`main`** — поставка шаблона: `.cursor/**`, `AGENTS.md`, `README.md`. Без `openspec/` эволюции kit (specs, ADR, рабочие ЗНИ, архивы), без `tools/`. Заготовка шаблона ЗНИ — `.cursor/templates/seed/changes/_template/`.
 3. **Обновление поставки** (только из репозитория kit):
    - рабочее дерево чистое, нужные правки уже на `develop`;
    - `git checkout main`;
    - `git merge develop`;
-   - удалить с `main`: `openspec/changes/archive/`, рабочие `openspec/changes/<имя>` (если влились), каталог `tools/`;
-   - коммит снятия архивов и утилит;
+   - удалить с `main`: каталог `openspec/` (если влился), каталог `tools/`;
+   - коммит снятия архивов, спек и утилит;
    - `git push origin main` (обычный push, без `--force`);
    - в consumer-проект снова скопировать только `.cursor/` + `AGENTS.md`.
-4. На `main` содержательные коммиты не делать: только merge из `develop` и cleanup-коммит снятия архивов/утилит.
+4. На `main` содержательные коммиты не делать: только merge из `develop` и cleanup-коммит снятия `openspec/` и `tools/`.
 5. Приёмка срезов эволюции — в **sandbox**: копия `.cursor`+`AGENTS.md` с `develop` (или с фича-ветки до слияния) → Reload → учебный сценарий из Primary среза.
 
 ## Forms / MXL

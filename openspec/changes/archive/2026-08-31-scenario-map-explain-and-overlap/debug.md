@@ -45,3 +45,9 @@ last_challenge_at: "2026-08-30T13:57:49+09:00"
 ## Снятие продукта — 2026-08-31
 
 Продукт «карта сценария» снят ЗНИ `universal-visual-explanation`. Эту ЗНИ не реализовывать и не сливать. `tasks.md` и spec этой ЗНИ не переписывать: цель была чинить снятый конвейер.
+
+## Archive — 2026-08-31
+
+- Режим: принудительное продолжение без отметки приёмки (`S1.accept` остаётся `[ ]`)
+- Дельта `specs/scenario-map-canvas` в главные spec **не** сливается: реализация снята соседней ЗНИ `universal-visual-explanation`
+- Пересечение capability `scenario-map-canvas`: в главные spec уходит REMOVED из `universal-visual-explanation`

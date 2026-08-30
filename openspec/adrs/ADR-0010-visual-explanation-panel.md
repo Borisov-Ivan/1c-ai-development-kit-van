@@ -3,7 +3,7 @@
 **Статус:** Load-Bearing
 **Дата:** 2026-08-31
 **Область:** kit / visual explanation
-**Источник:** openspec/changes/universal-visual-explanation/design.md
+**Источник:** openspec/changes/archive/2026-08-31-universal-visual-explanation/design.md
 **Load-bearing:** yes
 **Protects-invariants:**
   - "Прямая просьба показать, как устроено / схему / карту (без объекта-схемы 1С) открывает панель из текущего ответа; журнал и отчёт не обязательны; числа элементов как порога отказа нет"
@@ -44,8 +44,8 @@
 
 ## Связи
 
-- **Specs:** openspec/specs/visual-explanation/spec.md (после архивации ЗНИ); дельта — openspec/changes/universal-visual-explanation/specs/visual-explanation/spec.md
-- **Changes:** openspec/changes/universal-visual-explanation/
+- **Specs:** openspec/specs/visual-explanation/spec.md
+- **Changes:** openspec/changes/archive/2026-08-31-universal-visual-explanation/
 - **Supersedes:** ADR-0008, ADR-0009
 - **Связанные ADR:** ADR-0001
 
