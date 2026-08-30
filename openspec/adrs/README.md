@@ -9,5 +9,6 @@
 | [ADR-0005](ADR-0005-noapi-visibility-canon-same-turn.md) | Видимость режима без API — канон в том же ходе | Accepted | 2026-08-20 | kit / chat surface · выбор моделей |
 | [ADR-0006](ADR-0006-opsx-progress-russian.md) | Язык команд /opsx:* — русский, профиль не сильнее бюджета | Accepted | 2026-08-20 | kit / chat surface |
 | [ADR-0007](ADR-0007-author-marker-only-if-bsl.md) | Вопрос маркера автора только если будет BSL | Accepted | 2026-08-20 | kit / metadata gate |
-| [ADR-0008](ADR-0008-scenario-map-native-parent-registration.md) | Карта сценария — нативная регистрация панели родителем | Load-Bearing | 2026-08-28 | kit / scenario map canvas |
-| [ADR-0009](ADR-0009-scenario-map-main-view-answers-header.md) | Главный вид карты сценария отвечает на вопрос шапки | Load-Bearing | 2026-08-30 | kit / scenario map canvas |
+| [ADR-0008](ADR-0008-scenario-map-native-parent-registration.md) | Карта сценария — нативная регистрация панели родителем | Superseded by ADR-0010 | 2026-08-28 | kit / scenario map canvas |
+| [ADR-0009](ADR-0009-scenario-map-main-view-answers-header.md) | Главный вид карты сценария отвечает на вопрос шапки | Superseded by ADR-0010 | 2026-08-30 | kit / scenario map canvas |
+| [ADR-0010](ADR-0010-visual-explanation-panel.md) | Визуальное объяснение текущего ответа на панели рядом с чатом | Load-Bearing | 2026-08-31 | kit / visual explanation |

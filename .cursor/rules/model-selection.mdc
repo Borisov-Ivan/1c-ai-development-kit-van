@@ -91,7 +91,6 @@ priority: 200
 | `onec-code-simplifier` | `composer-2.5-fast` |
 | `onec-trace-analyst` | *(без `model`)* |
 | `openspec-quality-controller` | *(без `model`)* |
-| `onec-scenario-map-designer` | *(без `model`)* |
 
 Цепочка каждой роли — **два шага**: Primary (если задан) → вызов **без** `model=`. Ошибка вызова `Task` (недоступность модели, таймаут, лимиты, `Invalid model selection`) — переход ко второму шагу; содержательный отказ агента — не повод менять модель.
 
@@ -116,7 +115,7 @@ priority: 200
 
 Закрытая эскалация Fable — **не** часть этой цепочки (см. раздел ниже). Сбой Opus **не** переключает вызов на Fable.
 
-## Цепочка для writer / explorer / trace-analyst / quality-controller / scenario-map-designer
+## Цепочка для writer / explorer / trace-analyst / quality-controller
 
 1. `Task(...)` **без** `model=` (модель чата).
 2. При явном запросе пользователя — `model=` из описания `Task` по его указанию.

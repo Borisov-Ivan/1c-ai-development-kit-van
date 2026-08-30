@@ -26,7 +26,7 @@ priority: 999
 | REFACTOR поверхности | **onec-code-simplifier** | Да в `/review` шаг 6.4 |
 | Когерентность срезов | **openspec-quality-controller** | Да в pre-apply verify |
 
-**Карта сценария (не 1С-роль):** манифест панели — `onec-scenario-map-designer` (группа Generic/OpenSpec, `Task` без `model=`). Файл регистрирует родительский агент сессии. 1С-контент (`src/**`, `.bsl`) этому агенту не отдавать; обследование кода — `onec-code-explorer`. Шаблон: `1c-agent-patterns/scenario-map-designer.md`.
+**Визуальное объяснение:** данные панели собирает родитель сессии, файл пишет родитель; сборщик манифеста не вызывается. Протокол — `.cursor/skills/visual-explanation/SKILL.md`.
 
 **Якорь apply-reviewer:** авто-fix — **только** functional MUST_FIX **без** `QualityFlag=weak`, tag `design-prescribed` и agreement-override. Weak / design-prescribed / agreement-override → **не** авто-fix, **не** авто-waive, **не** AskQuestion в apply; одна строка-след в отчёте задачи («на `/review` потребуется подтверждение качества»). Финальный выбор as-designed / queue-fix — только в `/review` / `/release-review` (шаг 4.5 skill).
 

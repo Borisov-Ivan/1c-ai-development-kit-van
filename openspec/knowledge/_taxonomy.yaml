@@ -12,7 +12,7 @@ domains:
     owner: project
     subdomains:
       - chat
-      - scenario-map
+      - visual-explanation
       - workflow
       - common
 

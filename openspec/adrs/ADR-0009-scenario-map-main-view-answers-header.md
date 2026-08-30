@@ -1,10 +1,10 @@
 # ADR-0009: Главный вид карты сценария отвечает на вопрос шапки
 
-**Статус:** Load-Bearing
+**Статус:** Superseded by ADR-0010
 **Дата:** 2026-08-30
 **Область:** kit / scenario map canvas
 **Источник:** openspec/changes/scenario-map-readability-meaning/reports/architecture-loop-redesign-2026-08-30.md
-**Load-bearing:** yes
+**Load-bearing:** no
 **Protects-invariants:**
   - "Главный вид отвечает на вопрос шапки без клика; приёмка — читатель называет ответ, когда текст шапки скрыт"
   - "В этой ЗНИ средства главного вида — граф со связями и таблица со смысловыми колонками; граф по умолчанию, когда содержание топологическое"
