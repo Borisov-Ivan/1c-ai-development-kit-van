@@ -91,7 +91,7 @@ metadata:
 
    - `{date}` = сегодня `dd.MM.yyyy`. При опции «Без описания» — preview без `{comment_suffix}`.
    - Опции: «Принять черновик» / «Без описания — только ФИО и дата» / Other.
-   - **Preview на шаге 1.5:** scope (`cfe` / `cf-ea`) ещё неизвестен — tasks создаются позже. В gate показывать **cfe-preview** как иллюстрацию transport; полный scope-specific preview — в `/opsx:status` и apply. Cf-формат — в status после tasks.
+   - **Preview на шаге 1.5:** scope (`cfe` / `cf`) ещё неизвестен — tasks создаются позже. В gate показывать **cfe-preview** как иллюстрацию transport; полный scope-specific preview — в `/opsx:status` и apply. Cf-формат — в status после tasks.
 
    3. **Если черновик собрать не из чего** (нет блока, нет Why) — fallback: один текстовый вопрос «Описание для маркера (1 фраза по-русски: что меняем и зачем; можно пусто)». Если `developer` ещё не известен — сначала шаг 2a. Не «ФИО + domain_label» в одном сообщении.
 
@@ -347,7 +347,7 @@ metadata:
            - `Скорректировать` → принять пользовательский комментарий, повторно делегировать architect с этим комментарием, обновить `design.md`.
            - `Пересобрать срезы` → повторить делегирование со сменой модели или указанием «другое группирование».
       5. **If `## Slices` section is present:**
-         - Delegate to **openspec-quality-controller** (quick check — criteria 1, 3, 5, 5b, 8, 8b, 9–11 from QC), see `openspec-quality-controller.md`. **Do NOT** grep keyword lists for criterion 8 — QC semantic judgment only. Criterion 8b (self-achievable acceptance) — catch false slice boundaries at authoring: merge slices, do not defer.
+         - Delegate to **openspec-quality-controller** (quick check — criteria 1, 3, 5, 5b, 8, 8b, 9–11 from QC), see `.cursor/skills/1c-agent-patterns/quality-controller.md`. **Do NOT** grep keyword lists for criterion 8 — QC semantic judgment only. Criterion 8b (self-achievable acceptance) — catch false slice boundaries at authoring: merge slices, do not defer.
          - If critical issues — show the user and AskQuestion whether to regenerate.
          - Otherwise — proceed.
       6. **Foundation Slice Guard** (before AskQuestion «Принять» on proposed slices):

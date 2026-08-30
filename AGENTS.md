@@ -16,7 +16,7 @@
 
 - Профили чата → `model-adaptation.mdc` + `model-*.mdc`. HALT-жаргон → `chat-lexicon.md`. Бриф → `.cursor/docs/templates/brief-card.md`. Стиль авторов скиллов → `opsx-output-style.md`.
 - HALT BSL → `1c-halt-triggers.mdc`. Pipeline → `1c-writer-pipeline.mdc`. XML → `1c-xml-write-guard.mdc`. Task/модели → `tool-name-guard.mdc` / `model-selection.mdc`. Агенты → `.cursor/agents/*.md`. Журнал → `.cursor/docs/agents-CHANGELOG.md`.
-- Сессия → `session-discipline.mdc`. Context-strategy → `.cursor/skills/context-strategy/SKILL.md`. Карта сценария → `.cursor/skills/scenario-map-canvas/SKILL.md`. Картограф панели (не 1С-роль) → `.cursor/agents/onec-scenario-map-designer.md`. Отчёты субагентов → `preserve-subagent-reports.mdc`.
+- Сессия → `session-discipline.mdc`. Context-strategy → `.cursor/skills/context-strategy/SKILL.md`. Визуальное объяснение → `.cursor/skills/visual-explanation/SKILL.md`. Отчёты субагентов → `preserve-subagent-reports.mdc`.
 - Forms → `forms-mxl-mode-gate.mdc`. Архитектура / RCA → `architect-gate.mdc` / `verified-cause-gate.mdc`. Specs/срезы → `openspec-specs-gate.mdc` / `vertical-slices.mdc`. AP → `bsl-antipatterns.mdc`.
 - ADR → `openspec/adrs/` + `adr-format.mdc`. KB → `openspec/knowledge/` + `knowledge-format.mdc`. Маркеры → `marker-canon.md`. Пути cf/cfe → `openspec/project.md` (после `/init-project`; в kit нет) + `capture-to-project.mdc` + `project-paths.mdc`.
 - Ревью: `.cursor/docs/review-guide.md`; `/review`; `.cursor/skills/review/SKILL.md`. Disposition — `openspec/specs/review-quality-disposition/spec.md`, ADR-0003.

@@ -41,7 +41,6 @@ description: Reference guide for 1C agent delegation patterns - complexity asses
 | `openspec-quality-controller` | [quality-controller.md](quality-controller.md) | slice coherence review (verify Layer 2) |
 | `onec-code-simplifier` | [simplifier.md](simplifier.md) | рефакторинг (REFACTOR-замечания) |
 | `onec-trace-analyst` | (нет шаблона; контракт в `.cursor/agents/onec-trace-analyst.md`) | бриф готовится в чате (Ultra-Lite explore — см. `openspec-explore/SKILL.md`, шаг «Маршрут шагов»); полный отчёт → `temp/reports/trace-analysis-*.md` |
-| `onec-scenario-map-designer` | [scenario-map-designer.md](scenario-map-designer.md) | манифест панели карты сценария (Generic/OpenSpec, не 1С-роль; файл пишет родитель) |
 
 ---
 
@@ -95,11 +94,6 @@ description: Reference guide for 1C agent delegation patterns - complexity asses
 ### openspec-quality-controller
 - Domain-agnostic readonly Slice Coherence review
 - Вызывается из `/opsx:verify` Layer 2 (MANDATORY)
-
-### onec-scenario-map-designer
-- Манифест панели карты сценария из переданного источника и диапазонов; файл не пишет
-- **Не** 1С-роль: `src/**` / `.bsl` не отдавать (обследование — `onec-code-explorer`)
-- Вызов без `model=`; отказ строить из-за модели запрещён
 
 ### onec-code-simplifier
 - REFACTOR-замечания из ревью (запахи кода, читаемость)

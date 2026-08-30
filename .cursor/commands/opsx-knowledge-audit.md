@@ -27,6 +27,6 @@ description: Аудит Knowledge Base — факты, TTL, якоря, инде
 ```text
 /opsx:knowledge-audit
 /opsx:knowledge-audit --overdue
-/opsx:knowledge-audit --domain KonturDiadok --metrics
-/opsx:knowledge-audit --from-archive 2026-04-25-do2-pavlik-merge-roli-avtopodstanovka
+/opsx:knowledge-audit --domain DemoEDO --metrics
+/opsx:knowledge-audit --from-archive 2026-04-25-sample-change
 ```

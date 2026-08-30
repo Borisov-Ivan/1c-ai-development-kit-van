@@ -22,8 +22,8 @@
 | `.cursor/` | команды, правила, навыки, документы, заготовки | да |
 | `AGENTS.md` | навигационный индекс | да |
 | `README.md` | устройство этого репозитория | нет |
-| `openspec/specs/`, `openspec/adrs/` | требования и решения самого kit | нет |
-| `openspec/changes/` и `archive/` | рабочие ЗНИ эволюции kit | нет |
+| `openspec/specs/`, `openspec/adrs/` | требования и решения самого kit (живут на `develop`) | нет |
+| `openspec/changes/` и `archive/` | рабочие ЗНИ эволюции kit (живут на `develop`) | нет |
 | `tools/` | утилиты разработки kit (парсер трасс) | нет |
 | `.cursor/templates/seed/` | заготовки, которые `/init-project` копирует уже **в проекте** | да (внутри `.cursor/`) |
 
@@ -31,13 +31,13 @@
 
 | Ветка | Роль |
 |-------|------|
-| `develop` | разработка kit: правила, навыки, открытые ЗНИ, архивы, `tools/` |
-| `main` | чистая поставка: то же содержимое `.cursor/` и `AGENTS.md`, плюс specs/ADR kit; без архивов ЗНИ и без `tools/` |
+| `develop` | разработка kit: правила, навыки, specs/ADR, открытые ЗНИ, архивы, `tools/` |
+| `main` | чистая поставка шаблона: `.cursor/` и `AGENTS.md` (плюс `README.md` репозитория); без `openspec/specs`, без ADR эволюции kit, без архивов ЗНИ и без `tools/` |
 
-Правило: на `main` содержательные правки не делают. Сначала `develop`, потом публикация (слияние + снятие архивов). Короткую фича-ветку сразу сливают в `develop`, не оставляют домом архива.
+Правило: на `main` содержательные правки не делают. Сначала `develop`, потом публикация (слияние + снятие архивов, спек и утилит). Короткую фича-ветку сразу сливают в `develop`, не оставляют домом архива.
 
 ```text
-правка на develop → слияние в main → снять archive/ и tools/ → push main
+правка на develop → слияние в main → снять archive/, specs/ADR и tools/ → push main
                               ↓
               клонировать main → скопировать .cursor/ и AGENTS.md в проект
 ```
@@ -57,8 +57,8 @@ git clone -b main --depth 1 <url-этого-репозитория> kit-van
 
 1. Все правки уже на `develop`, рабочее дерево чистое.
 2. `git checkout main` → `git merge develop`.
-3. Удалить с `main`: `openspec/changes/archive/`, рабочие папки `openspec/changes/<имя>` (кроме того, что живёт в `.cursor/templates/seed/`), каталог `tools/`.
-4. Коммит «Публикация поставки: снять архивы и утилиты с main» → `git push origin main`.
+3. Удалить с `main`: `openspec/` целиком (specs, ADR, архивы ЗНИ — они остаются на `develop`), каталог `tools/`. Заготовка шаблона ЗНИ — `.cursor/templates/seed/` (едет внутри `.cursor/`).
+4. Коммит «Публикация поставки: на main только шаблон» → `git push origin main`.
 5. В каждом проекте 1С снова скопировать `.cursor/` и `AGENTS.md` с обновлённого `main`.
 
 Полный рецепт и приёмка срезов эволюции — [`.cursor/docs/kit-template-workflow.md`](.cursor/docs/kit-template-workflow.md). Чеклист перед объявлением версии — [`.cursor/docs/delivery-integrity.md`](.cursor/docs/delivery-integrity.md).

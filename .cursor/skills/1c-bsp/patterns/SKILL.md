@@ -5,7 +5,7 @@ description: "SSL/БСП subsystems guidance. Use when working with standard lib
 
 # 1C SSL/БСП Subsystems Reference
 
-This skill provides guidance for using SSL subsystems via repository search tools (Grep/SemanticSearch).
+This skill provides guidance for using SSL subsystems via repository search tools (Grep/SemanticSearch; if SemanticSearch is unavailable — Grep and Glob, do not stop the session).
 
 For basic SSL usage (attribute access, user messages) — see `.cursor/docs/1c-coding-standards.md`.
 

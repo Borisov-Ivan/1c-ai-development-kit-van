@@ -237,7 +237,7 @@ Breadth-first for initial discovery, depth-first for specific call chains.
 Поиск по репозиторию:
   - Grep(pattern="ИмяПроцедуры", type="bsl") — поиск по коду
   - Glob(glob_pattern="**/ИмяМодуля/**/*.bsl") — поиск файлов
-  - SemanticSearch — когда точное имя неизвестно
+  - SemanticSearch — когда точное имя неизвестно; если инструмент недоступен — Grep и Glob, сессию не стопить
   - Read — чтение модулей и XML-метаданных
 
 Опциональные инструменты сессии (если подключены):
@@ -277,6 +277,7 @@ Semantic search:
     query="How does client data validation work?",
     target_directories=["src/cf/Catalogs/Клиенты"]
   )
+  # если смысловой поиск недоступен — Grep и Glob, сессию не стопить
 ```
 
 ---
@@ -351,7 +352,7 @@ Before reading any code:
 
 ```yaml
 1. Identify patterns:
-   - Similar implementations: Grep / SemanticSearch("паттерн")
+   - Similar implementations: Grep / SemanticSearch("паттерн"); если смысловой поиск недоступен — Grep и Glob
    - БСП usage: поиск по подсистемам БСП в репозитории
    - Architecture patterns: Document in notes
 
@@ -711,14 +712,14 @@ Output: Hypothesis Verification Template
 ### Example 3: Focused Investigation (cf/cfe interplay)
 
 ```yaml
-Task: "Проследить цепочку сопоставления входящего документа Диадок
+Task: "Проследить цепочку сопоставления входящего документа ЭДО
        с документом 1С — от события до результата каскада"
 
 Task type: Focused Investigation
 Phases: 0 → 2 → 5
 
 Phase 2:
-  - cfe: КД_ПодключаемыйМодульДиадок.ObjectModule — НайтиСопоставлениеДокумента
+  - cfe: ДемоПодключаемыйМодульЭДО.ObjectModule — НайтиСопоставлениеДокумента
   - cfe: тот же модуль — НайтиСопоставлениеДокументаПоПериоду, ОбогатитьКандидатов,
     ПрименитьКаскадСопоставления
   - cf: не задействован (каскад полностью в cfe)
@@ -743,7 +744,7 @@ Output: Compact report
 5. **Note dependencies** - Internal and external
 6. **Identify issues** - Technical debt, anti-patterns
 7. **Use RLM when available** - Load and save context (NOT_CONNECTED by default)
-8. **Use Search Tools** - Search metadata and code using Grep/Glob/SemanticSearch/Read
+8. **Use Search Tools** - Search metadata and code using Grep/Glob/SemanticSearch/Read; если смысловой поиск недоступен — Grep и Glob, сессию не стопить
 9. **Be thorough** - Deep understanding, not surface
 10. **Verify citations before final** - run Cite Verification for key `file:line` facts
 11. **Be practical** - Actionable insights

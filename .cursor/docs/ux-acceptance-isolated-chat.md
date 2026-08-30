@@ -34,11 +34,11 @@ SSOT контракта: `.cursor/docs/opsx-output-style.md` §2.6.
 
 | ID | Шаг | Pass |
 |----|-----|------|
-| **G1** | Новый чат: `/opsx:verify diadok-mchd-before-pack` после backfill ledger | GO **или** одна развилка; при GO — `**Следующий шаг:**` + user-action команда; **0** agent-keys; нет reopen mount/cleanup |
+| **G1** | Новый чат: `/opsx:verify sample-mchd-before-pack` после backfill ledger | GO **или** одна развилка; при GO — `**Следующий шаг:**` + user-action команда; **0** agent-keys; нет reopen mount/cleanup |
 | **G2** | Ответ на развилку → extend | Handoff на языке эффекта; ledger в debug.md |
 | **G3** | Повторный `/opsx:verify` в **той же** сессии | Блок «Уже зафиксировано»; **0** reopen закрытых решений |
 
-**Hard gate:** G1+G3 (или G1 GO без G2). Fixture: `diadok-mchd-before-pack` с `debug.md` § Verify decision ledger.
+**Hard gate:** G1+G3 (или G1 GO без G2). Fixture: `sample-mchd-before-pack` с `debug.md` § Verify decision ledger.
 
 ## Anti-patterns (fail)
 
@@ -71,16 +71,16 @@ SSOT контракта: `.cursor/docs/opsx-output-style.md` §2.6.
 
 | Сценарий | Change / примечание |
 |----------|---------------------|
-| A, C | `do2-pavlik-predzapolnenie-viz-shablony` — после repair или tag «до repair» |
+| A, C | `sample-change` — после repair или tag «до repair» |
 | B | тот же change с открытым CHALLENGE (контракт схемы КП) |
 | D | любой новый запуск new из explore-блока |
 | E, E3 | любой change с готовым срезом к приёмке (Primary в metadata) |
 | E2 | mechanical slice (`**Режим apply:** mechanical`) или change без `**Приёмка:**` в рабочих задачах |
-| E4 | change с задачами Конфигуратора и отсутствующими объектами в `src/` (как `do2-pavlik-knopki-file-actions` до выгрузки) |
-| F | произвольный симптом ДО2 |
+| E4 | change с задачами Конфигуратора и отсутствующими объектами в `src/` (как `sample-change` до выгрузки) |
+| F | произвольный симптом конфигурации |
 | F2 | `signing-contract-sign-verify-bytes` + уточнение «только облачные УНЭП» |
 | F3 | тот же change + запрос локального УНЭП (drift-warning) |
-| G1–G3 | `diadok-mchd-before-pack` — ledger backfill в debug.md |
+| G1–G3 | `sample-mchd-before-pack` — ledger backfill в debug.md |
 | **H** *(опционально)* | post-apply verify (все `[x]`) — next step = `/opsx:archive`, не apply |
 
 Опционально: `temp/ux-fixtures/README.md` с git tag на commit «до repair».
@@ -98,4 +98,4 @@ SSOT контракта: `.cursor/docs/opsx-output-style.md` §2.6.
 - [ ] F — explore бриф B3 / финал
 - [ ] F2 — extend B1 в новом чате
 - [ ] F3 — extend B2 drift в новом чате
-- [ ] G1/G2/G3 — verify anti-fatigue на `diadok-mchd-before-pack`
+- [ ] G1/G2/G3 — verify anti-fatigue на `sample-mchd-before-pack`

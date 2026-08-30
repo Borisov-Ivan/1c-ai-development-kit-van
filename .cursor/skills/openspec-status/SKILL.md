@@ -37,7 +37,7 @@ Read-only skill. Не вызывает субагентов, не правит �
    Вывести в слот «Маркеры»:
    - `developer`, `comment_suffix` (domain_label), `marker_style` (default `canonical`)
    - **process-only:** `да` если suffix match baseline запретам `marker-canon.md` (и project overlay); иначе `нет`
-   - **marker_scope:** Grep tasks/design на `src/.../*.bsl` → `cfe` | `cf-ea` | `mixed` | `не определён`
+   - **marker_scope:** Grep tasks/design на `src/.../*.bsl` (нормализовать `\` → `/`) → `cfe` | `cf` | `mixed` | `не определён`. `openspec/project.md` не источник класса.
    - **Preview transport** (date = сегодня `dd.MM.yyyy`):
      - cfe: `// +++ {developer} {date} {suffix}` / `// --- {developer}`
      - cf: `// {cfMarkerPrefix} {suffix} +++` / close по project.md

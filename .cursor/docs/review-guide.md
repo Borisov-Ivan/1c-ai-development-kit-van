@@ -26,6 +26,7 @@ Apply-reviewer проверяет только файлы текущей зад�
 | «Готовим релиз расширения» | `/release-review <расширение>` |
 | «Предрелиз по ЗНI, но с архобзором всего расширения» | `/release-review <расширение> <change>` |
 | «Предрелиз только по change» | `/release-review <change>` |
+| «После приёмки последнего среза — пока ЗНИ не в архиве» | `/release-review <change>` |
 
 Имя расширения — папка cfe в `src/` (см. [`openspec/project.md`](../../openspec/project.md)).
 
@@ -34,9 +35,9 @@ Apply-reviewer проверяет только файлы текущей зад�
 ## Примеры `/release-review`
 
 ```
-/release-review КонтурДиадок
-/release-review КонтурДиадок diadoc-mchd-fio-display
-/release-review diadoc-admin-edo-narrow-semantics
+/release-review ДемоРасширение
+/release-review ДемоРасширение sample-change
+/release-review sample-change
 ```
 
 ---
@@ -45,7 +46,7 @@ Apply-reviewer проверяет только файлы текущей зад�
 
 ```
 /review
-/review src/cfe/КонтурДиадок/...
+/review src/cfe/ДемоРасширение/...
 /review openspec/changes/my-change
 /review --full
 ```

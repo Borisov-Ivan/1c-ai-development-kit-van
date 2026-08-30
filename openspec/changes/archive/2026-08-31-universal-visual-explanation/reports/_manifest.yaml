@@ -1,0 +1,85 @@
+reports:
+  - file: design-challenge-2026-08-30.md
+    type: architecture
+    scope:
+      files: [openspec/changes/universal-visual-explanation/design.md]
+    status: active
+    legacy: false
+  - file: architecture-new-2026-08-30.md
+    type: architecture
+    scope:
+      files: [openspec/changes/universal-visual-explanation/design.md]
+    status: active
+    legacy: false
+  - file: architecture-slice-decomposition-2026-08-30.md
+    type: architecture
+    scope:
+      files: [openspec/changes/universal-visual-explanation/design.md]
+    status: active
+    legacy: false
+  - file: quality-control-2026-08-30.md
+    type: quality-control
+    scope:
+      files: [openspec/changes/universal-visual-explanation/design.md]
+    status: active
+    legacy: false
+  - file: quality-control-2026-08-30-2.md
+    type: quality-control
+    scope:
+      files: [openspec/changes/universal-visual-explanation/tasks.md]
+    status: active
+    legacy: false
+  - file: design-challenge-2026-08-30-2.md
+    type: architecture
+    scope:
+      files: [openspec/changes/universal-visual-explanation/design.md]
+    status: active
+    legacy: false
+  - file: architecture-task-readiness-2026-08-30.md
+    type: architecture
+    scope:
+      files: [openspec/changes/universal-visual-explanation/tasks.md]
+    status: active
+    legacy: false
+  - file: verification-2026-08-30.md
+    type: verification
+    scope:
+      files: [openspec/changes/universal-visual-explanation/design.md]
+    status: active
+    legacy: false
+  - file: quality-control-2026-08-31.md
+    type: quality-control
+    scope:
+      files: [openspec/changes/universal-visual-explanation/tasks.md]
+    status: active
+    legacy: false
+  - file: design-challenge-2026-08-31.md
+    type: architecture
+    scope:
+      files: [openspec/changes/universal-visual-explanation/design.md]
+    status: active
+    legacy: false
+  - file: architecture-task-readiness-2026-08-31.md
+    type: architecture
+    scope:
+      files: [openspec/changes/universal-visual-explanation/tasks.md]
+    status: active
+    legacy: false
+  - file: quality-control-2026-08-31-2.md
+    type: quality-control
+    scope:
+      files: [openspec/changes/universal-visual-explanation/tasks.md]
+    status: active
+    legacy: false
+  - file: verification-2026-08-31.md
+    type: verification
+    scope:
+      files: [openspec/changes/universal-visual-explanation/design.md]
+    status: active
+    legacy: false
+  - file: verification-2026-08-31-2.md
+    type: verification
+    scope:
+      files: [openspec/changes/universal-visual-explanation/tasks.md]
+    status: active
+    legacy: false

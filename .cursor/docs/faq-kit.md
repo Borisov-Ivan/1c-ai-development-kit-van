@@ -33,7 +33,7 @@
 
 ## Поставка шаблона
 
-Копируются `.cursor` + `AGENTS.md`. ЗНИ эволюции kit ведутся на ветке шаблонного репо; папку `openspec/changes/` в main потребителей не мержат. См. [kit-template-workflow.md](./kit-template-workflow.md).
+Копируются `.cursor` + `AGENTS.md`. Specs, ADR и ЗНИ эволюции kit живут на `develop`; на `main` — только шаблон. См. [kit-template-workflow.md](./kit-template-workflow.md).
 
 ## session-save / restore / retro
 

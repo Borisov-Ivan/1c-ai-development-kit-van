@@ -32,7 +32,7 @@ description: Контролируемое расширение scope сущес�
 
 **Примеры:**
 
-- `/opsx:extend do2-roli-avtopodstanovka-gate --from-review openspec/changes/do2-roli-avtopodstanovka-gate/reports/review-do2-roli-avtopodstanovka-gate-2026-04-29-subagent-raw.md "Пересмотреть решение по представлению роли"`
+- `/opsx:extend sample-change --from-review openspec/changes/sample-change/reports/review-sample-change-2026-04-29-subagent-raw.md "Пересмотреть решение по представлению роли"`
 - `/opsx:extend add-auth --from-report temp/reports/trace-analysis-2026-04-29-token-rotation.md "Добавить требование по ротации токенов"`
 - `/opsx:extend add-auth @temp/explore-handoff-2026-04-29-token-rotation.md "Учесть найденный риск"`
 
