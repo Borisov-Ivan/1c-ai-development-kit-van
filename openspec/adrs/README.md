@@ -10,3 +10,4 @@
 | [ADR-0006](ADR-0006-opsx-progress-russian.md) | Язык команд /opsx:* — русский, профиль не сильнее бюджета | Accepted | 2026-08-20 | kit / chat surface |
 | [ADR-0007](ADR-0007-author-marker-only-if-bsl.md) | Вопрос маркера автора только если будет BSL | Accepted | 2026-08-20 | kit / metadata gate |
 | [ADR-0008](ADR-0008-scenario-map-native-parent-registration.md) | Карта сценария — нативная регистрация панели родителем | Load-Bearing | 2026-08-28 | kit / scenario map canvas |
+| [ADR-0009](ADR-0009-scenario-map-main-view-answers-header.md) | Главный вид карты сценария отвечает на вопрос шапки | Load-Bearing | 2026-08-30 | kit / scenario map canvas |

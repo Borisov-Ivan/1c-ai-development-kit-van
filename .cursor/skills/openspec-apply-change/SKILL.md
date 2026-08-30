@@ -66,7 +66,7 @@ Implement tasks from an OpenSpec change.
 
    **Handle states:**
    - If `state: "blocked"` (missing artifacts): show message, suggest `/opsx:new <name>` (resume)
-   - If `state: "all_done"`: congratulate, suggest archive
+   - If `state: "all_done"`: **не печатать финал в этой ветке.** Вычислить `marker_scope` тем же проходом, что на шаге 4 (Grep `tasks.md` и при необходимости `design.md` на пути `src/.../*.bsl`). Затем вести ход к карточке «Реализация завершена» шага 7 (вариант `final`) — она печатает ту же развилку, что шаг 6 блока «Manual acceptance shortcut».
    - Otherwise: proceed to implementation
 
 4. **Read tasks + minimal context (lazy loading) + verify pre-flight**
@@ -162,7 +162,7 @@ Implement tasks from an OpenSpec change.
       *(agent-only: отметить `S<N>.accept` / legacy `S<N>.T<M>`; варианты [1]/[3] мапятся на протокол ниже.)*
 
    4. По ответу:
-      - [1] → определить целевой чекбокс приёмки: предпочтительно `S<N>.accept`; если в срезе только legacy `S<N>.T<M>` — отметить их все (срез принят целиком); mark [x], append debug.md "решение: принят", сгенерировать reports/slice-acceptance-S<N>-YYYY-MM-DD.md, перейти к задачам S<N+1>.
+      - [1] → определить целевой чекбокс приёмки: предпочтительно `S<N>.accept`; если в срезе только legacy `S<N>.T<M>` — отметить их все (срез принят целиком); mark [x], append debug.md "решение: принят", сгенерировать reports/slice-acceptance-S<N>-YYYY-MM-DD.md. Затем: если срез **не** последний (есть следующий заголовок `# Срез S<K>:` с K > N) — перейти к задачам S<N+1>; если срез **последний** (нет такого заголовка) — **не** переходить к S<N+1> и **не** печатать карточку `final` здесь: вести ход на ту же развилку шага 6 блока «Manual acceptance shortcut» (после `marker_scope` шага 4).
       - [2] → запросить описание проблемы; append debug.md "решение: не принят" + секция ## Debug — S<N>; создать fix-задачи перед `S<N>.accept` (или legacy `S<N>.T<M>`); начать их выполнение.
       - [3] → запросить **S<K>** и описание дефекта; **Grep** в `tasks.md` приёмочную строку среза (`S<K>.accept` или legacy `S<K>.T<M>`):
         - Если приёмочная задача среза `S<K>` = **`[ ]`** (срез S<K> **не** принят) → **inside-slice rework** по `.cursor/rules/vertical-slices.mdc` (**ИНВАРИАНТ: Defect placement**): добавить fix-задачи **внутрь** `S<K>` **перед** приёмочной задачей; **не** создавать `# Срез S<N+1>` без cross-slice; append в `debug.md` `Решение: inside-slice rework` + RCA-кратко; начать выполнение fix-задач.
@@ -419,8 +419,14 @@ Implement tasks from an OpenSpec change.
      3. Append в debug.md "решение: принят (manual shortcut)".
      4. Определить, **последний ли** срез S<N> в `tasks.md`: нет следующего заголовка вида `# Срез S<K>:` с K > N.
      5. **Если срез не последний** — продолжить к следующему срезу / задачам (как раньше).
-     6. **Если срез последний** — в **чат** (тонко, `chat-output-budget.mdc`): подтвердить приёмку среза с названием (§10 стайл-гайда); спросить: «Архивировать ЗНИ? Напишите `архив` для подтверждения или `стоп` чтобы остановиться.» Завершить ход **без** автозапуска archive до ответа.
-     7. **Авто-archive:** если на шаге 6 пользователь ответил **`архив`** (или явная эквивалентная фраза) — в **этой же сессии** выполнить шаги скилла `openspec-archive-change/SKILL.md` для `<change-name>` целиком (как при `/opsx:archive <name>`), с **тонким** итогом в чат (T-CONFIRM §5.5); при блокере архива — карточка по правилам archive, не молчать. Ответ **`стоп`** — завершить сессию apply без archive.
+     6. **Если срез последний** — в **чат** (тонко, `chat-output-budget.mdc`): подтвердить приёмку среза с названием (§10 стайл-гайда). Затем **единственная формулировка развилки** (SSOT этого хука; на неё ссылаются ветка [1] шага 5, `state: "all_done"` шага 3 и вариант `final` шага 7). Одна фраза: до архива постановку ещё можно дописать. Дальше:
+        - Если `marker_scope` (шаг 4) = `cfe` или `mixed` — три ответа: `ревью` / `архив` / `стоп`. В этом сообщении **нет** второй команды в слоте следующего шага (сигнал — ответ в чате).
+        - Если `marker_scope` пуст или `cf-ea` — прежний вопрос: «Архивировать ЗНИ? Напишите `архив` для подтверждения или `стоп` чтобы остановиться.» Слова `ревью` нет.
+        Завершить ход **без** автозапуска archive и **без** запуска `/release-review` до ответа.
+     7. **Разбор ответа на шаг 6:**
+        - **`ревью`** (слово было в вопросе): в **чат** ровно один следующий шаг `/release-review <change-name>` (один аргумент — имя ЗНИ). Завершить сессию apply **без** запуска предрелиза и **без** второго вопроса в том же ходе. ЗНИ остаётся в `openspec/changes/<name>/`. Архив остаётся доступен командой `/opsx:archive <change-name>` (не печатать её в этом ходе).
+        - **`архив`** (или явная эквивалентная фраза) — в **этой же сессии** выполнить шаги скилла `openspec-archive-change/SKILL.md` для `<change-name>` целиком (как при `/opsx:archive <name>`), с **тонким** итогом в чат (T-CONFIRM §5.5); при блокере архива — карточка по правилам archive, не молчать.
+        - **`стоп`** — завершить сессию apply без archive.
 
    - **Ранний выход ("стоп" в любой момент):**
      Пользователь явно: "стоп" / "stop" / "прекрати" / "прерви" / "пока хватит".
@@ -525,7 +531,7 @@ Implement tasks from an OpenSpec change.
    - `### 6. Issue` — **только `pause-decision`**: развилка по `.cursor/docs/templates/decision-block.md` — блок «**Что решить:**» + триада + варианты A/B, **суть inline**. **Запрещено** заменять суть ссылкой-указателем. Для **pause-wait** секции Issue нет: чат — инвентарь объектов; расхождение имён в ИБ — одна фраза в конце, не A/B в заголовке. Полные таблицы — в файле `reports/handoff-*.md`.
    - `### 7. Short-cut` — **только в варианте `acceptance`**: строка про подтверждение обычной фразой («принято», «срез принят»).
 
-   Если все срезы приняты (`final`) — добавить строку «All tasks complete. Ready to archive: `/opsx:archive <change-name>`». Если `pause-decision` из-за design/scope mismatch — предложить `Follow-up: /opsx:extend <change-name>` рядом с вариантами решения. Если `pause-wait` — ждать выгрузки / сообщения в чате. Если `pause-decision` — ждать ответа. Если `acceptance` — end turn.
+   Если все срезы приняты (`final`) — **чат:** при `marker_scope` `cfe` или `mixed` — та же развилка шага 6 блока «Manual acceptance shortcut» (не одиночная строка с командой архива); при пустом `marker_scope` и `cf-ea` — прежняя строка «All tasks complete. Ready to archive: `/opsx:archive <change-name>`». **Файл** `reports/handoff-final-*.md`: нейтральный перечень доступных команд (`/release-review <change-name>`, `/opsx:archive <change-name>`) **без** формы вопроса; без кода расширения — только архив, как раньше. Если `pause-decision` из-за design/scope mismatch — предложить `Follow-up: /opsx:extend <change-name>` рядом с вариантами решения. Если `pause-wait` — ждать выгрузки / сообщения в чате. Если `pause-decision` — ждать ответа. Если `acceptance` — end turn. Если `final` с развилкой — ждать ответа (`ревью` / `архив` / `стоп`).
 
    **Self-check** (см. §7 стайл-гайда) перед выводом: слои разделены, нумерованные списки, одинаковые имена секций, длина в пределах лимитов.
 
@@ -587,10 +593,10 @@ Implement tasks from an OpenSpec change.
 
 <!-- pause-decision: ### 6. Issue — decision-block -->
 <!-- acceptance: ### 7. Short-cut -->
-<!-- final: Ready to archive -->
+<!-- final: chat = fork (cfe/mixed) or archive line; file = command list without question -->
 ```
 
-**Чат:** `acceptance` — заголовок среза + «что сделано» + «Карта правок» ≤5 + «Что проверить» + «Как вернуться». **pause-wait** — `templates/pause-wait-chat.md` (не прогресс, не «ничего в коде»). **pause-decision** — decision-block. Без Schema и без таблиц.
+**Чат:** `acceptance` — заголовок среза + «что сделано» + «Карта правок» ≤5 + «Что проверить» + «Как вернуться». **`final`** — та же развилка шага 6 при `cfe`/`mixed`; иначе строка архива (файл handoff — перечень команд без вопроса). **pause-wait** — `templates/pause-wait-chat.md` (не прогресс, не «ничего в коде»). **pause-decision** — decision-block. Без Schema и без таблиц.
 
 **Имена секций** `### 1`…`### 5` совпадают для `acceptance` / `pause-decision` / `final`. Для **pause-wait** дополнительно раздел **«Что создать в Конфигураторе»** (первый) и приложение выгрузки. Связь в `debug.md` `## Slice Gate Decisions` → «Связанный отчёт» без изменения.
 

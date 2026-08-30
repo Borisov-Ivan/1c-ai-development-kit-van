@@ -10,8 +10,9 @@ header:
   insight: "Кэш картинки живёт отдельно от кэша копии: пока PNG не снят, новая копия снова получает старый формат."
   sources:
     - "temp/reports/exploration-example-vizualizaciya-shtampa.md"
+  medium: "graph"
   view_primary: "causal-flow"
-  focus_node: "cache-stamp-png"
+  focus_node: "user-sees"
 
 nodes:
   - id: "signed-original"
@@ -86,7 +87,7 @@ edges:
   - from: "cache-stamp-png"
     to: "overlay"
     relation: "feeds"
-    label: "берётся готовая картинка"
+    label: "берёт готовую картинку"
     evidence_ref: "src/Example/cf/CommonModules/РаботаСФайламиВызовСервера/Ext/Module.bsl:9540-9565"
   - from: "overlay"
     to: "cache-visual-copy"
@@ -125,4 +126,7 @@ annotations:
     evidence_ref: "src/Example/cf/CommonModules/РаботаСЭП/Ext/Module.bsl:1445-1476"
     anchor:
       node: "invalidate-on-sign"
+
+# Стартовый узел — исход для читателя (открытие файла со штампом), не гигиена и не первый шаг.
+# Ловушка одной подписи якорится на событие сброса копии: сброс есть, смена макета в него не входит.
 ```
