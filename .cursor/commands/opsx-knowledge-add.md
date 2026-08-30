@@ -22,7 +22,7 @@ description: Добавить verified KB-факты из отчётов или 
 **Примеры:**
 
 ```text
-/opsx:knowledge-add temp/reports/exploration-pavДополнительныеФункции-2026-04-28.md
+/opsx:knowledge-add temp/reports/exploration-demo-additional-functions-2026-04-28.md
 /opsx:knowledge-add temp/reports/report1.md temp/reports/report2.md
-/opsx:knowledge-add openspec/changes/archive/2026-04-25-do2-pavlik-merge-roli-avtopodstanovka/reports/trace-analysis-2026-04-25.md --no-bundle
+/opsx:knowledge-add openspec/changes/archive/2026-04-25-sample-change/reports/trace-analysis-2026-04-25.md --no-bundle
 ```

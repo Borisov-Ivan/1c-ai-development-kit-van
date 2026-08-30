@@ -202,7 +202,7 @@ Missing downstream:
 ```yaml
 For each critical line (error site, or points relevant to the analysis focus — e.g. write call, transaction start/end, slow call):
   1. Resolve module from MODULES MAP (e.g. M03 → ОбщийМодуль.ДействияСервер.Модуль)
-  2. Locate file in workspace: src/**/Module.bsl or equivalent (cf/cfe, xml/ДО3/ext, etc.)
+  2. Locate file in workspace: src/**/Module.bsl or equivalent (cf/cfe, xml)
   3. Read the file (Read tool) at the indicated line range (e.g. ±20 lines)
   4. Confirm: procedure name, surrounding logic, parameters if visible
   5. In output: "Verified in <file>:<line> — [brief context]"
@@ -290,14 +290,15 @@ Recommendations for downstream agents:
 ```yaml
 Read:
   - Trace file (path from user or workspace)
-  - Source files: src/**/*.bsl (cf, cfe, xml/ДО3/ext, etc.)
+  - Source files: src/**/*.bsl (cf, cfe, xml)
 
 Grep / Glob:
   - Find module by name: Glob("**/ДействияСервер/**/*.bsl")
-  - Find procedure: Grep("Процедура pavIU_АктуализироватьИЗаписатьДействие", type="bsl")
+  - Find procedure: Grep("Процедура ext_АктуализироватьИЗаписатьДействие", type="bsl")
 
 SemanticSearch:
   - Locate callers of a procedure when trace shows call but file is unknown
+  - Если смысловой поиск недоступен — Grep и Glob, сессию не стопить
 ```
 
 ---

@@ -36,7 +36,7 @@ reports:
   - file: architecture-2026-04-20.md
     type: architecture
     scope:
-      files: [src/ДО2/cf/BusinessProcesses/Согласование/Forms/ФормаИзменениеПараметров/Ext/Form/Module.bsl]
+      files: [src/Конфигурация/cf/BusinessProcesses/Согласование/Forms/ФормаИзменениеПараметров/Ext/Form/Module.bsl]
     status: active | superseded
     legacy: false
 ```

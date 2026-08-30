@@ -4,8 +4,8 @@
 
 ## Changes
 
-1. `nastroyka-knopok-processov` — active: `openspec/changes/nastroyka-knopok-processov`
-2. `podpisanie-cherez-soglasovanie` — active: `openspec/changes/podpisanie-cherez-soglasovanie`
+1. `sample-change` — active: `openspec/changes/sample-change`
+2. `another-change` — active: `openspec/changes/another-change`
 
 ## TZ
 
@@ -16,7 +16,7 @@
 1. **Этап 1 — Система настроек** — регистр сведений правил, вкладка в доп. функциях, выключатель; кнопки на форме задачи ещё не появляются.
 2. **Этап 2 — Кнопки и применение настроек** — показ кнопок по правилам, старт процессов, что вне первой поставки.
 
-Запрещено: заголовки этапов = `nastroyka-knopok-processov` / `podpisanie-cherez-soglasovanie` / «ЗНИ 1» / «ЗНИ 2».
+Запрещено: заголовки этапов = `sample-change` / `another-change` / «ЗНИ 1» / «ЗНИ 2».
 
 ## Сверка после компиляции
 
@@ -44,7 +44,7 @@
 
 ## Output path
 
-`openspec/changes/nastroyka-knopok-processov/overview-control-88781.md`
+`openspec/changes/sample-change/overview-control-88781.md`
 
 ## Brief override (как будто пользователь подтвердил)
 

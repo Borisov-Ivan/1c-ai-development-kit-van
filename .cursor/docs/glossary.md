@@ -34,7 +34,7 @@
 - **Бриф B0–B3 / B-explain** — уровни Sync Card (`.cursor/docs/templates/brief-card.md`).
 - **kit-only** — ЗНИ без прикладного `.bsl`; маркеры `developer: n/a`.
 - **`developer: n/a`** — маркеры автора не применяются (нет BSL в scope).
-- **`marker_scope`** — cf / cfe / mixed / не определён.
+- **`marker_scope`** — `cf` / `cfe` / `mixed` / не определён. Считается по сегментам `/cf/` и `/cfe/` в путях модулей **этой** ЗНИ; карточка проекта класс не задаёт.
 
 ## Проверка (verify)
 

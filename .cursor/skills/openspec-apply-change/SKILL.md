@@ -118,17 +118,19 @@ Implement tasks from an OpenSpec change.
 
    - Если `developer` пустой/плейсхолдер (`<ФИО>`, `<developer>`, «Уточнить») — взять `defaultDeveloper` из project.md; если и там пусто — один вопрос в чат: **только ФИО** (не смешивать с описанием).
 
-   **marker_scope** (Grep `tasks.md` и при необходимости `design.md` на пути `src/.../*.bsl`):
-   - только `src/ЭДО и ЭА/cf/` → **cf-ea**
-   - только cfe (`src/ЭДО ПАО/cfe/`, `src/ДО3 Демо/cfe/`) → **cfe**
+   **marker_scope** (Grep `tasks.md` и `design.md` на пути `src/**/*.bsl`; перед сегментами нормализовать `\` → `/`):
+   - только `/cfe/` (нет `/cf/` как сегмента каталога выгрузки) → **cfe**
+   - только `/cf/` → **cf**
    - оба → **mixed** (writer получает оба шаблона + таблицу «путь → шаблон»)
+   - нет путей → не определён (для развилки last-slice = как `cf`)
+   - `openspec/project.md` **не** источник `marker_scope` (наличие корня cfe в карточке не делает kit-only ЗНИ `mixed`)
 
    - Если `developer: n/a` и `marker_scope` не пуст — сначала `defaultDeveloper` из карточки проекта без вопроса; если пусто — один вопрос про ФИО **до** правки BSL. В маркер кода `n/a` **не** писать.
    - Если `developer: n/a` и `marker_scope` пуст — маркеры не применяются; `n/a` в код не писать.
 
    Сформировать (date = текущая `dd.MM.yyyy`):
    - **cfe:** `open_marker` = `// +++ {developer} {date}` или `// +++ {developer} {date} {comment_suffix}`; `close_marker` = `// --- {developer}`
-   - **cf-ea:** `open_marker` = `// {cfMarkerPrefix} {comment_suffix} +++` (или однострочный `// {cfMarkerPrefix} {comment_suffix}` для целой процедуры); `close_marker` = `// {cfMarkerPrefix без двоеточия} ---`
+   - **cf:** `open_marker` = `// {cfMarkerPrefix} {comment_suffix} +++` (или однострочный `// {cfMarkerPrefix} {comment_suffix}` для целой процедуры); `close_marker` = `// {cfMarkerPrefix без двоеточия} ---`
    - **mixed:** передать оба набора + явная инструкция scope по пути файла из задачи
 
    Если секции Metadata нет — сначала ФИО (если нет `defaultDeveloper`), затем отдельный вопрос про **описание** (`comment_suffix`; можно пусто → `marker_style: minimal`); дописать Metadata в proposal.md. Не монолит «ФИО + domain_label».
@@ -419,9 +421,9 @@ Implement tasks from an OpenSpec change.
      3. Append в debug.md "решение: принят (manual shortcut)".
      4. Определить, **последний ли** срез S<N> в `tasks.md`: нет следующего заголовка вида `# Срез S<K>:` с K > N.
      5. **Если срез не последний** — продолжить к следующему срезу / задачам (как раньше).
-     6. **Если срез последний** — в **чат** (тонко, `chat-output-budget.mdc`): подтвердить приёмку среза с названием (§10 стайл-гайда). Затем **единственная формулировка развилки** (SSOT этого хука; на неё ссылаются ветка [1] шага 5, `state: "all_done"` шага 3 и вариант `final` шага 7). Одна фраза: до архива постановку ещё можно дописать. Дальше:
+     6. **Если срез последний** — в **чат** (тонко, `chat-output-budget.mdc`): подтвердить приёмку среза с названием (Read только §10 `.cursor/docs/opsx-output-style.md`, не весь стайл-гайд). Затем **единственная формулировка развилки** (SSOT этого хука; на неё ссылаются ветка [1] шага 5, `state: "all_done"` шага 3 и вариант `final` шага 7). Одна фраза: до архива постановку ещё можно дописать. Дальше:
         - Если `marker_scope` (шаг 4) = `cfe` или `mixed` — три ответа: `ревью` / `архив` / `стоп`. В этом сообщении **нет** второй команды в слоте следующего шага (сигнал — ответ в чате).
-        - Если `marker_scope` пуст или `cf-ea` — прежний вопрос: «Архивировать ЗНИ? Напишите `архив` для подтверждения или `стоп` чтобы остановиться.» Слова `ревью` нет.
+        - Если `marker_scope` пуст, `не определён` или `cf` — прежний вопрос: «Архивировать ЗНИ? Напишите `архив` для подтверждения или `стоп` чтобы остановиться.» Слова `ревью` нет.
         Завершить ход **без** автозапуска archive и **без** запуска `/release-review` до ответа.
      7. **Разбор ответа на шаг 6:**
         - **`ревью`** (слово было в вопросе): в **чат** ровно один следующий шаг `/release-review <change-name>` (один аргумент — имя ЗНИ). Завершить сессию apply **без** запуска предрелиза и **без** второго вопроса в том же ходе. ЗНИ остаётся в `openspec/changes/<name>/`. Архив остаётся доступен командой `/opsx:archive <change-name>` (не печатать её в этом ходе).
@@ -531,7 +533,7 @@ Implement tasks from an OpenSpec change.
    - `### 6. Issue` — **только `pause-decision`**: развилка по `.cursor/docs/templates/decision-block.md` — блок «**Что решить:**» + триада + варианты A/B, **суть inline**. **Запрещено** заменять суть ссылкой-указателем. Для **pause-wait** секции Issue нет: чат — инвентарь объектов; расхождение имён в ИБ — одна фраза в конце, не A/B в заголовке. Полные таблицы — в файле `reports/handoff-*.md`.
    - `### 7. Short-cut` — **только в варианте `acceptance`**: строка про подтверждение обычной фразой («принято», «срез принят»).
 
-   Если все срезы приняты (`final`) — **чат:** при `marker_scope` `cfe` или `mixed` — та же развилка шага 6 блока «Manual acceptance shortcut» (не одиночная строка с командой архива); при пустом `marker_scope` и `cf-ea` — прежняя строка «All tasks complete. Ready to archive: `/opsx:archive <change-name>`». **Файл** `reports/handoff-final-*.md`: нейтральный перечень доступных команд (`/release-review <change-name>`, `/opsx:archive <change-name>`) **без** формы вопроса; без кода расширения — только архив, как раньше. Если `pause-decision` из-за design/scope mismatch — предложить `Follow-up: /opsx:extend <change-name>` рядом с вариантами решения. Если `pause-wait` — ждать выгрузки / сообщения в чате. Если `pause-decision` — ждать ответа. Если `acceptance` — end turn. Если `final` с развилкой — ждать ответа (`ревью` / `архив` / `стоп`).
+   Если все срезы приняты (`final`) — **чат:** при `marker_scope` `cfe` или `mixed` — та же развилка шага 6 блока «Manual acceptance shortcut» (не одиночная строка с командой архива); при пустом `marker_scope`, `не определён` и `cf` — прежняя строка «All tasks complete. Ready to archive: `/opsx:archive <change-name>`». **Файл** `reports/handoff-final-*.md`: нейтральный перечень доступных команд (`/release-review <change-name>`, `/opsx:archive <change-name>`) **без** формы вопроса; без кода расширения — только архив, как раньше. Если `pause-decision` из-за design/scope mismatch — предложить `Follow-up: /opsx:extend <change-name>` рядом с вариантами решения. Если `pause-wait` — ждать выгрузки / сообщения в чате. Если `pause-decision` — ждать ответа. Если `acceptance` — end turn. Если `final` с развилкой — ждать ответа (`ревью` / `архив` / `стоп`).
 
    **Self-check** (см. §7 стайл-гайда) перед выводом: слои разделены, нумерованные списки, одинаковые имена секций, длина в пределах лимитов.
 

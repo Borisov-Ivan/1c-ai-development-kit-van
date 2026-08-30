@@ -152,7 +152,7 @@ CRITICAL:
 
 ```yaml
 When unsure about API names, syntax, or collisions:
-  - Search the repository: Grep, Glob, SemanticSearch on paths from openspec/project.md
+  - Search the repository: Grep, Glob, SemanticSearch on paths from openspec/project.md; если смысловой поиск недоступен — Grep и Glob, сессию не стопить
   - Read nearby modules; router `.cursor/docs/1c-coding-standards.md` → std-* / antipatterns / casebooks
   - Reuse existing implementations in cf/cfe before inventing new helpers
 If platform documentation is not available in-repo — state uncertainty or ask orchestrator/user; do not invent method signatures.
@@ -296,7 +296,7 @@ If file does not exist — STOP (see CRITICAL RULE 12).
 
 ```yaml
 1. Resolve API / global names:
-   - Grep / SemanticSearch in src/ (paths from project.md) for existing usages of methods and globals
+   - Grep / SemanticSearch in src/ (paths from project.md) for existing usages of methods and globals; если смысловой поиск недоступен — Grep и Glob, сессию не стопить
    - Read defining module or metadata fragment if needed
 
 2. Avoid name collisions:
@@ -642,7 +642,7 @@ Output:
 1. **Read coding standards router** (`.cursor/docs/1c-coding-standards.md` → navigator / std-* / antipatterns / casebooks) - Before any coding
 2. **Follow every applicable rule** - No exceptions
 3. **Self-review** - Always, before presenting
-4. **Verify names and reuse** - Grep/Read/SemanticSearch; avoid collisions with globals
+4. **Verify names and reuse** - Grep/Read/SemanticSearch (если смысловой поиск недоступен — Grep и Glob); avoid collisions with globals
 5. **Use БСП** - Reuse standard subsystems
 6. **Handle errors** - Попытка only with identified external factor; justification gate (G19). No traceless suppression, no silent degradation
 7. **Validate with BSL LSP** - Clean diagnostics

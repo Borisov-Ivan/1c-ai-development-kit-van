@@ -25,7 +25,7 @@
 1. **Nav-link (hybrid)** — кликабельный переход к модулю:
 
 ```markdown
-[`613:624:src/ДО2/cf/CommonModules/pavУсловияМашрутизации/Ext/Module.bsl`](../../src/ДО2/cf/CommonModules/pavУсловияМашрутизации/Ext/Module.bsl)
+[`613:624:src/Конфигурация/cf/CommonModules/extУсловияМаршрутизации/Ext/Module.bsl`](../../src/Конфигурация/cf/CommonModules/extУсловияМаршрутизации/Ext/Module.bsl)
 ```
 
 | Расположение отчёта | Относительный href к `src/...` |
@@ -39,7 +39,7 @@
 2. **Fence с телом** — тот же диапазон и путь в info-string, что ушёл в карточку чата (для чтения без прыжка):
 
 ````markdown
-```613:624:src/ДО2/cf/CommonModules/pavУсловияМашрутизации/Ext/Module.bsl
+```613:624:src/Конфигурация/cf/CommonModules/extУсловияМаршрутизации/Ext/Module.bsl
 <тело фрагмента>
 ```
 ````

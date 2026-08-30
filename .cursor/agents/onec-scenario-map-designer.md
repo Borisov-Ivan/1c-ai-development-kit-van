@@ -26,7 +26,7 @@ description: >-
 - вопрос/фокус, если пользователь уточнил шапку;
 - номер круга ремонта (0 = первая сборка; максимум 2 ремонта после нечистой проверки манифеста).
 
-Перед ответом — Read `.cursor/skills/scenario-map-canvas/SKILL.md`. Эталоны: `fixtures/map-good-causal.md`, `fixtures/map-good-table.md`, `fixtures/map-bad-accordion.md`, `fixtures/map-bad-no-insight.md`. Шаблон файла панели оркестратору не возвращать — он берёт `fixtures/canvas-shell.md` сам.
+Контракт средства, порога и запрета выдуманных рёбер — из брифа оркестратора (не полный Read скилла карты). Эталоны при необходимости: `fixtures/map-good-causal.md`, `fixtures/map-good-table.md`, `fixtures/map-bad-accordion.md`, `fixtures/map-bad-no-insight.md`. Шаблон файла панели оркестратору не возвращать — он берёт `fixtures/canvas-shell.md` сам.
 
 ## OUTPUT
 
