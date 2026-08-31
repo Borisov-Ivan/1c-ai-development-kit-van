@@ -1,0 +1,168 @@
+reports:
+  - file: architecture-new-2026-08-31.md
+    type: architecture
+    scope:
+      files:
+        - .cursor/skills/visual-explanation/SKILL.md
+        - .cursor/skills/visual-explanation/fixtures/panel-shell.md
+        - openspec/specs/visual-explanation/spec.md
+        - .cursor/skills/openspec-explore/SKILL.md
+        - openspec/adrs/ADR-0010-visual-explanation-panel.md
+        - openspec/changes/visual-explanation-composition/design.md
+    status: active
+    legacy: false
+  - file: quality-control-2026-08-31.md
+    type: quality-control
+    scope:
+      files:
+        - openspec/changes/visual-explanation-composition/tasks.md
+        - openspec/changes/visual-explanation-composition/design.md
+    status: active
+    legacy: false
+  - file: quality-control-2026-08-31-2.md
+    type: quality-control
+    scope:
+      files:
+        - openspec/changes/visual-explanation-composition/tasks.md
+        - openspec/changes/visual-explanation-composition/design.md
+    status: active
+    legacy: false
+  - file: architecture-task-readiness-2026-08-31.md
+    type: architecture
+    scope:
+      files:
+        - openspec/changes/visual-explanation-composition/tasks.md
+        - .cursor/skills/visual-explanation/SKILL.md
+        - .cursor/skills/visual-explanation/fixtures/panel-shell.md
+        - .cursor/skills/openspec-explore/SKILL.md
+        - openspec/adrs/ADR-0010-visual-explanation-panel.md
+    status: active
+    legacy: false
+  - file: verification-2026-08-31.md
+    type: verification
+    scope:
+      files:
+        - openspec/changes/visual-explanation-composition/proposal.md
+        - openspec/changes/visual-explanation-composition/design.md
+        - openspec/changes/visual-explanation-composition/tasks.md
+    status: active
+    legacy: false
+  - file: design-challenge-2026-08-31.md
+    type: design-challenge
+    scope:
+      files:
+        - openspec/changes/visual-explanation-composition/proposal.md
+        - openspec/changes/visual-explanation-composition/design.md
+        - openspec/changes/visual-explanation-composition/specs/visual-explanation/spec.md
+        - openspec/changes/visual-explanation-composition/tasks.md
+        - openspec/specs/visual-explanation/spec.md
+        - openspec/adrs/ADR-0010-visual-explanation-panel.md
+        - .cursor/skills/visual-explanation/SKILL.md
+        - .cursor/skills/visual-explanation/fixtures/panel-shell.md
+        - .cursor/skills/openspec-explore/SKILL.md
+        - .cursor/skills/openspec-explain/SKILL.md
+        - .cursor/skills/openspec-overview/SKILL.md
+    status: active
+    legacy: false
+  - file: design-challenge-2026-08-31-2.md
+    type: design-challenge
+    scope:
+      files:
+        - openspec/changes/visual-explanation-composition/proposal.md
+        - openspec/changes/visual-explanation-composition/design.md
+        - openspec/changes/visual-explanation-composition/specs/visual-explanation/spec.md
+        - openspec/changes/visual-explanation-composition/tasks.md
+        - openspec/specs/visual-explanation/spec.md
+        - openspec/adrs/ADR-0010-visual-explanation-panel.md
+        - .cursor/skills/visual-explanation/SKILL.md
+        - .cursor/skills/visual-explanation/fixtures/panel-shell.md
+        - .cursor/skills/openspec-explore/SKILL.md
+        - .cursor/skills/openspec-explain/SKILL.md
+        - .cursor/skills/openspec-overview/SKILL.md
+    status: active
+    legacy: false
+  - file: design-challenge-2026-08-31-3.md
+    type: design-challenge
+    scope:
+      files:
+        - openspec/changes/visual-explanation-composition/proposal.md
+        - openspec/changes/visual-explanation-composition/design.md
+        - openspec/changes/visual-explanation-composition/specs/visual-explanation/spec.md
+        - openspec/changes/visual-explanation-composition/tasks.md
+        - .cursor/skills/visual-explanation/SKILL.md
+        - .cursor/skills/visual-explanation/fixtures/panel-shell.md
+        - .cursor/skills/openspec-explore/SKILL.md
+        - .cursor/skills/openspec-explain/SKILL.md
+    status: active
+    legacy: false
+  - file: quality-control-2026-08-31-3.md
+    type: quality-control
+    scope:
+      files:
+        - openspec/changes/visual-explanation-composition/tasks.md
+        - openspec/changes/visual-explanation-composition/design.md
+    status: active
+    legacy: false
+  - file: architecture-task-readiness-2026-08-31-2.md
+    type: architecture
+    scope:
+      files:
+        - openspec/changes/visual-explanation-composition/tasks.md
+        - .cursor/skills/visual-explanation/SKILL.md
+        - .cursor/skills/visual-explanation/fixtures/panel-shell.md
+        - .cursor/skills/openspec-explore/SKILL.md
+        - openspec/adrs/ADR-0010-visual-explanation-panel.md
+    status: active
+    legacy: false
+  - file: architecture-task-readiness-2026-08-31-3.md
+    type: architecture
+    scope:
+      files:
+        - openspec/changes/visual-explanation-composition/tasks.md
+        - .cursor/skills/visual-explanation/SKILL.md
+        - .cursor/skills/visual-explanation/fixtures/panel-shell.md
+        - .cursor/skills/openspec-explore/SKILL.md
+        - .cursor/skills/openspec-explain/SKILL.md
+        - openspec/adrs/ADR-0010-visual-explanation-panel.md
+    status: active
+    legacy: false
+  - file: verification-2026-08-31-2.md
+    type: verification
+    scope:
+      files:
+        - openspec/changes/visual-explanation-composition/proposal.md
+        - openspec/changes/visual-explanation-composition/design.md
+        - openspec/changes/visual-explanation-composition/tasks.md
+        - openspec/changes/visual-explanation-composition/specs/visual-explanation/spec.md
+    status: active
+    legacy: false
+  - file: verification-2026-08-31-3.md
+    type: verification
+    scope:
+      files:
+        - .cursor/skills/visual-explanation/SKILL.md
+        - .cursor/skills/visual-explanation/fixtures/panel-shell.md
+        - .cursor/skills/openspec-explore/SKILL.md
+        - .cursor/skills/openspec-explain/SKILL.md
+        - openspec/adrs/ADR-0010-visual-explanation-panel.md
+        - openspec/changes/visual-explanation-composition/tasks.md
+    status: active
+    legacy: false
+  - file: code-map.md
+    type: code-map
+    scope:
+      files:
+        - .cursor/skills/visual-explanation/SKILL.md
+        - .cursor/skills/visual-explanation/fixtures/panel-shell.md
+        - .cursor/skills/openspec-explore/SKILL.md
+        - .cursor/skills/openspec-explain/SKILL.md
+        - openspec/adrs/ADR-0010-visual-explanation-panel.md
+    status: active
+    legacy: false
+  - file: handoff-acceptance-S1-2026-08-31.md
+    type: handoff
+    scope:
+      files:
+        - openspec/changes/visual-explanation-composition/tasks.md
+    status: active
+    legacy: false
