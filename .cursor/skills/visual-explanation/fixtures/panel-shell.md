@@ -4,18 +4,22 @@
 
 Обязательно:
 
-- импорт только из `cursor/canvas`;
-- рендер читает `presentation.form`: `flow` | `table` | `hierarchy` | `card`;
+- импорт только из `cursor/canvas`; не добавлять `Grid` и `Callout`;
+- рендер читает `presentation.form`: `flow` | `table` | `hierarchy` | `card` (четыре значения; скелет со сценами — вид главной области для `flow` и `hierarchy`, не новое значение формы);
+- в модель входят шаги истории `scenes[]`: текст шага и какие части в фокусе;
+- главная область по умолчанию — скелет слоёв и текущий шаг; «Назад / Дальше» — общая обёртка для `flow` и `hierarchy`, не копия внутри каждой ветки;
+- ветки `table` и `card` сохраняют свой вид без обязательного степпера;
 - иерархия — вложенный `Stack`, не граф с абсолютной раскладкой;
 - имена на полотне — полные фразы, не многоточие вместо шага;
 - стартово выбран `focus_item` (исход или виновник);
-- выбор элемента показывает `explanation` в деталях и **не** открывает файл;
+- выбор элемента показывает `explanation` (роль) и текст текущей сцены («в этом шаге»); отдельного поля на пару «часть × шаг» нет; выбор **не** открывает файл;
 - путь из ответа — кнопкой в деталях через `openFile`; `newComposerChat` **не** вызывать;
 - `key` только на нативных элементах (`span`), не на `Button` / `Row` / `Text`;
 - цвета из `useHostTheme()`; без градиентов, теней и эмодзи;
-- **запрещено:** граф с абсолютной раскладкой, снятие подписи с полотна, фиксированная ширина коробки как носитель смысла.
+- выбранная часть — основной вариант кнопки независимо от фокуса сцены; вне фокуса приглушается пояснение вторичным или третичным тоном текста, не прозрачностью, не своим цветом и не наложением; подпись части остаётся читаемой;
+- **запрещено:** граф с абсолютной раскладкой, снятие подписи с полотна, фиксированная ширина коробки как носитель смысла, самодельный HTML-плакат, водяной текст, сюжет штампа электронной подписи как эталон.
 
-Родитель **до записи** выбирает форму: больше 6 элементов или больше 5 связей → `table` или `card`, не `flow` и не `hierarchy`.
+Родитель **до записи:** таблица — только если вопрос сам есть сравнение одних и тех же свойств; число частей само не переводит в таблицу. Пока главная область — скелет со сценами: если в одной сцене больше шести именованных частей — дробить на сцены или сворачивать уровень, не сбрасывать в таблицу. Пример в этом файле не ставит `form: "table"`.
 
 ```tsx
 import {
@@ -55,6 +59,11 @@ type Relation = {
   confidence?: Confidence;
 };
 
+type Scene = {
+  text: string;
+  focus: ItemId[];
+};
+
 type PanelData = {
   question: string;
   takeaway: string;
@@ -62,29 +71,31 @@ type PanelData = {
   relations?: Relation[];
   focus_item: ItemId;
   presentation: { form: Form };
+  scenes?: Scene[];
 };
 
 /* Родитель заменяет объект целиком данными текущего ответа. */
 const DATA: PanelData = {
   question: "Когда документ проводится, а когда нет",
-  takeaway: "Проведение идёт только если заполнен договор; иначе запись остаётся черновиком",
+  takeaway:
+    "Проведение идёт только если заполнен договор; иначе запись остаётся черновиком",
   items: [
     {
       id: "contract",
-      label: "Договор заполнен",
-      explanation: "Без договора проведение не стартует",
+      label: "Договор в шапке",
+      explanation: "Источник: без договора проведение не стартует",
       confidence: "fact",
     },
     {
       id: "post",
       label: "Документ проводится",
-      explanation: "Движения пишутся, если договор на месте",
+      explanation: "Обработка пишет движения, если договор на месте",
       confidence: "fact",
     },
     {
       id: "draft",
       label: "Документ остаётся черновиком",
-      explanation: "Договор пуст — проведение не вызывается",
+      explanation: "Исход без договора: проведение не вызывается",
       confidence: "fact",
     },
   ],
@@ -93,7 +104,21 @@ const DATA: PanelData = {
     { from: "contract", to: "draft", label: "если пуст", confidence: "fact" },
   ],
   focus_item: "post",
-  presentation: { form: "table" },
+  presentation: { form: "flow" },
+  scenes: [
+    {
+      text: "Сначала смотрят договор в шапке: без него проведение не стартует.",
+      focus: ["contract"],
+    },
+    {
+      text: "Если договор заполнен, документ проводится и пишутся движения.",
+      focus: ["contract", "post"],
+    },
+    {
+      text: "Если договор пуст, документ остаётся черновиком.",
+      focus: ["contract", "draft"],
+    },
+  ],
 };
 
 function confidenceLabel(c: Confidence | undefined): string | null {
@@ -115,9 +140,18 @@ export default function VisualExplanationPanel() {
     "focus-item",
     initial,
   );
+  const scenes = DATA.scenes ?? [];
+  const [sceneIndex, setSceneIndex] = useCanvasState<number>("scene-index", 0);
+  const safeSceneIndex =
+    scenes.length === 0 ? 0 : Math.min(Math.max(sceneIndex, 0), scenes.length - 1);
+  const currentScene = scenes[safeSceneIndex];
+  const focusSet = currentScene
+    ? new Set(currentScene.focus)
+    : new Set(DATA.items.map((it) => it.id));
   const selected = itemById(selectedId) ?? itemById(initial);
   const relations = DATA.relations ?? [];
   const form = DATA.presentation.form;
+  const skeletonScenes = form === "flow" || form === "hierarchy";
 
   function selectItem(id: ItemId) {
     setSelectedId(id);
@@ -131,8 +165,17 @@ export default function VisualExplanationPanel() {
     });
   }
 
+  function goBack() {
+    setSceneIndex(Math.max(0, safeSceneIndex - 1));
+  }
+
+  function goNext() {
+    setSceneIndex(Math.min(scenes.length - 1, safeSceneIndex + 1));
+  }
+
   function ItemButton({ item }: { item: Item }) {
     const active = item.id === selected?.id;
+    const inSceneFocus = focusSet.has(item.id);
     return (
       <Stack gap={6}>
         <Button
@@ -141,7 +184,11 @@ export default function VisualExplanationPanel() {
         >
           {item.label}
         </Button>
-        {confidenceLabel(item.confidence) ? (
+        {!inSceneFocus ? (
+          <Text size="small" tone="tertiary">
+            {item.explanation}
+          </Text>
+        ) : confidenceLabel(item.confidence) ? (
           <Text size="small" tone="secondary">
             {confidenceLabel(item.confidence)}
           </Text>
@@ -285,11 +332,32 @@ export default function VisualExplanationPanel() {
     );
   }
 
+  function SkeletonChrome({ body }: { body: ReturnType<typeof FlowView> }) {
+    return (
+      <Stack gap={12}>
+        {currentScene ? <Text>{currentScene.text}</Text> : null}
+        {body}
+        {scenes.length > 1 ? (
+          <Row gap={8}>
+            <Button variant="secondary" onClick={goBack}>
+              Назад
+            </Button>
+            <Button variant="secondary" onClick={goNext}>
+              Дальше
+            </Button>
+          </Row>
+        ) : null}
+      </Stack>
+    );
+  }
+
   function Main() {
     if (form === "table") return <TableView />;
-    if (form === "hierarchy") return <HierarchyView />;
     if (form === "card") return <CardView />;
-    return <FlowView />;
+    if (form === "hierarchy") {
+      return <SkeletonChrome body={<HierarchyView />} />;
+    }
+    return <SkeletonChrome body={<FlowView />} />;
   }
 
   return (
@@ -310,6 +378,9 @@ export default function VisualExplanationPanel() {
             <CardBody>
               <Stack gap={10}>
                 <Text>{selected.explanation}</Text>
+                {currentScene && skeletonScenes ? (
+                  <Text tone="secondary">{currentScene.text}</Text>
+                ) : null}
                 {confidenceLabel(selected.confidence) ? (
                   <Pill size="sm">
                     {confidenceLabel(selected.confidence) ?? ""}
