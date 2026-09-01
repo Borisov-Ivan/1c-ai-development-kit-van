@@ -1,4 +1,39 @@
 reports:
+  - file: architecture-extend-coherence-2026-09-01.md
+    type: architecture
+    scope:
+      files:
+        - openspec/changes/visual-explanation-composition/proposal.md
+        - openspec/changes/visual-explanation-composition/design.md
+        - openspec/changes/visual-explanation-composition/tasks.md
+        - openspec/changes/visual-explanation-composition/specs/visual-explanation/spec.md
+        - openspec/adrs/ADR-0010-visual-explanation-panel.md
+        - .cursor/skills/visual-explanation/SKILL.md
+        - .cursor/skills/visual-explanation/fixtures/panel-shell.md
+    status: active
+    legacy: false
+  - file: architecture-2026-09-01-canvas-companion.md
+    type: architecture
+    scope:
+      files:
+        - .cursor/skills/visual-explanation/SKILL.md
+        - .cursor/skills/visual-explanation/fixtures/panel-shell.md
+        - openspec/changes/visual-explanation-composition/proposal.md
+        - openspec/changes/visual-explanation-composition/design.md
+        - openspec/changes/visual-explanation-composition/tasks.md
+        - openspec/changes/visual-explanation-composition/specs/visual-explanation/spec.md
+        - openspec/specs/visual-explanation/spec.md
+        - openspec/adrs/ADR-0010-visual-explanation-panel.md
+    status: active
+    legacy: false
+  - file: exploration-2026-09-01-canvas-wrong-picture.md
+    type: exploration
+    scope:
+      files:
+        - .cursor/skills/visual-explanation/SKILL.md
+        - .cursor/skills/visual-explanation/fixtures/panel-shell.md
+    status: active
+    legacy: false
   - file: architecture-new-2026-08-31.md
     type: architecture
     scope:

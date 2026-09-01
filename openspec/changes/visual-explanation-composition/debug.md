@@ -77,3 +77,35 @@ repair_attempt: 0
 - verification: grep/read OK (no new ADR file; README index unchanged)
 - source: orchestrator kit-markdown apply
 
+## Explore — 2026-09-01 (PavDO: не та картина)
+
+- источник: `/opsx:explore` после подтверждения брифа; бриф `C:\GitHub\PavDO\temp\reports\canvas-universal-skill-brief-2026-09-01.md`; полный отчёт `temp/reports/exploration-2026-09-01-canvas-wrong-picture.md`
+- профиль: explore-bug; user-goal: что в навыке всё ещё заставляет рисовать не ту картину
+- ## Verified facts: живой провал PavDO (конвейер, затем таблица с кнопками, идеал — три колонки без интерактива); kit-навык `flow|table|hierarchy|card` + скелет по умолчанию + запрет Grid + ItemButton/TableView; composition Behavior «случай = шаг, не колонка» / Scenario «плакат случаев»; S1.accept открыт
+- ## Hypotheses: нет блокирующих
+- ## Root Cause: контракт «одна из четырёх форм + рассказ устройства механизма», нет критерия «язык картинки = отношение в тексте»; Chosen скелет делает удачное сопоставление нелегальным. Маркер: [verified]
+- ## Architectural Impact: UX-значимый + системный (навык, шаблон, ADR-0010). Точечный фикс TableView недостаточен
+- связь с архивом: composition — directly-related; `2026-08-31-universal-visual-explanation` — directly-related; карта 2026-08-28 — adjacent
+- Architect Gate: report `reports/architecture-2026-09-01-canvas-companion.md` (копия `temp/reports/architecture-2026-09-01-canvas-wrong-picture.md`); Chosen = extend, не закрывать S1.accept на текущем тексте, не `/opsx:new`
+- следующий шаг: блок постановки в чате → `/opsx:extend visual-explanation-composition`
+
+## Extend Coherence Audit — 2026-09-01
+
+- Триггер: semantic
+- Drift-check из брифа: drift-warning
+- Вердикт архитектора: drift-warning
+- Отчёт: `reports/architecture-extend-coherence-2026-09-01.md`
+- Решение пользователя: accepted recommendations — вариант 1 (дополнить эту поставку: скелет = рецепт механизма; сопоставление = классы сразу без конвейера и пачки кнопок)
+
+## Extend — 2026-09-01
+
+- источник: user-extend, вариант 1 в чате; RCA `reports/exploration-2026-09-01-canvas-wrong-picture.md`; Chosen `reports/architecture-2026-09-01-canvas-companion.md`; аудит `reports/architecture-extend-coherence-2026-09-01.md`
+- что добавлено/изменено:
+  - proposal: Why (язык = отношение в тексте); What Changes п.3 BREAKING extend; Impact/Scope (два среза одной цели); Acceptance 1–5 (механизм vs сопоставление); Decisions п.6
+  - design: Goals 2; BC 1–9; D2 сужен; D8/D9; E-D1…E-D6; Hardcode Justification; Blast Radius; Slices S1+S2; Risks; Migration 6–8; Open Question про фикстуру S2 (не блокер)
+  - spec `visual-explanation`: «Form follows the content» — четыре формы = рецепты, не мир; снят MUST «неизвестный жанр → ближайшая из четырёх»; таблица без обязательной кнопки на имени; «Panel tells one scene…» сужен до работы «последовательность/слои»; Scenario «Плакат всех случаев не публикуется» — запрет каталога шагов процесса, классификация сразу = успех (имя Scenario не менялось); ADDED «Graphic language matches the relation in the text»; новые Scenario «Сопоставление уже сказанных классов», «Смешанный источник не даёт конвейер», «Таблица свойств без обязательных кнопок»
+  - tasks: заголовок/Primary/`S1.accept`/slice-gate S1 сужены (без универсального «не плакат»); S1.1–S1.5 остаются `[x]`; добавлен срез S2 mechanical (S2.1 навык работа/язык/носитель; S2.2 шаблон-библиотека; S2.3 ADR-0010 инвариант формы; S2.4 сверка против новой дельты) + `S2.accept`; Follow-up explain/overview не поднят в рабочие задачи
+- disposition: accepted (вариант 1)
+- Architect Gate: `reports/architecture-extend-coherence-2026-09-01.md`
+- следующий шаг: `/opsx:verify visual-explanation-composition`
+
