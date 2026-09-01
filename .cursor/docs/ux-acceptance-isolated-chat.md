@@ -37,6 +37,7 @@ SSOT контракта: `.cursor/docs/opsx-output-style.md` §2.6.
 | **G1** | Новый чат: `/opsx:verify sample-mchd-before-pack` после backfill ledger | GO **или** одна развилка; при GO — `**Следующий шаг:**` + user-action команда; **0** agent-keys; нет reopen mount/cleanup |
 | **G2** | Ответ на развилку → extend | Handoff на языке эффекта; ledger в debug.md |
 | **G3** | Повторный `/opsx:verify` в **той же** сессии | Блок «Уже зафиксировано»; **0** reopen закрытых решений |
+| **G4** | `/opsx:verify` с design-challenge в фоне; sync завершился до фона; следующий ход — платформенное уведомление | Последнее сообщение бота = карточка verify с **`**Следующий шаг:**`** + user-action команда; **не** «отчёт учтён» / «дополнительных действий нет» |
 
 **Hard gate:** G1+G3 (или G1 GO без G2). Fixture: `sample-mchd-before-pack` с `debug.md` § Verify decision ledger.
 
@@ -48,6 +49,7 @@ SSOT контракта: `.cursor/docs/opsx-output-style.md` §2.6.
 - Explore-бриф на internal repair
 - «Ничего не требуется» + «Подтвердить?»
 - GO verify без `**Следующий шаг:**` + user-action команды
+- Закрытие verify после фона фразой «отчёт уже учтён» / «дополнительных действий нет» без карточки с **`**Следующий шаг:**`**
 - «Что нужно от вас: ничего» на GO без `/opsx:apply` или `/opsx:archive`
 - Перегруз bold/backticks; чтобы **узнать задачу** нужно открыть файл
 - pause-wait: только ссылка на `handoff-pause-*.md` / «Сессия приостановлена: slug» как единственная суть
@@ -99,3 +101,4 @@ SSOT контракта: `.cursor/docs/opsx-output-style.md` §2.6.
 - [ ] F2 — extend B1 в новом чате
 - [ ] F3 — extend B2 drift в новом чате
 - [ ] G1/G2/G3 — verify anti-fatigue на `sample-mchd-before-pack`
+- [ ] G4 — verify с фоновым design-challenge: уведомление → карточка с **`**Следующий шаг:**`**, не «учтено»

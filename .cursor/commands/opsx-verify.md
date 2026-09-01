@@ -9,7 +9,7 @@ description: "Quality gate для ЗНИ: объём и режим по конт
 
 Ключ `-noapi` / `-api` пишется в любом сообщении чата и не является флагом этой команды.
 
-**Контракт для пользователя:** на вход только имя ЗНИ `<change-name>`. **Одна команда → одно финальное сообщение.** Verify **сам** чинит repair-класс (internal Repair Loop, max 2 attempts) без «Подтвердить?» и без ping-pong extend↔verify в чате. Ответ: «можно apply» + **Следующий шаг** (`/opsx:apply` \| `/opsx:archive` по `verify_mode`) \| decision + ответ в чате \| terminal fail + чат/extend \| тихий статус (1a) + next step. Chat Surface Contract — §2.6 `opsx-output-style.md`.
+**Контракт для пользователя:** на вход только имя ЗНИ `<change-name>`. **Одна команда → одно финальное сообщение** с карточкой вердикта и **`**Следующий шаг:**`** (последнее видимое сообщение запуска, в т.ч. если синтез на ходе уведомления о фоне). Verify **сам** чинит repair-класс (internal Repair Loop, max 2 attempts) без «Подтвердить?» и без ping-pong extend↔verify в чате. Ответ: «можно apply» + **Следующий шаг** (`/opsx:apply` \| `/opsx:archive` по `verify_mode`) \| decision + ответ в чате \| terminal fail + чат/extend \| тихий статус (1a) + next step. **Запрещено** закрывать verify «отчёт учтён» / «дополнительных действий нет» без **`**Следующий шаг:**`**. Chat Surface Contract — §2.6 `opsx-output-style.md`.
 
 **Первое действие:** прочитать `.cursor/skills/openspec-verify-change/SKILL.md` и идти по шагам. До прочтения скилла — не читать артефакты ЗНИ, трассы, модули.
 
