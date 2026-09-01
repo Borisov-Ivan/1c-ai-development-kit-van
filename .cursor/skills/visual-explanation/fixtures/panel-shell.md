@@ -1,25 +1,26 @@
 # Шаблон файла панели (не живой `.canvas.tsx`)
 
-Родитель подставляет константу `DATA` из текущего ответа и записывает один `.canvas.tsx` в каталог панелей текущей области. Живой файл в git не класть.
+Библиотека **необязательных рецептов**. Родитель подставляет константу `DATA` из текущего ответа и записывает один `.canvas.tsx` в каталог панелей текущей области. Живой файл в git не класть. Регистрация с чистого листа из тех же примитивов среды — штатная.
 
 Обязательно:
 
-- импорт только из `cursor/canvas`; не добавлять `Grid` и `Callout`;
-- рендер читает `presentation.form`: `flow` | `table` | `hierarchy` | `card` (четыре значения; скелет со сценами — вид главной области для `flow` и `hierarchy`, не новое значение формы);
-- в модель входят шаги истории `scenes[]`: текст шага и какие части в фокусе;
-- главная область по умолчанию — скелет слоёв и текущий шаг; «Назад / Дальше» — общая обёртка для `flow` и `hierarchy`, не копия внутри каждой ветки;
-- ветки `table` и `card` сохраняют свой вид без обязательного степпера;
-- иерархия — вложенный `Stack`, не граф с абсолютной раскладкой;
+- импорт только из `cursor/canvas`;
+- вопрос и короткий вывод на полотне;
 - имена на полотне — полные фразы, не многоточие вместо шага;
-- стартово выбран `focus_item` (исход или виновник);
-- выбор элемента показывает `explanation` (роль) и текст текущей сцены («в этом шаге»); отдельного поля на пару «часть × шаг» нет; выбор **не** открывает файл;
-- путь из ответа — кнопкой в деталях через `openFile`; `newComposerChat` **не** вызывать;
 - `key` только на нативных элементах (`span`), не на `Button` / `Row` / `Text`;
 - цвета из `useHostTheme()`; без градиентов, теней и эмодзи;
-- выбранная часть — основной вариант кнопки независимо от фокуса сцены; вне фокуса приглушается пояснение вторичным или третичным тоном текста, не прозрачностью, не своим цветом и не наложением; подпись части остаётся читаемой;
+- выбор элемента **не** открывает файл; `newComposerChat` **не** вызывать;
 - **запрещено:** граф с абсолютной раскладкой, снятие подписи с полотна, фиксированная ширина коробки как носитель смысла, самодельный HTML-плакат, водяной текст, сюжет штампа электронной подписи как эталон.
 
-Родитель **до записи:** таблица — только если вопрос сам есть сравнение одних и тех же свойств; число частей само не переводит в таблицу. Пока главная область — скелет со сценами: если в одной сцене больше шести именованных частей — дробить на сцены или сворачивать уровень, не сбрасывать в таблицу. Пример в этом файле не ставит `form: "table"`.
+Рецепты (копировать нужный; не новое значение `presentation.form`):
+
+- **Скелет со сценами** — работа = слои или последовательность механизма. `scenes[]`, «Назад / Дальше», части вне фокуса тускнеют вторичным тоном текста (не прозрачность). Пример `DATA` ниже — этот рецепт, не умолчание библиотеки.
+- **Классификация** — копировать тело `ClassificationView` **в `Main`**, только если работа = одноимённые эффекты одного ранга **и** картина даёт то, чего нет в чате (например, рядом в отчёте цепочки, и их легко принять за шаги). Колонка = именованный класс (`group` или один элемент-класс), не пункт списка. Ряд стопок — не умолчание для любого списка.
+- **Таблица свойств** — сравнение одних и тех же свойств. Имя не обязано быть кнопкой. Колонки «Элемент / Пояснение / Связь» — не единственная таблица.
+
+`ItemButton`, степпер и карточка деталей — опции рецепта скелета, не обязательный хром. `Grid` и `Callout` в рецепты не добавлять; продукт их не запрещает на сборке с чистого листа.
+
+Родитель **до записи:** назвать отношение и **какое восприятие дают те же части на полотне**. Нет восприятия — файл не писать. Поле формы — подсказка, его можно опустить. Готовая копия `Main` при опущенной `form` ничего не раскладывает — это незавершённая заготовка, не публикация. Классы: вставить тело `ClassificationView` в `Main`, `form` и `relations`-стрелки не копировать, `scenes` не копировать. Слои: скелет, не стопки. `Table` не подставлять, чтобы «было видно». Пустой список связей не рисует стрелки следования. Число пунктов само не выбирает раскладку. Каталог приёмов навыка на полотно не класть. Таблица — только если вопрос сам есть сравнение свойств. Пока рецепт — скелет со сценами: если в одной сцене больше шести именованных частей — дробить на сцены или сворачивать уровень, не сбрасывать в таблицу.
 
 ```tsx
 import {
@@ -48,6 +49,7 @@ type Item = {
   id: ItemId;
   label: string;
   explanation: string;
+  group?: string;
   confidence?: Confidence;
   evidence?: { path: string; start?: number; end?: number };
 };
@@ -70,11 +72,15 @@ type PanelData = {
   items: Item[];
   relations?: Relation[];
   focus_item: ItemId;
-  presentation: { form: Form };
+  presentation?: { form?: Form };
   scenes?: Scene[];
 };
 
-/* Родитель заменяет объект целиком данными текущего ответа. */
+const STARTER_FORMS: Form[] = ["flow", "table", "hierarchy", "card"];
+
+/* Пример рецепта скелета (разбор механизма), не умолчание библиотеки.
+   Другая работа заменяет тело Main: классы → ClassificationView(); сравнение свойств → TableView(); иначе свой Stack.
+   Не крутить form. Не публиковать копию, у которой Main вернул null. */
 const DATA: PanelData = {
   question: "Когда документ проводится, а когда нет",
   takeaway:
@@ -150,8 +156,10 @@ export default function VisualExplanationPanel() {
     : new Set(DATA.items.map((it) => it.id));
   const selected = itemById(selectedId) ?? itemById(initial);
   const relations = DATA.relations ?? [];
-  const form = DATA.presentation.form;
-  const skeletonScenes = form === "flow" || form === "hierarchy";
+  const form = DATA.presentation?.form;
+  const formIsStarter = form !== undefined && STARTER_FORMS.includes(form);
+  const skeletonRecipe =
+    (form === "flow" || form === "hierarchy") && scenes.length > 0;
 
   function selectItem(id: ItemId) {
     setSelectedId(id);
@@ -164,6 +172,9 @@ export default function VisualExplanationPanel() {
       path: item.evidence.path,
     });
   }
+
+  const evidenceItems = DATA.items.filter((it) => it.evidence?.path);
+  const singleEvidence = evidenceItems.length === 1 ? evidenceItems[0] : null;
 
   function goBack() {
     setSceneIndex(Math.max(0, safeSceneIndex - 1));
@@ -240,7 +251,7 @@ export default function VisualExplanationPanel() {
   function FlowView() {
     return (
       <Stack gap={12}>
-        {DATA.items.map((item, index) => {
+        {DATA.items.map((item) => {
           const rels = outgoing(item.id);
           return (
             <span key={item.id}>
@@ -255,11 +266,6 @@ export default function VisualExplanationPanel() {
                   </Text>
                 </span>
               ))}
-              {rels.length === 0 && index < DATA.items.length - 1 ? (
-                <Text size="small" tone="tertiary">
-                  ↓
-                </Text>
-              ) : null}
             </span>
           );
         })}
@@ -267,30 +273,61 @@ export default function VisualExplanationPanel() {
     );
   }
 
+  function ClassificationView() {
+    const grouped = new Map<string, Item[]>();
+    for (const item of DATA.items) {
+      const key = item.group?.trim() || item.id;
+      const list = grouped.get(key) ?? [];
+      list.push(item);
+      grouped.set(key, list);
+    }
+    return (
+      <Row gap={16} align="start" wrap>
+        {[...grouped.entries()].map(([key, members]) => {
+          const title = members[0]?.group?.trim() || members[0]?.label || key;
+          return (
+            <span key={key}>
+              <Stack gap={6} style={{ flex: 1, minWidth: 140 }}>
+                <Text weight="semibold">{title}</Text>
+                {members.map((item) => (
+                  <span key={item.id}>
+                    {item.label !== title ? <Text>{item.label}</Text> : null}
+                    <Text tone="secondary">{item.explanation}</Text>
+                    {confidenceLabel(item.confidence) ? (
+                      <Text size="small" tone="secondary">
+                        {confidenceLabel(item.confidence)}
+                      </Text>
+                    ) : null}
+                  </span>
+                ))}
+              </Stack>
+            </span>
+          );
+        })}
+      </Row>
+    );
+  }
+
   function TableView() {
-    const headers = ["Элемент", "Пояснение", "Связь"];
+    const headers =
+      relations.length > 0 ? ["Имя", "Пояснение", "Отношение"] : ["Имя", "Пояснение"];
     const rows = DATA.items.map((item) => {
-      const rels = outgoing(item.id);
-      const relText =
-        rels.length === 0
-          ? "—"
-          : rels
-              .map((r) => {
-                const target = itemById(r.to)?.label ?? r.to;
-                const guess = confidenceLabel(r.confidence);
-                return `${r.label} → ${target}${guess ? ` (${guess})` : ""}`;
-              })
-              .join("; ");
-      return [
-        <Button
-          variant={item.id === selected?.id ? "primary" : "secondary"}
-          onClick={() => selectItem(item.id)}
-        >
-          {item.label}
-        </Button>,
-        item.explanation,
-        relText,
-      ];
+      const cells: Array<string> = [item.label, item.explanation];
+      if (relations.length > 0) {
+        const rels = outgoing(item.id);
+        cells.push(
+          rels.length === 0
+            ? "—"
+            : rels
+                .map((r) => {
+                  const target = itemById(r.to)?.label ?? r.to;
+                  const guess = confidenceLabel(r.confidence);
+                  return `${r.label} → ${target}${guess ? ` (${guess})` : ""}`;
+                })
+                .join("; "),
+        );
+      }
+      return cells;
     });
     return <Table headers={headers} rows={rows} striped stickyHeader />;
   }
@@ -352,12 +389,18 @@ export default function VisualExplanationPanel() {
   }
 
   function Main() {
+    // !formIsStarter → null: незавершёнка, не публиковать. Сюда нельзя писать ClassificationView «потому что формы нет». Классы: заменить всё тело Main на <ClassificationView />. Слои: скелет (form flow|hierarchy + scenes). Иначе свой Stack в теле Main. Table не подставлять «чтобы было видно».
+    if (!formIsStarter) return null;
     if (form === "table") return <TableView />;
     if (form === "card") return <CardView />;
     if (form === "hierarchy") {
-      return <SkeletonChrome body={<HierarchyView />} />;
+      return skeletonRecipe ? (
+        <SkeletonChrome body={<HierarchyView />} />
+      ) : (
+        <HierarchyView />
+      );
     }
-    return <SkeletonChrome body={<FlowView />} />;
+    return skeletonRecipe ? <SkeletonChrome body={<FlowView />} /> : <FlowView />;
   }
 
   return (
@@ -365,20 +408,28 @@ export default function VisualExplanationPanel() {
       <Stack gap={8}>
         <H1>{DATA.question}</H1>
         <Text weight="semibold">{DATA.takeaway}</Text>
+        {singleEvidence && !skeletonRecipe ? (
+          <Button
+            variant="secondary"
+            onClick={() => openEvidence(singleEvidence)}
+          >
+            Открыть файл
+          </Button>
+        ) : null}
       </Stack>
       <Divider />
       <Row gap={24} align="start" wrap>
         <Stack gap={12} style={{ flex: 2, minWidth: 280 }}>
-          <H2>Как устроено</H2>
+          {formIsStarter ? <H2>Как устроено</H2> : null}
           <Main />
         </Stack>
-        {selected ? (
+        {skeletonRecipe && selected ? (
           <Card style={{ flex: 1, minWidth: 240 }}>
             <CardHeader>{selected.label}</CardHeader>
             <CardBody>
               <Stack gap={10}>
                 <Text>{selected.explanation}</Text>
-                {currentScene && skeletonScenes ? (
+                {currentScene ? (
                   <Text tone="secondary">{currentScene.text}</Text>
                 ) : null}
                 {confidenceLabel(selected.confidence) ? (
