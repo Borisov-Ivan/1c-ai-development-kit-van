@@ -9,7 +9,7 @@ verify_depth: full
 assumptions_accepted: []
 repair_attempt: 1
 last_challenge_at: "2026-09-01T03:08:37Z"
-last_verification: reports/verification-2026-09-01-2.md
+last_verification: reports/verification-2026-09-01-3.md
 ```
 
 ## Extend — 2026-09-01
@@ -27,3 +27,24 @@ last_verification: reports/verification-2026-09-01-2.md
 
 - Gaps из независимой проверки плана: (1) сузить «обработчики»/«видимость» без «в модуле»; (2) согласовать Mixed с одним вопросом выбора за ход; (3) закрыть MAY поясняющей строки
 - Files touched: design.md, specs/split-form-layout-modes/spec.md, tasks.md
+
+## Apply — S1 — 2026-09-01
+
+- Срез: S1 — Пропуск холостого вопроса поставки
+- Режим: mechanical (kit markdown)
+- Задачи: S1.1–S1.8 [x]; S1.accept [ ]
+
+### Регрессии (agent static)
+
+- S1.6 Layout stays manual unless apply permission: § «Политика макетов» в `forms-mxl-mode-gate.mdc` — без разрешения `manual` + WAIT, без `1c-mxl/compile`. Apply skill: default manual, без молчаливого assisted. Текст не менялся этой ЗНИ.
+- S1.7 Layout non-manual requires recorded apply permission: разрешение = чат apply / AskQuestion / `[mxl:…]` + запись в `debug.md` § Apply permissions. Apply skill guardrail Template.xml совпадает. Текст не менялся этой ЗНИ.
+- S1.8 Legacy single artifact_mode maps to form_mode: Mode Gate «Legacy fallback»; apply skill fallback lone `artifact_mode`; verify skill `legacy-artifact-mode-fallback`. Текст не менялся этой ЗНИ.
+
+## Slice Gate Decisions
+
+### Slice S1 — Пропуск холостого вопроса поставки (2026-09-01)
+Срез: S1 — Пропуск холостого вопроса поставки
+Решение: awaiting-acceptance
+Обоснование: все рабочие задачи реализованы; приёмочная задача передана на ручной прогон Primary.
+Изменения tasks: S1.1–S1.8 [x]; S1.accept остаётся [ ]
+Связанный отчёт: reports/handoff-acceptance-S1-2026-09-01.md
