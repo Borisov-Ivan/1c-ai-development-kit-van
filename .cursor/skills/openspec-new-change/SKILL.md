@@ -14,7 +14,7 @@ metadata:
 **Input**: The user's request may include a change name (kebab-case), a description of what they want to build, or nothing (auto-detect from context).
 
 **Output style:**
-- Сводка в чате («что создано», следующий шаг) — шаблон **T-CONFIRM** §5.5 + **Chat Surface Contract** §2.6: handoff на языке эффекта, **без** перечня файлов; **один** next step — `/opsx:verify <name>` (не «verify или apply», без auto-chain).
+- Сводка в чате («что создано», следующий шаг) — шаблон **T-CONFIRM** §5.5 + **Chat Surface Contract** §2.6: handoff на языке эффекта, **без** перечня файлов; если материалы перенесены — одна фраза «материалы разбора перенесены в задачу» (без путей); **один** next step — `/opsx:verify <name>` (не «verify или apply», без auto-chain).
 - **Подтверждение постановки перед scaffold:** бриф по `.cursor/docs/templates/brief-card.md` (§5.1 Sync Card). **B0** при свежем `## Постановка ЗНИ` в чате / журнале explain / explore-handoff — **одна информирующая строка без согласования имени** (slug — техническая деталь; END TURN не делается). **B1** при свободном тексте — слот **Изменение** (+ опц. **Затронутое**) + `Подтвердить?`; план работ в чат **запрещён**. KB-discovery — internal, в чат не выводится. `temp/briefs/*.md` не создаются.
 - **Генерируемые артефакты** `proposal.md`, `design.md`, `tasks.md`, spec deltas — подчиняются §1 «Три слоя» и §3 «Запрет внутренних ID в пользовательских полях»: секции для заказчика/приёмки (`Why`, `What Changes`, `Scope`, `Scenarios`, `Requirements`) — UX-слой; внутренние ID (`S<N>.<M>`, `S<N>.accept`, `D<N>`, `R<N>`, `I<N>`, номера задач `12.9`) — только в `## Slices`, `## Decisions`, `## Tasks`, `## Risks`. Перечисления — нумерованные списки. Перед записью — self-check-5 (§7).
 
@@ -149,13 +149,25 @@ metadata:
    **Если каталог существует (resume):**
    - **НЕ** вызывать `openspec new change`.
    - Одна строка в чат: «Дозавершаю ЗНИ `<name>` (resume)».
-   - Перейти к шагу 3.
+   - Перейти к шагу 2.1.
 
    **Если каталога нет (новый change):**
    ```bash
    openspec new change "<name>"
    ```
    Создаёт scaffold в `openspec/changes/<name>/`.
+   - Перейти к шагу 2.1.
+
+2.1. **Перенос отчётов исследования**
+
+   Сразу после появления каталога `openspec/changes/<name>/` (новый scaffold **или** resume), **до** записи proposal/design и **до** Design Gate:
+
+   - Выполнить переезд по `.cursor/rules/preserve-subagent-reports.mdc` § «Переезд в каталог ЗНИ». Алгоритм отбора в скилл **не** копировать.
+   - Переписать `report: temp/reports/X` на `reports/X` в постановке (`exploreContext`) и далее в `design.md` при записи.
+   - Нет кандидатов — не останавливать, не требовать «приложите отчёт».
+   - Resume — тот же шаг идемпотентно.
+   - После переезда ingest файла передачи и журнала explain: `openspec/changes/<name>/reports/<basename>` (не только `temp/explore-handoff-*` / `temp/reports/explain-*`).
+   - В финальном сообщении: если был переезд — одна фраза «материалы разбора перенесены в задачу»; **не** печатать перечень путей. Тихий пропуск — фразу не добавлять.
 
 3. **Read project context**
    Read `openspec/project.md` for project-level constraints (editing rules, allowed directories, conventions).
@@ -293,7 +305,7 @@ metadata:
          - **Objective markers**: Grep design.md for bug fix markers, base procedure interception, new metadata objects
          - **Semantic triggers**: Grep for `&Вместо`, `&После`, `&Перед`; missing `## Existing Mechanisms` or `## Design Rationale` when integration is described
          - **Structural triggers**: >1 file affected, >10 lines of change, contract/API changes
-      2. Check if `architecture-*.md` already exists in `reports/` (from prior explore session or current change).
+      2. Check if `architecture-*.md` already exists in `reports/` ЗНИ (после шага 2.1 — перенесённый отчёт исследования, не только `temp`). Служебные `architecture-new-*` / `architecture-task-readiness-*` / `design-challenge-*` **не** закрывают Gate как отчёт исследования.
       3. Check поле **«Architect / verify»** из `exploreContext` (machine-readable формат блока):
          - `report: <path>` → treat as existing architecture report only if the path exists and scope intersects the current change; otherwise treat Architect Gate as fired.
          - `required` → Architect Gate is considered fired regardless of design.md wording (unless the current invocation includes `--skip-architect <причина>`).
@@ -376,6 +388,7 @@ metadata:
 
 After completing all artifacts, summarize in chat (T-CONFIRM, Chat Surface Contract §2.6):
 - Change name (one line, language of effect — «ЗНИ создано»)
+- Если шаг 2.1 перенёс файлы — одна фраза «материалы разбора перенесены в задачу» (**без** перечня путей). Тихий пропуск — фразу не добавлять.
 - **Risk Surfacing (ОБЯЗАТЕЛЬНО):** 1–3 границы на UX-языке («Что меняется / что НЕ меняется»)
 - Architect Gate status: one line if actionable for user; details in `reports/`
 - **One next step only:** `/opsx:verify <name>` — без auto-chain, без «или apply»
@@ -399,7 +412,7 @@ After completing all artifacts, summarize in chat (T-CONFIRM, Chat Surface Contr
 **Guardrails**
 - **HALT — dual selection questions (self-check перед отправкой):** если черновик ответа содержит **два или более** вопроса выбора (`AskQuestion`, нумерованные взаимоисключающие варианты, две карточки выбора) — **не отправлять**; пересобрать сообщение с ровно одним вопросом выбора. Metadata Gate и Mode Gate в одном сообщении — запрещены. Поясняющая строка «записываю поставку программно» вопросом выбора **не** считается (можно в одном ходе с ровно одним каноном вопроса по другой форме).
 - **Metadata Gate MUST NOT be silently skipped** (новый change): не вызывать `openspec new change` без закрытого Metadata Gate. Гейт закрывается ответом пользователя **или** обоснованным пропуском kit-only (`developer: n/a`, `marker_style: minimal`). Молчаливый пропуск при BSL/`src/` в постановке запрещён. Перед финальной сводкой проверить `proposal.md` на `<ФИО>`, `<developer>`, «Уточнить до». Значение `n/a` при kit-only — не плейсхолдер и не WARNING. Если плейсхолдеры (`<ФИО>` и т.п.) и пользователь не выбирал «пропустить» — WARNING в сводке.
-- **Explore context MUST NOT be used only for naming**: Если в последних сообщениях чата найден свежий блок `## Постановка ЗНИ`, или свежий `temp/reports/explain-*.md` с секцией `## Постановка ЗНИ`, или свежий `temp/explore-handoff-*.md` — прочитать как source context и перенести все поля Handoff Contract (Симптом, Корневая причина с маркером, Что менять, Файлы, Приёмка, Связь с архивом, Architect/verify, Тема маркера, Срезы (черновик), Открытые решения) в `proposal`, `design`, `specs`, `tasks`, Metadata Gate и Design Gate. Legacy-файлы — только по явной ссылке пользователя (шаг 1.b, «Legacy-источники»).
+- **Explore context MUST NOT be used only for naming**: Если в последних сообщениях чата найден свежий блок `## Постановка ЗНИ`, или свежий `temp/reports/explain-*.md` / после шага 2.1 `openspec/changes/<name>/reports/explain-*.md` с секцией `## Постановка ЗНИ`, или свежий `temp/explore-handoff-*.md` / после шага 2.1 `openspec/changes/<name>/reports/explore-handoff-*.md` — прочитать как source context и перенести все поля Handoff Contract (Симптом, Корневая причина с маркером, Что менять, Файлы, Приёмка, Связь с архивом, Architect/verify, Тема маркера, Срезы (черновик), Открытые решения) в `proposal`, `design`, `specs`, `tasks`, Metadata Gate и Design Gate. Legacy-файлы — только по явной ссылке пользователя (шаг 1.b, «Legacy-источники»).
 - Create ALL artifacts needed for implementation (as defined by schema's `apply.requires`)
 - Always read dependency artifacts before creating a new one
 - If context is critically unclear, ask the user - but prefer making reasonable decisions to keep momentum
