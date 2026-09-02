@@ -570,7 +570,7 @@ open_questions_count: 0
 
 ### KB references
 
-Если входной промпт содержит `## Existing Knowledge`, после YAML front-matter и перед основной архитектурной секцией добавить:
+Если входной промпт содержит `## Existing Knowledge`, после YAML, H1 и шапки вводных (если это отчёт исследования) и перед `## Task` добавить:
 
 ```markdown
 ## KB references
@@ -581,6 +581,12 @@ open_questions_count: 0
 ```
 
 При conflict с `active` KB дополнительно добавить `## Knowledge conflicts` с доказательствами.
+
+### Шапка вводных (отчёт исследования)
+
+Только для архитектурного **отчёта исследования**: запись в `temp/reports/architecture-YYYY-MM-DD.md` / `architecture-YYYY-MM-DD-<тема>.md`, поле `report:` в постановке, каталог без ЗНИ. **Не** требовать ту же пятипольную шапку у готовности задач (`architecture-task-readiness-*`), независимого разбора постановки (`design-challenge-*`), оценки срезов, `architecture-new-*` и прочих служебных отчётов проверки постановки.
+
+Сразу после YAML и H1 (`# Architecture: …`), **до** тела `## Task` / `## KB references`: секция `## Вводные` по `.cursor/rules/preserve-subagent-reports.mdc` § «Шапка вводных». Таблицу полей не копировать. `scope.files` YAML **не** замена шапки.
 
 ### Tier by Complexity
 Выбирай объём документа в зависимости от сложности (указывается в MODE или определяется самостоятельно):
@@ -593,6 +599,10 @@ open_questions_count: 0
 
 ```markdown
 # Architecture: [Feature Name]
+
+## Вводные
+
+(Только отчёт исследования — см. § «Шапка вводных» выше. Служебные режимы проверки постановки секцию не пишут.)
 
 ## Task
 

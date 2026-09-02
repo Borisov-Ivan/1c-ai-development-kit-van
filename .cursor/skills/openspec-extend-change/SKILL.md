@@ -40,7 +40,7 @@ Chat Surface Contract — §2.6 `opsx-output-style.md`.
   - `--from-debug <path>` — `debug.md` или RCA-отчёт
   - `--from-verify <path>` — отчёт `/opsx:verify`
    - `--from-architecture <path>` — отчёт архитектора
-  - `--from-report <path>` — итог `/opsx:explore` или журнал `/opsx:explain`: `temp/reports/<тип>-YYYY-MM-DD-<slug>.md` (trace-analyst / explorer / architect / **explain**) или `openspec/changes/<name>/reports/explain-*.md`; также `temp/explore-handoff-*.md` (опциональный handoff с блоком `## Постановка ЗНИ`)
+  - `--from-report <path>` — итог `/opsx:explore` или журнал `/opsx:explain`: `temp/reports/<тип>-YYYY-MM-DD-<slug>.md` (trace-analyst / explorer / architect / **explain**) или уже `openspec/changes/<name>/reports/` после переезда; также `temp/explore-handoff-*.md` (опциональный handoff с блоком `## Постановка ЗНИ`). Если файл ещё в `temp` — сначала переезд по `.cursor/rules/preserve-subagent-reports.mdc` § «Переезд в каталог ЗНИ», дальше читать и ссылаться на путь в каталоге ЗНИ; оригинал в `temp` не оставлять.
   - `--from-explore <path>` — **legacy-источники, только по явной ссылке пользователя**: `temp/explore-summary-*.md`, `openspec/sessions/<slug>/analysis.md` (RCA, рецепт, fix-задачи). Новые файлы этих форматов не создаются
   - `--code-sync` — штатная синхронизация OpenSpec-артефактов с фактическим кодом после ручного упрощения, writer/apply или Code-Truth Gate (`phantom-symbol`, устаревшие имена процедур, drift design/tasks/debug).
 
@@ -63,7 +63,7 @@ Chat Surface Contract — §2.6 `opsx-output-style.md`.
    - иначе выполнить `openspec list --json` и выбрать активный / спросить пользователя.
 3. Выполнить `openspec instructions apply --change "<name>" --json`.
 4. Прочитать `openspec/project.md` и артефакты change из `contextFiles`: `proposal.md`, `design.md`, `tasks.md`, `specs/**` при наличии; для расширения scope также прочитать `debug.md` (если есть) — нужен для счётчика Scope Coherence Audit и записей `## Extend`.
-5. Прочитать только явно переданные source-файлы (`--from-*`, `@path`, пути в запросе). Трассы — через `/opsx:explore` (профиль bug). `--from-report` принимает (приоритет): `temp/reports/<тип>-YYYY-MM-DD-<slug>.md` (отчёт `Task` из Ultra-Lite explore **или** журнал `explain-*` из `/opsx:explain`), `openspec/changes/<name>/reports/explain-*.md`, `temp/explore-handoff-*.md` (handoff с блоком `## Постановка ЗНИ`); legacy-файлы — только через `--from-explore` по явной ссылке пользователя. Если указан `--code-sync`, source = артефакты change + `debug.md` + отчёты `reports/**` + результаты Code-Truth Gate; чтение BSL/XML до брифа всё равно запрещено.
+5. Прочитать только явно переданные source-файлы (`--from-*`, `@path`, пути в запросе). Трассы — через `/opsx:explore` (профиль bug). `--from-report` принимает (приоритет): `temp/reports/<тип>-YYYY-MM-DD-<slug>.md` (отчёт `Task` из Ultra-Lite explore **или** журнал `explain-*` из `/opsx:explain`), `openspec/changes/<name>/reports/` после переезда, `temp/explore-handoff-*.md` (handoff с блоком `## Постановка ЗНИ`); legacy-файлы — только через `--from-explore` по явной ссылке пользователя. **Если путь ещё в `temp/reports/…` или `temp/explore-handoff-*.md` — сначала перенести** в `openspec/changes/<name>/reports/` по `.cursor/rules/preserve-subagent-reports.mdc` § «Переезд в каталог ЗНИ», затем читать и ссылаться **только** на путь в каталоге ЗНИ; оригинал в `temp` не оставлять. Нет файла — тихий пропуск по правилу сохранения, не invent. Если указан `--code-sync`, source = артефакты change + `debug.md` + отчёты `reports/**` + результаты Code-Truth Gate; чтение BSL/XML до брифа всё равно запрещено.
 5a. **KB Discovery (internal):** прочитать `openspec/knowledge/_index.yaml` и при необходимости `_taxonomy.yaml` и выбранные KB `.md` — по алгоритму Entry Protocol шаг 1.6 (KB Discovery) `.cursor/skills/openspec-explore/SKILL.md` (anchor-paths из путей в уже прочитанных артефактах и source-файлах; бюджет Top-10). Результат — **не в чат**, только для промптов architect/explorer после «да».
 5b. **Brief Depth Classifier** — `.cursor/docs/opsx-output-style.md` §5.1 (B1 по умолчанию; B2 при drift/decision/`--code-sync`/`--from-review` >3 findings/`--from-verify` после decision; **никогда B3**).
 6. Сформировать и показать **бриф extend** (B1 или B2) по шаблону ниже.
@@ -169,7 +169,7 @@ Self-check перед выводом: уровень B1/B2 по классифи
 | `verify` | `verification-*.md`, классы Repair Loop (`decision` / `artifact-hygiene`), `CRITICAL/WARNING/SUGGESTION` (legacy-маркер `Phase B`) | decision cards, scope/design/task issues, recommended remediation |
 | `architecture` | `architecture-*.md`, `architecture-review-*` | рекомендуемые изменения design/spec/tasks/ADR, alternatives |
 | `explore` | legacy-источники только по явной ссылке пользователя (`explore-summary-*`, `Explore Summary`, `Decisions`, `Open questions`) | сформулированные требования, slice hints, unresolved questions |
-| `report` | `temp/reports/<тип>-*.md` (trace-analyst / explorer / architect / **explain**), `openspec/changes/<name>/reports/explain-*.md`, `temp/explore-handoff-*.md` (блок `## Постановка ЗНИ`) | root cause, verified facts, рецепт, задачи для `debug.md` и `tasks.md`, slice placement; из `explain-*` — заметки, кандидаты класса `решение`, цитаты, опц. `## Постановка ЗНИ` |
+| `report` | `temp/reports/<тип>-*.md` (trace-analyst / explorer / architect / **explain**), после переезда `openspec/changes/<name>/reports/<basename>`, `temp/explore-handoff-*.md` (блок `## Постановка ЗНИ`; после переезда — тот же файл в `reports/` ЗНИ) | root cause, verified facts, рецепт, задачи для `debug.md` и `tasks.md`, slice placement; из `explain-*` — заметки, кандидаты класса `решение`, цитаты, опц. `## Постановка ЗНИ`. Ссылки в постановке — на путь в каталоге ЗНИ, не на `temp/reports/` для перенесённого файла |
 | `code-sync` | флаг `--code-sync`, `phantom-symbol`, расхождения `design/tasks/debug` с фактическим кодом | фактические символы, устаревшие рецепты, какие артефакты догнать до кода |
 | `other` | markdown/text без явных маркеров | факты и open questions; если непонятно — AskQuestion |
 
@@ -454,8 +454,8 @@ Architect обязателен, если:
 Команды семейства `/opsx:*` должны ссылаться на extend, когда вывод показывает необходимость изменить scope:
 
 - `/review`: `Architecture findings` или findings, противоречащие `design.md` → `/opsx:extend <name> --from-review <report-path>`.
-- `/opsx:explore` (Ultra-Lite): RCA и рецепт → `/opsx:extend <name> --from-report temp/reports/<тип>-YYYY-MM-DD-<slug>.md` (отчёт `Task`) или `temp/explore-handoff-*.md` (если был handoff).
-- `/opsx:explain`: журнал прохода → `/opsx:extend <name> --from-report temp/reports/explain-YYYY-MM-DD-<slug>.md` (или `openspec/changes/<name>/reports/explain-*.md`).
+- `/opsx:explore` (Ultra-Lite): RCA и рецепт → `/opsx:extend <name> --from-report <path>` (файл в `temp/reports/…` переезжает в `reports/` этой ЗНИ по правилу сохранения; дальше ссылки на путь в каталоге ЗНИ) или `temp/explore-handoff-*.md` (если был handoff — тоже переезд).
+- `/opsx:explain`: журнал прохода → `/opsx:extend <name> --from-report <path>` (`temp/reports/explain-*.md` переезжает; либо уже `openspec/changes/<name>/reports/explain-*.md`).
 - `/opsx:verify`: Repair Loop даёт класс `decision` по scope/design/tasks → `/opsx:extend <name> --from-verify <report-path>`.
 - `/opsx:apply`: реализация выявила scope mismatch → `/opsx:extend <name>`.
 - `/opsx:explore`: есть активный change и обсуждение даёт новое требование → `/opsx:extend <name>`.
