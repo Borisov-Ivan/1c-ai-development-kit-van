@@ -46,7 +46,7 @@
 ## Связи
 
 - **Specs:** openspec/specs/visual-explanation/spec.md
-- **Changes:** openspec/changes/archive/2026-08-31-universal-visual-explanation/; уточнение — openspec/changes/visual-explanation-composition/
+- **Changes:** openspec/changes/archive/2026-08-31-universal-visual-explanation/; уточнение — openspec/changes/archive/2026-09-02-visual-explanation-composition/
 - **Supersedes:** ADR-0008, ADR-0009
 - **Связанные ADR:** ADR-0001
 

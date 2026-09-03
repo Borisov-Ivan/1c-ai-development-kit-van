@@ -37,7 +37,7 @@
 
 ## Связи
 
-- **Specs:** openspec/specs/chat-surface-clarity/spec.md
-- **Changes:** archive/2026-08-01-chat-surface-clarity/
+- **Specs:** openspec/specs/chat-surface-clarity/spec.md; openspec/specs/explore-report-intake/spec.md; openspec/specs/explore-report-promote/spec.md; openspec/specs/split-form-layout-modes/spec.md
+- **Changes:** archive/2026-08-01-chat-surface-clarity/; archive/2026-09-02-explore-reports-into-change/; archive/2026-09-02-skip-form-mode-module-only/
 - **Supersedes:** —
 - **Связанные ADR:** —
