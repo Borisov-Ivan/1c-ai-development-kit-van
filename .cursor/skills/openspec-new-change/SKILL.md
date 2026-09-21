@@ -285,6 +285,14 @@ metadata:
       7. Макет в new не спрашивать (вопрос макета не возвращать).
       8. Все режимы форм **закрыты записью** в proposal до перехода к Design Gate AskQuestion (`bsl-only` без вопроса или ответ на канон).
 
+   d.2. **External Contract Ledger (после `proposal.md`, до Design Gate AskQuestion)**
+
+      Источник записи — только явно подтверждённое поле Handoff Contract или прямой ответ пользователя (явное требование заказчика / явно принятый референс). Исследовательский вывод и донор **не** повышают `authority`.
+
+      - Нет такого условия → **не** создавать `debug.md` и **не** заводить пустую секцию `## External Contract Ledger`. Отсутствие реестра — нормальный режим, не дефект.
+      - Есть явное условие → создать `openspec/changes/<name>/debug.md` с `## External Contract Ledger` по schema `openspec-verify-change/SKILL.md` § Load artifacts. Поля: `id: EC-*`, `authority: customer-direct | accepted-reference`, `source`, `axis`, `primary_event_id`, `primary_event_at` (ISO с поясом). Authority явного указания **не** понижать без решения пользователя и **не** выводить по смыслу текста.
+      - Тема или ось неоднозначны → **один** вопрос классификации; не объединять по текстовой близости.
+
    e. **Design Gate (MANDATORY — after design + Forms Mode Gate, before specs/tasks)**:
 
       After the `design` artifact is created and written, **before** proceeding to `specs` or `tasks`:

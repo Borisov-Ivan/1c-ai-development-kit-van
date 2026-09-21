@@ -123,8 +123,17 @@
 - **Layer 1 (Гигиена артефактов):** <PASS / AUTOFIXED + перечень / FAIL>.
 - **Layer 2 (Internal Coherence):** <PASS / WARNING / FAIL>; QC отчёт: `<path>`.
 - **Layer 3 (Problem-Solution Trace):** <PASS / WARNING / FAIL>; алерты: `<коды>`.
-- **Layer 4 (Independent Challenge):** <APPROVE / CHALLENGE / REJECT / SKIPPED-novelty / SKIPPED-override>; отчёт: `<path>`.
-- **Layer 5 (Implementation Readiness):** <PASS / WARNING / FAIL>; отчёт: `<path>`.
+- **Layer 4 (Independent Challenge):** <APPROVE / CHALLENGE / REJECT / SKIPPED-novelty / SKIPPED-override / SKIPPED-lite>; отчёт: `<path>`; trigger: `<причина или none>`.
+- **Layer 5 (Implementation Readiness):** <PASS / WARNING / FAIL>; отчёт: `<path>`; trigger: `<причина или none>`.
+
+### Каскад дельты
+
+- **verify_depth:** <full / incremental / lite>.
+- **recomputed:** `<check_id>@<scope_anchor>` — <причина из invalidation_map>.
+- **reused:** `<check_id>@<scope_anchor>` — cache hit (полный input match).
+- **escalated:** <профиль QC / design-challenge / task-readiness / none> — <trigger reason или «не запускался»>.
+
+Чат **не** получает этот список; бюджет карточки прежний.
 
 ### Авто-исправлено (Layer 1)
 
@@ -153,6 +162,7 @@
 ### Секция «Технический аудит»
 
 - **Всегда** все пять буллетов в указанном порядке. Если слой не выполнялся (Layer 4 пропущен по новизне) — буллет остаётся со статусом `SKIPPED-novelty` и одной фразой обоснования.
+- Секция `### Каскад дельты` обязательна: явные перечни recomputed / reused / escalated. Без неё повторный прогон не доказывает точечную инвалидацию.
 - Имена `Layer N`, `design-challenge`, `task-readiness` — **разрешены** в этой секции (только здесь).
 
 ---

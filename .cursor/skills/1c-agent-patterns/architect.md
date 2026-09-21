@@ -206,6 +206,14 @@ Task(
          - design: openspec/changes/<change-name>/design.md
          - specs: openspec/changes/<change-name>/specs/**/spec.md
 
+         ## Профильная дельта (не полный debug.md)
+
+         - trigger_reason: <first-axis | axis-hash-changed | external-contract-conflict | two-alternatives | security-resource-precedent | unknown-boundary>
+         - delta_design: <что изменилось в оси / 'full — cache miss'>
+         - affected_contract_ids: <EC-* or 'none'>
+         - reused_evidence: <прошлый design-challenge path + что переиспользовать>
+         - Не повторять детерминированные графы Scenario↔slice; не требовать полный debug.md.
+
          ## Запреты
 
          - Не опираться на собственные прошлые отчёты `reports/architecture-*.md`
@@ -258,7 +266,7 @@ Task(
 
 ## Architect — task readiness review (verify Layer 5)
 
-Used by `/opsx:verify` Layer 5 (Implementation Readiness) — MANDATORY in every pre-apply verification. The architect evaluates holistic readiness: can the ЗНИ be implemented as-is by agents and users without returning for clarification?
+Used by `/opsx:verify` Layer 5 (Implementation Readiness) — only when the Layer 5 profile trigger fires (changed risky tasks or `task-readiness` in invalidation_map). Without trigger, reuse the last readiness report; do not launch a second mandatory run. The architect evaluates holistic readiness of **invalidated tasks**: can they be implemented as-is without returning for clarification?
 
 ```
 Task(
@@ -285,6 +293,14 @@ Task(
          - Замечания механических проверок (verify, Layers 1–3):
            <список или «замечаний нет»>
          - Executability issues (verify, Layer 5 pre-screen): <список или «замечаний нет»>
+
+         ## Профильная дельта (не полный debug.md)
+
+         - trigger_reason: <unknown-composition | manual-config | unknown-signature | new-cross-module | unconfirmed-api | unknown-boundary | none>
+         - changed_tasks: <S<N>.<M> list or 'all — cache miss'>
+         - affected_contract_ids: <EC-* or 'none'>
+         - reused_evidence: <прошлый task-readiness path + что не переоценивать>
+         - Не повторять матрицу сценариев; не требовать полный debug.md и второй обязательный прогон.
 
          ## Критерии оценки
 

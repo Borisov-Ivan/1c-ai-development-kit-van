@@ -371,7 +371,7 @@ Implement tasks from an OpenSpec change.
      Детектор: все рабочие задачи `S<N>.<M>` = `[x]`, приёмочная задача среза (`S<N>.accept` или legacy `S<N>.T<M>`) = `[ ]`.
 
      **Внутренний verify (обязательно до приёмочного handoff):**
-     1. Оркестратор выполняет проверки по скиллу `openspec-verify-change/SKILL.md` для **текущего среза** в `pre-apply` контексте — **предпочтительно** узкий/инкрементальный прогон на границе среза (не полный пакет независимого аудита «с нуля» между хвостами задач), **без** длинного вывода в чат. Optional hygiene дельты среза (контекст/связи/простой язык) — в handoff одной строкой; не требовать полный независимый аудит постановки как способ per-slice integrity.
+     1. Оркестратор выполняет проверки по скиллу `openspec-verify-change/SKILL.md` для **текущего среза** в `pre-apply` контексте. Переиспользовать YAML `snapshot` последнего `reports/verification-*.md`: `artifact_hashes`, `check_cache`, `invalidation_map`. По умолчанию — `verify_depth: incremental` (дельта границы среза). Расширять до `full` **только** при неизвестной границе дельты или сработавшем профильном триггере Layer 4/5. ЗНИ, принятые по старому полному прогону (срез S1 и ранее), остаются принимаемыми: отсутствие новых полей снимка = cache miss, не ошибка формата приёмки. Формат пользовательской приёмки (`S<N>.accept`, T-HANDOFF) **не** менять. **Без** длинного вывода в чат. Optional hygiene дельты среза (контекст/связи/простой язык) — в handoff одной строкой; не требовать полный независимый аудит постановки как способ per-slice integrity.
      2. Сохранить полный отчёт в `openspec/changes/<name>/reports/verification-YYYY-MM-DD.md` (если день уже использовался — суффикс `-2`, `-3`).
      3. **Чат:** если вердикт внутреннего прогона **NO-GO** — вывести **кратко** по `.cursor/rules/chat-output-budget.mdc` + ссылка на файл отчёта; **не** переходить к шагу приёмочного handoff, пока пользователь не обработает блокеры (как при обычном `/opsx:verify`).
      4. Если вердикт **GO** — **не упоминать** verify в сообщении пользователю.
@@ -446,6 +446,7 @@ Implement tasks from an OpenSpec change.
      Изменения tasks: <"нет" / "N задач добавлено" / "создан S<K>.fix">
      Связанный отчёт: reports/slice-acceptance-S<N>-YYYY-MM-DD.md (если принят)
      ```
+     **External Contract Ledger (возврат и подтверждение):** приёмка, возврат (`не принят`), корректировка или явное исключение обновляют **существующую** связанную запись `## External Contract Ledger` — новый обязательный артефакт не создавать. Если секции нет, slice-gate **сам** её не заводит (только явное внешнее условие из new/extend/verify). В точке первичного события дописать стабильные `primary_event_at` (ISO с поясом), `kind` (`customer-return` | `customer-correction`), тему (`EC-*` + axis) и `primary_event_id`; `source_fingerprint` = SHA-256(`id|kind|primary_event_id|primary_event_at`). Тема неоднозначна → один вопрос «существующая тема / новая тема»; не объединять по текстовой близости.
    - Show which task is being worked on
    - **Classify** (Task Dispatch table above) — announce type and executor
    - **Delegate** to the designated executor (agent or skill)

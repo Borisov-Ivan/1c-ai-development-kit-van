@@ -113,8 +113,8 @@ priority: 200
 | **explore** (Structured Investigation, шаг Decide) | blocking | Архитектор **обязателен**. AskQuestion пользователю: «Сработали триггеры [...]. Запустить архитектора?» без равноправной опции пропуска. Отказ только через явный пользовательский ввод с причиной; фиксируется в блоке «Постановка ЗНИ» как `declined: <reason>`. Если архитектор не запущен и отказ не зафиксирован — статус `required`, `/opsx:new` не рекомендовать |
 | **new** (Design Gate) | blocking | Без опции пропуска. Escape только через флаг `--skip-architect <причина>`, оставляющий явный аудит-след `.gate-override.yaml`. |
 | **verify** Layer 2.5 (Loop Detection) | blocking | При срабатывании петли приёмки (объективный триггер выше) → архитектор в режиме `deep-analysis` — редизайн-аудит петлевого среза; отчёт `reports/architecture-loop-redesign-*.md`; FAIL → NO-GO. Зеркало в extend §5a Триггер 3. См. `.cursor/skills/openspec-verify-change/SKILL.md` Layer 2.5. |
-| **verify** Layer 4 (Independent Challenge) | audit | Архитектор в режиме `design-challenge` — **независимый адверсариальный аудит** `proposal.md` ↔ `design.md`. Триггер: первый pre-apply прогон verify по ЗНИ или mtime `design.md` > `snapshot.last_challenge_at`. Отчёт `reports/design-challenge-YYYY-MM-DD.md`. Это **не дублирует** Architect Gate из new/explore: new даёт согласие на подход (auctorial), challenge даёт независимое подтверждение (adversarial). См. `.cursor/skills/openspec-verify-change/SKILL.md` Layer 4. |
-| **verify** Layer 5 (Implementation Readiness) | readiness | Архитектор в режиме `task-readiness` — оценка реализуемости задач. CRITICAL в отчёте verify при GAP. Не пересматривает архитектурный подход (это сделал Layer 4). |
+| **verify** Layer 4 (Independent Challenge) | audit | Архитектор в режиме `design-challenge` — **независимый адверсариальный аудит** `proposal.md` ↔ `design.md`. Триггер: первый pre-apply прогон; **изменившийся хэш архитектурной оси**; конфликт внешнего контракта с design; две жизнеспособные альтернативы; риск безопасности / ресурсов / прецедента. Один `mtime(design.md)` без смены входного хэша и без профильного триггера **не** создаёт новый полный вызов — переиспользуется прошлый `design-challenge-*.md`. Отчёт `reports/design-challenge-YYYY-MM-DD.md`. Это **не дублирует** Architect Gate из new/explore: new даёт согласие на подход (auctorial), challenge даёт независимое подтверждение (adversarial). См. `.cursor/skills/openspec-verify-change/SKILL.md` Layer 4. |
+| **verify** Layer 5 (Implementation Readiness) | readiness | Архитектор в режиме `task-readiness` — оценка реализуемости **изменившихся рискованных** задач (неизвестная композиция перехватов, ручная конфигурация, неизвестная сигнатура/контракт данных, новая межмодульная связь, неподтверждённый API). Без профильного триггера и при совпавшем хэше текста задач — переиспользовать прошлый отчёт, новый вызов не создавать. CRITICAL в отчёте verify при GAP. Не пересматривает архитектурный подход (это сделал Layer 4). |
 | **apply** (pre-flight) | readiness | Soft redirect на `/opsx:verify`. Если в change dir не найден ни один из `reports/verification-*.md` — предупреждение. **Не дублирует** проверку триггеров new/verify |
 | **1c-agent-delegation** (правка .bsl вне OpenSpec) | blocking | При срабатывании → onec-code-architect до реализации |
 | **extend** (Scope Coherence Audit) | audit | При срабатывании scope-drift триггеров (см. `openspec-extend-change/SKILL.md` п. 5a) → onec-code-architect в режиме `scope-coherence-audit`; отчёт `reports/architecture-extend-coherence-*.md` |
@@ -167,7 +167,7 @@ Architect Gate из new/explore (`design`-режим) и Independent Challenge �
 | Промпт | `mode=design`, Simplicity Check + альтернативы | `mode=design-challenge`, три обязательных вопроса (Q1 fit, Q2 optimality, Q3 fresh-eye) |
 | Закрывает Architect Gate? | да (для триггеров) | **нет** — это Layer 4 verify, отдельный gate |
 | Тип отчёта | `reports/architecture-*.md` | `reports/design-challenge-*.md` |
-| Триггер запуска | триггеры выше при создании ЗНИ | первый pre-apply verify или mtime(design.md) > snapshot.last_challenge_at |
+| Триггер запуска | триггеры выше при создании ЗНИ | первый pre-apply verify; изменившийся хэш оси design; профильный триггер D7. Не `mtime` без смены хэша |
 
 **Запрет.** Architect Gate из new/explore **не закрывается** файлом `design-challenge-*.md`, и наоборот — Layer 4 verify не считается выполненным по факту наличия `architecture-*.md`. Каждый gate ищет свой файл отчёта.
 
@@ -175,7 +175,7 @@ Architect Gate из new/explore (`design`-режим) и Independent Challenge �
 
 ## DESIGN REVIEW (качество постановки)
 
-Отдельный набор триггеров для оценки **качества артефактов** (не архитектурного подхода). Основной потребитель — `/opsx:verify` (Layer 5 — Implementation Readiness, `mode=task-readiness`). Apply не дублирует триггеры.
+Отдельный набор триггеров для оценки **качества артефактов** (не архитектурного подхода). Основной потребитель — `/opsx:verify` (Layer 5 — Implementation Readiness, `mode=task-readiness`). Apply не дублирует триггеры. Layer 5 в verify запускается **только** если сработал профильный триггер изменившихся рискованных задач (см. таблицу потребителей); иначе прошлый отчёт readiness переиспользуется.
 
 Триггеры (ANY → мягкая рекомендация через AskQuestion, не блокирующая):
 

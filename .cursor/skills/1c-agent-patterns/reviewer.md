@@ -17,6 +17,11 @@
  → эмитить QualityFlag=weak и Disposition=needs-confirm, не silent VERIFIED_OK.
  Tag design-prescribed при антипаттерне по постановке.
  Whitelist silent Evidence — runtime-SSOT `.cursor/agents/onec-code-reviewer.md` § DESIGN AUTHORITY.]
+
+## External Contract
+[Только затронутые EC-* из debug.md § External Contract Ledger, если секция есть и пересекает scope ревью.
+ assertion, axis, parity, подтверждённые отличия. Весь реестр не копировать.
+ Секции нет — блок опустить. Цитата design не подтверждает качество.]
 ```
 
 Prerelease-добавка (только `/release-review`): `as-designed` на quality weak **не** снимает Category 12 / release-hygiene без отдельного waive.

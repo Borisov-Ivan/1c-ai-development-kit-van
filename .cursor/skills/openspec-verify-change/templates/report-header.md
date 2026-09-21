@@ -37,7 +37,19 @@ snapshot:
     design.md: "YYYY-MM-DDTHH:mm:ss"
     tasks.md: "YYYY-MM-DDTHH:mm:ss"
     specs/<capability-folder>/spec.md: "YYYY-MM-DDTHH:mm:ss"
-  last_challenge_at: "YYYY-MM-DDTHH:mm:ss"  # mtime design.md на момент последнего успешного Layer 4
+  last_challenge_at: "YYYY-MM-DDTHH:mm:ss"  # ISO успешного Layer 4; сравнение оси — по artifact_hashes, не по mtime
+  artifact_hashes: {}
+  # SHA-256 нормализованного содержимого proposal/design/tasks/specs/** и структурных секций debug
+  external_contract_digest: "<sha256>"
+  # SHA-256 упорядоченных EC-*, их решений и отпечатков первичных событий
+  decision_fingerprints: {}
+  # ключ = id закрытого решения; значение = SHA-256(id + closed_at + source)
+  rules_versions: {}
+  # ключ = путь файла правила; значение = SHA-256 нормализованного файла
+  check_cache: {}
+  # ключ результата: check_id + scope_anchor + ordered_input_hashes + rules_version + evidence_digest
+  invalidation_map: {}
+  # check_id → причина инвалидации (артефакт / EC-* / версия правила)
 ---
 ```
 
@@ -72,10 +84,11 @@ snapshot:
 
 ### `snapshot.last_challenge_at`
 
-ISO-метка времени модификации `design.md` на момент последнего **успешного** прогона Layer 4 (вердикт APPROVE или CHALLENGE с принятым к работе через `--from-verify`). Используется на следующем verify для решения, нужен ли challenge заново:
+ISO-метка момента последнего **успешного** прогона Layer 4 (вердикт APPROVE или CHALLENGE с принятым к работе через `--from-verify`). Решение «нужен ли challenge заново» — по **хэшу архитектурной оси** в `artifact_hashes`, не по сравнению одного `mtime` с этой меткой:
 
-- Если `mtime(design.md) > last_challenge_at` → Layer 4 запускается.
-- Если `mtime(design.md) <= last_challenge_at` → Layer 4 пропускается (`layer_status.layer_4_independent_challenge: SKIPPED-novelty`).
+- Хэш оси изменился относительно снимка последнего успешного Layer 4 → Layer 4 запускается.
+- Хэш оси совпал и нет профильного триггера → Layer 4 пропускается (`layer_status.layer_4_independent_challenge: SKIPPED-novelty`).
+- `mtime(design.md)` изменился, хэш тот же → вызов **не** создаётся.
 
 При первом verify по ЗНИ `last_challenge_at` отсутствует → Layer 4 обязателен.
 
@@ -101,7 +114,46 @@ ISO-метка времени модификации `design.md` на момен
 
 ### `snapshot.artifacts_mtime`
 
-ISO-8601 строка до секунды для `proposal.md`, `design.md`, `tasks.md` и каждого `openspec/changes/<name>/specs/**/*.md`. Используется фильтром новизны (`silent_ok` / `progress_only` / `full_run`) на следующем прогоне.
+ISO-8601 строка до секунды для `proposal.md`, `design.md`, `tasks.md` и каждого `openspec/changes/<name>/specs/**/*.md`. **`mtime` решает только**, нужно ли пересчитать хэш содержимого; сравнение новизны и кэш — по `artifact_hashes`, не по одной метке времени.
+
+### Нормализация и ключ кэша (SSOT)
+
+Нормализация перед SHA-256: перевод перевода строк в LF, снятие хвостовых пробелов, **включая** YAML front-matter файла. Старый snapshot без `artifact_hashes` / `check_cache` — **cache miss** (полный пересчёт затронутых контролей, не ошибка).
+
+**Ключ результата** `check_cache`:
+
+```text
+check_id + scope_anchor + ordered_input_hashes + rules_version + evidence_digest
+```
+
+`rules_versions[path]` = SHA-256 нормализованного файла правила. `decision_fingerprints[id]` = SHA-256 от `id + closed_at + source`. `external_contract_digest` = SHA-256 упорядоченных `EC-*`, их `parity`/`confirmation` и `source_fingerprint` первичных событий.
+
+### Канонический перечень контролей
+
+| `check_id` | Входные артефакты | Файлы правил |
+|---|---|---|
+| `hygiene-checkboxes` | `tasks.md` | этот скилл § Layer 1 |
+| `slice-gate-markers` | `tasks.md` | `.cursor/rules/vertical-slices.mdc` |
+| `user-task-contract` | `tasks.md` | `.cursor/rules/vertical-slices.mdc` § User Task Contract |
+| `external-contract-schema` | `debug.md` § External Contract Ledger | этот скилл § Load artifacts |
+| `external-validity` | `debug.md` ledger + реестр; `design.md` § «Решения verify»; `reports/slice-acceptance-S*-*.md` | этот скилл § External validity |
+| `scenario-coverage` | `specs/**`, `design.md` ## Slices, `tasks.md` | `.cursor/rules/vertical-slices.mdc`, `.cursor/rules/openspec-specs-gate.mdc` |
+| `code-truth` | backticks в design/tasks/specs/debug | `.cursor/rules/code-truth-gate.mdc` |
+| `precedent-regression` | `specs/**`, archive | `.cursor/rules/precedent-regression-gate.mdc` |
+| `loop-detection` | `debug.md` Slice Gate / Extend | `.cursor/rules/vertical-slices.mdc` § Loop Detection |
+| `problem-solution-trace` | `proposal.md`, `specs/**`, `tasks.md` | этот скилл § Layer 3 |
+| `design-challenge` | `proposal.md`, `design.md`, `specs/**`, `external_contract_digest` | `.cursor/rules/architect-gate.mdc` |
+| `task-readiness` | `tasks.md`, `design.md` (изменившиеся задачи) | `.cursor/rules/architect-gate.mdc` |
+
+### Точечная инвалидация
+
+1. Новое структурированное внешнее событие → `external-validity`, связанная запись `EC-*`, детектор повторения; `design-challenge` — только при конфликте с design.
+2. Изменение одного Scenario → его связи, внешний контракт этой оси, семантика связанного среза.
+3. Изменение одной задачи → её `task-readiness`, зависимые задачи, связанный срез только если изменился результат приёмки.
+4. Изменение только отметки `[x]`/`[ ]` → прогресс и проверка реализации, не архитектурный план.
+5. Изменение версии правила → только контроли, объявившие этот файл в таблице выше.
+
+Недоказанная локальность → консервативно инвалидировать **затронутый срез**, не весь пакет. Неизвестная граница → `verify_depth: full`.
 
 ## Что хранится только в YAML и НЕ дублируется в чат
 

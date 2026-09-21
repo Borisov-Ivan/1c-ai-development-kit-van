@@ -329,6 +329,7 @@ Architect обязателен, если:
    - **`Architect Gate:`** — **обязательное** поле в каждой секции `## Extend —`. Значение: либо ссылка на отчёт (`reports/architecture-extend-*.md` / `architecture-extend-coherence-*.md` / `architecture-loop-redesign-*.md`), либо одно из `не вызывался` / `не требовался` / `declined` / `—`. Поле — детерминированный вход счётчика **M** Триггера 2 (§5a); без него M недосчитывает раунды без архитектора.
    - ссылки на отчёты architect/explorer;
    - следующий шаг.
+6. **External Contract Ledger (user-extend, первичное событие):** новое **явное** требование заказчика или **явно принятый** референс из подтверждённого брифа → запись в `## External Contract Ledger` (создать секцию только при первом таком условии). Обычное уточнение, исследовательский вывод и `donor` **не** повышаются автоматически. Поля: `source`, `authority`, `external_contract_id` (`EC-*`), дата, `primary_event_id`, `primary_event_at`, `source_fingerprint` (канон — verify § Load artifacts). Authority явного указания **не** понижать без решения пользователя. Неоднозначная тема → один вопрос классификации. `repair-from-verify` этот пункт **не** выполняет.
 
 ### 6a. Verify decision ledger (после user-extend `--from-verify` по decision)
 
@@ -343,14 +344,19 @@ Architect обязателен, если:
        summary: "<проза>"
        closed_at: "YYYY-MM-DD"
        source: verify-user-answer
+       confirmed_by: user
+       authority: customer-direct | accepted-reference   # только если развилка несла внешнее условие
+       external_contract_id: EC-*                        # парный id темы; иначе поля не писать
    open_decision_id: null
    decision_round: <N+1>
    verify_depth: incremental
    assumptions_accepted: []
    ```
+   Если закрываемая развилка — внешнее условие: **обязательны** `authority`, `external_contract_id`, `confirmed_by: user`. Обычная workflow-развилка эти поля **не** получает (детектор verify молчит).
 2. **Обязательно** добавить зеркало в `design.md` § **`## Решения verify (зафиксировано)`** — 1–2 строки прозой **без** `id:` (не дублировать параграфы из `## Decisions`). Это **человекочитаемый источник**, из которого `/opsx:apply` воспроизводит решение прозой (apply не читает YAML-ledger для чата). Пропуск этого шага оставит apply без прозы и вернёт голый код развилки — недопустимо.
 3. Удалить из `open_known_questions` (если велся в debug или последнем verification snapshot) темы, закрытые этим decision.
 4. Internal mapping: парсинг ответа пользователя → `decision_id` + вариант; при неоднозначности — один уточняющий вопрос **прозой**.
+5. **External Contract Ledger:** материализовать или обновить связанную тему `EC-*` (schema — `openspec-verify-change/SKILL.md` § Load artifacts): `primary_event_id`, `primary_event_at`, `source_fingerprint`, `confirmation`/`parity` по ответу. `repair-from-verify` эти поля **не** пишет и **не** ставит `confirmed_by: user`.
 
 **repair-from-verify:** ledger **не** меняет `decision_round`; только технические правки design/tasks.
 

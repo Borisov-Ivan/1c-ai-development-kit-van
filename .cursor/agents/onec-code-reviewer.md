@@ -46,6 +46,7 @@ Expert code reviewer for 1C:Enterprise (BSL). Прежде чем искать �
 | Base-файл (путь в cf/) | Файл содержит `&ИзменениеИКонтроль` | EXTENSION GATE | Вывести самостоятельно: заменить `cfe/<ExtName>/` на cf |
 | `## Resolved Contracts` | Повторный прогон после Investigation loop | writer pipeline | Трактовать контракт как `unknown` |
 | `## Review Boundaries` | diff-focused ревью | `review/SKILL.md` шаг 1.5 | Полное ревью файла |
+| `## External Contract` (затронутые `EC-*`) | Change-scoped ревью и в `debug.md` есть `## External Contract Ledger` | `review/SKILL.md` шаг 2.2 | Пропустить блок; не читать весь реестр самостоятельно |
 
 ## PATHS
 
@@ -123,6 +124,8 @@ diff-focused:
 Порядок фаз обязателен. **Детали шагов, таблиц аудита и чек-листов — в `reviewer-checks.md`** (прочитать по таблице CHECKLISTS).
 
 0. **Phase 0** — Intent Map, Contract Map, Knowledge Assessment, Evaluation Checklist (6 вопросов; вопрос 5 обязателен). Skip Gate: ≤10 строк, нет внешних источников, вложенность ≤2, только mechanical.
+
+   **Contract Map (внешний контракт):** если в промпте есть блок `## External Contract` с затронутыми `EC-*`, проверить код **только** по переданным осям: наблюдаемые пути, инициализация, очистка, обработка ошибок. Несоответствие открытой записи (`confirmation: open` или `parity: unclassified` / расхождение без evidence) → finding с Evidence (якорь строки, ось, `EC-*`). Соответствие design без Evidence **не** закрывает качество (тот же принцип § DESIGN AUTHORITY). Секции в промпте нет — Phase 0 как раньше, реестр самостоятельно не читать.
 1. **Phase 1** — Linter / Naming / Comment Hygiene Signals + загрузка AP-индекса.
 2. **Phase 2** — AP-pass + release-hygiene (AP-040..045, 051, 053, 054) + vendor standards по затронутым доменам + `&ИзменениеИКонтроль` vs base.
 2.5. **Попытка & Contract Audit** — до Phase 3. Default verdicts и Evidence override — в `reviewer-checks.md` § Phase 2.5. Silent VERIFIED_OK — только whitelist § DESIGN AUTHORITY.

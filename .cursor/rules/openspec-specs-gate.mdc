@@ -70,6 +70,8 @@ Glob по `openspec/changes/<name>/specs/**/*.md`. Если 0 файлов и а
 
 **Связь с vertical slices:** implementation-level Requirement/Scenario часто порождает foundation-slice с gate (QC `slice-not-vertical`, `slice-foundation-with-gate`). Не маппить 1:1 Requirement → Slice.
 
+**Принятые оси референса (внешний контракт):** если в `debug.md` § `## External Contract Ledger` есть записи `authority: accepted-reference` с объявленными `topic.axis`, каждая такая ось SHALL иметь наблюдаемый контракт в spec (`WHEN`/`THEN` без implementation-leak) **или** свежо подтверждённое отличие (`parity: diverges` | `not-applicable` с `confirmed_by: user`). Правило опирается на schema записи, `authority`, расширяемую `axis` (`custom:<slug>`) и `EC-*`; предметные оси конкретного проекта в гейт не вносить. `donor` и `internal` **не** делают референс полным эталоном без повышения `authority`. Отсутствие реестра — не дефект наблюдаемости.
+
 ## ИСКЛЮЧЕНИЯ
 
 - Пользователь явно сказал «без спеки» / «skip specs».

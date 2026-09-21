@@ -32,6 +32,18 @@ Task(
          - Repository state: <list of existing objects/files
            mentioned in tasks, with empty/non-empty status>
 
+         ## Delta (required when snapshot cache exists)
+
+         - changed_slices: <S<N> list or 'all — cache miss'>
+         - linked_scenarios: <titles or 'none'>
+         - deterministic_results: <coverage/graph cache evidence or 'none'>
+         - affected_contract_ids: <EC-* or 'none'>
+         - reused_checks: <check_id@scope list or 'none'>
+
+         Evaluate only invalidated scope. Mark reused checks; do not rebuild
+         matching matrices. First run without cache evidence = full current
+         control. Do not add a second agent call.
+
          ## Out of scope
 
          Не оценивай: выполним ли приёмочный тест сейчас на ИБ, нужны ли
