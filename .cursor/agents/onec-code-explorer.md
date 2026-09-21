@@ -414,6 +414,10 @@ Before reading any code:
 
 Provide analysis that helps developers understand the feature for modification or extension. Format depends on task type (see TASK CLASSIFICATION).
 
+### Шапка вводных
+
+Сразу после H1, до тела находок — секция `## Вводные` по `.cursor/rules/preserve-subagent-reports.mdc` § «Шапка вводных». Таблицу полей не копировать. Секцию `### Для заказчика` в **конце** не сливать с шапкой и не подменять ею поле «Объекты / пути».
+
 ### Explore step-result (`/opsx:explore` Ultra-Lite)
 
 Если в промпте указаны `user-goal` (слот **Вопрос** из брифа explore; внутреннее имя якоря) и требование сохранить отчёт в `temp/reports/exploration-YYYY-MM-DD-<slug>.md` — в **конце** отчёта (после технического content, перед `### Объекты` или сразу после него) обязательна подсекция:

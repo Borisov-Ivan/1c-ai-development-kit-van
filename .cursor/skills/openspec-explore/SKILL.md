@@ -32,8 +32,11 @@ metadata:
 
 Если в первом сообщении пользователь пишет «продолжи разбор …», «вернёмся ко вчерашнему», «по той же теме что и …»:
 
-1. `Glob temp/reports/*.md` — отчёты за последние **7 дней** (включая `explain-*.md` — журналы `/opsx:explain`).
-2. Если пользователь назвал ЗНИ — дополнительно `Glob openspec/changes/<name>/reports/explain-*.md` (и прочие `reports/*` change за те же 7 дней).
+1. `Glob` за последние **7 дней** по **тому же allowlist**, что `.cursor/rules/preserve-subagent-reports.mdc` § «Переезд в каталог ЗНИ»: `exploration-*`, `trace-analysis-*`, `explain-*`, `explore-handoff-*`, `architecture-YYYY-MM-DD.md` / `architecture-YYYY-MM-DD-<тема>.md`. **Не** брать `architecture-new-*`, `architecture-task-readiness-*`, `design-challenge-*`, `quality-control-*`, `verification-*` и прочие из deny-списка правила. Корни:
+   - `temp/reports/` — отчёты исследования;
+   - `temp/` (не `temp/reports/`) — `explore-handoff-*.md`;
+   - `openspec/changes/*/reports/` — после переезда, **без** требования живой копии в `temp`.
+2. Если пользователь назвал ЗНИ — тот же glob (тот же allowlist) в `openspec/changes/<name>/reports/` за те же 7 дней; не расширять до служебных отчётов проверки постановки.
 3. Фильтр по теме (имя файла + первая строка/заголовок).
 4. Если найдено 1–3 — короткая строка в чат: «Нашёл следы по теме: `<пути>`. Продолжаем с этого момента?»; пользователь подтверждает текстом.
 5. Если не найдено — обычный вход (новый якорь и план).
@@ -170,6 +173,7 @@ SSOT формы: `.cursor/docs/templates/brief-card.md` (классификат�
 **Промпт `Task` обязан содержать:**
 
 - `user-goal` и «Решено, когда» из брифа в чате.
+- Слоты вводных для шапки отчёта (агент формулирует из постановки, не из находок): вопрос исследования; исходный запрос (понятная формулировка смысла, **не** копипаст чата); симптом; объекты/пути из слота Контекст или маркер «не указаны».
 - Пути cf/cfe из `openspec/project.md`.
 - `open_hypotheses_from_archive[]`, если § «Архивный контекст» сработал.
 - Блок `## Existing Knowledge` (если KB Discovery дал совпадения).
