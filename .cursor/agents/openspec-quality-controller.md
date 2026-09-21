@@ -36,6 +36,18 @@ Read and apply these references before evaluating:
 
 Do not duplicate or invent phase-gate logic. Phase classification P0-P4 is deprecated.
 
+## INPUT (delta from orchestrator)
+
+The orchestrator prompt MAY include a delta block. When present, treat it as authoritative for scope:
+
+- `changed_slices` — evaluate only these slices plus their linked scenarios.
+- `linked_scenarios` — Scenario titles already bound by deterministic Layer 3 / coverage checks.
+- `deterministic_results` — precomputed graphs, coverage matrices, cache evidence. Do **not** rebuild a matching matrix or dependency graph when hashes match.
+- `affected_contract_ids` — `EC-*` in scope; ignore the rest of any ledger.
+- `reused_checks` — `check_id@scope` already PASS/WARNING; do not re-derive; mark **reused** in the report.
+
+New findings only for **invalidated** scope. If the prompt has no delta block (first run / cache miss), evaluate the full current plan as today.
+
 ## MODE DETECTION
 
 1. If `tasks.md` contains `^# Срез S\d+`, evaluate in slice mode.
@@ -146,9 +158,9 @@ Group recommendations by automatic fix vs decision required.
 
 1. Read canonical references and prompt-provided artifacts.
 2. Detect slice or legacy mode.
-3. Parse slices, metadata, tasks, acceptance tests, and gates.
-4. Cross-reference specs scenarios against slice metadata and acceptance tasks.
-5. Build the dependency graph.
-6. Evaluate checklist criteria.
-7. Produce the report in the output format.
+3. Parse slices, metadata, tasks, acceptance tests, and gates — **invalidated slices first**; skip unchanged slices listed in `reused_checks`.
+4. Cross-reference specs scenarios against slice metadata and acceptance tasks for linked/changed scenarios only when a delta is provided.
+5. Build the dependency graph only for edges touching changed slices; reuse cached graph otherwise.
+6. Evaluate checklist criteria on invalidated scope; copy reused verdicts for the rest.
+7. Produce the report in the output format. Explicitly list reused scope vs new findings.
 8. Save result to the path specified in the prompt, if one is provided.

@@ -13,7 +13,7 @@ metadata:
 
 ## Принципы
 
-1. **Пять слоёв, в строгом порядке.** Каждый слой имеет единственную цель; пропуск/слияние слоёв запрещены, кроме явного триггера Layer 4.
+1. **Пять слоёв, в строгом порядке.** Каждый слой имеет единственную цель; слияние слоёв запрещено. Пропуск — только по каскаду: дешёвый блокер завершает прогон до не относящейся к нему эскалации; Layer 4 / Layer 5 — только по профильному триггеру или смене хэша оси.
 2. **Бинарный вердикт (internal → chat).** Internal ledger: `GO` / `NO-GO`. В чат — формулировки verdict-card (не сырые `GO`/`NO-GO`, не «WARNING/SUGGESTION», не «PASS/FAIL»).
 3. **Без скидок по объёму.** Глубина проверки одинакова для маленьких и больших ЗНИ — одна сломанная задача может остановить пользователя так же, как 25. **Исключение:** режимы `verify_depth` (`incremental`, `lite`) с guardrails — см. § «Verify depth» ниже; не ослабляют adversarial Layer 4 на первом прогоне.
 4. **Verify чинит repair-класс сам.** Содержательные правки scope — через user `/opsx:extend`. Детерминированные пробелы постановки (карта repair в §2.6 `opsx-output-style.md`) — **internal Repair Loop** внутри verify, без user-facing extend и без «Подтвердить?».
@@ -22,20 +22,27 @@ metadata:
 
 ## Архитектура (5 слоёв)
 
+Каскад (строго): снимок и хэши → детерминированная дельта → гигиена → внешняя валидность → детерминированные связи затронутого scope → QC только изменившихся срезов → петля приёмки → трассировка Why при cache miss → профильный challenge / readiness **только** по триггеру. Дешёвый блокер (гигиена не блокирует; внешняя валидность и детерминированный FAIL) **завершает прогон** до QC и профильной эскалации. Обычный повтор: ноль или один профильный вызов.
+
 ```mermaid
 flowchart TD
-  start[verify start] --> L1[Layer 1: Hygiene auto-fixes]
-  L1 --> L2[Layer 2: Internal Coherence QC + code-truth]
+  start[verify start] --> Snap[snapshot hashes delta]
+  Snap --> L1[Layer 1: Hygiene auto-fixes]
+  L1 --> ExtVal[External validity]
+  ExtVal -->|cheap blocker| Stop[NO-GO stop before QC and profile]
+  ExtVal -->|PASS| L2[Layer 2: Internal Coherence QC changed slices]
   L2 --> L25[Layer 2.5: Loop Detection acceptance loop]
   L25 -->|петля >= max и нет redesign| LoopNoGo[NO-GO: architect deep-analysis redesign]
   L25 -->|нет петли| L3[Layer 3: Problem-Solution Trace Why-Req-Tasks]
-  L3 --> Trigger{Layer 4 нужен?}
-  Trigger -->|первый pre-apply OR mtime design.md - last_challenge_at| L4[Layer 4: Independent Challenge architect design-challenge]
-  Trigger -->|design не менялся| Skip[Skip L4]
-  L4 --> L5
-  Skip --> L5
-  L5[Layer 5: Implementation Readiness architect task-readiness]
+  L3 --> Trigger{Layer 4: axis hash or profile?}
+  Trigger -->|first pre-apply OR axis hash changed OR D7 trigger| L4[Layer 4: Independent Challenge]
+  Trigger -->|axis hash same AND no profile trigger| SkipL4[Skip L4 reuse]
+  L4 --> L5trig{Layer 5: changed risky tasks?}
+  SkipL4 --> L5trig
+  L5trig -->|yes| L5[Layer 5: Implementation Readiness]
+  L5trig -->|no| SkipL5[Skip L5 reuse]
   L5 --> Verdict{Все слои PASS?}
+  SkipL5 --> Verdict
   Verdict -->|Да| GO[GO can apply]
   Verdict -->|Layer 3 / Layer 4 doubts| NoGo[NO-GO discuss explore/extend]
   Verdict -->|Layer 1/2/5 only| Hygiene[GO with auto-fixes briefly described]
@@ -76,16 +83,18 @@ Verify не правит scope артефактов. Если в запросе 
 
 | Условие | `verify_depth` | Слои |
 |---------|----------------|------|
-| Первый verify / `decision_round=0` / смена оси design / REJECT security·correctness | `full` | L1–L5 (независимый аудит) |
-| Повторный verify, design не менялся, нет открытой развилки | `lite` | L2 + L5; L4 `SKIPPED-lite` — только исполнимость |
-| После **user-extend** по decision (`decision_round>0`) | `incremental` | L1 diff + L4 targeted + L5 если менялся tasks |
-| **Между срезами** (после приёмки `S<N>.accept` / slice-gate из apply) **и** design.md не менялся с последнего challenge | `incremental` | L2 + L5 по затронутому срезу; L4 `SKIPPED-novelty` |
+| Первый verify / `decision_round=0` / смена оси design (хэш оси) / REJECT security·correctness / неизвестная граница дельты | `full` | все контроли заново; кэш игнорируется |
+| Повторный verify, входы совпали, нет открытой темы высокого авторитета | `lite` | действующие guardrails; независимый аудит постановки переиспользуется (`SKIPPED-lite`) |
+| После **user-extend** по decision (`decision_round>0`) или дельта с доказанной локальностью | `incremental` | пересчёт `invalidation_map`; остальное из `check_cache` |
+| **Между срезами** (после приёмки `S<N>.accept` / slice-gate из apply) **и** хэш архитектурной оси не менялся | `incremental` | invalidated scope текущего среза; L4 только по профильному триггеру |
 
-**Guardrails `lite` (авто):** недоступен при `open_decision_id != null`, `decision_round > 0`, или открытой развилке в последнем отчёте. В чате: «проверена исполнимость без повторного независимого аудита постановки».
+**Сопоставление с кэшем:** `full` — пересчитать все `check_id`, `check_cache` не читать. `incremental` — пересчитать ключи из `invalidation_map`, совпавшие ключи `check_cache` переиспользовать. `lite` — как incremental плюс пропуск независимого аудита постановки. Прежний тихий путь (`silent_ok`) = **полное совпадение** `artifact_hashes` + `external_contract_digest` + `rules_versions` + `decision_fingerprints`.
 
-**Guardrails `incremental`:** только после user-extend по decision **или** на границе среза (slice-gate); **не** после internal Repair Loop (repair → `verify_depth: full`). Если `design_mtime` > `last_challenge_at` — incremental на границе среза недоступен, нужен `full` (L4 обязателен). `/opsx:apply` на slice-gate ссылается на этот режим вместо полного прогона.
+**Guardrails `lite` (авто):** недоступен при `open_decision_id != null` (хотя бы одна открытая тема высокого авторитета), `decision_round > 0`, или открытой развилке в последнем отчёте. В чате: «проверена исполнимость без повторного независимого аудита постановки».
 
-**Ось архитектуры (лаконичность, D5):** полный независимый аудит (L4 full) обязателен при **смене оси** (новый архитектурный рычаг / REJECT security·correctness / явный redesign), а **не** при каждом `mtime(design.md)` после APPROVE закрытой оси. После GO + закрытая развилка + ось не менялась → default `lite` / `incremental` (см. таблицу). **Не ужимать:** первый full по ЗНИ; петля приёмки среза; аудит при смене оси или REJECT.
+**Guardrails `incremental`:** после user-extend по decision, на границе среза (slice-gate) **или** когда дельта локализована картой инвалидации; **не** после internal Repair Loop (repair → `verify_depth: full`). Если хэш архитектурной оси (нормализованный `design.md` § Decisions / Behavior Contract, не голый `mtime`) изменился относительно `last_challenge_at` — incremental на границе среза недоступен, нужен `full` (L4 обязателен). `/opsx:apply` на slice-gate ссылается на этот режим вместо полного прогона. Недоказанная локальность → расширить до затронутого среза; неизвестная граница → `full`.
+
+**Ось архитектуры (лаконичность, D5):** полный независимый аудит (L4 full) обязателен при **смене оси** (новый архитектурный рычаг / REJECT security·correctness / явный redesign / изменившийся хэш оси), а **не** при каждом `mtime(design.md)` после APPROVE закрытой оси. После GO + закрытая развилка + ось не менялась → default `lite` / `incremental` (см. таблицу). **Не ужимать:** первый full по ЗНИ; петля приёмки среза; аудит при смене оси или REJECT.
 
 **Repair-класс:** точечный re-check слоёв согласованности/готовности без полного пакета независимых аудитов «с нуля». Жёстче насыщение развилок (`decision_round_max` / earlier saturated) — не разгонять форум гипотез через серию full verify.
 
@@ -97,36 +106,51 @@ Verify не правит scope артефактов. Если в запросе 
 
 ### 2. Load artifacts
 
-Прочитать (с фиксацией mtime для snapshot):
+Прочитать (mtime — только признак «нужно ли пересчитать хэш»; решение по слоям — по `artifact_hashes` и карте инвалидации):
 
 - `openspec/changes/<name>/proposal.md`
-- `openspec/changes/<name>/design.md` (mtime → `design_mtime` для решения по Layer 4)
+- `openspec/changes/<name>/design.md` (хэш нормализованного содержимого / оси Decisions·Behavior Contract → Layer 4; не голый mtime)
 - `openspec/changes/<name>/tasks.md`
 - `openspec/changes/<name>/specs/**/*.md`
-- `openspec/changes/<name>/debug.md` (если есть) — **обязательно** секция `## Verify decision ledger` (runtime SSOT closed decisions)
+- `openspec/changes/<name>/debug.md` (если есть) — секция `## Verify decision ledger` (runtime SSOT closed decisions); секция `## External Contract Ledger` — **если есть** (не создавать при отсутствии)
 - `openspec/changes/<name>/reports/_manifest.yaml` (если есть)
 - `openspec/project.md`
 
 **Decision ledger (agent-only):** если в `debug.md` есть `## Verify decision ledger`, прочитать YAML-блок (`closed_decisions`, `decision_round`, `open_decision_id`, `assumptions_accepted`). Если секции нет — инициализировать пустой ledger в памяти оркестратора; при Save report синхронизировать в snapshot. Также прочитать design § «Решения verify (зафиксировано)» — UX-mirror для промпта L4 и блока «Уже зафиксировано» в чате.
 
+**External Contract Ledger (schema, SSOT записи):** если секции `## External Contract Ledger` **нет** и нет нового структурированного события из закрытого перечня § External validity — сохранить прежний полный прогон: **не** создавать секцию, **не** поднимать блокер, вопрос или информационное сообщение. `donor` и `internal` сами по себе **не** блокируют.
+
+Если секция есть — прочитать YAML `external_contract:` и валидировать каждую запись по фиксированному контракту (поля из design D1; свободная проза не дополняет схему):
+
+- **id:** `EC-*` (стабилен внутри ЗНИ; `open_decision_id` пишет тот же идентификатор).
+- **Идентичность темы:** `topic.capability + topic.anchor + topic.axis + topic.reference`. Автообъединение по текстовой близости **запрещено**.
+- **axis:** стартовый словарь `actor` | `trigger` | `timing` | `visible-result` | `absence` | `side-effect` | `error-recovery` либо `custom:<slug>`. Предметные оси конкретного проекта в движок не вносить.
+- **source:** `path#anchor` **или** `entry-point:<command>@<ISO>` (ISO с часовым поясом). Для `entry-point:*` команда-источник обязана оставить зеркало в `debug.md`; проверка читает зеркало, не историю чата.
+- **authority:** `customer-direct` | `accepted-reference` | `donor` | `internal`.
+- **decision.parity:** `matches` | `diverges` | `not-applicable` | `unclassified`.
+- **confirmation:** `open` | `confirmed` | `waived` | `superseded`. Для `confirmed` / `waived` обязательны `confirmed_at` и `confirmed_by`. Для `customer-direct` и объявленной оси `accepted-reference` допустимо только `confirmed_by: user`.
+- **signals[]:** `id`, `kind` (`customer-return` | `customer-correction` | `reference-evidence` | `policy-change`), `primary_event_id`, `primary_event_at`, `source_fingerprint`. Отпечаток канонически: SHA-256 от `id|kind|primary_event_id|primary_event_at` (разделитель `|`, без хвостовых пробелов). Пересказ с тем же `primary_event_id` — не новый сигнал.
+
+Невалидная запись (нет id / authority / axis / source / идентичности темы) → не угадывать поля; трактовать как незарегистрированное структурированное событие § External validity, если источник входит в закрытый перечень.
+
 ### 3. Determine mode
 
 Grep `tasks.md` на `^- \[[ ]\]` — если найдено хотя бы одно совпадение, `verify_mode = pre-apply`; иначе `post-apply`.
 
-### 4. Novelty Check (фильтр повторных запусков)
+### 4. Novelty Check (детерминированная дельта)
 
-1. Найти последний `reports/verification-*.md` (по дате в имени файла) и прочитать его YAML `snapshot`.
-2. Сравнить с текущим состоянием:
-   - `accepted_tasks` — список `[x]` в `tasks.md`. Если множество совпало → флаг `accepted_tasks: same`.
-   - `artifacts_mtime` — каждый файл из `proposal/design/tasks/specs` имеет ту же ISO-метку, что в snapshot → флаг `artifacts: same`.
-   - `last_challenge_at` ≥ `design_mtime` → флаг `challenge: actual`.
-3. Если **все три** флага `same/actual` **И** в текущем запросе пользователя нет содержательных вопросов (был только триггер `/opsx:verify <name>`) — путь **`silent_ok`**:
+1. Найти последний `reports/verification-*.md` (по дате в имени файла) и прочитать YAML `snapshot`. Нет `artifact_hashes` / `check_cache` → cache miss, дальше как с пустым кэшем.
+2. Для каждого входного артефакта: если `mtime` не изменился — переиспользовать сохранённый хэш; если изменился — пересчитать SHA-256 нормализованного содержимого (рецепт — `templates/report-header.md`). Не считать новизну по одному `mtime`.
+3. Построить дельту: изменившиеся `artifact_hashes`, `external_contract_digest`, `decision_fingerprints`, `rules_versions`. Заполнить `invalidation_map` по канонической таблице того же шаблона.
+4. Если **все** хэши входов, дайджест внешнего контракта, отпечатки решений и версии правил совпали **И** в запросе нет содержательных вопросов (только `/opsx:verify <name>`) — путь **`silent_ok`** (полное совпадение входов):
    - **Не запускать слои 1–5.**
    - **Не создавать новый файл отчёта.**
    - Прочитать тело последнего `reports/verification-*.md` (не только YAML).
-   - **Не опираться на историю чата** («вы уже подтвердили», prior turns) — только YAML `snapshot`, mtime артефактов и тело последнего отчёта.
-   - В чат — «тихий» вариант `.cursor/skills/openspec-verify-change/templates/chat-summary.md`: **1a**, если прошлый вердикт «можно apply»; **1b-decision**, если есть открытая развилка; **1b-repair**, если только repair-блокеры — запустить **Repair Loop** (без сообщения в чат), затем один финальный ответ. Запрещено выводить список «Что доработать» пунктами в чате.
-4. Если хотя бы один флаг разошёлся — продолжить со слоя 1.
+   - **Не опираться на историю чата** — только YAML `snapshot`, хэши и тело последнего отчёта.
+   - В чат — «тихий» вариант `.cursor/skills/openspec-verify-change/templates/chat-summary.md`: **1a**, если прошлый вердикт «можно apply»; **1b-decision**, если есть открытая развилка; **1b-repair**, если только repair-блокеры — запустить **Repair Loop** (без сообщения в чат), затем один финальный ответ.
+5. Если разошлось — `verify_depth` из §1c: `full` игнорирует кэш; `incremental` пересчитывает только invalidated `check_id` и переиспользует остальное `check_cache`; недоказанная локальность → затронутый срез; неизвестная граница → `full`.
+
+Записать `artifact_hashes`, `invalidation_map` и попадания кэша в snapshot нового отчёта.
 
 ### Layer 1 — Гигиена артефактов (тихая, авто-исправление)
 
@@ -157,13 +181,41 @@ Layer 1 **никогда** не блокирует — только правит
 
 **Цель:** артефакты не противоречат друг другу.
 
+**2.0. External validity (ранняя остановка, до QC и профильной эскалации)** — дешёвый детерминированный контроль. Блокер входит в `layer_2_internal_coherence: FAIL` с классом **decision**; отдельный статус слоя **не** вводится. `decision_round_max` / GO-saturated этот блокер **не** снимают. Запрет `lite` при `open_decision_id != null` — тот же существующий guardrail §1c, второй механизм не добавлять.
+
+Закрытый перечень структурированных источников (даты сравнивать; авторитет по свободной прозе **не** угадывать). Записи `## Verify decision ledger` учитывать **только** при наличии и `authority`, и `external_contract_id`:
+
+1. `debug.md` § `Slice Gate Decisions`: `не принят`, `inside-slice rework` или `стоп`;
+2. `debug.md` § `Extend —`: источник и изменение, явно переданные пользователем;
+3. `debug.md` § `Verify decision ledger`: новый ответ пользователя только с `authority: customer-direct | accepted-reference` и `external_contract_id: EC-*`;
+4. `reports/slice-acceptance-S<N>-*.md`: `Primary acceptance: fail`;
+5. `design.md` § «Решения verify (зафиксировано)»: только зеркало с тем же `external_contract_id`.
+
+Тела прочих отчётов, `_manifest.yaml`, свободная проза proposal/design и семантическое сходство **не** входы.
+
+**Блокеры** (каждый указывает тему, ось и источник; чат — прозой по `decision-block.md`, не сырыми кодами):
+
+| Условие | Алерт | Что нужно |
+|---|---|---|
+| Открытая запись `customer-direct` или открытая объявленная ось `accepted-reference` (`confirmation: open` либо исключение старше последнего уникального сигнала) | `external-contract-open` | Решение заказчика по этой теме |
+| Заявленная ось `accepted-reference` с `parity: unclassified` | `external-contract-unclassified-axis` | Классифицировать ось (`matches` / `diverges` / `not-applicable`) и свежее подтверждение |
+| Новое событие из перечня выше, которого нет в реестре (новее последней связанной записи) | `external-contract-unregistered` | Занести темой **или** отклонить с причиной (`authority: internal`, `parity: not-applicable`, `confirmation: waived`, отпечаток первичного события) |
+| Второй уникальный `source_fingerprint` по тому же `EC-*` | `external-contract-second-signal` | Новое подтверждение или исключение **после** второго сигнала |
+| `customer-direct` / ось `accepted-reference` закрыты или понижены до `donor`/`internal` без парной записи пользователя | `external-contract-internal-close` | Внутреннего согласования недостаточно |
+
+**Парная синхронизация журналов.** Пока есть хотя бы одна открытая тема высокого авторитета, `open_decision_id` = самый ранний такой `EC-*`; после закрытия — следующий либо `null`. Закрытие высокого авторитета действительно только при `closed_decisions[]` с тем же `EC-*`, `source: verify-user-answer`, `confirmed_by: user` и `closed_at` не ранее `primary_event_at` последнего уникального сигнала. Рассинхронизация журналов сохраняет блокер.
+
+При любом алерте таблицы — **не** запускать QC (2.1), Layer 4 и Layer 5 этого прогона. Синтез отчёта и чат-карточка decision — сразу. Пустой/отсутствующий реестр **и** нет события из перечня → контроль PASS без шума. Дешёвый блокер внешней валидности **всегда** раньше профильной эскалации: не запускать QC/L4/L5 «на всякий случай» параллельно.
+
 **2.1a. User Task Contract (mechanical pre-check)** — до QC: grep `tasks.md` по строкам `^- \[[ x]\] S\d+\.\d+` (не accept, не Follow-up) с таблицей DENY/ALLOW из `vertical-slices.mdc` § User Task Contract. Дополнительно: `При успешном verify S`, `после verify S`, `после стенда` в теле задачи → violation. Результат (список нарушений или «none») передать в промпт QC как **User Task Contract pre-check evidence**.
 
-**2.1. Slice Coherence (Quality Controller)** — делегировать **`openspec-quality-controller`** (Task **без** `model=`, по `model-selection.mdc`). Промпт: см. `1c-agent-patterns/quality-controller.md`. Получить `reports/quality-control-YYYY-MM-DD.md`.
+**2.1. Slice Coherence (Quality Controller)** — только **изменившиеся срезы** и связанные сценарии из `invalidation_map`. Если все ключи `scenario-coverage` / slice coherence попали в `check_cache` (полный input match) — **не** запускать агента; переиспользовать прошлый `quality-control-*.md` и пометить reused в техническом аудите. Первый прогон без cache evidence — полный текущий контроль (новый обязательный агентский вызов не добавляется).
+
+Иначе делегировать **`openspec-quality-controller`** (Task **без** `model=`, по `model-selection.mdc`). Промпт: см. `1c-agent-patterns/quality-controller.md` — передать changed slices, linked scenarios, deterministic results, affected `EC-*`, reused checks. Получить `reports/quality-control-YYYY-MM-DD.md`.
 
 **Режим запуска:** `run_in_background: false` (sync, последовательно). Карточка Task не показывается в чате как отдельное сообщение — `tool_result` идёт во внутренний контекст оркестратора. В промпт обязательно включить блок **Final message constraint** из секции «Запуск агентов verify» ниже и блок **User Task Contract pre-check evidence** из 2.1a.
 
-QC оценивает критерии 1–6, 8, **8b**, 9–11 из `vertical-slices.mdc` (Scenario Coverage, Slice Independence, Slice Completeness, Slice Dependency Graph, Slice Gate Integrity, Acceptance Checklist Coverage 5b amended, Rework Risk, Slice Verticality, **Self-Achievable Acceptance**, Foundation slice with gate, Acceptance Simplicity, User Task Contract).
+QC оценивает критерии 1–6, 8, **8b**, 9–11 из `vertical-slices.mdc` (Scenario Coverage, Slice Independence, Slice Completeness, Slice Dependency Graph, Slice Gate Integrity, Acceptance Checklist Coverage 5b amended, Rework Risk, Slice Verticality, **Self-Achievable Acceptance**, Foundation slice with gate, Acceptance Simplicity, User Task Contract) **только для invalidated scope**; совпавшие матрицы не перестраивать.
 
 **2.2. Code-Truth (механический)** — для каждого технического имени в backticks из `design.md`/`tasks.md`/`debug.md`/`specs/**` запустить `Grep` по путям из `openspec/project.md`. См. `.cursor/rules/code-truth-gate.mdc`.
 
@@ -177,7 +229,7 @@ QC оценивает критерии 1–6, 8, **8b**, 9–11 из `vertical-s
 
 - `PASS` — все критерии OK / только INFO.
 - `WARNING` — есть несущественные несостыковки (один scenario без покрытия в матрице, лишний legacy-маркер). На вердикт идёт как «не блокирует apply».
-- `FAIL` — циклы зависимостей срезов, `accept-checklist-empty`, `primary-acceptance-missing`, `acceptance-simplicity-overload`, `slice-not-vertical`, **`slice-accept-not-self-achievable`**, `slice-foundation-with-gate`, `user-task-contract-violation`, дублирование `S<N>.accept` в одном срезе, CRITICAL `phantom-symbol` в post-apply, или CRITICAL precedent-regression (`precedent-regression` / `invariant-drift` / `load-bearing-adr-bypass`).
+- `FAIL` — циклы зависимостей срезов, `accept-checklist-empty`, `primary-acceptance-missing`, `acceptance-simplicity-overload`, `slice-not-vertical`, **`slice-accept-not-self-achievable`**, `slice-foundation-with-gate`, `user-task-contract-violation`, дублирование `S<N>.accept` в одном срезе, CRITICAL `phantom-symbol` в post-apply, CRITICAL precedent-regression (`precedent-regression` / `invariant-drift` / `load-bearing-adr-bypass`), или блокер § External validity (`external-contract-open` / `external-contract-unclassified-axis` / `external-contract-unregistered` / `external-contract-second-signal` / `external-contract-internal-close`).
 
 `FAIL` в Layer 2 — это **NO-GO**.
 
@@ -185,7 +237,7 @@ QC оценивает критерии 1–6, 8, **8b**, 9–11 из `vertical-s
 
 **Цель:** поймать «хождение по кругу» — один срез многократно патчится / уходит на приёмку без подписания (`S<N>.accept` = `[ ]`). Каждый патч-раунд по отдельности исполним (Layer 5 PASS), поэтому петлю видит только метрика **поверх раундов**.
 
-**Метрика и порог** — SSOT `.cursor/rules/vertical-slices.mdc` § ДЕТЕКТОР ПЕТЛИ ПРИЁМКИ (`AcceptLoop`, `PatchRounds`, `acceptance_loop_max` default 3). Считается grep по `debug.md` § Slice Gate Decisions и § Extend —; здесь не дублируется.
+**Метрика и порог** — SSOT `.cursor/rules/vertical-slices.mdc` § ДЕТЕКТОР ПЕТЛИ ПРИЁМКИ (`AcceptLoop`, `PatchRounds`, `acceptance_loop_max` default 3). Считается grep по `debug.md` § Slice Gate Decisions и § Extend —; здесь не дублируется. Повтор темы `EC-*` (topic-loop) — **не** этот слой: см. тот же раздел «Две петли не смешивать» и § External validity.
 
 **Выполняется во всех `verify_depth`** — детект дешёвый (grep по уже загруженному `debug.md`); запуск архитектора — **только** при фактическом срабатывании.
 
@@ -223,16 +275,18 @@ QC оценивает критерии 1–6, 8, **8b**, 9–11 из `vertical-s
 
 **Цель:** независимое подтверждение, что выбранный design **решает** проблему **оптимальным** способом. Это не дублирует Architect Gate из new/explore: new даёт согласие на подход (auctorial), challenge даёт независимое подтверждение (adversarial). Подробности — `.cursor/rules/architect-gate.mdc` секция «INDEPENDENT CHALLENGE».
 
-**Триггеры запуска (любой):**
+**Триггеры запуска (любой; не `mtime` без смены хэша):**
 
-- Это **первый** `/opsx:verify` по этой ЗНИ (нет ни одного `reports/verification-*.md` или ни в одном snapshot нет `last_challenge_at`).
-- `mtime(design.md) > snapshot.last_challenge_at` (design менялся со времени последнего challenge — например, после `/opsx:extend`).
-- `verify_depth = incremental` — Layer 4 **targeted** (delta design + closed decisions), не полный adversarial re-run всех альтернатив.
+- Это **первый** `/opsx:verify` по этой ЗНИ (нет ни одного `reports/verification-*.md` или ни в одном snapshot нет `last_challenge_at`) — рискованная архитектурная ось проверяется впервые.
+- Хэш архитектурной оси (`design.md` § Decisions / Behavior Contract, иначе нормализованный `design.md`) **отличается** от хэша в snapshot последнего успешного Layer 4. Один изменившийся `mtime` при том же хэше **не** запускает вызов.
+- Профильный триггер D7: внешний контракт конфликтует с design; две жизнеспособные альтернативы; риск безопасности / ресурсов / прецедента.
+- `verify_depth = incremental` **и** `invalidation_map` содержит `design-challenge` — Layer 4 **targeted** (delta design + closed decisions + affected `EC-*`), не полный adversarial re-run всех альтернатив.
+- Неизвестная граница дельты → `verify_depth: full`, scope явно расширен.
 
 **Когда Layer 4 пропускается:**
 
 - `verify_depth = lite` → `layer_status.layer_4_independent_challenge: SKIPPED-lite`.
-- Триггеры не сработали (`mtime(design.md) ≤ last_challenge_at`) **и** `verify_depth ≠ incremental` → `SKIPPED-novelty`.
+- Триггеры не сработали (хэш оси совпал, профильного триггера нет) → `SKIPPED-novelty`; переиспользовать прошлый `design-challenge-*.md`.
 - В корне change есть `.gate-override.yaml` с `gate: design-challenge` — прочитать поле `timestamp`:
   - **≤ 7 дней** — пропуск с предупреждением в чат («Независимый аудит постановки отложен по вашему решению от <дата> (причина: <reason>); отсрочка истекает через <N> дней»). YAML: `layer_status.layer_4_independent_challenge: SKIPPED-override`.
   - **> 7 дней** — отсрочка истекла: **override игнорируется**, Layer 4 запускается как обычно. В info-секцию отчёта — `gate-override-expired`. Не давать молчаливый бессрочный обход.
@@ -252,7 +306,8 @@ QC оценивает критерии 1–6, 8, **8b**, 9–11 из `vertical-s
      Tag reopening alternatives: reopen-blocked: <decision_id>.
      Prefer implementation_invariant gaps over architectural forks when closed axis holds.
      ```
-   - При `verify_depth = incremental`: ограничить scope — «проверь только delta design с прошлого challenge и инварианты очистки/контекста; не переоткрывай closed decisions без verified new fact».
+   - При `verify_depth = incremental`: ограничить scope — «проверь только delta design с прошлого challenge, trigger reason, affected EC-* и инварианты очистки/контекста; не переоткрывай closed decisions без verified new fact; не повторяй детерминированные графы».
+   - Неизвестная граница: явно написать «scope расширен до полного».
    - **Запрет** опираться на `reports/architecture-*.md` собственного авторства как на источник истины.
    - Инструкции по адверсариальной установке, Three-Question Challenge и формату отчёта (см. `.cursor/agents/onec-code-architect.md` секция «Режим `design-challenge`»).
 4. Результат — `reports/design-challenge-YYYY-MM-DD.md` с YAML `verdict: APPROVE | CHALLENGE | REJECT`.
@@ -271,7 +326,7 @@ QC оценивает критерии 1–6, 8, **8b**, 9–11 из `vertical-s
 
 **Маппинг вердикта на статус слоя и чат:**
 
-- `APPROVE` → `layer_status.layer_4_independent_challenge: APPROVE` → не блокирует apply. Обновить `snapshot.last_challenge_at = mtime(design.md)`.
+- `APPROVE` → `layer_status.layer_4_independent_challenge: APPROVE` → не блокирует apply. Обновить `snapshot.last_challenge_at` (ISO момента успешного challenge) и `artifact_hashes` оси design.
 - `CHALLENGE` → после **Post-challenge classifier**: если только `implementation_invariant` → Repair Loop; если `drop reopen` → не NO-GO; если `supersedes` → одна эскалация в чат; иначе **NO-GO** с развилкой (максимум одна). `last_challenge_at` обновляется при CHALLENGE, прошедшем в чат или repair.
   - **Defensive filter:** workflow-формулировки — как раньше.
   - **Defensive filter reopen:** альтернатива с тегом `reopen-blocked: <id>`, противоречащая `closed_decisions` без verified new fact — **не** в чат.
@@ -283,7 +338,9 @@ QC оценивает критерии 1–6, 8, **8b**, 9–11 из `vertical-s
 
 **Цель:** задачи реально можно реализовать as-is. Это **не** пересмотр архитектурного подхода (это сделал Layer 4) — узкий фокус на исполнимости.
 
-Делегировать `onec-code-architect` с `mode=task-readiness` (промпт см. `1c-agent-patterns/architect.md`). **Режим запуска:** `run_in_background: false` (sync). Карточка Task не отображается в чате. В промпт обязательно включить блок **Final message constraint** (секция «Запуск агентов verify» ниже). Архитектор оценивает:
+**Триггер запуска (D7):** изменившиеся задачи содержат неизвестную композицию перехватов, ручную конфигурацию, неизвестную сигнатуру или контракт данных, новую межмодульную связь либо неподтверждённый API; либо `invalidation_map` содержит `task-readiness`. Изменение только отметки `[x]`/`[ ]` **не** запускает новый вызов. Хэш текста задач совпал → переиспользовать прошлый `architecture-task-readiness-*.md`, статус слоя скопировать, в техническом аудите — reused. Без триггера режим не требуется.
+
+Иначе делегировать `onec-code-architect` с `mode=task-readiness` (промпт см. `1c-agent-patterns/architect.md`: trigger reason, changed tasks, affected `EC-*`, reused evidence; не полный `debug.md`). **Режим запуска:** `run_in_background: false` (sync). Карточка Task не отображается в чате. В промпт обязательно включить блок **Final message constraint** (секция «Запуск агентов verify» ниже). Неизвестная граница → явно расширенный scope. Архитектор оценивает:
 
 1. Каждая задача `S<N>.<M>` имеет конкретные файл/процедуру/объект (по правилу `task-readability.mdc`)?
 2. Контракты данных (`Свойство()`/`ТипЗнч()`/защитные проверки) — оправданы (Data Contract Gate)?
@@ -326,6 +383,8 @@ verdict = NO-GO  otherwise
 - Layer 4 **не** REJECT с gap корректности / security / resource-leak.
 
 Тогда: `verdict: GO`, `layer_4: CHALLENGE-saturated`. В чат (вариант 2): «можно apply; остаточный риск … проверяется в S1.accept» — **без** agent-keys.
+
+**Не применяется** при открытой теме высокого авторитета / блокере § External validity: насыщение раундов архитектурной развилки этот блокер не снимает.
 
 **REJECT с утечкой контекста / security → всегда NO-GO**, cap не спасает.
 
@@ -378,7 +437,9 @@ Self-check: «можно действовать без файла» = польз
 
 После NO-GO классифицировать блокеры по карте repair/decision (§2.6 `opsx-output-style.md`, `layer_status` и коды алертов отчёта):
 
-1. **Decision blockers** (CHALLENGE/REJECT с A/B **после classifier**, `scope-violation`, FAIL с продуктовым выбором, Why ↔ plan, `supersedes`, **`slice-accept-not-self-achievable`**) → chat **3a-decision**, **END TURN**. Repair не запускать без ответа пользователя.
+1. **Decision blockers** (CHALLENGE/REJECT с A/B **после classifier**, `scope-violation`, FAIL с продуктовым выбором, Why ↔ plan, `supersedes`, **`slice-accept-not-self-achievable`**, блокеры § External validity) → chat **3a-decision**, **END TURN**. Repair не запускать без ответа пользователя.
+
+   Для блокера внешнего контракта: агент **MAY** предложить `parity: diverges` и `reason`, но **SHALL NOT** ставить `confirmed_by: user`, менять `open_decision_id` / `decision_round` / `closed_decisions[]` с `source: verify-user-answer` и снимать блокер. Ответ заказчика на эту развилку получает `authority` и `external_contract_id` и передаётся в **user-path** `/opsx:extend --from-verify` (не в repair-from-verify). Парное закрытие — только после этого ответа: `closed_decisions[]` с тем же `EC-*`, `source: verify-user-answer`, `confirmed_by: user`, `closed_at` не ранее последнего сигнала; затем пересчитать `open_decision_id` и увеличить `decision_round`.
 
    Для **`slice-accept-not-self-achievable`:** развилка на человеческом языке по `.cursor/docs/templates/decision-block.md` — **объединить срезы** (рекомендуется) **или** переписать Primary проблемного среза на исход, достижимый его собственными задачами. **Запрещено** как разрешение блокера: «процедурно не подписывать `S<N>.accept` до завершения более позднего среза без правки `tasks.md` / `design.md`» (вариант C из QC — создаёт пустую формальность).
 2. **Repair only** (включая `implementation_invariant` от classifier) + `repair_attempt < 2`:
@@ -398,10 +459,25 @@ Self-check: «можно действовать без файла» = польз
 После сохранения отчёта обновить YAML `snapshot` **и** синхронизировать `debug.md` § Verify decision ledger:
 
 - `accepted_tasks` — текущий список `[x]`.
-- `artifacts_mtime` — текущие mtime каждого артефакта.
+- `artifacts_mtime` — текущие mtime каждого артефакта (служебные; новизна — по хэшам).
+- `artifact_hashes`, `external_contract_digest`, `decision_fingerprints`, `rules_versions`, `check_cache`, `invalidation_map` — по рецепту `templates/report-header.md`.
 - `closed_decisions`, `decision_round`, `open_decision_id`, `verify_depth`, `assumptions_accepted` — из runtime ledger.
 - `last_challenge_at` — обновить **только** если Layer 4 был запущен и вернул `APPROVE` или `CHALLENGE` (в т.ч. saturated). При `REJECT`, блокирующем apply — не трогать.
 - `open_known_questions` — список открытых тем; **удалить** темы, закрытые через `closed_decisions` (sync с ledger).
+- **Пересчёт `open_decision_id`:** самый ранний открытый `EC-*` высокого авторитета либо `null`. Поля `confirmed_by: user`, `source: verify-user-answer`, `external_contract_id` и `open_decision_id` **не** менять из internal Repair Loop / auto-fix: их пишет только ответ заказчика через user-path extend.
+
+### Universal policy self-check
+
+Статическая самопроверка движка **до** синтеза чата (каждый прогон, в том числе при пустом реестре). Опора только на schema записи, `authority`, `axis`, `EC-*` и placeholders (`<capability>`, `path#anchor`, `entry-point:<command>@<ISO>`, `custom:<slug>`).
+
+Отклонить и не поднимать как обязательный внешний контракт:
+
+- абсолютные проектные пути и непараметризованные предметные идентификаторы в правиле или в выводе контроля;
+- обязательность реестра для ЗНИ без секции и без события из закрытого перечня § External validity;
+- понижение `customer-direct` / объявленной оси `accepted-reference` без решения пользователя;
+- угадывание авторитета по списку слов исследовательского кейса или по свободной прозе.
+
+Закрытый перечень источников — только пять пунктов § External validity. Нарушение self-check → не создавать блокер «нужен реестр»; исправить применение правила. Пустой реестр без нового структурированного события остаётся проходом без вопроса и информационного шума.
 
 ## Запуск агентов verify (гибридный режим)
 
@@ -409,16 +485,16 @@ Self-check: «можно действовать без файла» = польз
 
 | Layer | Агент | Mode | `run_in_background` | Когда |
 |---|---|---|---|---|
-| 2 | `openspec-quality-controller` | — (без `model=`) | **false** (sync) | Всегда |
+| 2 | `openspec-quality-controller` | — (без `model=`) | **false** (sync) | Invalidated срезы; skip если все slice-контроли reused |
 | 2.5 | `onec-code-architect` | `deep-analysis` | **true** (background) | **Только** при срабатывании петли приёмки (см. Layer 2.5) |
-| 4 | `onec-code-architect` | `design-challenge` | **true** (background) | По триггеру (см. Layer 4) |
-| 5 | `onec-code-architect` | `task-readiness` | **false** (sync) | Всегда |
+| 4 | `onec-code-architect` | `design-challenge` | **true** (background) | По триггеру (см. Layer 4): хэш оси или D7, не голый mtime |
+| 5 | `onec-code-architect` | `task-readiness` | **false** (sync) | По триггеру изменившихся рискованных задач (см. Layer 5) |
 
 ### Порядок (минимум видимых карточек, без удвоения времени)
 
-1. **Запустить design-challenge в background** (если триггер Layer 4 сработал) — `run_in_background: true`. Карточка Task в чате будет, но свёрнутая до одной строки благодаря Final message constraint.
-2. **Запустить QC sync** — `run_in_background: false`. Дождаться результата. Карточки в чате нет.
-3. **Запустить task-readiness sync** — `run_in_background: false`. Дождаться результата. Карточки в чате нет.
+1. **Запустить design-challenge в background** (если триггер Layer 4 сработал) — `run_in_background: true`. Карточка Task в чате будет, но свёрнутая до одной строки благодаря Final message constraint. Без триггера — не запускать.
+2. **Запустить QC sync** — только если invalidated slice scope не покрыт кэшем. `run_in_background: false`. Дождаться результата. Карточки в чате нет.
+3. **Запустить task-readiness sync** — только по триггеру Layer 5. `run_in_background: false`. Дождаться результата. Карточки в чате нет.
 4. **Дождаться завершения design-challenge** (если ещё не завершён). Если sync-агенты завершились раньше фона — **END TURN** допустим; **синтез обязателен** на **следующем** ходе по платформенному уведомлению о завершении фона (см. «HARD — закрытие команды» в Output to chat).
 5. **Синтез** — оркестратор пишет **одно** финальное сообщение пользователю по `.cursor/skills/openspec-verify-change/templates/chat-summary.md` с обязательным **`**Следующий шаг:**`**. Промежуточные карточки Task **не цитируются** и **не упоминаются**. Уведомление о фоне без уже отправленной карточки = шаг 5, не «учтено / действий нет».
 

@@ -367,6 +367,7 @@ Focus: full (new file)
 
 - Если ревью в рамках ЗНИ (`openspec/changes/<name>`): прочитать `design.md` и `reports/architecture-*.md`. Передать в промпт как `## Architectural Context` (сокращённо или целевой раздел).
 - **Framing (обязательно в промпте):** контекст намерения для Intent/Contract Map и поиска design-prescribed / contradiction; **соответствие design ≠ PASS по качеству**; skeptic stance к цитатам постановки.
+- **External Contract (change-scoped):** если есть `debug.md` § `## External Contract Ledger`, передать **только** записи, чьи `EC-*` пересекают scope ревью (затронутые файлы / сценарии): ожидаемое `assertion`, объявленные оси, `parity` и подтверждённые отличия. Весь реестр не перечитывать. Секции нет — текущий контракт промпта без дополнительного блока. Цитата design **не** становится автоматическим подтверждением качества.
 - Если ЗНИ нет — блок пропустить.
 
 ---
