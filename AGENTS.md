@@ -1,6 +1,6 @@
 # AGENTS.md — навигационный индекс
 
-**Диспетчер 1С:** `.cursor/rules/1c-agent-delegation.mdc`. **Гейты:** `.cursor/rules/gate-dispatcher.mdc`. **Чат:** `.cursor/rules/chat-output-budget.mdc` + `.cursor/docs/chat-lexicon.md`. Рекомендуемый чат — Grok 4; модели субагентов — только `.cursor/rules/model-selection.mdc` (архитектор Opus 5, ревьюер Gemini, упрощение Composer).
+**Диспетчер 1С:** `.cursor/rules/1c-agent-delegation.mdc`. **Гейты:** `.cursor/rules/gate-dispatcher.mdc`. **Чат:** `.cursor/rules/chat-output-budget.mdc` + `.cursor/docs/chat-lexicon.md`. Рекомендуемый чат — Grok 4; модели субагентов — только `.cursor/rules/model-selection.mdc` (архитектор — таблица шагов в этом правиле, ревьюер Gemini, упрощение Composer).
 
 **Поставка:** `.cursor/docs/kit-template-workflow.md` (kit на `develop`). Сценарии: `.cursor/docs/quick-start.md`. FAQ: `.cursor/docs/faq-kit.md`. Целостность: `.cursor/docs/delivery-integrity.md`. Устройство репо: `README.md` (в проект 1С не копируется).
 

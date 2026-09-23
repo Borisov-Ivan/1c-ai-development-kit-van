@@ -102,7 +102,7 @@ Task(
          при активном change или
          temp/reports/deep-analysis-YYYY-MM-DD.md вне change.",
   subagent_type="onec-code-architect",
-  model="<Opus 5; Fable только при тяжёлом триггере и слага в enum — model-selection.mdc>"
+  model="<по таблице шагов в .cursor/rules/model-selection.mdc, раздел «Закрытая эскалация Fable»>"
 )
 ```
 
@@ -110,7 +110,7 @@ Task(
 
 ## Architect — scope coherence audit (extend)
 
-Используется `/opsx:extend`, шаг **5a**, когда сработал семантический триггер (`Drift-check` ≠ pass) или объективный счётчик Extend без архитектора (см. `.cursor/skills/openspec-extend-change/SKILL.md`). Режим **`scope-coherence-audit`**: Simplicity Check не требуется.
+Используется `/opsx:extend`, шаг **5a**, когда сработал семантический триггер (`Drift-check` ≠ pass) или объективный счётчик Extend без архитектора (см. `.cursor/skills/openspec-extend-change/SKILL.md`). Режим **`scope-coherence-audit`**: Simplicity Check не требуется. Модель — по таблице шагов в `.cursor/rules/model-selection.mdc` (раздел «Закрытая эскалация Fable»).
 
 ```
 Task(
@@ -185,7 +185,7 @@ Used by `/opsx:verify` Layer 4 — независимый адверсариал
 
 Подробный протокол (адверсариальная установка, Three-Question Challenge, формат отчёта, маппинг вердикта) — см. `.cursor/agents/onec-code-architect.md` секция «Режим `design-challenge`».
 
-**Модель.** Закрытая эскалация Fable из `.cursor/rules/model-selection.mdc`: если слаг есть в описании `Task` — Fable + «Разбор постановки (Fable)»; иначе Opus 5 + «Разбор постановки (Opus 5)». Не передавать отсутствующий слаг. **Режим запуска: `run_in_background=true`** (см. SKILL.md verify, секция «Запуск агентов verify»).
+**Модель.** По таблице шагов в `.cursor/rules/model-selection.mdc` (раздел «Закрытая эскалация Fable»). **Режим запуска: `run_in_background=true`** (см. SKILL.md verify, секция «Запуск агентов verify»).
 
 ```
 Task(
@@ -257,7 +257,7 @@ Task(
          Use plain language: «первый ручной шаг», «приёмочный тест единственного
          шаблона», «выбранный вариант реализации».",
   subagent_type="onec-code-architect",
-  model="<закрытая эскалация Fable / иначе Opus 5 — model-selection.mdc>",
+  model="<по таблице шагов в .cursor/rules/model-selection.mdc, раздел «Закрытая эскалация Fable»>",
   run_in_background=true
 )
 ```
@@ -266,7 +266,7 @@ Task(
 
 ## Architect — task readiness review (verify Layer 5)
 
-Used by `/opsx:verify` Layer 5 (Implementation Readiness) — only when the Layer 5 profile trigger fires (changed risky tasks or `task-readiness` in invalidation_map). Without trigger, reuse the last readiness report; do not launch a second mandatory run. The architect evaluates holistic readiness of **invalidated tasks**: can they be implemented as-is without returning for clarification?
+Used by `/opsx:verify` Layer 5 (Implementation Readiness) — only when the Layer 5 profile trigger fires (changed risky tasks or `task-readiness` in invalidation_map). Without trigger, reuse the last readiness report; do not launch a second mandatory run. The architect evaluates holistic readiness of **invalidated tasks**: can they be implemented as-is without returning for clarification? Модель шаблон не задаёт: вызов без `model=` по таблице шагов в `.cursor/rules/model-selection.mdc` (раздел «Закрытая эскалация Fable»).
 
 ```
 Task(
@@ -383,12 +383,12 @@ Task(
          Только: можно ли реализовать as-is.
 
          Результат: сохранить в
-         openspec/changes/<change-name>/reports/task-readiness-review-YYYY-MM-DD.md.
+         openspec/changes/<change-name>/reports/architecture-task-readiness-YYYY-MM-DD.md.
 
          ## Final message to chat (HARD CONSTRAINT)
 
          Your final assistant message in this turn is a single line:
-         \"Отчёт сохранён: openspec/changes/<change-name>/reports/task-readiness-review-YYYY-MM-DD.md\".
+         \"Отчёт сохранён: openspec/changes/<change-name>/reports/architecture-task-readiness-YYYY-MM-DD.md\".
 
          Do NOT include verdict, severity, gap summary, layer name,
          simplicity check, recommendations, или any other analysis в финальном
