@@ -248,7 +248,7 @@ QC оценивает критерии 1–6, 8, **8b**, 9–11 из `vertical-s
 3. Порог достигнут для среза `S<N>`:
    - **Override:** в корне change есть `.gate-override.yaml` с `gate: acceptance-loop` — прочитать `timestamp`: ≤7 дней → `SKIPPED-override` (одна строка в чат: «Разбор петли приёмки отложен по вашему решению от <дата>; отсрочка истекает через <N> дней»), идти на Layer 3; >7 дней → override истёк (`gate-override-expired` в info), продолжить как срабатывание.
    - **Закрытие:** существует `reports/architecture-loop-redesign-*.md`, датированный **позже** последней `awaiting-acceptance` среза `S<N>` → петля уже разобрана архитектором → `layer_2_5_loop_detection: PASS`, идти на Layer 3.
-   - Иначе — **запустить редизайн-аудит:** `Task(onec-code-architect, mode=deep-analysis)` по закрытой эскалации в `model-selection.mdc` (петля приёмки = тяжёлый триггер: Fable + «Разбор постановки (Fable)», если слаг есть в описании `Task`; иначе Opus 5 + «Разбор постановки (Opus 5)», без передачи отсутствующего слага) с loop-контекстом: история раундов `S<N>` (записи Slice Gate Decisions + Extend —), ссылки на трассы/отчёты/`debug.md`, явный вопрос «корень один или это N независимых дефектов; предложить consolidation vs минимум». Запуск — `run_in_background: true`, блок **Final message constraint** (как Layer 4). Сохранить `reports/architecture-loop-redesign-YYYY-MM-DD.md`. Append `debug.md` § Loop Detection (формат — `vertical-slices.mdc`).
+   - Иначе — **запустить редизайн-аудит:** `Task(onec-code-architect, mode=deep-analysis)` по таблице шагов в `model-selection.mdc` (раздел «Закрытая эскалация Fable»; заголовок раздела не переименовывать). Второй перечень моделей здесь не держать. С loop-контекстом: история раундов `S<N>` (записи Slice Gate Decisions + Extend —), ссылки на трассы/отчёты/`debug.md`, явный вопрос «корень один или это N независимых дефектов; предложить consolidation vs минимум». Запуск — `run_in_background: true`, блок **Final message constraint** (как Layer 4). Сохранить `reports/architecture-loop-redesign-YYYY-MM-DD.md`. Append `debug.md` § Loop Detection (формат — `vertical-slices.mdc`).
    - Статус слоя `acceptance-loop-detected` → **FAIL → NO-GO**. Decision-card в чат (по `.cursor/docs/templates/decision-block.md`): суть петли (срез, сколько раз вернулся без приёмки) + рекомендация архитектора (consolidation / минимум) прозой; **Следующий шаг:** `/opsx:extend <name> --from-architecture <redesign-report>`.
 
 **Порядок и cap.** Layer 2.5 идёт **до** Layer 4; его FAIL — всегда NO-GO. Decision-fatigue cap (GO-saturated) гасит только остаточный Layer 4 challenge и петлю подавить **не может**.
@@ -293,7 +293,7 @@ QC оценивает критерии 1–6, 8, **8b**, 9–11 из `vertical-s
 
 **Запуск:**
 
-1. Делегировать `onec-code-architect` с `mode=design-challenge` по закрытой эскалации в `model-selection.mdc`: Fable + «Разбор постановки (Fable)», если слаг есть в описании `Task`; иначе Primary обычного архитектора (Opus 5) + «Разбор постановки (Opus 5)». Не передавать отсутствующий слаг. Не использовать Fable как запас после сбоя Opus.
+1. Делегировать `onec-code-architect` с `mode=design-challenge` по таблице шагов в `model-selection.mdc` (раздел «Закрытая эскалация Fable»; заголовок раздела не переименовывать). Второй перечень моделей здесь не держать.
 2. **Режим запуска:** `run_in_background: true` (параллельно с sync-агентами Layer 2/5). Самый длинный шаг verify; параллелизм нужен, иначе verify становится в 2.5x длиннее. В чате остаётся **одна короткая карточка** (одна строка пути к файлу) — это допустимо как фоновый прогресс-маркер и не нагружает внимание. В промпт обязательно включить блок **Final message constraint** (секция «Запуск агентов verify» ниже).
 3. Промпт включает:
    - `proposal.md`, `design.md`, `specs/**/spec.md` — как первичные источники.
@@ -340,7 +340,7 @@ QC оценивает критерии 1–6, 8, **8b**, 9–11 из `vertical-s
 
 **Триггер запуска (D7):** изменившиеся задачи содержат неизвестную композицию перехватов, ручную конфигурацию, неизвестную сигнатуру или контракт данных, новую межмодульную связь либо неподтверждённый API; либо `invalidation_map` содержит `task-readiness`. Изменение только отметки `[x]`/`[ ]` **не** запускает новый вызов. Хэш текста задач совпал → переиспользовать прошлый `architecture-task-readiness-*.md`, статус слоя скопировать, в техническом аудите — reused. Без триггера режим не требуется.
 
-Иначе делегировать `onec-code-architect` с `mode=task-readiness` (промпт см. `1c-agent-patterns/architect.md`: trigger reason, changed tasks, affected `EC-*`, reused evidence; не полный `debug.md`). **Режим запуска:** `run_in_background: false` (sync). Карточка Task не отображается в чате. В промпт обязательно включить блок **Final message constraint** (секция «Запуск агентов verify» ниже). Неизвестная граница → явно расширенный scope. Архитектор оценивает:
+Иначе делегировать `onec-code-architect` с `mode=task-readiness` **без** `model=` по таблице шагов в `.cursor/rules/model-selection.mdc` (раздел «Закрытая эскалация Fable»). Второй перечень моделей здесь не держать. Промпт см. `1c-agent-patterns/architect.md`: trigger reason, changed tasks, affected `EC-*`, reused evidence; не полный `debug.md`. **Режим запуска:** `run_in_background: false` (sync). Карточка Task не отображается в чате. В промпт обязательно включить блок **Final message constraint** (секция «Запуск агентов verify» ниже). Неизвестная граница → явно расширенный scope. Архитектор оценивает:
 
 1. Каждая задача `S<N>.<M>` имеет конкретные файл/процедуру/объект (по правилу `task-readability.mdc`)?
 2. Контракты данных (`Свойство()`/`ТипЗнч()`/защитные проверки) — оправданы (Data Contract Gate)?
@@ -358,6 +358,7 @@ QC оценивает критерии 1–6, 8, **8b**, 9–11 из `vertical-s
 - Нет GAP / минорные → `PASS`.
 - WARNING-уровень GAP (нечёткие формулировки, недостающие ссылки) → `WARNING` (не блокирует).
 - CRITICAL GAP (нереализуемая as-is задача) **или** `manual-config-incomplete` (5.1) → `FAIL` → **NO-GO**.
+- Сбой состоявшегося единственного вызова (вызов ушёл и вернулся ошибкой) → шаг не пройден; прошлый отчёт не подставляется как результат этого запуска. Переиспользование прошлого отчёта, когда вызов не запускался (триггер не сработал или хэш текста задач совпал), сохраняется. Пользователю предлагается повторить команду или явно продолжить без отчёта. Явное продолжение без отчёта нового статуса не вводит: слой остаётся `WARNING`, риск пишется в `assumptions_accepted`. Пока нет одного из этих двух решений, слой не закрывать как `PASS` и не синтезировать итог по прошлому отчёту.
 
 ### Финальный вердикт
 
@@ -488,7 +489,7 @@ Self-check: «можно действовать без файла» = польз
 | 2 | `openspec-quality-controller` | — (без `model=`) | **false** (sync) | Invalidated срезы; skip если все slice-контроли reused |
 | 2.5 | `onec-code-architect` | `deep-analysis` | **true** (background) | **Только** при срабатывании петли приёмки (см. Layer 2.5) |
 | 4 | `onec-code-architect` | `design-challenge` | **true** (background) | По триггеру (см. Layer 4): хэш оси или D7, не голый mtime |
-| 5 | `onec-code-architect` | `task-readiness` | **false** (sync) | По триггеру изменившихся рискованных задач (см. Layer 5) |
+| 5 | `onec-code-architect` | `task-readiness` | **false** (sync) | По триггеру изменившихся рискованных задач (см. Layer 5). Вызов без `model=` по таблице шагов в `.cursor/rules/model-selection.mdc` |
 
 ### Порядок (минимум видимых карточек, без удвоения времени)
 

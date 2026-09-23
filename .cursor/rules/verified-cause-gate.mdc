@@ -51,7 +51,7 @@ priority: 250
 1. **Glob** `openspec/changes/archive/**/specs/**/spec.md` и **прочитать** `proposal.md` архивных changes, чьи capabilities или пути пересекаются с текущим `tasks.md` / `design.md` (по подстрокам путей `src/`).
 2. Если пересечение найдено **и** текущий `design.md` потенциально **отменяет** цель или требование архива (см. триггеры в `.cursor/rules/precedent-regression-gate.mdc`) — **СТОП** до одного из:
    - заполненной секции `## Blast Radius` в `design.md` (контракт / источник / бизнес-эффект для пользователя 1С / альтернативы / обоснование), **или**
-   - делегирования `onec-code-architect` с `mode=precedent-coherence-audit` и сохранения отчёта `reports/architecture-precedent-coherence-YYYY-MM-DD.md`, классифицирующего изменение как `extends` vs `revokes`.
+   - делегирования `onec-code-architect` с `mode=precedent-coherence-audit` по таблице шагов в `.cursor/rules/model-selection.mdc` (раздел «Закрытая эскалация Fable»), без второго перечня режимов и без слага модели, и сохранения отчёта `reports/architecture-precedent-coherence-YYYY-MM-DD.md`, классифицирующего изменение как `extends` vs `revokes`.
 3. Если пересечений нет или отмены контракта нет — продолжить (HALT не применяется).
 
 Источник: защита от молчаливой отмены контрактов между ЗНИ (verify Layer 2.4, extend drift-check).

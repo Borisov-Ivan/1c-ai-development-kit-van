@@ -12,3 +12,4 @@
 | [ADR-0008](ADR-0008-scenario-map-native-parent-registration.md) | Карта сценария — нативная регистрация панели родителем | Superseded by ADR-0010 | 2026-08-28 | kit / scenario map canvas |
 | [ADR-0009](ADR-0009-scenario-map-main-view-answers-header.md) | Главный вид карты сценария отвечает на вопрос шапки | Superseded by ADR-0010 | 2026-08-30 | kit / scenario map canvas |
 | [ADR-0010](ADR-0010-visual-explanation-panel.md) | Визуальное объяснение текущего ответа на панели рядом с чатом | Load-Bearing | 2026-08-31 | kit / visual explanation |
+| [ADR-0011](ADR-0011-architect-step-model-table.md) | Исключения модели архитектора живут в одной таблице шагов | Accepted | 2026-09-23 | kit / выбор моделей субагентов |
