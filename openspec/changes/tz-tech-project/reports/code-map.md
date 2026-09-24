@@ -1,0 +1,12 @@
+# Срез S1 — Техпроект по файлу задания (2026-09-24)
+
+- **S1.1** · команда · обёртка (created) — по файлу задания запускается единый протокол, сначала читается навык. [`.cursor/commands/opsx-techproject.md`](.cursor/commands/opsx-techproject.md):1-15
+- **S1.2** · навык · протокол входа (modified) — первый вывод это лист и согласование; техпроект и постановка только после непустой пометки и повторного запуска. [`.cursor/skills/openspec-techproject/SKILL.md`](.cursor/skills/openspec-techproject/SKILL.md):12-29
+- **S1.3** · навык · каркас согласования (modified) — сюжет обзора и строки часов, без архитектуры, алгоритма и интеграций. [`.cursor/skills/openspec-techproject/SKILL.md`](.cursor/skills/openspec-techproject/SKILL.md):90-109
+- **S1.4** · навык · лист вопросов (modified) — у пункта два варианта и место для ответа, либо «вопросов нет»; в обоих случаях строка подтверждения. [`.cursor/skills/openspec-techproject/SKILL.md`](.cursor/skills/openspec-techproject/SKILL.md):59-88
+- **S1.5** · навык · дыры (modified) — запрет выдумывать и фильтр замечаний остаются; дыры ищутся протоколом исследования, папка шаблонов не читается. [`.cursor/skills/openspec-techproject/SKILL.md`](.cursor/skills/openspec-techproject/SKILL.md):31-57
+- **S1.6** · навык · часы (modified) — одна строка справочника даёт нижнюю границу на коэффициент плюс сумму нижних границ факторов; нет строки — вопрос и часов нет. [`.cursor/skills/openspec-techproject/SKILL.md`](.cursor/skills/openspec-techproject/SKILL.md):111-128
+- **S1.7** · навык · карта входящего файла (modified) — задание читается по своим заголовкам и не заменяется бланком. [`.cursor/skills/openspec-techproject/SKILL.md`](.cursor/skills/openspec-techproject/SKILL.md):130-132
+- **S1.8** · навык · имена (modified) — отдельной сверки с выгрузкой нет; ненайденное имя остаётся дырой, команда не останавливается. [`.cursor/skills/openspec-techproject/SKILL.md`](.cursor/skills/openspec-techproject/SKILL.md):49-57
+- **S1.9** · навык · техпроект (modified) — таблицы объекта, проводки только из задания, внедрение, откат и часы, без текста процедур. [`.cursor/skills/openspec-techproject/SKILL.md`](.cursor/skills/openspec-techproject/SKILL.md):134-146
+- **S1.10** · навык · постановка (created) — после подтверждения пишется блок постановки; каталог задачи не создаётся. [`.cursor/skills/openspec-techproject/SKILL.md`](.cursor/skills/openspec-techproject/SKILL.md):148-170

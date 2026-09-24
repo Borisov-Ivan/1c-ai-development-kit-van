@@ -5,3 +5,13 @@
 - **S1.3** · правило контроля среза · ключ опоры (modified) — прошлый контроль берётся при вердикте «в порядке», том же наборе названий сценариев и том же тексте обязательного пункта приёмки; правка необязательного пункта контроль не сбрасывает. [`.cursor/skills/openspec-verify-change/SKILL.md`](.cursor/skills/openspec-verify-change/SKILL.md):232
 - **S1.4** · шапка отчёта проверки · отметка опоры (modified) — в техническом аудите явно видно, что взят прошлый результат контроля среза, а не новый полный контроль. [`.cursor/skills/openspec-verify-change/templates/report-header.md`](.cursor/skills/openspec-verify-change/templates/report-header.md):173
 - **S1.5** · правило срезов · момент порога правок (modified) — порог проверяется в начале прохода, до нового продуктового вопроса. [`.cursor/rules/vertical-slices.mdc`](.cursor/rules/vertical-slices.mdc):330
+
+# Срез S3 — Пакетная карточка решений в проверке (2026-09-24)
+
+- **S3.1** · правило проверки · карточка остановки (modified) — карточка перечисляет все открытые темы, известные к концу прогона; служебный указатель самой ранней темы список не обрезает. [`.cursor/skills/openspec-verify-change/SKILL.md`](.cursor/skills/openspec-verify-change/SKILL.md):230
+- **S3.2** · правило дополнения · пакет ответов (modified) — все ответы одной карточки записываются одной секцией дополнения, следующий прогон эти темы не задаёт снова. [`.cursor/skills/openspec-extend-change/SKILL.md`](.cursor/skills/openspec-extend-change/SKILL.md):337-339
+- **S3.3** · правило проверки · запрет снять тему с листа (modified) — формулировка «дописать вместе с ответом, не отдельным вопросом» не снимает тему, уже известную к концу прогона: обе остаются нумерованными вопросами одной карточки. [`.cursor/skills/openspec-verify-change/SKILL.md`](.cursor/skills/openspec-verify-change/SKILL.md):230
+- **S3.3** · правило проверки · шаг сборки сообщения (modified) — тот же запрет в месте, где собирается сообщение заказчику. [`.cursor/skills/openspec-verify-change/SKILL.md`](.cursor/skills/openspec-verify-change/SKILL.md):530
+- **S3.3** · шаблон развёрнутой карточки (modified) — запрет снять известную тему с листа. [`.cursor/skills/openspec-verify-change/templates/card-decision.md`](.cursor/skills/openspec-verify-change/templates/card-decision.md):57
+- **S3.3** · шаблон сообщения в чат (modified) — обе темы остаются нумерованными вопросами; то же в правилах оформления сообщения. [`.cursor/skills/openspec-verify-change/templates/chat-summary.md`](.cursor/skills/openspec-verify-change/templates/chat-summary.md):76
+
