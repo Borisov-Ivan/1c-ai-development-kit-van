@@ -8,7 +8,7 @@
 
 `.cursor/rules/sdd-workflow.mdc` — explore → new → verify → apply → verify → archive. Вход исследования: `/opsx:explore`.
 
-`/opsx:explore`, `/opsx:new`, `/opsx:verify`, `/opsx:apply`, `/opsx:archive`, `/opsx:extend`, `/opsx:status`, `/opsx:explain`, `/opsx:overview`, `/opsx:knowledge-add`, `/opsx:knowledge-init`, `/opsx:knowledge-audit`, `/opsx:sync`, `/opsx:bulk-archive`, `/review`, `/release-review`, `/init-project`, `/session-save`, `/session-restore`, `/session-retro`.
+`/opsx:explore`, `/opsx:new`, `/opsx:verify`, `/opsx:apply`, `/opsx:archive`, `/opsx:extend`, `/opsx:status`, `/opsx:explain`, `/opsx:overview`, `/opsx:techproject`, `/opsx:knowledge-add`, `/opsx:knowledge-init`, `/opsx:knowledge-audit`, `/opsx:sync`, `/opsx:bulk-archive`, `/review`, `/release-review`, `/init-project`, `/session-save`, `/session-restore`, `/session-retro`.
 
 Сценарии — `.cursor/docs/quick-start.md`. Термины — `.cursor/docs/glossary.md`. Init — `.cursor/docs/init-project-protocol.md`. Схема отчёта архитектора — `.cursor/docs/architect-report-schema.md`. Слои маркеров — `.cursor/docs/marker-layers-guide.md`.
 
