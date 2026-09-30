@@ -14,6 +14,8 @@ verify: internal Repair Loop (repair-класс) — без user-facing extend
 review/explore → extend (user) → verify → apply
 ```
 
+Замена утверждённого значения в уже проверенной ЗНИ (класс «замена значения», §1c `.cursor/skills/openspec-verify-change/SKILL.md` и дополнение `.cursor/skills/openspec-extend-change/SKILL.md`): дополнение → применение без проверки постановки. Остальная последовательность команд не меняется.
+
 **Chat Surface Contract** — §2.6 `.cursor/docs/opsx-output-style.md` (сквозной UX всех `/opsx:*`).
 
 | Этап | Команда | Что происходит | Агенты |

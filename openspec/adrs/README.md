@@ -13,3 +13,6 @@
 | [ADR-0009](ADR-0009-scenario-map-main-view-answers-header.md) | Главный вид карты сценария отвечает на вопрос шапки | Superseded by ADR-0010 | 2026-08-30 | kit / scenario map canvas |
 | [ADR-0010](ADR-0010-visual-explanation-panel.md) | Визуальное объяснение текущего ответа на панели рядом с чатом | Load-Bearing | 2026-08-31 | kit / visual explanation |
 | [ADR-0011](ADR-0011-architect-step-model-table.md) | Исключения модели архитектора живут в одной таблице шагов | Accepted | 2026-09-23 | kit / выбор моделей субагентов |
+| [ADR-0012](ADR-0012-verify-by-delta-and-external-contract.md) | Проверка по дельте и внешний контракт | Accepted | 2026-09-30 | kit / проверка постановки |
+| [ADR-0013](ADR-0013-verify-does-not-restart-closed-topics.md) | Повторная проверка не переоткрывает закрытое | Accepted | 2026-09-30 | kit / проверка постановки |
+| [ADR-0014](ADR-0014-light-route-value-and-archive.md) | Лёгкий маршрут замены значения и архива | Accepted | 2026-09-30 | kit / проверка постановки |
