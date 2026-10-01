@@ -25,6 +25,11 @@ snapshot:
     - S1.accept
   closed_decisions: []
   # agent-only: id (snake_case), summary (prose), closed_at (ISO date), source (verify-user-answer | repair-from-verify)
+  # premise: {claim, anchor} либо premise: none (процессное решение). Записи без поля premise сверку пропускают молча.
+  refuted_premises: []
+  # дописываемый список, поля ответа заказчика не заменяет:
+  # decision_id, refuting_anchor (путь и строка для показа), report, detected_at,
+  # fingerprint = SHA-256(decision_id|путь файла без строки|текст опровержения)
   open_decision_id: null
   decision_round: 0
   decision_round_max: 2
@@ -164,6 +169,8 @@ check_id + scope_anchor + ordered_input_hashes + rules_version + evidence_digest
 | `problem-solution-trace` | `proposal.md`, `specs/**`, `tasks.md` | этот скилл § Layer 3 |
 | `design-challenge` | `proposal.md`, `design.md`, `specs/**`, `external_contract_digest` | `.cursor/rules/architect-gate.mdc` |
 | `task-readiness` | `tasks.md`, `design.md` (изменившиеся задачи) | `.cursor/rules/architect-gate.mdc` |
+| `premise-reconciliation` | новые отчёты `reports/` после снимка (кроме `verification-*`, отчётов слоёв проверки и `reports/quality-traces.md`); отчёты независимого разбора и готовности текущего прогона; журнал решений с полем `premise` | этот скилл § сверка предпосылок |
+| `simplicity-check` | отчёты архитектора с `mode` в шапке | этот скилл § контроль простоты; пересчитывается на каждом прогоне, из кэша не берётся |
 
 ### Точечная инвалидация
 

@@ -512,7 +512,7 @@ Focus: full (new file)
 Все кодовые замечания (critical/high/medium/low) **кроме carve-out weak / design-prescribed / agreement-override** → автоматически writer с замечаниями → повторный reviewer. Макс. 2 итерации — согласовано с Phase 7 агента writer.
 Архитектурные замечания (новый объект, API, структура хранения, RLS) → СТОП, к пользователю.
 
-**Carve-out QualityFlag weak / design-prescribed (apply-reviewer):** без AskQuestion disposition (скорость apply). Авто-fix — **только** functional MUST_FIX **без** `QualityFlag=weak`, tag `design-prescribed` и agreement-override. Weak / design-prescribed / agreement-override → **только** оставить open + одна строка-след в отчёте задачи («на `/review` потребуется подтверждение качества»); **не** авто-waive как as-designed и **не** авто-fix. Финальный выбор as-designed / queue-fix — только в `/review` / `/release-review` (шаг 4.5).
+**Carve-out QualityFlag weak / design-prescribed (apply-reviewer):** без AskQuestion disposition (скорость apply). Авто-fix — **только** functional MUST_FIX **без** `QualityFlag=weak`, tag `design-prescribed` и agreement-override. Weak / design-prescribed / agreement-override → **только** оставить open и дописать строку в `reports/quality-traces.md` по формату из `openspec-apply-change/SKILL.md` (carve-out weak); **не** авто-waive как as-designed и **не** авто-fix. Финальный выбор as-designed / queue-fix — только в `/review` / `/release-review` (шаг 4.5).
 
 **Поверхность (DISPROPORTIONATE_SURFACE / REFACTOR по шуму):** при полном ревью нового/переписанного модуля с REFACTOR по поверхности — **не закрывать** задачу apply/`/review` без `onec-code-simplifier` или **явного waive** пользователя. Sidecar-шаблоны (`1c-agent-patterns/sidecar.md`) и `1c-utility-agents.mdc` этот MUST **не** содержат и якорь в delegation не заменяют.
 
@@ -552,6 +552,8 @@ Focus: full (new file)
 В чат (без имён агентов): «Совпадает с постановкой, но спорно по качеству. Оставить как задумано / поставить в очередь на исправление / отложить?»
 
 Записать ответ в main report — секция `## Disposition` (см. ниже). Опционально очередь: `openspec/changes/<id>/reports/review-queue-<slug>-YYYY-MM-DD.md` или `temp/reports/review-queue-*.md` без change.
+
+Если замечание есть в `reports/quality-traces.md`, в его строку дописать результат (as-designed / queue-fix / deferred), дату и кто решил. После пометки строка больше не открыта (`status` не `открыто`). `/release-review` идёт через тот же шаг 4.5.
 
 ### Нормализация при as-designed
 

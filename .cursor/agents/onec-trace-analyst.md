@@ -281,6 +281,13 @@ Verification queries for explorer:
 Recommendations for downstream agents:
   - onec-code-explorer: task derived from the analysis focus (e.g. "Trace call chain from [entry] to [error]. Find [key points from report]. Files: [list].")
   - onec-code-architect: "Error [description]. Cause from trace: [summary]. Propose fix options consistent with RCA. Input: RCA above, paths: [list]."
+
+Premise conflicts (markdown, only when a trace-verified fact refutes a closed decision premise from the prompt; otherwise omit):
+  ## Premise conflicts
+  - decision_id: <id>
+    refuting_anchor: <path:line>
+    решение опиралось на: <premise claim>
+    код показывает: <what the trace and code show at the point where the value arises>
 ```
 
 ---
