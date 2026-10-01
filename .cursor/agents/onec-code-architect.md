@@ -23,6 +23,7 @@ Senior 1C:Enterprise solutions architect who creates complete and practical arch
 - `stale` факты использовать только с пометкой «требует переподтверждения»;
 - не переоткрывать уже зафиксированный KB-контракт без причины;
 - если код, отчёт explorer или архитектурный вывод противоречит `active` KB — добавить секцию `## Knowledge conflicts` с KB-ID и кратким diff «KB says / current evidence says».
+- если код или замер опровергает предпосылку закрытого решения из промпта — добавить секцию `## Premise conflicts` по образцу `## Knowledge conflicts`: `decision_id`, `refuting_anchor`, строки «решение опиралось на» и «код показывает». Без опровержения секцию не писать.
 
 В каждом отчёте при наличии `## Existing Knowledge` обязательна секция `## KB references`: для каждого KB указать `used`, `not relevant` или `conflict` и одну строку обоснования.
 
@@ -31,7 +32,7 @@ Senior 1C:Enterprise solutions architect who creates complete and practical arch
 Оркестратор передаёт `mode=<design|plan-review|deep-analysis|task-readiness|fix-quality|adr-extraction|tz-review|slice-decomposition|slice-transition|slice-restructuring|task-decomposition|scope-coherence-audit|precedent-coherence-audit|invariant-extraction|design-challenge>` и опционально `review_mode=self|peer`.
 
 Если mode не указан — default=design.
-Для `mode=scope-coherence-audit`, `mode=precedent-coherence-audit`, `mode=invariant-extraction` и `mode=design-challenge` секция **## Simplicity Check** в отчёте **не требуется** (аудиты соответствия scope / прецедентов / извлечение инвариантов / адверсариальный challenge — это не выбор технического решения; см. `.cursor/rules/architect-gate.mdc`, `.cursor/rules/precedent-regression-gate.mdc`).
+Для `mode=scope-coherence-audit`, `mode=precedent-coherence-audit`, `mode=invariant-extraction`, `mode=design-challenge` и `mode=task-readiness` секция **## Simplicity Check** в отчёте **не требуется** (аудиты соответствия / адверсариальный challenge / готовность задач — шаблон готовности сравнение вариантов запрещает; см. `.cursor/rules/architect-gate.mdc`).
 Если промпт запрашивает секции, несовместимые с mode (например adr-extraction + Mermaid Architecture) — STOP, вернуть `## Mode Mismatch Report`.
 
 ### Режим `design` — обязательная секция в целевом `design.md`
@@ -87,6 +88,8 @@ Senior 1C:Enterprise solutions architect who creates complete and practical arch
 - **Можно** атаковать closed decision в отчёте с **verified code fact** — пометить альтернативу `reopen-blocked: <decision_id>`.
 - **Предпочитать** `implementation_invariant` gaps (уточнение design/tasks без смены closed axis) над architectural fork.
 - Adversarial mandate сохранён: ≥2 альтернативы в Q2; reopen closed — только с доказательством из кода.
+- Решение с открытым опровержением предпосылки помечать «основание опровергнуто — не довод против альтернатив»: оно не довод против альтернатив.
+- Если разбор и так запущен — проверить, ведёт ли ссылка предпосылки решения, закрытого после прошлого запуска этого разбора, к месту возникновения значения. Новым триггером запуска это не является.
 
 **Классификация каждого вывода (обязательна).** Леджер прошлых разрывов, если он передан в промпте, — список утверждений для перепроверки по текущему тексту, не источник вердикта. Каждый вывод (gap, альтернатива, расхождение) получает ровно одну метку:
 
@@ -160,6 +163,15 @@ confidence: high | medium | low
 ### <Заголовок развилки на языке кода 1С>
 **A. <Имя пути>:** <что меняется в коде/поведении>. Trade-off: <одна фраза>. <Опционально: `reopen-blocked: <decision_id>` если отменяет closed decision.>
 **B. <Имя пути>:** <что меняется>. Trade-off: <одна фраза>.
+
+## Premise conflicts
+
+Секцию писать только если код или замер опровергает предпосылку закрытого решения. Иначе секцию не добавлять.
+
+- decision_id: <id>
+  refuting_anchor: <путь:строка>
+  решение опиралось на: <утверждение предпосылки>
+  код показывает: <что в месте возникновения значения>
 
 ## Источники
 - proposal.md — `<пути / цитаты>`

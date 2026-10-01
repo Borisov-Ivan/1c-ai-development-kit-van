@@ -351,6 +351,7 @@ Architect обязателен, если:
        closed_at: "YYYY-MM-DD"
        source: verify-user-answer
        confirmed_by: user
+       premise: {claim: "<утверждение>", anchor: "<путь:строка или reports/файл#якорь>"}  # либо premise: none
        authority: customer-direct | accepted-reference   # только если развилка несла внешнее условие
        external_contract_id: EC-*                        # парный id темы; иначе поля не писать
    open_decision_id: null
@@ -359,7 +360,8 @@ Architect обязателен, если:
    assumptions_accepted: []
    ```
    Если закрываемая развилка — внешнее условие: **обязательны** `authority`, `external_contract_id`, `confirmed_by: user`. Обычная workflow-развилка эти поля **не** получает (детектор verify молчит).
-2. **Обязательно** добавить зеркало в `design.md` § **`## Решения verify (зафиксировано)`** — 1–2 строки прозой **без** `id:` (не дублировать параграфы из `## Decisions`). Это **человекочитаемый источник**, из которого `/opsx:apply` воспроизводит решение прозой (apply не читает YAML-ledger для чата). Пропуск этого шага оставит apply без прозы и вернёт голый код развилки — недопустимо.
+2. **Обязательно** добавить зеркало в `design.md` § **`## Решения verify (зафиксировано)`** — 1–2 строки прозой **без** `id:` (не дублировать параграфы из `## Decisions`) и строку предпосылки: утверждение и доказательство, либо пометка, что решение процессное (`premise: none`). Это **человекочитаемый источник**, из которого `/opsx:apply` воспроизводит решение прозой (apply не читает YAML-ledger для чата). Пропуск этого шага оставит apply без прозы и вернёт голый код развилки — недопустимо.
+2a. **Ответ на эскалацию опровержения.** Писать **новую** запись по тому же `decision_id` с `closed_at` позже `detected_at` открытого опровержения. При смене выбора — новая `premise`. Запись в `refuted_premises[]` и прежний ответ заказчика не переписывать. Тема закрывается только этой более новой записью.
 3. Удалить из `open_known_questions` (если велся в debug или последнем verification snapshot) темы, закрытые этим decision.
 4. Internal mapping: парсинг ответа пользователя → `decision_id` + вариант; при неоднозначности — один уточняющий вопрос **прозой**.
 5. **External Contract Ledger:** материализовать или обновить связанную тему `EC-*` (schema — `openspec-verify-change/SKILL.md` § Load artifacts): `primary_event_id`, `primary_event_at`, `source_fingerprint`, `confirmation`/`parity` по ответу. `repair-from-verify` эти поля **не** пишет и **не** ставит `confirmed_by: user`.

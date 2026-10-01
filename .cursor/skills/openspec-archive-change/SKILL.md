@@ -13,7 +13,7 @@ Archive a completed change in the experimental workflow.
 
 **Output style:** итог в чат — **одна строка эффекта** («заархивировано») + опц. actionable KB/ADR; **Chat Surface Contract** §2.6: без internal-команд, без перечня non-events. T-CONFIRM §5.5. Self-check §2.6 + §3a `chat-output-budget.mdc`.
 
-**Auto-yes policy:** Invoking archive means the user accepts the recommended path: proceed despite incomplete artifacts/tasks, **sync delta specs to main** when a delta exists, and **extract all ADR-worthy decisions** from architecture reports. Do **not** use **AskQuestion** for ADR/sync. **Не** выводить в чат предупреждения о: незакрытых follow-up в `tasks.md`, пустом диффе маркеров `0/0`, отсутствии analytical reports / KB-кандидатов / отложенном KB (см. шаги 2–3, 5.5). **Исключения (AskQuestion разрешён):** шаг 1 — выбор change при неоднозначности; шаг 3.5 — непринятые приёмочные задачи в slice mode (`S<N>.accept` или legacy `S<N>.T<M>`); шаг 5.5 — сохранение KB-фактов (когда кандидаты есть).
+**Auto-yes policy:** Invoking archive means the user accepts the recommended path: proceed despite incomplete artifacts/tasks, **sync delta specs to main** when a delta exists, and **extract all ADR-worthy decisions** from architecture reports. Do **not** use **AskQuestion** for ADR/sync. **Не** выводить в чат предупреждения о: незакрытых follow-up в `tasks.md`, пустом диффе маркеров `0/0`, отсутствии analytical reports / KB-кандидатов / отложенном KB (см. шаги 2–3, 5.5). **Исключения (AskQuestion разрешён):** шаг 1 — выбор change при неоднозначности; шаг 3.5 — непринятые приёмочные задачи в slice mode (`S<N>.accept` или legacy `S<N>.T<M>`); шаг 3.7 — открытые следы качества; шаг 5.5 — сохранение KB-фактов (когда кандидаты есть).
 
 **Input**: Optionally specify a change name. If omitted, check if it can be inferred from conversation context. If vague or ambiguous you MUST prompt for available changes.
 
@@ -96,7 +96,7 @@ Archive a completed change in the experimental workflow.
 
    **Legacy mode (нет `# Срез`):** пропустить шаг 3.5.
 
-   **Bypass `--force-legacy`:** Если в команде пользователя есть флаг **`--force-legacy`**, не показывать карточку и AskQuestion. Запомнить для шага 7 одну строку T-CONFIRM (не `### Warnings`): кратко «Архив с --force-legacy; непринятые приёмочные задачи (`S<N>.accept` / legacy `S<N>.T<M>`) остаются `[ ]`» (перечислить только при 1–2 задачах, иначе «см. `tasks.md`»). Продолжить со шага 4.
+   **Bypass `--force-legacy`:** Если в команде пользователя есть флаг **`--force-legacy`**, не показывать карточку и AskQuestion шага 3.5. Запомнить для шага 7 одну строку T-CONFIRM (не `### Warnings`): кратко «Архив с --force-legacy; непринятые приёмочные задачи (`S<N>.accept` / legacy `S<N>.T<M>`) остаются `[ ]`» (перечислить только при 1–2 задачах, иначе «см. `tasks.md`»). Вопрос об открытых следах качества (шаг 3.7) этот флаг **не** обходит. Продолжить со шага 3.6, затем 3.7.
 
    **Если slice mode и нет `--force-legacy`:**
 
@@ -134,9 +134,9 @@ Archive a completed change in the experimental workflow.
       - **A.** *(если выполнено условие п.4)* Primary пройден на ИБ — отметить accept каждого незакрытого среза `[x]`, продолжить архив. **Дисклеймер:** подтверждаете успешный прогон Primary на ИБ.
       - **B.** Тесты не пройдены / нужна доработка → **STOP**; рекомендовать `/opsx:apply <name>` или `/opsx:verify <name>`.
       - **C.** Отложить архив → **STOP**.
-      - **D.** Принудительное продолжение **без** отметки в `tasks.md` (семантика **`--force-legacy`**) → шаги 4–7; в warnings: `Archived with --force-legacy: …` (перечислить непринятые приёмочные задачи).
+      - **D.** Принудительное продолжение **без** отметки в `tasks.md` (семантика **`--force-legacy`**) → шаги 3.6, 3.7, затем 4–7; вопрос об открытых следах качества вариант D **не** обходит; в warnings: `Archived with --force-legacy: …` (перечислить непринятые приёмочные задачи).
 
-   6. Обработка ответов: **B** или **C** → завершить archive (**return**). **D** → для шага 7 строка T-CONFIRM (не Warnings): «Принудительное продолжение без отметки приёмочных задач; см. `tasks.md`.», продолжить шаг 4.
+   6. Обработка ответов: **B** или **C** → завершить archive (**return**). **D** → для шага 7 строка T-CONFIRM (не Warnings): «Принудительное продолжение без отметки приёмочных задач; см. `tasks.md`.», продолжить шаги 3.6 и 3.7, затем шаг 4. Вариант D вопрос о следах не обходит.
 
    7. **Ответ A — обязательные артефакты (MUST):**
       - Для каждого затронутого среза заменить acceptance set с `[ ]` на `[x]`:
@@ -184,6 +184,16 @@ Archive a completed change in the experimental workflow.
    - завершить archive (return).
 
    Если `phantom-symbol` относится только к незавершённым follow-up задачам — **silent** (не warning в чат); продолжить.
+
+   3.7. **Открытые следы качества (после 3.5 и 3.6, до синхронизации спецификаций)**
+
+   Прочитать `reports/quality-traces.md`. Файла нет или нет строк со `status: открыто` — вопрос о следах не задавать. Имена срезов с `Решение: принят без проверки` в `debug.md` § `## Slice Gate Decisions` вывести одной строкой в том же сообщении, что вопрос о следах, либо единственной строкой, если вопроса нет. Отдельного вопроса и остановки архива из-за этой пометки нет. Если нет ни открытых следов, ни таких срезов — шаг пропустить молча.
+
+   Иначе при открытых следах — короткий список открытых строк (задача, файл, суть) и вопрос `ревью` / `архив без ревью` / `стоп`. Вопрос задаётся и после ответа `архив` на развилке последнего среза. Признак «следы уже показаны» из развилки в архив не передаётся. `--force-legacy` и вариант D шага 3.5 этот вопрос не обходят.
+
+   - `ревью` — архив не выполняется; в чате один следующий шаг `/review <имя>`.
+   - `стоп` — архив не выполняется.
+   - `архив без ревью` — в каждую открытую строку дописать «архив без ревью, <дата>, <кто>»; `status` остаётся `открыто`; значением решения по качеству запись не считается; архив продолжается со шага 4.
 
 4. **Assess delta spec sync state**
 

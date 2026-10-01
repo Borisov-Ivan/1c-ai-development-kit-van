@@ -28,7 +28,7 @@ priority: 999
 
 **Визуальное объяснение:** данные панели собирает родитель сессии, файл пишет родитель; сборщик манифеста не вызывается. Протокол — `.cursor/skills/visual-explanation/SKILL.md`.
 
-**Якорь apply-reviewer:** авто-fix — **только** functional MUST_FIX **без** `QualityFlag=weak`, tag `design-prescribed` и agreement-override. Weak / design-prescribed / agreement-override → **не** авто-fix, **не** авто-waive, **не** AskQuestion в apply; одна строка-след в отчёте задачи («на `/review` потребуется подтверждение качества»). Финальный выбор as-designed / queue-fix — только в `/review` / `/release-review` (шаг 4.5 skill).
+**Якорь apply-reviewer:** авто-fix — **только** functional MUST_FIX **без** `QualityFlag=weak`, tag `design-prescribed` и agreement-override. Weak / design-prescribed / agreement-override → **не** авто-fix, **не** авто-waive, **не** AskQuestion в apply; строка в `reports/quality-traces.md` («на `/review` потребуется подтверждение качества»). Финальный выбор as-designed / queue-fix — только в `/review` / `/release-review` (шаг 4.5 skill).
 
 **Якорь поверхности:** при полном ревью нового/переписанного модуля с REFACTOR по поверхности — **не закрывать** задачу apply/`/review` без `onec-code-simplifier` или **явного waive** пользователя. `1c-utility-agents.mdc` и sidecar-шаблоны (`1c-agent-patterns/sidecar.md`) этот MUST **не** содержат и якорь не заменяют.
 

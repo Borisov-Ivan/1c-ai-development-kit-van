@@ -121,7 +121,7 @@ priority: 200
 
 ## SIMPLICITY CHECK (обязательный выход архитектора)
 
-Каждый отчёт `onec-code-architect` в режимах `design`, `plan-review`, `task-readiness`, `fix-quality`, `slice-decomposition`, `task-decomposition`, `deep-analysis` обязан содержать секцию ниже. Для `deep-analysis` (редизайн петлевого среза) Simplicity Check обязателен: редизайн предлагает техническое решение (consolidation vs минимум), а не аудит соответствия. Режимы **`scope-coherence-audit`**, **`precedent-coherence-audit`**, **`invariant-extraction`**, **`design-challenge`** Simplicity Check **не требуют** — это аудиты соответствия / адверсариальный challenge, а не выбор технического решения в одном change.
+Каждый отчёт `onec-code-architect` в режимах `design`, `plan-review`, `fix-quality`, `slice-decomposition`, `task-decomposition`, `deep-analysis` обязан содержать секцию ниже. Для `deep-analysis` (редизайн петлевого среза) Simplicity Check обязателен: редизайн предлагает техническое решение (consolidation vs минимум), а не аудит соответствия. Режимы **`task-readiness`**, **`scope-coherence-audit`**, **`precedent-coherence-audit`**, **`invariant-extraction`**, **`design-challenge`** Simplicity Check **не требуют**. Предупреждение `architect-simplicity-missing` ссылается на контроль простоты проверки: тот контроль смотрит этот же список режимов и не сужает его.
 
 ```markdown
 ## Simplicity Check

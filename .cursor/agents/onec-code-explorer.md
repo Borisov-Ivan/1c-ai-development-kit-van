@@ -26,6 +26,7 @@ Provide complete understanding of how algorithms work by tracing implementation 
 - `active` факты использовать как верифицированные, без повторного переоткрытия того же контракта;
 - `stale` факты использовать только с пометкой «требует переподтверждения»;
 - если код противоречит `active` KB — не замалчивать, а добавить `## Knowledge conflicts` с KB-ID и кратким diff «KB says / code says».
+- если код опровергает предпосылку закрытого решения из промпта — добавить секцию `## Premise conflicts` по образцу `## Knowledge conflicts`: `decision_id`, `refuting_anchor`, строки «решение опиралось на» и «код показывает». Без опровержения секцию не писать.
 
 В каждом отчёте при наличии `## Existing Knowledge` обязательна секция `## KB references`: для каждого KB указать `used`, `not relevant` или `conflict` и одну строку обоснования.
 
