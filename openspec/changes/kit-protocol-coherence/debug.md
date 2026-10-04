@@ -50,3 +50,12 @@ open_known_questions: []
 - Темы: G2 — accepted; G3 — accepted; G6 — accepted; G7 — accepted; G8 — accepted; G4 — deferred (строка диспетчера уже в рисках, рецепта на удаление нет); G9 — accepted.
 - Architect Gate: `reports/design-challenge-2026-10-04-2.md`
 - Следующий шаг: проверка постановки продолжается в том же прогоне
+
+## Slice Gate Decisions
+
+### Slice S1 — Конец среза (2026-10-04)
+Срез: S1 — Конец среза
+Решение: awaiting-acceptance
+Обоснование: все рабочие задачи реализованы; приёмочная задача передана на ручной прогон Primary.
+Изменения tasks: нет (S1.accept остаётся [ ])
+Связанный отчёт: reports/handoff-acceptance-S1-2026-10-04.md
