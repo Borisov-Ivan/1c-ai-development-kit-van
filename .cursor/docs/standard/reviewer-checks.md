@@ -186,7 +186,7 @@ Check via Anti-pattern Registry (see category 16):
   AP-027: Guard-then-catch (Попытка after guard validating same value) — HIGH
   AP-028: Check-after-establish (property/attribute check after type established) — HIGH
   AP-029: Defense stack (Попытка + Свойство as contract uncertainty compensation) — HIGH/CRITICAL
-  AP-030: Hidden partial result (Попытка+Продолжить/Возврат without user feedback) — HIGH
+  AP-030: скрытый частичный результат — уровень строки AP-030 в `.cursor/rules/bsl-antipatterns.mdc`, свой уровень чеклист не держит
   AP-032: Inconsistent persistent state (Попытка + persistent write + no re-raise + downstream dependency) — CRITICAL
   AP-047: Substituted Authority — local implementation replaces delegation to the owner of behavior (base/BSP/platform/common module) — HIGH
   AP-048: Manual reference/GUID serialization in exchange code — HIGH

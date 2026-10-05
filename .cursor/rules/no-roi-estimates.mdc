@@ -1,5 +1,5 @@
 ---
-description: Запрет на расчет ROI и временные оценки
+description: "Запрет на расчёт ROI и спонтанные оценки времени. Исключение: часы называет техпроект (openspec-techproject/SKILL.md и labor_standards.md)."
 alwaysApply: false
 ---
 
@@ -25,7 +25,7 @@ alwaysApply: false
 
 ## EXCEPTIONS
 
-- Спонтанные оценки трудозатрат в любых контекстах (proposal, design, apply, чат) запрещены.
+- Часы называет `.cursor/skills/openspec-techproject/SKILL.md` и его справочник `labor_standards.md`. Спонтанная оценка в другой команде нормой не считается.
 
 ---
 

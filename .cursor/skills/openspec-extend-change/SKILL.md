@@ -31,7 +31,7 @@ Chat Surface Contract — §2.6 `opsx-output-style.md`.
 
 Пользователь может передать:
 
-- `<change-name>` — имя change. Если не указано, определить по `openspec list --json`; при неоднозначности — `AskQuestion`.
+- `<change-name>` — имя change. Если не указано и открыта ровно одна заявка — дописывается она. Если несколько или ни одной — `AskQuestion` по `openspec list --json`.
 - Текст нового требования / пересмотра / замечания.
 - Ссылки на файлы в любом виде:
   - `@path/to/file.md`
@@ -60,7 +60,8 @@ Chat Surface Contract — §2.6 `opsx-output-style.md`.
 1. Прочитать этот `SKILL.md` (Command → Skill, `session-discipline.mdc`).
 2. Определить change:
    - если `<change-name>` указан — использовать его;
-   - иначе выполнить `openspec list --json` и выбрать активный / спросить пользователя.
+   - если имя не указано и открыта ровно одна заявка — дописывается она;
+   - иначе `openspec list --json` и `AskQuestion`.
 3. Выполнить `openspec instructions apply --change "<name>" --json`.
 4. Прочитать `openspec/project.md` и артефакты change из `contextFiles`: `proposal.md`, `design.md`, `tasks.md`, `specs/**` при наличии; для расширения scope также прочитать `debug.md` (если есть) — нужен для счётчика Scope Coherence Audit и записей `## Extend`.
 5. Прочитать только явно переданные source-файлы (`--from-*`, `@path`, пути в запросе). Трассы — через `/opsx:explore` (профиль bug). `--from-report` принимает (приоритет): `temp/reports/<тип>-YYYY-MM-DD-<slug>.md` (отчёт `Task` из Ultra-Lite explore **или** журнал `explain-*` из `/opsx:explain`), `openspec/changes/<name>/reports/` после переезда, `temp/explore-handoff-*.md` (handoff с блоком `## Постановка ЗНИ`); legacy-файлы — только через `--from-explore` по явной ссылке пользователя. **Если путь ещё в `temp/reports/…` или `temp/explore-handoff-*.md` — сначала перенести** в `openspec/changes/<name>/reports/` по `.cursor/rules/preserve-subagent-reports.mdc` § «Переезд в каталог ЗНИ», затем читать и ссылаться **только** на путь в каталоге ЗНИ; оригинал в `temp` не оставлять. Нет файла — тихий пропуск по правилу сохранения, не invent. Если указан `--code-sync`, source = артефакты change + `debug.md` + отчёты `reports/**` + результаты Code-Truth Gate; чтение BSL/XML до брифа всё равно запрещено.
@@ -244,10 +245,10 @@ Self-check перед выводом: уровень B1/B2 по классифи
 
 **Триггер 3 (объективный, петля приёмки — зеркало verify Layer 2.5):**
 
-Цель — поймать петлю **до** дорогого `/opsx:verify`, пока пользователь ещё в `/opsx:extend`. Метрика и порог — SSOT `.cursor/rules/vertical-slices.mdc` § ДЕТЕКТОР ПЕТЛИ ПРИЁМКИ (`AcceptLoop`, `PatchRounds`, `acceptance_loop_max` default 3).
+Цель — поймать петлю **до** дорогого `/opsx:verify`, пока пользователь ещё в `/opsx:extend`. Срабатывание — тот же детектор, что в `.cursor/rules/vertical-slices.mdc` § ДЕТЕКТОР ПЕТЛИ ПРИЁМКИ. Второе переоткрытие одной темы останавливает дописывание. Три передачи на приёмку без переоткрытия темы стоп не дают. Своей формулы «максимум из числа передач и числа правок» здесь нет.
 
-1. Для каждого среза `S<N>` с `S<N>.accept = [ ]` вычислить `AcceptLoop(S<N>)` и `PatchRounds(S<N>)` по `debug.md` (§ Slice Gate Decisions + § Extend —).
-2. Триггер 3 срабатывает, если для какого-либо `S<N>`: `max(AcceptLoop, PatchRounds) >= acceptance_loop_max`, **и** нет `reports/architecture-loop-redesign-*.md` новее последней `awaiting-acceptance` этого среза, **и** нет действующего (`≤7 дней`) `.gate-override.yaml` с `gate: acceptance-loop`.
+1. Прочитать детектор и применить его к журналу, не пересчитывая порог своей формулой.
+2. Триггер 3 срабатывает при срабатывании детектора, **и** нет `reports/architecture-loop-redesign-*.md` новее последней `awaiting-acceptance` этого среза, **и** нет действующего (`≤7 дней`) `.gate-override.yaml` с `gate: acceptance-loop`.
 
 **Если сработал Триггер 3** (приоритет над Триггерами 1/2 — разбирается корень, а не дрейф):
 
@@ -320,7 +321,8 @@ Architect обязателен, если:
 2. `specs/**/spec.md` — delta spec (`ADDED`, `MODIFIED`, `REMOVED`), минимум один Scenario на Requirement.
 3. `design.md` — `Existing Mechanisms`, `Design Rationale`, `Decisions`, `Slices`, `Risks`, `Open Questions`.
 4. `tasks.md` — slice-aware вставка:
-   - непринятый срез → inside-slice перед `S<N>.accept` (или legacy `S<N>.T<M>`);
+   - один непринятый срез → inside-slice перед `S<N>.accept` (или legacy `S<N>.T<M>`);
+   - дефект двух непринятых срезов → новый срез по правилу размещения дефекта в `.cursor/rules/vertical-slices.mdc`, не задача внутри одного из них;
    - принятый срез → fix-срез;
    - новая функциональность → новый срез или расширение непринятого, только после Ambiguity Gate;
    - legacy → подходящая секция или «Рефакторинг и качество».

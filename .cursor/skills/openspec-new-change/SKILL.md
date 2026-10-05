@@ -16,7 +16,7 @@ metadata:
 **Output style:**
 - Сводка в чате («что создано», следующий шаг) — шаблон **T-CONFIRM** §5.5 + **Chat Surface Contract** §2.6: handoff на языке эффекта, **без** перечня файлов; если материалы перенесены — одна фраза «материалы разбора перенесены в задачу» (без путей); **один** next step — `/opsx:verify <name>` (не «verify или apply», без auto-chain).
 - **Подтверждение постановки перед scaffold:** бриф по `.cursor/docs/templates/brief-card.md` (§5.1 Sync Card). **B0** при свежем `## Постановка ЗНИ` в чате / журнале explain / explore-handoff — **одна информирующая строка без согласования имени** (slug — техническая деталь; END TURN не делается). **B1** при свободном тексте — слот **Изменение** (+ опц. **Затронутое**) + `Подтвердить?`; план работ в чат **запрещён**. KB-discovery — internal, в чат не выводится. `temp/briefs/*.md` не создаются.
-- **Генерируемые артефакты** `proposal.md`, `design.md`, `tasks.md`, spec deltas — подчиняются §1 «Три слоя» и §3 «Запрет внутренних ID в пользовательских полях»: секции для заказчика/приёмки (`Why`, `What Changes`, `Scope`, `Scenarios`, `Requirements`) — UX-слой; внутренние ID (`S<N>.<M>`, `S<N>.accept`, `D<N>`, `R<N>`, `I<N>`, номера задач `12.9`) — только в `## Slices`, `## Decisions`, `## Tasks`, `## Risks`. Перечисления — нумерованные списки. Перед записью — self-check-5 (§7).
+- **Генерируемые артефакты** `proposal.md`, `design.md`, `tasks.md`, spec deltas — подчиняются §1 «Три слоя» и §3 «Запрет внутренних ID в пользовательских полях»: секции для заказчика/приёмки (`Результат`, `Why`, `What Changes`, `Scope`, `Scenarios`, `Requirements`) — UX-слой; внутренние ID (`S<N>.<M>`, `S<N>.accept`, `D<N>`, `R<N>`, `I<N>`, номера задач `12.9`) — только в `## Slices`, `## Decisions`, `## Tasks`, `## Risks`. Перечисления — нумерованные списки. Перед записью — self-check-5 (§7).
 
 **Steps**
 
@@ -189,6 +189,8 @@ metadata:
 
 5. **Create artifacts in sequence until apply-ready**
 
+   Порядок один: постановка, решение без срезов, проверка решения, требования, раздел срезов в решении, задачи. Срезы собираются после требований, потому что ссылаются на их сценарии. Заголовки шагов проверки решения и нарезки этому порядку следуют.
+
    Use the **TodoWrite tool** to track progress through the artifacts.
 
    **Error handling (MANDATORY for all Task delegations in new):**
@@ -213,7 +215,7 @@ metadata:
         - `dependencies`: Completed artifacts to read for context
       - Read any completed dependency files for context
       - If the change name/brief was derived from a `## Постановка ЗНИ` block (chat, `temp/reports/explain-*.md`, or `temp/explore-handoff-*.md`) — or from a legacy-файла по явной ссылке пользователя (шаг 1.b, «Legacy-источники») — use it as `exploreContext` for `proposal`, `design`, `specs`, and `tasks` (verified sections only; hypotheses — с пометкой `[hypothesis: план]`).
-      - If `exploreContext` exists, use it as source context for `proposal`, `design`, `specs`, and `tasks`: для нового формата (`## Постановка ЗНИ`) — Симптом → `## Why`, Корневая причина / Что менять → `## What Changes` / scope, Файлы → `## Scope`, Приёмка → `## Acceptance Criteria` / scenarios, Связь с архивом → `## Decisions` (extends/precedent), Architect/verify → Design Gate, Срезы (черновик) → подсказка `## Slices`, Тема маркера → Metadata Gate, **Открытые решения → `design.md` § Открытые вопросы** (и карточка решения пользователю до apply, если решение блокирующее). Для legacy — `Ключевые решения` → scope/design rationale, `Knowledge findings` → context/assumptions, `Рекомендации по срезам` → `## Slices`, `Architect Gate` → Design Gate. Treat `exploreContext` as verified investigation context only to the extent its reports are referenced; do not invent code facts from prose.
+      - If `exploreContext` exists, use it as source context for `proposal`, `design`, `specs`, and `tasks`: для нового формата (`## Постановка ЗНИ`) — «Что менять» и «Приёмка» (если постановка про дефект — ещё «Симптом») → первый раздел `## Результат`; Симптом → `## Why`, Корневая причина / Что менять → `## What Changes` / scope, Файлы → `## Scope`, Приёмка → `## Acceptance Criteria` / scenarios, Связь с архивом → `## Decisions` (extends/precedent), Architect/verify → Design Gate, Срезы (черновик) → подсказка `## Slices`, Тема маркера → Metadata Gate, **Открытые решения → `design.md` § Открытые вопросы** (и карточка решения пользователю до apply, если решение блокирующее). Для legacy — `Ключевые решения` → scope/design rationale, `Knowledge findings` → context/assumptions, `Рекомендации по срезам` → `## Slices`, `Architect Gate` → Design Gate. Treat `exploreContext` as verified investigation context only to the extent its reports are referenced; do not invent code facts from prose.
       - **Special case: `tasks` artifact (slice-aware task decomposition)**:
         Before delegating tasks, the **Slice Generation Gate** must have been passed (see step 5e.1 below) and design.md MUST contain a `## Slices` section.
 
@@ -237,13 +239,14 @@ metadata:
         - H1 headers `# Срез S<N>: <имя>` (one per slice from design)
         - metadata blocks under each slice header (Сценарий, **Primary acceptance**, Приёмка, Связь со spec, Зависимости; опц. **Режим apply:** mechanical)
         - task IDs with slice prefix `S<N>.<M>`
-        - **exactly one** acceptance task `S<N>.accept` per slice, with a bullet-checklist of scenarios in its body (one bullet per Scenario from `**Связь со spec:**`)
+        - **exactly one** acceptance task `S<N>.accept` per slice. Покрытие сценария — правило в `.cursor/rules/vertical-slices.mdc`: сценарий, закрытый задачей среза, в чеклисте приёмки может не стоять отдельной строкой и сиротой не считается. Требования «буллет приёмки на каждый сценарий» здесь нет.
         - slice-gate markers `<!-- slice-gate: <criterion> -->`
 
         No classification P0–P4, no `# Фаза N`, no `<!-- phase-gate -->`, no multiple `S<N>.T<M>` per slice (legacy format — only for migrated changes). See `.cursor/rules/vertical-slices.mdc` (в т.ч. **ИНВАРИАНТ: Defect placement** — не плодить `# Срез S<N+1>` для дефекта непринятого среза без cross-slice / frozen-slice).
 
         Architect reads files independently and returns tasks.md content.
         Save the result to `outputPath`.
+        После записи `tasks.md` вызвать **openspec-quality-controller** полным шаблоном `.cursor/skills/1c-agent-patterns/quality-controller.md`, без подмножества критериев. Вызов из создания не удалять. Критические замечания показать пользователю и спросить, пересобрать ли задачи.
         If architect Task fails — двухшаговая цепочка `model-selection.mdc`; после исчерпания — СТОП + канон, не писать tasks.md текстом оркестратора.
 
         **Post-tasks self-check (Primary + Acceptance Coverage):**
@@ -260,6 +263,7 @@ metadata:
       - Apply `context` and `rules` as constraints - but do NOT copy them into the file
       - **Metadata block**: When creating `proposal.md`, ALWAYS add `## Metadata (comment markers)` (`developer`, `comment_suffix`, `marker_style`) immediately after `## Why`.
       - **Forms mode**: When creating `proposal.md`, ALWAYS add `## Forms mode` with `form_mode:` (`manual` | `assisted` | `bsl-only` | `n/a`) или map `forms:` — по `forms-mxl-mode-gate.mdc`. Без управляемых форм / kit → `form_mode: n/a`. Единый `artifact_mode` в **новых** change не писать как SSOT. Финальные per-form режимы (если формы в scope) — цикл на шаге 5.d.1 до Design Gate AskQuestion.
+      - **Результат**: при первом создании `proposal.md` всегда ставить `## Результат` первым заголовком, до `## Why`. Блок `## Metadata (comment markers)` по-прежнему сразу после `## Why`. Источник абзаца — поля постановки «Что менять» и «Приёмка»; если постановка про дефект, к источникам добавляется «Симптом»: абзац говорит, что перестаёт происходить и где это видно, а не только какую правку сделали. Без постановки — уже написанные «что меняется» и критерии приёмки. Тон: 2–4 предложения о том, что можно сделать и где это видно, без путей к файлам, номеров внутренних шагов и срезов, имён команд и агентов. Раздел пишется только при первом создании описания. Если шаблон уже открывается заголовком `## Результат` — заполнить этот раздел, второй такой заголовок не вставлять. При продолжении создания, если в существующем `proposal.md` раздела нет, раздел не добавлять.
       - Show brief progress: "✓ Created <artifact-id>"
 
    b. **Continue until all `applyRequires` artifacts are complete**
@@ -309,9 +313,9 @@ metadata:
       - Есть явное условие → создать `openspec/changes/<name>/debug.md` с `## External Contract Ledger` по schema `openspec-verify-change/SKILL.md` § Load artifacts. Поля: `id: EC-*`, `authority: customer-direct | accepted-reference`, `source`, `axis`, `primary_event_id`, `primary_event_at` (ISO с поясом). Authority явного указания **не** понижать без решения пользователя и **не** выводить по смыслу текста.
       - Тема или ось неоднозначны → **один** вопрос классификации; не объединять по текстовой близости.
 
-   e. **Design Gate (MANDATORY — after design + Forms Mode Gate, before specs/tasks)**:
+   e. **Design Gate (MANDATORY — проверка решения после решения без срезов, до требований)**:
 
-      After the `design` artifact is created and written, **before** proceeding to `specs` or `tasks`:
+      After the `design` artifact is created and written, **before** proceeding to `specs`:
 
       1. Check triggers from `architect-gate.mdc` on the just-created design.md:
          - **Objective markers**: Grep design.md for bug fix markers, base procedure interception, new metadata objects
@@ -349,9 +353,9 @@ metadata:
       7. **If no triggers fired** → continue without pause
       8. **Продуктовые развилки не закрывать авторским ответом.** Находка архитектора с классом «продуктовая развилка», пункт «Открытые решения» передачи и открытый вопрос описания о наблюдаемом поведении не вписываются в `## Decisions` как выбранный агентом вариант. Они остаются открытыми и передаются в шаг 5.e.2. Вопрос о способе реализации в этот класс не входит: его агент закрывает сам.
 
-   e.1. **Slice Generation Gate (MANDATORY — after Design Gate, before `specs`/`tasks`):**
+   e.1. **Slice Generation Gate (MANDATORY — после требований, до задач):**
 
-      After the `design` artifact is created (and Design Gate passed), **before** proceeding to any artifact whose creation depends on design (notably `tasks`, but also before further specs refinement):
+      После записи требований (`specs`) и пройденной проверки решения, **до** `tasks`. Раздел срезов не ставится раньше требований.
 
       1. Read the just-created `design.md` and all `specs/**/spec.md`.
       2. Count likely tasks volume from design scope (rough estimate — files, procedures, UI elements).
@@ -375,10 +379,7 @@ metadata:
            - `Принять` → перейти к `tasks`.
            - `Скорректировать` → принять пользовательский комментарий, повторно делегировать architect с этим комментарием, обновить `design.md`.
            - `Пересобрать срезы` → повторить делегирование со сменой модели или указанием «другое группирование».
-      5. **If `## Slices` section is present:**
-         - Delegate to **openspec-quality-controller** (quick check — criteria 1, 3, 5, 5b, 8, 8b, 9–11 from QC), see `.cursor/skills/1c-agent-patterns/quality-controller.md`. **Do NOT** grep keyword lists for criterion 8 — QC semantic judgment only. Criterion 8b (self-achievable acceptance) — catch false slice boundaries at authoring: merge slices, do not defer.
-         - If critical issues — show the user and AskQuestion whether to regenerate.
-         - Otherwise — proceed.
+      5. **If `## Slices` section is present:** ранняя проверка раздела срезов до списка задач остаётся за архитектором декомпозиции (шаг 4). Контролёр срезов здесь не вызывается.
       6. **Foundation Slice Guard** (before AskQuestion «Принять» on proposed slices):
          1. Grep `specs/**/spec.md` for `scenario-implementation-leak` per `.cursor/rules/openspec-specs-gate.mdc` (implementation-leak markers in `- **THEN**` only — structural check).
          2. If QC (or architect output) indicates `slice-foundation-with-gate` / `slice-not-vertical` on a proposed decomposition — **do not offer «Принять»**; only «Скорректировать» / «Пересобрать» with explanation (merge foundation into primary slice).
@@ -400,6 +401,15 @@ metadata:
       4. Список непуст — одно сообщение-пакет по `.cursor/docs/templates/decision-block.md` § «Пакет развилок»: нумерованные вопросы, у каждого два-три варианта с честным «но», одно приглашение ответить на весь пакет. **END TURN.** Утверждение о системе, от которого зависит выбор в пакете, подавать по правилу доказательства `.cursor/docs/templates/decision-block.md` § «Доказательство утверждения о системе». Факт проверять в уже идущем вызове архитектора или исследователя до пакета. Непроверенный факт включать в пакет нумерованным вопросом о самом факте, без варианта на этом утверждении. Отбор продуктовых развилок не менять.
       5. Ответы записываются в журнал решений (`debug.md` § `## Verify decision ledger` и зеркало в `design.md`) **до** первой проверки. У каждой записи писать `premise: {claim, anchor}` — утверждение и доказательство, на которых принят выбор, либо `premise: none` для процессного решения. Свой ответ на помеченную продуктовую развилку в постановку не вписывать.
       6. Пока известные на момент создания продуктовые развилки не закрыты ответами, первая проверка не стартует.
+
+   f. **Проверка раздела «Результат» (только первое создание описания)**
+
+      Перед итогом первого создания прочитать `proposal.md`. Если этот прогон впервые записал описание:
+      - описание начинается с `## Результат`;
+      - в разделе 2–4 предложения;
+      - в тексте нет пути к файлу, номера внутреннего шага или среза, имени команды или агента.
+      Если проверка не пройдена — переписать раздел на месте по тем же правилам тона. Итог создания (шаг 6) не выводить, пока проверка не пройдена.
+      Если описание уже существовало и раздела `## Результат` в нём нет — проверку не запускать и раздел не добавлять.
 
 6. **Show final status**
    ```bash

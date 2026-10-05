@@ -21,7 +21,7 @@ review/explore → extend (user) → verify → apply
 | Этап | Команда | Что происходит | Агенты |
 |------|---------|----------------|--------|
 | **Исследование** | `/opsx:explore` | Карточный бриф B3 (`brief-card.md`) → ≤3 `Task` (trace + explorer) → превью + **Итог / Вердикт / Дальше** в чате → финал bug: блок `## Постановка ЗНИ` **в чате**. Полные отчёты — `temp/reports/`. Опциональный handoff — `temp/explore-handoff-*.md` по словесной просьбе. Профили bug/question. **Knowledge Discovery**. | onec-code-explorer, onec-trace-analyst, onec-code-architect |
-| **Создание / resume change** | `/opsx:new` | proposal → design (вкл. `## Slices`) → specs → tasks (с `# Срез S<N>`). Повторный вызов — дозавершение артефактов. | onec-code-architect (slice decomposition + slice-aware task decomposition) |
+| **Создание / resume change** | `/opsx:new` | Порядок — шаг 5 скилла создания: постановка, решение без срезов, проверка решения, требования, срезы, задачи. Повторный вызов — дозавершение артефактов. | onec-code-architect (slice decomposition + slice-aware task decomposition) |
 | **Проверка** | `/opsx:verify` | Pre-flight + **internal Repair Loop** (max 2) для repair-класса без чата. Decision → один вопрос A/B, END TURN. Одна команда → **одно** финальное сообщение. `snapshot` без опоры на историю чата. | onec-code-architect, openspec-quality-controller |
 | **Расширение scope** | `/opsx:extend` | **user-extend:** бриф → правки → hint verify. **repair-from-verify:** internal из verify, **без** сообщений в чат. | onec-code-architect, onec-code-explorer |
 | **Реализация** | `/opsx:apply` | **Step-by-slice** (default): один срез — карточка приёмки — следующий срез. Опции: step-by-step / batch | onec-code-writer + onec-code-reviewer |
@@ -51,7 +51,8 @@ review/explore → extend (user) → verify → apply
 
 | Случай | Действие |
 |--------|----------|
-| Slice mode, дефект в **непринятом** срезе S<N> | Вставить новую задачу `S<N>.<M+1>` **перед** `S<N>.accept` (или legacy `S<N>.T<M>`) |
+| Slice mode, дефект в **одном непринятом** срезе S<N> | Вставить новую задачу `S<N>.<M+1>` **перед** `S<N>.accept` (или legacy `S<N>.T<M>`) |
+| Slice mode, дефект задевает **два** среза с неподписанной приёмкой | Новый срез по правилу размещения дефекта в `.cursor/rules/vertical-slices.mdc`, не задача внутри одного из них |
 | Slice mode, дефект в **принятом** срезе S<K> | Создать **fix-срез** `S<N+1>: Исправление дефекта S<K>` (зависит от S<K>) |
 | Slice mode, новая функциональность | Новый срез `S<N+1>` или расширение существующего непринятого |
 | Новое требование / отчёт ревью / архитектурное замечание в существующем change | `/opsx:extend <name> [--from-review …]` → user-extend (бриф) → hint `/opsx:verify` |
@@ -74,7 +75,7 @@ review/explore → extend (user) → verify → apply
 - Каждый срез заканчивается приёмочной задачей `S<N>.accept` и `<!-- slice-gate: ... -->`
 - BSL — только через агентов (onec-code-writer → onec-code-reviewer)
 - Для точечных правок (2–10 строк, 1 файл) — Light Mode (см. `1c-halt-triggers.mdc` § LIGHT MODE); для slice mode оформить как минимальный срез S<N> с одной задачей и приёмочным тестом
-- Pre-apply `/opsx:verify` **не блокирует** `/opsx:apply` (advisory). Пропуск post-apply verify закрывает archive (auto-verify) или явный `/opsx:verify` после apply.
+- Обзор маршрута повторяет следующий шаг из итога последней проверки (поле итога и открытая развилка в шапке отчёта, строка «Следующий шаг» в теле) и не обещает, что проверка до разработки никогда не останавливает старт. Пропуск post-apply verify закрывает archive (auto-verify) или явный `/opsx:verify` после apply.
 
 ## СПРАВОЧНИК ПАТТЕРНОВ
 

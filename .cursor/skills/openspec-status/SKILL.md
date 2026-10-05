@@ -61,11 +61,18 @@ Read-only skill. Не вызывает субагентов, не правит �
    - `Get-ChildItem openspec/changes/<name>/reports/*.md` — сортировать по дате имени (`YYYY-MM-DD`), группировать по типу (`verification-*`, `architecture-*`, `exploration-*`, `trace-analysis-*`, `resolved-contract-*`, `design-review-*`, `migrate-to-slices-*`, `slice-acceptance-*`, `review-*`, `prerelease-review-*`).
    - Для каждого типа — последний файл с датой.
 
-6. **Recommend next command.**
-   - Если `awaiting-acceptance` в debug.md → рекомендация: `/opsx:apply <name>` (войдёт в resume-with-pending-verdict).
+6. **Recommend next command.** Хозяин — итог последнего отчёта `reports/verification-*.md` с `verify_mode: pre-apply`: поля `verdict` и `snapshot.open_decision_id` в шапке, строка «Следующий шаг» в теле. Дата в имени отчёта не решает, новее ли дополнение постановки.
+
+   Сравнить хэши файлов постановки с `snapshot.artifact_hashes`. Отметки `[x]` в `tasks.md` дополнением не считать (сырой `tasks.md` разошёлся, `tasks.md#normalized` совпал). `debug.md` в сравнение не входит.
+   - Хэши разошлись и в `debug.md` есть секция дополнения (`## Extend`), в том числе за тот же день — рекомендация равна строке «Следующий шаг» последней такой секции. Дата заголовка секции источником не служит.
+   - Хэши разошлись и такой секции нет — старый шаг отчёта не использовать. Следующий шаг: `/opsx:verify <name>`.
+
+   Если хэши совпали или отчёта нет:
+   - Если `awaiting-acceptance` в debug.md и итог разрешает разработку (или отчёта нет) → `/opsx:apply <name>` (войдёт в resume-with-pending-verdict).
    - Если slice mode и все `S<N>.accept` = `[x]` → `/opsx:archive <name>` (+ возможно `/opsx:verify <name>` если нет final verify).
    - Если есть `[ ]` в tasks и нет pre-apply verify отчёта → `/opsx:verify <name>`.
-   - Если есть `[ ]` и есть pre-apply verify → `/opsx:apply <name>`.
+   - Если итог запрещает старт (`verdict` не разрешает) или `snapshot.open_decision_id` не пуст → строка «Следующий шаг» из тела отчёта, не разработка.
+   - Если итог разрешает старт и есть `[ ]` → `/opsx:apply <name>`.
    - Если artifacts не `done` (нет tasks.md) → `/opsx:new <name>` (resume).
    - Иначе — общая рекомендация с перечнем вариантов.
 

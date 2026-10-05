@@ -22,7 +22,7 @@ priority: 200
 - Перехват/компенсация базовой платформенной процедуры (Grep design.md)
 - Новый объект метаданных в design (Grep design.md)
 - В `debug.md` change: **M ≥ 3** строк с `Architect Gate:\s*(не вызывался|не требовался|declined|—)` (см. `.cursor/skills/openspec-extend-change/SKILL.md`, п. 5a, Триггер 2) **и** (нет `reports/architecture-extend-coherence-*.md` **или** дата последней секции `## Extend — YYYY-MM-DD` в `debug.md` новее даты в имени новейшего `architecture-extend-coherence-*.md`)
-- **Петля приёмки (acceptance loop):** для среза `S<N>` с `S<N>.accept = [ ]` метрика `max(AcceptLoop, PatchRounds) >= acceptance_loop_max` (SSOT — `.cursor/rules/vertical-slices.mdc` § ДЕТЕКТОР ПЕТЛИ ПРИЁМКИ) **и** нет `reports/architecture-loop-redesign-*.md` новее последней `awaiting-acceptance` этого среза **и** нет действующего (`≤7 дней`) `.gate-override.yaml` с `gate: acceptance-loop`. Потребители — verify Layer 2.5 (blocking) и extend §5a Триггер 3; режим архитектора — `deep-analysis`
+- **Петля приёмки:** срабатывание — детектор в `.cursor/rules/vertical-slices.mdc` § ДЕТЕКТОР ПЕТЛИ ПРИЁМКИ. Второе переоткрытие одной темы останавливает правки. Три передачи на приёмку без переоткрытия темы стоп не дают. Своей формулы «максимум из числа передач и числа правок» здесь нет. Нет отчёта редизайна новее последней передачи этого среза и нет действующего (`≤7 дней`) `.gate-override.yaml` с `gate: acceptance-loop`. Потребители — verify Layer 2.5 и extend §5a Триггер 3; режим архитектора — `deep-analysis`
 
 Детальные списки grep-фраз (объективные и семантические маркеры для design.md / tasks.md) — в `.cursor/skills/openspec-verify-change/SKILL.md`, Layer 4 (Independent Challenge) и Layer 2 (структурные проверки design).
 
@@ -110,7 +110,7 @@ priority: 200
 
 | Контекст | Тип | Действие |
 |----------|-----|----------|
-| **explore** (Structured Investigation, шаг Decide) | blocking | Архитектор **обязателен**. AskQuestion пользователю: «Сработали триггеры [...]. Запустить архитектора?» без равноправной опции пропуска. Отказ только через явный пользовательский ввод с причиной; фиксируется в блоке «Постановка ЗНИ» как `declined: <reason>`. Если архитектор не запущен и отказ не зафиксирован — статус `required`, `/opsx:new` не рекомендовать |
+| **explore** (Structured Investigation, шаг Decide) | blocking | Архитектор запускается без вопроса. Отказ — только флаг пропуска при создании заявки (`--skip-architect`). Поле постановки отказ не хранит. Если архитектор не запущен — статус `required` |
 | **new** (Design Gate) | blocking | Без опции пропуска. Escape только через флаг `--skip-architect <причина>`, оставляющий явный аудит-след `.gate-override.yaml`. |
 | **verify** Layer 2.5 (Loop Detection) | blocking | При срабатывании петли приёмки (объективный триггер выше) → архитектор в режиме `deep-analysis` — редизайн-аудит петлевого среза; отчёт `reports/architecture-loop-redesign-*.md`; FAIL → NO-GO. Зеркало в extend §5a Триггер 3. См. `.cursor/skills/openspec-verify-change/SKILL.md` Layer 2.5. |
 | **verify** Layer 4 (Independent Challenge) | audit | Архитектор в режиме `design-challenge` — **независимый адверсариальный аудит** `proposal.md` ↔ `design.md`. Триггер: первый pre-apply прогон; **изменившийся хэш архитектурной оси**; конфликт внешнего контракта с design; две жизнеспособные альтернативы; риск безопасности / ресурсов / прецедента. Один `mtime(design.md)` без смены входного хэша и без профильного триггера **не** создаёт новый полный вызов — переиспользуется прошлый `design-challenge-*.md`. Отчёт `reports/design-challenge-YYYY-MM-DD.md`. Это **не дублирует** Architect Gate из new/explore: new даёт согласие на подход (auctorial), challenge даёт независимое подтверждение (adversarial). См. `.cursor/skills/openspec-verify-change/SKILL.md` Layer 4. |
@@ -148,7 +148,7 @@ priority: 200
 Gate считается пройденным, если выполняется **любое** из:
 1. Файл `architecture-*.md` существует в `reports/` change или `temp/reports/`, и его `scope.files` или `scope.modules` в YAML front-matter пересекаются с текущей задачей. (Одиночный старый отчёт без пересечения scope — Gate НЕ закрыт).
 2. Отчёт зарегистрирован в `reports/_manifest.yaml` со статусом `active` и подходящим `scope`.
-3. Пользователь явно отклонил архитектора через флаг `--skip-architect` (задокументировано в `.gate-override.yaml`) или через `Architect Gate: declined: <reason>` в поле «Architect / verify» блока «Постановка ЗНИ». При последующем `/opsx:new` причина из блока должна быть подтверждена флагом `--skip-architect <причина>` и перенесена в `.gate-override.yaml`; без этого Design Gate снова срабатывает.
+3. Пользователь явно отклонил архитектора флагом `--skip-architect` при создании заявки (задокументировано в `.gate-override.yaml`). Поле постановки отказ не хранит. Без флага Design Gate снова срабатывает.
 4. Триггеры не сработали (ни один из трёх групп).
 5. Для **scope-drift** триггеров (объективный счётчик Extend без архитектора и семантический `Drift-check` из брифа `/opsx:extend`): Gate закрывается **только** файлом `reports/architecture-extend-coherence-*.md`, созданным **после** события, поднявшего триггер. Обычные `architecture-*.md` и `architecture-extend-*.md` (без суффикса coherence) **не закрывают** отдельно зафиксированную scope-drift проблему.
 

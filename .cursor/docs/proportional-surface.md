@@ -15,7 +15,7 @@
 ## Стык
 
 - Reviewer: ≥1 REFACTOR при систематическом шуме поверхности.
-- Apply/review: не закрывать задачу с таким REFACTOR без `onec-code-simplifier` или явного waive пользователя.
+- Apply/review: обязанность не закрывать задачу — якорь поверхности в `.cursor/rules/1c-agent-delegation.mdc`. Здесь второй формулы нет.
 - Sidecar (S5) **не** несёт этот MUST.
 
 Фикстура (optional smoke): `temp/fixtures/proportional-surface-noisy-module.bsl` — создать локально при проверке (каталог `temp/fixtures/` в kit не поставляется).
