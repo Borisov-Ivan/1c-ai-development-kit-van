@@ -263,9 +263,9 @@ QC оценивает критерии 1–6, 8, **8b**, 9–11 из `vertical-s
 
 **2.2. Code-Truth (механический)** — для каждого технического имени в backticks из `design.md`/`tasks.md`/`debug.md`/`specs/**` запустить `Grep` по путям из `openspec/project.md`. См. `.cursor/rules/code-truth-gate.mdc`.
 
-В `pre-apply` — `phantom-symbol` = WARNING; в `post-apply` — для `[x]` задач/принятых срезов CRITICAL (см. `code-truth-gate.mdc`).
+Тяжесть — раздел SEVERITY в `.cursor/rules/code-truth-gate.mdc`. Проверка до разработки не понижает имя на закрытой задаче до предупреждения. Своей шкалы здесь нет.
 
-**2.3. Spec ↔ Tasks ↔ Design coverage** — каждый `#### Scenario:` из `specs/**/spec.md` должен встречаться в `## Slices` design (строка «Scenarios из spec») И в чеклисте какого-то `S<N>.accept`. Иначе — алерт `scenario-orphan-design` или `scenario-orphan-accept`.
+**2.3. Spec ↔ Tasks ↔ Design coverage** — каждый `#### Scenario:` из `specs/**/spec.md` должен быть назван в `## Slices` design (строка «Scenarios из spec»). Иначе — `scenario-orphan-design`. Отдельный буллет приёмки на каждый сценарий не требуется: сценарий, закрытый задачей среза, не сирота приёмки (правило покрытия в `.cursor/rules/vertical-slices.mdc`).
 
 **2.4. Cross-Archive Regression Audit (precedent regression)** — защита от молчаливой отмены ранее принятого контракта. **SSOT (триггеры, алгоритм, матрица severity, бюджет ≤10 архивов):** `.cursor/rules/precedent-regression-gate.mdc`, секция «АЛГОРИТМ VERIFY LAYER 2.4» — Read и выполнить, здесь не дублируется. Выполняется в `pre-apply`; в `post-apply` для непринятых задач/срезов; пропускается, когда все задачи `[x]` (постфактум приёмка не пересматривает регрессию дельты). CRITICAL `precedent-regression` / `invariant-drift` / `load-bearing-adr-bypass` → класс **decision** в Repair Loop.
 
@@ -273,7 +273,7 @@ QC оценивает критерии 1–6, 8, **8b**, 9–11 из `vertical-s
 
 - `PASS` — все критерии OK / только INFO.
 - `WARNING` — есть несущественные несостыковки (один scenario без покрытия в матрице, лишний legacy-маркер). На вердикт идёт как «не блокирует apply».
-- `FAIL` — циклы зависимостей срезов, `accept-checklist-empty`, `primary-acceptance-missing`, `acceptance-simplicity-overload`, `slice-not-vertical`, **`slice-accept-not-self-achievable`**, `slice-foundation-with-gate`, `user-task-contract-violation`, дублирование `S<N>.accept` в одном срезе, CRITICAL `phantom-symbol` в post-apply, CRITICAL precedent-regression (`precedent-regression` / `invariant-drift` / `load-bearing-adr-bypass`), или блокер § External validity (`external-contract-open` / `external-contract-unclassified-axis` / `external-contract-unregistered` / `external-contract-second-signal` / `external-contract-internal-close`).
+- `FAIL` — циклы зависимостей срезов, `accept-checklist-empty`, `primary-acceptance-missing`, `acceptance-simplicity-overload`, `slice-not-vertical`, **`slice-accept-not-self-achievable`**, `slice-foundation-with-gate`, `user-task-contract-violation`, дублирование `S<N>.accept` в одном срезе, CRITICAL `phantom-symbol` по разделу тяжести `.cursor/rules/code-truth-gate.mdc` (в том числе имя на закрытой задаче в проверке до разработки), CRITICAL precedent-regression (`precedent-regression` / `invariant-drift` / `load-bearing-adr-bypass`), или блокер § External validity (`external-contract-open` / `external-contract-unclassified-axis` / `external-contract-unregistered` / `external-contract-second-signal` / `external-contract-internal-close`).
 
 `FAIL` в Layer 2 — это **NO-GO**.
 
@@ -287,9 +287,9 @@ QC оценивает критерии 1–6, 8, **8b**, 9–11 из `vertical-s
 
 **Алгоритм:**
 
-1. Для каждого среза `S<N>` с `S<N>.accept = [ ]` вычислить `AcceptLoop(S<N>)` и `PatchRounds(S<N>)`.
-2. Ни для одного среза порог не достигнут → `layer_2_5_loop_detection: PASS`, идти на Layer 3.
-3. Порог достигнут для среза `S<N>`:
+1. Срабатывание читать из детектора `.cursor/rules/vertical-slices.mdc` § ДЕТЕКТОР ПЕТЛИ ПРИЁМКИ, не из своей формулы. Второе переоткрытие одной темы останавливает проверку так же, как дописывание и правило архитектора. Три передачи на приёмку без переоткрытия темы стоп не дают.
+2. Детектор не сработал → `layer_2_5_loop_detection: PASS`, идти на Layer 3.
+3. Детектор сработал для среза `S<N>`:
    - **Override:** в корне change есть `.gate-override.yaml` с `gate: acceptance-loop` — прочитать `timestamp`: ≤7 дней → `SKIPPED-override` (одна строка в чат: «Разбор петли приёмки отложен по вашему решению от <дата>; отсрочка истекает через <N> дней»), идти на Layer 3; >7 дней → override истёк (`gate-override-expired` в info), продолжить как срабатывание.
    - **Закрытие:** существует `reports/architecture-loop-redesign-*.md`, датированный **позже** последней `awaiting-acceptance` среза `S<N>` → петля уже разобрана архитектором → `layer_2_5_loop_detection: PASS`, идти на Layer 3.
    - Иначе — **запустить редизайн-аудит:** `Task(onec-code-architect, mode=deep-analysis)` по таблице шагов в `model-selection.mdc` (раздел «Закрытая эскалация Fable»; заголовок раздела не переименовывать). Второй перечень моделей здесь не держать. С loop-контекстом: история раундов `S<N>` (записи Slice Gate Decisions + Extend —), ссылки на трассы/отчёты/`debug.md`, явный вопрос «корень один или это N независимых дефектов; предложить consolidation vs минимум». Запуск — `run_in_background: true`, блок **Final message constraint** (как Layer 4). Сохранить `reports/architecture-loop-redesign-YYYY-MM-DD.md`. Append `debug.md` § Loop Detection (формат — `vertical-slices.mdc`).
@@ -308,7 +308,7 @@ QC оценивает критерии 1–6, 8, **8b**, 9–11 из `vertical-s
 1. **Why → Requirements.** В `proposal.md` `## Why` есть пункты, не покрытые ни одним `### Requirement` в `specs/**/spec.md`? → `why-orphan-requirement` (FAIL).
 2. **Requirements → Scenarios.** Каждый `### Requirement` имеет ≥1 `#### Scenario:`? Иначе → `requirement-orphan-scenario` (FAIL).
 3. **Scenarios → Slices.** Каждый `#### Scenario:` упомянут в `## Slices` design.md? Иначе → `scenario-orphan-slice` (WARNING — может быть подобрано в Layer 2; FAIL только если несовпадение системное).
-4. **Slices → Acceptance.** Каждый Scenario, заявленный в `**Связь со spec:**` среза, есть буллетом в чеклисте `S<N>.accept` этого среза? Иначе — алерт `accept-bullets-missing-scenario` (WARNING) от Layer 2 (5b QC); Layer 3 не дублирует.
+4. **Slices → Acceptance.** Сценарий, закрытый задачей среза, не сирота приёмки — правило покрытия в `.cursor/rules/vertical-slices.mdc`. Проверка, что сценарий назван в разделе срезов решения, остаётся в пункте 3. Своей проверки «сценарий обязан быть буллетом приёмки» здесь нет.
 5. **Slices → Tasks.** Для каждого среза есть рабочие задачи (`S<N>.<M>`) И ровно одна `S<N>.accept`. Срез без рабочих задач — алерт `slice-empty` (FAIL).
 6. **Scenario observability (`scenario-implementation-leak`).** Grep `specs/**/spec.md`: для каждого `#### Scenario:` проверить `- **THEN**` на маркеры implementation-leak (см. `.cursor/rules/openspec-specs-gate.mdc` секция «НАБЛЮДАЕМОСТЬ СЦЕНАРИЕВ»). При совпадении — **WARNING** `scenario-implementation-leak`; рекомендация: переписать THEN наблюдаемо, детали — в design.md. Не эскалирует в FAIL Layer 3, но включается в отчёт verify.
 7. **Metadata domain_label (`process-only-marker-suffix`).** Read `proposal.md` § `## Metadata (comment markers)` (dual-parser: yaml или list). Baseline запреты — `.cursor/docs/marker-canon.md` ⊕ project overlay. Если `comment_suffix` match → **WARNING** `process-only-marker-suffix`; рекомендация: переписать suffix или `/opsx:extend` перед apply. Не FAIL Layer 3.

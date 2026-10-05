@@ -13,7 +13,7 @@ Archive multiple completed changes in a single operation.
 
 This skill allows you to batch-archive changes, handling spec conflicts intelligently by checking the codebase to determine what's actually implemented.
 
-**ПРОТОКОЛ АРХИВАЦИИ — ПОЛНЫЙ, per change (HARD).** Bulk-archive — это пакетный запуск **того же** протокола, что `/opsx:archive` (`.cursor/skills/openspec-archive-change/SKILL.md`): slice-gate (непринятые `S<N>.accept`), verify-отчёт, баланс маркеров `// +++`/`// ---`, code-truth, извлечение ADR/KB — для **каждого** change. Шаги ниже описывают только пакетную обёртку (выбор, конфликты specs, сводка). **Запрещено** архивировать change в обход полного протокола; если для какого-то change полный протокол не проходит (блокер slice-gate, незакрытые задачи) — этот change пропускается с пометкой в сводке, остальные продолжаются. Осознанный обход — только явный `--force-legacy` per change, как в одиночном archive.
+**ПРОТОКОЛ АРХИВАЦИИ — ПОЛНЫЙ, per change (HARD).** Bulk-archive — это пакетный запуск **того же** протокола, что `/opsx:archive` (`.cursor/skills/openspec-archive-change/SKILL.md`): slice-gate (непринятые `S<N>.accept`), verify-отчёт, баланс маркеров `// +++`/`// ---`, code-truth, извлечение ADR/KB — для **каждого** change. Шаги ниже описывают только пакетную обёртку (выбор, конфликты specs, сводка). **Запрещено** архивировать change в обход полного протокола. Обычные незакрытые задачи заявку не пропускают и предупреждение в чат не пишут — как шаг 3 одиночного архива. Пропуск с пометкой в сводке — только блокер непринятой приёмки среза; остальные change продолжаются. Осознанный обход — только явный `--force-legacy` per change, как в одиночном archive.
 
 **Output style:** финальная сводка (что архивировано, какие конфликты были разрешены, следующие рекомендации) — шаблон **T-CONFIRM** из `.cursor/docs/opsx-output-style.md` §5.5. Перечень архивированных changes — нумерованный список (один change на строку, имя + новый путь). Конфликты и предупреждения — отдельная нумерованная секция. Перед выводом — self-check-5 (§7).
 
@@ -47,6 +47,7 @@ This skill allows you to batch-archive changes, handling spec conflicts intellig
    b. **Task completion** - Read `openspec/changes/<name>/tasks.md`
       - Count `- [ ]` (incomplete) vs `- [x]` (complete)
       - If no tasks file exists, note as "No tasks"
+      - Обычные незакрытые задачи не повод для предупреждения и не повод пропустить заявку (шаг 3 одиночного архива). Блокер — непринятая приёмка среза, его ловит шаг 8a.
 
    c. **Delta specs** - Check `openspec/changes/<name>/specs/` directory
       - List which capability specs exist
@@ -102,11 +103,7 @@ This skill allows you to batch-archive changes, handling spec conflicts intellig
      - auth spec: Will apply add-oauth then add-jwt (both implemented, chronological order)
    ```
 
-   For incomplete changes, show warnings:
-   ```
-   Warnings:
-   - add-verify-skill: 1 incomplete artifact, 3 incomplete tasks
-   ```
+   Обычные незакрытые задачи в предупреждения не выводить и из-за них заявку не пропускать.
 
 7. **Confirm batch operation**
 
@@ -115,10 +112,9 @@ This skill allows you to batch-archive changes, handling spec conflicts intellig
    - "Archive N changes?" with options based on status
    - Options might include:
      - "Archive all N changes"
-     - "Archive only N ready changes (skip incomplete)"
      - "Cancel"
 
-   If there are incomplete changes, make clear they'll be archived with warnings.
+   Непредлагать пропуск из-за обычных незакрытых задач и не писать, что они уйдут в архив с предупреждением.
 
 8. **Execute archive for each confirmed change — full protocol**
 

@@ -26,6 +26,7 @@ Always-apply **только триггеры**. Тела гейтов — on-dem
 | XML метаданных в `src/` (полный шаблон инструкции Конфигуратора) | `.cursor/rules/1c-xml-write-guard.mdc` |
 | Команда-обёртка / протокол хода / context-strategy | тело в `session-discipline.mdc` — **Read не требуется**; детали обрезки — `command-skill-gate.mdc` |
 | Прямая просьба «покажи схему», «покажи, как устроено», «покажи карту» | `.cursor/skills/visual-explanation/SKILL.md` |
+| Спонтанная оценка часов (исключение — техпроект) | `.cursor/rules/no-roi-estimates.mdc` |
 
 ## Алгоритм
 

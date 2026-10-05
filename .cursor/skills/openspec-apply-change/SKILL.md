@@ -82,10 +82,11 @@ Implement tasks from an OpenSpec change.
 
    **Pre-flight: verify check & Metadata**
 
-   Glob в change dir: `reports/verification-*.md`. Взять последний по дате в имени, прочитать YAML `verify_mode` (`pre-apply` / `post-apply`) — фаза в снапшоте, не в имени файла.
+   Glob в change dir: `reports/verification-*.md`. Взять последний отчёт и прочитать `verify_mode` (`pre-apply` / `post-apply`): фаза в этом поле, не в имени файла.
 
-   - **If found** → show summary line from report (first CRITICAL/WARNING counts). Continue.
-   - **If NOT found** → soft warning:
+   Хозяин входа — итог этого отчёта: поле `verdict` и `snapshot.open_decision_id` в шапке, строка «Следующий шаг» в теле. Отмена прошлого договора, открытая развилка и открытое указание заказчика входят в этот итог; отдельных проверок под них не заводить. Отрицательный итог внутреннего прогона на границе среза остаётся в шаге передачи, не здесь. Дата в имени отчёта не решает, новее ли дополнение постановки.
+
+   - **Если отчёта нет** → прежнее предупреждение:
      ```
      "Pre-apply verify не проводился. Рекомендуется `/opsx:verify <name>`
      для проверки качества артефактов (формат tasks, gates, конкретность задач).
@@ -94,15 +95,10 @@ Implement tasks from an OpenSpec change.
      - Option 1 → STOP apply, suggest running `/opsx:verify <name>` first
      - Option 2 → continue implementation
 
-   Verify check is advisory — does not block apply.
-
-   **Open decision at entry (MANDATORY):**
-   После чтения отчёта verify проверить открытую развилку:
-   - YAML `snapshot.open_decision_id != null` в последнем `reports/verification-*.md`, **или**
-   - `debug.md` § `## Verify decision ledger` → `open_decision_id` не пуст, **или**
-   - в `design.md` есть незакрытый вопрос (`## Open Questions`) / зеркало `## Решения verify (зафиксировано)` с пометкой open.
-
-   Если открытая развилка есть — **на входе apply** (не только на pause) вывести блок развилки **строго** по `.cursor/docs/templates/decision-block.md`: «**Что решить:** <заголовок прозой>» + триада «В чём проблема / На что влияет / Если A·B» + варианты A/B. Факты брать из человекочитаемого зеркала (отчёт verify § «Решения до apply» / design § «Решения verify (зафиксировано)»), **синтезируя формулировки прозой по §1c** (`chat-output-budget.mdc` Тест понятности), **не копируя** метки/ID/англ-термины из артефакта. Голый `OQ1` / `S1.1a` / `interim` / англ-метка варианта без перевода — запрещён (§1b.8 / §1c). Пользователь отвечает в чате; зафиксировать через `/opsx:extend <name> --from-verify` до старта зависимого среза. END TURN, если развилка блокирует ближайший срез.
+   - **Если отчёт есть** — сравнить хэши файлов постановки с `snapshot.artifact_hashes`. Отметки `[x]` в `tasks.md` дополнением не считать: сырой `tasks.md` разошёлся, а `tasks.md#normalized` совпал. `debug.md` в это сравнение не входит.
+     - Хэши разошлись и в `debug.md` есть секция дополнения (`## Extend`) — не начинать задачи. Следующий шаг — строка «Следующий шаг» этой секции; при нескольких секциях брать последнюю в файле. Дата заголовка секции источником не служит.
+     - Хэши разошлись и такой секции нет — это новая проверка, не старый шаг отчёта. Следующий шаг: `/opsx:verify <name>`.
+     - Хэши совпали. Разработка продолжается только если итог её разрешает: `verdict` не запрещает старт и `snapshot.open_decision_id` пуст. Запрет или открытая развилка — предложить строку «Следующий шаг» из тела отчёта и не начинать задачи.
 
    **Metadata (comment markers) check:**
    Прочитать `proposal.md` и `openspec/project.md` (секция «Разработчик по умолчанию»: `defaultDeveloper`, `cfMarkerPrefix`). Baseline запреты domain_label — `.cursor/docs/marker-canon.md` ⊕ project overlay.

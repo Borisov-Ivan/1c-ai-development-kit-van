@@ -77,7 +77,7 @@ This is an **agent-driven** operation - you will read delta specs and directly e
 
    После применения изменений:
    - Сформировать `openspec/changes/<name>/reports/spec-sync-<name>-YYYY-MM-DD.md`: какие capability затронуты, какие требования добавлены/изменены/удалены (кратко).
-   - **Чат:** если **ни один** файл `openspec/specs/**/spec.md` не изменился (дельта уже отражена в main) — одна строка: «Спеки уже синхронизированы с дельтой. Дальше: `/opsx:archive <name>`.» (или `/opsx:verify <name>` по ситуации). Если были **фактические** правки файлов — одна строка: «Спеки обновлены: `<path1>`[, `<path2>`…]. Дальше: `/opsx:verify <name>`.» Без списка requirements в чате.
+   - **Чат:** если перенос вызвал архив — строку «дальше — проверка» не печатать; архив продолжает свои шаги в том же ходе. Одиночный перенос: если **ни один** файл `openspec/specs/**/spec.md` не изменился — «Спеки уже синхронизированы с дельтой. Дальше: `/opsx:archive <name>`.» Если были фактические правки — «Спеки обновлены: `<path1>`[, `<path2>`…]. Дальше: `/opsx:verify <name>`.» Без списка requirements в чате.
 
 5. **Post-verification (без diff в чате)**
 
@@ -120,6 +120,8 @@ Unlike programmatic merging, you can apply **partial updates**:
 - Use your judgment to merge changes sensibly
 
 **Output On Success (чат)**
+
+Если перенос вызвал архив — этих строк нет: архив продолжает свои шаги в том же ходе. Одиночный перенос:
 
 ```
 Спеки обновлены: openspec/specs/<capability>/spec.md[, …]. Дальше: `/opsx:verify <change-name>`.

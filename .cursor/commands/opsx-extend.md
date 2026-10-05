@@ -17,18 +17,7 @@ description: Контролируемое расширение scope сущес�
 
 **Первое действие:** прочитать `.cursor/skills/openspec-extend-change/SKILL.md` и далее идти по его шагам. До прочтения скилла — никаких других чтений артефактов, отчётов, трасс или модулей.
 
-**Input:**
-- `<change-name>` — обязательно.
-- Текст расширения в сообщении пользователя (или AskQuestion при отсутствии).
-- Опционально — ссылка на файл/отчёт, который нужно проанализировать как основание для правки ЗНИ:
-  - `@path/to/file.md`
-  - `--from-review <path>` — отчёт `/review`
-  - `--from-report <path>` — итог `/opsx:explore`: `temp/reports/<тип>-YYYY-MM-DD-<slug>.md` (полный отчёт `Task`: trace-analysis, exploration, architecture), `temp/explore-handoff-*.md` (опциональный handoff с блоком `## Постановка ЗНИ`), или legacy `openspec/sessions/<slug>/analysis.md`. Основной путь capture fix.
-  - `--from-debug <path>` — устаревший alias: `debug.md` или RCA в change (предпочтительно `--from-report`)
-  - `--from-verify <path>` — отчёт `/opsx:verify`
-  - `--from-architecture <path>` — отчёт архитектора
-  - `--from-explore <path>` — legacy-источники, только по явной ссылке пользователя (`temp/explore-summary-*.md`, `openspec/sessions/<slug>/analysis.md`)
-  - `--code-sync` — код упростили/поменяли вручную, артефакты отстали: explorer читает факт кода → артефакты догоняют (режим в SKILL extend)
+**Input:** имя заявки, текст расширения и допустимые пути флага отчёта — абзац Input скилла дописывания. Без имени при ровно одной открытой заявке дописывается она. Свой перечень путей флага команда не держит.
 
 **Примеры:**
 
