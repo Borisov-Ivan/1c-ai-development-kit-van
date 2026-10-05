@@ -16,3 +16,4 @@
 | [ADR-0012](ADR-0012-verify-by-delta-and-external-contract.md) | Проверка по дельте и внешний контракт | Accepted | 2026-09-30 | kit / проверка постановки |
 | [ADR-0013](ADR-0013-verify-does-not-restart-closed-topics.md) | Повторная проверка не переоткрывает закрытое | Accepted | 2026-09-30 | kit / проверка постановки |
 | [ADR-0014](ADR-0014-light-route-value-and-archive.md) | Лёгкий маршрут замены значения и архива | Accepted | 2026-09-30 | kit / проверка постановки |
+| [ADR-0015](ADR-0015-proposal-result-paragraph.md) | Абзац «Результат» пишется при создании и сверяется при закрытии | Accepted | 2026-10-05 | kit / описание задачи |
