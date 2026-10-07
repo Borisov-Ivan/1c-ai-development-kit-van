@@ -1,0 +1,15 @@
+reports:
+  - file: architecture-new-2026-08-27.md
+    type: architecture
+    mode: plan-review
+    scope:
+      files:
+        - .cursor/skills/scenario-map-canvas/SKILL.md
+        - .cursor/rules/gate-dispatcher.mdc
+        - .cursor/skills/openspec-explain/templates/exit-card.md
+        - .cursor/skills/openspec-explore/SKILL.md
+        - AGENTS.md
+        - openspec/glossary.md
+        - .cursor/docs/chat-lexicon.md
+    status: active
+    legacy: false
