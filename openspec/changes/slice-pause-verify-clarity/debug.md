@@ -42,9 +42,19 @@ closed_decisions:
     premise:
       claim: "Повтор того же ответа не даёт отличить смену факта от механического подтверждения и снижает контроль."
       anchor: "openspec/changes/slice-pause-verify-clarity/reports/verification-2026-10-14-2.md"
+  - id: slice_handoff_three_answers
+    summary: "Если сдача среза предполагается, на карточке три ответа: «Принять срез», «Дать замечание по реализации», «Отложить до финального теста». В чате видно, последний это срез или промежуточный. Отдельная сдача — только у изолированного блока. Отметка «приёмка в конце» при постановке снимает вопрос у промежуточного среза. При возобновлении статус спрашивается, только если отметки нет и срез не отмечен принятым."
+    closed_at: "2026-10-14T17:50:00+09:00"
+    source: verify-user-answer
+    confirmed_by: user
+    authority: customer-direct
+    external_contract_id: EC-5
+    premise:
+      claim: "На сдаче среза человек выбирает принять, дать замечание по реализации или отложить до финального теста."
+      anchor: "openspec/changes/slice-pause-verify-clarity/debug.md#Extend — 2026-10-14 (3)"
 open_decision_id: null
-decision_round: 2
-verify_depth: incremental
+decision_round: 3
+verify_depth: full
 assumptions_accepted: []
 ```
 
@@ -149,6 +159,26 @@ external_contract:
         primary_event_id: verify-answer-2026-10-14T14:41:00+09:00
         primary_event_at: "2026-10-14T14:41:00+09:00"
         source_fingerprint: "579f31b9cc285b6acf7242be6f31a28a7ccfbd0c73d04d9eac922faf1f4a07a5"
+  - id: EC-5
+    topic:
+      capability: kit-protocol-coherence
+      anchor: "три ответа на сдаче среза"
+      axis: visible-result
+      reference: "Принять срез, Дать замечание по реализации, Отложить до финального теста"
+    axis: visible-result
+    source: "entry-point:/opsx:extend@2026-10-14T17:50:00+09:00"
+    authority: customer-direct
+    decision:
+      parity: matches
+    confirmation: confirmed
+    confirmed_at: "2026-10-14T17:50:00+09:00"
+    confirmed_by: user
+    signals:
+      - id: sig-ec5
+        kind: customer-correction
+        primary_event_id: extend-answer-2026-10-14T17:50:00+09:00
+        primary_event_at: "2026-10-14T17:50:00+09:00"
+        source_fingerprint: "c6e6565d9e603417882d957d7f814ade6a219edfa9f47e9f0e5f4bf3de1c4777"
 ```
 
 ## Extend — 2026-10-14 (2)
@@ -167,3 +197,21 @@ external_contract:
 - Вердикт архитектора: drift-warning
 - Отчёт: `reports/architecture-extend-coherence-2026-10-14-2.md`
 - Решение пользователя: accepted recommendations — вариант 1, вопрос только про изменение результата
+
+## Extend — 2026-10-14 (3)
+
+- Источник: подтверждение брифа, вариант 1. Человек: если сдача среза предполагается, на карточке три ответа — «Принять срез», «Дать замечание по реализации», «Отложить до финального теста». В чате видно, последний это срез или промежуточный. Отдельная сдача — для изолированного блока. Отметку «приёмка в конце» можно поставить при постановке. При возобновлении статус спрашивается, только если отметки нет и срез не отмечен принятым.
+- Что изменено: пункт 2 постановки, требование «Конец среза один», сценарий «Передача предлагает три ответа», отметка «приёмка в конце», решение D2, контракт поведения, строка Blast Radius, задачи S1.1, S1.8–S1.10, S1.12–S1.14, приёмка S1 и признак проверки на карточке сдачи в S3. Пакет по-прежнему закрывается одним ответом. Новый срез не заводился.
+- Темы: EC-5. Прежние EC-1…EC-4 не переспрашиваются.
+- Architect Gate: `reports/architecture-extend-coherence-2026-10-14-3.md`
+- Вердикт сверки цельности: drift-warning, заявка остаётся одной.
+- Следующий шаг: `/opsx:verify slice-pause-verify-clarity`
+
+## Extend Coherence Audit — 2026-10-14 (3)
+
+- Триггер: semantic
+- Drift-check из брифа: drift-warning
+- Вердикт архитектора: drift-warning
+- Отчёт: `reports/architecture-extend-coherence-2026-10-14-3.md`
+- Решение пользователя: accepted recommendations — три ответа на сдаче среза
+
