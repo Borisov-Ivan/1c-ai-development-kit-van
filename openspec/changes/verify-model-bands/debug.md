@@ -48,3 +48,12 @@ refuted_premises: []
 - Темы: G9, G10
 - Architect Gate: `reports/design-challenge-2026-10-14-2.md`
 - следующий шаг: внутренний повтор проверки
+
+## Slice Gate Decisions
+
+### Slice S1 — Назначение модели по цене ошибки (2026-10-14)
+Срез: S1 — Назначение модели по цене ошибки
+Решение: awaiting-acceptance
+Обоснование: все рабочие задачи реализованы; приёмочная задача передана на ручной прогон Primary.
+Изменения tasks: нет (S1.accept остаётся [ ])
+Связанный отчёт: reports/handoff-acceptance-S1-2026-10-14.md

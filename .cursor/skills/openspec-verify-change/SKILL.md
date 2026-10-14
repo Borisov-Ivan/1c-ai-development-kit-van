@@ -255,7 +255,7 @@ Layer 1 **никогда** не блокирует — только правит
 
 **2.1. Slice Coherence (Quality Controller)** — только **изменившиеся срезы** и связанные сценарии из `invalidation_map`. Контроль среза **не** запускать повторно, если прошлый контроль этого среза в порядке, упорядоченный набор названий сценариев среза тот же, что был на входе того контроля, и нормализованный текст обязательного пункта приёмки (Primary) не изменился. Опциональные буллеты приёмки остаются по названиям сценариев: правка формулировки внутри опционального буллета контроль не сбрасывает. В техническом аудите — отметка «опора на прошлый контроль среза» (прошлый `quality-control-*.md` взят как результат, новый полный контроль с нуля не создаётся). Детерминированные сверки покрытия (`scenario-coverage` и связанные grep) считаются как раньше и при опоре не пропускаются. Нет прошлого отчёта, прошлый контроль не в порядке, появился или исчез заголовок сценария, либо изменился текст обязательного пункта приёмки — контроль целиком. Первый прогон без прошлого контроля в порядке — полный текущий контроль (новый обязательный агентский вызов не добавляется).
 
-Иначе делегировать **`openspec-quality-controller`** (Task **без** `model=`, по `model-selection.mdc`). Промпт: см. `1c-agent-patterns/quality-controller.md` — передать changed slices, linked scenarios, deterministic results, affected `EC-*`, reused checks. Получить `reports/quality-control-YYYY-MM-DD.md`.
+Иначе делегировать **`openspec-quality-controller`**. Модель — из строки роли в `model-selection.mdc`, второй перечень здесь не разворачивать. Промпт: см. `1c-agent-patterns/quality-controller.md` — передать changed slices, linked scenarios, deterministic results, affected `EC-*`, reused checks. Получить `reports/quality-control-YYYY-MM-DD.md`.
 
 **Режим запуска:** `run_in_background: false` (sync, последовательно). Карточка Task не показывается в чате как отдельное сообщение — `tool_result` идёт во внутренний контекст оркестратора. В промпт обязательно включить блок **Final message constraint** из секции «Запуск агентов verify» ниже и блок **User Task Contract pre-check evidence** из 2.1a.
 
@@ -392,7 +392,7 @@ QC оценивает критерии 1–6, 8, **8b**, 9–11 из `vertical-s
 
 **Триггер запуска (D7):** изменившиеся задачи содержат неизвестную композицию перехватов, ручную конфигурацию, неизвестную сигнатуру или контракт данных, новую межмодульную связь либо неподтверждённый API; либо `invalidation_map` содержит `task-readiness`. Изменение только отметки `[x]`/`[ ]` **не** запускает новый вызов. Хэш текста задач совпал → переиспользовать прошлый `architecture-task-readiness-*.md`, статус слоя скопировать, в техническом аудите — reused. Без триггера режим не требуется.
 
-Иначе делегировать `onec-code-architect` с `mode=task-readiness` **без** `model=` по таблице шагов в `.cursor/rules/model-selection.mdc` (раздел «Закрытая эскалация Fable»). Второй перечень моделей здесь не держать. Промпт см. `1c-agent-patterns/architect.md`: trigger reason, changed tasks, affected `EC-*`, reused evidence; не полный `debug.md`. **Режим запуска:** `run_in_background: false` (sync). Карточка Task не отображается в чате. В промпт обязательно включить блок **Final message constraint** (секция «Запуск агентов verify» ниже). Неизвестная граница → явно расширенный scope. Архитектор оценивает:
+Иначе делегировать `onec-code-architect` с `mode=task-readiness`. Модель — из строки готовности задач таблицы шагов в `.cursor/rules/model-selection.mdc` (раздел «Закрытая эскалация Fable»). Второй перечень моделей здесь не держать. Промпт см. `1c-agent-patterns/architect.md`: trigger reason, changed tasks, affected `EC-*`, reused evidence; не полный `debug.md`. **Режим запуска:** `run_in_background: false` (sync). Карточка Task не отображается в чате. В промпт обязательно включить блок **Final message constraint** (секция «Запуск агентов verify» ниже). Неизвестная граница → явно расширенный scope. Архитектор оценивает:
 
 1. Каждая задача `S<N>.<M>` имеет конкретные файл/процедуру/объект (по правилу `task-readability.mdc`)?
 2. Контракты данных (`Свойство()`/`ТипЗнч()`/защитные проверки) — оправданы (Data Contract Gate)?
@@ -561,10 +561,10 @@ Self-check: «можно действовать без файла» = польз
 
 | Layer | Агент | Mode | `run_in_background` | Когда |
 |---|---|---|---|---|
-| 2 | `openspec-quality-controller` | — (без `model=`) | **false** (sync) | Invalidated срезы; skip если все slice-контроли reused |
+| 2 | `openspec-quality-controller` | модель — строка роли в `model-selection.mdc` | **false** (sync) | Invalidated срезы; skip если все slice-контроли reused |
 | 2.5 | `onec-code-architect` | `deep-analysis` | **true** (background) | **Только** при срабатывании петли приёмки (см. Layer 2.5) |
 | 4 | `onec-code-architect` | `design-challenge` | **true** (background) | По триггеру (см. Layer 4): хэш оси или D7, не голый mtime |
-| 5 | `onec-code-architect` | `task-readiness` | **false** (sync) | По триггеру изменившихся рискованных задач (см. Layer 5). Вызов без `model=` по таблице шагов в `.cursor/rules/model-selection.mdc` |
+| 5 | `onec-code-architect` | `task-readiness` | **false** (sync) | По триггеру изменившихся рискованных задач (см. Layer 5). Модель — строка готовности задач в `.cursor/rules/model-selection.mdc` |
 
 ### Порядок (минимум видимых карточек, без удвоения времени)
 
