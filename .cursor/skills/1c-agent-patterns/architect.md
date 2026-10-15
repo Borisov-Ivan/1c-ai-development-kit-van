@@ -271,7 +271,7 @@ Task(
 
 ## Architect — task readiness review (verify Layer 5)
 
-Used by `/opsx:verify` Layer 5 (Implementation Readiness) — only when the Layer 5 profile trigger fires (changed risky tasks or `task-readiness` in invalidation_map). Without trigger, reuse the last readiness report; do not launch a second mandatory run. The architect evaluates holistic readiness of **invalidated tasks**: can they be implemented as-is without returning for clarification? Модель шаблон не задаёт: вызов без `model=` по таблице шагов в `.cursor/rules/model-selection.mdc` (раздел «Закрытая эскалация Fable»).
+Used by `/opsx:verify` Layer 5 (Implementation Readiness) — only when the Layer 5 profile trigger fires (changed risky tasks or `task-readiness` in invalidation_map). Without trigger, reuse the last readiness report; do not launch a second mandatory run. The architect evaluates holistic readiness of **invalidated tasks**: can they be implemented as-is without returning for clarification? Модель задаёт строка готовности задач в таблице шагов `.cursor/rules/model-selection.mdc` (раздел «Закрытая эскалация Fable»). Шаблон не закрепляет вызов без явной модели на все поводы.
 
 ```
 Task(
@@ -420,6 +420,7 @@ Task(
          Use plain language: «первый ручной шаг», «приёмочный тест единственного
          шаблона», «выбранный вариант реализации».",
   subagent_type="onec-code-architect",
+  model="<по строке готовности задач в таблице шагов .cursor/rules/model-selection.mdc, раздел «Закрытая эскалация Fable»>",
   run_in_background=false
 )
 ```
