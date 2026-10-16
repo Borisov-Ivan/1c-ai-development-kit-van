@@ -158,7 +158,7 @@ Implement tasks from an OpenSpec change.
       - [2] «Дать замечание по реализации» → запросить описание проблемы. Если замечание называет предыдущий срез — размещение дефекта (ветка ниже). Иначе append debug.md "решение: не принят" + секция ## Debug — S<N>; создать fix-задачи перед `S<N>.accept` (или legacy `S<N>.T<M>`); начать их выполнение.
       - [3] «Отложить до финального теста» → приёмку не отмечать `[x]` и не считать это молчаливой подписью недостижимой приёмки. Append debug.md `Решение: отложено до финального теста`. У промежуточного среза следующий запуск статус не спрашивает, общий тест остаётся на конце, задачи следующего среза можно начать. На последнем срезе архив не предлагать.
       - Замечание про предыдущий срез → запросить **S<K>** и описание дефекта; **Grep** в `tasks.md` приёмочную строку среза (`S<K>.accept` или legacy `S<K>.T<M>`):
-        - Если приёмочная задача среза `S<K>` = **`[ ]`** (срез S<K> **не** принят) → **inside-slice rework** по `.cursor/rules/vertical-slices.mdc` (**ИНВАРИАНТ: Defect placement**): добавить fix-задачи **внутрь** `S<K>` **перед** приёмочной задачей; **не** создавать `# Срез S<N+1>` без cross-slice; append в `debug.md` `Решение: inside-slice rework` + RCA-кратко; начать выполнение fix-задач.
+        - Если приёмочная задача среза `S<K>` = **`[ ]`** (срез S<K> **не** принят) → **inside-slice rework** по `.cursor/rules/vertical-slices.mdc` (**ИНВАРИАНТ: Defect placement**): добавить fix-задачи **внутрь** `S<K>` **перед** приёмочной задачей; **не** создавать `# Срез S<N+1>`, пока инвариант размещения этого не разрешает; append в `debug.md` `Решение: inside-slice rework` + RCA-кратко; начать выполнение fix-задач.
         - Если приёмочная задача среза `S<K>` = **`[x]`** (срез S<K> принят, frozen) → создать **fix-срез** `# Срез S<N+1>: …` с отдельным `S<N+1>.accept` по `vertical-slices.mdc`; **снять** `[x]` с приёмки `S<K>` только если инвариант/постановка явно требует повторной приёмки S<K> (зафиксировать в `debug.md`); иначе — только приёмка нового среза.
 
    5. Если awaiting-acceptance не обнаружено — перейти к обычному "Show current progress" ниже.
@@ -634,7 +634,7 @@ Implement tasks from an OpenSpec change.
 - **Template.xml / MXL tasks:** Default manual (**pause-wait** / рецепт в файле). Non-manual/`assisted` → only with recorded apply permission (`debug.md` § Apply permissions or `[mxl:…]`); then `1c-mxl/compile`+validate; no raw Write. Do not resurrect Mode Gate layout question in new.
 - **Form module BSL tasks:** if the task changes `Forms/.../Ext/Form/Module.bsl` only (for example `Элементы.Добавить`, visibility, event handlers), run the standard BSL writer/reviewer pipeline; this is not a `Form.xml` task.
 - Reference: `1c-agent-delegation.mdc` (BSL gate), `1c-utility-agents.mdc` (forms, queries, tests).
-- **vertical-slices.mdc:** вердикт Slice Gate **[3]** и любое добавление `# Срез` — только по **ИНВАРИАНТ: Defect placement** (не создавать fix-срез при приёмочной задаче среза `S<K>.accept` (или legacy `S<K>.T<M>`) = `[ ]` без cross-slice).
+- **vertical-slices.mdc:** вердикт Slice Gate **[3]** и любое добавление `# Срез` — только по **ИНВАРИАНТ: Defect placement** (не создавать fix-срез при приёмочной задаче среза `S<K>.accept` (или legacy `S<K>.T<M>`) = `[ ]`, если инвариант размещения новый заголовок не разрешает).
 
 **Fluid Workflow Integration**
 

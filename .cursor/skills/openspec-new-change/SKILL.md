@@ -242,7 +242,7 @@ metadata:
         - **exactly one** acceptance task `S<N>.accept` per slice. Покрытие сценария — правило в `.cursor/rules/vertical-slices.mdc`: сценарий, закрытый задачей среза, в чеклисте приёмки может не стоять отдельной строкой и сиротой не считается. Требования «буллет приёмки на каждый сценарий» здесь нет.
         - slice-gate markers `<!-- slice-gate: <criterion> -->`
 
-        No classification P0–P4, no `# Фаза N`, no `<!-- phase-gate -->`, no multiple `S<N>.T<M>` per slice (legacy format — only for migrated changes). See `.cursor/rules/vertical-slices.mdc` (в т.ч. **ИНВАРИАНТ: Defect placement** — не плодить `# Срез S<N+1>` для дефекта непринятого среза без cross-slice / frozen-slice).
+        No classification P0–P4, no `# Фаза N`, no `<!-- phase-gate -->`, no multiple `S<N>.T<M>` per slice (legacy format — only for migrated changes). See `.cursor/rules/vertical-slices.mdc` (в т.ч. **ИНВАРИАНТ: Defect placement** — не плодить `# Срез S<N+1>` для дефекта непринятого среза, если инвариант новый заголовок не разрешает).
 
         Architect reads files independently and returns tasks.md content.
         Save the result to `outputPath`.

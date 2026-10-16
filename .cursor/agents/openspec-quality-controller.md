@@ -73,7 +73,7 @@ In slice mode, evaluate the criteria from `vertical-slices.mdc` (section «QUALI
    - Legacy: `acceptance-without-scenario` (WARNING) only.
 6. Rework Risk
 8. Slice Verticality — `slice-not-vertical` when **no** mandatory Primary describes black-box behavior. **CRITICAL** when `# Срез` present.
-8b. Self-Achievable Acceptance — `slice-accept-not-self-achievable` when mandatory Primary `S<N>` недостижим силами задач этого среза (дубль journey с `S<N+1>`, forward-зависимость приёмки от более позднего среза). **CRITICAL** when `# Срез` present. Remediation: merge slices (decision-required).
+8b. Self-Achievable Acceptance — `slice-accept-not-self-achievable` when mandatory Primary `S<N>` недостижим силами задач этого среза (дубль journey с `S<N+1>`, forward-зависимость приёмки от более позднего среза). **CRITICAL** when `# Срез` present. Remediation: если видимый результат и момент приёмки совпадают — раскладка по инварианту размещения, без карточки; если расходятся — merge slices (decision-required).
 9. Foundation slice with gate — `slice-foundation-with-gate`. **CRITICAL** when `# Срез` present. Remediation: merge slices.
 10. Acceptance Simplicity — `acceptance-simplicity-overload` when >1 mandatory (non-optional) black-box journey in `S<N>.accept`. **CRITICAL**.
 11. User Task Contract — `user-task-contract-violation` when `S<N>.<M>` assigns **user** runtime work (ИБ, консоль, отладчик, API без UX-proxy) or conditional chains «после verify/stенда». Apply DENY/ALLOW grep from `vertical-slices.mdc` § User Task Contract; add semantic check for paraphrases. **CRITICAL** when `# Срез` present.
@@ -103,9 +103,9 @@ For each alert that can be auto-repaired, append:
 
 Repairable alerts: `primary-acceptance-missing`, `accept-bullets-missing-scenario`, `acceptance-simplicity-overload`, `slice-not-vertical`, `slice-foundation-with-gate` (merge instruction), `user-task-contract-violation` (extend §6d).
 
-**Decision-required (не auto-repair):** `slice-accept-not-self-achievable` — объединение срезов или переписывание Primary меняет структуру ЗНИ; remediation: merge slices (default) или rewrite Primary на собственный видимый путь; **запрещено** «процедурно не подписывать accept до следующего среза».
+**Decision-required (не auto-repair):** `slice-accept-not-self-achievable`, когда варианты расходятся в результате или в моменте приёмки — объединение срезов или переписывание Primary меняет структуру ЗНИ; remediation: merge slices (default) или rewrite Primary на собственный видимый путь; **запрещено** «процедурно не подписывать accept до следующего среза». Если видимый результат и момент приёмки совпадают, этот алерт не decision: раскладка по «ИНВАРИАНТ: Defect placement», карточка «объединить срезы или переписать приёмку» не пишется, уже открытая приёмка из текста ошибки снимается.
 
-Decision-required (прочее): merge changing scope/spec cross-slice.
+Decision-required (прочее): слияние, которое меняет scope или spec, когда результат или момент приёмки расходятся. При том же видимом результате и том же моменте приёмки это не развилка.
 
 ## ALERT RULES
 
