@@ -9,6 +9,7 @@
   - "В чат копируются только продуктовые формулировки; skill/compile/Gate/Schema/slug агентов — agent-facing"
   - "Вопрос режима формы — три русских варианта (Конфигуратор / Form.xml в репозитории / модуль формы) без жаргона поставки kit"
   - "Полный handoff со Schema и таблицами — только в reports; в чате thin"
+  - "Блок основных тестов сдачи вне потолка короткого сообщения; таблицы задач и необязательные сценарии остаются в файле"
   - "Entry-бриф не содержит списка KB и slug субагентов"
 
 ## Контекст
@@ -21,6 +22,7 @@
 2. Канон Mode Gate в чате — три русских варианта; условие skill — только после выбора, agent-only.
 3. Thin chat vs файл: Schema и markdown-таблицы срезов — только в `reports/handoff-*.md`.
 4. KB в entry-брифе запрещён; имена субагентов в чате запрещены единообразно (opsx / lexicon / brief-card).
+5. Уточнение 2026-10-27: потолок короткой сдачи не сжимает блок основных тестов. Финальный тест — сдача, после которой в заявке не остаётся открытых рабочих задач срезов. Слова выбора архива не меняются.
 
 ## Альтернативы
 
@@ -38,6 +40,6 @@
 ## Связи
 
 - **Specs:** openspec/specs/chat-surface-clarity/spec.md; openspec/specs/explore-report-intake/spec.md; openspec/specs/explore-report-promote/spec.md; openspec/specs/split-form-layout-modes/spec.md
-- **Changes:** archive/2026-08-01-chat-surface-clarity/; archive/2026-09-02-explore-reports-into-change/; archive/2026-09-02-skip-form-mode-module-only/
+- **Changes:** archive/2026-08-01-chat-surface-clarity/; archive/2026-09-02-explore-reports-into-change/; archive/2026-09-02-skip-form-mode-module-only/; archive/2026-10-27-slice-handoff-final-tests/
 - **Supersedes:** —
 - **Связанные ADR:** —
