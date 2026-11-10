@@ -13,7 +13,7 @@ metadata:
 
 **Жанр:** краткая постановка проекта (факты поставки). Не туториал, не защита решения, не письмо с разжёвыванием.
 
-**Не делает:** правки `proposal`/`design`/`tasks`/`specs`, вызов writer/explorer/architect, обследование `.bsl`. Сборщик манифеста карты — исключение, только по согласию (см. Guardrails).
+**Не делает:** правки `proposal`/`design`/`tasks`/`specs`, вызов writer/explorer/architect, обследование `.bsl`. Сборщик манифеста не вызывается.
 
 **Эталон структуры:** [`fixtures/golden-88781-overview.md`](fixtures/golden-88781-overview.md)  
 **Эталон голоса этапа:** [`fixtures/voice-good-stage.md`](fixtures/voice-good-stage.md)  
