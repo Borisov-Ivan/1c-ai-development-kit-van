@@ -55,7 +55,7 @@ Metadata (proposal) → values (project.md) + mechanism (marker-canon) → Trans
 | **AP-051** | MARKER-MERGE-001 — сжимать смежные пары |
 | **AP-053** | Содержимое domain_label осмысленное; baseline запреты — `marker-canon.md`; remediation — **переписать**, не delete |
 | **AP-054** | **Текст** комментария/JSDoc и **тело** блоков `+++`/`---` — на русском; SSOT allow-list — карточка AP-054 + `marker-canon.md` |
-| **MARKER-PLACEMENT-001** | Inline-close с `КонецПроцедуры`/`КонецФункции`; SSOT — `marker-canon.md` |
+| **MARKER-PLACEMENT-001** | Inline-close с `КонецПроцедуры`/`КонецФункции`; одна оставшаяся строка — один хвост, не пара. SSOT — `marker-canon.md` |
 
 Change-scoped: `/review` с metadata из proposal. Полный scope: `/release-review`.
 

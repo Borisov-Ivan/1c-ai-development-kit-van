@@ -127,6 +127,8 @@ Implement tasks from an OpenSpec change.
    Если секции Metadata нет — сначала ФИО (если нет `defaultDeveloper`), затем отдельный вопрос про **описание** (`comment_suffix`; можно пусто → `marker_style: minimal`); дописать Metadata в proposal.md. Не монолит «ФИО + domain_label».
    Передать маркеры в промпт `onec-code-writer` (см. §3a COMMENT MARKERS).
 
+   **Размещение одной строки** (текст `open_marker` и `close_marker` не менять): вместе с маркерами передать критерий из `.cursor/docs/marker-canon.md` § MARKER-PLACEMENT-001. Одна оставшаяся строка кода вне строковой константы и без своего смыслового комментария несёт хвост, равный уже собранной открывающей пометке. Пара остаётся для нескольких соседних строк, новой процедуры, строки внутри строковой константы, строки со своим комментарием и строки внутри блока удаления. Соседние хвосты одного изменения сжимаются в пару.
+
    **Forms mode (per-form) — читать до Form.xml-задач:**
    - Секция proposal: целевое `## Forms mode`; readers также `## Forms & layouts mode` (legacy-заголовок).
    - Источник истины: скаляр `form_mode:` **или** map `forms:` (ключ метаданных → mode). Значения: `manual` | `assisted` | `bsl-only` | `n/a`.

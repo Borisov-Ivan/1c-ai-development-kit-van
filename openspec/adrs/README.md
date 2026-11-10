@@ -17,3 +17,7 @@
 | [ADR-0013](ADR-0013-verify-does-not-restart-closed-topics.md) | Повторная проверка не переоткрывает закрытое | Accepted | 2026-09-30 | kit / проверка постановки |
 | [ADR-0014](ADR-0014-light-route-value-and-archive.md) | Лёгкий маршрут замены значения и архива | Accepted | 2026-09-30 | kit / проверка постановки |
 | [ADR-0015](ADR-0015-proposal-result-paragraph.md) | Абзац «Результат» пишется при создании и сверяется при закрытии | Accepted | 2026-10-05 | kit / описание задачи |
+| [ADR-0016](ADR-0016-named-confirm-counts-as-postanovka.md) | Подтверждение на создании с именем считается постановкой | Load-Bearing | 2026-11-10 | kit / создание заявки |
+| [ADR-0017](ADR-0017-create-command-only-beside-block.md) | Команда новой заявки из исследования только рядом с блоком | Load-Bearing | 2026-11-10 | kit / финал разбора |
+| [ADR-0018](ADR-0018-module-only-sign-not-own-decision.md) | Признак «только модуль» не берётся из решения того же хода | Load-Bearing | 2026-11-10 | kit / режим формы |
+| [ADR-0019](ADR-0019-one-line-change-mark-is-a-tail.md) | Одна оставшаяся строка помечается одним хвостом | Load-Bearing | 2026-11-10 | kit / пометка изменения |
