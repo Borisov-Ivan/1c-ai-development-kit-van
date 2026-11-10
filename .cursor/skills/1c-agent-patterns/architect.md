@@ -102,7 +102,7 @@ Task(
          при активном change или
          temp/reports/deep-analysis-YYYY-MM-DD.md вне change.",
   subagent_type="onec-code-architect",
-  model="<по таблице шагов в .cursor/rules/model-selection.mdc, раздел «Закрытая эскалация Fable»>"
+  model="<по таблице шагов в .cursor/rules/model-selection.mdc, раздел «Таблица шагов архитектора»>"
 )
 ```
 
@@ -110,7 +110,7 @@ Task(
 
 ## Architect — scope coherence audit (extend)
 
-Используется `/opsx:extend`, шаг **5a**, когда сработал семантический триггер (`Drift-check` ≠ pass) или объективный счётчик Extend без архитектора (см. `.cursor/skills/openspec-extend-change/SKILL.md`). Режим **`scope-coherence-audit`**: Simplicity Check не требуется. Модель — по таблице шагов в `.cursor/rules/model-selection.mdc` (раздел «Закрытая эскалация Fable»).
+Используется `/opsx:extend`, шаг **5a**, когда сработал семантический триггер (`Drift-check` ≠ pass) или объективный счётчик Extend без архитектора (см. `.cursor/skills/openspec-extend-change/SKILL.md`). Режим **`scope-coherence-audit`**: Simplicity Check не требуется. Модель — по таблице шагов в `.cursor/rules/model-selection.mdc` (раздел «Таблица шагов архитектора»).
 
 ```
 Task(
@@ -185,7 +185,7 @@ Used by `/opsx:verify` Layer 4 — независимый адверсариал
 
 Подробный протокол (адверсариальная установка, Three-Question Challenge, формат отчёта, маппинг вердикта) — см. `.cursor/agents/onec-code-architect.md` секция «Режим `design-challenge`».
 
-**Модель.** По таблице шагов в `.cursor/rules/model-selection.mdc` (раздел «Закрытая эскалация Fable»). **Режим запуска: `run_in_background=true`** (см. SKILL.md verify, секция «Запуск агентов verify»).
+**Модель.** По таблице шагов в `.cursor/rules/model-selection.mdc` (раздел «Таблица шагов архитектора»). **Режим запуска: `run_in_background=true`** (см. SKILL.md verify, секция «Запуск агентов verify»).
 
 ```
 Task(
@@ -262,7 +262,7 @@ Task(
          Use plain language: «первый ручной шаг», «приёмочный тест единственного
          шаблона», «выбранный вариант реализации».",
   subagent_type="onec-code-architect",
-  model="<по таблице шагов в .cursor/rules/model-selection.mdc, раздел «Закрытая эскалация Fable»>",
+  model="<по таблице шагов в .cursor/rules/model-selection.mdc, раздел «Таблица шагов архитектора»>",
   run_in_background=true
 )
 ```
@@ -271,7 +271,7 @@ Task(
 
 ## Architect — task readiness review (verify Layer 5)
 
-Used by `/opsx:verify` Layer 5 (Implementation Readiness) — only when the Layer 5 profile trigger fires (changed risky tasks or `task-readiness` in invalidation_map). Without trigger, reuse the last readiness report; do not launch a second mandatory run. The architect evaluates holistic readiness of **invalidated tasks**: can they be implemented as-is without returning for clarification? Модель задаёт строка готовности задач в таблице шагов `.cursor/rules/model-selection.mdc` (раздел «Закрытая эскалация Fable»). Шаблон не закрепляет вызов без явной модели на все поводы.
+Used by `/opsx:verify` Layer 5 (Implementation Readiness) — only when the Layer 5 profile trigger fires (changed risky tasks or `task-readiness` in invalidation_map). Without trigger, reuse the last readiness report; do not launch a second mandatory run. The architect evaluates holistic readiness of **invalidated tasks**: can they be implemented as-is without returning for clarification? Модель задаёт строка готовности задач в таблице шагов `.cursor/rules/model-selection.mdc` (раздел «Таблица шагов архитектора»). Шаблон не закрепляет вызов без явной модели на все поводы.
 
 ```
 Task(
@@ -420,7 +420,7 @@ Task(
          Use plain language: «первый ручной шаг», «приёмочный тест единственного
          шаблона», «выбранный вариант реализации».",
   subagent_type="onec-code-architect",
-  model="<по строке готовности задач в таблице шагов .cursor/rules/model-selection.mdc, раздел «Закрытая эскалация Fable»>",
+  model="<по строке готовности задач в таблице шагов .cursor/rules/model-selection.mdc, раздел «Таблица шагов архитектора»>",
   run_in_background=false
 )
 ```

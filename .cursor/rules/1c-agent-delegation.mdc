@@ -21,7 +21,7 @@ priority: 999
 | Правка BSL | **onec-code-writer** | Да (`INPUT CONTRACT`) |
 | Ревью после правок | **onec-code-reviewer** | Да |
 | Архитектура | **onec-code-architect** | Да до реализации (`architect-gate.mdc`) |
-| Обследование 3+ модулей / любое обследование кода | **onec-code-explorer** | Да |
+| Любое обследование кода | **onec-code-explorer** | Да |
 | Трасса/стек | **onec-trace-analyst** | Да (`1c-error-analysis.mdc`) |
 | REFACTOR поверхности | **onec-code-simplifier** | Да в `/review` шаг 6.4 |
 | Когерентность срезов | **openspec-quality-controller** | Да в pre-apply verify |

@@ -1,6 +1,6 @@
 # Quality Controller — шаблоны промптов
 
-Шаблоны для делегирования `Task(subagent_type="openspec-quality-controller")`. Domain-agnostic readonly-агент. Активная модель — фронтматтер `.cursor/agents/openspec-quality-controller.md`.
+Шаблоны для делегирования `Task(subagent_type="openspec-quality-controller")`. Domain-agnostic readonly-агент. Модель вызова — из строки роли в `.cursor/rules/model-selection.mdc`, не из файла агента.
 
          Критерии оценки (Slice Coherence: Scenario Coverage, Slice Independence, Slice Completeness, Slice Dependency Graph, Slice Gate Integrity, Acceptance Checklist 5b, Rework Risk, criteria 8, **8b self-achievable acceptance**, 9–11) — `.cursor/rules/vertical-slices.mdc`.
 

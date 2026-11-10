@@ -32,6 +32,7 @@ Prerelease-добавка (только `/release-review`): `as-designed` на q
 
 ```
 Task(
+  model="<старшая модель семейства Gemini по строке onec-code-reviewer в .cursor/rules/model-selection.mdc; семейства в списке нет — параметр model не передавать>",
   description="Ревью кода [feature]",
   prompt="## Цель
          Полное ревью качества кода для [feature].
@@ -193,6 +194,7 @@ Task(
 
 ```
 Task(
+  model="<старшая модель семейства Gemini по строке onec-code-reviewer в .cursor/rules/model-selection.mdc; семейства в списке нет — параметр model не передавать>",
   description="Предрелизное ревью [extension/change]",
   prompt="Проверь качество кода для предрелиза [feature/extension].
 
@@ -253,6 +255,7 @@ Task(
 
 ```
 Task(
+  model="<старшая модель семейства Gemini по строке onec-code-reviewer в .cursor/rules/model-selection.mdc; семейства в списке нет — параметр model не передавать>",
   description="Ревью фикса [описание бага]",
   prompt="Проверь качество исправления ошибки для [feature/модуль].
 

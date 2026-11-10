@@ -45,7 +45,7 @@ Quick-fix снижает накладные расходы, не глубину 
 | Light Mode: 2–10 строк, 1 файл | **onec-code-writer** + **onec-code-reviewer** | см. LIGHT MODE |
 | Mechanical Mode: find-replace | StrReplace + Grep + **reviewer** | см. MECHANICAL MODE |
 | Правка `.bsl` (общий) | architect-gate → architect → writer → reviewer | `architect-gate.mdc` |
-| Исследование 3+ модулей | **onec-code-explorer** | порог 0, `1c-agent-delegation.mdc` |
+| Обследование кода | **onec-code-explorer** | порог 0, `1c-agent-delegation.mdc` |
 | Bug fix (маркеры ошибки) | verified-cause-gate → architect при масштабе | `verified-cause-gate.mdc` |
 
 ## APPLY GATE
