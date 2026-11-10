@@ -116,6 +116,7 @@ Check:
       adjacent +++/--- blocks for the same domain_label / [ID#NNN] and the same semantic change
       are merged into one outer block.
     - When merged opening markers carry different dates, keep the latest.
+    - A single tail at the end of one remaining code line is a finished mark (MARKER-PLACEMENT-001). Do not ask to restore a pair on that line. Adjacent tails of one change are compressed into one pair.
     - Do NOT propose marker merging where AP-040 applies (markers not in whitelist) —
       correct finding there is removal, not merging.
 
